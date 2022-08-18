@@ -46,23 +46,32 @@ python3 -m pip install -e .
    export TI_DEVICE_MEMORY_FRACTION=0.9
    export TI_DEVICE_MEMORY_GB=4
    ```
+
+**为使用GGUI，尝试升级为0.8.0**
+1. libz3.so.4: cannot open shared object file: No such file or directory Consider installing libtinfo5: sudo apt-get install libtinfo5
+   ```
+   sudo apt update
+   sudo apt install libz3-dev
+   sudo apt-cache show libz3-dev |grep -i version
+   Out: Version: 4.4.1-0.3build4
+   ```
    
    ---
    
-1. 无法找到 `mujoco210`
+2. 无法找到 `mujoco210`
    
    ```
    mkdir .mujoco # 在home路徑下下創建
    # Mujoco官网下载 mujoco210 folder，并放进上述 folder 中
    ```
    
-2. 配置`.bashrc`
+3. 配置`.bashrc`
    ```
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ubuntu/.mujoco/mujoco210/bin
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
    ```
    
-3. 安装 GLEW 库
+4. 安装 GLEW 库
    ```
    sudo apt-get install libglew-dev glew-utils
    ```
