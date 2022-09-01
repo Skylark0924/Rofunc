@@ -47,6 +47,9 @@ python3 -m pip install -e .
    export TI_DEVICE_MEMORY_GB=4
    ```
 
+5.  Event device type CUDA does not match blocking stream's device type CPU.
+   
+
 **为使用GGUI，尝试升级为0.8.0**
 1. libz3.so.4: cannot open shared object file: No such file or directory Consider installing libtinfo5: sudo apt-get install libtinfo5
    ```
