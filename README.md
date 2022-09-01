@@ -2,11 +2,11 @@
 
 ## Roadmap
 
-Roadmap is a personal learning experience and also a simple guidance about Robotics.
+Roadmap is a personal learning experience and also simple guidance about Robotics.
 
 ## Rofunc
 
-Rofunc is a package for real-world robotics experiment, including useful functions about devices (Xsens, Optitrack, Zed) and planning.
+Rofunc is a package for real-world robotics experiments, including useful functions for devices (Xsens, Optitrack, Zed) and planning.
 
 ### Installation
 
@@ -17,4 +17,4 @@ python setup.py install
 ```
 
 ### Documentation
-Currently, we just provide a simple document, please refer [here](./rofunc/).
+Currently, we provide a simple document; please refer to [here](./rofunc/).
