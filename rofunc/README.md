@@ -24,9 +24,9 @@ import rofunc as rf
 
 | Classes      | Types     | Functions             | Description                        | Status |
 |--------------|-----------|-----------------------|------------------------------------|--------|
-| **Devices**  | Xsens     | `xsens.process`       | Decoding the .mvnx file            | ✔️     |
-|              |           | `xsens.visualize`     | Show or save gif about the motion  | ✔️     |
-|              | Optitrack | `optitrack.process`   | Process the output .csv data       | ✔️     |
+| **Devices**  | Xsens     | `xsens.process`       | Decoding the .mvnx file            | ✅     |
+|              |           | `xsens.visualize`     | Show or save gif about the motion  | ✅     |
+|              | Optitrack | `optitrack.process`   | Process the output .csv data       | ✅     |
 |              |           | `optitrack.visualize` | Show or save gif about the motion  |        |
 |              | ZED       | `zed.record`          | Record with multiple cameras       |        |
 |              |           | `zed.playback`        | Playback the recording             |        |
