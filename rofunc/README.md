@@ -10,9 +10,9 @@ import rofunc as rf
 
 | Classes      | Types     | Functions             | Description                       | Status |
 |--------------|-----------|-----------------------|-----------------------------------|--------|
-| **Devices**  | Xsens     | `xsens.process`       | Decoding the .mvnx file           |   :white_check_mark:      |
-|              |           | `xsens.visualize`     | Show or save gif about the motion | :white_check_mark:      |
-|              | Optitrack | `optitrack.process`   | Process the output .csv data      | :white_check_mark:      |
+| **Devices**  | Xsens     | `xsens.process`       | Decoding the .mvnx file           | ✔️     |
+|              |           | `xsens.visualize`     | Show or save gif about the motion | ✔️      |
+|              | Optitrack | `optitrack.process`   | Process the output .csv data      | ✔️      |
 |              |           | `optitrack.visualize` | Show or save gif about the motion |        |
 |              | ZED       | `zed.record`          | Show or save gif about the motion |        |
 |              |           | `zed.playback`        | Show or save gif about the motion |        |
