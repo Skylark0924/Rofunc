@@ -1,5 +1,15 @@
 # Robotics Functions (RoFunc)
 
+- [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
+  - [Hello, robot world!](#hello-robot-world)
+  - [Available functions](#available-functions)
+    - [Xsens](#xsens)
+      - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
+      - [Visualize the motion data](#visualize-the-motion-data)
+    - [Optitrack](#optitrack)
+      - [Get useful data](#get-useful-data)
+      - [Visualize the motion data](#visualize-the-motion-data-1)
+
 ## Hello, robot world!
 
 ```python
@@ -8,16 +18,16 @@ import rofunc as rf
 
 ## Available functions
 
-| Classes      | Types     | Functions             | Description                       | Status |
-|--------------|-----------|-----------------------|-----------------------------------|--------|
-| **Devices**  | Xsens     | `xsens.process`       | Decoding the .mvnx file           | ✔️     |
-|              |           | `xsens.visualize`     | Show or save gif about the motion | ✔️      |
-|              | Optitrack | `optitrack.process`   | Process the output .csv data      | ✔️      |
-|              |           | `optitrack.visualize` | Show or save gif about the motion |        |
-|              | ZED       | `zed.record`          | Show or save gif about the motion |        |
-|              |           | `zed.playback`        | Show or save gif about the motion |        |
-| **Planning** | LQT       | `lqt.uni`             | Show or save gif about the motion |        |
-|              |           | `lqt.bi`              | Show or save gif about the motion |        |
+| Classes      | Types     | Functions             | Description                        | Status |
+|--------------|-----------|-----------------------|------------------------------------|--------|
+| **Devices**  | Xsens     | `xsens.process`       | Decoding the .mvnx file            | ✔️     |
+|              |           | `xsens.visualize`     | Show or save gif about the motion  | ✔️     |
+|              | Optitrack | `optitrack.process`   | Process the output .csv data       | ✔️     |
+|              |           | `optitrack.visualize` | Show or save gif about the motion  |        |
+|              | ZED       | `zed.record`          | Record with multiple cameras       |        |
+|              |           | `zed.playback`        | Playback the recording             |        |
+| **Planning** | LQT       | `lqt.uni`             | LQT for one agent                  |        |
+|              |           | `lqt.bi`              | LQT for two agent with constraints |        |
 
 ### Xsens
 
