@@ -12,6 +12,10 @@
 
 ## Hello, robot world!
 
+```
+pip install rofunc
+```
+
 ```python
 import rofunc as rf
 ```
