@@ -32,13 +32,13 @@ def plot_skeleton(skeleton_data_path: str, save_gif=False):
 
     fig = plt.figure()
     ax = Axes3D(fig)
-    ax.set_xlim(-0.5, 1)  # 因为清空了画布，所以要重新设置坐标轴的范围
+    ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
     ax.set_ylim(-0.5, 1)
     ax.set_zlim(-.5, 2)
 
     def update(index):
-        ax.cla()  # 清空画布
-        ax.set_xlim(-0.5, 1)  # 因为清空了画布，所以要重新设置坐标轴的范围
+        ax.cla()  # Clear the canvas
+        ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
         ax.set_ylim(-0.5, 1)
         ax.set_zlim(-.5, 2)
         for label in labels:
@@ -49,7 +49,7 @@ def plot_skeleton(skeleton_data_path: str, save_gif=False):
                     x, y, z = data_dict['{}'.format(label.split('.')[0])][index, :3]
                     ax.scatter(x, y, z, c='r')
 
-    ax.set_xlim(-0.5, 1)  # 因为清空了画布，所以要重新设置坐标轴的范围
+    ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
     ax.set_ylim(-0.5, 1)
     ax.set_zlim(-.5, 2)
     ani = animation.FuncAnimation(fig, update, np.arange(0, dim, 10), interval=100, blit=False)
