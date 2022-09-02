@@ -17,4 +17,3 @@
 |---|----------|-------------|----|
 | **Devices**  | `xsens.visualize` | | |
 |              | `xsens.visualize` | | |
-| **Planning** | `xsens.visualize` | | |
