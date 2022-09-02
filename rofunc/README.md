@@ -8,16 +8,16 @@ import rofunc as rf
 
 ## Available functions
 
-| Classes      | Types     | Functions             | Description                       |
-|--------------|-----------|-----------------------|-----------------------------------|
-| **Devices**  | Xsens     | `xsens.process`       | Decoding the .mvnx file           |
-|              |           | `xsens.visualize`     | Show or save gif about the motion |
-|              | Optitrack | `optitrack.process`   | Process the output .csv data      |
-|              |           | `optitrack.visualize` | Show or save gif about the motion |
-|              | ZED       | `zed.record`          | Show or save gif about the motion |
-|              |           | `zed.playback`        | Show or save gif about the motion |
-| **Planning** | LQT       | `lqt.uni`             | Show or save gif about the motion |
-|              |           | `lqt.bi`              | Show or save gif about the motion |
+| Classes      | Types     | Functions             | Description                       | Status |
+|--------------|-----------|-----------------------|-----------------------------------|--------|
+| **Devices**  | Xsens     | `xsens.process`       | Decoding the .mvnx file           | ✅      |
+|              |           | `xsens.visualize`     | Show or save gif about the motion | ✅      |
+|              | Optitrack | `optitrack.process`   | Process the output .csv data      | ✅      |
+|              |           | `optitrack.visualize` | Show or save gif about the motion |        |
+|              | ZED       | `zed.record`          | Show or save gif about the motion |        |
+|              |           | `zed.playback`        | Show or save gif about the motion |        |
+| **Planning** | LQT       | `lqt.uni`             | Show or save gif about the motion |        |
+|              |           | `lqt.bi`              | Show or save gif about the motion |        |
 
 ### Xsens
 
@@ -122,6 +122,7 @@ Then you will obtain new csv files in the same directory.
 ```
 
 > We also provide a batch form cleaning several data in parallel.
+
 ```python 
 import rofunc as rf
 
