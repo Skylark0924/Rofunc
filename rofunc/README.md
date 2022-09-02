@@ -1,5 +1,15 @@
 # Robotics Functions (RoFunc)
 
+- [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
+  - [Hello, robot world!](#hello-robot-world)
+  - [Available functions](#available-functions)
+    - [Xsens](#xsens)
+      - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
+      - [Visualize the motion data](#visualize-the-motion-data)
+    - [Optitrack](#optitrack)
+      - [Get useful data](#get-useful-data)
+      - [Visualize the motion data](#visualize-the-motion-data-1)
+
 ## Hello, robot world!
 
 ```python
