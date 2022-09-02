@@ -11,9 +11,7 @@ Rofunc is a package for real-world robotics experiments, including useful functi
 ### Installation
 
 ```
-git clone https://github.com/Skylark0924/Roadmap-for-robot-science.git
-cd rofunc/python/
-python setup.py install
+pip install rofunc
 ```
 
 ### Documentation
