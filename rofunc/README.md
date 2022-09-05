@@ -28,7 +28,11 @@ import rofunc as rf
 |                |             | `xsens.visualize`     | Show or save gif about the motion                     | ✅     |
 |                | Optitrack   | `optitrack.process`   | Process the output .csv data                          | ✅     |
 |                |             | `optitrack.visualize` | Show or save gif about the motion                     |        |
+<<<<<<< HEAD
 |                | ZED         | `zed.record`          | Record with multiple cameras                          | ✅     |
+=======
+|                | ZED         | `zed.record`          | Record with multiple cameras                          | ✔️     |
+>>>>>>> main
 |                |             | `zed.playback`        | Playback the recording                                |        |
 |                | Multi-modal | `mmodal.capture`      | Capture multi-modal demonstration data simultaneously |        |
 | **Logger**     |             | `logger.write`        | Custom tensorboard-based logger                       |        |
