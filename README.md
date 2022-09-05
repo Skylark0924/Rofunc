@@ -14,7 +14,7 @@ import rofunc as rf
 pip install rofunc
 ```
 
-### Documentation
+### [Documentation](./rofunc/)
 Currently, we provide a simple document; please refer to [here](./rofunc/).
 
 
