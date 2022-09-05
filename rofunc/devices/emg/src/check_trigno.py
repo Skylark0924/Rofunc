@@ -24,20 +24,25 @@ def check_emg(host):
                              host=host)
 
     # test single-channel
-    dev.start()
-    for i in range(4):
-        data = dev.read()
-        assert data.shape == (1, 270)
-    print('single-channel achieved')
-    dev.stop()
+    # dev.start()
+    # for i in range(4):
+    #     data = dev.read()
+    #     assert data.shape == (1, 270)
+    # print('single-channel achieved')
+    # dev.stop()
 
     # test multi-channel
-    dev.set_channel_range((0, 4))
+    dev.set_channel_range((0, 5))
     dev.start()
-    for i in range(4):
-        data = dev.read()
-        assert data.shape == (5, 270)
-    print('multi-channel achieved')
+    # for i in range(10):
+    #     data = dev.read()
+    #     assert data.shape == (6, 270)
+    # print('multi-channel achieved')
+
+    while True:
+        data = dev.read() * 10000
+        assert data.shape == (6, 270)
+        print(data)
     dev.stop()
 
 
@@ -49,6 +54,7 @@ def check_accel(host):
     for i in range(4):
         data = dev.read()
         assert data.shape == (3, 10)
+    print('Accel achieved')
     dev.stop()
 
 
@@ -58,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-a', '--addr',
         dest='host',
-        default='169.254.197.162',
+        default='10.13.52.82',
         help="IP address of the machine running TCU. Default is localhost.")
     args = parser.parse_args()
 

@@ -230,7 +230,7 @@ class Sensor:
 def main():
     # Main is currently written purely for testing sockets
     # I will implement the actual main() tomorrow...
-    test_class = Controller(('169.254.197.162', 50040), 15, True)
+    test_class = Controller(('10.13.52.82', 50040), 15, True)
     test_class.start()
     test_class.join()
     sys.exit(0)
