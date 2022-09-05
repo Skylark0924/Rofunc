@@ -5,37 +5,20 @@ import time
 import signal
 import logging
 import os
-from .src.record import get_intrinsic_parameters
-
-zed_list = []
-left_list = []
-depth_list = []
-timestamp_list = []
-thread_list = []
-stop_signal = False
-recording_param_list = []
+from src.record import get_intrinsic_parameters
 
 
-def signal_handler(signal, frame):
-    global stop_signal
-    global zed_list
+def signal_handler(signal, frame, zed_list):
     print('ZED', zed_list)
     for cam in zed_list:
         cam.disable_recording()
         cam.close()
-    stop_signal = True
+    signal = True
     time.sleep(0.5)
     exit()
 
 
-def grab_run(index):
-    global stop_signal
-    global zed_list
-    global timestamp_list
-    global left_list
-    global depth_list
-    global recording_param_list
-
+def grab_run(zed_list, recording_param_list, index):
     err = zed_list[index].enable_recording(recording_param_list[index])
     if err != sl.ERROR_CODE.SUCCESS:
         print('Wrong', index)
@@ -52,17 +35,22 @@ def grab_run(index):
             print("Camera: " + str(index) + "Frame count: " + str(frames_recorded), end="\r")
 
 
-def record(exp_name):
-    global stop_signal
-    global zed_list
-    global left_list
-    global depth_list
-    global timestamp_list
-    global thread_list
+def record(root_dir, exp_name):
+    if os.path.exists('{}/{}'.format(root_dir, exp_name)):
+        raise Exception('There are already some files in {}, please rename the exp_name.')
+    else:
+        os.mkdir('{}/{}'.format(root_dir, exp_name))
+
+    zed_list = []
+    left_list = []
+    depth_list = []
+    timestamp_list = []
+    thread_list = []
+    recording_param_list = []
+
     # global path
-    global recording_param_list
     signal.signal(signal.SIGINT, signal_handler)
-    logging.basicConfig(filename='data/{}/parameter.log'.format(exp_name, exp_name), filemode='a', level=logging.INFO)
+    logging.basicConfig(filename='{}/{}/parameter.log'.format(root_dir, exp_name), filemode='a', level=logging.INFO)
 
     print("Running...")
     init = sl.InitParameters()
@@ -109,11 +97,10 @@ def record(exp_name):
     # Start camera threads
     for index in range(0, len(zed_list)):
         if zed_list[index].is_opened():
-            thread_list.append(threading.Thread(target=grab_run, args=(index,)))
+            thread_list.append(threading.Thread(target=grab_run, args=(zed_list, recording_param_list, index,)))
             thread_list[index].start()
 
     # Stop the threads
-    stop_signal = True
     for index in range(0, len(thread_list)):
         thread_list[index].join()
 
@@ -123,9 +110,5 @@ def record(exp_name):
 if __name__ == "__main__":
     root_dir = 'data/'
     exp_name = '20220630_1552_tactile'
-    if os.path.exists('{}/{}'.format(root_dir, exp_name)):
-        raise Exception('There are already some files in {}, please rename the exp_name.')
-    else:
-        os.mkdir('{}/{}'.format(root_dir, exp_name))
 
-    record(exp_name)
+    record(root_dir, exp_name)

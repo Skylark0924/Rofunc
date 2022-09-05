@@ -6,9 +6,9 @@ import signal
 import logging
 import os
 
-exp_name = '20220630_1552_tactile'
-if not os.path.exists('data/{}'.format(exp_name)):
-    os.mkdir('data/{}'.format(exp_name))
+# exp_name = '20220630_1552_tactile'
+# if not os.path.exists('data/{}'.format(exp_name)):
+#     os.mkdir('data/{}'.format(exp_name))
 
 zed_list = []
 left_list = []
@@ -18,7 +18,7 @@ thread_list = []
 stop_signal = False
 recording_param_list = []
 
-logging.basicConfig(filename='data/{}/{}.log'.format(exp_name, exp_name), filemode='a', level=logging.INFO)
+# logging.basicConfig(filename='data/{}/{}.log'.format(exp_name, exp_name), filemode='a', level=logging.INFO)
 
 
 def get_intrinsic_parameters(cam):
