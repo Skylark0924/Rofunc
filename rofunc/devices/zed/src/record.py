@@ -21,8 +21,7 @@ recording_param_list = []
 logging.basicConfig(filename='data/{}/{}.log'.format(exp_name, exp_name), filemode='a', level=logging.INFO)
 
 
-def get_intrinsic_parameters(cam, serial_number):
-    logging.info('Serial_number: {}'.format(serial_number))
+def get_intrinsic_parameters(cam):
     calibration_params = cam.get_camera_information().camera_configuration.calibration_parameters
     # Focal length of the left eye in pixels
     focal_left_x = calibration_params.left_cam.fx
@@ -33,12 +32,6 @@ def get_intrinsic_parameters(cam, serial_number):
     t = calibration_params.T
     # Horizontal field of view of the left eye in degrees
     h_fov = calibration_params.left_cam.h_fov
-
-    logging.info('focal_left_x: {}'.format(focal_left_x))
-    logging.info('k1: {}'.format(k1))
-    logging.info('tz: {}'.format(t))
-    logging.info('h_fov: {}'.format(h_fov))
-
     return focal_left_x, k1, t, h_fov
 
 
