@@ -25,6 +25,7 @@ import rofunc as rf
 
 ## Available functions
 
+<<<<<<< HEAD
 | Classes        | Types       | Functions             | Description                                          | Status |
 |----------------|-------------|-----------------------|------------------------------------------------------|--------|
 | **Devices**    | Xsens       | `xsens.record`        | Record the human motion via network streaming        |        |
@@ -44,6 +45,25 @@ import rofunc as rf
 |                | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation      |        |
 | **Planning**   | LQT         | `lqt.uni`             | LQT for one agent                                    |        |
 |                |             | `lqt.bi`              | LQT for two agent with constraints                   |        |
+=======
+| Classes        | Types       | Functions             | Description                                           | Status |
+|----------------|-------------|-----------------------|-------------------------------------------------------|--------|
+| **Devices**    | Xsens       | `xsens.process`       | Decoding the .mvnx file                               | ✅      |
+|                |             | `xsens.visualize`     | Show or save gif about the motion                     | ✅      |
+|                | Optitrack   | `optitrack.process`   | Process the output .csv data                          | ✅      |
+|                |             | `optitrack.visualize` | Show or save gif about the motion                     |        |
+|                | ZED         | `zed.record`          | Record with multiple cameras                          | ✅      |
+|                |             | `zed.playback`        | Playback the recording and save snapshots             |   ✅     |
+|                | Multi-modal | `mmodal.record`      | Capture multi-modal demonstration data simultaneously |        |
+| **Logger**     |             | `logger.write`        | Custom tensorboard-based logger                       |        |
+| **Coordinate** |             | `coord.custom_class`  | Define the custom class of `Pose`                     |        |
+|                |             | `coord.transform`     | Useful functions about coordinate transformation      |        |
+| **VisuaLab**   | 2D          | `visualab.2d`         | 2-dim trajectory visualization                        |        |
+|                | 3D          | `visualab.3d`         | 3-dim trajectory visualization                        |        |
+|                | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation       |        |
+| **Planning**   | LQT         | `lqt.uni`             | LQT for one agent                                     |        |
+|                |             | `lqt.bi`              | LQT for two agent with constraints                    |        |
+>>>>>>> main
 
 ### Xsens
 
