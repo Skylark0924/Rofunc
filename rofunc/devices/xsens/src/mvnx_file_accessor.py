@@ -1,4 +1,4 @@
-from rofunc.xsens.src import mvn
+from ..src import mvn
 import warnings
 
 

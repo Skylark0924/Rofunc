@@ -37,7 +37,8 @@ def grab_run(zed_list, recording_param_list, index):
 
 def record(root_dir, exp_name):
     if os.path.exists('{}/{}'.format(root_dir, exp_name)):
-        raise Exception('There are already some files in {}, please rename the exp_name.')
+        raise Exception('There are already some files in {}, please rename the exp_name.'.format(
+            '{}/{}'.format(root_dir, exp_name)))
     else:
         os.mkdir('{}/{}'.format(root_dir, exp_name))
 
@@ -108,7 +109,10 @@ def record(root_dir, exp_name):
 
 
 if __name__ == "__main__":
-    root_dir = 'data/'
-    exp_name = '20220630_1552_tactile'
+    root_dir = '/home/ubuntu/Data/zed_record'
+    exp_name = '20220909'
 
-    record(root_dir, exp_name)
+    # record(root_dir, exp_name)
+    import rofunc as rf
+
+    rf.zed.record(root_dir, exp_name)
