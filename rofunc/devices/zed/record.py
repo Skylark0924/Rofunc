@@ -1,19 +1,34 @@
-from signal import signal, SIGINT
-import pyzed.sl as sl
-import threading
-import time
-import signal
 import logging
 import os
-from src.record import get_intrinsic_parameters
+import signal
+import threading
+import time
+
+import pyzed.sl as sl
+
+zed_list = []
 
 
-def signal_handler(signal, frame, zed_list):
+def get_intrinsic_parameters(cam):
+    calibration_params = cam.get_camera_information().camera_configuration.calibration_parameters
+    # Focal length of the left eye in pixels
+    focal_left_x = calibration_params.left_cam.fx
+    # First radial distortion coefficient
+    k1 = calibration_params.left_cam.disto[0]
+    # Translation between left and right eye on z-axis
+
+    t = calibration_params.T
+    # Horizontal field of view of the left eye in degrees
+    h_fov = calibration_params.left_cam.h_fov
+    return focal_left_x, k1, t, h_fov
+
+
+def signal_handler(signal, frame):
+    global zed_list
     print('ZED', zed_list)
     for cam in zed_list:
         cam.disable_recording()
         cam.close()
-    signal = True
     time.sleep(0.5)
     exit()
 
@@ -36,13 +51,14 @@ def grab_run(zed_list, recording_param_list, index):
 
 
 def record(root_dir, exp_name):
+    global zed_list
+
     if os.path.exists('{}/{}'.format(root_dir, exp_name)):
         raise Exception('There are already some files in {}, please rename the exp_name.'.format(
             '{}/{}'.format(root_dir, exp_name)))
     else:
         os.mkdir('{}/{}'.format(root_dir, exp_name))
 
-    zed_list = []
     left_list = []
     depth_list = []
     timestamp_list = []
@@ -110,7 +126,7 @@ def record(root_dir, exp_name):
 
 if __name__ == "__main__":
     root_dir = '/home/ubuntu/Data/zed_record'
-    exp_name = '20220909'
+    exp_name = '20220909212234'
 
     # record(root_dir, exp_name)
     import rofunc as rf
