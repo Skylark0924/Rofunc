@@ -29,7 +29,7 @@ import rofunc as rf
 |                | Optitrack   | `optitrack.process`   | Process the output .csv data                          | ✅      |
 |                |             | `optitrack.visualize` | Show or save gif about the motion                     |        |
 |                | ZED         | `zed.record`          | Record with multiple cameras                          | ✅      |
-|                |             | `zed.playback`        | Playback the recording                                |        |
+|                |             | `zed.playback`        | Playback the recording and save snapshots             |        |
 |                | Multi-modal | `mmodal.capture`      | Capture multi-modal demonstration data simultaneously |        |
 | **Logger**     |             | `logger.write`        | Custom tensorboard-based logger                       |        |
 | **Coordinate** |             | `coord.custom_class`  | Define the custom class of `Pose`                     |        |
@@ -159,13 +159,39 @@ rf.optitrack.process.data_clean_batch(input_dir)
 
 #### Record
 
-It is capable to check the camera devices connected to the computer autonomously and record multiple cameras in parallel.
+It is capable to check the camera devices connected to the computer autonomously and record multiple cameras in
+parallel.
 
 ```python 
 import rofunc as rf
 
 root_dir = '/home/ubuntu/Data/zed_record'
 exp_name = '20220909'
-
 rf.zed.record(root_dir, exp_name)
+```
+
+#### Playback
+
+It is capable to check the camera devices connected to the computer autonomously and record multiple cameras in
+parallel.
+
+```python 
+import rofunc as rf
+
+recording_path = '/home/ubuntu/Data/06_24/Video/20220624_1649/38709363.svo'
+rf.zed.playback(recording_path)
+```
+
+You can save the snapshots as prompted
+
+```
+Reading SVO file: /home/ubuntu/Data/06_24/Video/20220624_1649/38709363.svo
+  Save the current image:     s
+  Quit the video reading:     q
+
+Saving image 0.png : SUCCESS
+Saving image 1.png : SUCCESS
+Saving image 2.png : SUCCESS
+Saving image 3.png : SUCCESS
+...
 ```
