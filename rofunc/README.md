@@ -1,14 +1,17 @@
 # Robotics Functions (RoFunc)
 
 - [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
-    - [Hello, robot world!](#hello-robot-world)
-    - [Available functions](#available-functions)
-        - [Xsens](#xsens)
-            - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
-            - [Visualize the motion data](#visualize-the-motion-data)
-        - [Optitrack](#optitrack)
-            - [Get useful data](#get-useful-data)
-            - [Visualize the motion data](#visualize-the-motion-data-1)
+  - [Hello, robot world!](#hello-robot-world)
+  - [Available functions](#available-functions)
+    - [Xsens](#xsens)
+      - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
+      - [Visualize the motion data](#visualize-the-motion-data)
+    - [Optitrack](#optitrack)
+      - [Get useful data](#get-useful-data)
+      - [Visualize the motion data](#visualize-the-motion-data-1)
+    - [Zed](#zed)
+      - [Record](#record)
+      - [Playback](#playback)
 
 ## Hello, robot world!
 
@@ -22,23 +25,25 @@ import rofunc as rf
 
 ## Available functions
 
-| Classes        | Types       | Functions             | Description                                           | Status |
-|----------------|-------------|-----------------------|-------------------------------------------------------|--------|
-| **Devices**    | Xsens       | `xsens.process`       | Decoding the .mvnx file                               | ✅      |
-|                |             | `xsens.visualize`     | Show or save gif about the motion                     | ✅      |
-|                | Optitrack   | `optitrack.process`   | Process the output .csv data                          | ✅      |
-|                |             | `optitrack.visualize` | Show or save gif about the motion                     |        |
-|                | ZED         | `zed.record`          | Record with multiple cameras                          | ✅      |
-|                |             | `zed.playback`        | Playback the recording and save snapshots             |        |
-|                | Multi-modal | `mmodal.capture`      | Capture multi-modal demonstration data simultaneously |        |
-| **Logger**     |             | `logger.write`        | Custom tensorboard-based logger                       |        |
-| **Coordinate** |             | `coord.custom_class`  | Define the custom class of `Pose`                     |        |
-|                |             | `coord.transform`     | Useful functions about coordinate transformation      |        |
-| **VisuaLab**   | 2D          | `visualab.2d`         | 2-dim trajectory visualization                        |        |
-|                | 3D          | `visualab.3d`         | 3-dim trajectory visualization                        |        |
-|                | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation       |        |
-| **Planning**   | LQT         | `lqt.uni`             | LQT for one agent                                     |        |
-|                |             | `lqt.bi`              | LQT for two agent with constraints                    |        |
+| Classes        | Types       | Functions             | Description                                          | Status |
+|----------------|-------------|-----------------------|------------------------------------------------------|--------|
+| **Devices**    | Xsens       | `xsens.record`        | Record the human motion via network streaming        |        |
+|                |             | `xsens.process`       | Decode the .mvnx file                                | ✅      |
+|                |             | `xsens.visualize`     | Show or save gif about the motion                    | ✅      |
+|                | Optitrack   | `optitrack.record`    | Record the motion of markers via network streaming   |        |
+|                |             | `optitrack.process`   | Process the output .csv data                         | ✅      |
+|                |             | `optitrack.visualize` | Show or save gif about the motion                    |        |
+|                | ZED         | `zed.record`          | Record with multiple cameras                         | ✅      |
+|                |             | `zed.playback`        | Playback the recording and save snapshots            | ✅      |
+|                | Multi-modal | `mmodal.record`       | Record multi-modal demonstration data simultaneously |        |
+| **Logger**     |             | `logger.write`        | Custom tensorboard-based logger                      |        |
+| **Coordinate** |             | `coord.custom_class`  | Define the custom class of `Pose`                    |        |
+|                |             | `coord.transform`     | Useful functions about coordinate transformation     |        |
+| **VisuaLab**   | 2D          | `visualab.2d`         | 2-dim trajectory visualization                       |        |
+|                | 3D          | `visualab.3d`         | 3-dim trajectory visualization                       |        |
+|                | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation      |        |
+| **Planning**   | LQT         | `lqt.uni`             | LQT for one agent                                    |        |
+|                |             | `lqt.bi`              | LQT for two agent with constraints                   |        |
 
 ### Xsens
 
