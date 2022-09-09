@@ -1,14 +1,14 @@
 # Robotics Functions (RoFunc)
 
 - [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
-  - [Hello, robot world!](#hello-robot-world)
-  - [Available functions](#available-functions)
-    - [Xsens](#xsens)
-      - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
-      - [Visualize the motion data](#visualize-the-motion-data)
-    - [Optitrack](#optitrack)
-      - [Get useful data](#get-useful-data)
-      - [Visualize the motion data](#visualize-the-motion-data-1)
+    - [Hello, robot world!](#hello-robot-world)
+    - [Available functions](#available-functions)
+        - [Xsens](#xsens)
+            - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
+            - [Visualize the motion data](#visualize-the-motion-data)
+        - [Optitrack](#optitrack)
+            - [Get useful data](#get-useful-data)
+            - [Visualize the motion data](#visualize-the-motion-data-1)
 
 ## Hello, robot world!
 
@@ -24,11 +24,11 @@ import rofunc as rf
 
 | Classes        | Types       | Functions             | Description                                           | Status |
 |----------------|-------------|-----------------------|-------------------------------------------------------|--------|
-| **Devices**    | Xsens       | `xsens.process`       | Decoding the .mvnx file                               | ✅     |
-|                |             | `xsens.visualize`     | Show or save gif about the motion                     | ✅     |
-|                | Optitrack   | `optitrack.process`   | Process the output .csv data                          | ✅     |
+| **Devices**    | Xsens       | `xsens.process`       | Decoding the .mvnx file                               | ✅      |
+|                |             | `xsens.visualize`     | Show or save gif about the motion                     | ✅      |
+|                | Optitrack   | `optitrack.process`   | Process the output .csv data                          | ✅      |
 |                |             | `optitrack.visualize` | Show or save gif about the motion                     |        |
-|                | ZED         | `zed.record`          | Record with multiple cameras                          | ✅     |
+|                | ZED         | `zed.record`          | Record with multiple cameras                          | ✅      |
 |                |             | `zed.playback`        | Playback the recording                                |        |
 |                | Multi-modal | `mmodal.capture`      | Capture multi-modal demonstration data simultaneously |        |
 | **Logger**     |             | `logger.write`        | Custom tensorboard-based logger                       |        |
@@ -154,3 +154,18 @@ rf.optitrack.process.data_clean_batch(input_dir)
 ```
 
 #### Visualize the motion data
+
+### Zed
+
+#### Record
+
+It is capable to check the camera devices connected to the computer autonomously and record multiple cameras in parallel.
+
+```python 
+import rofunc as rf
+
+root_dir = '/home/ubuntu/Data/zed_record'
+exp_name = '20220909'
+
+rf.zed.record(root_dir, exp_name)
+```

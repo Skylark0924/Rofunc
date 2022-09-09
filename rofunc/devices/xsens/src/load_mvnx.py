@@ -6,8 +6,8 @@ Script to load an mvnx
 import xml.etree.ElementTree as ET
 import collections
 import numpy as np
-from rofunc.xsens.src.mvnx_file_accessor import MvnxFileAccessor
-from rofunc.xsens.src import mvn
+from .mvnx_file_accessor import MvnxFileAccessor
+from ..src import mvn
 
 # Xml namespace for mvnx files
 ns = {'mvn': 'http://www.xsens.com/mvn/mvnx'}

@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 import numpy as np
 import pandas as pd
-from rofunc.xsens.src.load_mvnx import load_mvnx
+from .src.load_mvnx import load_mvnx
 
 
 def data_clean(input_path, output_dir):
