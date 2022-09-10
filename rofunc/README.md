@@ -235,7 +235,7 @@ def export_batch(filedir, all_mode=True, mode=None, core_num=10):
 ```
 
 Example:
-```
+```python
 rf.zed.export_batch('/home/ubuntu/Data/06_24/Video/20220624_1649', core_num=20)
 ```
 
