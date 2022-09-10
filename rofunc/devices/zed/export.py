@@ -217,4 +217,7 @@ def export_batch(filedir, all_mode=True, mode=None, core_num=10):
 if __name__ == "__main__":
     # for i in range(5):
     # export('/home/ubuntu/Data/06_24/Video/20220624_1649/38709363.svo', 2)
-    export_batch('/home/ubuntu/Data/06_24/Video/20220624_1649', mode=1, core_num=20)
+    # export_batch('/home/ubuntu/Data/06_24/Video/20220624_1649', core_num=20)
+    import rofunc as rf
+
+    rf.zed.export_batch('/home/ubuntu/Data/06_24/Video/20220624_1649', core_num=20)
