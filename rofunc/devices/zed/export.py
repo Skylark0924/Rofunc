@@ -1,6 +1,7 @@
 import enum
+import multiprocessing
+import os
 import sys
-from pathlib import Path
 
 import cv2
 import numpy as np
@@ -20,47 +21,56 @@ def progress_bar(percent_done, bar_length=50):
     sys.stdout.flush()
 
 
-def export(filepath):
-    if not sys.argv or len(sys.argv) != 4:
-        sys.stdout.write("Usage: \n\n")
-        sys.stdout.write("    ZED_SVO_Export A B C \n\n")
-        sys.stdout.write("Please use the following parameters from the command line:\n")
-        sys.stdout.write(" A - SVO file path (input) : \"path/to/file.svo\"\n")
-        sys.stdout.write(" B - AVI file path (output) or image sequence folder(output) :\n")
-        sys.stdout.write("         \"path/to/output/file.avi\" or \"path/to/output/folder\"\n")
-        sys.stdout.write(" C - Export mode:  0=Export LEFT+RIGHT AVI.\n")
-        sys.stdout.write("                   1=Export LEFT+DEPTH_VIEW AVI.\n")
-        sys.stdout.write("                   2=Export LEFT+RIGHT image sequence.\n")
-        sys.stdout.write("                   3=Export LEFT+DEPTH_VIEW image sequence.\n")
-        sys.stdout.write("                   4=Export LEFT+DEPTH_16Bit image sequence.\n")
-        sys.stdout.write(" A and B need to end with '/' or '\\'\n\n")
-        sys.stdout.write("Examples: \n")
-        sys.stdout.write("  (AVI LEFT+RIGHT):  ZED_SVO_Export \"path/to/file.svo\" \"path/to/output/file.avi\" 0\n")
-        sys.stdout.write("  (AVI LEFT+DEPTH):  ZED_SVO_Export \"path/to/file.svo\" \"path/to/output/file.avi\" 1\n")
-        sys.stdout.write("  (SEQUENCE LEFT+RIGHT):  ZED_SVO_Export \"path/to/file.svo\" \"path/to/output/folder\" 2\n")
-        sys.stdout.write("  (SEQUENCE LEFT+DEPTH):  ZED_SVO_Export \"path/to/file.svo\" \"path/to/output/folder\" 3\n")
-        sys.stdout.write("  (SEQUENCE LEFT+DEPTH_16Bit):  ZED_SVO_Export \"path/to/file.svo\" \"path/to/output/folder\""
-                         " 4\n")
-        exit()
+def export(filepath, mode=1):
+    """
+    Export the svo file with specific mode.
+    Args:
+        filepath: SVO file path (input) : path/to/file.svo
+        mode: Export mode:  0=Export LEFT+RIGHT AVI.
+                            1=Export LEFT+DEPTH_VIEW AVI.
+                            2=Export LEFT+RIGHT image sequence.
+                            3=Export LEFT+DEPTH_VIEW image sequence.
+                            4=Export LEFT+DEPTH_16Bit image sequence.
+
+    Returns:
+
+    """
 
     # Get input parameters
     svo_input_path = filepath
-    output_path = filepath.split('.')
+    root_path = filepath.split('.')[0]
+    output_dir = root_path + '_export'
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
     output_as_video = True
-    app_type = AppType.LEFT_AND_RIGHT
-    if sys.argv[3] == "1" or sys.argv[3] == "3":
+    if mode == 0:
+        app_type = AppType.LEFT_AND_RIGHT
+        mode_name = 'left_and_right.avi'
+    elif mode == 1:
         app_type = AppType.LEFT_AND_DEPTH
-    if sys.argv[3] == "4":
+        mode_name = 'left_and_depth.avi'
+    elif mode == 2:
+        app_type = AppType.LEFT_AND_RIGHT
+        mode_name = 'left_and_right_img_seq'
+    elif mode == 3:
+        app_type = AppType.LEFT_AND_DEPTH
+        mode_name = 'left_and_depth_img_seq'
+    elif mode == 4:
         app_type = AppType.LEFT_AND_DEPTH_16
+        mode_name = 'left_and_depth_16_img_seq'
+    else:
+        raise Exception('Wrong mode index, should be one of [0, 1, 2, 3, 4]')
+
+    output_path = os.path.join(output_dir, mode_name)
 
     # Check if exporting to AVI or SEQUENCE
-    if sys.argv[3] != "0" and sys.argv[3] != "1":
+    if mode != 0 and mode != 1:
         output_as_video = False
 
-    if not output_as_video and not output_path.is_dir():
-        sys.stdout.write("Input directory doesn't exist. Check permissions or create it.\n",
-                         output_path, "\n")
-        exit()
+    if not output_as_video:
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
 
     # Specify SVO path parameter
     init_params = sl.InitParameters()
@@ -110,7 +120,7 @@ def export(filepath):
     rt_param.sensing_mode = sl.SENSING_MODE.FILL
 
     # Start SVO conversion to AVI/SEQUENCE
-    sys.stdout.write("Converting SVO... Use Ctrl-C to interrupt conversion.\n")
+    sys.stdout.write("Converting SVO to {}. Use Ctrl-C to interrupt conversion.\n".format(mode_name))
 
     nb_frames = zed.get_svo_number_of_frames()
 
@@ -142,9 +152,10 @@ def export(filepath):
                 video_writer.write(ocv_image_sbs_rgb)
             else:
                 # Generate file names
-                filename1 = output_path / ("left%s.png" % str(svo_position).zfill(6))
-                filename2 = output_path / (("right%s.png" if app_type == AppType.LEFT_AND_RIGHT
-                                            else "depth%s.png") % str(svo_position).zfill(6))
+                filename1 = os.path.join(output_path, "left_{}.png".format(str(svo_position).zfill(6)))
+                filename2 = os.path.join(output_path, "right_{}.png".format(
+                    str(svo_position).zfill(6))) if app_type == AppType.LEFT_AND_RIGHT \
+                    else os.path.join(output_path, "depth_{}.png".format( str(svo_position).zfill(6)))
 
                 # Save Left images
                 cv2.imwrite(str(filename1), left_image.get_data())
@@ -163,6 +174,9 @@ def export(filepath):
             if svo_position >= (nb_frames - 1):  # End of SVO
                 sys.stdout.write("\nSVO end has been reached. Exiting now.\n")
                 break
+        elif zed.grab(rt_param) == sl.ERROR_CODE.END_OF_SVOFILE_REACHED:
+            sys.stdout.write("\nSVO end has been reached. Exiting now.\n")
+            break
 
     if output_as_video:
         # Close the video writer
@@ -172,7 +186,35 @@ def export(filepath):
     return 0
 
 
-if __name__ == "__main__":
-    import rofunc as rf
+def parallel(z):
+    return export(z[0], z[1])
 
-    rf.zed.export('/home/ubuntu/Data/06_24/Video/20220624_1649/38709363.svo')
+
+def export_batch(filedir, all_mode=True, mode=None, core_num=10):
+    files = os.listdir(filedir)
+    pool = multiprocessing.Pool(core_num)
+
+    if all_mode and mode is None:
+        filepaths = []
+        for mode in range(5):
+            for file in files:
+                if file[-3:] == 'svo':
+                    filepaths.append((os.path.join(filedir, file), mode))
+        pool.map(parallel, filepaths)
+    elif mode is not None:
+        filepaths = []
+        for file in files:
+            if file[-3:] == 'svo':
+                filepaths.append((os.path.join(filedir, file), mode))
+        pool.map(parallel, filepaths)
+    else:
+        raise Exception('Wrong parameters')
+
+    pool.close()
+    pool.join()
+
+
+if __name__ == "__main__":
+    # for i in range(5):
+    # export('/home/ubuntu/Data/06_24/Video/20220624_1649/38709363.svo', 2)
+    export_batch('/home/ubuntu/Data/06_24/Video/20220624_1649', mode=1, core_num=20)
