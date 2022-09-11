@@ -1,0 +1,21 @@
+'''
+    Replace this paragraph by a short description of your program.
+
+    Copyright (c) 2021 Idiap Research Institute, http://www.idiap.ch/
+    Written by John Doe <John.Doe@idiap.ch>,
+    Sylvain Calinon <https://calinon.ch>
+
+    This file is part of RCFS.
+
+    RCFS is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 3 as
+    published by the Free Software Foundation.
+
+    RCFS is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with RCFS. If not, see <http://www.gnu.org/licenses/>.
+'''
