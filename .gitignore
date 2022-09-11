@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+doc/rofunc.synctex.gz
+
+doc/rofunc.bbl
+
+doc/rofunc.aux
+
+doc/rofunc.blg
+
+doc/rofunc.out
