@@ -25,26 +25,29 @@ import rofunc as rf
 
 ## Available functions
 
-| Classes        | Types       | Functions             | Description                                          | Status |
-|----------------|-------------|-----------------------|------------------------------------------------------|--------|
-| **Devices**    | Xsens       | `xsens.record`        | Record the human motion via network streaming        |        |
-|                |             | `xsens.process`       | Decode the .mvnx file                                | ✅      |
-|                |             | `xsens.visualize`     | Show or save gif about the motion                    | ✅      |
-|                | Optitrack   | `optitrack.record`    | Record the motion of markers via network streaming   |        |
-|                |             | `optitrack.process`   | Process the output .csv data                         | ✅      |
-|                |             | `optitrack.visualize` | Show or save gif about the motion                    |        |
-|                | ZED         | `zed.record`          | Record with multiple cameras                         | ✅      |
-|                |             | `zed.playback`        | Playback the recording and save snapshots            | ✅      |
-|                |             | `zed.export`          | Export the recording to mp4                          |        |
-|                | Multi-modal | `mmodal.record`       | Record multi-modal demonstration data simultaneously |        |
-| **Logger**     |             | `logger.write`        | Custom tensorboard-based logger                      |        |
-| **Coordinate** |             | `coord.custom_class`  | Define the custom class of `Pose`                    |        |
-|                |             | `coord.transform`     | Useful functions about coordinate transformation     |        |
-| **VisuaLab**   | 2D          | `visualab.2d`         | 2-dim trajectory visualization                       |        |
-|                | 3D          | `visualab.3d`         | 3-dim trajectory visualization                       |        |
-|                | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation      |        |
-| **Planning**   | LQT         | `lqt.uni`             | LQT for one agent                                    |        |
-|                |             | `lqt.bi`              | LQT for two agent with constraints                   |        |
+| Classes                         | Types       | Functions             | Description                                                 | Status |
+|---------------------------------|-------------|-----------------------|-------------------------------------------------------------|--------|
+| **Devices**                     | Xsens       | `xsens.record`        | Record the human motion via network streaming               |        |
+|                                 |             | `xsens.process`       | Decode the .mvnx file                                       | ✅      |
+|                                 |             | `xsens.visualize`     | Show or save gif about the motion                           | ✅      |
+|                                 | Optitrack   | `optitrack.record`    | Record the motion of markers via network streaming          |        |
+|                                 |             | `optitrack.process`   | Process the output .csv data                                | ✅      |
+|                                 |             | `optitrack.visualize` | Show or save gif about the motion                           |        |
+|                                 | ZED         | `zed.record`          | Record with multiple cameras                                | ✅      |
+|                                 |             | `zed.playback`        | Playback the recording and save snapshots                   | ✅      |
+|                                 |             | `zed.export`          | Export the recording to mp4                                 |        |
+|                                 | Multi-modal | `mmodal.record`       | Record multi-modal demonstration data simultaneously        |        |
+| **Logger**                      |             | `logger.write`        | Custom tensorboard-based logger                             |        |
+| **Coordinate**                  |             | `coord.custom_class`  | Define the custom class of `Pose`                           |        |
+|                                 |             | `coord.transform`     | Useful functions about coordinate transformation            |        |
+| **VisuaLab**                    | 2D          | `visualab.2d`         | 2-dim trajectory visualization                              |        |
+|                                 | 3D          | `visualab.3d`         | 3-dim trajectory visualization                              |        |
+|                                 | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation             |        |
+| **Planning**                    | LQT         | `lqt.uni`             | LQT for one agent with several via-points                   | ✅      |
+|                                 |             | `lqt.bi`              | LQT for two agent with coordination constraints             |        |
+| **Learning from Demonstration** |             | `tpgmmm.uni`          | TP-GMM for one agent with several demonstrated trajectories |        |
+
+## Devices
 
 ### Xsens
 
@@ -201,3 +204,30 @@ Saving image 2.png : SUCCESS
 Saving image 3.png : SUCCESS
 ...
 ```
+
+## Planning
+
+### LQT
+
+#### Uni
+
+```python
+import rofunc as rf
+import numpy as np
+
+param = {
+    "nbData": 500,   # Number of data points
+    "nbVarPos": 7,   # Dimension of position data
+    "nbDeriv": 2,    # Number of static and dynamic features (2 -> [x,dx])
+    "dt": 1e-2,      # Time step duration
+    "rfactor": 1e-8  # Control cost
+}
+param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
+
+data = np.load('data/z_manipulator_poses.npy')
+
+u_hat, x_hat, muQ, idx_slices = rf.lqt.uni(param, data)
+rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
+```
+
+![](../img/lqt_uni.png)
