@@ -54,6 +54,7 @@ import rofunc as rf
   - [Planning](#planning)
     - [LQT](#lqt)
       - [Uni](#uni)
+      - [Bimanual](#bimanual)
 
 ## Devices
 
