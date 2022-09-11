@@ -3,6 +3,7 @@
 - [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
   - [Hello, robot world!](#hello-robot-world)
   - [Available functions](#available-functions)
+  - [Devices](#devices)
     - [Xsens](#xsens)
       - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
       - [Visualize the motion data](#visualize-the-motion-data)
@@ -12,6 +13,9 @@
     - [Zed](#zed)
       - [Record](#record)
       - [Playback](#playback)
+  - [Planning](#planning)
+    - [LQT](#lqt)
+      - [Uni](#uni)
 
 ## Hello, robot world!
 
