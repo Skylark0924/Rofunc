@@ -1,21 +1,5 @@
 # Robotics Functions (RoFunc)
 
-- [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
-  - [Hello, robot world!](#hello-robot-world)
-  - [Available functions](#available-functions)
-  - [Devices](#devices)
-    - [Xsens](#xsens)
-      - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
-      - [Visualize the motion data](#visualize-the-motion-data)
-    - [Optitrack](#optitrack)
-      - [Get useful data](#get-useful-data)
-      - [Visualize the motion data](#visualize-the-motion-data-1)
-    - [Zed](#zed)
-      - [Record](#record)
-      - [Playback](#playback)
-  - [Planning](#planning)
-    - [LQT](#lqt)
-      - [Uni](#uni)
 
 ## Hello, robot world!
 
@@ -52,6 +36,24 @@ import rofunc as rf
 | **Learning from Demonstration** | DMP         | `dmp.uni`             | DMP for one agent with several (or one) demonstrated trajectories    |        |
 |                                 | TP-GMM      | `tpgmmm.uni`          | TP-GMM for one agent with several (or one) demonstrated trajectories |        |
 |                                 |             | `tpgmmm.bi`           | TP-GMM for two agent with coordination learned from demonstration    |        |
+
+
+- [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
+  - [Hello, robot world!](#hello-robot-world)
+  - [Available functions](#available-functions)
+  - [Devices](#devices)
+    - [Xsens](#xsens)
+      - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
+      - [Visualize the motion data](#visualize-the-motion-data)
+    - [Optitrack](#optitrack)
+      - [Get useful data](#get-useful-data)
+      - [Visualize the motion data](#visualize-the-motion-data-1)
+    - [Zed](#zed)
+      - [Record](#record)
+      - [Playback](#playback)
+  - [Planning](#planning)
+    - [LQT](#lqt)
+      - [Uni](#uni)
 
 ## Devices
 
