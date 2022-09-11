@@ -23,7 +23,7 @@ import rofunc as rf
 |                                 |             | `optitrack.visualize` | Show or save gif about the motion                                    |        |
 |                                 | ZED         | `zed.record`          | Record with multiple cameras                                         | ✅      |
 |                                 |             | `zed.playback`        | Playback the recording and save snapshots                            | ✅      |
-|                                 |             | `zed.export`          | Export the recording to mp4                                          |        |
+|                                 |             | `zed.export`          | Export the recording to mp4                                          | ✅      |
 |                                 | Multi-modal | `mmodal.record`       | Record multi-modal demonstration data simultaneously                 |        |
 | **Logger**                      |             | `logger.write`        | Custom tensorboard-based logger                                      |        |
 | **Coordinate**                  |             | `coord.custom_class`  | Define the custom class of `Pose`                                    |        |
