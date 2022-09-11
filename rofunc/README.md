@@ -12,7 +12,6 @@
     - [Zed](#zed)
       - [Record](#record)
       - [Playback](#playback)
-      - [Export](#export)
 
 ## Hello, robot world!
 
@@ -205,3 +204,30 @@ Saving image 2.png : SUCCESS
 Saving image 3.png : SUCCESS
 ...
 ```
+
+## Planning
+
+### LQT
+
+#### Uni
+
+```python
+import rofunc as rf
+import numpy as np
+
+param = {
+    "nbData": 500,   # Number of data points
+    "nbVarPos": 7,   # Dimension of position data
+    "nbDeriv": 2,    # Number of static and dynamic features (2 -> [x,dx])
+    "dt": 1e-2,      # Time step duration
+    "rfactor": 1e-8  # Control cost
+}
+param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
+
+data = np.load('data/z_manipulator_poses.npy')
+
+u_hat, x_hat, muQ, idx_slices = rf.lqt.uni(param, data)
+rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
+```
+
+![](../img/lqt_uni.png)
