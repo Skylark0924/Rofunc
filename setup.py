@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name="rofunc",
-    version="0.0.0.7.1",
+    version="0.0.0.8",
     description='Useful functions for robot experiments',
     author="skylark",
     author_email="jjliu@mae.cuhk.edu.hk",
     packages=find_packages(),
-    install_requires=['numpy', 'matplotlib', 'pandas', 'tqdm', 'pillow'],
+    install_requires=['numpy', 'matplotlib', 'pandas', 'tqdm', 'pillow', 'pytransform3d'],
     python_requires='>=3.6',
     license='MIT',
     classifiers=[

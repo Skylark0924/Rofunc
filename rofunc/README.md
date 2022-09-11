@@ -12,7 +12,6 @@
     - [Zed](#zed)
       - [Record](#record)
       - [Playback](#playback)
-      - [Export](#export)
 
 ## Hello, robot world!
 
@@ -26,26 +25,29 @@ import rofunc as rf
 
 ## Available functions
 
-| Classes        | Types       | Functions             | Description                                          | Status |
-|----------------|-------------|-----------------------|------------------------------------------------------|--------|
-| **Devices**    | Xsens       | `xsens.record`        | Record the human motion via network streaming        |        |
-|                |             | `xsens.process`       | Decode the .mvnx file                                | ✅      |
-|                |             | `xsens.visualize`     | Show or save gif about the motion                    | ✅      |
-|                | Optitrack   | `optitrack.record`    | Record the motion of markers via network streaming   |        |
-|                |             | `optitrack.process`   | Process the output .csv data                         | ✅      |
-|                |             | `optitrack.visualize` | Show or save gif about the motion                    |        |
-|                | ZED         | `zed.record`          | Record with multiple cameras                         | ✅      |
-|                |             | `zed.playback`        | Playback the recording and save snapshots            | ✅      |
-|                |             | `zed.export`          | Export the recording to .avi and image sequence      | ✅      |
-|                | Multi-modal | `mmodal.record`       | Record multi-modal demonstration data simultaneously |        |
-| **Logger**     |             | `logger.write`        | Custom tensorboard-based logger                      |        |
-| **Coordinate** |             | `coord.custom_class`  | Define the custom class of `Pose`                    |        |
-|                |             | `coord.transform`     | Useful functions about coordinate transformation     |        |
-| **VisuaLab**   | 2D          | `visualab.2d`         | 2-dim trajectory visualization                       |        |
-|                | 3D          | `visualab.3d`         | 3-dim trajectory visualization                       |        |
-|                | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation      |        |
-| **Planning**   | LQT         | `lqt.uni`             | LQT for one agent                                    |        |
-|                |             | `lqt.bi`              | LQT for two agent with constraints                   |        |
+| Classes                         | Types       | Functions             | Description                                                 | Status |
+|---------------------------------|-------------|-----------------------|-------------------------------------------------------------|--------|
+| **Devices**                     | Xsens       | `xsens.record`        | Record the human motion via network streaming               |        |
+|                                 |             | `xsens.process`       | Decode the .mvnx file                                       | ✅      |
+|                                 |             | `xsens.visualize`     | Show or save gif about the motion                           | ✅      |
+|                                 | Optitrack   | `optitrack.record`    | Record the motion of markers via network streaming          |        |
+|                                 |             | `optitrack.process`   | Process the output .csv data                                | ✅      |
+|                                 |             | `optitrack.visualize` | Show or save gif about the motion                           |        |
+|                                 | ZED         | `zed.record`          | Record with multiple cameras                                | ✅      |
+|                                 |             | `zed.playback`        | Playback the recording and save snapshots                   | ✅      |
+|                                 |             | `zed.export`          | Export the recording to mp4                                 |        |
+|                                 | Multi-modal | `mmodal.record`       | Record multi-modal demonstration data simultaneously        |        |
+| **Logger**                      |             | `logger.write`        | Custom tensorboard-based logger                             |        |
+| **Coordinate**                  |             | `coord.custom_class`  | Define the custom class of `Pose`                           |        |
+|                                 |             | `coord.transform`     | Useful functions about coordinate transformation            |        |
+| **VisuaLab**                    | 2D          | `visualab.2d`         | 2-dim trajectory visualization                              |        |
+|                                 | 3D          | `visualab.3d`         | 3-dim trajectory visualization                              |        |
+|                                 | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation             |        |
+| **Planning**                    | LQT         | `lqt.uni`             | LQT for one agent with several via-points                   | ✅      |
+|                                 |             | `lqt.bi`              | LQT for two agent with coordination constraints             |        |
+| **Learning from Demonstration** |             | `tpgmmm.uni`          | TP-GMM for one agent with several demonstrated trajectories |        |
+
+## Devices
 
 ### Xsens
 
@@ -203,40 +205,29 @@ Saving image 3.png : SUCCESS
 ...
 ```
 
-#### Export
-```python
-def export(filepath, mode=1):
-    """
-    Export the svo file with specific mode.
-    Args:
-        filepath: SVO file path (input) : path/to/file.svo
-        mode: Export mode:  0=Export LEFT+RIGHT AVI.
-                            1=Export LEFT+DEPTH_VIEW AVI.
-                            2=Export LEFT+RIGHT image sequence.
-                            3=Export LEFT+DEPTH_VIEW image sequence.
-                            4=Export LEFT+DEPTH_16Bit image sequence.
+## Planning
 
-    Returns:
+### LQT
 
-    """
-```
+#### Uni
 
-Example
 ```python
 import rofunc as rf
+import numpy as np
 
-rf.zed.export('/home/ubuntu/Data/06_24/Video/20220624_1649/38709363.svo', 2)
+param = {
+    "nbData": 500,   # Number of data points
+    "nbVarPos": 7,   # Dimension of position data
+    "nbDeriv": 2,    # Number of static and dynamic features (2 -> [x,dx])
+    "dt": 1e-2,      # Time step duration
+    "rfactor": 1e-8  # Control cost
+}
+param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
+
+data = np.load('data/z_manipulator_poses.npy')
+
+u_hat, x_hat, muQ, idx_slices = rf.lqt.uni(param, data)
+rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
 ```
 
-> Since the converting always take a long time, I provide the batch form to convert in parallel. 
-
-```python
-def export_batch(filedir, all_mode=True, mode=None, core_num=10):
-```
-
-Example:
-```python
-rf.zed.export_batch('/home/ubuntu/Data/06_24/Video/20220624_1649', core_num=20)
-```
-
-Then you can convert all the .svo files under the specific directory with all mode in parallel. Enjoy it!
+![](../img/lqt_uni.png)
