@@ -161,12 +161,10 @@ def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=Tr
         fig = plt.figure(figsize=(4, 4))
         ax = fig.add_subplot(111, projection='3d')
 
-    # for slice_t in idx_slices:
-    #     ax.scatter(muQ_l[slice_t][0], muQ_l[slice_t][1], muQ_l[slice_t][2], c='red', s=10)
-    #     ax.scatter(muQ_r[slice_t][0], muQ_r[slice_t][1], muQ_r[slice_t][2], c='orange', s=10)
-
-    # ax.scatter(muQ_l[slice_t][0], muQ_l[slice_t][2], muQ_l[slice_t][1], c='red', s=10)
-    # ax.scatter(muQ_r[slice_t][0], muQ_r[slice_t][2], muQ_r[slice_t][1], c='orange', s=10)
+    if muQ_l is not None and muQ_r is not None and idx_slices is not None:
+        for slice_t in idx_slices:
+            ax.scatter(muQ_l[slice_t][0], muQ_l[slice_t][1], muQ_l[slice_t][2], c='red', s=10)
+            ax.scatter(muQ_r[slice_t][0], muQ_r[slice_t][1], muQ_r[slice_t][2], c='orange', s=10)
 
     # Plot 3d trajectories
     ax.plot(x_hat_l[:, 0], x_hat_l[:, 1], x_hat_l[:, 2], c='blue')
@@ -200,7 +198,7 @@ def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_fi
         ax = fig.add_subplot(111, projection='3d')
 
     if muQ is not None and idx_slices is not None:
-        i = 0
+        # i = 0
         for slice_t in idx_slices:
             ax.scatter(muQ[slice_t][0], muQ[slice_t][1], muQ[slice_t][2], c='red', s=10)
             # label = '%d' % i
@@ -224,8 +222,7 @@ def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_fi
         assert save_file_name is not None
         np.save(save_file_name, np.array(x_hat))
 
-    if not save:
-        plt.show()
+    plt.show()
 
 
 def uni(param, data):
@@ -242,30 +239,29 @@ def uni(param, data):
     return u_hat, x_hat, muQ, idx_slices
 
 
-def bi(param, data):
-    start_pose = np.zeros((14,), dtype=np.float32)
-    start_pose[:7] = data[0]
+def bi(param, l_data, r_data):
+    l_start_pose = np.zeros((14,), dtype=np.float32)
+    r_start_pose = np.zeros((14,), dtype=np.float32)
+    l_start_pose[:7] = l_data[0]
+    r_start_pose[:7] = r_data[0]
+    via_point_pose_l = l_data[1:]
+    via_point_pose_r = r_data[1:]
+    param['nbPoints'] = len(via_point_pose_l)
 
-    l_data = data[0:len(data):2]
-    r_data = data[1:len(data):2]
-    l_data = data[1:]
-    param['nbPoints'] = len(via_point_pose)
-
-    via_point_l, muQ_l, Q, R, idx_slices, tl = get_matrices(param, l_data)
-    via_point_r, muQ_r, Q, R, idx_slices, tl = get_matrices(param, r_data)
+    via_point_l, muQ_l, Q, R, idx_slices, tl = get_matrices(param, via_point_pose_l)
+    via_point_r, muQ_r, Q, R, idx_slices, tl = get_matrices(param, via_point_pose_r)
 
     Su, Sx = set_dynamical_system(param)
 
-    u_hat_l, x_hat_l = get_u_x(param, via_point_l, muQ_l, Q, R, Su, Sx)
-    u_hat_r, x_hat_r = get_u_x(param, via_point_r, muQ_r, Q, R, Su, Sx)
+    u_hat_l, x_hat_l = get_u_x(param, l_start_pose, via_point_l, muQ_l, Q, R, Su, Sx)
+    u_hat_r, x_hat_r = get_u_x(param, r_start_pose, via_point_r, muQ_r, Q, R, Su, Sx)
 
-    plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)
-
-    return u_hat_l, x_hat_l, u_hat_r, x_hat_r
+    return u_hat_l, u_hat_r, x_hat_l,  x_hat_r, muQ_l, muQ_r, idx_slices
 
 
 if __name__ == '__main__':
     import rofunc as rf
+
     param = {
         "nbData": 500,  # Number of data points
         "nbVarPos": 7,  # Dimension of position data
@@ -275,12 +271,18 @@ if __name__ == '__main__':
     }
     param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
 
-    # data = np.loadtxt('/home/ubuntu/Github/DGform/controller/data/link7_loc_ori.txt', delimiter=', ')
+    # Uni
+    # data = np.load(
+    #     '/home/ubuntu/Github/DGform/interactive/skylark/stretch-31-Aug-2022-08:48:15.683806/z_manipulator_poses.npy')
+    # filter_indices = [0, 1, 5, 10, 22, 36]
+    # data = data[filter_indices]
 
-    data = np.load(
-        '/home/ubuntu/Github/DGform/interactive/skylark/stretch-31-Aug-2022-08:48:15.683806/z_manipulator_poses.npy')
-    filter_indices = [0, 1, 5, 10, 22, 36]
-    data = data[filter_indices]
+    # u_hat, x_hat, muQ, idx_slices = rf.lqt.uni(param, data)
+    # rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
 
-    u_hat, x_hat, muQ, idx_slices = rf.lqt.uni(param, data)
-    rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
+    # Bi
+    data = np.loadtxt('/home/ubuntu/Github/DGform/controller/data//link7_loc_ori.txt', delimiter=', ')
+    l_data = data[0:len(data):2]
+    r_data = data[1:len(data):2]
+    u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices = rf.lqt.bi(param, l_data, r_data)
+    rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)

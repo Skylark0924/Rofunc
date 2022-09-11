@@ -48,7 +48,7 @@ import rofunc as rf
 |                                 | 3D          | `visualab.3d`         | 3-dim trajectory visualization                                       |        |
 |                                 | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation                      |        |
 | **Planning**                    | LQT         | `lqt.uni`             | LQT for one agent with several via-points                            | ✅      |
-|                                 |             | `lqt.bi`              | LQT for two agent with coordination constraints                      |        |
+|                                 |             | `lqt.bi`              | LQT for two agent with coordination constraints                      | ✅      |
 | **Learning from Demonstration** | DMP         | `dmp.uni`             | DMP for one agent with several (or one) demonstrated trajectories    |        |
 |                                 | TP-GMM      | `tpgmmm.uni`          | TP-GMM for one agent with several (or one) demonstrated trajectories |        |
 |                                 |             | `tpgmmm.bi`           | TP-GMM for two agent with coordination learned from demonstration    |        |
@@ -231,9 +231,37 @@ param = {
 param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
 
 data = np.load('data/z_manipulator_poses.npy')
+filter_indices = [0, 1, 5, 10, 22, 36]
+data = data[filter_indices]
 
 u_hat, x_hat, muQ, idx_slices = rf.lqt.uni(param, data)
 rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
 ```
 
 ![](../img/lqt_uni.png)
+
+#### Bimanual
+
+> Currently, there is no coordination between the generated bimanual trajectories.
+
+```python
+import rofunc as rf
+import numpy as np
+
+param = {
+    "nbData": 500,  # Number of data points
+    "nbVarPos": 7,  # Dimension of position data
+    "nbDeriv": 2,  # Number of static and dynamic features (2 -> [x,dx])
+    "dt": 1e-2,  # Time step duration
+    "rfactor": 1e-8  # Control cost
+}
+param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
+
+data = np.loadtxt('data/link7_loc_ori.txt', delimiter=', ')
+l_data = data[0:len(data):2]
+r_data = data[1:len(data):2]
+u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices = rf.lqt.bi(param, l_data, r_data)
+rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)
+```
+
+![](../img/lqt_bi.png)
