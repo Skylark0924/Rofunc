@@ -25,6 +25,7 @@ import rofunc as rf
 |                                 |             | `zed.playback`        | Playback the recording and save snapshots                            | ✅      |
 |                                 |             | `zed.export`          | Export the recording to mp4                                          | ✅      |
 |                                 | Multi-modal | `mmodal.record`       | Record multi-modal demonstration data simultaneously                 |        |
+|                                 |             | `mmodal.export`       | Export multi-modal demonstration data in one line                    | ✅      |
 | **Logger**                      |             | `logger.write`        | Custom tensorboard-based logger                                      |        |
 | **Coordinate**                  |             | `coord.custom_class`  | Define the custom class of `Pose`                                    |        |
 |                                 |             | `coord.transform`     | Useful functions about coordinate transformation                     |        |
@@ -212,6 +213,70 @@ Saving image 1.png : SUCCESS
 Saving image 2.png : SUCCESS
 Saving image 3.png : SUCCESS
 ...
+```
+
+#### Export
+
+```python
+def export(filepath, mode=1):
+    """
+    Export the svo file with specific mode.
+    Args:
+        filepath: SVO file path (input) : path/to/file.svo
+        mode: Export mode:  0=Export LEFT+RIGHT AVI.
+                            1=Export LEFT+DEPTH_VIEW AVI.
+                            2=Export LEFT+RIGHT image sequence.
+                            3=Export LEFT+DEPTH_VIEW image sequence.
+                            4=Export LEFT+DEPTH_16Bit image sequence.
+
+    Returns:
+
+    """
+```
+
+```python
+import rofunc as rf
+
+rf.zed.export('/home/ubuntu/Data/06_24/Video/20220624_1649/38709363.svo', 2)
+```
+
+```python
+import rofunc as rf
+
+rf.zed.export_batch('/home/ubuntu/Data/06_24/Video/20220624_1649', core_num=20)
+```
+
+### Multi-modal
+
+#### Export
+
+The raw data folder should have these following contents:
+
+```
+.
+├── optitrack_csv (necessary)
+│   ├── exp_01
+│   │   ├── Take 2022-09-09 06.32.26 PM.csv
+│   │   ├── Take 2022-09-09 06.32.26 PM_ManusVRGlove_3f6ec26f_3f6ec26f.csv
+│   │   └── Take 2022-09-09 06.32.26 PM_ManusVRGlove_7b28f20b_7b28f20b.csv
+│   └── exp_02
+│       ├── Take 2022-09-09 06.34.11 PM.csv
+│       ├── Take 2022-09-09 06.34.11 PM_ManusVRGlove_3f6ec26f_3f6ec26f.csv
+│       └── Take 2022-09-09 06.34.11 PM_ManusVRGlove_7b28f20b_7b28f20b.csv
+├── xsens_mvnx (necessary)
+│   ├── exp_01.mvnx
+│   ├── ...
+└── zed (necessary)
+    ├── HD1080_SN38709363_18-24-20.svo
+    ├── ...
+ 
+```
+
+
+```python
+import rofunc as rf
+
+rf.mmodal.export('/home/ubuntu/Data/2022_09_09_Taichi')
 ```
 
 ## Planning
