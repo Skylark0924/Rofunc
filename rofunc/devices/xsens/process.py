@@ -170,5 +170,6 @@ def get_skeleton_batch(mvnx_dir):
     """
     mvnxs = os.listdir(mvnx_dir)
     for mvnx in tqdm(mvnxs):
-        mvnx_path = os.path.join(mvnx_dir, mvnx)
-        get_skeleton(mvnx_path)
+        if mvnx.split('.')[-1] == 'mvnx':
+            mvnx_path = os.path.join(mvnx_dir, mvnx)
+            get_skeleton(mvnx_path)
