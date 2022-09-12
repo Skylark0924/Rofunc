@@ -43,15 +43,16 @@ def hmm_plot_3d(demos_xdx_f, model):
     plt.show()
 
 
-def poe_plot(model, mod1, mod2, prod, demos_x, demo_idx):
+def poe_plot(mod1, mod2, prod, demos_x, demo_idx):
     fig, ax = plt.subplots(ncols=3, nrows=1)
     fig.set_size_inches((12, 6))
     for i in ax:
         i.set_aspect('equal')
 
     ax[0].set_title('model 1')
-    pbd.plot_gmm(model.mu, model.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
+    pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
     ax[1].set_title('model 2')
+    pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[1], dim=[0, 1], color='orangered', alpha=0.3)
     ax[2].set_title('tranformed models and product')
     pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[2], dim=[0, 1], color='steelblue', alpha=0.3)
     pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[2], dim=[0, 1], color='orangered', alpha=0.3)
@@ -66,15 +67,16 @@ def poe_plot(model, mod1, mod2, prod, demos_x, demo_idx):
     plt.show()
 
 
-def poe_plot_3d(model, mod1, mod2, prod, demos_x, demo_idx):
+def poe_plot_3d(mod1, mod2, prod, demos_x, demo_idx):
     fig, ax = plt.subplots(ncols=3, nrows=1)
     fig.set_size_inches((12, 6))
     for i in ax:
         i.set_aspect('equal')
 
     ax[0].set_title('model 1')
-    pbd.plot_gmm(model.mu, model.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
+    pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
     ax[1].set_title('model 2')
+    pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[1], dim=[0, 1], color='orangered', alpha=0.3)
     ax[2].set_title('tranformed models and product')
     pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[2], dim=[0, 1], color='steelblue', alpha=0.3)
     pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[2], dim=[0, 1], color='orangered', alpha=0.3)
