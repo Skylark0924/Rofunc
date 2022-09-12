@@ -190,23 +190,24 @@ def parallel(z):
     return export(z[0], z[1])
 
 
-def export_batch(filedir, all_mode=True, mode=None, core_num=10):
+def export_batch(filedir, all_mode=True, mode_lst=None, core_num=10):
     files = os.listdir(filedir)
     pool = multiprocessing.Pool(core_num)
 
-    if all_mode and mode is None:
+    if all_mode and mode_lst is None:
         filepaths = []
         for mode in range(5):
             for file in files:
                 if file[-3:] == 'svo':
                     filepaths.append((os.path.join(filedir, file), mode))
         pool.map(parallel, filepaths)
-    elif mode is not None:
+    elif mode_lst is not None:
         filepaths = []
-        for file in files:
-            if file[-3:] == 'svo':
-                filepaths.append((os.path.join(filedir, file), mode))
-        pool.map(parallel, filepaths)
+        for mode in mode_lst:
+            for file in files:
+                if file[-3:] == 'svo':
+                    filepaths.append((os.path.join(filedir, file), mode))
+            pool.map(parallel, filepaths)
     else:
         raise Exception('Wrong parameters')
 
