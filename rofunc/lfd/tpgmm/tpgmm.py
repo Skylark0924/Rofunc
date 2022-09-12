@@ -2,7 +2,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pbdlib as pbd
-import utils
+import visualize
 
 
 def get_dx(demos_x):
@@ -55,9 +55,9 @@ def HMM_learning(demos_xdx_f, demos_xdx_augm, plot=False):
     # plotting
     if plot:
         if int(len(demos_xdx_f[0][0, 0]) / 2) == 2:
-            utils.hmm_plot(demos_xdx_f, model)
+            visualize.hmm_plot(demos_xdx_f, model)
         elif int(len(demos_xdx_f[0][0, 0]) / 2) > 2:
-            utils.hmm_plot_3d(demos_xdx_f, model)
+            visualize.hmm_plot_3d(demos_xdx_f, model)
         else:
             raise Exception('Dimension is less than 2, cannot plot')
     return model
@@ -76,9 +76,9 @@ def poe(model, demos_A_xdx, demos_b_xdx, demos_x, demo_idx, plot=False):
 
     if plot:
         if len(demos_x[0, 0]) == 2:
-            utils.poe_plot(model, mod1, mod2, prod, demos_x, demo_idx)
+            visualize.poe_plot(mod1, mod2, prod, demos_x, demo_idx)
         elif len(demos_x[0, 0]) > 2:
-            utils.poe_plot_3d(model, mod1, mod2, prod, demos_x, demo_idx)
+            visualize.poe_plot_3d(mod1, mod2, prod, demos_x, demo_idx)
         else:
             raise Exception('Dimension is less than 2, cannot plot')
     return prod
@@ -89,7 +89,7 @@ def generate(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=Fal
     sq = model.viterbi(demos_xdx_augm[demo_idx])
 
     # solving LQR with Product of Gaussian, see notebook on LQR
-    lqr = pbd.PoGLQR(nb_dim=7, dt=0.01, horizon=demos_xdx[demo_idx].shape[0])
+    lqr = pbd.PoGLQR(nb_dim=len(demos_x[0, 0]), dt=0.01, horizon=demos_xdx[demo_idx].shape[0])
     lqr.mvn_xi = prod.concatenate_gaussian(sq)  # augmented version of gaussian
     lqr.mvn_u = -4
     lqr.x0 = demos_xdx[demo_idx][0]
@@ -97,9 +97,9 @@ def generate(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=Fal
     xi = lqr.seq_xi
     if plot:
         if len(demos_x[0, 0]) == 2:
-            utils.generate_plot(xi, prod, demos_x, demo_idx)
+            visualize.generate_plot(xi, prod, demos_x, demo_idx)
         elif len(demos_x[0, 0]) > 2:
-            utils.generate_plot_3d(xi, prod, demos_x, demo_idx)
+            visualize.generate_plot_3d(xi, prod, demos_x, demo_idx)
         else:
             raise Exception('Dimension is less than 2, cannot plot')
     return xi
@@ -110,11 +110,6 @@ def uni(demos_x, show_demo_idx, plot=False):
     model = HMM_learning(demos_xdx_f, demos_xdx_augm, plot=plot)
     prod = poe(model, demos_A_xdx, demos_b_xdx, demos_x, show_demo_idx, plot=plot)
     gen = generate(model, prod, demos_x, demos_xdx, demos_xdx_augm, show_demo_idx, plot=plot)
-
-    if plot:
-        plt.figure()
-        plt.plot(gen[:, 0], gen[:, 1])
-        plt.show()
     return gen
 
 
@@ -149,7 +144,7 @@ if __name__ == '__main__':
     #                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
     #                         [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
     # demos_x = rf.utils.bezier.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-    # rf.tpgmm.uni(demos_x, show_demo_idx=2, plot=True)
+    # uni(demos_x, show_demo_idx=2, plot=True)
 
     # Bi
     # left_demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
@@ -160,16 +155,23 @@ if __name__ == '__main__':
     #                               [[8, 8], [7, 1], [4, 5], [6, 8], [4, 3.5]]])
     # demos_left_x = rf.utils.bezier.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
     # demos_right_x = rf.utils.bezier.multi_bezier_demos(right_demo_points)
-    # bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=False)
+    # bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
 
     # Uni_3d
-    # demo_points = np.array([[[0, 0, 1], [-1, 8, 1], [4, 3, 2], [2, 1, 2], [4, 3, 2]],
-    #                         [[0, -2, 1], [-1, 7, 1], [3, 2.5, 2], [2, 1.6, 2], [4, 3, 2]],
-    #                         [[0, -1, 1], [-1, 8, 1], [4, 5.2, 2], [2, 1.1, 2], [4, 3.5, 2]]])
-    # demos_x = rf.utils.bezier.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
-    raw_demo = np.expand_dims(raw_demo, axis=0)
-    demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+    # raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
+    # raw_demo = np.expand_dims(raw_demo, axis=0)
+    # demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+    #
+    # gen = uni(demos_x, show_demo_idx=2, plot=True)
 
-    gen = uni(demos_x, show_demo_idx=2, plot=True)
-    print()
+    # Bi 3d
+    left_raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
+    right_raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/RightHand.npy')
+    left_raw_demo = np.expand_dims(left_raw_demo, axis=0)
+    right_raw_demo = np.expand_dims(right_raw_demo, axis=0)
+    demos_left_x = np.vstack((left_raw_demo[:, 82:232, :], left_raw_demo[:, 233:383, :], left_raw_demo[:, 376:526, :]))
+    demos_right_x = np.vstack((right_raw_demo[:, 82:232, :], right_raw_demo[:, 233:383, :], right_raw_demo[:, 376:526, :]))
+
+    gen_l, gen_r = gen = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
+
+
