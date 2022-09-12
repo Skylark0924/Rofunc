@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="rofunc",
-    version="0.0.0.8",
+    version="0.0.0.9",
     description='Useful functions for robot experiments',
     author="skylark",
     author_email="jjliu@mae.cuhk.edu.hk",

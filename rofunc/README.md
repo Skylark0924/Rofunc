@@ -34,8 +34,8 @@ import rofunc as rf
 | **Planning**                    | LQT         | `lqt.uni`             | LQT for one agent with several via-points                            | ✅      |
 |                                 |             | `lqt.bi`              | LQT for two agent with coordination constraints                      | ✅      |
 | **Learning from Demonstration** | DMP         | `dmp.uni`             | DMP for one agent with several (or one) demonstrated trajectories    |        |
-|                                 | TP-GMM      | `tpgmmm.uni`          | TP-GMM for one agent with several (or one) demonstrated trajectories |        |
-|                                 |             | `tpgmmm.bi`           | TP-GMM for two agent with coordination learned from demonstration    |        |
+|                                 | TP-GMM      | `tpgmmm.uni`          | TP-GMM for one agent with several (or one) demonstrated trajectories | ✅      |
+|                                 |             | `tpgmmm.bi`           | TP-GMM for two agent with coordination learned from demonstration    | ✅      |
 
 
 - [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
@@ -217,7 +217,7 @@ Saving image 3.png : SUCCESS
 
 ### LQT
 
-#### Uni
+#### Unimanual
 
 ```python
 import rofunc as rf
@@ -267,3 +267,38 @@ rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=Fa
 ```
 
 ![](../img/lqt_bi.png)
+
+
+## Learning from Demonstration
+
+### TP-GMM
+
+#### Unimanual
+
+```python
+import rofunc as rf
+import numpy as np
+
+demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
+                        [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
+                        [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
+demos_x = rf.utils.bezier.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+rf.tpgmm.uni(demos_x, show_demo_idx=2, plot=True)
+```
+
+#### Bimanual
+
+```python
+import rofunc as rf
+import numpy as np
+
+left_demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
+                             [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
+                             [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
+right_demo_points = np.array([[[8, 8], [7, 1], [4, 3], [6, 8], [4, 3]],
+                              [[8, 7], [7, 1], [3, 3], [6, 6], [4, 3]],
+                              [[8, 8], [7, 1], [4, 5], [6, 8], [4, 3.5]]])
+demos_left_x = rf.utils.bezier.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+demos_right_x = rf.utils.bezier.multi_bezier_demos(right_demo_points)
+rf.tpgmm.bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
+```
