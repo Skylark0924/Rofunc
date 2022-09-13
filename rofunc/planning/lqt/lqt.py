@@ -2,6 +2,7 @@ from math import factorial
 
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm
 from pytransform3d.rotations import matrix_from_quaternion, plot_basis
 
 
@@ -239,6 +240,26 @@ def uni(param, data):
     return u_hat, x_hat, muQ, idx_slices
 
 
+def uni_recursive(param, data, interval=3):
+    start_pose = np.zeros((14,), dtype=np.float32)
+    start_pose[:7] = data[0, :7]
+
+    x_hat_lst = []
+    for i in tqdm(range(0, len(data), interval)):
+        via_point_pose = data[i + 1:i + interval + 1]
+        param['nbPoints'] = len(via_point_pose)
+
+        via_point, muQ, Q, R, idx_slices, tl = get_matrices_vel(param, via_point_pose)
+        Su, Sx = set_dynamical_system(param)
+        u_hat, x_hat = get_u_x(param, start_pose, via_point, muQ, Q, R, Su, Sx)
+        start_pose = x_hat[-1]
+        x_hat_lst.append(x_hat)
+
+    x_hat = np.array(x_hat_lst).reshape((-1, 14))
+
+    return u_hat, x_hat, muQ, idx_slices
+
+
 def bi(param, l_data, r_data):
     l_start_pose = np.zeros((14,), dtype=np.float32)
     r_start_pose = np.zeros((14,), dtype=np.float32)
@@ -256,14 +277,14 @@ def bi(param, l_data, r_data):
     u_hat_l, x_hat_l = get_u_x(param, l_start_pose, via_point_l, muQ_l, Q, R, Su, Sx)
     u_hat_r, x_hat_r = get_u_x(param, r_start_pose, via_point_r, muQ_r, Q, R, Su, Sx)
 
-    return u_hat_l, u_hat_r, x_hat_l,  x_hat_r, muQ_l, muQ_r, idx_slices
+    return u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices
 
 
 if __name__ == '__main__':
     import rofunc as rf
 
     param = {
-        "nbData": 500,  # Number of data points
+        "nbData": 200,  # Number of data points
         "nbVarPos": 7,  # Dimension of position data
         "nbDeriv": 2,  # Number of static and dynamic features (2 -> [x,dx])
         "dt": 1e-2,  # Time step duration
@@ -281,8 +302,12 @@ if __name__ == '__main__':
     # rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
 
     # Bi
-    data = np.loadtxt('/home/ubuntu/Github/DGform/controller/data//link7_loc_ori.txt', delimiter=', ')
-    l_data = data[0:len(data):2]
-    r_data = data[1:len(data):2]
-    u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices = rf.lqt.bi(param, l_data, r_data)
-    rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)
+    # data = np.loadtxt('/home/ubuntu/Github/DGform/controller/data//link7_loc_ori.txt', delimiter=', ')
+    # l_data = data[0:len(data):2]
+    # r_data = data[1:len(data):2]
+    # u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices = rf.lqt.bi(param, l_data, r_data)
+    # rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)
+
+    data = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep_l.npy')
+    u_hat, x_hat, muQ, idx_slices = uni_recursive(param, data, interval=3)
+    rf.lqt.plot_3d_uni(x_hat, ori=False, save=False)
