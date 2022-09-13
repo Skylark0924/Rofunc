@@ -1,8 +1,7 @@
-import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
 import numpy as np
+import rofunc as rf
+
 import pbdlib as pbd
-import visualize
 
 
 def get_dx(demos_x):
@@ -55,9 +54,9 @@ def HMM_learning(demos_xdx_f, demos_xdx_augm, plot=False):
     # plotting
     if plot:
         if int(len(demos_xdx_f[0][0, 0]) / 2) == 2:
-            visualize.hmm_plot(demos_xdx_f, model)
+            rf.tpgmm.hmm_plot(demos_xdx_f, model)
         elif int(len(demos_xdx_f[0][0, 0]) / 2) > 2:
-            visualize.hmm_plot_3d(demos_xdx_f, model)
+            rf.tpgmm.hmm_plot_3d(demos_xdx_f, model)
         else:
             raise Exception('Dimension is less than 2, cannot plot')
     return model
@@ -76,12 +75,33 @@ def poe(model, demos_A_xdx, demos_b_xdx, demos_x, demo_idx, plot=False):
 
     if plot:
         if len(demos_x[0, 0]) == 2:
-            visualize.poe_plot(mod1, mod2, prod, demos_x, demo_idx)
+            rf.tpgmm.poe_plot(mod1, mod2, prod, demos_x, demo_idx)
         elif len(demos_x[0, 0]) > 2:
-            visualize.poe_plot_3d(mod1, mod2, prod, demos_x, demo_idx)
+            rf.tpgmm.poe_plot_3d(mod1, mod2, prod, demos_x, demo_idx)
         else:
             raise Exception('Dimension is less than 2, cannot plot')
     return prod
+
+
+def reproduce(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=False):
+    # get the most probable sequence of state for this demonstration
+    sq = model.viterbi(demos_xdx_augm[demo_idx])
+
+    # solving LQR with Product of Gaussian, see notebook on LQR
+    lqr = pbd.PoGLQR(nb_dim=len(demos_x[0, 0]), dt=0.01, horizon=demos_xdx[demo_idx].shape[0])
+    lqr.mvn_xi = prod.concatenate_gaussian(sq)  # augmented version of gaussian
+    lqr.mvn_u = -4
+    lqr.x0 = demos_xdx[demo_idx][0]
+
+    xi = lqr.seq_xi
+    if plot:
+        if len(demos_x[0, 0]) == 2:
+            rf.tpgmm.generate_plot(xi, prod, demos_x, demo_idx)
+        elif len(demos_x[0, 0]) > 2:
+            rf.tpgmm.generate_plot_3d(xi, prod, demos_x, demo_idx)
+        else:
+            raise Exception('Dimension is less than 2, cannot plot')
+    return xi
 
 
 def generate(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=False):
@@ -97,9 +117,9 @@ def generate(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=Fal
     xi = lqr.seq_xi
     if plot:
         if len(demos_x[0, 0]) == 2:
-            visualize.generate_plot(xi, prod, demos_x, demo_idx)
+            rf.tpgmm.generate_plot(xi, prod, demos_x, demo_idx)
         elif len(demos_x[0, 0]) > 2:
-            visualize.generate_plot_3d(xi, prod, demos_x, demo_idx)
+            rf.tpgmm.generate_plot_3d(xi, prod, demos_x, demo_idx)
         else:
             raise Exception('Dimension is less than 2, cannot plot')
     return xi
@@ -109,8 +129,8 @@ def uni(demos_x, show_demo_idx, plot=False):
     demos_xdx, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm = get_related_matrix(demos_x)
     model = HMM_learning(demos_xdx_f, demos_xdx_augm, plot=plot)
     prod = poe(model, demos_A_xdx, demos_b_xdx, demos_x, show_demo_idx, plot=plot)
-    gen = generate(model, prod, demos_x, demos_xdx, demos_xdx_augm, show_demo_idx, plot=plot)
-    return gen
+    rep = reproduce(model, prod, demos_x, demos_xdx, demos_xdx_augm, show_demo_idx, plot=plot)
+    return rep
 
 
 def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
@@ -125,20 +145,17 @@ def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
     prod_l = poe(model_l, demos_left_A_xdx, demos_left_b_xdx, demos_left_x, show_demo_idx, plot=plot)
     prod_r = poe(model_r, demos_right_A_xdx, demos_right_b_xdx, demos_right_x, show_demo_idx, plot=plot)
 
-    gen_l = generate(model_l, prod_l, demos_left_x, demos_left_xdx, demos_left_xdx_augm, show_demo_idx, plot=plot)
-    gen_r = generate(model_r, prod_r, demos_right_x, demos_right_xdx, demos_right_xdx_augm, show_demo_idx, plot=plot)
+    rep_l = reproduce(model_l, prod_l, demos_left_x, demos_left_xdx, demos_left_xdx_augm, show_demo_idx, plot=plot)
+    rep_r = reproduce(model_r, prod_r, demos_right_x, demos_right_xdx, demos_right_xdx_augm, show_demo_idx, plot=plot)
 
     if plot:
-        plt.figure()
-        plt.plot(gen_l[:, 0], gen_l[:, 1])
-        plt.plot(gen_r[:, 0], gen_r[:, 1])
-        plt.show()
-    return gen_l, gen_r
+        nb_dim = int(rep_l.shape[1] / 2)
+        data_lst = [rep_l[:, :nb_dim], rep_r[:, :nb_dim]]
+        rf.visualab.traj_plot(data_lst)
+    return rep_l, rep_r
 
 
 if __name__ == '__main__':
-    import rofunc as rf
-
     # Uni
     # demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
     #                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
@@ -170,8 +187,9 @@ if __name__ == '__main__':
     left_raw_demo = np.expand_dims(left_raw_demo, axis=0)
     right_raw_demo = np.expand_dims(right_raw_demo, axis=0)
     demos_left_x = np.vstack((left_raw_demo[:, 82:232, :], left_raw_demo[:, 233:383, :], left_raw_demo[:, 376:526, :]))
-    demos_right_x = np.vstack((right_raw_demo[:, 82:232, :], right_raw_demo[:, 233:383, :], right_raw_demo[:, 376:526, :]))
+    demos_right_x = np.vstack(
+        (right_raw_demo[:, 82:232, :], right_raw_demo[:, 233:383, :], right_raw_demo[:, 376:526, :]))
 
-    gen_l, gen_r = gen = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
-
-
+    rep_l, rep_r = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
+    np.save('/home/ubuntu/Data/2022_09_09_Taichi/rep_l', rep_l)
+    np.save('/home/ubuntu/Data/2022_09_09_Taichi/rep_r', rep_r)
