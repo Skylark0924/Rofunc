@@ -2,6 +2,7 @@ import numpy as np
 from .utils.utils import lifted_transfer_matrix
 import pbdlib as pbd
 from . import MVN
+from tqdm import tqdm
 
 
 class LQR(object):
@@ -276,7 +277,7 @@ class LQR(object):
         _S[-1] = Q
         _v[-1] = Q.dot(z)
 
-        for t in range(self.horizon - 2, -1, -1):
+        for t in tqdm(range(self.horizon - 2, -1, -1)):
             Q, z = self.get_Q_z(t)
             R = self.get_R(t)
             A = self.get_A(t)

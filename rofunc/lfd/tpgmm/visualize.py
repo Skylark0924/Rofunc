@@ -95,8 +95,8 @@ def generate_plot(xi, prod, demos_x, demo_idx):
     plt.figure()
 
     plt.title('Trajectory reproduction')
+    pbd.plot_gmm(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold', alpha=0.5)
     plt.plot(xi[:, 0], xi[:, 1], color='r', lw=2, label='generated line')
-    pbd.plot_gmm(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold')
     plt.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], 'k--', lw=2, label='demo line')
     plt.axis('equal')
     plt.legend()
