@@ -29,11 +29,28 @@ def get_A_b(demos_x):
         demos_A.append(np.tile([[[1., 0.], [-0., -1.]], [[1., 0.], [-0., -1.]]], (len(demos_x[i]), 1, 1, 1)))
     demos_A_xdx = [np.kron(np.eye(len(demos_x[0][0])), d) for d in demos_A]
     demos_b_xdx = [np.concatenate([d, np.zeros(d.shape)], axis=-1) for d in demos_b]
-
     return demos_A, demos_b, demos_A_xdx, demos_b_xdx
 
 
 def get_related_matrix(demos_x):
+    """
+    M: Number of demonstrated trajectories in a training set (m will be used as index)
+    T: Number of datapoints in a trajectory (t will be used as index)
+    P: Number of candidate frames in a task-parameterized mixture (j will be used as index/exponent)
+    nb_dim: Dimension of the demo state
+
+    Args:
+        demos_x: Original states of demos, [M, T, nb_dim]
+    Returns:
+        demos_dx: First derivative of states, [M, T, nb_dim]
+        demos_xdx: Concat original states with their first derivative, [M, T, nb_dim * 2]
+        demos_A: the orientation of the p-th candidate coordinate system for this demonstration, [M, T, P, 2, 2]
+        demos_b: the position of the p-th candidate coordinate system for this demonstration,  [M, T, P, nb_dim]
+        demos_A_xdx: Augment demos_A to original states and their first derivative, [M, T, P, nb_dim * 2, nb_dim * 2]
+        demos_b_xdx: Augment demos_b to original states and their first derivative, [M, T, P, nb_dim * 2]
+        demos_xdx_f: States and their first derivative in P frames, [M, T, P, nb_dim * 2]
+        demos_xdx_augm: Reshape demos_xdx_f, [M, T, nb_dim * 2 * P]
+    """
     demos_dx = get_dx(demos_x)
     demos_xdx = [np.hstack([_x, _dx]) for _x, _dx in
                  zip(demos_x, demos_dx)]  # Position and velocity (num_of_points, 14)
@@ -42,7 +59,7 @@ def get_related_matrix(demos_x):
                    zip(demos_xdx, demos_A_xdx, demos_b_xdx)]
     demos_xdx_augm = [d.reshape(-1, len(demos_xdx[0][0]) * 2) for d in
                       demos_xdx_f]  # (num_of_points, 28): 0~13 pos-vel in coord 1, 14~27 pos-vel in coord 2
-    return demos_xdx, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm
+    return demos_dx, demos_xdx, demos_A, demos_b, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm
 
 
 def HMM_learning(demos_xdx_f, demos_xdx_augm, plot=False):
@@ -74,9 +91,9 @@ def poe(model, demos_A_xdx, demos_b_xdx, demos_x, demo_idx, plot=False):
     prod = mod1 * mod2
 
     if plot:
-        if len(demos_x[0, 0]) == 2:
+        if len(demos_x[0][0]) == 2:
             rf.tpgmm.poe_plot(mod1, mod2, prod, demos_x, demo_idx)
-        elif len(demos_x[0, 0]) > 2:
+        elif len(demos_x[0][0]) > 2:
             rf.tpgmm.poe_plot_3d(mod1, mod2, prod, demos_x, demo_idx)
         else:
             raise Exception('Dimension is less than 2, cannot plot')
@@ -88,28 +105,7 @@ def reproduce(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=Fa
     sq = model.viterbi(demos_xdx_augm[demo_idx])
 
     # solving LQR with Product of Gaussian, see notebook on LQR
-    lqr = pbd.PoGLQR(nb_dim=len(demos_x[0, 0]), dt=0.01, horizon=demos_xdx[demo_idx].shape[0])
-    lqr.mvn_xi = prod.concatenate_gaussian(sq)  # augmented version of gaussian
-    lqr.mvn_u = -4
-    lqr.x0 = demos_xdx[demo_idx][0]
-
-    xi = lqr.seq_xi
-    if plot:
-        if len(demos_x[0, 0]) == 2:
-            rf.tpgmm.generate_plot(xi, prod, demos_x, demo_idx)
-        elif len(demos_x[0, 0]) > 2:
-            rf.tpgmm.generate_plot_3d(xi, prod, demos_x, demo_idx)
-        else:
-            raise Exception('Dimension is less than 2, cannot plot')
-    return xi
-
-
-def generate(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=False):
-    # get the most probable sequence of state for this demonstration
-    sq = model.viterbi(demos_xdx_augm[demo_idx])
-
-    # solving LQR with Product of Gaussian, see notebook on LQR
-    lqr = pbd.PoGLQR(nb_dim=len(demos_x[0, 0]), dt=0.01, horizon=demos_xdx[demo_idx].shape[0])
+    lqr = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_xdx[demo_idx].shape[0])
     lqr.mvn_xi = prod.concatenate_gaussian(sq)  # augmented version of gaussian
     lqr.mvn_u = -4
     lqr.x0 = demos_xdx[demo_idx][0]
@@ -126,17 +122,17 @@ def generate(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=Fal
 
 
 def uni(demos_x, show_demo_idx, plot=False):
-    demos_xdx, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm = get_related_matrix(demos_x)
+    _, demos_xdx, _, _, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm = get_related_matrix(demos_x)
     model = HMM_learning(demos_xdx_f, demos_xdx_augm, plot=plot)
     prod = poe(model, demos_A_xdx, demos_b_xdx, demos_x, show_demo_idx, plot=plot)
     rep = reproduce(model, prod, demos_x, demos_xdx, demos_xdx_augm, show_demo_idx, plot=plot)
-    return rep
+    return model, rep
 
 
 def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
-    demos_left_xdx, demos_left_A_xdx, demos_left_b_xdx, demos_left_xdx_f, demos_left_xdx_augm = get_related_matrix(
+    _, demos_left_xdx, _, _, demos_left_A_xdx, demos_left_b_xdx, demos_left_xdx_f, demos_left_xdx_augm = get_related_matrix(
         demos_left_x)
-    demos_right_xdx, demos_right_A_xdx, demos_right_b_xdx, demos_right_xdx_f, demos_right_xdx_augm = get_related_matrix(
+    _, demos_right_xdx, _, _, demos_right_A_xdx, demos_right_b_xdx, demos_right_xdx_f, demos_right_xdx_augm = get_related_matrix(
         demos_right_x)
 
     model_l = HMM_learning(demos_left_xdx_f, demos_left_xdx_augm, plot=plot)
@@ -152,16 +148,16 @@ def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
         nb_dim = int(rep_l.shape[1] / 2)
         data_lst = [rep_l[:, :nb_dim], rep_r[:, :nb_dim]]
         rf.visualab.traj_plot(data_lst)
-    return rep_l, rep_r
+    return model_l, model_r, rep_l, rep_r
 
 
 if __name__ == '__main__':
     # Uni
-    # demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
-    #                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
-    #                         [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
-    # demos_x = rf.utils.bezier.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-    # uni(demos_x, show_demo_idx=2, plot=True)
+    demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
+                            [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
+                            [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
+    demos_x = rf.bezier.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+    model, rep = uni(demos_x, show_demo_idx=2, plot=True)
 
     # Bi
     # left_demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
@@ -170,26 +166,26 @@ if __name__ == '__main__':
     # right_demo_points = np.array([[[8, 8], [7, 1], [4, 3], [6, 8], [4, 3]],
     #                               [[8, 7], [7, 1], [3, 3], [6, 6], [4, 3]],
     #                               [[8, 8], [7, 1], [4, 5], [6, 8], [4, 3.5]]])
-    # demos_left_x = rf.utils.bezier.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-    # demos_right_x = rf.utils.bezier.multi_bezier_demos(right_demo_points)
-    # bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
+    # demos_left_x = rf.bezier.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+    # demos_right_x = rf.bezier.multi_bezier_demos(right_demo_points)
+    # model_l, model_r, rep_l, rep_r = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
 
     # Uni_3d
     # raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
     # raw_demo = np.expand_dims(raw_demo, axis=0)
     # demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
     #
-    # gen = uni(demos_x, show_demo_idx=2, plot=True)
+    # model, rep = uni(demos_x, show_demo_idx=2, plot=True)
 
     # Bi 3d
-    left_raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
-    right_raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/RightHand.npy')
-    left_raw_demo = np.expand_dims(left_raw_demo, axis=0)
-    right_raw_demo = np.expand_dims(right_raw_demo, axis=0)
-    demos_left_x = np.vstack((left_raw_demo[:, 82:232, :], left_raw_demo[:, 233:383, :], left_raw_demo[:, 376:526, :]))
-    demos_right_x = np.vstack(
-        (right_raw_demo[:, 82:232, :], right_raw_demo[:, 233:383, :], right_raw_demo[:, 376:526, :]))
-
-    rep_l, rep_r = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
-    np.save('/home/ubuntu/Data/2022_09_09_Taichi/rep_l', rep_l)
-    np.save('/home/ubuntu/Data/2022_09_09_Taichi/rep_r', rep_r)
+    # left_raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
+    # right_raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/RightHand.npy')
+    # left_raw_demo = np.expand_dims(left_raw_demo, axis=0)
+    # right_raw_demo = np.expand_dims(right_raw_demo, axis=0)
+    # demos_left_x = np.vstack((left_raw_demo[:, 82:232, :], left_raw_demo[:, 233:383, :], left_raw_demo[:, 376:526, :]))
+    # demos_right_x = np.vstack(
+    #     (right_raw_demo[:, 82:232, :], right_raw_demo[:, 233:383, :], right_raw_demo[:, 376:526, :]))
+    #
+    # model_l, model_r, rep_l, rep_r = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
+    # np.save('/home/ubuntu/Data/2022_09_09_Taichi/rep_l', rep_l)
+    # np.save('/home/ubuntu/Data/2022_09_09_Taichi/rep_r', rep_r)
