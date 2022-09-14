@@ -21,7 +21,7 @@ def traj_plot(data_lst, title=None, mode=None):
     """
 
     Args:
-        data_lst: list or np.array
+        data_lst: list with 2d array or 3d array
         title:
         mode:
 
