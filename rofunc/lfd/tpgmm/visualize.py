@@ -1,6 +1,6 @@
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
-import pbdlib as pbd
+import rofunc as rf
 
 
 def hmm_plot(demos_xdx_f, model):
@@ -11,12 +11,12 @@ def hmm_plot(demos_xdx_f, model):
     ax[0].set_title('pos - coord. %d' % 1)
     for p in demos_xdx_f:
         ax[0].plot(p[:, 0, 0], p[:, 0, 1])
-    pbd.plot_gmm(model.mu, model.sigma, ax=ax[0], dim=[0, 1], color='steelblue')
+    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax[0], dim=[0, 1], color='steelblue')
 
     ax[1].set_title('pos - coord. %d' % 2)
     for p in demos_xdx_f:
         ax[1].plot(p[:, 1, 0], p[:, 1, 1])
-    pbd.plot_gmm(model.mu, model.sigma, ax=ax[1], dim=[4, 5], color='orangered')
+    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax[1], dim=[4, 5], color='orangered')
 
     plt.tight_layout()
     plt.show()
@@ -31,13 +31,13 @@ def hmm_plot_3d(demos_xdx_f, model):
     ax.set_title('pos - coord. %d' % 1)
     for p in demos_xdx_f:
         ax.plot(p[:, 0, 0], p[:, 0, 1], p[:, 0, 2])
-    # pbd.plot_gmm(model.mu, model.sigma, ax=ax[0], dim=[0, 1], color='steelblue')
+    # rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax[0], dim=[i for i in range(7)], color='steelblue')
 
     ax = fig.add_subplot(1, 2, 2, projection='3d')
     ax.set_title('pos - coord. %d' % 2)
     for p in demos_xdx_f:
         ax.plot(p[:, 1, 0], p[:, 1, 1], p[:, 1, 2])
-    # pbd.plot_gmm(model.mu, model.sigma, ax=ax[1], dim=[4, 5], color='orangered')
+    # rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax[1], dim=[i+14 for i in range(7)], color='orangered')
 
     plt.tight_layout()
     plt.show()
@@ -50,13 +50,13 @@ def poe_plot(mod1, mod2, prod, demos_x, demo_idx):
         i.set_aspect('equal')
 
     ax[0].set_title('model 1')
-    pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
+    rf.visualab.gmm_plot(mod1.mu, mod1.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
     ax[1].set_title('model 2')
-    pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[1], dim=[0, 1], color='orangered', alpha=0.3)
+    rf.visualab.gmm_plot(mod2.mu, mod2.sigma, swap=True, ax=ax[1], dim=[0, 1], color='orangered', alpha=0.3)
     ax[2].set_title('tranformed models and product')
-    pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[2], dim=[0, 1], color='steelblue', alpha=0.3)
-    pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[2], dim=[0, 1], color='orangered', alpha=0.3)
-    pbd.plot_gmm(prod.mu, prod.sigma, swap=True, ax=ax[2], dim=[0, 1], color='gold', alpha=0.3)
+    rf.visualab.gmm_plot(mod1.mu, mod1.sigma, swap=True, ax=ax[2], dim=[0, 1], color='steelblue', alpha=0.3)
+    rf.visualab.gmm_plot(mod2.mu, mod2.sigma, swap=True, ax=ax[2], dim=[0, 1], color='orangered', alpha=0.3)
+    rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, ax=ax[2], dim=[0, 1], color='gold', alpha=0.3)
     ax[2].plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], color="b")
 
     patches = [mpatches.Patch(color='steelblue', label='transformed model 1'),
@@ -74,13 +74,13 @@ def poe_plot_3d(mod1, mod2, prod, demos_x, demo_idx):
         i.set_aspect('equal')
 
     ax[0].set_title('model 1')
-    pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
+    rf.visualab.gmm_plot(mod1.mu, mod1.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
     ax[1].set_title('model 2')
-    pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[1], dim=[0, 1], color='orangered', alpha=0.3)
+    rf.visualab.gmm_plot(mod2.mu, mod2.sigma, swap=True, ax=ax[1], dim=[0, 1], color='orangered', alpha=0.3)
     ax[2].set_title('tranformed models and product')
-    pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[2], dim=[0, 1], color='steelblue', alpha=0.3)
-    pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[2], dim=[0, 1], color='orangered', alpha=0.3)
-    pbd.plot_gmm(prod.mu, prod.sigma, swap=True, ax=ax[2], dim=[0, 1], color='gold', alpha=0.3)
+    rf.visualab.gmm_plot(mod1.mu, mod1.sigma, swap=True, ax=ax[2], dim=[0, 1], color='steelblue', alpha=0.3)
+    rf.visualab.gmm_plot(mod2.mu, mod2.sigma, swap=True, ax=ax[2], dim=[0, 1], color='orangered', alpha=0.3)
+    rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, ax=ax[2], dim=[0, 1], color='gold', alpha=0.3)
     ax[2].plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], color="b")
 
     patches = [mpatches.Patch(color='steelblue', label='transformed model 1'),
@@ -95,7 +95,7 @@ def generate_plot(xi, prod, demos_x, demo_idx):
     plt.figure()
 
     plt.title('Trajectory reproduction')
-    pbd.plot_gmm(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold', alpha=0.5)
+    rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold', alpha=0.5)
     plt.plot(xi[:, 0], xi[:, 1], color='r', lw=2, label='generated line')
     plt.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], 'k--', lw=2, label='demo line')
     plt.axis('equal')
@@ -109,7 +109,7 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx):
 
     ax.set_title('Trajectory reproduction')
     ax.plot(xi[:, 0], xi[:, 1], xi[:, 2], color='r', lw=2, label='generated line')
-    # pbd.plot_gmm(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold')
+    # rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold')
     ax.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2], 'k--', lw=2, label='demo line')
     plt.legend()
     plt.show()
