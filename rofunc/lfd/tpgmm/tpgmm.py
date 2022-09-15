@@ -156,7 +156,7 @@ if __name__ == '__main__':
     demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
                             [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
                             [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
-    demos_x = rf.bezier.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+    demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
     model, rep = uni(demos_x, show_demo_idx=2, plot=True)
 
     # Bi
@@ -166,8 +166,8 @@ if __name__ == '__main__':
     # right_demo_points = np.array([[[8, 8], [7, 1], [4, 3], [6, 8], [4, 3]],
     #                               [[8, 7], [7, 1], [3, 3], [6, 6], [4, 3]],
     #                               [[8, 8], [7, 1], [4, 5], [6, 8], [4, 3.5]]])
-    # demos_left_x = rf.bezier.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-    # demos_right_x = rf.bezier.multi_bezier_demos(right_demo_points)
+    # demos_left_x = rf.data_generator.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+    # demos_right_x = rf.data_generator.multi_bezier_demos(right_demo_points)
     # model_l, model_r, rep_l, rep_r = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
 
     # Uni_3d

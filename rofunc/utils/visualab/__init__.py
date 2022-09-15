@@ -1,3 +1,5 @@
 from __future__ import absolute_import
 
-from .trajectory_plot import *
+from .trajectory import *
+from .ellipsoid import *
+from .distribution import *

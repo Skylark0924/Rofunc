@@ -1,12 +1,11 @@
-import os
 import numpy as np
-import matplotlib.pyplot as plt
-import pbdlib as pbd
 import rofunc as rf
 from scipy.linalg import block_diag
 
+import pbdlib as pbd
 
-def poe_new(mu_gmr, sigma_gmr, start_x, end_x, demos_x, demo_idx, horzion=150, plot=False):
+
+def poe_gmr(mu_gmr, sigma_gmr, start_x, end_x, demos_x, demo_idx, horzion=150, plot=False):
     gmm = pbd.GMM(mu=mu_gmr, sigma=sigma_gmr)
 
     # get transformation for new situation
@@ -48,7 +47,7 @@ def uni(demos_x, show_demo_idx, start_x, end_x, plot=False):
                                         dim_out=slice(1, 4 * len(start_x) + 1), plot=plot)
 
     # Generate for new situation
-    prod = poe_new(mu_gmr, sigma_gmr, start_x, end_x, demos_x, show_demo_idx,
+    prod = poe_gmr(mu_gmr, sigma_gmr, start_x, end_x, demos_x, show_demo_idx,
                    horzion=demos_xdx[show_demo_idx].shape[0], plot=plot)
 
     lqr = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_xdx[show_demo_idx].shape[0])
@@ -82,7 +81,7 @@ if __name__ == '__main__':
     # demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
     #                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
     #                         [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
-    # demos_x = rf.bezier.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+    # demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
     # start_pose, end_pose = [-1, -2], [6, 6]
     # model, rep = uni(demos_x, 2, start_pose, end_pose, plot=True)
 
