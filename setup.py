@@ -7,7 +7,7 @@ setup(
     author="skylark",
     author_email="jjliu@mae.cuhk.edu.hk",
     packages=find_packages(),
-    install_requires=['matplotlib', 'pandas', 'tqdm', 'pillow', 'pytransform3d', 'tensorflow', 'numpy'],
+    install_requires=['matplotlib', 'pandas', 'tqdm', 'pillow', 'pytransform3d', 'tensorflow', 'numpy', 'nestle'],
     python_requires='>=3.6',
     license='MIT',
     classifiers=[
