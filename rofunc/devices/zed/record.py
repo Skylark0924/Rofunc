@@ -58,6 +58,7 @@ def record(root_dir, exp_name):
             '{}/{}'.format(root_dir, exp_name)))
     else:
         os.mkdir('{}/{}'.format(root_dir, exp_name))
+        print('Recording folder: {}/{}'.format(root_dir, exp_name))
 
     left_list = []
     depth_list = []
@@ -125,9 +126,13 @@ def record(root_dir, exp_name):
 
 if __name__ == "__main__":
     root_dir = '/home/skylark/Data/zed_record'
-    exp_name = '20220916'
+    # exp_name = '20220916_1552'
+    # from time import gmtime, strftime
+    # exp_name = strftime("%Y%m%d_%H%M%S", gmtime())
+    from datetime import datetime
+    exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
 
-    record(root_dir, exp_name)
-    # import rofunc as rf
-    #
-    # rf.zed.record(root_dir, exp_name)
+    # record(root_dir, exp_name)
+    import rofunc as rf
+
+    rf.zed.record(root_dir, exp_name)
