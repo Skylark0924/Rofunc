@@ -34,9 +34,13 @@ import rofunc as rf
 |                                 | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation                      |        |
 | **Planning**                    | LQT         | `lqt.uni`             | LQT for one agent with several via-points                            | ✅      |
 |                                 |             | `lqt.bi`              | LQT for two agent with coordination constraints                      | ✅      |
+|                                 |             | `lqt.recursive`       | Generate smooth trajectories for robot execution recursively         | ✅      |
 | **Learning from Demonstration** | DMP         | `dmp.uni`             | DMP for one agent with several (or one) demonstrated trajectories    |        |
-|                                 | TP-GMM      | `tpgmmm.uni`          | TP-GMM for one agent with several (or one) demonstrated trajectories | ✅      |
-|                                 |             | `tpgmmm.bi`           | TP-GMM for two agent with coordination learned from demonstration    | ✅      |
+|                                 | GMR         | `gmr.uni`             | GMR for one agent with several (or one) demonstrated trajectories    | ✅      |
+|                                 | TP-GMM      | `tpgmm.uni`          | TP-GMM for one agent with several (or one) demonstrated trajectories  | ✅      |
+|                                 |             | `tpgmm.bi`           | TP-GMM for two agent with coordination learned from demonstration     | ✅      |
+|                                 | TP-GMR      | `tpgmr.uni`          | TP-GMR for one agent with several (or one) demonstrated trajectories  | ✅      |
+|                                 |             | `tpgmr.bi`           | TP-GMR for two agent with coordination learned from demonstration     | ✅      |
 
 
 - [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
