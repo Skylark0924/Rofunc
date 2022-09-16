@@ -79,7 +79,6 @@ def record(root_dir, exp_name):
     cameras = sl.Camera.get_device_list()
     index = 0
     for cam in cameras:
-
         init.set_from_serial_number(cam.serial_number)
         if index >= 2:
             init.sdk_gpu_id = 1
@@ -94,7 +93,7 @@ def record(root_dir, exp_name):
         timestamp_list.append(0)
         last_ts_list.append(0)
 
-        video_path = 'data/{}/{}.svo'.format(exp_name, cam.serial_number)
+        video_path = '{}/{}/{}.svo'.format(root_dir, exp_name, cam.serial_number)
         recording_param_list.append(sl.RecordingParameters(video_path, sl.SVO_COMPRESSION_MODE.H264))
         status = zed_list[index].open(init)
         if status != sl.ERROR_CODE.SUCCESS:
@@ -125,10 +124,10 @@ def record(root_dir, exp_name):
 
 
 if __name__ == "__main__":
-    root_dir = '/home/ubuntu/Data/zed_record'
-    exp_name = '20220909212234'
+    root_dir = '/home/skylark/Data/zed_record'
+    exp_name = '20220916'
 
-    # record(root_dir, exp_name)
-    import rofunc as rf
-
-    rf.zed.record(root_dir, exp_name)
+    record(root_dir, exp_name)
+    # import rofunc as rf
+    #
+    # rf.zed.record(root_dir, exp_name)
