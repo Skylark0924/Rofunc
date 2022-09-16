@@ -28,7 +28,7 @@ import rofunc as rf
 |                                 |             | `mmodal.export`       | Export multi-modal demonstration data in one line                    | ✅      |
 | **Logger**                      |             | `logger.write`        | Custom tensorboard-based logger                                      |        |
 | **Coordinate**                  |             | `coord.custom_class`  | Define the custom class of `Pose`                                    |        |
-|                                 |             | `coord.transform`     | Useful functions about coordinate transformation                     |        |
+|                                 |             | `coord.transform`     | Useful functions about coordinate transformation                     | ✅      |
 | **VisuaLab**                    | 2D          | `visualab.2d`         | 2-dim trajectory visualization                                       |        |
 |                                 | 3D          | `visualab.3d`         | 3-dim trajectory visualization                                       |        |
 |                                 | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation                      |        |
