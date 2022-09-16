@@ -308,6 +308,16 @@ if __name__ == '__main__':
     # u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices = rf.lqt.bi(param, l_data, r_data)
     # rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)
 
-    data = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep_l.npy')
-    u_hat, x_hat, muQ, idx_slices = uni_recursive(param, data, interval=3)
-    rf.lqt.plot_3d_uni(x_hat, ori=False, save=False)
+    # Recursive
+    # data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
+    # data = np.zeros((len(data_raw), 14))
+    # data[:, :7] = data_raw
+    # filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
+    # filter_indices.append(len(data_raw) - 1)
+    # data = data[filter_indices]
+    # u_hat, x_hat, muQ, idx_slices = uni_recursive(param, data, interval=2)
+    # rf.lqt.plot_3d_uni(x_hat, ori=False, save=True, save_file_name='/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_r.npy')
+
+    # Show the data
+    data = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep2_r.npy')
+    rf.lqt.plot_3d_uni(data)

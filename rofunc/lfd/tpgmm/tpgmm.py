@@ -73,7 +73,7 @@ def HMM_learning(demos_xdx_f, demos_xdx_augm, plot=False):
         if int(len(demos_xdx_f[0][0, 0]) / 2) == 2:
             rf.tpgmm.hmm_plot(demos_xdx_f, model)
         elif int(len(demos_xdx_f[0][0, 0]) / 2) > 2:
-            rf.tpgmm.hmm_plot_3d(demos_xdx_f, model)
+            rf.tpgmm.hmm_plot_3d(demos_xdx_f, model, scale=0.1)
         else:
             raise Exception('Dimension is less than 2, cannot plot')
     return model
@@ -153,11 +153,11 @@ def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
 
 if __name__ == '__main__':
     # Uni
-    demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
-                            [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
-                            [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
-    demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-    model, rep = uni(demos_x, show_demo_idx=2, plot=True)
+    # demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
+    #                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
+    #                         [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
+    # demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+    # model, rep = uni(demos_x, show_demo_idx=2, plot=True)
 
     # Bi
     # left_demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
@@ -171,11 +171,11 @@ if __name__ == '__main__':
     # model_l, model_r, rep_l, rep_r = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
 
     # Uni_3d
-    # raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
-    # raw_demo = np.expand_dims(raw_demo, axis=0)
-    # demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
-    #
-    # model, rep = uni(demos_x, show_demo_idx=2, plot=True)
+    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
+    raw_demo = np.expand_dims(raw_demo, axis=0)
+    demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+
+    model, rep = uni(demos_x, show_demo_idx=2, plot=True)
 
     # Bi 3d
     # left_raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
