@@ -10,4 +10,3 @@ cd ..
 pyana3p setup.py bdist_wheel sdist
 cd ./dist
 pip3p install rofunc-0.0.0.9-py3-none-any.whl
-pip3p install numpy==1.21.6
