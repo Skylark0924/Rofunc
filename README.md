@@ -2,11 +2,11 @@
 
 ## Rofunc
 
-Rofunc package focuses on the **robotics Imitation Learning (IL) and Learning from Demonstration (LfD)** fields, provides useful and 
-convenient python functions for robotics, including _demonstration collection, data pre-process, LfD algorithms, planning
+Rofunc package focuses on the **robotics Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides useful and 
+convenient python functions for robotics, including _demonstration collection, data pre-processing, LfD algorithms, planning
 and control methods_. We also plan to provide Isaac Gym based robot simulator for evaluation. The purpose of this package is
 attempting to advance the field by building a full-process toolkit and validation platform that simplifies and standardizes 
-the process of demonstration data collection, processing, and learning. 
+the process of demonstration data collection, processing, and learning.
 
 ### Installation
 The installation is very easy,
@@ -25,7 +25,7 @@ Thus, have fun in the robotics world!
 
 ### [Documentation](./rofunc/)
 Currently, we provide a simple document; please refer to [here](./rofunc/). A comprehensive one with both English and 
-Chinese versions is building via the [readthedoc](https://rofunc.readthedocs.io/en/stable/). 
+Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/stable/). 
 The available functions and plans can be found as follows.
 
 
