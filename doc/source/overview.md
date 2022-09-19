@@ -1,13 +1,11 @@
-# Rofunc: The Full Process Python Package for Robot Learning from Demonstration
-
-## Rofunc
+# Overview
 
 Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and 
 convenient python functions for robotics, including _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also plan to provide an Isaac Gym-based robot simulator for evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
 
-![](./img/pipeline.png)
+![](../../img/pipeline.png)
 
-### Installation
+## Installation
 The installation is very easy,
 
 ```
@@ -22,7 +20,8 @@ import rofunc as rf
 
 Thus, have fun in the robotics world!
 
-### [Documentation](./rofunc/)
+
+## Available functions
 Currently, we provide a simple document; please refer to [here](./rofunc/). A comprehensive one with both English and 
 Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/stable/). 
 The available functions and plans can be found as follows.
@@ -57,8 +56,4 @@ The available functions and plans can be found as follows.
 |                                 | Distribution | `visualab.distribution` | 2-dim/3-dim distribution visualization                               | ✅      |
 |                                 | Ellipsoid    | `visualab.ellipsoid`    | 2-dim/3-dim ellipsoid visualization                                  | ✅      |
 | **RoboLab**                     | Kinematics   | `robolab.kinematics`    | ...                                                                  | ✅      |
-
-## Roadmap
-
-Roadmap is a personal learning experience and also simple guidance about robotics and Learning from Demonstration (LfD) fields.
 
