@@ -9,7 +9,7 @@ Rofunc: The Full Process Python Package for Robot Learning from Demonstration
 Rofunc
 ----------------
 :doc:`overview`
-
+   Show motivation, pipeline and list the available functions of `rofunc` package.
 :doc:`devices/README`
    How to record, process, visual and export the multimodal demonstration data.
 :doc:`lfd/README`
