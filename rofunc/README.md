@@ -28,15 +28,19 @@ import rofunc as rf
 |                                 |             | `mmodal.export`       | Export multi-modal demonstration data in one line                    | ✅      |
 | **Logger**                      |             | `logger.write`        | Custom tensorboard-based logger                                      |        |
 | **Coordinate**                  |             | `coord.custom_class`  | Define the custom class of `Pose`                                    |        |
-|                                 |             | `coord.transform`     | Useful functions about coordinate transformation                     |        |
-| **VisuaLab**                    | 2D          | `visualab.2d`         | 2-dim trajectory visualization                                       |        |
-|                                 | 3D          | `visualab.3d`         | 3-dim trajectory visualization                                       |        |
-|                                 | 3D with ori | `visualab.3dori`      | 3-dim trajectory visualization with orientation                      |        |
+|                                 |             | `coord.transform`     | Useful functions about coordinate transformation                     | ✅      |
+| **VisuaLab**                    | Trajectory  | `visualab.trajectory` | 2-dim/3-dim/with ori trajectory visualization                        | ✅      |
+|                                 | Distribution| `visualab.distribution`| 2-dim/3-dim distribution visualization                              | ✅      |
+|                                 | Ellipsoid   | `visualab.ellipsoid`  | 2-dim/3-dim ellipsoid visualization                                  | ✅      |
 | **Planning**                    | LQT         | `lqt.uni`             | LQT for one agent with several via-points                            | ✅      |
 |                                 |             | `lqt.bi`              | LQT for two agent with coordination constraints                      | ✅      |
+|                                 |             | `lqt.recursive`       | Generate smooth trajectories for robot execution recursively         | ✅      |
 | **Learning from Demonstration** | DMP         | `dmp.uni`             | DMP for one agent with several (or one) demonstrated trajectories    |        |
-|                                 | TP-GMM      | `tpgmmm.uni`          | TP-GMM for one agent with several (or one) demonstrated trajectories | ✅      |
-|                                 |             | `tpgmmm.bi`           | TP-GMM for two agent with coordination learned from demonstration    | ✅      |
+|                                 | GMR         | `gmr.uni`             | GMR for one agent with several (or one) demonstrated trajectories    | ✅      |
+|                                 | TP-GMM      | `tpgmm.uni`          | TP-GMM for one agent with several (or one) demonstrated trajectories  | ✅      |
+|                                 |             | `tpgmm.bi`           | TP-GMM for two agent with coordination learned from demonstration     | ✅      |
+|                                 | TP-GMR      | `tpgmr.uni`          | TP-GMR for one agent with several (or one) demonstrated trajectories  | ✅      |
+|                                 |             | `tpgmr.bi`           | TP-GMR for two agent with coordination learned from demonstration     | ✅      |
 
 
 - [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
@@ -348,7 +352,7 @@ import numpy as np
 demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
                         [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
-demos_x = rf.utils.bezier.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
 rf.tpgmm.uni(demos_x, show_demo_idx=2, plot=True)
 ```
 
@@ -364,7 +368,7 @@ left_demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
 right_demo_points = np.array([[[8, 8], [7, 1], [4, 3], [6, 8], [4, 3]],
                               [[8, 7], [7, 1], [3, 3], [6, 6], [4, 3]],
                               [[8, 8], [7, 1], [4, 5], [6, 8], [4, 3.5]]])
-demos_left_x = rf.utils.bezier.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-demos_right_x = rf.utils.bezier.multi_bezier_demos(right_demo_points)
+demos_left_x = rf.data_generator.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
+demos_right_x = rf.data_generator.multi_bezier_demos(right_demo_points)
 rf.tpgmm.bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
 ```
