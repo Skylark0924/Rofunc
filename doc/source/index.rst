@@ -10,11 +10,11 @@ Welcome to RoFunc's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   face.md
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
+* :ref:`API`
 * :ref:`search`
