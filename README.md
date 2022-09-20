@@ -1,6 +1,6 @@
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration
 
-
+![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)
 ![License](https://img.shields.io/github/license/Skylark0924/Rofunc)
 
 ## Rofunc
