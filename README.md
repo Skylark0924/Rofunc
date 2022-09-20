@@ -1,5 +1,8 @@
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration
 
+
+![License](https://img.shields.io/github/license/Skylark0924/Rofunc)
+
 ## Rofunc
 
 Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and 
