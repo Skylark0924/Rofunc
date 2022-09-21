@@ -3,6 +3,8 @@
 ![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)
 ![License](https://img.shields.io/github/license/Skylark0924/Rofunc)
 
+![](./img/logo2.png)
+
 ## Rofunc
 
 Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and 
