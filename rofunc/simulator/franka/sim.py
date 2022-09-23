@@ -1,4 +1,6 @@
 import math
+
+import numpy as np
 from isaacgym import gymapi
 from isaacgym import gymutil
 
@@ -151,16 +153,19 @@ def init_attractor(gym, envs, viewer, franka_handles):
     return attractor_handles, axes_geom, sphere_geom
 
 
-def update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, t):
+def update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index):
     gym.clear_lines(viewer)
     for i in range(num_envs):
         # Update attractor target from current franka state
         attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
         pose = attractor_properties.target
         # pose.p: (x, y, z), pose.r: (w, x, y, z)
-        pose.p.x = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs)
-        pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
-        pose.p.z = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs)
+        # pose.p.x = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs)
+        # pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
+        # pose.p.z = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs)
+        pose.p.x = traj[index, 0] * 0.5
+        pose.p.y = traj[index, 2] * 0.5
+        pose.p.z = traj[index, 1] * 0.5
 
         gym.set_attractor_target(envs[i], attractor_handles[i], pose)
 
@@ -191,12 +196,16 @@ def run_traj(traj, gym, sim, envs, viewer, franka_handles, attractor_handles, ax
     # Time to wait in seconds before moving robot
     next_franka_update_time = 1e-3
 
+    index = 0
     while not gym.query_viewer_has_closed(viewer):
         # Every 0.01 seconds the pose of the attactor is updated
         t = gym.get_sim_time(sim)
         if t >= next_franka_update_time:
-            update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, len(envs), t)
+            update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, len(envs), index)
             next_franka_update_time += 0.01
+            index += 1
+            if index >= len(traj):
+                index = 0
 
         # Step the physics
         gym.simulate(sim)
@@ -218,7 +227,9 @@ if __name__ == '__main__':
     gym, sim_params, sim, viewer = init_sim(args)
     envs, franka_handles = init_env(gym, sim, viewer)
     attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles)
-    run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
+
+    traj = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep2_l.npy')
+    run_traj(traj, gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
 
     # import rofunc as rf
     #
