@@ -27,7 +27,7 @@ def create_attractor():
     # Make attractor in all axes
     attractor_properties.axes = gymapi.AXIS_ALL
     pose = gymapi.Transform()
-    pose.p = gymapi.Vec3(-0.6, 0.0, -0.6)
+    pose.p = gymapi.Vec3(0., 0.0, 0.)
     pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
 
     # Create helper geometry used for visualization
@@ -77,9 +77,10 @@ def update_curi(gym, envs, viewer, curi_infos, attractor_infos, t):
         # Update attractor target from current curi state
         attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
         pose = attractor_properties.target
-        pose.p.y = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs) + 1
+        pose.p.y = -0.2 + 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs) + 1
         # pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
-        pose.p.x = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs) + 0.1
+        pose.p.x = 0.7 + 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs) + 0.1
+        pose.p.z = 0.5
 
         gym.set_attractor_target(envs[i], attractor_handles[i], pose)
 
@@ -134,8 +135,8 @@ def create_sim(gym, args):
         quit()
 
     # Point camera at environments
-    cam_pos = gymapi.Vec3(4.0, 2.0, -1.0)
-    cam_target = gymapi.Vec3(0.0, 1.0, 1.0)
+    cam_pos = gymapi.Vec3(3.0, 2.0, 0.0)
+    cam_target = gymapi.Vec3(0.0, 0.0, 0.0)
     gym.viewer_camera_look_at(viewer, None, cam_pos, cam_target)
 
     # Add ground plane
@@ -155,7 +156,7 @@ def create_sim(gym, args):
     curi_asset = gym.load_asset(sim, asset_root, curi_asset_file, asset_options)
 
     # Set up the env grid
-    num_envs = 9
+    num_envs = 1
     spacing = 2.0
     env_lower = gymapi.Vec3(-spacing, 0.0, -spacing)
     env_upper = gymapi.Vec3(spacing, spacing, spacing)
@@ -212,7 +213,7 @@ def main():
     sim, envs, viewer, curi_infos, attractor_infos = create_sim(gym, args)
 
     # Time to wait in seconds before moving robot
-    next_curi_update_time = 1.5
+    next_curi_update_time = 3
 
     while not gym.query_viewer_has_closed(viewer):
         # Every 0.01 seconds the pose of the attactor is updated
