@@ -214,7 +214,13 @@ def run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geo
 
 if __name__ == '__main__':
     args = gymutil.parse_arguments(description="Franka Attractor Example")
-    gym, sim_params, sim, viewer = init_sim(args)
-    envs, franka_handles = init_env(gym, sim, viewer)
-    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles)
-    run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
+    # gym, sim_params, sim, viewer = init_sim(args)
+    # envs, franka_handles = init_env(gym, sim, viewer)
+    # attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles)
+    # run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
+
+    import rofunc as rf
+    gym, sim_params, sim, viewer = rf.franka.init_sim(args)
+    envs, franka_handles = rf.franka.init_env(gym, sim, viewer)
+    attractor_handles, axes_geom, sphere_geom = rf.franka.init_attractor(gym, envs, viewer, franka_handles)
+    rf.franka.run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
