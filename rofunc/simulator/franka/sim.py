@@ -105,23 +105,6 @@ def init_env(gym, sim, viewer, num_envs=1):
     return envs, franka_handles
 
 
-def update_franka(gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, t):
-    gym.clear_lines(viewer)
-    for i in range(num_envs):
-        # Update attractor target from current franka state
-        attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
-        pose = attractor_properties.target
-        pose.p.x = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs)
-        pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
-        pose.p.z = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs)
-
-        gym.set_attractor_target(envs[i], attractor_handles[i], pose)
-
-        # Draw axes and sphere at attractor location
-        gymutil.draw_lines(axes_geom, gym, viewer, envs[i], pose)
-        gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
-
-
 def init_attractor(gym, envs, viewer, franka_handles):
     # Attractor setup
     attractor_handles = []
@@ -168,7 +151,25 @@ def init_attractor(gym, envs, viewer, franka_handles):
     return attractor_handles, axes_geom, sphere_geom
 
 
-def run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom):
+def update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, t):
+    gym.clear_lines(viewer)
+    for i in range(num_envs):
+        # Update attractor target from current franka state
+        attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
+        pose = attractor_properties.target
+        # pose.p: (x, y, z), pose.r: (w, x, y, z)
+        pose.p.x = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs)
+        pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
+        pose.p.z = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs)
+
+        gym.set_attractor_target(envs[i], attractor_handles[i], pose)
+
+        # Draw axes and sphere at attractor location
+        gymutil.draw_lines(axes_geom, gym, viewer, envs[i], pose)
+        gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
+
+
+def run_traj(traj, gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom):
     # get joint limits and ranges for Franka
     franka_dof_props = gym.get_actor_dof_properties(envs[0], franka_handles[0])
     franka_lower_limits = franka_dof_props['lower']
@@ -188,13 +189,13 @@ def run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geo
         gym.set_actor_dof_states(envs[i], franka_handles[i], franka_dof_states, gymapi.STATE_POS)
 
     # Time to wait in seconds before moving robot
-    next_franka_update_time = 1.5
+    next_franka_update_time = 1e-3
 
     while not gym.query_viewer_has_closed(viewer):
         # Every 0.01 seconds the pose of the attactor is updated
         t = gym.get_sim_time(sim)
         if t >= next_franka_update_time:
-            update_franka(gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, len(envs), t)
+            update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, len(envs), t)
             next_franka_update_time += 0.01
 
         # Step the physics
@@ -214,13 +215,14 @@ def run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geo
 
 if __name__ == '__main__':
     args = gymutil.parse_arguments(description="Franka Attractor Example")
-    # gym, sim_params, sim, viewer = init_sim(args)
-    # envs, franka_handles = init_env(gym, sim, viewer)
-    # attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles)
-    # run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
+    gym, sim_params, sim, viewer = init_sim(args)
+    envs, franka_handles = init_env(gym, sim, viewer)
+    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles)
+    run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
 
-    import rofunc as rf
-    gym, sim_params, sim, viewer = rf.franka.init_sim(args)
-    envs, franka_handles = rf.franka.init_env(gym, sim, viewer)
-    attractor_handles, axes_geom, sphere_geom = rf.franka.init_attractor(gym, envs, viewer, franka_handles)
-    rf.franka.run_traj(gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
+    # import rofunc as rf
+    #
+    # gym, sim_params, sim, viewer = rf.franka.init_sim(args)
+    # envs, franka_handles = rf.franka.init_env(gym, sim, viewer)
+    # attractor_handles, axes_geom, sphere_geom = rf.franka.init_attractor(gym, envs, viewer, franka_handles)
+    # run_traj(None, gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
