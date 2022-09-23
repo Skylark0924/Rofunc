@@ -1,10 +1,16 @@
 import numpy as np
 import rofunc as rf
-
 import pbdlib as pbd
 
 
 def get_dx(demos_x):
+    """
+    Get the first derivative of the demo displacement
+    Args:
+        demos_x: demo displacement
+    Returns:
+        demos_dx: demo velocity
+    """
     demos_dx = []
     for i in range(len(demos_x)):
         demo_dx = []
@@ -34,22 +40,23 @@ def get_A_b(demos_x):
 
 def get_related_matrix(demos_x):
     """
+    Some related matrices are generated from the demo data with displacement
     M: Number of demonstrated trajectories in a training set (m will be used as index)
     T: Number of datapoints in a trajectory (t will be used as index)
     P: Number of candidate frames in a task-parameterized mixture (j will be used as index/exponent)
     nb_dim: Dimension of the demo state
 
     Args:
-        demos_x: Original states of demos, [M, T, nb_dim]
+        demos_x: original demos with only displacement information, [M, T, nb_dim]
     Returns:
-        demos_dx: First derivative of states, [M, T, nb_dim]
-        demos_xdx: Concat original states with their first derivative, [M, T, nb_dim * 2]
+        demos_dx: first derivative of states, [M, T, nb_dim]
+        demos_xdx: concat original states with their first derivative, [M, T, nb_dim * 2]
         demos_A: the orientation of the p-th candidate coordinate system for this demonstration, [M, T, P, 2, 2]
         demos_b: the position of the p-th candidate coordinate system for this demonstration,  [M, T, P, nb_dim]
-        demos_A_xdx: Augment demos_A to original states and their first derivative, [M, T, P, nb_dim * 2, nb_dim * 2]
-        demos_b_xdx: Augment demos_b to original states and their first derivative, [M, T, P, nb_dim * 2]
-        demos_xdx_f: States and their first derivative in P frames, [M, T, P, nb_dim * 2]
-        demos_xdx_augm: Reshape demos_xdx_f, [M, T, nb_dim * 2 * P]
+        demos_A_xdx: augment demos_A to original states and their first derivative, [M, T, P, nb_dim * 2, nb_dim * 2]
+        demos_b_xdx: augment demos_b to original states and their first derivative, [M, T, P, nb_dim * 2]
+        demos_xdx_f: states and their first derivative in P frames, [M, T, P, nb_dim * 2]
+        demos_xdx_augm: reshape demos_xdx_f, [M, T, nb_dim * 2 * P]
     """
     demos_dx = get_dx(demos_x)
     demos_xdx = [np.hstack([_x, _dx]) for _x, _dx in
@@ -62,11 +69,22 @@ def get_related_matrix(demos_x):
     return demos_dx, demos_xdx, demos_A, demos_b, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm
 
 
-def HMM_learning(demos_xdx_f, demos_xdx_augm, plot=False):
-    model = pbd.HMM(nb_states=4)
+def HMM_learning(demos_xdx_f, demos_xdx_augm, nb_states=4, reg=1e-3, plot=False):
+    """
+    Learn the HMM model by using demos_xdx_augm
+    Args:
+        demos_xdx_f: states and their first derivative in P frames, [M, T, P, nb_dim * 2]
+        demos_xdx_augm: reshape demos_xdx_f, [M, T, nb_dim * 2 * P]
+        nb_states: number of HMM states
+        reg: [float] or list with [nb_dim x float] for different regularization in different dimensions
+            Regularization term used in M-step for covariance matrices
+        plot: [bool], whether to plot the demo and learned model
+    Returns:
+        model: learned HMM model
+    """
+    model = pbd.HMM(nb_states=nb_states)
     model.init_hmm_kbins(demos_xdx_augm)  # initializing model
-
-    model.em(demos_xdx_augm, reg=1e-3)
+    model.em(demos_xdx_augm, reg=reg)
 
     # plotting
     if plot:
@@ -80,6 +98,18 @@ def HMM_learning(demos_xdx_f, demos_xdx_augm, plot=False):
 
 
 def poe(model, demos_A_xdx, demos_b_xdx, demos_x, demo_idx, plot=False):
+    """
+    Product of Expert/Gaussian (PoE), which calculates the mixture distribution from multiple coordinates
+    Args:
+        model: learned model
+        demos_A_xdx: augment demos_A to original states and their first derivative, [M, T, P, nb_dim * 2, nb_dim * 2]
+        demos_b_xdx: augment demos_b to original states and their first derivative, [M, T, P, nb_dim * 2]
+        demos_x: original demos with only displacement information, [M, T, nb_dim]
+        demo_idx: index of the specific demo to be reproduced
+        plot: [bool], whether to plot the PoE
+    Returns:
+
+    """
     # get transformation for given demonstration.
     # We use the transformation of the first timestep as they are constant
     A, b = demos_A_xdx[demo_idx][0], demos_b_xdx[demo_idx][0]
@@ -101,6 +131,18 @@ def poe(model, demos_A_xdx, demos_b_xdx, demos_x, demo_idx, plot=False):
 
 
 def reproduce(model, prod, demos_x, demos_xdx, demos_xdx_augm, demo_idx, plot=False):
+    """
+    Reproduce the specific demo_idx from the learned model
+    Args:
+        model: learned model
+        prod: result of PoE
+        demos_x: original demos with only displacement information, [M, T, nb_dim]
+        demos_xdx: concat original states with their first derivative, [M, T, nb_dim * 2]
+        demos_xdx_augm: reshape demos_xdx_f, [M, T, nb_dim * 2 * P]
+        demo_idx: index of the specific demo to be reproduced
+        plot: [bool], whether to plot the
+    Returns:
+    """
     # get the most probable sequence of state for this demonstration
     sq = model.viterbi(demos_xdx_augm[demo_idx])
 

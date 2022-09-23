@@ -9,8 +9,9 @@ setup(
     url='https://github.com/Skylark0924/Rofunc',
     packages=find_packages(),
     install_requires=['matplotlib', 'pandas', 'tqdm', 'pillow', 'pytransform3d', 'tensorflow', 'numpy==1.21.6',
-                      'nestle',
-                      'pbdlib @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl'],
+                      'nestle', 'omegaconf', 'hydra-core', 'opencv-python'
+                      'pbdlib @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl',
+                      'isaacgym @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4-py3-none-any.whl'],
     python_requires=">=3.6,<3.11",
     keywords=['robotics', 'learning from demonstration'],
     license='MIT',
