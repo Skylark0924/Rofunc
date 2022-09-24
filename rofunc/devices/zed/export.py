@@ -38,7 +38,7 @@ def export(filepath, mode=1):
 
     # Get input parameters
     svo_input_path = filepath
-    root_path = filepath.split('.')[0]
+    root_path = filepath.split('.svo')[0]
     output_dir = root_path + '_export'
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
