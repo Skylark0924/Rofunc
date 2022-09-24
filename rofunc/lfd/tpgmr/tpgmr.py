@@ -153,12 +153,12 @@ if __name__ == '__main__':
     # model, rep = uni(demos_x, 2, start_pose, end_pose, plot=True)
 
     # Uni_3d
-    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
+    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-057/LeftHand.npy')
     raw_demo = np.expand_dims(raw_demo, axis=0)
-    demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
-    show_demo_idx = 2
-    # demos_x = np.vstack((raw_demo[:, 367:427, :], raw_demo[:, 420:480, :], raw_demo[:, 475:535, :]))
-    # show_demo_idx = 1
+    # demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+    # show_demo_idx = 2
+    demos_x = np.vstack((raw_demo[:, 367:427, :], raw_demo[:, 420:480, :], raw_demo[:, 475:535, :]))
+    show_demo_idx = 1
     start_pose = demos_x[show_demo_idx][-1]
     end_pose = demos_x[show_demo_idx][0]
     model, rep = uni(demos_x, show_demo_idx, start_pose, end_pose, plot=True)
