@@ -2,6 +2,9 @@
 
 ![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)
 ![License](https://img.shields.io/github/license/Skylark0924/Rofunc)
+![](https://img.shields.io/pypi/dm/Rofunc)
+![](https://img.shields.io/github/issues-closed-raw/Skylark0924/Rofunc)
+![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)
 
 ![](./img/logo2.png)
 
