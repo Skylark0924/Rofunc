@@ -196,7 +196,7 @@ def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=Tr
 def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_file_name=None, ax=None):
     if ax is None:
         fig = plt.figure(figsize=(4, 4))
-        ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection='3d', fc='white')
 
     if muQ is not None and idx_slices is not None:
         # i = 0
@@ -319,5 +319,5 @@ if __name__ == '__main__':
     # rf.lqt.plot_3d_uni(x_hat, ori=False, save=True, save_file_name='/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_r.npy')
 
     # Show the data
-    data = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep2_r.npy')
-    rf.lqt.plot_3d_uni(data)
+    data = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_l.npy')
+    plot_3d_uni(data)

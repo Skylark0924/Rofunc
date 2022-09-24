@@ -213,11 +213,14 @@ if __name__ == '__main__':
     # model_l, model_r, rep_l, rep_r = bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
 
     # Uni_3d
-    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
+    # raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
+    # raw_demo = np.expand_dims(raw_demo, axis=0)
+    # demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-057/LeftHand.npy')
     raw_demo = np.expand_dims(raw_demo, axis=0)
-    demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+    demos_x = np.vstack((raw_demo[:, 367:427, :], raw_demo[:, 420:480, :], raw_demo[:, 475:535, :]))
 
-    model, rep = uni(demos_x, show_demo_idx=2, plot=True)
+    model, rep = uni(demos_x, show_demo_idx=1, plot=True)
 
     # Bi 3d
     # left_raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')

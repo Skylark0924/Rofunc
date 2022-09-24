@@ -194,7 +194,7 @@ def run_traj(traj, gym, sim, envs, viewer, franka_handles, attractor_handles, ax
         gym.set_actor_dof_states(envs[i], franka_handles[i], franka_dof_states, gymapi.STATE_POS)
 
     # Time to wait in seconds before moving robot
-    next_franka_update_time = 1e-3
+    next_franka_update_time = 1
 
     index = 0
     while not gym.query_viewer_has_closed(viewer):
@@ -228,7 +228,7 @@ if __name__ == '__main__':
     envs, franka_handles = init_env(gym, sim, viewer)
     attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles)
 
-    traj = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep2_l.npy')
+    traj = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_l.npy')
     run_traj(traj, gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
 
     # import rofunc as rf
