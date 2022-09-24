@@ -13,7 +13,6 @@ import rofunc as rf
 
 - [Robotics Functions (RoFunc)](#robotics-functions-rofunc)
   - [Hello, robot world!](#hello-robot-world)
-  - [Available functions](#available-functions)
   - [Devices](#devices)
     - [Xsens](#xsens)
       - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
@@ -24,10 +23,17 @@ import rofunc as rf
     - [Zed](#zed)
       - [Record](#record)
       - [Playback](#playback)
+      - [Export](#export)
+    - [Multi-modal](#multi-modal)
+      - [Export](#export-1)
   - [Planning](#planning)
     - [LQT](#lqt)
-      - [Uni](#uni)
+      - [Unimanual](#unimanual)
       - [Bimanual](#bimanual)
+  - [Learning from Demonstration](#learning-from-demonstration)
+    - [TP-GMM](#tp-gmm)
+      - [Unimanual](#unimanual-1)
+      - [Bimanual](#bimanual-1)
 
 ## Devices
 
