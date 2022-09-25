@@ -47,7 +47,7 @@ def show(args):
         gym.sync_frame_time(sim)
 
 
-def run_traj(args, traj):
+def run_traj(args, traj, attracted_joint="panda_hand"):
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
@@ -57,7 +57,6 @@ def run_traj(args, traj):
     envs, franka_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1)
 
     # Create the attractor
-    attracted_joint = "panda_hand"
     attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles, attracted_joint)
 
     # get joint limits and ranges for Franka
@@ -110,7 +109,7 @@ if __name__ == '__main__':
     args = gymutil.parse_arguments(description="Franka Attractor Example")
 
     traj = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_l.npy')
-    run_traj(args, traj)
+    run_traj(args, traj, )
     # show(args)
 
     # import rofunc as rf
