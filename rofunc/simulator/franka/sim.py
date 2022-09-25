@@ -3,154 +3,7 @@ import math
 import numpy as np
 from isaacgym import gymapi
 from isaacgym import gymutil
-
-
-def init_sim(args):
-    # Initialize gym
-    gym = gymapi.acquire_gym()
-
-    # configure sim
-    sim_params = gymapi.SimParams()
-    sim_params.dt = 1.0 / 60.0
-    sim_params.substeps = 2
-    if args.physics_engine == gymapi.SIM_FLEX:
-        sim_params.flex.solver_type = 5
-        sim_params.flex.num_outer_iterations = 4
-        sim_params.flex.num_inner_iterations = 15
-        sim_params.flex.relaxation = 0.75
-        sim_params.flex.warm_start = 0.8
-    elif args.physics_engine == gymapi.SIM_PHYSX:
-        sim_params.physx.solver_type = 1
-        sim_params.physx.num_position_iterations = 4
-        sim_params.physx.num_velocity_iterations = 1
-        sim_params.physx.num_threads = args.num_threads
-        sim_params.physx.use_gpu = args.use_gpu
-
-    sim_params.use_gpu_pipeline = False
-    if args.use_gpu_pipeline:
-        print("WARNING: Forcing CPU pipeline.")
-
-    sim = gym.create_sim(args.compute_device_id, args.graphics_device_id, args.physics_engine, sim_params)
-
-    if sim is None:
-        print("*** Failed to create sim")
-        quit()
-
-    # Create viewer
-    viewer = gym.create_viewer(sim, gymapi.CameraProperties())
-    if viewer is None:
-        print("*** Failed to create viewer")
-        quit()
-    return gym, sim_params, sim, viewer
-
-
-def init_env(gym, sim, viewer, num_envs=1):
-    # Add ground plane
-    plane_params = gymapi.PlaneParams()
-    gym.add_ground(sim, plane_params)
-
-    # Load franka asset
-    asset_root = "../assets"
-    franka_asset_file = "urdf/franka_description/robots/franka_panda.urdf"
-
-    asset_options = gymapi.AssetOptions()
-    asset_options.fix_base_link = True
-    asset_options.flip_visual_attachments = True
-    asset_options.armature = 0.01
-
-    print("Loading asset '%s' from '%s'" % (franka_asset_file, asset_root))
-    franka_asset = gym.load_asset(sim, asset_root, franka_asset_file, asset_options)
-
-    # Set up the env grid
-    spacing = 1.0
-    env_lower = gymapi.Vec3(-spacing, 0.0, -spacing)
-    env_upper = gymapi.Vec3(spacing, spacing, spacing)
-
-    envs = []
-    franka_handles = []
-
-    # Point camera at environments
-    cam_pos = gymapi.Vec3(3.0, 2.0, 0.0)
-    cam_target = gymapi.Vec3(0.0, 0.0, 0.0)
-    gym.viewer_camera_look_at(viewer, None, cam_pos, cam_target)
-
-    print("Creating %d environments" % num_envs)
-    num_per_row = int(math.sqrt(num_envs))
-    pose = gymapi.Transform()
-    pose.p = gymapi.Vec3(0, 0.0, 0.0)
-    pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
-    for i in range(num_envs):
-        # create env
-        env = gym.create_env(sim, env_lower, env_upper, num_per_row)
-        envs.append(env)
-
-        # add franka
-        franka_handle = gym.create_actor(env, franka_asset, pose, "franka", i, 2)
-        franka_handles.append(franka_handle)
-
-    franka_dof_props = gym.get_actor_dof_properties(envs[0], franka_handles[0])
-
-    # override default stiffness and damping values
-    franka_dof_props['stiffness'].fill(1000.0)
-    franka_dof_props['damping'].fill(1000.0)
-
-    # Give a desired pose for first 2 robot joints to improve stability
-    franka_dof_props["driveMode"][0:2] = gymapi.DOF_MODE_POS
-
-    franka_dof_props["driveMode"][7:] = gymapi.DOF_MODE_POS
-    franka_dof_props['stiffness'][7:] = 1e10
-    franka_dof_props['damping'][7:] = 1.0
-
-    for i in range(num_envs):
-        gym.set_actor_dof_properties(envs[i], franka_handles[i], franka_dof_props)
-
-    return envs, franka_handles
-
-
-def init_attractor(gym, envs, viewer, franka_handles):
-    # Attractor setup
-    attractor_handles = []
-    attractor_properties = gymapi.AttractorProperties()
-    attractor_properties.stiffness = 5e5
-    attractor_properties.damping = 5e3
-
-    # Make attractor in all axes
-    attractor_properties.axes = gymapi.AXIS_ALL
-    pose = gymapi.Transform()
-    pose.p = gymapi.Vec3(0, 0.0, 0.0)
-    pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
-
-    # Create helper geometry used for visualization
-    # Create an wireframe axis
-    axes_geom = gymutil.AxesGeometry(0.1)
-    # Create an wireframe sphere
-    sphere_rot = gymapi.Quat.from_euler_zyx(0.5 * math.pi, 0, 0)
-    sphere_pose = gymapi.Transform(r=sphere_rot)
-    sphere_geom = gymutil.WireframeSphereGeometry(0.03, 12, 12, sphere_pose, color=(1, 0, 0))
-
-    franka_hand = "panda_hand"
-
-    for i in range(len(envs)):
-        env = envs[i]
-        franka_handle = franka_handles[i]
-
-        body_dict = gym.get_actor_rigid_body_dict(env, franka_handle)
-        props = gym.get_actor_rigid_body_states(env, franka_handle, gymapi.STATE_POS)
-        hand_handle = body = gym.find_actor_rigid_body_handle(env, franka_handle, franka_hand)
-
-        # Initialize the attractor
-        attractor_properties.target = props['pose'][:][body_dict[franka_hand]]
-        attractor_properties.target.p.y -= 0.1
-        attractor_properties.target.p.z = 0.1
-        attractor_properties.rigid_handle = hand_handle
-
-        # Draw axes and sphere at attractor location
-        gymutil.draw_lines(axes_geom, gym, viewer, env, attractor_properties.target)
-        gymutil.draw_lines(sphere_geom, gym, viewer, env, attractor_properties.target)
-
-        attractor_handle = gym.create_rigid_body_attractor(env, attractor_properties)
-        attractor_handles.append(attractor_handle)
-    return attractor_handles, axes_geom, sphere_geom
+from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
 
 
 def update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index):
@@ -174,7 +27,19 @@ def update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vi
         gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
 
 
-def run_traj(traj, gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom):
+def run_traj(args, traj):
+    # Initial gym and sim
+    gym, sim_params, sim, viewer = init_sim(args)
+
+    # Load CURI asset and set the env
+    asset_root = "../assets"
+    asset_file = "urdf/franka_description/robots/franka_panda.urdf"
+    envs, franka_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1)
+
+    # Create the attractor
+    attracted_joint = "panda_hand"
+    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles, attracted_joint)
+
     # get joint limits and ranges for Franka
     franka_dof_props = gym.get_actor_dof_properties(envs[0], franka_handles[0])
     franka_lower_limits = franka_dof_props['lower']
@@ -224,16 +89,10 @@ def run_traj(traj, gym, sim, envs, viewer, franka_handles, attractor_handles, ax
 
 if __name__ == '__main__':
     args = gymutil.parse_arguments(description="Franka Attractor Example")
-    gym, sim_params, sim, viewer = init_sim(args)
-    envs, franka_handles = init_env(gym, sim, viewer)
-    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles)
 
     traj = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_l.npy')
-    run_traj(traj, gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
+    # run_traj(args, traj)
 
-    # import rofunc as rf
-    #
-    # gym, sim_params, sim, viewer = rf.franka.init_sim(args)
-    # envs, franka_handles = rf.franka.init_env(gym, sim, viewer)
-    # attractor_handles, axes_geom, sphere_geom = rf.franka.init_attractor(gym, envs, viewer, franka_handles)
-    # run_traj(None, gym, sim, envs, viewer, franka_handles, attractor_handles, axes_geom, sphere_geom)
+    import rofunc as rf
+
+    rf.franka.run_traj(args, traj)
