@@ -13,6 +13,7 @@ def init_sim(args):
     sim_params = gymapi.SimParams()
     sim_params.dt = 1.0 / 60.0
     sim_params.substeps = 2
+    sim_params.gravity.y = -9.80
     if args.physics_engine == gymapi.SIM_FLEX:
         sim_params.flex.solver_type = 5
         sim_params.flex.num_outer_iterations = 4
@@ -37,20 +38,26 @@ def init_sim(args):
         quit()
 
     # Create viewer
-    viewer = gym.create_viewer(sim, gymapi.CameraProperties())
+    camera_props = gymapi.CameraProperties()
+    camera_props.horizontal_fov = 75.0
+    camera_props.width = 1920
+    camera_props.height = 1080
+    # camera_props.use_collision_geometry = True
+    viewer = gym.create_viewer(sim, camera_props)
     if viewer is None:
         print("*** Failed to create viewer")
         quit()
     return gym, sim_params, sim, viewer
 
 
-def init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1):
+def init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base_link=True,
+             cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0)):
     # Add ground plane
     plane_params = gymapi.PlaneParams()
     gym.add_ground(sim, plane_params)
 
     asset_options = gymapi.AssetOptions()
-    asset_options.fix_base_link = True
+    asset_options.fix_base_link = fix_base_link
     asset_options.flip_visual_attachments = True
     asset_options.armature = 0.01
 
@@ -58,7 +65,6 @@ def init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1):
     asset = gym.load_asset(sim, asset_root, asset_file, asset_options)
 
     # Set up the env grid
-    spacing = 1.0
     env_lower = gymapi.Vec3(-spacing, 0.0, -spacing)
     env_upper = gymapi.Vec3(spacing, spacing, spacing)
 
@@ -66,8 +72,6 @@ def init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1):
     handles = []
 
     # Point camera at environments
-    cam_pos = gymapi.Vec3(3.0, 2.0, 0.0)
-    cam_target = gymapi.Vec3(0.0, 0.0, 0.0)
     gym.viewer_camera_look_at(viewer, None, cam_pos, cam_target)
 
     print("Creating %d environments" % num_envs)
@@ -112,9 +116,6 @@ def init_attractor(gym, envs, viewer, handles, attracted_joint):
 
     # Make attractor in all axes
     attractor_properties.axes = gymapi.AXIS_ALL
-    pose = gymapi.Transform()
-    pose.p = gymapi.Vec3(0, 0.0, 0.0)
-    pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
 
     # Create helper geometry used for visualization
     # Create a wireframe axis
@@ -136,6 +137,47 @@ def init_attractor(gym, envs, viewer, handles, attracted_joint):
         attractor_properties.target = props['pose'][:][body_dict[attracted_joint]]
         attractor_properties.target.p.y -= 0.1
         attractor_properties.target.p.z = 0.1
+        attractor_properties.rigid_handle = attracted_joint_handle
+
+        # Draw axes and sphere at attractor location
+        gymutil.draw_lines(axes_geom, gym, viewer, env, attractor_properties.target)
+        gymutil.draw_lines(sphere_geom, gym, viewer, env, attractor_properties.target)
+
+        attractor_handle = gym.create_rigid_body_attractor(env, attractor_properties)
+        attractor_handles.append(attractor_handle)
+    return attractor_handles, axes_geom, sphere_geom
+
+
+def init_bimanual_attractor(gym, envs, viewer, handles, attracted_joint):
+    # Attractor setup
+    attractor_handles = []
+    attractor_properties = gymapi.AttractorProperties()
+    attractor_properties.stiffness = 5e5
+    attractor_properties.damping = 5e3
+
+    # Make attractor in all axes
+    attractor_properties.axes = gymapi.AXIS_ALL
+
+    # Create helper geometry used for visualization
+    # Create a wireframe axis
+    axes_geom = gymutil.AxesGeometry(0.1)
+    # Create a wireframe sphere
+    sphere_rot = gymapi.Quat.from_euler_zyx(0.5 * math.pi, 0, 0)
+    sphere_pose = gymapi.Transform(r=sphere_rot)
+    sphere_geom = gymutil.WireframeSphereGeometry(0.03, 12, 12, sphere_pose, color=(1, 0, 0))
+
+    for i in range(len(envs)):
+        env = envs[i]
+        handle = handles[i]
+
+        body_dict = gym.get_actor_rigid_body_dict(env, handle)
+        props = gym.get_actor_rigid_body_states(env, handle, gymapi.STATE_POS)
+        attracted_joint_handle = body = gym.find_actor_rigid_body_handle(env, handle, attracted_joint)
+
+        # Initialize the attractor
+        attractor_properties.target = props['pose'][:][body_dict[attracted_joint]]
+        # attractor_properties.target.p.y -= 0.1
+        # attractor_properties.target.p.z = 0.1
         attractor_properties.rigid_handle = attracted_joint_handle
 
         # Draw axes and sphere at attractor location
