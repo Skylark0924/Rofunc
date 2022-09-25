@@ -1,1 +1,2 @@
 rofunc
+sphinx!=5.2.0.post0
