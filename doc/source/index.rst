@@ -27,16 +27,17 @@ Roadmap
 .. Hidden TOCs
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Rofunc
    :hidden:
+   :glob:
 
    overview
    devices/README
    lfd/README
    planning/README
    tools/README
-   simulator/README
+   simulator/*
 
 .. toctree::
    :maxdepth: 1
