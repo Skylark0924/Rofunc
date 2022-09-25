@@ -16,8 +16,8 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         # pose.p.x = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs)
         # pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
         # pose.p.z = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs)
-        pose.p.x = 0.7 + traj[index, 0] * 1
-        pose.p.y = 0.2 + traj[index, 2] * 0.5
+        pose.p.x = 0.7 + traj[index, 0] * 0.5
+        pose.p.y = -0.2 + traj[index, 2]
         pose.p.z = traj[index, 1] * 0.5
 
         # pose.p.y = -0.2 + 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs) + 1
@@ -51,7 +51,7 @@ def show(args):
         gym.sync_frame_time(sim)
 
 
-def run_traj(args, traj):
+def run_traj(args, traj, attracted_joint="panda_right_hand"):
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
@@ -61,7 +61,6 @@ def run_traj(args, traj):
     envs, curi_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, fix_base_link=False)
 
     # Create the attractor
-    attracted_joint = "panda_right_hand"
     attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, curi_handles, attracted_joint)
 
     # get joint limits and ranges for Franka
@@ -154,7 +153,7 @@ def run_traj_bi(args, traj_l, traj_r):
                          t)
             update_robot(traj_r, gym, envs, attractor_handles_r, axes_geom_r, sphere_geom_r, viewer, len(envs), index,
                          t)
-            next_curi_update_time += 0.05
+            next_curi_update_time += 0.01
             index += 1
             if index >= len(traj_l):
                 index = 0
@@ -175,17 +174,19 @@ def run_traj_bi(args, traj_l, traj_r):
 
 
 if __name__ == '__main__':
-    args = gymutil.parse_arguments(description="CURI Attractor Example")
+    args = gymutil.parse_arguments()
 
-    traj_r = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_l.npy')
-    traj_l = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
+    from importlib_resources import files
+
+    traj_r = np.load(files('rofunc.data').joinpath('taichi_1r.npy'))
+    traj_l = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))
+    # traj_r = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_l.npy')  # [traj_len, 7]
+    # traj_l = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')  # [traj_len, 7]
+
     # run_traj(args, traj)
-    run_traj_bi(args, traj_l, traj_r)
+    # run_traj_bi(args, traj_l, traj_r)
     # show(args)
 
-    # import rofunc as rf
-    #
-    # gym, sim_params, sim, viewer = rf.franka.init_sim(args)
-    # envs, curi_handles = rf.franka.init_env(gym, sim, viewer)
-    # attractor_handles, axes_geom, sphere_geom = rf.franka.init_attractor(gym, envs, viewer, curi_handles)
-    # run_traj(None, gym, sim, envs, viewer, curi_handles, attractor_handles, axes_geom, sphere_geom)
+    import rofunc as rf
+
+    rf.curi.run_traj_bi(args, traj_l, traj_r)
