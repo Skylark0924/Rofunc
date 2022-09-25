@@ -6,7 +6,7 @@ from isaacgym import gymutil
 from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
 
 
-def update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index):
+def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index):
     gym.clear_lines(viewer)
     for i in range(num_envs):
         # Update attractor target from current franka state
@@ -27,11 +27,31 @@ def update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vi
         gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
 
 
+def show(args):
+    # Initial gym and sim
+    gym, sim_params, sim, viewer = init_sim(args)
+
+    # Load franka asset and set the env
+    asset_root = "../assets"
+    asset_file = "urdf/franka_description/robots/franka_panda.urdf"
+    envs, franka_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1)
+
+    while not gym.query_viewer_has_closed(viewer):
+        # Step the physics
+        gym.simulate(sim)
+        gym.fetch_results(sim, True)
+
+        # Step rendering
+        gym.step_graphics(sim)
+        gym.draw_viewer(viewer, sim, False)
+        gym.sync_frame_time(sim)
+
+
 def run_traj(args, traj):
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
-    # Load CURI asset and set the env
+    # Load franka asset and set the env
     asset_root = "../assets"
     asset_file = "urdf/franka_description/robots/franka_panda.urdf"
     envs, franka_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1)
@@ -44,7 +64,6 @@ def run_traj(args, traj):
     franka_dof_props = gym.get_actor_dof_properties(envs[0], franka_handles[0])
     franka_lower_limits = franka_dof_props['lower']
     franka_upper_limits = franka_dof_props['upper']
-    franka_ranges = franka_upper_limits - franka_lower_limits
     franka_mids = 0.5 * (franka_upper_limits + franka_lower_limits)
     franka_num_dofs = len(franka_dof_props)
 
@@ -66,7 +85,7 @@ def run_traj(args, traj):
         # Every 0.01 seconds the pose of the attactor is updated
         t = gym.get_sim_time(sim)
         if t >= next_franka_update_time:
-            update_franka(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, len(envs), index)
+            update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, len(envs), index)
             next_franka_update_time += 0.01
             index += 1
             if index >= len(traj):
@@ -91,8 +110,9 @@ if __name__ == '__main__':
     args = gymutil.parse_arguments(description="Franka Attractor Example")
 
     traj = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_l.npy')
-    # run_traj(args, traj)
+    run_traj(args, traj)
+    # show(args)
 
-    import rofunc as rf
-
-    rf.franka.run_traj(args, traj)
+    # import rofunc as rf
+    #
+    # rf.franka.run_traj(args, traj)
