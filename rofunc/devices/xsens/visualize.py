@@ -61,7 +61,7 @@ def plot_skeleton(skeleton_data_path: str, save_gif=False):
         plt.show()
 
 
-def plot_skeleton_batch(skeleton_dir):
+def plot_skeleton_batch(skeleton_dir, save_gif=True):
     """
     Example:
         from rofunc.xsens.visualize import plot_skeleton_batch
@@ -74,4 +74,4 @@ def plot_skeleton_batch(skeleton_dir):
     for skeleton in tqdm(skeletons):
         skeleton_path = os.path.join(skeleton_dir, skeleton)
         if os.path.isdir(skeleton_path):
-            plot_skeleton(skeleton_path)
+            plot_skeleton(skeleton_path, save_gif)

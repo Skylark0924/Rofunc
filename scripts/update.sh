@@ -5,6 +5,8 @@ alias pyana3p="/home/ubuntu/anaconda3/envs/plast/bin/python3.7"
 # Expand aliases defined in the shell ~/.bashrc
 
 cd ../dist
+rm -rf ./build
+rm -rf ./dist
 pip3p uninstall -y rofunc
 cd ..
 pyana3p setup.py bdist_wheel sdist
