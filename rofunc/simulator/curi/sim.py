@@ -8,7 +8,6 @@ from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
 
 
 def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index, t):
-    gym.clear_lines(viewer)
     for i in range(num_envs):
         # Update attractor target from current franka state
         attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
@@ -17,9 +16,9 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         # pose.p.x = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs)
         # pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
         # pose.p.z = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs)
-        pose.p.x = 0.7 + traj[index, 0] * 0.5
-        pose.p.y = -0.2 + traj[index, 2]
-        pose.p.z = traj[index, 1] * 0.5
+        pose.p.x = traj[index, 0]
+        pose.p.y = traj[index, 2]
+        pose.p.z = traj[index, 1]
 
         # pose.p.y = -0.2 + 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs) + 1
         # pose.p.x = 0.7 + 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs) + 0.1
@@ -32,13 +31,16 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
 
 
-def show(args):
+def show(args, asset_root=None, asset_file=None):
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
     # Load CURI asset and set the env
-    asset_root = "../assets"
-    asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+    if asset_root is None and asset_file is None:
+        import site
+        pip_root_path = site.getsitepackages()[0]
+        asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
+        asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     init_env(gym, sim, viewer, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=False)
 
     while not gym.query_viewer_has_closed(viewer):
@@ -52,13 +54,16 @@ def show(args):
         gym.sync_frame_time(sim)
 
 
-def run_traj(args, traj, attracted_joint="panda_right_hand"):
+def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, asset_file=None, update_freq=0.001):
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
     # Load CURI asset and set the env
-    asset_root = "../assets"
-    asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+    if asset_root is None and asset_file is None:
+        import site
+        pip_root_path = site.getsitepackages()[0]
+        asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
+        asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     envs, curi_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, fix_base_link=False)
 
     # Create the attractor
@@ -89,8 +94,9 @@ def run_traj(args, traj, attracted_joint="panda_right_hand"):
         # Every 0.01 seconds the pose of the attractor is updated
         t = gym.get_sim_time(sim)
         if t >= next_curi_update_time:
+            gym.clear_lines(viewer)
             update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, len(envs), index, t)
-            next_curi_update_time += 0.05
+            next_curi_update_time += update_freq
             index += 1
             if index >= len(traj):
                 index = 0
@@ -110,21 +116,40 @@ def run_traj(args, traj, attracted_joint="panda_right_hand"):
     gym.destroy_sim(sim)
 
 
-def run_traj_bi(args, traj_l, traj_r):
+def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, asset_file=None, update_freq=0.001):
+    """
+
+    Args:
+        args:
+        traj_l:
+        traj_r:
+        attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
+        asset_root:
+        asset_file:
+
+    Returns:
+
+    """
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
     # Load CURI asset and set the env
-    import site
-    pip_root_path = site.getsitepackages()[0]
-    asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
-    asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+    if asset_root is None and asset_file is None:
+        import site
+        pip_root_path = site.getsitepackages()[0]
+        asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
+        asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     envs, curi_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, fix_base_link=False)
 
     # Create the attractor
-    attracted_joint_l = "panda_left_hand"
+    if attracted_joints is None:
+        attracted_joint_l = "panda_left_hand"
+        attracted_joint_r = "panda_right_hand"
+    else:
+        assert isinstance(attracted_joints, list)
+        attracted_joint_l = attracted_joints[0]
+        attracted_joint_r = attracted_joints[1]
     attractor_handles_l, axes_geom_l, sphere_geom_l = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_l)
-    attracted_joint_r = "panda_right_hand"
     attractor_handles_r, axes_geom_r, sphere_geom_r = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_r)
 
     # get joint limits and ranges for Franka
@@ -152,11 +177,12 @@ def run_traj_bi(args, traj_l, traj_r):
         # Every 0.01 seconds the pose of the attractor is updated
         t = gym.get_sim_time(sim)
         if t >= next_curi_update_time:
+            gym.clear_lines(viewer)
             update_robot(traj_l, gym, envs, attractor_handles_l, axes_geom_l, sphere_geom_l, viewer, len(envs), index,
                          t)
             update_robot(traj_r, gym, envs, attractor_handles_r, axes_geom_r, sphere_geom_r, viewer, len(envs), index,
                          t)
-            next_curi_update_time += 0.01
+            next_curi_update_time += update_freq
             index += 1
             if index >= len(traj_l):
                 index = 0
@@ -192,4 +218,15 @@ if __name__ == '__main__':
 
     import rofunc as rf
 
-    rf.curi.run_traj_bi(args, traj_l, traj_r)
+    x_hat_l = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep4_l.npy')[350:]
+    x_hat_r = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep4_r.npy')[350:]
+
+    # rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, ori=False)
+
+    x_hat_l[:, 0] += 0.5
+    x_hat_r[:, 0] += 0.5
+    x_hat_l[:, 1] -= 0.2
+    x_hat_r[:, 1] -= 0.2
+    x_hat_l[:, 1] = -x_hat_l[:, 1]
+    x_hat_r[:, 1] = -x_hat_r[:, 1]
+    run_traj_bi(args, x_hat_l, x_hat_r, update_freq=0.001)
