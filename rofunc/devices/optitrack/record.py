@@ -3,6 +3,9 @@ import re
 import os
 import threading
 import time
+import numpy as np
+import keyboard
+
 
 def data_process(data):
     position = re.findall(r"Position\s*:\s*(.*)", data)[0]
@@ -20,11 +23,25 @@ def opti_run(root_dir, exp_name, ip, port):
         utf_data = client.recv(1024).decode("utf-8")
         raw_position, raw_orientation = data_process(utf_data)
         client.send("ok".encode("utf-8"))
+        raw_pose = np.append(raw_position, raw_orientation)
+        opti_data = np.append(raw_pose, axis=0)
 
         # save optitrack data to npy file
+        if keyboard.read_key() == 's':
+            np.save(root_dir + exp_name + 'opti_data.npy', opti_data)
+            break
 
 
 def record(root_dir, exp_name, ip, port):
+    """
+    Args:
+        root_dir: root directory
+        exp_name: npy file location
+        ip: ip address of server computer
+        port: port number of optitrack server
+
+    Returns: None
+    """
     if os.path.exists('{}/{}'.format(root_dir, exp_name)):
         raise Exception('There are already some files in {}, please rename the exp_name.'.format(
             '{}/{}'.format(root_dir, exp_name)))
@@ -33,6 +50,8 @@ def record(root_dir, exp_name, ip, port):
         print('Recording folder: {}/{}'.format(root_dir, exp_name))
         opti_thread = threading.Thread(target=opti_run, args=(root_dir, exp_name, ip, port))
         opti_thread.start()
+        opti_thread.join()
+        print('Optitrack record finished')
 
 
 if __name__ == "__main__":
