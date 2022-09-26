@@ -1,7 +1,7 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
 
-# <editor-fold desc="Matrices Definition">
+# <editor-fold desc="CURI Matrices Definition">
 # Matrix from world frame to left arm base frame for CURI robot
 T_W2CURIl = np.array([[0.626009, -0.736984, 0.254887, 0.45908], [-0.12941, 0.224144, 0.965926, 0.11216],
                 [-0.769003, -0.637663, 0.0449435, 1.19266], [0, 0, 0, 1]])
