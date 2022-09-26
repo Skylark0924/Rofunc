@@ -157,7 +157,8 @@ def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     plt.show()
 
 
-def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=True, save=False, ax=None):
+def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=True, save=False, save_file_name=None,
+               ax=None):
     if ax is None:
         fig = plt.figure(figsize=(4, 4))
         ax = fig.add_subplot(111, projection='3d')
@@ -187,8 +188,9 @@ def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=Tr
             ax = plot_basis(ax=ax, R=R_r, p=p_r, s=0.01)
 
     if save:
-        np.save("/controller/data/cup.npy", np.array(x_hat_l))
-        np.save("/controller/data/spoon.npy", np.array(x_hat_r))
+        assert save_file_name is not None
+        np.save(save_file_name[0], np.array(x_hat_l))
+        np.save(save_file_name[1], np.array(x_hat_r))
 
     plt.show()
 
