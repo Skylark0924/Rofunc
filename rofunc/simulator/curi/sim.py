@@ -221,7 +221,7 @@ if __name__ == '__main__':
     x_hat_l = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep4_l.npy')[350:]
     x_hat_r = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep4_r.npy')[350:]
 
-    # rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, ori=False)
+    rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, ori=False)
 
     x_hat_l[:, 0] += 0.5
     x_hat_r[:, 0] += 0.5
