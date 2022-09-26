@@ -33,7 +33,7 @@ Thus, have fun in the robotics world!
 
 ### [Documentation](./rofunc/)
 Currently, we provide a simple document; please refer to [here](./rofunc/). A comprehensive one with both English and 
-Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/stable/). 
+Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/). 
 The available functions and plans can be found as follows.
 
 
