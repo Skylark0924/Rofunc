@@ -78,7 +78,7 @@ The available functions and plans can be found as follows.
 |                                                 | RoboLab                | `robolab.kinematics`    | Forward /inverse kinematics w.r.t URDF file                                   |        |
 | **Simulator**                                   | Franka                 | `franka.sim`            | Execute specific trajectory via single Franka Panda arm in Isaac Gym          | ✅      |
 |                                                 | DualFranka             | `dualfranka.sim`        | Execute specific trajectory via dual Franka Panda arm in Isaac Gym            |        |
-|                                                 | CURI                   | `curi.sim`              | Execute specific trajectory via human-like CURI robot in Isaac Gym            |  ✅      |
+|                                                 | CURI                   | `curi.sim`              | Execute specific trajectory via human-like CURI robot in Isaac Gym            | ✅      |
 |                                                 | Walker                 | `walker.sim`            | Execute specific trajectory via UBTECH Walker robot  in Isaac Gym             |        |
 
 ## Roadmap
