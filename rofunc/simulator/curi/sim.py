@@ -1,4 +1,5 @@
 import math
+import os.path
 
 import numpy as np
 from isaacgym import gymapi
@@ -114,7 +115,9 @@ def run_traj_bi(args, traj_l, traj_r):
     gym, sim_params, sim, viewer = init_sim(args)
 
     # Load CURI asset and set the env
-    asset_root = "../assets"
+    import site
+    pip_root_path = site.getsitepackages()[0]
+    asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     envs, curi_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, fix_base_link=False)
 
