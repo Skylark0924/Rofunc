@@ -31,16 +31,25 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
 
 
-def show(args, asset_root=None, asset_file=None):
+def show(args, asset_root=None):
+    """
+
+    Args:
+        args:
+        asset_root: the location of `assets` folder, e.g., /home/ubuntu/anaconda3/envs/plast/lib/python3.7/site-packages/rofunc/simulator/assets
+
+    Returns:
+
+    """
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
     # Load CURI asset and set the env
-    if asset_root is None and asset_file is None:
+    if asset_root is None:
         import site
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
-        asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+    asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     init_env(gym, sim, viewer, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=False)
 
     while not gym.query_viewer_has_closed(viewer):
@@ -54,16 +63,28 @@ def show(args, asset_root=None, asset_file=None):
         gym.sync_frame_time(sim)
 
 
-def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, asset_file=None, update_freq=0.001):
+def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, update_freq=0.001):
+    """
+
+    Args:
+        args:
+        traj:
+        attracted_joint:
+        asset_root: the location of `assets` folder, e.g., /home/ubuntu/anaconda3/envs/plast/lib/python3.7/site-packages/rofunc/simulator/assets
+        update_freq:
+
+    Returns:
+
+    """
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
     # Load CURI asset and set the env
-    if asset_root is None and asset_file is None:
+    if asset_root is None:
         import site
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
-        asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+    asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     envs, curi_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, fix_base_link=False)
 
     # Create the attractor
@@ -116,7 +137,7 @@ def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, as
     gym.destroy_sim(sim)
 
 
-def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, asset_file=None, update_freq=0.001):
+def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, update_freq=0.001):
     """
 
     Args:
@@ -124,8 +145,8 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, as
         traj_l:
         traj_r:
         attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
-        asset_root:
-        asset_file:
+        asset_root: the location of `assets` folder, e.g., /home/ubuntu/anaconda3/envs/plast/lib/python3.7/site-packages/rofunc/simulator/assets
+        update_freq:
 
     Returns:
 
@@ -134,11 +155,11 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, as
     gym, sim_params, sim, viewer = init_sim(args)
 
     # Load CURI asset and set the env
-    if asset_root is None and asset_file is None:
+    if asset_root is None:
         import site
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
-        asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+    asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     envs, curi_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, fix_base_link=False)
 
     # Create the attractor
