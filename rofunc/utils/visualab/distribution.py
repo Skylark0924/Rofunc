@@ -133,11 +133,13 @@ def gmm_plot3d(mu, covariance, color, alpha=0.5, ax=None, scale=0.1, max_gaussia
     plt.set_cmap('Set1')
 
     if n_gaussian >= max_gaussian:
-        index_to_plot = np.linspace(0, n_gaussian, num=max_gaussian, dtype=np.int8)
+        index_to_plot = np.linspace(0, n_gaussian - 1, num=max_gaussian, dtype=np.int8)
+        disable_flag = False
     else:
         index_to_plot = np.arange(0, n_gaussian)
+        disable_flag = True
 
-    for i in tqdm(index_to_plot):
+    for i in tqdm(index_to_plot, disable=disable_flag):
         # Plot the ellipsoid
         R = np.real(sp.linalg.sqrtm(scale * covariance[i, :]))
         rf.visualab.sphere_plot3d(mu[i, :], R, color=color, alpha=alpha, ax=ax)

@@ -32,13 +32,15 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
     ax.set_title('pos - coord. %d' % 1)
     for p in demos_xdx_f:
         ax.plot(p[:, 0, 0], p[:, 0, 1], p[:, 0, 2])
-    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i for i in range(3)], color='steelblue', scale=scale, alpha=0.1)
+    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i for i in range(3)], color='steelblue', scale=scale,
+                         alpha=0.1)
 
     ax = fig.add_subplot(1, 2, 2, projection='3d', fc='white')
     ax.set_title('pos - coord. %d' % 2)
     for p in demos_xdx_f:
         ax.plot(p[:, 1, 0], p[:, 1, 1], p[:, 1, 2])
-    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i+14 for i in range(3)], color='orangered', scale=scale, alpha=0.1)
+    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i + 14 for i in range(3)], color='orangered', scale=scale,
+                         alpha=0.1)
 
     plt.tight_layout()
     plt.show()
