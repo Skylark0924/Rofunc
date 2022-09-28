@@ -1,0 +1,2 @@
+recursive-include rofunc/data/ *
+recursive-include rofunc/simulator/assets/ *
