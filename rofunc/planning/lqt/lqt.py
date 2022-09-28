@@ -1,9 +1,11 @@
+import random
 from math import factorial
 
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
+from matplotlib.pyplot import cm
 from pytransform3d.rotations import matrix_from_quaternion, plot_basis
+from tqdm import tqdm
 
 
 def get_matrices(param, data):
@@ -168,28 +170,39 @@ def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=Tr
             ax.scatter(muQ_l[slice_t][0], muQ_l[slice_t][1], muQ_l[slice_t][2], c='red', s=10)
             ax.scatter(muQ_r[slice_t][0], muQ_r[slice_t][1], muQ_r[slice_t][2], c='orange', s=10)
 
-    # Plot 3d trajectories
-    ax.plot(x_hat_l[:, 0], x_hat_l[:, 1], x_hat_l[:, 2], c='blue', label='left arm')
-    ax.plot(x_hat_r[:, 0], x_hat_r[:, 1], x_hat_r[:, 2], c='green', label='right arm')
+    if not isinstance(x_hat_l, list):
+        if len(x_hat_l.shape) == 2:
+            x_hat_l = np.expand_dims(x_hat_l, axis=0)
+            x_hat_r = np.expand_dims(x_hat_r, axis=0)
 
-    # Starting points
-    ax.scatter(x_hat_l[0, 0], x_hat_l[0, 1], x_hat_l[0, 2], c='blue', s=20, label='left start point')
-    ax.scatter(x_hat_r[0, 0], x_hat_r[0, 1], x_hat_r[0, 2], c='green', s=20, label='right start point')
+    for i in range(len(x_hat_l)):
+        c_l = cm.tab20c(random.random())
+        c_r = cm.rainbow(random.random())
 
-    # End points
-    ax.scatter(x_hat_l[-1, 0], x_hat_l[-1, 1], x_hat_l[-1, 2], marker='x', c='blue', s=20, label='left end point')
-    ax.scatter(x_hat_r[-1, 0], x_hat_r[-1, 1], x_hat_r[-1, 2], marker='x', c='green', s=20, label='right end point')
+        # Plot 3d trajectories
+        ax.plot(x_hat_l[i][:, 0], x_hat_l[i][:, 1], x_hat_l[i][:, 2], label='left arm', c=c_l)
+        ax.plot(x_hat_r[i][:, 0], x_hat_r[i][:, 1], x_hat_r[i][:, 2], label='right arm', c=c_r)
 
-    if ori:
-        l_ori = x_hat_l[:, 3:7]
-        r_ori = x_hat_r[:, 3:7]
-        for t in range(len(l_ori)):
-            R_l = matrix_from_quaternion(l_ori[t])
-            R_r = matrix_from_quaternion(r_ori[t])
-            p_l = x_hat_l[t, :3]
-            p_r = x_hat_r[t, :3]
-            ax = plot_basis(ax=ax, R=R_l, p=p_l, s=0.01)
-            ax = plot_basis(ax=ax, R=R_r, p=p_r, s=0.01)
+        # Starting points
+        ax.scatter(x_hat_l[i][0, 0], x_hat_l[i][0, 1], x_hat_l[i][0, 2], s=20, label='left start point', c=c_l)
+        ax.scatter(x_hat_r[i][0, 0], x_hat_r[i][0, 1], x_hat_r[i][0, 2], s=20, label='right start point', c=c_r)
+
+        # End points
+        ax.scatter(x_hat_l[i][-1, 0], x_hat_l[i][-1, 1], x_hat_l[i][-1, 2], marker='x', s=20, c=c_l,
+                   label='left end point')
+        ax.scatter(x_hat_r[i][-1, 0], x_hat_r[i][-1, 1], x_hat_r[i][-1, 2], marker='x', s=20, c=c_r,
+                   label='right end point')
+
+        if ori:
+            l_ori = x_hat_l[i][:, 3:7]
+            r_ori = x_hat_r[i][:, 3:7]
+            for t in range(len(l_ori)):
+                R_l = matrix_from_quaternion(l_ori[t])
+                R_r = matrix_from_quaternion(r_ori[t])
+                p_l = x_hat_l[i][t, :3]
+                p_r = x_hat_r[i][t, :3]
+                ax = plot_basis(ax=ax, R=R_l, p=p_l, s=0.01)
+                ax = plot_basis(ax=ax, R=R_r, p=p_r, s=0.01)
 
     if save:
         assert save_file_name is not None
@@ -287,8 +300,6 @@ def bi(param, l_data, r_data):
 
 
 if __name__ == '__main__':
-    import rofunc as rf
-
     param = {
         "nbData": 200,  # Number of data points
         "nbVarPos": 7,  # Dimension of position data
