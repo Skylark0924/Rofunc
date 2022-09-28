@@ -105,7 +105,7 @@ def generate_plot(xi, prod, demos_x, demo_idx):
     plt.show()
 
 
-def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False):
+def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, plot_ori=True):
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111, projection='3d', fc='white')
 
@@ -117,25 +117,26 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False):
     plt.legend()
     plt.show()
 
-    t = np.arange(len(xi))
-    plt.figure()
-    plt.subplot(2, 2, 1)
-    plt.plot(t, xi[:, 3], color='r', lw=2, label='generated line')
-    plt.plot(t, demos_x[demo_idx][:, 3], 'k--', lw=2, label='demo line')
-    plt.title('w-t')
+    if plot_ori:
+        t = np.arange(len(xi))
+        plt.figure()
+        plt.subplot(2, 2, 1)
+        plt.plot(t, xi[:, 3], color='r', lw=2, label='generated line')
+        plt.plot(np.arange(len(demos_x[demo_idx][:, 3])), demos_x[demo_idx][:, 3], 'k--', lw=2, label='demo line')
+        plt.title('w-t')
 
-    plt.subplot(2, 2, 2)
-    plt.plot(t, xi[:, 4], color='r', lw=2, label='generated line')
-    plt.plot(t, demos_x[demo_idx][:, 4], 'k--', lw=2, label='demo line')
-    plt.title('x-t')
+        plt.subplot(2, 2, 2)
+        plt.plot(t, xi[:, 4], color='r', lw=2, label='generated line')
+        plt.plot(np.arange(len(demos_x[demo_idx][:, 4])), demos_x[demo_idx][:, 4], 'k--', lw=2, label='demo line')
+        plt.title('x-t')
 
-    plt.subplot(2, 2, 3)
-    plt.plot(t, xi[:, 5], color='r', lw=2, label='generated line')
-    plt.plot(t, demos_x[demo_idx][:, 5], 'k--', lw=2, label='demo line')
-    plt.title('y-t')
+        plt.subplot(2, 2, 3)
+        plt.plot(t, xi[:, 5], color='r', lw=2, label='generated line')
+        plt.plot(np.arange(len(demos_x[demo_idx][:, 5])), demos_x[demo_idx][:, 5], 'k--', lw=2, label='demo line')
+        plt.title('y-t')
 
-    plt.subplot(2, 2, 4)
-    plt.plot(t, xi[:, 6], color='r', lw=2, label='generated line')
-    plt.plot(t, demos_x[demo_idx][:, 6], 'k--', lw=2, label='demo line')
-    plt.title('z-t')
-    plt.show()
+        plt.subplot(2, 2, 4)
+        plt.plot(t, xi[:, 6], color='r', lw=2, label='generated line')
+        plt.plot(np.arange(len(demos_x[demo_idx][:, 6])), demos_x[demo_idx][:, 6], 'k--', lw=2, label='demo line')
+        plt.title('z-t')
+        plt.show()
