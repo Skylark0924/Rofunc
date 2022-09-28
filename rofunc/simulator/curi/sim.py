@@ -41,6 +41,8 @@ def show(args, asset_root=None):
     Returns:
 
     """
+    print('\033[1;32m--------{}--------\033[0m'.format('Show the CURI simulator in the interactive mode'))
+
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
@@ -76,6 +78,8 @@ def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, up
     Returns:
 
     """
+    print('\033[1;32m--------{}--------\033[0m'.format('Execute trajectory with the CURI simulator'))
+
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
@@ -151,6 +155,8 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
     Returns:
 
     """
+    print('\033[1;32m--------{}--------\033[0m'.format('Execute bimanual trajectory with the CURI simulator'))
+
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
