@@ -33,7 +33,7 @@ Thus, have fun in the robotics world!
 
 ### [Documentation](./rofunc/)
 Currently, we provide a simple document; please refer to [here](./rofunc/). A comprehensive one with both English and 
-Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/stable/). 
+Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/). 
 The available functions and plans can be found as follows.
 
 
@@ -78,7 +78,7 @@ The available functions and plans can be found as follows.
 |                                                 | RoboLab                | `robolab.kinematics`    | Forward /inverse kinematics w.r.t URDF file                                   |        |
 | **Simulator**                                   | Franka                 | `franka.sim`            | Execute specific trajectory via single Franka Panda arm in Isaac Gym          | ✅      |
 |                                                 | DualFranka             | `dualfranka.sim`        | Execute specific trajectory via dual Franka Panda arm in Isaac Gym            |        |
-|                                                 | CURI                   | `curi.sim`              | Execute specific trajectory via human-like CURI robot in Isaac Gym            |  ✅      |
+|                                                 | CURI                   | `curi.sim`              | Execute specific trajectory via human-like CURI robot in Isaac Gym            | ✅      |
 |                                                 | Walker                 | `walker.sim`            | Execute specific trajectory via UBTECH Walker robot  in Isaac Gym             |        |
 
 ## Roadmap
