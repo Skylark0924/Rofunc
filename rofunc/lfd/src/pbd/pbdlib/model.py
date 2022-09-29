@@ -80,7 +80,7 @@ class Model(object):
 		elif isinstance(value, np.ndarray):
 			self._reg = value
 		elif isinstance(value, float):
-			print(value)
+			# print(value)
 			self._reg = value ** 2 * np.eye(self.nb_dim)
 		else:
 			raise ValueError('Regularization should be of type float, ndarray or list')

@@ -28,6 +28,8 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
 
 
 def show(args):
+    print('\033[1;32m--------{}--------\033[0m'.format('Show the Franka simulator in the interactive mode'))
+
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
@@ -48,6 +50,8 @@ def show(args):
 
 
 def run_traj(args, traj, attracted_joint="panda_hand"):
+    print('\033[1;32m--------{}--------\033[0m'.format('Execute trajectory with the Franka simulator'))
+
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
 
