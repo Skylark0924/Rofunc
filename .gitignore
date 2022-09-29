@@ -137,3 +137,6 @@ doc/rofunc.aux
 doc/rofunc.blg
 
 doc/rofunc.out
+
+.idea/
+whl/
