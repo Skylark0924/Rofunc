@@ -101,3 +101,6 @@ howpublished = {\url{https://github.com/Skylark0924/Rofunc}},
 commit = {689cb899f4640d3a2f769654b988c3a8a8c2bad5}
 }
 ```
+
+## The Team
+Rofunc is developed and maintained by the CLOVER Lab (Collaborative and Versatile Robot Laboratory), CUHK.
