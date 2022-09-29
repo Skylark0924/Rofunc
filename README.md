@@ -85,3 +85,19 @@ The available functions and plans can be found as follows.
 
 Roadmap is a personal learning experience and also simple guidance about robotics and Learning from Demonstration (LfD) fields.
 
+
+## Cite
+
+If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
+
+```
+@misc{Junjia2022,
+author = {Liu, Junjia},
+title = {Rofunc},
+year = {2022},
+publisher = {GitHub},
+journal = {GitHub repository},
+howpublished = {\url{https://github.com/Skylark0924/Rofunc}},
+commit = {689cb899f4640d3a2f769654b988c3a8a8c2bad5}
+}
+```
