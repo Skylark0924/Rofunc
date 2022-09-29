@@ -10,6 +10,8 @@ Rofunc
 ----------------
 :doc:`overview`
    Show motivation, pipeline and list the available functions of `rofunc` package.
+:doc:`quickstart`
+   A bimanual dough rolling example that takes you through the whole process of robot learning from demonstration.
 :doc:`devices/index`
    How to record, process, visual and export the multimodal demonstration data.
 :doc:`lfd/index`
@@ -33,6 +35,7 @@ Roadmap
    :glob:
 
    overview
+   quickstart
    devices/index
    lfd/index
    planning/index
