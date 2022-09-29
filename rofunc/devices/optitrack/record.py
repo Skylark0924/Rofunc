@@ -2,9 +2,8 @@ import socket
 import re
 import os
 import threading
-import time
 import numpy as np
-import keyboard
+
 
 
 def data_process(data):
@@ -27,11 +26,8 @@ def opti_run(root_dir, exp_name, ip, port):
         client.send("ok".encode("utf-8"))
         raw_pose = np.append(raw_position, raw_orientation)
         opti_data = np.append(opti_data, raw_pose, axis=0)
-
-        # save optitrack data to npy file
-        # if keyboard.read_key() == 's':
         np.save(root_dir + '/' + exp_name + '/' + 'opti_data.npy', opti_data)
-        # break
+
 
 
 def record(root_dir, exp_name, ip, port):
@@ -63,8 +59,6 @@ if __name__ == "__main__":
 
     from datetime import datetime
     exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
-
-    # import rofunc as rf
     record(root_dir, exp_name, ip, port)
     # filename = '/home/skylark/Data/optitrack_record/20220929_134531/opti_data.npy'
     # data = np.load(filename).reshape((-1, 7))
