@@ -10,7 +10,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=['matplotlib', 'pandas', 'tqdm', 'pillow', 'pytransform3d', 'tensorflow', 'numpy==1.21.6',
-                      'nestle', 'omegaconf', 'hydra-core', 'opencv-python', 'keyboard'],
+                      'nestle', 'omegaconf', 'hydra-core', 'opencv-python'],
                       # 'pbdlib @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl',
                       # 'isaacgym @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4-py3-none-any.whl',
                       # 'pyzed @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/pyzed-3.7-cp37-cp37m-linux_x86_64.whl'],
