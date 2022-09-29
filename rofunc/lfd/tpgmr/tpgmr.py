@@ -6,6 +6,8 @@ import pbdlib as pbd
 
 
 def poe_gmr(mu_gmr, sigma_gmr, start_x, end_x, demos_x, demo_idx, horzion=150, plot=False):
+    print('{}'.format('product of expert'))
+
     gmm = pbd.GMM(mu=mu_gmr, sigma=sigma_gmr)
 
     # get transformation for new situation
@@ -35,6 +37,9 @@ def poe_gmr(mu_gmr, sigma_gmr, start_x, end_x, demos_x, demo_idx, horzion=150, p
 
 
 def uni(demos_x, show_demo_idx, start_x, end_x, plot=False):
+    print('\033[1;32m--------{}--------\033[0m'.format(
+        'Learning the trajectory representation from demonstration via TP-GMR.'))
+
     # Learn the time-dependent GMR from demonstration
     demos_dx, demos_xdx, demos_A, demos_b, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm = rf.tpgmm.get_related_matrix(
         demos_x)
@@ -76,71 +81,71 @@ def uni(demos_x, show_demo_idx, start_x, end_x, plot=False):
     return prod, xi
 
 
-def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
-    _, demos_left_xdx, _, _, demos_left_A_xdx, demos_left_b_xdx, demos_left_xdx_f, demos_left_xdx_augm = rf.tpgmm.get_related_matrix(
-        demos_left_x)
-    _, demos_right_xdx, _, _, demos_right_A_xdx, demos_right_b_xdx, demos_right_xdx_f, demos_right_xdx_augm = rf.tpgmm.get_related_matrix(
-        demos_right_x)
-
-    t = np.linspace(0, 50, demos_left_x[0].shape[0])
-    demos_l = [np.hstack([t[:, None], d]) for d in demos_left_xdx_augm]
-    demos_r = [np.hstack([t[:, None], d]) for d in demos_right_xdx_augm]
-
-    model_l = rf.gmr.GMM_learning(demos_l, plot=plot)
-    model_r = rf.gmr.GMM_learning(demos_r, plot=plot)
-    mu_gmr_l, sigma_gmr_l = rf.gmr.estimate(model_l, demos_left_xdx_f, t[:, None], dim_in=slice(0, 1),
-                                            dim_out=slice(1, 4 * len(start_x_l) + 1), plot=plot)
-    mu_gmr_r, sigma_gmr_r = rf.gmr.estimate(model_r, demos_right_xdx_f, t[:, None], dim_in=slice(0, 1),
-                                            dim_out=slice(1, 4 * len(start_x_r) + 1), plot=plot)
-
-    # Generate for new situation
-    prod_l = poe_gmr(mu_gmr_l, sigma_gmr_l, start_x_l, end_x_l, demos_x, show_demo_idx,
-                   horzion=demos_left_xdx_f[show_demo_idx].shape[0], plot=plot)
-    prod_r = poe_gmr(mu_gmr_r, sigma_gmr_r, start_x_r, end_x_r, demos_x, show_demo_idx,
-                   horzion=demos_right_xdx_f[show_demo_idx].shape[0], plot=plot)
-
-    lqr_l = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_left_xdx_f[show_demo_idx].shape[0])
-    lqr_r = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_right_xdx_f[show_demo_idx].shape[0])
-
-    mvn = pbd.MVN()
-    mvn.mu = np.concatenate([i for i in prod_l.mu])
-    mvn._sigma = block_diag(*[i for i in prod_l.sigma])
-
-    lqr_l.mvn_xi = mvn
-    lqr_l.mvn_u = -4
-    start_xdx_l = np.zeros(len(start_x_l) * 2)
-    start_xdx_l[:len(start_x_l)] = start_x_l
-    lqr_l.x0 = start_xdx_l
-
-    xi_l = lqr_l.seq_xi
-    end_xdx_l = np.zeros(len(end_x_l) * 2)
-    end_xdx_l[:len(start_x_l)] = end_x_l
-    xi_l = np.append(xi_l, end_xdx_l.reshape((1, -1)), axis=0)
-
-    mvn = pbd.MVN()
-    mvn.mu = np.concatenate([i for i in prod_r.mu])
-    mvn._sigma = block_diag(*[i for i in prod_r.sigma])
-
-    lqr_r.mvn_xi = mvn
-    lqr_r.mvn_u = -4
-    start_xdx_r = np.zeros(len(start_x_r) * 2)
-    start_xdx_r[:len(start_x_r)] = start_x_r
-    lqr_r.x0 = start_xdx_r
-
-    xi_r = lqr_r.seq_xi
-    end_xdx_r = np.zeros(len(end_x_r) * 2)
-    end_xdx_r[:len(start_x_r)] = end_x_r
-    xi_r = np.append(xi_r, end_xdx_r.reshape((1, -1)), axis=0)
-
-    if plot:
-        if len(demos_x[0][0]) == 2:
-            rf.tpgmm.generate_plot(xi, prod, demos_x, show_demo_idx)
-        elif len(demos_x[0][0]) > 2:
-            rf.tpgmm.generate_plot_3d(xi_l, prod_l, demos_left_x, show_demo_idx, scale=0.001)
-            rf.tpgmm.generate_plot_3d(xi_r, prod_r, demos_right_x, show_demo_idx, scale=0.001)
-        else:
-            raise Exception('Dimension is less than 2, cannot plot')
-    return model_l, model_r, xi_l, xi_r
+# def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
+#     _, demos_left_xdx, _, _, demos_left_A_xdx, demos_left_b_xdx, demos_left_xdx_f, demos_left_xdx_augm = rf.tpgmm.get_related_matrix(
+#         demos_left_x)
+#     _, demos_right_xdx, _, _, demos_right_A_xdx, demos_right_b_xdx, demos_right_xdx_f, demos_right_xdx_augm = rf.tpgmm.get_related_matrix(
+#         demos_right_x)
+#
+#     t = np.linspace(0, 50, demos_left_x[0].shape[0])
+#     demos_l = [np.hstack([t[:, None], d]) for d in demos_left_xdx_augm]
+#     demos_r = [np.hstack([t[:, None], d]) for d in demos_right_xdx_augm]
+#
+#     model_l = rf.gmr.GMM_learning(demos_l, plot=plot)
+#     model_r = rf.gmr.GMM_learning(demos_r, plot=plot)
+#     mu_gmr_l, sigma_gmr_l = rf.gmr.estimate(model_l, demos_left_xdx_f, t[:, None], dim_in=slice(0, 1),
+#                                             dim_out=slice(1, 4 * len(start_x_l) + 1), plot=plot)
+#     mu_gmr_r, sigma_gmr_r = rf.gmr.estimate(model_r, demos_right_xdx_f, t[:, None], dim_in=slice(0, 1),
+#                                             dim_out=slice(1, 4 * len(start_x_r) + 1), plot=plot)
+#
+#     # Generate for new situation
+#     prod_l = poe_gmr(mu_gmr_l, sigma_gmr_l, start_x_l, end_x_l, demos_x, show_demo_idx,
+#                    horzion=demos_left_xdx_f[show_demo_idx].shape[0], plot=plot)
+#     prod_r = poe_gmr(mu_gmr_r, sigma_gmr_r, start_x_r, end_x_r, demos_x, show_demo_idx,
+#                    horzion=demos_right_xdx_f[show_demo_idx].shape[0], plot=plot)
+#
+#     lqr_l = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_left_xdx_f[show_demo_idx].shape[0])
+#     lqr_r = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_right_xdx_f[show_demo_idx].shape[0])
+#
+#     mvn = pbd.MVN()
+#     mvn.mu = np.concatenate([i for i in prod_l.mu])
+#     mvn._sigma = block_diag(*[i for i in prod_l.sigma])
+#
+#     lqr_l.mvn_xi = mvn
+#     lqr_l.mvn_u = -4
+#     start_xdx_l = np.zeros(len(start_x_l) * 2)
+#     start_xdx_l[:len(start_x_l)] = start_x_l
+#     lqr_l.x0 = start_xdx_l
+#
+#     xi_l = lqr_l.seq_xi
+#     end_xdx_l = np.zeros(len(end_x_l) * 2)
+#     end_xdx_l[:len(start_x_l)] = end_x_l
+#     xi_l = np.append(xi_l, end_xdx_l.reshape((1, -1)), axis=0)
+#
+#     mvn = pbd.MVN()
+#     mvn.mu = np.concatenate([i for i in prod_r.mu])
+#     mvn._sigma = block_diag(*[i for i in prod_r.sigma])
+#
+#     lqr_r.mvn_xi = mvn
+#     lqr_r.mvn_u = -4
+#     start_xdx_r = np.zeros(len(start_x_r) * 2)
+#     start_xdx_r[:len(start_x_r)] = start_x_r
+#     lqr_r.x0 = start_xdx_r
+#
+#     xi_r = lqr_r.seq_xi
+#     end_xdx_r = np.zeros(len(end_x_r) * 2)
+#     end_xdx_r[:len(start_x_r)] = end_x_r
+#     xi_r = np.append(xi_r, end_xdx_r.reshape((1, -1)), axis=0)
+#
+#     if plot:
+#         if len(demos_x[0][0]) == 2:
+#             rf.tpgmm.generate_plot(xi, prod, demos_x, show_demo_idx)
+#         elif len(demos_x[0][0]) > 2:
+#             rf.tpgmm.generate_plot_3d(xi_l, prod_l, demos_left_x, show_demo_idx, scale=0.001)
+#             rf.tpgmm.generate_plot_3d(xi_r, prod_r, demos_right_x, show_demo_idx, scale=0.001)
+#         else:
+#             raise Exception('Dimension is less than 2, cannot plot')
+#     return model_l, model_r, xi_l, xi_r
 
 
 if __name__ == '__main__':
@@ -153,12 +158,12 @@ if __name__ == '__main__':
     # model, rep = uni(demos_x, 2, start_pose, end_pose, plot=True)
 
     # Uni_3d
-    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
+    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-057/LeftHand.npy')
     raw_demo = np.expand_dims(raw_demo, axis=0)
-    demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
-    show_demo_idx = 2
-    # demos_x = np.vstack((raw_demo[:, 367:427, :], raw_demo[:, 420:480, :], raw_demo[:, 475:535, :]))
-    # show_demo_idx = 1
+    # demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+    # show_demo_idx = 2
+    demos_x = np.vstack((raw_demo[:, 367:427, :], raw_demo[:, 420:480, :], raw_demo[:, 475:535, :]))
+    show_demo_idx = 1
     start_pose = demos_x[show_demo_idx][-1]
     end_pose = demos_x[show_demo_idx][0]
     model, rep = uni(demos_x, show_demo_idx, start_pose, end_pose, plot=True)

@@ -32,13 +32,15 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
     ax.set_title('pos - coord. %d' % 1)
     for p in demos_xdx_f:
         ax.plot(p[:, 0, 0], p[:, 0, 1], p[:, 0, 2])
-    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i for i in range(3)], color='steelblue', scale=scale, alpha=0.1)
+    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i for i in range(3)], color='steelblue', scale=scale,
+                         alpha=0.1)
 
     ax = fig.add_subplot(1, 2, 2, projection='3d', fc='white')
     ax.set_title('pos - coord. %d' % 2)
     for p in demos_xdx_f:
         ax.plot(p[:, 1, 0], p[:, 1, 1], p[:, 1, 2])
-    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i+14 for i in range(3)], color='orangered', scale=scale, alpha=0.1)
+    rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i + 14 for i in range(3)], color='orangered', scale=scale,
+                         alpha=0.1)
 
     plt.tight_layout()
     plt.show()
@@ -105,7 +107,7 @@ def generate_plot(xi, prod, demos_x, demo_idx):
     plt.show()
 
 
-def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False):
+def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, plot_ori=True):
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111, projection='3d', fc='white')
 
@@ -117,25 +119,26 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False):
     plt.legend()
     plt.show()
 
-    t = np.arange(len(xi))
-    plt.figure()
-    plt.subplot(2, 2, 1)
-    plt.plot(t, xi[:, 3], color='r', lw=2, label='generated line')
-    plt.plot(t, demos_x[demo_idx][:, 3], 'k--', lw=2, label='demo line')
-    plt.title('w-t')
+    if plot_ori:
+        t = np.arange(len(xi))
+        plt.figure()
+        plt.subplot(2, 2, 1)
+        plt.plot(t, xi[:, 3], color='r', lw=2, label='generated line')
+        plt.plot(np.arange(len(demos_x[demo_idx][:, 3])), demos_x[demo_idx][:, 3], 'k--', lw=2, label='demo line')
+        plt.title('w-t')
 
-    plt.subplot(2, 2, 2)
-    plt.plot(t, xi[:, 4], color='r', lw=2, label='generated line')
-    plt.plot(t, demos_x[demo_idx][:, 4], 'k--', lw=2, label='demo line')
-    plt.title('x-t')
+        plt.subplot(2, 2, 2)
+        plt.plot(t, xi[:, 4], color='r', lw=2, label='generated line')
+        plt.plot(np.arange(len(demos_x[demo_idx][:, 4])), demos_x[demo_idx][:, 4], 'k--', lw=2, label='demo line')
+        plt.title('x-t')
 
-    plt.subplot(2, 2, 3)
-    plt.plot(t, xi[:, 5], color='r', lw=2, label='generated line')
-    plt.plot(t, demos_x[demo_idx][:, 5], 'k--', lw=2, label='demo line')
-    plt.title('y-t')
+        plt.subplot(2, 2, 3)
+        plt.plot(t, xi[:, 5], color='r', lw=2, label='generated line')
+        plt.plot(np.arange(len(demos_x[demo_idx][:, 5])), demos_x[demo_idx][:, 5], 'k--', lw=2, label='demo line')
+        plt.title('y-t')
 
-    plt.subplot(2, 2, 4)
-    plt.plot(t, xi[:, 6], color='r', lw=2, label='generated line')
-    plt.plot(t, demos_x[demo_idx][:, 6], 'k--', lw=2, label='demo line')
-    plt.title('z-t')
-    plt.show()
+        plt.subplot(2, 2, 4)
+        plt.plot(t, xi[:, 6], color='r', lw=2, label='generated line')
+        plt.plot(np.arange(len(demos_x[demo_idx][:, 6])), demos_x[demo_idx][:, 6], 'k--', lw=2, label='demo line')
+        plt.title('z-t')
+        plt.show()
