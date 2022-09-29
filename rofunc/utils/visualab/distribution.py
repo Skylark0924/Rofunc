@@ -105,7 +105,7 @@ def gmm_plot2d(Mu, Sigma, nbStates, color=[1, 0, 0], alpha=0.5, linewidth=1, mar
     return l
 
 
-def gmm_plot3d(mu, covariance, color, alpha=0.5, ax=None, scale=0.1):
+def gmm_plot3d(mu, covariance, color, alpha=0.5, ax=None, scale=0.1, max_gaussian=10):
     """
     plots points and their corresponding gmm model in 3D
     Input:
@@ -113,10 +113,11 @@ def gmm_plot3d(mu, covariance, color, alpha=0.5, ax=None, scale=0.1):
         w: n_gaussians, gmm weights
         mu: 3 X n_gaussians, gmm means
         stdev: 3 X n_gaussians, gmm standard deviation (assuming diagonal covariance matrix)
+        max_gaussian: the maximum number of Gaussian to show
     Output:
         None
     """
-    n_gaussians = mu.shape[0]
+    n_gaussian = mu.shape[0]
     # Visualize data
     if ax is None:
         fig = plt.figure(figsize=(8, 8))
@@ -130,7 +131,15 @@ def gmm_plot3d(mu, covariance, color, alpha=0.5, ax=None, scale=0.1):
         ax.set_zlabel('Z')
         ax.view_init(35.246, 45)
     plt.set_cmap('Set1')
-    for i in tqdm(range(0, n_gaussians, 10)):
+
+    if n_gaussian >= max_gaussian:
+        index_to_plot = np.linspace(0, n_gaussian - 1, num=max_gaussian, dtype=np.int8)
+        disable_flag = False
+    else:
+        index_to_plot = np.arange(0, n_gaussian)
+        disable_flag = True
+
+    for i in tqdm(index_to_plot, disable=disable_flag):
         # Plot the ellipsoid
         R = np.real(sp.linalg.sqrtm(scale * covariance[i, :]))
         rf.visualab.sphere_plot3d(mu[i, :], R, color=color, alpha=alpha, ax=ax)
