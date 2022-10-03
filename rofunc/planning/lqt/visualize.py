@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import rofunc as rf
-from pytransform3d.rotations import matrix_from_quaternion, plot_basis
 
 
 def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
