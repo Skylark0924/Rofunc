@@ -60,7 +60,7 @@ def traj_plot(data_lst, title=None, mode=None, ori=False, g_ax=None):
         title:
         mode:
         ori:
-        ax:
+        g_ax:
 
     Returns:
 
