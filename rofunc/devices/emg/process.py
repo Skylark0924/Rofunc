@@ -79,7 +79,7 @@ if __name__ == '__main__':
         # c_h[i] = a * (1 - math.exp(- b * (MVC_1[i] + MVC_2[i]))) / (1 + math.exp(- b * (MVC_1[i] + MVC_2[i])))
     c_h = np.array(c_h)
     plt.plot(c_h)
-
+    plt.show()
     # Visualise the processing
     nk.emg_plot(signals_1, sampling_rate=int(1000 / n))
     plt.show()
