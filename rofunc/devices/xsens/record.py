@@ -1,6 +1,8 @@
 import numpy as np
 import socket
 import struct
+import os
+import threading
 
 
 def byte_to_str(data, n):
@@ -68,8 +70,8 @@ class Header:
             )
             return False
         if (
-            self.item_counter
-            != self.body_segments_num + self.props_num + self.finger_segments_num
+                self.item_counter
+                != self.body_segments_num + self.props_num + self.finger_segments_num
         ):
             print(
                 "XSensInterface: Segments number in total does not match item counter"
@@ -109,7 +111,7 @@ class Datagram(object):
         return self.header.is_object
 
     def decode_to_pose_array_msg(
-        self, ref_frame, ref_frame_id=None, scaling_factor=1.0
+            self, ref_frame, ref_frame_id=None, scaling_factor=1.0
     ):
         """
         Decode the bytes in the streaming data to pose array message.
@@ -127,8 +129,8 @@ class Datagram(object):
 
         for i in range(self.header.item_num):
             item = self.payload[
-                i * self.header.item_size: (i + 1) * self.header.item_size
-            ]
+                   i * self.header.item_size: (i + 1) * self.header.item_size
+                   ]
             pose_msg = self._decode_to_pose_msg(item)
             if pose_msg is None:
                 return None
@@ -164,13 +166,13 @@ class Datagram(object):
 
 class XsensInterface(object):
     def __init__(
-        self,
-        udp_ip,
-        udp_port,
-        ref_frame,
-        scaling=1.0,
-        buffer_size=4096,
-        **kwargs  # DO NOT REMOVE
+            self,
+            udp_ip,
+            udp_port,
+            ref_frame,
+            scaling=1.0,
+            buffer_size=4096,
+            **kwargs  # DO NOT REMOVE
     ):
         super(XsensInterface, self).__init__()
 
@@ -239,11 +241,27 @@ class XsensInterface(object):
             print('No data received, please check Xsens.')
             return None
 
+    def save_file_thread(self, root_dir: str, exp_name: str) -> None:
+        """
+        save xsens motion data to the file
+        Args:
+            root_dir: root dictionary
+            exp_name: dictionary saving the npy file, named according to time
+        Returns:
+            None
+        """
+        while True:
+            data = self.get_datagram()
+            np.save(root_dir + '/' + exp_name + '/' + 'xsens_data.npy', data)
+
     @staticmethod
     def _get_header(data):
-        """Get the header data from the received MVN Awinda datagram.
-        :param data: Tuple From self._sock.recvfrom(self._buffer_size)
-        :return: Header
+        """
+        Get the header data from the received MVN Awinda datagram.
+        Args:
+            data: Tuple From self._sock.recvfrom(self._buffer_size)
+        Returns:
+            Header
         """
         if len(data) < 24:
             print(
@@ -287,4 +305,35 @@ class XsensInterface(object):
             return None
 
 
+def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str) -> None:
+    """
+    Args:
+        root_dir: root directory
+        exp_name: npy file location
+        ip: ip address of server computer
+        port: port number of optitrack server
+        ref_frame: reference frame
+    Returns: None
+    """
+    if os.path.exists('{}/{}'.format(root_dir, exp_name)):
+        raise Exception('There are already some files in {}, please rename the exp_name.'.format(
+            '{}/{}'.format(root_dir, exp_name)))
+    else:
+        os.mkdir('{}/{}'.format(root_dir, exp_name))
+        print('Recording folder: {}/{}'.format(root_dir, exp_name))
+        interface = XsensInterface(ip, port, ref_frame=ref_frame)
+        opti_thread = threading.Thread(target=interface.save_file_thread, args=(root_dir, exp_name))
+        opti_thread.start()
+        opti_thread.join()
+        print('Optitrack record finished')
 
+
+if __name__ == "__main__":
+    root_dir = '/home/skylark/Data/optitrack_record'
+    ip = '192.168.13.118'
+    port = 6688
+
+    from datetime import datetime
+
+    exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
+    record(root_dir, exp_name, ip, port)
