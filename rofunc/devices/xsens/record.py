@@ -234,15 +234,10 @@ class XsensInterface(object):
             pose_array_msg = datagram.decode_to_pose_array_msg(
                 self.ref_frame, self.ref_frame_id
             )
-            if pose_array_msg is None:
-                return False
-            if datagram.is_object:
-                self.object_poses = pose_array_msg
-            else:
-                self.body_segments_poses = pose_array_msg
-            return True
+            return pose_array_msg
         else:
-            return False
+            print('No data received, please check Xsens.')
+            return None
 
     @staticmethod
     def _get_header(data):
@@ -290,3 +285,6 @@ class XsensInterface(object):
             return Datagram(header, data[24:])
         else:
             return None
+
+
+
