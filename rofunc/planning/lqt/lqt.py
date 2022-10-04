@@ -71,7 +71,7 @@ def set_dynamical_system(param: Dict):
     A = np.kron(A1d, np.identity(param["nbVarPos"], dtype=np.float32))
     B = np.kron(B1d, np.identity(param["nbVarPos"], dtype=np.float32))
 
-    nb_var = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
+    nb_var = param["nb_var"]  # Dimension of state vector
 
     # Build Sx and Su transfer matrices
     Su = np.zeros((nb_var * param["nbData"], param["nbVarPos"] * (param["nbData"] - 1)))
