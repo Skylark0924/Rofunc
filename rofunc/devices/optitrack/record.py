@@ -3,18 +3,34 @@ import re
 import os
 import threading
 import numpy as np
+from typing import Tuple, List
 
 
+def data_process(data: str) -> Tuple[List, List]:
+    """
+    Args:
+        data: string received from optitrack win server
 
-def data_process(data):
+    Returns:
+        position, orientation: position and orientation of the rigidbody
+    """
     position = re.findall(r"Position\s*:\s*(.*)", data)[0]
     orientation = re.findall(r"Orientation\s*:\s*(.*)", data)[0]
     return eval(position), eval(orientation)
 
 
-def opti_run(root_dir, exp_name, ip, port):
+def opti_run(root_dir: str, exp_name: str, ip: str, port: int) -> None:
+    """
+    Args:
+        root_dir: root dictionary
+        exp_name: dictionary saving the npy file, named according to time
+        ip: ip address
+        port: port
+
+    Returns:
+        None
+    """
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # client.settimeout(20.0)
     client.connect((ip, port))
     print("Connected to socket: {}:{}".format(ip, port))
     # receive optitrack data
@@ -27,7 +43,6 @@ def opti_run(root_dir, exp_name, ip, port):
         raw_pose = np.append(raw_position, raw_orientation)
         opti_data = np.append(opti_data, raw_pose, axis=0)
         np.save(root_dir + '/' + exp_name + '/' + 'opti_data.npy', opti_data)
-
 
 
 def record(root_dir, exp_name, ip, port):
@@ -58,9 +73,9 @@ if __name__ == "__main__":
     port = 6688
 
     from datetime import datetime
+
     exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
     record(root_dir, exp_name, ip, port)
     # filename = '/home/skylark/Data/optitrack_record/20220929_134531/opti_data.npy'
     # data = np.load(filename).reshape((-1, 7))
     # print(data[7:])
-
