@@ -45,7 +45,7 @@ def opti_run(root_dir: str, exp_name: str, ip: str, port: int) -> None:
         np.save(root_dir + '/' + exp_name + '/' + 'opti_data.npy', opti_data)
 
 
-def record(root_dir, exp_name, ip, port):
+def record(root_dir: str, exp_name: str, ip: str, port: int) -> None:
     """
     Args:
         root_dir: root directory
