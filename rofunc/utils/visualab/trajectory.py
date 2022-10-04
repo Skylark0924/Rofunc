@@ -1,4 +1,5 @@
 import random
+from typing import List
 
 import matplotlib.pyplot as plt
 from matplotlib.axes._axes import _log as matplotlib_axes_logger
@@ -8,14 +9,14 @@ from pytransform3d.rotations import matrix_from_quaternion, plot_basis
 matplotlib_axes_logger.setLevel('ERROR')
 
 
-def traj_plot2d(data_lst, title=None):
+def traj_plot2d(data_lst: List, title: str = None):
     plt.figure()
     for data in data_lst:
         plt.plot(data[:, 0], data[:, 1])
     plt.show()
 
 
-def traj_plot3d(data_lst, title=None, g_ax=None, ori=False):
+def traj_plot3d(data_lst: List, title: str = None, g_ax=None, ori: bool = False):
     if g_ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d', fc='white')
@@ -52,7 +53,7 @@ def traj_plot3d(data_lst, title=None, g_ax=None, ori=False):
         plt.show()
 
 
-def traj_plot(data_lst, title=None, mode=None, ori=False, g_ax=None):
+def traj_plot(data_lst: List, title: str = None, mode: str = None, ori: bool = False, g_ax=None):
     """
 
     Args:
@@ -67,7 +68,6 @@ def traj_plot(data_lst, title=None, mode=None, ori=False, g_ax=None):
     """
     if mode is None:
         mode = '2d' if len(data_lst[0][0]) == 2 else '3d'
-
     if mode == '2d':
         traj_plot2d(data_lst, title)
     elif mode == '3d':
