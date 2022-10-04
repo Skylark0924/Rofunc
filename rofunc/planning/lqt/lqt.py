@@ -98,7 +98,7 @@ def get_u_x(param: Dict, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray,
 
 
 def uni(param: Dict, data: np.ndarray):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT.'))
+    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
 
     start_pose = np.zeros((14,), dtype=np.float32)
     start_pose[:7] = data[0]
@@ -114,7 +114,7 @@ def uni(param: Dict, data: np.ndarray):
 
 
 def uni_hierarchical(param: Dict, data: np.ndarray, interval: int = 3):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically.'))
+    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
 
     start_pose = np.zeros((14,), dtype=np.float32)
     start_pose[:7] = data[0, :7]
@@ -135,7 +135,7 @@ def uni_hierarchical(param: Dict, data: np.ndarray, interval: int = 3):
 
 
 def bi(param, l_data, r_data):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT.'))
+    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
 
     l_start_pose = np.zeros((14,), dtype=np.float32)
     r_start_pose = np.zeros((14,), dtype=np.float32)
