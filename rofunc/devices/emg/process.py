@@ -55,40 +55,83 @@ if __name__ == '__main__':
     n = 4
     FRAME_SIZE = 64
     HOP_LENGTH = 32
+    SAMPING_RATE = 1000
     # Generate 10 seconds of EMG signal (recorded at 250 samples / second)
-    # emg_1 = nk.emg_simulate(duration=10, sampling_rate=1000, burst_number=3)
-    emg_1 = np.load('data_sensor_4_time_30.npy')
-    # emg_2 = nk.emg_simulate(duration=10, sampling_rate=1000, burst_number=0)
-    plt.plot(emg_1)
-    plt.show()
+    emg_1 = nk.emg_simulate(duration=10, sampling_rate=SAMPING_RATE, burst_number=3)
+    # emg_1 = np.load('data_sensor_4_time_30.npy')
+    emg_2 = nk.emg_simulate(duration=10, sampling_rate=SAMPING_RATE, burst_number=2)
 
     emg_filter_1 = filtering(emg_1, n)
-    # emg_filter_2 = filtering(emg_2, n)
+    emg_filter_2 = filtering(emg_2, n)
 
-    EMG_clean_1, MVC_1, signals_1 = processing(emg_filter_1, int(1000 / n))
-    # EMG_clean_2, MVC_2, signals_2 = processing(emg_filter_2, int(1000 / n))
-    plt.plot(EMG_clean_1)
+    EMG_clean_1, MVC_1, signals_1 = processing(emg_filter_1, int(SAMPING_RATE / n))
+    EMG_clean_2, MVC_2, signals_2 = processing(emg_filter_2, int(SAMPING_RATE / n))
+
+    fig, (ax0, ax1) = plt.subplots(nrows=2, ncols=1, sharex=True)
+    ax1.set_xlabel("Time (seconds)", fontweight="bold", fontdict={'family': 'Times New Roman', 'size': 20}, fontsize=12)
+    fig.suptitle("Raw and Clean EMG Signals", fontweight="bold", fontdict={'family': 'Times New Roman', 'size': 20},
+                 fontsize=16)
+    plt.subplots_adjust(hspace=0.2)
+    x_axis = np.linspace(0, emg_filter_1.shape[0] / int(SAMPING_RATE / n), emg_filter_1.shape[0])
+    # Plot cleaned and raw EMG.
+    legend_font = {"family": "Times New Roman"}
+    ax0.set_title("Sensor_1", fontdict={'family': 'Times New Roman', 'size': 20}, fontsize=12)
+    ax0.plot(x_axis, emg_filter_1, color="#B0BEC5", label="Raw", zorder=1)
+    ax0.plot(
+        x_axis, EMG_clean_1, color="#FFC107", label="Cleaned", zorder=1, linewidth=1.5
+    )
+    ax0.legend(loc="upper right", frameon=True, prop=legend_font)
+
+    ax1.set_title("Sensor_2", fontdict={'family': 'Times New Roman', 'size': 20}, fontsize=12)
+    ax1.plot(x_axis, emg_filter_2, color="#B0BEC5", label="Raw", zorder=1)
+    ax1.plot(
+        x_axis, EMG_clean_2, color="#FFC107", label="Cleaned", zorder=1, linewidth=1.5
+    )
+    ax1.legend(loc="upper right", frameon=True, prop=legend_font)
     plt.show()
 
     EMG_abs_1 = absolutevalue(EMG_clean_1)
-    # EMG_abs_2 = absolutevalue(EMG_clean_2)
-    plt.plot(EMG_abs_1)
-    plt.show()
+    EMG_abs_2 = absolutevalue(EMG_clean_2)
 
     # '''Calculate the root mean square (RMS) of the EMG signals'''
     # EMG_rms_1 = lib.feature.rms(EMG_abs_1, frame_length=FRAME_SIZE, hop_length=HOP_LENGTH)[0]
     # EMG_rms_2 = lib.feature.rms(EMG_abs_2, frame_length=FRAME_SIZE, hop_length=HOP_LENGTH)[0]
 
     A_1 = activationlevel(MVC_1, 0.35)
-    # A_2 = activationlevel(MVC_2, 0.35)
+    A_2 = activationlevel(MVC_2, 0.35)
+    # Plot absolute value and MVC of EMG.
+    fig, (ax0, ax1) = plt.subplots(nrows=2, ncols=1, sharex=True)
+    ax1.set_xlabel("Time (seconds)", fontweight="bold", fontdict={'family': 'Times New Roman', 'size': 20}, fontsize=12)
+    fig.suptitle("Absolute Value and MVC of EMG signals", fontweight="bold",
+                 fontdict={'family': 'Times New Roman', 'size': 20}, fontsize=16)
+    plt.subplots_adjust(hspace=0.2)
+    x_axis = np.linspace(0, EMG_abs_1.shape[0] / int(SAMPING_RATE / n), EMG_abs_1.shape[0])
+    # Plot cleaned and raw EMG.
+    ax0.set_title("Sensor_1", fontdict={'family': 'Times New Roman', 'size': 20}, fontsize=12)
+    ax0.plot(x_axis, EMG_abs_1, color="#B0BEC5", label="ABS", zorder=1)
+    ax2 = ax0.twinx()
+    ax2.plot(
+        x_axis, MVC_1, color="#FA6839", label="MVC", linewidth=1.5
+    )
+    ax0.legend(loc="upper left", frameon=True, prop=legend_font)
+    ax2.legend(loc="upper right", frameon=True, prop=legend_font)
+
+    ax1.set_title("Sensor_2", fontdict={'family': 'Times New Roman', 'size': 20}, fontsize=12)
+    ax1.plot(x_axis, EMG_abs_2, color="#B0BEC5", label="ABS", zorder=1)
+    ax3 = ax1.twinx()
+    ax3.plot(
+        x_axis, MVC_2, color="#FA6839", label="MVC", linewidth=1.5
+    )
+    ax1.legend(loc="upper left", frameon=True, prop=legend_font)
+    ax3.legend(loc="upper right", frameon=True, prop=legend_font)
+    plt.show()
 
     # c_h = [0] * len(A_1)
     # for i in range(len(A_1)):
     #     c_h[i] = a * (1 - math.exp(- b * (A_1[i] + A_2[i]))) / (1 + math.exp(- b * (A_1[i] + A_2[i])))
     #     # c_h[i] = a * (1 - math.exp(- b * (MVC_1[i] + MVC_2[i]))) / (1 + math.exp(- b * (MVC_1[i] + MVC_2[i])))
     # c_h = np.array(c_h)
-    plt.plot(MVC_1)
-    plt.show()
+
     # Visualise the processing
     # nk.emg_plot(signals_1, sampling_rate=int(1000 / n))
     # plt.show()
