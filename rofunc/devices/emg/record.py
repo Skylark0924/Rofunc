@@ -1,13 +1,16 @@
-from src import pytrigno
 import argparse
+
 import numpy as np
-import os.path
+
+from src import pytrigno
+
+
 def record(host, n, t):
     dev = pytrigno.TrignoEMG(channel_range=(0, 0), samples_per_read=1000,
                              host=host)
 
     # test n-channel
-    dev.set_channel_range((0, n-1))
+    dev.set_channel_range((0, n - 1))
     dev.start()
 
     data_sensor_1 = []
@@ -17,7 +20,7 @@ def record(host, n, t):
     data_sensor_5 = []
     data_sensor_6 = []
     for i in range(int(t)):
-    # while True:
+        # while True:
         data = dev.read() * 1e6
         print(data)
         assert data.shape == (n, 1000)
@@ -33,9 +36,10 @@ def record(host, n, t):
         data_sensor_4.append(data_4)
         data_sensor_5.append(data_5)
         data_sensor_6.append(data_6)
-    print(n,'-channel achieved')
+    print(n, '-channel achieved')
     dev.stop()
     return data_sensor_1, data_sensor_2, data_sensor_3, data_sensor_4, data_sensor_5, data_sensor_6
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
