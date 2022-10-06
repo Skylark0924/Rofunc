@@ -54,32 +54,39 @@ if __name__ == '__main__':
     FRAME_SIZE = 64
     HOP_LENGTH = 32
     # Generate 10 seconds of EMG signal (recorded at 250 samples / second)
-    emg_1 = nk.emg_simulate(duration=10, sampling_rate=1000, burst_number=3)
-    emg_2 = nk.emg_simulate(duration=10, sampling_rate=1000, burst_number=0)
+    # emg_1 = nk.emg_simulate(duration=10, sampling_rate=1000, burst_number=3)
+    emg_1 = np.load('data_sensor_4_time_30.npy')
+    # emg_2 = nk.emg_simulate(duration=10, sampling_rate=1000, burst_number=0)
+    plt.plot(emg_1)
+    plt.show()
 
     emg_filter_1 = filtering(emg_1, n)
-    emg_filter_2 = filtering(emg_2, n)
+    # emg_filter_2 = filtering(emg_2, n)
 
     EMG_clean_1, MVC_1, signals_1 = processing(emg_filter_1, int(1000 / n))
-    EMG_clean_2, MVC_2, signals_2 = processing(emg_filter_2, int(1000 / n))
+    # EMG_clean_2, MVC_2, signals_2 = processing(emg_filter_2, int(1000 / n))
+    plt.plot(EMG_clean_1)
+    plt.show()
 
     EMG_abs_1 = absolutevalue(EMG_clean_1)
-    EMG_abs_2 = absolutevalue(EMG_clean_2)
+    # EMG_abs_2 = absolutevalue(EMG_clean_2)
+    plt.plot(EMG_abs_1)
+    plt.show()
 
-    '''Calculate the root mean square (RMS) of the EMG signals'''
-    EMG_rms_1 = lib.feature.rms(EMG_abs_1, frame_length=FRAME_SIZE, hop_length=HOP_LENGTH)[0]
-    EMG_rms_2 = lib.feature.rms(EMG_abs_2, frame_length=FRAME_SIZE, hop_length=HOP_LENGTH)[0]
+    # '''Calculate the root mean square (RMS) of the EMG signals'''
+    # EMG_rms_1 = lib.feature.rms(EMG_abs_1, frame_length=FRAME_SIZE, hop_length=HOP_LENGTH)[0]
+    # EMG_rms_2 = lib.feature.rms(EMG_abs_2, frame_length=FRAME_SIZE, hop_length=HOP_LENGTH)[0]
 
     A_1 = activationlevel(MVC_1, 0.35)
-    A_2 = activationlevel(MVC_2, 0.35)
+    # A_2 = activationlevel(MVC_2, 0.35)
 
-    c_h = [0] * len(A_1)
-    for i in range(len(A_1)):
-        c_h[i] = a * (1 - math.exp(- b * (A_1[i] + A_2[i]))) / (1 + math.exp(- b * (A_1[i] + A_2[i])))
-        # c_h[i] = a * (1 - math.exp(- b * (MVC_1[i] + MVC_2[i]))) / (1 + math.exp(- b * (MVC_1[i] + MVC_2[i])))
-    c_h = np.array(c_h)
-    plt.plot(c_h)
+    # c_h = [0] * len(A_1)
+    # for i in range(len(A_1)):
+    #     c_h[i] = a * (1 - math.exp(- b * (A_1[i] + A_2[i]))) / (1 + math.exp(- b * (A_1[i] + A_2[i])))
+    #     # c_h[i] = a * (1 - math.exp(- b * (MVC_1[i] + MVC_2[i]))) / (1 + math.exp(- b * (MVC_1[i] + MVC_2[i])))
+    # c_h = np.array(c_h)
+    plt.plot(MVC_1)
     plt.show()
     # Visualise the processing
-    nk.emg_plot(signals_1, sampling_rate=int(1000 / n))
-    plt.show()
+    # nk.emg_plot(signals_1, sampling_rate=int(1000 / n))
+    # plt.show()
