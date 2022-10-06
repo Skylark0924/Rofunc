@@ -1,4 +1,4 @@
-Robot simulator
+Tools
 =================================
 
 .. toctree::
