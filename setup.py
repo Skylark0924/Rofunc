@@ -17,7 +17,7 @@ setup(
                       # 'pbdlib @ file:///home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/whl/pbdlib-0.1-py3-none-any.whl',
                       # 'isaacgym @ file:///home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/whl/isaacgym-1.0rc4-py3-none-any.whl',
                       # 'pyzed @ file:///home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/whl/pyzed-3.7-cp37-cp37m-linux_x86_64.whl'],
-    python_requires=">=3.6,<=3.8",
+    python_requires=">=3.6,<=3.9",
     keywords=['robotics', 'learning from demonstration'],
     license='MIT',
     entry_points={
