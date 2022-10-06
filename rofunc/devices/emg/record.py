@@ -54,7 +54,12 @@ if __name__ == '__main__':
     n = 6
     t = 30
     data_sensor_1, data_sensor_2, data_sensor_3, data_sensor_4, data_sensor_5, data_sensor_6 = record(args.host, n, t)
+    data_sensor_1 = np.reshape(np.array(data_sensor_1), -1)
+    data_sensor_2 = np.reshape(np.array(data_sensor_2), -1)
+    data_sensor_3 = np.reshape(np.array(data_sensor_3), -1)
     data_sensor_4 = np.reshape(np.array(data_sensor_4), -1)
+    data_sensor_5 = np.reshape(np.array(data_sensor_5), -1)
+    data_sensor_6 = np.reshape(np.array(data_sensor_6), -1)
     # print(data_sensor_4)
     np.save("data_sensor_4_time_{}.npy".format(t), data_sensor_4)
     # np.savetxt('data_sensor_4_time_{}.txt'.format(t), data_sensor_4, delimiter=',', fmt='%.08f')
