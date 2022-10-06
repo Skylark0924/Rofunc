@@ -1,16 +1,47 @@
 """
     LQT computed in a recursive way (via-point example)
 """
-import numpy as np
+from typing import Dict
+
 import matplotlib.pyplot as plt
-from matplotlib.cm import get_cmap
-from typing import Union, Dict, Tuple
+import numpy as np
+import rofunc as rf
 
 
 def get_matrices(param: Dict, data: np.ndarray):
+    param['nbPoints'] = len(data)
+
     R = np.eye(param["nbVarPos"]) * param["rfactor"]  # Control cost matrix
 
-    # Dynamical System settings (discrete version)
+    # Sparse reference with a set of via-points
+    tl = np.linspace(0, param["nbData"] - 1, param["nbPoints"] + 1)
+    tl = np.rint(tl[1:])
+
+    # Definition of augmented precision matrix Qa based on standard precision matrix Q0
+    Q0 = np.diag(np.hstack([np.ones(param["nbVarPos"]), np.zeros(param["nbVar"] - param["nbVarPos"])]))
+
+    Q0_augmented = np.identity(param["nbVar"] + 1)
+    Q0_augmented[:param["nbVar"], :param["nbVar"]] = Q0
+
+    Q = np.zeros([param["nbVar"] + 1, param["nbVar"] + 1, param["nbData"]])
+    for i in range(param["nbPoints"]):
+        Q[:, :, int(tl[i])] = np.vstack([
+            np.hstack([np.identity(param["nbVar"]), np.zeros([param["nbVar"], 1])]),
+            np.hstack([-data[i, :], 1])]) @ Q0_augmented @ np.vstack([
+            np.hstack([np.identity(param["nbVar"]), -data[i, :].reshape([-1, 1])]),
+            np.hstack([np.zeros(param["nbVar"]), 1])])
+    return Q, R, tl
+
+
+def set_dynamical_system(param):
+    """
+    Dynamical System settings (discrete version)
+    Args:
+        param:
+
+    Returns:
+
+    """
     A1d = np.zeros((param["nbDeriv"], param["nbDeriv"]))
     for i in range(param["nbDeriv"]):
         A1d += np.diag(np.ones((param["nbDeriv"] - i,)), i) * param["dt"] ** i / np.math.factorial(i)  # Discrete 1D
@@ -24,63 +55,24 @@ def get_matrices(param: Dict, data: np.ndarray):
     A = np.eye(A0.shape[0] + 1)  # Augmented A
     A[:A0.shape[0], :A0.shape[1]] = A0
     B = np.vstack((B0, np.zeros((1, param["nbVarPos"]))))  # Augmented B
-
-    # Sparse reference with a set of via-points
-    tl = np.linspace(0, param["nbData"] - 1, param["nbPoints"] + 1)
-    tl = np.rint(tl[1:])
-    Mu = np.array([[2, 3], [5, 1], [0, 0], [0, 0]])
-
-    # Definition of augmented precision matrix Qa based on standard precision matrix Q0
-    Q0 = np.diag(
-        np.hstack([
-            np.ones(param["nbVarPos"]), np.zeros(param["nbVar"] - param["nbVarPos"])
-        ])
-    )
-
-    Q0_augmented = np.identity(param["nbVar"] + 1)
-    Q0_augmented[:param["nbVar"], :param["nbVar"]] = Q0
-
-    Q = np.zeros([param["nbVar"] + 1, param["nbVar"] + 1, param["nbData"]])
-    for i in range(param["nbPoints"]):
-        Q[:, :, int(tl[i])] = np.vstack([
-            np.hstack([
-                np.identity(param["nbVar"]),
-                np.zeros([param["nbVar"], 1])
-            ]),
-            np.hstack([
-                -Mu[:, i].T,
-                1
-            ])
-        ]) @ Q0_augmented @ np.vstack([
-            np.hstack([
-                np.identity(param["nbVar"]),
-                -Mu[:, i].reshape([-1, 1])
-            ]),
-            np.hstack([
-                np.zeros(param["nbVar"]),
-                1
-            ])
-        ])
-    return Mu, Q, R, A, B, tl
+    return A, B
 
 
-# LQR with recursive computation and augmented state space
-# ============================================================
-def uni_recursive(param: Dict, data: np.ndarray):
-    Mu, Q, R, A, B, tl = get_matrices(param, data)
+def get_u_x(param, state_noise, P: np.ndarray, R: np.ndarray, A: np.ndarray, B: np.ndarray):
+    """
+    Reproduction with only feedback (FB) on augmented state
+    Args:
+        param:
+        state_noise:
+        P:
+        R:
+        A:
+        B:
 
-    state_noise = np.hstack((-1, -.1, np.zeros(param["nbVar"] + 1 - param["nbVarPos"])))
+    Returns:
 
-    P = np.zeros((param["nbVarX"], param["nbVarX"], param["nbData"]))
-    P[:, :, -1] = Q[:, :, -1]
-
+    """
     r = np.zeros((param["nbVar"] + 1, 2, param["nbData"]))
-    for t in range(param["nbData"] - 2, -1, -1):
-        P[:, :, t] = Q[:, :, t] - A.T @ (
-                P[:, :, t + 1] @ np.dot(B, np.linalg.pinv(B.T @ P[:, :, t + 1] @ B + R))
-                @ B.T @ P[:, :, t + 1] - P[:, :, t + 1]) @ A
-
-    # Reproduction with only feedback (FB) on augmented state
     for n in range(2):
         x = np.hstack([np.zeros(param["nbVar"]), 1])
         for t in range(param["nbData"]):
@@ -93,37 +85,79 @@ def uni_recursive(param: Dict, data: np.ndarray):
                 x += state_noise
 
             r[:, n, t] = x  # Log data
+    return r, u, x
 
-    vis(Mu, r)
+
+def uni_recursive(param: Dict, data: np.ndarray):
+    """
+    LQR with recursive computation and augmented state space
+    Args:
+        param:
+        data:
+
+    Returns:
+
+    """
+    Q, R, tl = get_matrices(param, data)
+    A, B = set_dynamical_system(param)
+
+    state_noise = np.hstack((-1, -.2, 1, 0, 0, 0, 0, np.zeros(param["nbVar"] + 1 - param["nbVarPos"])))
+
+    P = np.zeros((param["nbVarX"], param["nbVarX"], param["nbData"]))
+    P[:, :, -1] = Q[:, :, -1]
+
+    for t in range(param["nbData"] - 2, -1, -1):
+        P[:, :, t] = Q[:, :, t] - A.T @ (
+                P[:, :, t + 1] @ np.dot(B, np.linalg.pinv(B.T @ P[:, :, t + 1] @ B + R))
+                @ B.T @ P[:, :, t + 1] - P[:, :, t + 1]) @ A
+    r, u, x = get_u_x(param, state_noise, P, R, A, B)
+    vis3d(data, r)
+
+    return u, x
 
 
-def vis(Mu, r):
+def vis(data, r):
     plt.figure()
+    for n in range(2):
+        plt.plot(r[0, n, :], r[1, n, :], label="Trajectory {}".format(n + 1))
+        plt.scatter(r[0, n, 0], r[1, n, 0], marker='o')
 
-    cmap = get_cmap("Dark2")
-    cm = cmap.colors
+    plt.scatter(data[:, 0], data[:, 1], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
+    plt.legend()
+    plt.show()
+
+
+def vis3d(data, r):
+    fig = plt.figure(figsize=(4, 4))
+    ax = fig.add_subplot(111, projection='3d', fc='white')
 
     for n in range(2):
-        plt.plot(r[0, n, :], r[1, n, :], c=cm[n], label="Trajectory {}".format(n + 1))
-        plt.scatter(r[0, n, 0], r[1, n, 0], marker='o', c=cm[n])
+        ax.plot(r[0, n, :], r[1, n, :], r[2, n, :], label="Trajectory {}".format(n + 1))
+        ax.scatter(r[0, n, 0], r[1, n, 0], r[2, n, 0],  marker='o')
 
-    plt.scatter(Mu[0, :], Mu[1, :], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
+    # rf.visualab.traj_plot(r.transpose(1, 0, 2), mode='3d', ori=False, g_ax=ax)
+    # rf.visualab.traj_plot([r[:, , :]], mode='3d', ori=False, g_ax=ax)
+
+    ax.scatter(data[:, 0], data[:, 1], data[:, 2], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
     plt.legend()
     plt.show()
 
 
 if __name__ == '__main__':
-    # General parameters
-    # ===============================
     param = {
         "nbData": 100,  # Number of datapoints
-        "nbPoints": 2,  # Number of viapoints
+        "nbVarPos": 7,  # Dimension of position data (here: x1,x2)
         "nbDeriv": 2,  # Number of static and dynamic features (nbDeriv=2 for [x,dx] and u=ddx)
-        "nbVarPos": 2,  # Dimension of position data (here: x1,x2)
         "dt": 1E-2,  # Time step duration
         "rfactor": 1E-6,  # control cost in LQR
     }
     param["nbVar"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
     param["nbVarX"] = param["nbVar"] + 1  # Augmented state space
 
-    uni_recursive(param, None)
+    via_points = np.zeros((2, 14))
+    via_points[0, :7] = np.array([2, 5, 3, 0, 0, 0, 1])
+    via_points[1, :7] = np.array([3, 1, 1, 0, 0, 0, 1])
+
+    # via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0]])
+
+    uni_recursive(param, via_points)
