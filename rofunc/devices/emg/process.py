@@ -1,14 +1,12 @@
 import matplotlib.pyplot as plt
 import neurokit2 as nk
-import pandas as pd
-import librosa as lib
 import numpy as np
-import math
+
 
 def filtering(data_raw, n):
-    '''
+    """
     Filter the original EMG signals (from the Delsys system, 1000 Hz) to the desired frequency
-    '''
+    """
     data = []
     for i in range(0, len(data_raw) - n + 1, n):
         data_new = data_raw[i]
@@ -16,28 +14,31 @@ def filtering(data_raw, n):
     data = np.array(data)
     return data
 
+
 def absolutevalue(data):
-    '''
+    """
     Take the absolute value of the EMG signals
-    '''
+    """
     for i in range(len(data)):
         data[i] = abs(data[i])
     return data
 
+
 def processing(data, sample):
-    '''
+    """
     Clean the raw EMG signals and calculate the Maximum Voluntary Contraction (MVC) of the EMG signals
-    '''
+    """
     signals, info = nk.emg_process(data, sampling_rate=sample)
     signals_array = signals.values
     EMG_clean = signals_array[:, 1]
     MVC = signals_array[:, 2]
     return EMG_clean, MVC, signals
 
+
 def activationlevel(data, MVC):
-    '''
+    """
     Calculate the activation level of the EMG signals
-    '''
+    """
     A = [0] * len(data)
     for i in range(len(data)):
         A[i] = data[i] / MVC
@@ -46,6 +47,7 @@ def activationlevel(data, MVC):
         #     A[i] = 100
     A = np.array(A)
     return A
+
 
 if __name__ == '__main__':
     a = 20
