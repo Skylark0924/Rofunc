@@ -3,6 +3,7 @@ import socket
 import struct
 import os
 import threading
+from typing import List
 
 
 def byte_to_str(data, n):
@@ -125,7 +126,7 @@ class Datagram(object):
         Returns:
             pose_array_msg:
         """
-        pose_array_msg = np.array([])
+        pose_array_msg = []
 
         for i in range(self.header.item_num):
             item = self.payload[
@@ -134,12 +135,12 @@ class Datagram(object):
             pose_msg = self._decode_to_pose_msg(item)
             if pose_msg is None:
                 return None
-            np.append(pose_array_msg, pose_msg, axis=0)
+            pose_array_msg.append(pose_msg)
 
         return pose_array_msg
 
     @staticmethod
-    def _decode_to_pose_msg(item: str) -> np.ndarray:
+    def _decode_to_pose_msg(item: str) -> List:
         """
         Decode a type 02 stream to pose.
         Args:
@@ -160,7 +161,7 @@ class Datagram(object):
         qx = byte_to_float(item[20:24])
         qy = byte_to_float(item[24:28])
         qz = byte_to_float(item[28:32])
-        pose = np.array([x, y, z, qx, qy, qz, qw])
+        pose = [x, y, z, qx, qy, qz, qw]
         return pose
 
 
@@ -178,6 +179,7 @@ class XsensInterface(object):
 
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
         self._sock.bind((udp_ip, udp_port))
+
         self._buffer_size = buffer_size
 
         self._body_frames = {
@@ -206,21 +208,22 @@ class XsensInterface(object):
             "left_toe": 22,
         }
 
-        ref_frame_lowercase = ref_frame.lower()
-        if ref_frame_lowercase in self._body_frames:
-            self.ref_frame = ref_frame_lowercase
-            self.ref_frame_id = self._body_frames[ref_frame_lowercase]
-        elif ref_frame_lowercase == "" or ref_frame_lowercase == "world":
+        if ref_frame is not None:
+            ref_frame_lowercase = ref_frame.lower()
+            if ref_frame_lowercase in self._body_frames:
+                self.ref_frame = ref_frame_lowercase
+                self.ref_frame_id = self._body_frames[ref_frame_lowercase]
+            elif ref_frame_lowercase == "" or ref_frame_lowercase == "world":
+                print("XSensInterface: Reference frame is the world frame")
+                self.ref_frame = "world"
+                self.ref_frame_id = None
+            else:
+                print("XSensInterface: Using customized reference frame {}".format(ref_frame_lowercase))
+                self.ref_frame = ref_frame_lowercase
+                self.ref_frame_id = None
+        else:
             print("XSensInterface: Reference frame is the world frame")
             self.ref_frame = "world"
-            self.ref_frame_id = None
-        else:
-            print(
-                "XSensInterface: Using customized reference frame {}".format(
-                    ref_frame_lowercase
-                )
-            )
-            self.ref_frame = ref_frame_lowercase
             self.ref_frame_id = None
 
         self.scaling_factor = scaling
@@ -238,7 +241,6 @@ class XsensInterface(object):
             )
             return pose_array_msg
         else:
-            print('No data received, please check Xsens.')
             return None
 
     def save_file_thread(self, root_dir: str, exp_name: str) -> None:
@@ -250,9 +252,15 @@ class XsensInterface(object):
         Returns:
             None
         """
+        xsens_data = []
         while True:
+            print('1')
             data = self.get_datagram()
-            np.save(root_dir + '/' + exp_name + '/' + 'xsens_data.npy', data)
+            print(type(data))
+            if type(data)==list:
+                print(data)
+                xsens_data.append(data)
+                np.save(root_dir + '/' + exp_name + '/' + 'xsens_data.npy', np.array(xsens_data))
 
     @staticmethod
     def _get_header(data):
@@ -270,13 +278,13 @@ class XsensInterface(object):
             return None
         id_str = byte_to_str(data[0:6], 6)
         sample_counter = byte_to_uint32(data[6:10])
-        datagram_counter = struct.unpack("!B", data[10])
-        item_number = byte_to_uint8(data[11])
+        datagram_counter = struct.unpack("!B", data[10].to_bytes(1,'big'))
+        item_number = byte_to_uint8(data[11:12])
         time_code = byte_to_uint32(data[12:16])
-        character_id = byte_to_uint8(data[16])
-        body_segments_num = byte_to_uint8(data[17])
-        props_num = byte_to_uint8(data[18])
-        finger_segments_num = byte_to_uint8(data[19])
+        character_id = byte_to_uint8(data[16:17])
+        body_segments_num = byte_to_uint8(data[17:18])
+        props_num = byte_to_uint8(data[18:19])
+        finger_segments_num = byte_to_uint8(data[19:20])
         # 20 21 are reserved for future use
         payload_size = byte_to_uint16(data[22:24])
         header = Header(
@@ -305,7 +313,7 @@ class XsensInterface(object):
             return None
 
 
-def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str) -> None:
+def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str = None) -> None:
     """
     Args:
         root_dir: root directory
@@ -325,13 +333,13 @@ def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str) -> 
         opti_thread = threading.Thread(target=interface.save_file_thread, args=(root_dir, exp_name))
         opti_thread.start()
         opti_thread.join()
-        print('Optitrack record finished')
+        print('Xsens record finished')
 
 
 if __name__ == "__main__":
-    root_dir = '/home/skylark/Data/optitrack_record'
-    ip = '192.168.13.118'
-    port = 6688
+    root_dir = '/home/skylark/Data/xsens_record'
+    ip = '192.168.13.20'
+    port = 9763
 
     from datetime import datetime
 
