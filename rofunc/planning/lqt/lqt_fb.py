@@ -8,8 +8,8 @@ import numpy as np
 import rofunc as rf
 
 
-def get_matrices(param: Dict, data: np.ndarray):
-    param['nbPoints'] = len(data)
+def get_matrices(param: Dict, Mu: np.ndarray):
+    param['nbPoints'] = len(Mu)
 
     R = np.eye(param["nbVarPos"]) * param["rfactor"]  # Control cost matrix
 
@@ -27,13 +27,13 @@ def get_matrices(param: Dict, data: np.ndarray):
     for i in range(param["nbPoints"]):
         Q[:, :, int(tl[i])] = np.vstack([
             np.hstack([np.identity(param["nbVar"]), np.zeros([param["nbVar"], 1])]),
-            np.hstack([-data[i, :], 1])]) @ Q0_augmented @ np.vstack([
-            np.hstack([np.identity(param["nbVar"]), -data[i, :].reshape([-1, 1])]),
+            np.hstack([-Mu[i, :], 1])]) @ Q0_augmented @ np.vstack([
+            np.hstack([np.identity(param["nbVar"]), -Mu[i, :].reshape([-1, 1])]),
             np.hstack([np.zeros(param["nbVar"]), 1])])
     return Q, R, tl
 
 
-def set_dynamical_system(param):
+def set_dynamical_system(param: Dict):
     """
     Dynamical System settings (discrete version)
     Args:
@@ -58,7 +58,7 @@ def set_dynamical_system(param):
     return A, B
 
 
-def get_u_x(param, state_noise, P: np.ndarray, R: np.ndarray, A: np.ndarray, B: np.ndarray):
+def get_u_x(param: Dict, state_noise: np.ndarray, P: np.ndarray, R: np.ndarray, A: np.ndarray, B: np.ndarray):
     """
     Reproduction with only feedback (FB) on augmented state
     Args:
@@ -72,7 +72,8 @@ def get_u_x(param, state_noise, P: np.ndarray, R: np.ndarray, A: np.ndarray, B: 
     Returns:
 
     """
-    r = np.zeros((param["nbVar"] + 1, 2, param["nbData"]))
+    x_hat = np.zeros((param["nbVar"] + 1, 2, param["nbData"]))
+    u_hat = np.zeros((param["nbVarPos"], 2, param["nbData"]))
     for n in range(2):
         x = np.hstack([np.zeros(param["nbVar"]), 1])
         for t in range(param["nbData"]):
@@ -84,11 +85,18 @@ def get_u_x(param, state_noise, P: np.ndarray, R: np.ndarray, A: np.ndarray, B: 
             if t == 25 and n == 1:
                 x += state_noise
 
-            r[:, n, t] = x  # Log data
-    return r, u, x
+            if t == 70 and n == 1:
+                x += state_noise
+
+            if t == 75 and n == 1:
+                x += state_noise
+
+            x_hat[:, n, t] = x  # Log data
+            u_hat[:, n, t] = u  # Log data
+    return u_hat, x_hat
 
 
-def uni_recursive(param: Dict, data: np.ndarray):
+def uni_fb(param: Dict, data: np.ndarray):
     """
     LQR with recursive computation and augmented state space
     Args:
@@ -110,10 +118,9 @@ def uni_recursive(param: Dict, data: np.ndarray):
         P[:, :, t] = Q[:, :, t] - A.T @ (
                 P[:, :, t + 1] @ np.dot(B, np.linalg.pinv(B.T @ P[:, :, t + 1] @ B + R))
                 @ B.T @ P[:, :, t + 1] - P[:, :, t + 1]) @ A
-    r, u, x = get_u_x(param, state_noise, P, R, A, B)
-    vis3d(data, r)
-
-    return u, x
+    u_hat, x_hat = get_u_x(param, state_noise, P, R, A, B)
+    vis3d(data, x_hat)
+    return u_hat, x_hat
 
 
 def vis(data, r):
@@ -131,12 +138,8 @@ def vis3d(data, r):
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111, projection='3d', fc='white')
 
-    for n in range(2):
-        ax.plot(r[0, n, :], r[1, n, :], r[2, n, :], label="Trajectory {}".format(n + 1))
-        ax.scatter(r[0, n, 0], r[1, n, 0], r[2, n, 0],  marker='o')
-
-    # rf.visualab.traj_plot(r.transpose(1, 0, 2), mode='3d', ori=False, g_ax=ax)
-    # rf.visualab.traj_plot([r[:, , :]], mode='3d', ori=False, g_ax=ax)
+    rf.visualab.traj_plot([r.transpose(1, 2, 0)[0]], mode='3d', ori=False, g_ax=ax, title='Trajectory 1')
+    rf.visualab.traj_plot([r.transpose(1, 2, 0)[1]], mode='3d', ori=False, g_ax=ax, title='Trajectory 2')
 
     ax.scatter(data[:, 0], data[:, 1], data[:, 2], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
     plt.legend()
@@ -160,4 +163,4 @@ if __name__ == '__main__':
 
     # via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0]])
 
-    uni_recursive(param, via_points)
+    uni_fb(param, via_points)
