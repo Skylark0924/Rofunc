@@ -51,7 +51,7 @@ for i in range(len(idx_slices)):
     Q[slice_t, slice_t] = np.diag(np.hstack((np.ones(param["nbVarPos"]), np.zeros(param["nb_var"] - param["nbVarPos"]))))
 ```
 
-## Define linear system
+## Define dynamical system
 
 The simplified linear system can be described as $\boldsymbol{x}_{t+1}=\boldsymbol{A}_{t} \boldsymbol{x}_{t}+\boldsymbol{B}_{t} \boldsymbol{u}_{t}$. By converting the time sequential evolution into matrix form, we can yield a compact form, $\boldsymbol{x}=\boldsymbol{S}_{\boldsymbol{x}} \boldsymbol{x}_{1}+\boldsymbol{S}_{\boldsymbol{u}} u$.
 
