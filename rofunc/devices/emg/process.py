@@ -3,7 +3,7 @@ import neurokit2 as nk
 import numpy as np
 
 
-def process(data, sampling_rate, k):
+def process_one_channel(data, sampling_rate, k):
     """
 
     Args:
@@ -34,6 +34,54 @@ def process(data, sampling_rate, k):
         data_abs[i] = abs(data_clean[i])
     data_abs = np.array(data_abs)
     return data_filter, data_clean, data_mvc, data_abs
+
+
+def process_all_channels(data, n, sampling_rate, k):
+    """
+
+    Args:
+        data: raw emg data
+        n: number of emg channels
+        sampling_rate: recorded at samples / second
+        k: filtering rate of data to samples / k / second
+
+
+    Returns:
+    DATA_FILTER: Filter the original EMG signals (from the Delsys system, 2000 Hz) to the desired frequency
+    DATA_CLEAN: Clean the raw EMG signals
+    DATA_MVC: Calculate the Maximum Voluntary Contraction (MVC) of the EMG signals
+    DATA_ABS: Take the absolute value of the EMG signals
+    """
+    DATA_FILTER = []
+    DATA_CLEAN = []
+    DATA_MVC = []
+    DATA_ABS = []
+    for j in range(n):
+        data_filter = []
+        for i in range(0, len(data[:, j]) - k + 1, k):
+            data_new = data[i, j]
+            data_filter.append(data_new)
+        data_filter = np.array(data_filter)
+
+        signals, info = nk.emg_process(data_filter, sampling_rate=sampling_rate)
+        signals_array = signals.values
+        data_clean = signals_array[:, 1]
+        data_mvc = signals_array[:, 2]
+
+        data_abs = [0] * len(data_clean)
+        for i in range(len(data_clean)):
+            data_abs[i] = abs(data_clean[i])
+        data_abs = np.array(data_abs)
+
+        DATA_FILTER.append(data_filter)
+        DATA_CLEAN.append(data_clean)
+        DATA_MVC.append(data_mvc)
+        DATA_ABS.append(data_abs)
+    DATA_FILTER = np.transpose(np.array(DATA_FILTER), (1, 0))
+    DATA_CLEAN = np.transpose(np.array(DATA_CLEAN), (1, 0))
+    DATA_MVC = np.transpose(np.array(DATA_MVC), (1, 0))
+    DATA_ABS = np.transpose(np.array(DATA_ABS), (1, 0))
+    return DATA_FILTER, DATA_CLEAN, DATA_MVC, DATA_ABS
 
 
 def plot_raw_and_clean(data_filter, data_clean):
@@ -75,14 +123,11 @@ if __name__ == '__main__':
     SAMPING_RATE = 2000
     k = 4
     n = 4
-    data_filter = [0] * n
-    data_clean = [0] * n
-    data_mvc = [0] * n
-    data_abs = [0] * n
+    data_filter, data_clean, data_mvc, data_abs = process_all_channels(emg, n, SAMPING_RATE, k)
+
     for i in range(n):
-        data_filter[i], data_clean[i], data_mvc[i], data_abs[i] = process(emg[:, i], SAMPING_RATE, k)
-        plot_raw_and_clean(data_filter[i], data_clean[i])
-        plot_abs_and_mvc(data_abs[i], data_mvc[i])
+        plot_raw_and_clean(data_filter[:, i], data_clean[:, i])
+        plot_abs_and_mvc(data_abs[:, i], data_mvc[:, i])
     plt.show()
 
     # data_filter_1, data_clean_1, data_mvc_1, data_abs_1 = process(emg[:, 0], SAMPING_RATE, n)
