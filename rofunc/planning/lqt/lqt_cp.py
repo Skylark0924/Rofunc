@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy import special
 from math import factorial
 from typing import Union, Dict, Tuple
+import rofunc as rf
 
 
 # Building piecewise constant basis functions
@@ -44,6 +45,18 @@ def build_phi_fourier(nb_data, nb_fct):
     return phi.T
 
 
+def define_control_primitive(param):
+    functions = {
+        "PIECEWEISE": build_phi_piecewise,
+        "RBF": build_phi_rbf,
+        "BERNSTEIN": build_phi_bernstein,
+        "FOURIER": build_phi_fourier
+    }
+    phi = functions[param["basisName"]](param["nbData"] - 1, param["nbFct"])
+    PSI = np.kron(phi, np.identity(param["nbVarPos"]))
+    return PSI, phi
+
+
 # Dynamical System settings (discrete)
 # =====================================
 def set_dynamical_system(param: Dict):
@@ -66,14 +79,13 @@ def set_dynamical_system(param: Dict):
         Sx[i * nb_var:param["nbData"] * nb_var, :] = np.dot(Sx[i * nb_var:param["nbData"] * nb_var, :], A)
         Su[nb_var * i:nb_var * i + M.shape[0], 0:M.shape[1]] = M
         M = np.hstack((np.dot(A, M), B))  # [0,nb_state_var-1]
-
     return Su, Sx
 
 
 def get_u_x(param: Dict, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray,
-            Sx: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    x0 = np.zeros((param["nb_var"], 1))
-    w_hat = np.linalg.inv(PSI.T @ Su.T @ Q @ Su @ PSI + PSI.T @ R @ PSI) @ PSI.T @ Su.T @ Q @ (param["muQ"] - Sx @ x0)
+            Sx: np.ndarray, PSI: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    x0 = start_pose.reshape((param['nbVarPos'] * param['nbDeriv'], 1))
+    w_hat = np.linalg.inv(PSI.T @ Su.T @ Q @ Su @ PSI + PSI.T @ R @ PSI) @ PSI.T @ Su.T @ Q @ (muQ - Sx @ x0)
     u_hat = PSI @ w_hat
     x_hat = (Sx @ x0 + Su @ u_hat).reshape((-1, param["nb_var"]))
     u_hat = u_hat.reshape((-1, param["nbVarPos"]))
@@ -82,22 +94,26 @@ def get_u_x(param: Dict, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray,
 
 def uni_cp(param: Dict, data: np.ndarray):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
+    data = data[:, :param['nbVarPos']]
 
-    start_pose = np.zeros((14,), dtype=np.float32)
-    start_pose[:7] = data[0]
+    start_pose = np.zeros((param['nbVarPos'] * param['nbDeriv'],), dtype=np.float32)
+    start_pose[:param['nbVarPos']] = data[0]
 
     via_point_pose = data[1:]
     param['nbPoints'] = len(via_point_pose)
 
     via_point, muQ, Q, R, idx_slices, tl = rf.lqt.get_matrices(param, via_point_pose)
+    PSI, phi = define_control_primitive(param)
     Su, Sx = set_dynamical_system(param)
-    u_hat, x_hat = get_u_x(param, start_pose, muQ, Q, R, Su, Sx)
+    u_hat, x_hat = get_u_x(param, start_pose, muQ, Q, R, Su, Sx, PSI)
 
-    vis(x_hat, u_hat, idx_slices, tl)
+    # vis(param, x_hat, u_hat, muQ, idx_slices, tl, phi)
+    rf.lqt.plot_3d_uni([x_hat], muQ, idx_slices)
+    # rf.visualab.traj_plot([x_hat[:, :2]])
     return u_hat, x_hat, muQ, idx_slices
 
 
-def vis(x_hat, u_hat, idx_slices, tl):
+def vis(param, x_hat, u_hat, muQ, idx_slices, tl, phi):
     plt.figure()
 
     plt.title("2D Trajectory")
@@ -107,7 +123,7 @@ def vis(x_hat, u_hat, idx_slices, tl):
     plt.scatter(x_hat[0, 0], x_hat[0, 1], c='black', s=100)
 
     for slice_t in idx_slices:
-        plt.scatter(param["muQ"][slice_t][0], param["muQ"][slice_t][1], c='blue', s=100)
+        plt.scatter(muQ[slice_t][0], muQ[slice_t][1], c='blue', s=100)
 
     plt.plot(x_hat[:, 0], x_hat[:, 1], c='black')
 
@@ -152,6 +168,8 @@ if __name__ == '__main__':
         "nbData": 200,  # Number of data points
         "nbVarPos": 7,  # Dimension of position data
         "nbDeriv": 2,  # Number of static and dynamic features (2 -> [x,dx])
+        "nbFct": 9,  # Number of basis function
+        "basisName": "RBF",  # can be PIECEWEISE, RBF, BERNSTEIN, FOURIER
         "dt": 1e-2,  # Time step duration
         "rfactor": 1e-8  # Control cost
     }
@@ -160,13 +178,13 @@ if __name__ == '__main__':
     # Building basis functions
     # =========================
 
-    functions = {
-        "PIECEWEISE": build_phi_piecewise,
-        "RBF": build_phi_rbf,
-        "BERNSTEIN": build_phi_bernstein,
-        "FOURIER": build_phi_fourier
-    }
-    phi = functions[param["basisName"]](param["nbData"] - 1, param["nbFct"])
-    PSI = np.kron(phi, np.identity(param["nbVarPos"]))
+    data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
+    data = np.zeros((len(data_raw), 14))
+    data[:, :7] = data_raw
+    filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
+    filter_indices.append(len(data_raw) - 1)
+    via_points = data[filter_indices]
 
-    uni_cp(param)
+    # via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0], [3, 6, 0, 0], [4, 2, 0, 0]])
+
+    uni_cp(param, via_points)
