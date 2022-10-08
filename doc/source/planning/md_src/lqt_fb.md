@@ -1,4 +1,5 @@
-# LQT feedback version
+# LQT (feedback version)
+
 
 $$
 \begin{aligned}
@@ -6,8 +7,6 @@ c &=\left(\boldsymbol{\mu}_T-\boldsymbol{x}_T\right)^{\top} \boldsymbol{Q}_T\lef
 &=\tilde{\boldsymbol{x}}_T^{\top} \tilde{\boldsymbol{Q}}_T \tilde{\boldsymbol{x}}_T+\sum_{t=1}^{T-1}\left(\tilde{\boldsymbol{x}}_t^{\top} \tilde{\boldsymbol{Q}}_t \tilde{\boldsymbol{x}}_t+\boldsymbol{u}_t^{\top} \boldsymbol{R}_t \boldsymbol{u}_t\right),
 \end{aligned}
 $$
-
-
 
 ## Define related matrices
 
