@@ -6,7 +6,7 @@ import numpy as np
 from src import pytrigno
 
 
-def record(host, n, t):
+def record(host, n, samples_per_read, t):
     """
     Communication with and data acquisition from a Delsys Trigno wireless EMG system.
     Delsys Trigno Control Utility needs to be installed and running on, and the device
@@ -15,12 +15,12 @@ def record(host, n, t):
     Args:
         host: host of a remote machine
         n: number of emg channels
-        t: running time
+        samples_per_read： number of samples per read
+        t: number of batches (running time * 2000 / samples_per_read)
 
     Returns: None
     """
-    SAMPLES_PER_READ = 2000
-    dev = pytrigno.TrignoEMG(channel_range=(0, 0), samples_per_read=SAMPLES_PER_READ,
+    dev = pytrigno.TrignoEMG(channel_range=(0, 0), samples_per_read=samples_per_read,
                              host=host)
 
     dev.set_channel_range((0, n - 1))
@@ -30,7 +30,7 @@ def record(host, n, t):
         # while True:
         data = dev.read() * 1e6
         print(data)
-        assert data.shape == (n, SAMPLES_PER_READ)
+        assert data.shape == (n, samples_per_read)
         data_sensor.append(data)
     print(n, '-channel achieved')
     dev.stop()
@@ -49,6 +49,6 @@ if __name__ == '__main__':
         help="IP address of the machine running TCU. Default is localhost.")
     args = parser.parse_args()
 
-    # For instance, 4 channels and 10 seconds are chosen.
+    # For instance, 4 channels, 2000 samples per read and 10 batches are chosen.
     import rofunc as rf
-    rf.emg.record(args.host, 4, 10)
+    rf.emg.record(args.host, 4, 2000, 10)
