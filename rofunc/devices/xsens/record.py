@@ -4,6 +4,10 @@ import struct
 import os
 import threading
 from typing import List
+from pynput.keyboard import Key, Listener
+
+
+event = threading.Event()
 
 
 def byte_to_str(data, n):
@@ -164,7 +168,6 @@ class Datagram(object):
         pose = [x, y, z, qx, qy, qz, qw]
         return pose
 
-
 class XsensInterface(object):
     def __init__(
             self,
@@ -254,13 +257,14 @@ class XsensInterface(object):
         """
         xsens_data = []
         while True:
-            print('1')
             data = self.get_datagram()
             print(type(data))
-            if type(data)==list:
+            if type(data) == list:
                 print(data)
                 xsens_data.append(data)
+            if event.isSet():
                 np.save(root_dir + '/' + exp_name + '/' + 'xsens_data.npy', np.array(xsens_data))
+                break
 
     @staticmethod
     def _get_header(data):
@@ -313,6 +317,14 @@ class XsensInterface(object):
             return None
 
 
+def on_press(key):
+    # 当按下esc，结束监听
+    if key == Key.esc:
+        event.set()
+        print(f"你按下了esc，监听结束")
+        return False
+
+
 def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str = None) -> None:
     """
     Args:
@@ -330,10 +342,13 @@ def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str = No
         os.mkdir('{}/{}'.format(root_dir, exp_name))
         print('Recording folder: {}/{}'.format(root_dir, exp_name))
         interface = XsensInterface(ip, port, ref_frame=ref_frame)
-        opti_thread = threading.Thread(target=interface.save_file_thread, args=(root_dir, exp_name))
-        opti_thread.start()
-        opti_thread.join()
+        listener = Listener(on_press = on_press)
+        listener.start()
+        xsens_thread = threading.Thread(target = interface.save_file_thread, args=(root_dir, exp_name))
+        xsens_thread.start()
+        xsens_thread.join()
         print('Xsens record finished')
+
 
 
 if __name__ == "__main__":
@@ -345,3 +360,4 @@ if __name__ == "__main__":
 
     exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
     record(root_dir, exp_name, ip, port)
+
