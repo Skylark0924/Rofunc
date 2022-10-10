@@ -71,7 +71,7 @@ def set_dynamical_system(param: Dict):
     A = np.kron(A1d, np.identity(param["nbVarPos"], dtype=np.float32))
     B = np.kron(B1d, np.identity(param["nbVarPos"], dtype=np.float32))
 
-    nb_var = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
+    nb_var = param["nb_var"]  # Dimension of state vector
 
     # Build Sx and Su transfer matrices
     Su = np.zeros((nb_var * param["nbData"], param["nbVarPos"] * (param["nbData"] - 1)))
@@ -98,7 +98,7 @@ def get_u_x(param: Dict, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray,
 
 
 def uni(param: Dict, data: np.ndarray):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT.'))
+    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
 
     start_pose = np.zeros((14,), dtype=np.float32)
     start_pose[:7] = data[0]
@@ -114,7 +114,7 @@ def uni(param: Dict, data: np.ndarray):
 
 
 def uni_hierarchical(param: Dict, data: np.ndarray, interval: int = 3):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically.'))
+    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
 
     start_pose = np.zeros((14,), dtype=np.float32)
     start_pose[:7] = data[0, :7]
@@ -135,7 +135,7 @@ def uni_hierarchical(param: Dict, data: np.ndarray, interval: int = 3):
 
 
 def bi(param, l_data, r_data):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT.'))
+    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
 
     l_start_pose = np.zeros((14,), dtype=np.float32)
     r_start_pose = np.zeros((14,), dtype=np.float32)
