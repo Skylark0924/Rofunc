@@ -50,5 +50,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # For instance, 4 channels, 2000 samples per read and 10 batches are chosen.
-    import rofunc as rf
-    rf.emg.record(args.host, 4, 2000, 10)
+    # import rofunc as rf
+    # rf.emg.record(args.host, 2, 2000, 10)
+    record(args.host, 2, 2000, 10)

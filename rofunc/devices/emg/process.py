@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 import neurokit2 as nk
 import numpy as np
 
+SAMPING_RATE = 2000
+k = 4
+n = 2
+
 
 def process_one_channel(data, sampling_rate, k):
     """
@@ -120,9 +124,6 @@ def plot_abs_and_mvc(data_abs, data_mvc, k):
 
 if __name__ == '__main__':
     emg = np.load('./data/emg_data.npy')
-    SAMPING_RATE = 2000
-    k = 4
-    n = 4
     data_filter, data_clean, data_mvc, data_abs = process_all_channels(emg, n, SAMPING_RATE, k)
 
     for i in range(n):
