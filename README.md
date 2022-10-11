@@ -55,6 +55,7 @@ The available functions and plans can be found as follows.
 |                                                 |                        | `mmodal.export`         | Export multi-modal demonstration data in one line                             | ✅      |
 | **Learning from Demonstration**                 | DMP                    | `dmp.uni`               | DMP for one agent with several (or one) demonstrated trajectories             |        |
 |                                                 | GMR                    | `gmr.uni`               | GMR for one agent with several (or one) demonstrated trajectories             | ✅      |
+|                                                 | GMR                    | `gmm.uni`               | GMM for one agent with several (or one) demonstrated trajectories             |        |
 |                                                 | TP-GMM                 | `tpgmm.uni`             | TP-GMM for one agent with several (or one) demonstrated trajectories          | ✅      |
 |                                                 |                        | `tpgmm.bi`              | TP-GMM for two agents with coordination learned from demonstration            | ✅      |
 |                                                 | TP-GMR                 | `tpgmr.uni`             | TP-GMR for one agent with several (or one) demonstrated trajectories          | ✅      |
@@ -66,7 +67,7 @@ The available functions and plans can be found as follows.
 | **Planning**                                    | LQT                    | `lqt.uni`               | LQT for one agent with several via-points                                     | ✅      |
 |                                                 |                        | `lqt.bi`                | LQT for two agents with coordination constraints                              | ✅      |
 |                                                 |                        | `lqt.hierarchical`      | Generate smooth trajectories for robot execution hierarchically               | ✅      |
-|                                                 |                        | `lqt.recursive`         | Generate smooth trajectories with feedback                                    |        |
+|                                                 |                        | `lqt.recursive`         | Generate smooth trajectories with feedback                                    | ✅      |
 |                                                 | iLQR                   | `ilqr.uni`              | Iterative LQR (iLQR) for one agent with several via-points                    |        |
 |                                                 |                        | `ilqr.bi`               | Iterative LQR (iLQR) for two agents with several via-points                   |        |
 | **Tools**                                       | Logger                 | `logger.write`          | Custom tensorboard-based logger                                               |        |
