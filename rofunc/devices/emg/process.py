@@ -84,15 +84,15 @@ def process_all_channels(data, n, sampling_rate, k):
     return DATA_FILTER, DATA_CLEAN, DATA_MVC, DATA_ABS
 
 
-def plot_raw_and_clean(data_filter, data_clean):
+def plot_raw_and_clean(data_filter, data_clean, k):
     fig, ax0 = plt.subplots(nrows=1, ncols=1, sharex=True)
     ax0.set_xlabel("Time (seconds)", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
     fig.suptitle("Raw and Clean EMG Signals", fontweight="bold", fontdict={'family': 'Times New Roman'},
                  fontsize=16)
     plt.subplots_adjust(hspace=0.2)
-    x_axis = np.linspace(0, data_filter.shape[0] / int(SAMPING_RATE / k), data_filter.shape[0])
+    x_axis = np.linspace(0, data_filter.shape[0] / int(2000 / k), data_filter.shape[0])
     legend_font = {"family": "Times New Roman"}
-    ax0.set_title("Sensor_1", fontdict={'family': 'Times New Roman'}, fontsize=12)
+    ax0.set_title("Sensor", fontdict={'family': 'Times New Roman'}, fontsize=12)
     ax0.plot(x_axis, data_filter, color="#B0BEC5", label="Raw", zorder=1)
     ax0.plot(
         x_axis, data_clean, color="#FFC107", label="Cleaned", zorder=1, linewidth=1.5
@@ -100,15 +100,15 @@ def plot_raw_and_clean(data_filter, data_clean):
     ax0.legend(loc="upper right", frameon=True, prop=legend_font)
 
 
-def plot_abs_and_mvc(data_abs, data_mvc):
+def plot_abs_and_mvc(data_abs, data_mvc, k):
     fig, ax0 = plt.subplots(nrows=1, ncols=1, sharex=True)
     ax0.set_xlabel("Time (seconds)", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
     fig.suptitle("Absolute Value and MVC of EMG signals", fontweight="bold",
                  fontdict={'family': 'Times New Roman'}, fontsize=16)
     plt.subplots_adjust(hspace=0.2)
-    x_axis = np.linspace(0, data_abs.shape[0] / int(SAMPING_RATE / n), data_abs.shape[0])
+    x_axis = np.linspace(0, data_abs.shape[0] / int(2000 / k), data_abs.shape[0])
     legend_font = {"family": "Times New Roman"}
-    ax0.set_title("Sensor_1", fontdict={'family': 'Times New Roman'}, fontsize=12)
+    ax0.set_title("Sensor", fontdict={'family': 'Times New Roman'}, fontsize=12)
     ax0.plot(x_axis, data_abs, color="#B0BEC5", label="ABS", zorder=1)
     ax1 = ax0.twinx()
     ax1.plot(
@@ -126,8 +126,8 @@ if __name__ == '__main__':
     data_filter, data_clean, data_mvc, data_abs = process_all_channels(emg, n, SAMPING_RATE, k)
 
     for i in range(n):
-        plot_raw_and_clean(data_filter[:, i], data_clean[:, i])
-        plot_abs_and_mvc(data_abs[:, i], data_mvc[:, i])
+        plot_raw_and_clean(data_filter[:, i], data_clean[:, i], k)
+        plot_abs_and_mvc(data_abs[:, i], data_mvc[:, i], k)
     plt.show()
 
     # # process single channel
