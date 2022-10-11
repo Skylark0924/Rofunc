@@ -88,7 +88,7 @@ def set_dynamical_system(param: Dict):
 
 def get_u_x(param: Dict, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray,
             Sx: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    x0 = start_pose.reshape((14, 1))
+    x0 = start_pose.reshape((param['nbVarPos'] * param['nbDeriv'], 1))
 
     # Equ. 18
     u_hat = np.linalg.inv(Su.T @ Q @ Su + R) @ Su.T @ Q @ (muQ - Sx @ x0)
@@ -100,8 +100,8 @@ def get_u_x(param: Dict, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray,
 def uni(param: Dict, data: np.ndarray):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
 
-    start_pose = np.zeros((14,), dtype=np.float32)
-    start_pose[:7] = data[0]
+    start_pose = np.zeros((param['nbVarPos'] * param['nbDeriv'],), dtype=np.float32)
+    start_pose[:param['nbVarPos']] = data[0]
 
     via_point_pose = data[1:]
     param['nbPoints'] = len(via_point_pose)
@@ -116,8 +116,8 @@ def uni(param: Dict, data: np.ndarray):
 def uni_hierarchical(param: Dict, data: np.ndarray, interval: int = 3):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
 
-    start_pose = np.zeros((14,), dtype=np.float32)
-    start_pose[:7] = data[0, :7]
+    start_pose = np.zeros((param['nbVarPos'] * param['nbDeriv'],), dtype=np.float32)
+    start_pose[:param['nbVarPos']] = data[0, :param['nbVarPos']]
 
     x_hat_lst = []
     for i in tqdm(range(0, len(data), interval)):
@@ -130,17 +130,17 @@ def uni_hierarchical(param: Dict, data: np.ndarray, interval: int = 3):
         start_pose = x_hat[-1]
         x_hat_lst.append(x_hat)
 
-    x_hat = np.array(x_hat_lst).reshape((-1, 14))
+    x_hat = np.array(x_hat_lst).reshape((-1, param['nbVarPos'] * param['nbDeriv']))
     return u_hat, x_hat, muQ, idx_slices
 
 
 def bi(param, l_data, r_data):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
 
-    l_start_pose = np.zeros((14,), dtype=np.float32)
-    r_start_pose = np.zeros((14,), dtype=np.float32)
-    l_start_pose[:7] = l_data[0]
-    r_start_pose[:7] = r_data[0]
+    l_start_pose = np.zeros((param['nbVarPos'] * param['nbDeriv'],), dtype=np.float32)
+    r_start_pose = np.zeros((param['nbVarPos'] * param['nbDeriv'],), dtype=np.float32)
+    l_start_pose[:param['nbVarPos']] = l_data[0]
+    r_start_pose[:param['nbVarPos']] = r_data[0]
     via_point_pose_l = l_data[1:]
     via_point_pose_r = r_data[1:]
     param['nbPoints'] = len(via_point_pose_l)
