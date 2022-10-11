@@ -6,4 +6,5 @@ Planning and Control
 
    lqt
    lqt_fb
+   lqt_cp
 

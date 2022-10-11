@@ -2,9 +2,10 @@ from __future__ import absolute_import
 
 from .devices import zed, xsens, optitrack, mmodal, emg
 from .lfd import ml, dl, rl
-from .planning import lqt
-from .utils import visualab, coord, data_generator, params
+from .planning import lqt, lqr
+from .utils import visualab, coord, data_generator, params, primitive
 from .simulator import franka, dualfranka, curi, walker
 
 from .lfd.ml import tpgmm, gmr, tpgmr
+from .lfd.dl import bc, strans
 from .lfd.rl import ppo, dqn
