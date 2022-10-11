@@ -8,8 +8,8 @@ import numpy as np
 import rofunc as rf
 
 
-def get_matrices(param: Dict, Mu: np.ndarray):
-    param['nbPoints'] = len(Mu)
+def get_matrices(param: Dict, data: np.ndarray):
+    param['nbPoints'] = len(data)
 
     R = np.eye(param["nbVarPos"]) * param["rfactor"]  # Control cost matrix
 
@@ -27,8 +27,8 @@ def get_matrices(param: Dict, Mu: np.ndarray):
     for i in range(param["nbPoints"]):
         Q[:, :, int(tl[i])] = np.vstack([
             np.hstack([np.identity(param["nbVar"]), np.zeros([param["nbVar"], 1])]),
-            np.hstack([-Mu[i, :], 1])]) @ Q0_augmented @ np.vstack([
-            np.hstack([np.identity(param["nbVar"]), -Mu[i, :].reshape([-1, 1])]),
+            np.hstack([-data[i, :], 1])]) @ Q0_augmented @ np.vstack([
+            np.hstack([np.identity(param["nbVar"]), -data[i, :].reshape([-1, 1])]),
             np.hstack([np.zeros(param["nbVar"]), 1])])
     return Q, R, tl
 
