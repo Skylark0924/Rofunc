@@ -141,8 +141,4 @@ doc/rofunc.out
 .idea/
 whl/
 
-rofunc/devices/emg/data/data_sensor_4_time_30.npy
-
-rofunc/devices/emg/data_sensor_4_time_30.npy
-
 scripts/update.sh
