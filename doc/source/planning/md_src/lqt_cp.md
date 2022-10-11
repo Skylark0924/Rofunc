@@ -1,15 +1,15 @@
 # LQT (control primitive version)
 
-Use the control primitive to represent the control command $\boldsymbol{u}=\Psi \boldsymbol{w}$ 
+Use the control primitive to represent the control command $\boldsymbol{u}=\boldsymbol \Psi \boldsymbol{w}$ 
 $$
-\min _{\boldsymbol{w}}(\boldsymbol{x}-\boldsymbol{\mu})^{\top} \boldsymbol{Q}(\boldsymbol{x}-\boldsymbol{\mu})+\boldsymbol{w}^{\top} \Psi^{\top} \boldsymbol{R} \Psi \boldsymbol{w}, \quad \text { s.t. } \quad \boldsymbol{x}=\boldsymbol{S}_{\boldsymbol{x}} \boldsymbol{x}_1+\boldsymbol{S}_{\boldsymbol{u}} \Psi \boldsymbol{w}
+\min _{\boldsymbol{w}}(\boldsymbol{x}-\boldsymbol{\mu})^{\top} \boldsymbol{Q}(\boldsymbol{x}-\boldsymbol{\mu})+\boldsymbol{w}^{\top} \boldsymbol\Psi^{\top} \boldsymbol{R} \boldsymbol\Psi \boldsymbol{w}, \quad \text { s.t. } \quad \boldsymbol{x}=\boldsymbol{S}_{\boldsymbol{x}} \boldsymbol{x}_1+\boldsymbol{S}_{\boldsymbol{u}} \boldsymbol \Psi \boldsymbol{w}
 $$
 the analytic solution is 
 $$
-\hat{w}=\left(\Psi^{\top} \boldsymbol{S}_u^{\top} Q \boldsymbol{S}_u \Psi+\Psi^{\top} \boldsymbol{R} \Psi\right)^{-1} \Psi^{\top} \boldsymbol{S}_u^{\top} Q\left(\mu-S_x x_1\right)
+\hat{\boldsymbol w}=\left(\boldsymbol \Psi^{\top} \boldsymbol{S}_u^{\top} \boldsymbol Q \boldsymbol{S}_u \boldsymbol \Psi+\boldsymbol \Psi^{\top} \boldsymbol{R} \boldsymbol \Psi\right)^{-1} \boldsymbol \Psi^{\top} \boldsymbol{S}_u^{\top} \boldsymbol Q\left(\boldsymbol \mu-\boldsymbol S_x \boldsymbol x_1\right)
 $$
 
-## Define control primitives
+### Define control primitives
 
 ```python
 # Building piecewise constant basis functions
@@ -57,7 +57,7 @@ def define_control_primitive(param):
     return PSI
 ```
 
-## Define dynamical system
+### Define dynamical system
 
 ```python
 def set_dynamical_system(param: Dict):
@@ -83,10 +83,10 @@ def set_dynamical_system(param: Dict):
     return Su, Sx
 ```
 
-## Solve the LQT with control primitive 
+### Solve the LQT with control primitive 
 
 $$
-\hat{w}=\left(\Psi^{\top} \boldsymbol{S}_u^{\top} Q \boldsymbol{S}_u \Psi+\Psi^{\top} \boldsymbol{R} \Psi\right)^{-1} \Psi^{\top} \boldsymbol{S}_u^{\top} Q\left(\mu-S_x x_1\right)
+\hat{\boldsymbol w}=\left(\boldsymbol \Psi^{\top} \boldsymbol{S}_u^{\top} \boldsymbol Q \boldsymbol{S}_u \boldsymbol \Psi+\boldsymbol \Psi^{\top} \boldsymbol{R} \boldsymbol \Psi\right)^{-1} \boldsymbol \Psi^{\top} \boldsymbol{S}_u^{\top} \boldsymbol Q\left(\boldsymbol \mu-\boldsymbol S_x \boldsymbol x_1\right)\label{3}
 $$
 
 ```python
@@ -95,5 +95,113 @@ w_hat = np.linalg.inv(PSI.T @ Su.T @ Q @ Su @ PSI + PSI.T @ R @ PSI) @ PSI.T @ S
 u_hat = PSI @ w_hat
 x_hat = (Sx @ x0 + Su @ u_hat).reshape((-1, param["nb_var"]))
 u_hat = u_hat.reshape((-1, param["nbVarPos"]))
+```
+
+---
+
+## Reformulate LQT with control primitives via Dynamical movement primitives (DMP) 
+
+Linear quadratic tracking (LQT) with control primitives can be used in a similar fashion as in DMP, by requesting a target to be reached at the end of the movement and by requesting the observed acceleration profile to be tracked, while encoding the control commands as radial basis functions.
+
+
+
+Like the [Least squares formulation of recursive LQT](./lqt_fb.md), we can reformat Equ.  $\ref{3}$ as
+$$
+\hat{\boldsymbol W}=\left(\boldsymbol{\Psi}^{\top} \boldsymbol{S}_u^{\top} \tilde{\boldsymbol{Q}} \boldsymbol{S}_u \boldsymbol{\Psi}+\boldsymbol{\Psi}^{\top} \boldsymbol R \boldsymbol \Psi\right)^{-1} \boldsymbol \Psi^{\top} \boldsymbol S_u^{\top} \tilde{\boldsymbol Q} \boldsymbol S_x, \quad \boldsymbol F=\boldsymbol\Psi \hat{\boldsymbol W},
+$$
+by setting $\boldsymbol{u}=-\boldsymbol{F}\tilde{\boldsymbol{x}}_1$
+
+### Define related metrics
+
+```python
+def get_matrices(param: Dict, data: np.ndarray):
+    # Task setting (tracking of acceleration profile and reaching of an end-point)
+    Q = np.kron(np.identity(param["nbData"]),
+                np.diag(np.concatenate((np.zeros((param["nbVarU"] * 2)), np.ones(param["nbVarU"]) * 1e-6))))
+
+    Q[-1 - param["nbVar"] + 1:-1 - param["nbVar"] + 2 * param["nbVarU"] + 1,
+    -1 - param["nbVar"] + 1:-1 - param["nbVar"] + 2 * param["nbVarU"] + 1] = np.identity(2 * param["nbVarU"]) * 1e0
+
+    # Weighting matrices in augmented state form
+    Qm = np.zeros((param["nbVarX"] * param["nbData"], param["nbVarX"] * param["nbData"]))
+
+    for t in range(param["nbData"]):
+        id0 = np.linspace(0, param["nbVar"] - 1, param["nbVar"], dtype=int) + t * param["nbVar"]
+        id = np.linspace(0, param["nbVarX"] - 1, param["nbVarX"], dtype=int) + t * param["nbVarX"]
+        Qm[id[0]:id[-1] + 1, id[0]:id[-1] + 1] = np.vstack(
+            (np.hstack((np.identity(param["nbVar"]), np.zeros((param["nbVar"], 1)))),
+             np.append(-data[:, t].reshape(1, -1), 1))) \
+                                                 @ block_diag((Q[id0[0]:id0[-1] + 1, id0[0]:id0[-1] + 1]),
+                                                              1) @ np.vstack(
+            (np.hstack((np.identity(param["nbVar"]), -data[:, t].reshape(-1, 1))),
+             np.append(np.zeros((1, param["nbVar"])), 1)))
+
+    Rm = np.identity((param["nbData"] - 1) * param["nbVarU"]) * param["rfactor"]
+    return Qm, Rm
+```
+
+### Define dynamical system
+
+```python
+def set_dynamical_system(param: Dict):
+    A1d = np.zeros(param["nbDeriv"])
+    for i in range(param["nbDeriv"]):
+        A1d = A1d + np.diag(np.ones((1, param["nbDeriv"] - i)).flatten(), i) * param["dt"] ** i * 1 / factorial(
+            i)  # Discrete 1D
+
+    B1d = np.zeros((param["nbDeriv"], 1))
+    for i in range(param["nbDeriv"]):
+        B1d[param["nbDeriv"] - 1 - i] = param["dt"] ** (i + 1) * 1 / factorial(i + 1)  # Discrete 1D
+
+    A0 = np.kron(A1d, np.eye(param["nbVarU"]))  # Discrete nD
+    B0 = np.kron(B1d, np.eye(param["nbVarU"]))  # Discrete nD
+
+    A = np.vstack((np.hstack((A0, np.zeros((param["nbVar"], 1)))),
+                   np.hstack((np.zeros((param["nbVar"])), 1)).reshape(1, -1)))  # Augmented A (homogeneous)
+    B = np.vstack((B0, np.zeros((1, param["nbVarU"]))))  # Augmented B (homogeneous)
+
+    # Build Sx and Su transfer matrices (for augmented state space)
+    Sx = np.kron(np.ones((param["nbData"], 1)), np.eye(param["nbVarX"], param["nbVarX"]))
+    Su = np.zeros(
+        (param["nbVarX"] * param["nbData"], param["nbVarU"] * (param["nbData"] - 1)))  # It's maybe n-1 not sure
+    M = B
+    for i in range(1, param["nbData"]):
+        Sx[i * param["nbVarX"]:param["nbData"] * param["nbVarX"], :] = np.dot(
+            Sx[i * param["nbVarX"]:param["nbData"] * param["nbVarX"], :], A)
+        Su[param["nbVarX"] * i:param["nbVarX"] * i + M.shape[0], 0:M.shape[1]] = M
+        M = np.hstack((np.dot(A, M), B))  # [0,nb_state_var-1]
+    return Su, Sx, A, B
+```
+
+### Solve LQT (CP version) in a feedback form
+
+```python
+def get_u_x(param: Dict, state_noise: np.ndarray, muQ: np.ndarray, Qm: np.ndarray, Rm: np.ndarray, Su: np.ndarray,
+            Sx: np.ndarray, PSI: np.ndarray, A: np.ndarray, B: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    # Least squares formulation of recursive LQR with an augmented state space and control primitives
+    W = np.linalg.inv(PSI.T @ Su.T @ Qm @ Su @ PSI + PSI.T @ Rm @ PSI) @ PSI.T @ Su.T @ Qm @ Sx
+    F = PSI @ W  # F with control primitives
+
+    # Reproduction with feedback controller on augmented state space (with CP)
+    Ka = np.empty((param["nbData"] - 1, param["nbVarU"], param["nbVarX"]))
+    Ka[0, :, :] = F[0:param["nbVarU"], :]
+    P = np.identity(param["nbVarX"])
+    for t in range(param["nbData"] - 2):
+        id = t * param["nbVarU"] + np.linspace(2, param["nbVarU"] + 1, param["nbVarU"], dtype=int)
+        P = P @ np.linalg.pinv(A - B @ Ka[t, :, :])
+        Ka[t + 1, :, :] = F[id, :] @ P
+
+    x_hat = np.zeros((2, param["nbVarX"], param["nbData"] - 1))
+    u_hat = np.zeros((2, param["nbVarPos"], param["nbData"] - 1))
+    for n in range(2):
+        x = np.append(muQ[:, 0] + np.append(np.array([2, 1]), np.zeros(param["nbVar"] - 2)), 1).reshape(-1, 1)
+        for t in range(param["nbData"] - 1):
+            # Feedback control on augmented state (resulting in feedback and feedforward terms on state)
+            u = -Ka[t, :, :] @ x
+            x = A @ x + B @ u  # Update of state vector
+            if t == 24 and n == 1:
+                x = x + state_noise  # Simulated noise on the state
+            x_hat[n, :, t] = x.flatten()  # State
+    return u_hat, x_hat
 ```
 

@@ -8,8 +8,8 @@ import numpy as np
 import rofunc as rf
 
 
-def get_matrices(param: Dict, Mu: np.ndarray):
-    param['nbPoints'] = len(Mu)
+def get_matrices(param: Dict, data: np.ndarray):
+    param['nbPoints'] = len(data)
 
     R = np.eye(param["nbVarPos"]) * param["rfactor"]  # Control cost matrix
 
@@ -27,8 +27,8 @@ def get_matrices(param: Dict, Mu: np.ndarray):
     for i in range(param["nbPoints"]):
         Q[:, :, int(tl[i])] = np.vstack([
             np.hstack([np.identity(param["nbVar"]), np.zeros([param["nbVar"], 1])]),
-            np.hstack([-Mu[i, :], 1])]) @ Q0_augmented @ np.vstack([
-            np.hstack([np.identity(param["nbVar"]), -Mu[i, :].reshape([-1, 1])]),
+            np.hstack([-data[i, :], 1])]) @ Q0_augmented @ np.vstack([
+            np.hstack([np.identity(param["nbVar"]), -data[i, :].reshape([-1, 1])]),
             np.hstack([np.zeros(param["nbVar"]), 1])])
     return Q, R, tl
 
@@ -72,7 +72,7 @@ def get_u_x(param: Dict, state_noise: np.ndarray, P: np.ndarray, R: np.ndarray, 
     Returns:
 
     """
-    x_hat = np.zeros((param["nbVar"] + 1, 2, param["nbData"]))
+    x_hat = np.zeros((param["nbVarX"], 2, param["nbData"]))
     u_hat = np.zeros((param["nbVarPos"], 2, param["nbData"]))
     for n in range(2):
         x = np.hstack([np.zeros(param["nbVar"]), 1])
@@ -109,7 +109,7 @@ def uni_fb(param: Dict, data: np.ndarray):
     Q, R, tl = get_matrices(param, data)
     A, B = set_dynamical_system(param)
 
-    state_noise = np.hstack((-1, -.2, 1, 0, 0, 0, 0, np.zeros(param["nbVar"] + 1 - param["nbVarPos"])))
+    state_noise = np.hstack((-1, -.2, 1, 0, 0, 0, 0, np.zeros(param["nbVarX"] - param["nbVarPos"])))
 
     P = np.zeros((param["nbVarX"], param["nbVarX"], param["nbData"]))
     P[:, :, -1] = Q[:, :, -1]
@@ -123,23 +123,23 @@ def uni_fb(param: Dict, data: np.ndarray):
     return u_hat, x_hat
 
 
-def vis(data, r):
+def vis(data, x_hat):
     plt.figure()
     for n in range(2):
-        plt.plot(r[0, n, :], r[1, n, :], label="Trajectory {}".format(n + 1))
-        plt.scatter(r[0, n, 0], r[1, n, 0], marker='o')
+        plt.plot(x_hat[0, n, :], x_hat[1, n, :], label="Trajectory {}".format(n + 1))
+        plt.scatter(x_hat[0, n, 0], x_hat[1, n, 0], marker='o')
 
     plt.scatter(data[:, 0], data[:, 1], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
     plt.legend()
     plt.show()
 
 
-def vis3d(data, r):
+def vis3d(data, x_hat):
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111, projection='3d', fc='white')
 
-    rf.visualab.traj_plot([r.transpose(1, 2, 0)[0]], mode='3d', ori=False, g_ax=ax, title='Trajectory 1')
-    rf.visualab.traj_plot([r.transpose(1, 2, 0)[1]], mode='3d', ori=False, g_ax=ax, title='Trajectory 2')
+    rf.visualab.traj_plot([x_hat.transpose(1, 2, 0)[0]], mode='3d', ori=False, g_ax=ax, title='Trajectory 1')
+    rf.visualab.traj_plot([x_hat.transpose(1, 2, 0)[1]], mode='3d', ori=False, g_ax=ax, title='Trajectory 2')
 
     ax.scatter(data[:, 0], data[:, 1], data[:, 2], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
     plt.legend()
@@ -148,7 +148,7 @@ def vis3d(data, r):
 
 if __name__ == '__main__':
     param = {
-        "nbData": 100,  # Number of datapoints
+        "nbData": 200,  # Number of datapoints
         "nbVarPos": 7,  # Dimension of position data (here: x1,x2)
         "nbDeriv": 2,  # Number of static and dynamic features (nbDeriv=2 for [x,dx] and u=ddx)
         "dt": 1E-2,  # Time step duration
@@ -157,10 +157,13 @@ if __name__ == '__main__':
     param["nbVar"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
     param["nbVarX"] = param["nbVar"] + 1  # Augmented state space
 
-    via_points = np.zeros((2, 14))
+    # 7-dim example
+    via_points = np.zeros((3, 14))
     via_points[0, :7] = np.array([2, 5, 3, 0, 0, 0, 1])
     via_points[1, :7] = np.array([3, 1, 1, 0, 0, 0, 1])
+    via_points[2, :7] = np.array([5, 4, 1, 0, 0, 0, 1])
 
+    # 2-dim example
     # via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0]])
 
     uni_fb(param, via_points)
