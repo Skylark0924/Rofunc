@@ -2,63 +2,25 @@
     Linear Quadratic tracker with control primitives applied on a via-point example
 """
 
+from typing import Dict, Tuple
+
+import matplotlib.pyplot as plt
 import numpy as np
 import rofunc as rf
-import matplotlib.pyplot as plt
-from scipy import special
-from math import factorial
-from typing import Union, Dict, Tuple
-import rofunc as rf
-
-
-# Building piecewise constant basis functions
-def build_phi_piecewise(nb_data, nb_fct):
-    phi = np.kron(np.identity(nb_fct), np.ones((int(np.ceil(nb_data / nb_fct)), 1)))
-    return phi[:nb_data]
-
-
-# Building radial basis functions (RBFs)
-def build_phi_rbf(nb_data, nb_fct):
-    t = np.linspace(0, 1, nb_data).reshape((-1, 1))
-    tMu = np.linspace(t[0], t[-1], nb_fct)
-    phi = np.exp(-1e2 * (t.T - tMu) ** 2)
-    return phi.T
-
-
-# Building Bernstein basis functions
-def build_phi_bernstein(nb_data, nb_fct):
-    t = np.linspace(0, 1, nb_data)
-    phi = np.zeros((nb_data, nb_fct))
-    for i in range(nb_fct):
-        phi[:, i] = factorial(nb_fct - 1) / (factorial(i) * factorial(nb_fct - 1 - i)) * (1 - t) ** (
-                nb_fct - 1 - i) * t ** i
-    return phi
-
-
-# Building Fourier basis functions
-def build_phi_fourier(nb_data, nb_fct):
-    t = np.linspace(0, 1, nb_data).reshape((-1, 1))
-
-    # Alternative computation for real and even signal
-    k = np.arange(0, nb_fct).reshape((-1, 1))
-    phi = np.cos(t.T * k * 2 * np.pi)
-    return phi.T
 
 
 def define_control_primitive(param):
     functions = {
-        "PIECEWEISE": build_phi_piecewise,
-        "RBF": build_phi_rbf,
-        "BERNSTEIN": build_phi_bernstein,
-        "FOURIER": build_phi_fourier
+        "PIECEWEISE": rf.primitive.build_phi_piecewise,
+        "RBF": rf.primitive.build_phi_rbf,
+        "BERNSTEIN": rf.primitive.build_phi_bernstein,
+        "FOURIER": rf.primitive.build_phi_fourier
     }
     phi = functions[param["basisName"]](param["nbData"] - 1, param["nbFct"])
     PSI = np.kron(phi, np.identity(param["nbVarPos"]))
     return PSI, phi
 
 
-# Dynamical System settings (discrete)
-# =====================================
 def set_dynamical_system(param: Dict):
     nb_var = param["nb_var"]
     A = np.identity(nb_var)
@@ -84,7 +46,7 @@ def set_dynamical_system(param: Dict):
 
 def get_u_x(param: Dict, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray,
             Sx: np.ndarray, PSI: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    x0 = start_pose.reshape((param['nbVarPos'] * param['nbDeriv'], 1))
+    x0 = start_pose.reshape((param['nb_var'], 1))
     w_hat = np.linalg.inv(PSI.T @ Su.T @ Q @ Su @ PSI + PSI.T @ R @ PSI) @ PSI.T @ Su.T @ Q @ (muQ - Sx @ x0)
     u_hat = PSI @ w_hat
     x_hat = (Sx @ x0 + Su @ u_hat).reshape((-1, param["nb_var"]))
@@ -93,10 +55,10 @@ def get_u_x(param: Dict, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray,
 
 
 def uni_cp(param: Dict, data: np.ndarray):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
+    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT (control primitive)'))
     data = data[:, :param['nbVarPos']]
 
-    start_pose = np.zeros((param['nbVarPos'] * param['nbDeriv'],), dtype=np.float32)
+    start_pose = np.zeros((param['nb_var'],), dtype=np.float32)
     start_pose[:param['nbVarPos']] = data[0]
 
     via_point_pose = data[1:]
@@ -174,9 +136,6 @@ if __name__ == '__main__':
         "rfactor": 1e-8  # Control cost
     }
     param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
-
-    # Building basis functions
-    # =========================
 
     data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
     data = np.zeros((len(data_raw), 14))
