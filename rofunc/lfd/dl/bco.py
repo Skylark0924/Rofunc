@@ -92,3 +92,40 @@ def train_policy(training_set, state_space_size, policy, batch_size=256, n_epoch
     return policy
 
 
+if __name__ == '__main__':
+    env = gym.make('Pendulum-v0')
+    state_space_size = env.observation_space.shape[0]
+    action_space_size = env.action_space.shape[0]
+    transition_model = nn.Sequential(
+        nn.Linear(state_space_size * 2, 128),
+        nn.ReLU(),
+        nn.Linear(128, 128),
+        nn.ReLU(),
+        nn.Linear(128, state_space_size)
+    )
+    policy_model = nn.Sequential(
+        nn.Linear(state_space_size, 128),
+        nn.ReLU(),
+        nn.Linear(128, 128),
+        nn.ReLU(),
+        nn.Linear(128, action_space_size)
+    )
+    ep = 100
+    t = 100
+    states = torch.zeros((ep, t, state_space_size), dtype=torch.float)
+    actions = torch.zeros((ep, t, action_space_size), dtype=torch.float)
+    for i in range(ep):
+        state = env.reset()
+        for j in range(t):
+            states[i, j] = torch.tensor(state, dtype=torch.float)
+            action = env.action_space.sample()
+            actions[i, j] = torch.tensor(action, dtype=torch.float)
+            state, reward, done, info = env.step(action)
+            if done:
+                break
+    states, actions = data_process(states, actions)
+    training_set = torch.cat((states, actions), dim=1)
+    transition_model = train_transition(training_set, state_space_size, transition_model)
+    policy_model = train_policy(training_set, state_space_size, policy_model)
+    torch.save(transition_model, 'transition_model.pt')
+    torch.save(policy_model, 'policy_model.pt')
