@@ -3,6 +3,7 @@
 
 $$
 \begin{aligned}
+\label{1}
 c &=\left(\boldsymbol{\mu}_T-\boldsymbol{x}_T\right)^{\top} \boldsymbol{Q}_T\left(\boldsymbol{\mu}_T-\boldsymbol{x}_T\right)+\sum_{t=1}^{T-1}\left(\left(\boldsymbol{\mu}_t-\boldsymbol{x}_t\right)^{\top} \boldsymbol{Q}_t\left(\boldsymbol{\mu}_t-\boldsymbol{x}_t\right)+\boldsymbol{u}_t^{\top} \boldsymbol{R}_t \boldsymbol{u}_t\right) \\
 &=\tilde{\boldsymbol{x}}_T^{\top} \tilde{\boldsymbol{Q}}_T \tilde{\boldsymbol{x}}_T+\sum_{t=1}^{T-1}\left(\tilde{\boldsymbol{x}}_t^{\top} \tilde{\boldsymbol{Q}}_t \tilde{\boldsymbol{x}}_t+\boldsymbol{u}_t^{\top} \boldsymbol{R}_t \boldsymbol{u}_t\right),
 \end{aligned}
@@ -30,7 +31,7 @@ $$
 \end{array}\right]\left[\begin{array}{cc}
 \boldsymbol{I} & -\boldsymbol{\mu}_t \\
 0 & 1
-\end{array}\right],
+\end{array}\right],\label{2}
 $$
 
 ```python
@@ -64,7 +65,7 @@ $$
 \end{array}\right]}_{\tilde{\boldsymbol{x}}_t}+\underbrace{\left[\begin{array}{c}
 \boldsymbol{B} \\
 0
-\end{array}\right]}_{\tilde{\boldsymbol{B}}} \boldsymbol{u}_t
+\end{array}\right]}_{\tilde{\boldsymbol{B}}} \boldsymbol{u}_t\label{3}
 $$
 
 ```python
@@ -106,18 +107,8 @@ Q_{\boldsymbol{u x}, t}=\boldsymbol{B}_t^{\top} \boldsymbol{V}_{t+1} \boldsymbol
 $$
 
 $$
-\hat{u}_t=-\boldsymbol{K}_t x_t, \quad \text { with } \quad \boldsymbol{K}_t=Q_{u \boldsymbol{u}, t}^{-1} Q_{\boldsymbol{u x}, t} .
+\hat{u}_t=-\boldsymbol{K}_t x_t, \quad \text { with } \quad \boldsymbol{K}_t=Q_{u \boldsymbol{u}, t}^{-1} Q_{\boldsymbol{u x}, t}. \label{5}
 $$
-
-```python
-P = np.zeros((param["nbVarX"], param["nbVarX"], param["nbData"]))
-P[:, :, -1] = Q[:, :, -1]
-
-for t in range(param["nbData"] - 2, -1, -1):
-	P[:, :, t] = Q[:, :, t] - A.T @ (
-            P[:, :, t + 1] @ np.dot(B, np.linalg.pinv(B.T @ P[:, :, t + 1] @ B + R))
-            @ B.T @ P[:, :, t + 1] - P[:, :, t + 1]) @ A
-```
 
 
 $$
@@ -127,6 +118,50 @@ $$
 $$
 \boldsymbol{u}_t^{\mathrm{ff}}=-\boldsymbol{k}_t-\boldsymbol{K}_t \boldsymbol{\mu}_t
 $$
+
+
+
+---
+
+## Least squares formulation of recursive LQT
+
+As we mentioned in Equ. $\ref{1}, \ref{2}, \ref{3}$  the problem of tracking a reference signal $\{\boldsymbol{\mu}_t\}^T_{t=1}$ can be recast as a regulation problem by considering a dynamical system with an augmented states 
+$$
+\begin{aligned}
+&\min_{\boldsymbol{u}} (\boldsymbol{\mu} -\boldsymbol{x})^{\top}\boldsymbol{Q}(\boldsymbol{\mu} -\boldsymbol{x})+\boldsymbol{u}^\top\boldsymbol{R}\boldsymbol{u}\\
+\Rightarrow &\min_{\boldsymbol{u}} \tilde{\boldsymbol{x}}^{\top}\tilde{\boldsymbol{Q}}\tilde{\boldsymbol{x}}+\boldsymbol{u}^\top\boldsymbol{R}\boldsymbol{u}\\
+& s.t. \tilde{\boldsymbol{x}}=\boldsymbol{S}_\tilde{\boldsymbol{x}}\tilde{\boldsymbol{x}}_1+\boldsymbol{S}_\boldsymbol{u}\boldsymbol{u}
+\end{aligned}
+$$
+and has the solution 
+$$
+\hat{\boldsymbol{u}}=-\left(\boldsymbol{S}_{\boldsymbol{u}}^{\top} \boldsymbol{Q} \boldsymbol{S}_{\boldsymbol{u}}+\boldsymbol{R}\right)^{-1} \boldsymbol{S}_\boldsymbol{u}^{\top} \boldsymbol{Q}\boldsymbol{S}_{\tilde{\boldsymbol{x}}} \tilde{\boldsymbol{x}}_1
+$$
+We can introduce a matrix $\boldsymbol{F}$ to describe $\boldsymbol{u}=-\boldsymbol{F}\tilde{\boldsymbol{x}}_1$, then we get
+$$
+\min_{\boldsymbol{F}} \tilde{\boldsymbol{x}}^{\top}\boldsymbol{Q}\tilde{\boldsymbol{x}}+(\boldsymbol{F}\tilde{\boldsymbol{x}}_1)^\top\boldsymbol{R}(\boldsymbol{F}\tilde{\boldsymbol{x}}_1)\\
+s.t. \tilde{\boldsymbol{x}}=(\boldsymbol{S}_\tilde{\boldsymbol{x}} - \boldsymbol{S}_\boldsymbol{u}\boldsymbol{F})\tilde{\boldsymbol{x}}_1
+$$
+the solution changes to 
+$$
+\hat{\boldsymbol{F}}=-\left(\boldsymbol{S}_{\boldsymbol{u}}^{\top} \boldsymbol{Q} \boldsymbol{S}_{\boldsymbol{u}}+\boldsymbol{R}\right)^{-1} \boldsymbol{S}_\boldsymbol{u}^{\top} \boldsymbol{Q}\boldsymbol{S}_{\boldsymbol{x}}
+$$
+We decompose ${\boldsymbol{F}}$ as block matrices ${\boldsymbol{F}}_t$ with $t ∈ {1, . . . , T − 1}$. ${\boldsymbol{F}}$ can then be used to iteratively reconstruct
+regulation gains $\boldsymbol{K}_t$, by starting from $\boldsymbol{K}_1 = \boldsymbol{F}_1, \boldsymbol{P}_1 = I,$ and by computing recursively
+$$
+\boldsymbol{P}_t=\boldsymbol{P}_{t-1}\left(\boldsymbol{A}_{t-1}-\boldsymbol{B}_{t-1} \boldsymbol{K}_{t-1}\right)^{-1}, \quad \boldsymbol{K}_t=\boldsymbol{F}_t \boldsymbol{P}_t
+$$
+which can then be used in a feedback controller as in Equ. $\ref{5}$.
+
+```python
+P = np.zeros((param["nbVarX"], param["nbVarX"], param["nbData"]))
+P[:, :, -1] = Q[:, :, -1]
+
+for t in range(param["nbData"] - 2, -1, -1):
+    P[:, :, t] = Q[:, :, t] - A.T @ (
+        P[:, :, t + 1] @ np.dot(B, np.linalg.pinv(B.T @ P[:, :, t + 1] @ B + R))
+        @ B.T @ P[:, :, t + 1] - P[:, :, t + 1]) @ A
+```
 
 ```python
 def get_u_x(param: Dict, state_noise: np.ndarray, P: np.ndarray, R: np.ndarray, A: np.ndarray, B: np.ndarray):

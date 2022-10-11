@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from src import pytrigno
+from .src import pytrigno
 
 
 def record(host, n, samples_per_read, t):
