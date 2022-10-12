@@ -7,10 +7,11 @@ import rofunc as rf
 from rofunc.config.get_config import *
 
 
-def get_matrices(cfg: DictConfig, data: np.ndarray):
-    cfg.nbPoints = len(data)
+def get_matrices(cfg: DictConfig, via_points: np.ndarray):
+    cfg.nbPoints = len(via_points)
 
-    R = np.eye(cfg.nbVarPos) * cfg.rfactor  # Control cost matrix
+    # Control cost matrix
+    R = np.eye(cfg.nbVarPos) * cfg.rfactor
 
     # Sparse reference with a set of via-points
     tl = np.linspace(0, cfg.nbData - 1, cfg.nbPoints + 1)
@@ -18,29 +19,20 @@ def get_matrices(cfg: DictConfig, data: np.ndarray):
 
     # Definition of augmented precision matrix Qa based on standard precision matrix Q0
     Q0 = np.diag(np.hstack([np.ones(cfg.nbVarPos), np.zeros(cfg.nbVar - cfg.nbVarPos)]))
-
-    Q0_augmented = np.identity(cfg.nbVar + 1)
+    Q0_augmented = np.identity(cfg.nbVarX)
     Q0_augmented[:cfg.nbVar, :cfg.nbVar] = Q0
 
-    Q = np.zeros([cfg.nbVar + 1, cfg.nbVar + 1, cfg.nbData])
+    Q = np.zeros([cfg.nbVarX, cfg.nbVarX, cfg.nbData])
     for i in range(cfg.nbPoints):
         Q[:, :, int(tl[i])] = np.vstack([
             np.hstack([np.identity(cfg.nbVar), np.zeros([cfg.nbVar, 1])]),
-            np.hstack([-data[i, :], 1])]) @ Q0_augmented @ np.vstack([
-            np.hstack([np.identity(cfg.nbVar), -data[i, :].reshape([-1, 1])]),
+            np.hstack([-via_points[i, :], 1])]) @ Q0_augmented @ np.vstack([
+            np.hstack([np.identity(cfg.nbVar), -via_points[i, :].reshape([-1, 1])]),
             np.hstack([np.zeros(cfg.nbVar), 1])])
     return Q, R, tl
 
 
 def set_dynamical_system(cfg: DictConfig):
-    """
-    Dynamical System settings (discrete version)
-    Args:
-        param:
-
-    Returns:
-
-    """
     A1d = np.zeros((cfg.nbDeriv, cfg.nbDeriv))
     for i in range(cfg.nbDeriv):
         A1d += np.diag(np.ones((cfg.nbDeriv - i,)), i) * cfg.dt ** i / np.math.factorial(i)  # Discrete 1D
@@ -61,7 +53,7 @@ def get_u_x(cfg: DictConfig, state_noise: np.ndarray, P: np.ndarray, R: np.ndarr
     """
     Reproduction with only feedback (FB) on augmented state
     Args:
-        param:
+        cfg:
         state_noise:
         P:
         R:
@@ -95,20 +87,28 @@ def get_u_x(cfg: DictConfig, state_noise: np.ndarray, P: np.ndarray, R: np.ndarr
     return u_hat, x_hat
 
 
-def uni_fb(data: np.ndarray, cfg: DictConfig = None):
+def uni_fb(via_points: np.ndarray, cfg: DictConfig = None):
     """
     LQR with recursive computation and augmented state space
     Args:
-        param:
-        data:
+        via_points:
+        cfg:
 
     Returns:
 
     """
-    Q, R, tl = get_matrices(cfg, data)
+    print('\033[1;32m--------{}--------\033[0m'.format('LQT with feedback control'))
+
+    cfg = get_config("./", "lqt") if cfg is None else cfg
+    # cfg.nbVarPos = 2
+
+    Q, R, tl = get_matrices(cfg, via_points)
     A, B = set_dynamical_system(cfg)
 
-    state_noise = np.hstack((-1, -.2, 1, 0, 0, 0, 0, np.zeros(cfg.nbVarX - cfg.nbVarPos)))
+    state_noise = np.hstack(
+        (-1, -.2, 1, 0, 0, 0, 0, np.zeros(cfg.nbVarX - cfg.nbVarPos)))  # TODO: real noise from robot
+    # state_noise = np.hstack(
+    #     (-1, -.2, np.zeros(cfg.nbVarX - cfg.nbVarPos)))
 
     P = np.zeros((cfg.nbVarX, cfg.nbVarX, cfg.nbData))
     P[:, :, -1] = Q[:, :, -1]
@@ -118,29 +118,30 @@ def uni_fb(data: np.ndarray, cfg: DictConfig = None):
                 P[:, :, t + 1] @ np.dot(B, np.linalg.pinv(B.T @ P[:, :, t + 1] @ B + R))
                 @ B.T @ P[:, :, t + 1] - P[:, :, t + 1]) @ A
     u_hat, x_hat = get_u_x(cfg, state_noise, P, R, A, B)
-    vis3d(data, x_hat)
+    vis3d(via_points, x_hat)
     return u_hat, x_hat
 
 
-def vis(data, x_hat):
+def vis(via_points, x_hat):
     plt.figure()
     for n in range(2):
         plt.plot(x_hat[0, n, :], x_hat[1, n, :], label="Trajectory {}".format(n + 1))
         plt.scatter(x_hat[0, n, 0], x_hat[1, n, 0], marker='o')
 
-    plt.scatter(data[:, 0], data[:, 1], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
+    plt.scatter(via_points[:, 0], via_points[:, 1], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
     plt.legend()
     plt.show()
 
 
-def vis3d(data, x_hat):
+def vis3d(via_points, x_hat):
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111, projection='3d', fc='white')
 
-    rf.visualab.traj_plot([x_hat.transpose(1, 2, 0)[0]], mode='3d', ori=False, g_ax=ax, title='Trajectory 1')
-    rf.visualab.traj_plot([x_hat.transpose(1, 2, 0)[1]], mode='3d', ori=False, g_ax=ax, title='Trajectory 2')
+    rf.visualab.traj_plot([x_hat.transpose(1, 2, 0)[0]], mode='3d', ori=False, g_ax=ax, legend='Trajectory 1')
+    rf.visualab.traj_plot([x_hat.transpose(1, 2, 0)[1]], mode='3d', ori=False, g_ax=ax, legend='Trajectory 2')
 
-    ax.scatter(data[:, 0], data[:, 1], data[:, 2], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
+    ax.scatter(via_points[:, 0], via_points[:, 1], via_points[:, 2], s=20 * 1.5 ** 2, marker='o', color="red",
+               label="Via-points")
     plt.legend()
     plt.show()
 

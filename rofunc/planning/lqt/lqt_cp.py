@@ -1,7 +1,7 @@
 """
     Linear Quadratic tracker with control primitives applied on a via-point example
 """
-from typing import Dict, Tuple
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,24 +22,23 @@ def define_control_primitive(cfg):
 
 
 def set_dynamical_system(cfg: DictConfig):
-    nb_var = cfg.nbVar
-    A = np.identity(nb_var)
+    A = np.identity(cfg.nbVar)
     if cfg.nbDeriv == 2:
         A[:cfg.nbVarPos, -cfg.nbVarPos:] = np.identity(cfg.nbVarPos) * cfg.dt
 
-    B = np.zeros((nb_var, cfg.nbVarPos))
+    B = np.zeros((cfg.nbVar, cfg.nbVarPos))
     derivatives = [cfg.dt, cfg.dt ** 2 / 2][:cfg.nbDeriv]
     for i in range(cfg.nbDeriv):
         B[i * cfg.nbVarPos:(i + 1) * cfg.nbVarPos] = np.identity(cfg.nbVarPos) * derivatives[::-1][i]
 
     # Build Sx and Su transfer matrices
-    Su = np.zeros((nb_var * cfg.nbData, cfg.nbVarPos * (cfg.nbData - 1)))  # It's maybe n-1 not sure
-    Sx = np.kron(np.ones((cfg.nbData, 1)), np.eye(nb_var, nb_var))
+    Su = np.zeros((cfg.nbVar * cfg.nbData, cfg.nbVarPos * (cfg.nbData - 1)))  # It's maybe n-1 not sure
+    Sx = np.kron(np.ones((cfg.nbData, 1)), np.eye(cfg.nbVar, cfg.nbVar))
 
     M = B
     for i in range(1, cfg.nbData):
-        Sx[i * nb_var:cfg.nbData * nb_var, :] = np.dot(Sx[i * nb_var:cfg.nbData * nb_var, :], A)
-        Su[nb_var * i:nb_var * i + M.shape[0], 0:M.shape[1]] = M
+        Sx[i * cfg.nbVar:cfg.nbData * cfg.nbVar, :] = np.dot(Sx[i * cfg.nbVar:cfg.nbData * cfg.nbVar, :], A)
+        Su[cfg.nbVar * i:cfg.nbVar * i + M.shape[0], 0:M.shape[1]] = M
         M = np.hstack((np.dot(A, M), B))  # [0,nb_state_var-1]
     return Su, Sx
 
@@ -54,28 +53,25 @@ def get_u_x(cfg: DictConfig, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndar
     return u_hat, x_hat
 
 
-def uni_cp(data: np.ndarray, cfg: DictConfig = None):
+def uni_cp(via_points_raw: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT (control primitive)'))
 
-    cfg = get_config() if cfg is None else cfg
+    cfg = get_config("./", "lqt") if cfg is None else cfg
 
-    data = data[:, :cfg.nbVarPos]
+    via_points = np.zeros((len(via_points_raw), cfg.nbVar))
+    via_points[:, :cfg.nbVarPos] = via_points_raw
+    start_pose = via_points[0]
+    via_point_pose = via_points[1:]
 
-    start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
-    start_pose[:cfg.nbVarPos] = data[0]
-
-    via_point_pose = data[1:]
-    cfg.nbPoints = len(via_point_pose)
-
-    via_point, muQ, Q, R, idx_slices, tl = rf.lqt.get_matrices(cfg, via_point_pose)
+    mu, Q, R, idx_slices, tl = rf.lqt.get_matrices(cfg, via_point_pose)
     PSI, phi = define_control_primitive(cfg)
     Su, Sx = set_dynamical_system(cfg)
-    u_hat, x_hat = get_u_x(cfg, start_pose, muQ, Q, R, Su, Sx, PSI)
+    u_hat, x_hat = get_u_x(cfg, start_pose, mu, Q, R, Su, Sx, PSI)
 
     # vis(param, x_hat, u_hat, muQ, idx_slices, tl, phi)
-    rf.lqt.plot_3d_uni([x_hat], muQ, idx_slices)
+    rf.lqt.plot_3d_uni([x_hat], mu, idx_slices)
     # rf.visualab.traj_plot([x_hat[:, :2]])
-    return u_hat, x_hat, muQ, idx_slices
+    return u_hat, x_hat, mu, idx_slices
 
 
 def vis(cfg, x_hat, u_hat, muQ, idx_slices, tl, phi):
@@ -129,13 +125,11 @@ def vis(cfg, x_hat, u_hat, muQ, idx_slices, tl, phi):
 
 
 if __name__ == '__main__':
-    data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    data = np.zeros((len(data_raw), 14))
-    data[:, :7] = data_raw
-    filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
-    filter_indices.append(len(data_raw) - 1)
-    via_points = data[filter_indices]
+    via_points_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
+    filter_indices = [i for i in range(0, len(via_points_raw) - 10, 5)]
+    filter_indices.append(len(via_points_raw) - 1)
+    via_points_raw = via_points_raw[filter_indices]
 
     # via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0], [3, 6, 0, 0], [4, 2, 0, 0]])
 
-    uni_cp(via_points)
+    uni_cp(via_points_raw)
