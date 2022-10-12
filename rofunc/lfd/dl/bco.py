@@ -91,11 +91,12 @@ def train_policy(training_set, state_space_size, policy, batch_size=256, n_epoch
         loss_list.append(total_loss / training_set.shape[0])
     return policy
 
-
+# behavior cloning
 if __name__ == '__main__':
     env = gym.make('Pendulum-v0')
     state_space_size = env.observation_space.shape[0]
     action_space_size = env.action_space.shape[0]
+    expert_states = torch.tensor(np.load('../../data/test_data_BCO/states_expert_Pendulum.npy'), dtype=torch.float)
     transition_model = nn.Sequential(
         nn.Linear(state_space_size * 2, 128),
         nn.ReLU(),
