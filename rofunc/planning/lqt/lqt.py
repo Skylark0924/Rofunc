@@ -1,15 +1,12 @@
+"""
+    Linear Quadratic tracker
+"""
 from math import factorial
-from typing import Dict, Tuple
+from typing import Tuple
 
-from hydra import compose, initialize
 import numpy as np
-from rofunc.config.custom_resolvers import *
+from rofunc.config.get_config import *
 from tqdm import tqdm
-
-
-# @hydra.main(version_base=None, config_path="../../config", config_name="lqt")
-# def get_lqt_config(cfg: DictConfig) -> None:
-#     print(OmegaConf.to_yaml(cfg))
 
 
 def get_matrices(cfg: DictConfig, data: np.ndarray):
@@ -102,10 +99,12 @@ def get_u_x(cfg: DictConfig, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndar
     return u_hat, x_hat
 
 
-def uni(cfg: DictConfig, data: np.ndarray):
+def uni(data: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
 
-    start_pose = np.zeros((cfg.nbVarX * cfg.nbDeriv,), dtype=np.float32)
+    cfg = get_config("./", "lqt") if cfg is None else cfg
+
+    start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
     start_pose[:cfg.nbVarPos] = data[0]
 
     via_point_pose = data[1:]
@@ -118,8 +117,10 @@ def uni(cfg: DictConfig, data: np.ndarray):
     return u_hat, x_hat, muQ, idx_slices
 
 
-def uni_hierarchical(cfg: DictConfig, data: np.ndarray, interval: int = 3):
+def uni_hierarchical(data: np.ndarray, cfg: DictConfig = None, interval: int = 3):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
+
+    cfg = get_config("./", "lqt") if cfg is None else cfg
 
     start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
     start_pose[:cfg.nbVarPos] = data[0, :cfg.nbVarPos]
@@ -139,11 +140,13 @@ def uni_hierarchical(cfg: DictConfig, data: np.ndarray, interval: int = 3):
     return u_hat, x_hat, muQ, idx_slices
 
 
-def bi(cfg, l_data, r_data):
+def bi(l_data: np.ndarray, r_data: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
 
-    l_start_pose = np.zeros((cfg.nbVarX * cfg.nbDeriv,), dtype=np.float32)
-    r_start_pose = np.zeros((cfg.nbVarX * cfg.nbDeriv,), dtype=np.float32)
+    cfg = get_config("./", "lqt") if cfg is None else cfg
+
+    l_start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
+    r_start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
     l_start_pose[:cfg.nbVarPos] = l_data[0]
     r_start_pose[:cfg.nbVarPos] = r_data[0]
     via_point_pose_l = l_data[1:]
@@ -161,47 +164,35 @@ def bi(cfg, l_data, r_data):
 
 
 if __name__ == '__main__':
-    # import rofunc as rf
-    # cfg = get_lqt_config()
-    # initialize(config_path="../../config")
-    # cfg = compose(config_name="lqt")
-    from hydra.core.hydra_config import HydraConfig
-    import hydra
-    from hydra import compose, initialize
-    if HydraConfig.initialized():
-        hydra.core.global_hydra.GlobalHydra.instance().clear()
+    import rofunc as rf
 
-    with initialize(config_path="../../config", version_base=None):
-        cfg = compose(config_name="lqt")
-        # cfg_dict = omegaconf_to_dict(cfg.task)
-        # cfg_dict['env']['numEnvs'] = num_envs
+    # with initialize(config_path="../../config", version_base=None):
+    #     cfg = compose(config_name="lqt")
 
-    # Uni
-    # data = np.load(
-    #     '/home/ubuntu/Github/DGform/interactive/skylark/stretch-31-Aug-2022-08:48:15.683806/z_manipulator_poses.npy')
-    # filter_indices = [0, 1, 5, 10, 22, 36]
-    # data = data[filter_indices]
+    # <editor-fold desc="Uni example">
+    data = np.load(
+        '/home/ubuntu/Github/DGform/interactive/skylark/stretch-31-Aug-2022-08:48:15.683806/z_manipulator_poses.npy')
+    filter_indices = [0, 1, 5, 10, 22, 36]
+    data = data[filter_indices]
+    u_hat, x_hat, muQ, idx_slices = rf.lqt.uni(data)
+    rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
+    # </editor-fold>
 
-    # u_hat, x_hat, muQ, idx_slices = rf.lqt.uni(param, data)
-    # rf.lqt.plot_3d_uni(x_hat, muQ, idx_slices, ori=False, save=False)
-
-    # Bi
+    # <editor-fold desc="Bi example">
     # data = np.loadtxt('/home/ubuntu/Github/DGform/controller/data//link7_loc_ori.txt', delimiter=', ')
     # l_data = data[0:len(data):2]
     # r_data = data[1:len(data):2]
-    # u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices = rf.lqt.bi(param, l_data, r_data)
+    # u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices = bi(l_data, r_data)
     # rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)
+    # </editor-fold>
 
-    # Recursive
-    data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    data = np.zeros((len(data_raw), 14))
-    data[:, :7] = data_raw
-    filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
-    filter_indices.append(len(data_raw) - 1)
-    data = data[filter_indices]
-    u_hat, x_hat, muQ, idx_slices = uni_hierarchical(cfg, data, interval=2)
+    # <editor-fold desc="Recursive example">
+    # data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
+    # data = np.zeros((len(data_raw), 14))
+    # data[:, :7] = data_raw
+    # filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
+    # filter_indices.append(len(data_raw) - 1)
+    # data = data[filter_indices]
+    # u_hat, x_hat, muQ, idx_slices = uni_hierarchical(data, interval=2)
     # rf.lqt.plot_3d_uni(x_hat, ori=False, save=True, save_file_name='/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_r.npy')
-
-    # Show the data
-    # data = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_l.npy')
-    # rf.lqt.plot_3d_uni(data)
+    # </editor-fold>
