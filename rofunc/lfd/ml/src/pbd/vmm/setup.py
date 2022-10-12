@@ -10,5 +10,5 @@ setup(name='vmm',
       license='MIT',
       packages=find_packages(),
       install_requires = [
-          'numpy','scipy','matplotlib', 'tensorflow', 'tensorflow_probability', 'ipykernel', 'pyyaml', 'jupyter', 'lxml'],
+          'numpy','scipy','matplotlib', 'tensorflow_probability', 'ipykernel', 'pyyaml', 'jupyter', 'lxml'],
       zip_safe=False)

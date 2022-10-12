@@ -6,7 +6,7 @@ from sklearn import mixture
 from scipy.stats import wishart
 from .model import *
 from .utils import gaussian_moment_matching
-from .utils.math_utils import log_normalize
+# from .utils.math_utils import log_normalize
 
 
 class MTMM(Model):
