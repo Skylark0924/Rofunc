@@ -103,13 +103,13 @@ def get_skeleton_from_json_batch(json_dir):
         get_skeleton_from_json(json_path)
 
 
-def get_skeleton(mvnx_path, output_dir=None):
+def export(mvnx_path, output_dir=None):
     """
     Example:
-        from rofunc.xsens.process import get_skeleton
+        import rofunc as rf
 
         mvnx_file = '/home/ubuntu/Data/06_24/Xsens/dough_01.mvnx'
-        get_skeleton(mvnx_file)
+        rf.xsens.export(mvnx_file)
     """
     if mvnx_path.split('.')[-1] == 'mvnx':
         mvnx_file = load_mvnx(mvnx_path)
@@ -160,16 +160,16 @@ def get_skeleton(mvnx_path, output_dir=None):
         np.save(os.path.join(output_dir, "right_finger_{}.npy".format(label)), pose)
 
 
-def get_skeleton_batch(mvnx_dir):
+def export_batch(mvnx_dir):
     """
     Example:
-        from rofunc.xsens.process import get_skeleton_batch
+        import rofunc as rf
 
         mvnx_dir = '../xsens_data'
-        get_skeleton_batch(mvnx_dir)
+        rf.xsens.export_batch(mvnx_dir)
     """
     mvnxs = os.listdir(mvnx_dir)
     for mvnx in tqdm(mvnxs):
         if mvnx.split('.')[-1] == 'mvnx':
             mvnx_path = os.path.join(mvnx_dir, mvnx)
-            get_skeleton(mvnx_path)
+            export(mvnx_path)
