@@ -3,7 +3,8 @@ import numpy as np
 import rofunc as rf
 
 
-def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
+def plot_2d(cfg, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
+    # TODO: check
     plt.figure()
     plt.title("2D Trajectory")
     plt.scatter(x_hat_l[0, 0], x_hat_l[0, 1], c='blue', s=100)
@@ -25,7 +26,7 @@ def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     axs[0].plot(x_hat_l[:, 0], c='blue')
     axs[0].plot(x_hat_r[:, 0], c='green')
     axs[0].set_ylabel("$x_1$")
-    axs[0].set_xticks([0, param["nbData"]])
+    axs[0].set_xticks([0, cfg.nbData])
     axs[0].set_xticklabels(["0", "T"])
 
     for i, t in enumerate(tl):
@@ -35,7 +36,7 @@ def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     axs[1].plot(x_hat_r[:, 1], c='green')
     axs[1].set_ylabel("$x_2$")
     axs[1].set_xlabel("$t$")
-    axs[1].set_xticks([0, param["nbData"]])
+    axs[1].set_xticks([0, cfg.nbData])
     axs[1].set_xticklabels(["0", "T"])
 
     dis_lst = []
@@ -47,7 +48,7 @@ def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     axs[2].plot(timestep, dis_lst)
     axs[2].set_ylabel("traj_dis")
     axs[2].set_xlabel("$t$")
-    axs[2].set_xticks([0, param["nbData"]])
+    axs[2].set_xticks([0, cfg.nbData])
     axs[2].set_xticklabels(["0", "T"])
 
     dis_lst = []
@@ -73,6 +74,10 @@ def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_fi
     if muQ is not None and idx_slices is not None:
         for slice_t in idx_slices:
             ax.scatter(muQ[slice_t][0], muQ[slice_t][1], muQ[slice_t][2], c='red', s=10)
+
+    if not isinstance(x_hat, list):
+        if len(x_hat.shape) == 2:
+            x_hat = np.expand_dims(x_hat, axis=0)
 
     rf.visualab.traj_plot(x_hat, mode='3d', ori=ori, g_ax=ax)
 

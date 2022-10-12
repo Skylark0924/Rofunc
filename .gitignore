@@ -140,3 +140,6 @@ doc/rofunc.out
 
 .idea/
 whl/
+
+scripts/update.sh
+/rofunc/planning/lqt/outputs/

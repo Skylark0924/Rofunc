@@ -1,10 +1,9 @@
-Planning and Control
+Tools
 =================================
 
 .. toctree::
    :maxdepth: 2
 
-   lqt
-   lqt_fb
-   lqt_cp
+   visualab
+   robolab
 
