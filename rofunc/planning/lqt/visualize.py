@@ -64,7 +64,8 @@ def plot_2d(cfg, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     plt.show()
 
 
-def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_file_name=None, g_ax=None):
+def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_file_name=None, g_ax=None, title=None,
+                legend=None):
     if g_ax is None:
         fig = plt.figure(figsize=(4, 4))
         ax = fig.add_subplot(111, projection='3d', fc='white')
@@ -79,7 +80,8 @@ def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_fi
         if len(x_hat.shape) == 2:
             x_hat = np.expand_dims(x_hat, axis=0)
 
-    rf.visualab.traj_plot(x_hat, mode='3d', ori=ori, g_ax=ax)
+    title = 'Unimanual trajectory' if title is None else title
+    rf.visualab.traj_plot(x_hat, legend=legend, title=title, mode='3d', ori=ori, g_ax=ax)
 
     if save:
         assert save_file_name is not None
@@ -89,7 +91,7 @@ def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_fi
 
 
 def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=False, save=False, save_file_name=None,
-               g_ax=None):
+               g_ax=None, title=None, legend_lst=None):
     if g_ax is None:
         fig = plt.figure(figsize=(4, 4))
         ax = fig.add_subplot(111, projection='3d', fc='white')
@@ -106,8 +108,11 @@ def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=Fa
             x_hat_l = np.expand_dims(x_hat_l, axis=0)
             x_hat_r = np.expand_dims(x_hat_r, axis=0)
 
-    rf.visualab.traj_plot(x_hat_l, title='left arm', mode='3d', ori=ori, g_ax=ax)
-    rf.visualab.traj_plot(x_hat_r, title='right arm', mode='3d', ori=ori, g_ax=ax)
+    title = 'Bimanual trajectory' if title is None else title
+    legend_l = 'left arm' if legend_lst is None else legend_lst[0]
+    legend_r = 'right arm' if legend_lst is None else legend_lst[1]
+    rf.visualab.traj_plot(x_hat_l, title=title, legend=legend_l, mode='3d', ori=ori, g_ax=ax)
+    rf.visualab.traj_plot(x_hat_r, legend=legend_r, mode='3d', ori=ori, g_ax=ax)
 
     if save:
         assert save_file_name is not None
