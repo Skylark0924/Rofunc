@@ -8,9 +8,8 @@ from tqdm import tqdm
 
 
 # @hydra.main(version_base=None, config_path="../../config", config_name="lqt")
-# def get_lqt_config(cfg: DictConfig) -> DictConfig:
+# def get_lqt_config(cfg: DictConfig) -> None:
 #     print(OmegaConf.to_yaml(cfg))
-#     return cfg
 
 
 def get_matrices(cfg: DictConfig, data: np.ndarray):
@@ -20,23 +19,23 @@ def get_matrices(cfg: DictConfig, data: np.ndarray):
 
     tl = np.linspace(0, cfg.nbData, cfg.nbPoints + 1)
     tl = np.rint(tl[1:]).astype(np.int64) - 1
-    idx_slices = [slice(i, i + cfg.nb_var, 1) for i in (tl * cfg.nb_var)]
+    idx_slices = [slice(i, i + cfg.nbVar, 1) for i in (tl * cfg.nbVar)]
 
     # Target
-    muQ = np.zeros((cfg.nb_var * cfg.nbData, 1), dtype=np.float32)
+    muQ = np.zeros((cfg.nbVar * cfg.nbData, 1), dtype=np.float32)
     # Task precision
-    Q = np.zeros((cfg.nb_var * cfg.nbData, cfg.nb_var * cfg.nbData), dtype=np.float32)
+    Q = np.zeros((cfg.nbVar * cfg.nbData, cfg.nbVar * cfg.nbData), dtype=np.float32)
 
     via_point = []
     for i in range(len(idx_slices)):
         slice_t = idx_slices[i]
-        x_t = np.zeros((cfg.nb_var, 1))
+        x_t = np.zeros((cfg.nbVar, 1))
         x_t[:cfg.nbVarPos] = data[i].reshape((cfg.nbVarPos, 1))
         muQ[slice_t] = x_t
         via_point.append(x_t)
 
         Q[slice_t, slice_t] = np.diag(
-            np.hstack((np.ones(cfg.nbVarPos), np.zeros(cfg.nb_var - cfg.nbVarPos))))
+            np.hstack((np.ones(cfg.nbVarPos), np.zeros(cfg.nbVar - cfg.nbVarPos))))
     return via_point, muQ, Q, R, idx_slices, tl
 
 
@@ -47,23 +46,23 @@ def get_matrices_vel(cfg: DictConfig, data: np.ndarray):
 
     tl = np.linspace(0, cfg.nbData, cfg.nbPoints + 1)
     tl = np.rint(tl[1:]).astype(np.int64) - 1
-    idx_slices = [slice(i, i + cfg.nb_var, 1) for i in (tl * cfg.nb_var)]
+    idx_slices = [slice(i, i + cfg.nbVar, 1) for i in (tl * cfg.nbVar)]
 
     # Target
-    muQ = np.zeros((cfg.nb_var * cfg.nbData, 1), dtype=np.float32)
+    muQ = np.zeros((cfg.nbVar * cfg.nbData, 1), dtype=np.float32)
     # Task precision
-    Q = np.zeros((cfg.nb_var * cfg.nbData, cfg.nb_var * cfg.nbData), dtype=np.float32)
+    Q = np.zeros((cfg.nbVar * cfg.nbData, cfg.nbVar * cfg.nbData), dtype=np.float32)
 
     via_point = []
     for i in range(len(idx_slices)):
         slice_t = idx_slices[i]
-        # x_t = np.zeros((cfg.nb_var, 1))
-        x_t = data[i].reshape((cfg.nb_var, 1))
+        # x_t = np.zeros((cfg.nbVar, 1))
+        x_t = data[i].reshape((cfg.nbVar, 1))
         muQ[slice_t] = x_t
         via_point.append(x_t)
 
         Q[slice_t, slice_t] = np.diag(
-            np.hstack((np.ones(cfg.nbVarPos), np.zeros(cfg.nb_var - cfg.nbVarPos))))
+            np.hstack((np.ones(cfg.nbVarPos), np.zeros(cfg.nbVar - cfg.nbVarPos))))
     return via_point, muQ, Q, R, idx_slices, tl
 
 
@@ -77,7 +76,7 @@ def set_dynamical_system(cfg: DictConfig):
     A = np.kron(A1d, np.identity(cfg.nbVarPos, dtype=np.float32))
     B = np.kron(B1d, np.identity(cfg.nbVarPos, dtype=np.float32))
 
-    nb_var = cfg.nb_var  # Dimension of state vector
+    nb_var = cfg.nbVar  # Dimension of state vector
 
     # Build Sx and Su transfer matrices
     Su = np.zeros((nb_var * cfg.nbData, cfg.nbVarPos * (cfg.nbData - 1)))
@@ -94,12 +93,12 @@ def set_dynamical_system(cfg: DictConfig):
 
 def get_u_x(cfg: DictConfig, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray,
             Sx: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    x0 = start_pose.reshape((cfg.nbVarX * cfg.nbDeriv, 1))
+    x0 = start_pose.reshape((cfg.nbVar, 1))
 
     # Equ. 18
     u_hat = np.linalg.inv(Su.T @ Q @ Su + R) @ Su.T @ Q @ (muQ - Sx @ x0)
     # x= S_x x_1 + S_u u
-    x_hat = (Sx @ x0 + Su @ u_hat).reshape((-1, cfg.nb_var))
+    x_hat = (Sx @ x0 + Su @ u_hat).reshape((-1, cfg.nbVar))
     return u_hat, x_hat
 
 
@@ -122,7 +121,7 @@ def uni(cfg: DictConfig, data: np.ndarray):
 def uni_hierarchical(cfg: DictConfig, data: np.ndarray, interval: int = 3):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
 
-    start_pose = np.zeros((cfg.nbVarX * cfg.nbDeriv,), dtype=np.float32)
+    start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
     start_pose[:cfg.nbVarPos] = data[0, :cfg.nbVarPos]
 
     x_hat_lst = []
@@ -164,8 +163,18 @@ def bi(cfg, l_data, r_data):
 if __name__ == '__main__':
     # import rofunc as rf
     # cfg = get_lqt_config()
-    initialize(config_path="../../config")
-    cfg = compose(config_name="lqt")
+    # initialize(config_path="../../config")
+    # cfg = compose(config_name="lqt")
+    from hydra.core.hydra_config import HydraConfig
+    import hydra
+    from hydra import compose, initialize
+    if HydraConfig.initialized():
+        hydra.core.global_hydra.GlobalHydra.instance().clear()
+
+    with initialize(config_path="../../config", version_base=None):
+        cfg = compose(config_name="lqt")
+        # cfg_dict = omegaconf_to_dict(cfg.task)
+        # cfg_dict['env']['numEnvs'] = num_envs
 
     # Uni
     # data = np.load(
