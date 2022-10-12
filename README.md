@@ -39,7 +39,7 @@ The available functions and plans can be found as follows.
 
 | Classes                                         | Types                  | Functions               | Description                                                                   | Status |
 |-------------------------------------------------|------------------------|-------------------------|-------------------------------------------------------------------------------|--------|
-| **Demonstration collection and pre-processing** | Xsens                  | `xsens.record`          | Record the human motion via network streaming                                 |        |
+| **Demonstration collection and pre-processing** | Xsens                  | `xsens.record`          | Record the human motion via network streaming                                 | ✅      |
 |                                                 |                        | `xsens.process`         | Decode the .mvnx file                                                         | ✅      |
 |                                                 |                        | `xsens.visualize`       | Show or save gif about the motion                                             | ✅      |
 |                                                 | Optitrack              | `optitrack.record`      | Record the motion of markers via network streaming                            |        |
@@ -60,17 +60,20 @@ The available functions and plans can be found as follows.
 |                                                 |                        | `tpgmm.bi`              | TP-GMM for two agents with coordination learned from demonstration            | ✅      |
 |                                                 | TP-GMR                 | `tpgmr.uni`             | TP-GMR for one agent with several (or one) demonstrated trajectories          | ✅      |
 |                                                 |                        | `tpgmr.bi`              | TP-GMR for two agents with coordination learned from demonstration            | ✅      |
-|                                                 | Behavior Cloning       | `bc.uni`                | NN-based baseline behavior cloning method                                     |        |
+|                                                 | Behavior Cloning       | `bc.uni`                | NN-based baseline behavior cloning method                                     | ✅      |
 |                                                 | Structured-Transformer | `strans.uni`            | Structured-Transformer method propose in                                      |        |
 |                                                 | CQL                    | `cql.uni`               | Conservative Q-learning for fully offline learning                            |        |
 |                                                 |                        | `mcql.uni`              | Mixed conservative Q-learning for learning from demonstration with interation |        |
 | **Planning**                                    | LQT                    | `lqt.uni`               | LQT for one agent with several via-points                                     | ✅      |
 |                                                 |                        | `lqt.bi`                | LQT for two agents with coordination constraints                              | ✅      |
-|                                                 |                        | `lqt.hierarchical`      | Generate smooth trajectories for robot execution hierarchically               | ✅      |
-|                                                 |                        | `lqt.recursive`         | Generate smooth trajectories with feedback                                    | ✅      |
-|                                                 | iLQR                   | `ilqr.uni`              | Iterative LQR (iLQR) for one agent with several via-points                    |        |
+|                                                 |                        | `lqt.uni_hierarchical`  | Generate smooth trajectories for robot execution hierarchically               | ✅      |
+|                                                 |                        | `lqt.uni_fb`            | Generate smooth trajectories with feedback                                    | ✅      |
+|                                                 |                        | `lqt.uni_cp`            | LQT with control primitive                                                    | ✅      |
+|                                                 |                        | `lqt.uni_cp_dmp`        | LQT with control primitive and DMP form                                       | ✅      |
+|                                                 | iLQR                   | `ilqr.uni`              | Iterative LQR (iLQR) for one agent with several via-points                    | ✅      |
 |                                                 |                        | `ilqr.bi`               | Iterative LQR (iLQR) for two agents with several via-points                   |        |
 | **Tools**                                       | Logger                 | `logger.write`          | Custom tensorboard-based logger                                               |        |
+|                                                 | Config                 | `config.get_config`     | General config API by using `hydra`                                           | ✅      |
 |                                                 | Coordinate             | `coord.custom_class`    | Define the custom class of `Pose`                                             |        |
 |                                                 |                        | `coord.transform`       | Useful functions about coordinate transformation                              | ✅      |
 |                                                 | VisuaLab               | `visualab.trajectory`   | 2-dim/3-dim/with ori trajectory visualization                                 | ✅      |
