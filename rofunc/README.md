@@ -274,7 +274,7 @@ param = {
     "dt": 1e-2,      # Time step duration
     "rfactor": 1e-8  # Control cost
 }
-param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
+cfg.nbVar = cfg.nbVarPos * cfg.nbDeriv  # Dimension of state vector
 
 data = np.load('data/z_manipulator_poses.npy')
 filter_indices = [0, 1, 5, 10, 22, 36]
@@ -301,7 +301,7 @@ param = {
     "dt": 1e-2,  # Time step duration
     "rfactor": 1e-8  # Control cost
 }
-param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
+cfg.nbVar = cfg.nbVarPos * cfg.nbDeriv  # Dimension of state vector
 
 data = np.loadtxt('data/link7_loc_ori.txt', delimiter=', ')
 l_data = data[0:len(data):2]

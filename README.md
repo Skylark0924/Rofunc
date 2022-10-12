@@ -7,7 +7,7 @@
 ![](https://img.shields.io/github/issues-closed-raw/Skylark0924/Rofunc)
 ![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)
 
-![](./img/logo2.png)
+![](./img/logo1.png)
 
 ## Rofunc
 
@@ -55,6 +55,7 @@ The available functions and plans can be found as follows.
 |                                                 |                        | `mmodal.export`         | Export multi-modal demonstration data in one line                             | ✅      |
 | **Learning from Demonstration**                 | DMP                    | `dmp.uni`               | DMP for one agent with several (or one) demonstrated trajectories             |        |
 |                                                 | GMR                    | `gmr.uni`               | GMR for one agent with several (or one) demonstrated trajectories             | ✅      |
+|                                                 | GMR                    | `gmm.uni`               | GMM for one agent with several (or one) demonstrated trajectories             |        |
 |                                                 | TP-GMM                 | `tpgmm.uni`             | TP-GMM for one agent with several (or one) demonstrated trajectories          | ✅      |
 |                                                 |                        | `tpgmm.bi`              | TP-GMM for two agents with coordination learned from demonstration            | ✅      |
 |                                                 | TP-GMR                 | `tpgmr.uni`             | TP-GMR for one agent with several (or one) demonstrated trajectories          | ✅      |
@@ -66,7 +67,7 @@ The available functions and plans can be found as follows.
 | **Planning**                                    | LQT                    | `lqt.uni`               | LQT for one agent with several via-points                                     | ✅      |
 |                                                 |                        | `lqt.bi`                | LQT for two agents with coordination constraints                              | ✅      |
 |                                                 |                        | `lqt.hierarchical`      | Generate smooth trajectories for robot execution hierarchically               | ✅      |
-|                                                 |                        | `lqt.recursive`         | Generate smooth trajectories with feedback                                    |        |
+|                                                 |                        | `lqt.recursive`         | Generate smooth trajectories with feedback                                    | ✅      |
 |                                                 | iLQR                   | `ilqr.uni`              | Iterative LQR (iLQR) for one agent with several via-points                    |        |
 |                                                 |                        | `ilqr.bi`               | Iterative LQR (iLQR) for two agents with several via-points                   |        |
 | **Tools**                                       | Logger                 | `logger.write`          | Custom tensorboard-based logger                                               |        |
@@ -92,13 +93,13 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 ```
 @misc{Junjia2022,
-author = {Liu, Junjia},
-title = {Rofunc},
-year = {2022},
-publisher = {GitHub},
-journal = {GitHub repository},
-howpublished = {\url{https://github.com/Skylark0924/Rofunc}},
-commit = {689cb899f4640d3a2f769654b988c3a8a8c2bad5}
+	author = {Liu, Junjia and Li, Zhihao and Li, Chenzui},
+	title = {Rofunc: The full process python package for robot learning from demonstration},
+	year = {2022},
+	publisher = {GitHub},
+	journal = {GitHub repository},
+	howpublished = {\url{https://github.com/Skylark0924/Rofunc}},
+	commit = {689cb899f4640d3a2f769654b988c3a8a8c2bad5}
 }
 ```
 
