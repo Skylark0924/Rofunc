@@ -12,7 +12,6 @@ from scipy.linalg import block_diag
 from rofunc.config.get_config import *
 
 
-
 def get_matrices(cfg: DictConfig, data: np.ndarray):
     # Task setting (tracking of acceleration profile and reaching of an end-point)
     Q = np.kron(np.identity(cfg.nbData),
@@ -101,27 +100,23 @@ def get_u_x(cfg: DictConfig, state_noise: np.ndarray, muQ: np.ndarray, Qm: np.nd
 def uni_cp_dmp(data: np.ndarray, cfg: DictConfig = None):
     print(
         '\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT (control primitive and DMP)'))
-    # data = data[:, :cfg.nbVarPos]
-
-    # start_pose = np.zeros((param['nbVar'],), dtype=np.float32)
-    # start_pose[:cfg.nbVarPos] = data[0]
-
-    # via_point_pose = data[1:]
-    # cfg.nbPoints = len(via_point_pose)
-
     Qm, Rm = get_matrices(cfg, data)
     PSI, phi = rf.lqt.define_control_primitive(cfg)
     Su, Sx, A, B = set_dynamical_system(cfg)
 
+    # state_noise = np.hstack(
+    #     (-1, -.2, 1, 0, 0, 0, 0, np.zeros(cfg.nbVarX - cfg.nbVarPos))).reshape(
+    #     (cfg.nbVarX, 1))  # Simulated noise on 3d state
     state_noise = np.hstack(
-        (-1, -.2, 1, 0, 0, 0, 0, np.zeros(cfg.nbVarX - cfg.nbVarPos))).reshape((cfg.nbVarX, 1))  # Simulated noise on state
+        (-1, -.2, np.zeros(cfg.nbVarX - cfg.nbVarPos))).reshape(
+        (cfg.nbVarX, 1))  # Simulated noise on 2d state
 
     u_hat, x_hat = get_u_x(cfg, state_noise, data, Qm, Rm, Su, Sx, PSI, A, B)
 
     # vis(param, x_hat, u_hat, muQ, idx_slices, tl, phi)
-    vis3d(data, x_hat)
+    # vis3d(data, x_hat)
     # rf.visualab.traj_plot([x_hat[:, :2]])
-    # vis(x_hat, data)
+    vis(x_hat, data)
     return u_hat, x_hat
 
 
@@ -154,26 +149,33 @@ def vis3d(data, x_hat):
 
 if __name__ == '__main__':
     cfg = get_config('./', 'lqt')
+    cfg.nbDeriv = 3
 
-    data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    # filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
-    # filter_indices.append(len(data_raw) - 1)
-    MuPos = data_raw  # pose
-    MuVel = np.gradient(MuPos)[0] / cfg.dt
-    MuAcc = np.gradient(MuVel)[0] / cfg.dt
-    via_points = np.hstack((MuPos, MuVel, MuAcc)).T
+    # <editor-fold desc="3d example">
+    # data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
+    # # filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
+    # # filter_indices.append(len(data_raw) - 1)
+    # MuPos = data_raw  # pose
+    # MuVel = np.gradient(MuPos)[0] / cfg.dt
+    # MuAcc = np.gradient(MuVel)[0] / cfg.dt
+    # via_points = np.hstack((MuPos, MuVel, MuAcc)).T
+    # </editor-fold>
+
+    # <editor-fold desc="2d letter example data">
+    cfg.nbVarU = 2
+    cfg.nbVarPos = 2
+    from scipy.interpolate import interp1d
+    x = np.load(
+        '/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/planning/src/robotics-codes-from-scratch-master/data/2Dletters/S.npy')[
+        0, :, :2].T
+
+    f_pos = interp1d(np.linspace(0, np.size(x, 1) - 1, np.size(x, 1), dtype=int), x, kind='cubic')
+    MuPos = f_pos(np.linspace(0, np.size(x, 1) - 1, cfg.nbData))  # Position
+    MuVel = np.gradient(MuPos)[1] / cfg.dt
+    MuAcc = np.gradient(MuVel)[1] / cfg.dt
+    # Position, velocity and acceleration profiles as references
+    via_points = np.vstack((MuPos, MuVel, MuAcc))
+    # </editor-fold>
+
     cfg.nbData = len(via_points[0])
-    # 2d letter example data
-    # from scipy.interpolate import interp1d
-    # x = np.load(
-    #     '/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/planning/src/robotics-codes-from-scratch-master/data/2Dletters/S.npy')[
-    #     0, :, :2].T
-    #
-    # f_pos = interp1d(np.linspace(0, np.size(x, 1) - 1, np.size(x, 1), dtype=int), x, kind='cubic')
-    # MuPos = f_pos(np.linspace(0, np.size(x, 1) - 1, cfg.nbData))  # Position
-    # MuVel = np.gradient(MuPos)[1] / cfg.dt
-    # MuAcc = np.gradient(MuVel)[1] / cfg.dt
-    # # Position, velocity and acceleration profiles as references
-    # via_points = np.vstack((MuPos, MuVel, MuAcc))
-
     uni_cp_dmp(via_points, cfg)

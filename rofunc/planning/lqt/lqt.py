@@ -13,32 +13,7 @@ def get_matrices(cfg: DictConfig, via_points: np.ndarray):
     cfg.nbPoints = len(via_points)
 
     # Control cost matrix
-    R = np.identity((cfg.nbData - 1) * cfg.nbVarPos, dtype=np.float32) * cfg.rfactor  
-
-    tl = np.linspace(0, cfg.nbData, cfg.nbPoints + 1)
-    tl = np.rint(tl[1:]).astype(np.int64) - 1
-    idx_slices = [slice(i, i + cfg.nbVar, 1) for i in (tl * cfg.nbVar)]
-
-    # Target
-    mu = np.zeros((cfg.nbVar * cfg.nbData, 1), dtype=np.float32)
-    # Task precision
-    Q = np.zeros((cfg.nbVar * cfg.nbData, cfg.nbVar * cfg.nbData), dtype=np.float32)
-
-    for i in range(len(idx_slices)):
-        slice_t = idx_slices[i]
-        x_t = np.zeros((cfg.nbVar, 1))
-        x_t[:cfg.nbVarPos] = via_points[i].reshape((cfg.nbVarPos, 1))
-        mu[slice_t] = x_t
-
-        Q[slice_t, slice_t] = np.diag(np.hstack((np.ones(cfg.nbVarPos), np.zeros(cfg.nbVar - cfg.nbVarPos))))
-    return mu, Q, R, idx_slices, tl
-
-
-def get_matrices_vel(cfg: DictConfig, via_points: np.ndarray):
-    cfg.nbPoints = len(via_points)
-
-    # Control cost matrix
-    R = np.identity((cfg.nbData - 1) * cfg.nbVarPos, dtype=np.float32) * cfg.rfactor  
+    R = np.identity((cfg.nbData - 1) * cfg.nbVarPos, dtype=np.float32) * cfg.rfactor
 
     tl = np.linspace(0, cfg.nbData, cfg.nbPoints + 1)
     tl = np.rint(tl[1:]).astype(np.int64) - 1
@@ -53,6 +28,7 @@ def get_matrices_vel(cfg: DictConfig, via_points: np.ndarray):
         slice_t = idx_slices[i]
         x_t = via_points[i].reshape((cfg.nbVar, 1))
         mu[slice_t] = x_t
+
         Q[slice_t, slice_t] = np.diag(np.hstack((np.ones(cfg.nbVarPos), np.zeros(cfg.nbVar - cfg.nbVarPos))))
     return mu, Q, R, idx_slices, tl
 
@@ -89,16 +65,15 @@ def get_u_x(cfg: DictConfig, start_pose: np.ndarray, mu: np.ndarray, Q: np.ndarr
     return u_hat, x_hat
 
 
-def uni(via_points: np.ndarray, cfg: DictConfig = None):
+def uni(via_points_raw: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
 
     cfg = get_config("./", "lqt") if cfg is None else cfg
 
-    start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
-    start_pose[:cfg.nbVarPos] = via_points[0]
-
+    via_points = np.zeros((len(via_points_raw), cfg.nbVar))
+    via_points[:, :cfg.nbVarPos] = via_points_raw
+    start_pose = via_points[0]
     via_point_pose = via_points[1:]
-    cfg.nbPoints = len(via_point_pose)
 
     mu, Q, R, idx_slices, tl = get_matrices(cfg, via_point_pose)
     Su, Sx = set_dynamical_system(cfg)
@@ -106,20 +81,20 @@ def uni(via_points: np.ndarray, cfg: DictConfig = None):
     return u_hat, x_hat, mu, idx_slices
 
 
-def uni_hierarchical(via_points: np.ndarray, cfg: DictConfig = None, interval: int = 3):
+def uni_hierarchical(via_points_raw: np.ndarray, cfg: DictConfig = None, interval: int = 3):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
 
     cfg = get_config("./", "lqt") if cfg is None else cfg
 
-    start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
-    start_pose[:cfg.nbVarPos] = via_points[0, :cfg.nbVarPos]
+    via_points = np.zeros((len(via_points_raw), cfg.nbVar))
+    via_points[:, :cfg.nbVarPos] = via_points_raw[:, :cfg.nbVarPos]
+    start_pose = via_points[0]
 
     x_hat_lst = []
     for i in tqdm(range(0, len(via_points), interval)):
         via_point_pose = via_points[i + 1:i + interval + 1]
-        cfg.nbPoints = len(via_point_pose)
 
-        mu, Q, R, idx_slices, tl = get_matrices_vel(cfg, via_point_pose)
+        mu, Q, R, idx_slices, tl = get_matrices(cfg, via_point_pose)
         Su, Sx = set_dynamical_system(cfg)
         u_hat, x_hat = get_u_x(cfg, start_pose, mu, Q, R, Su, Sx)
         start_pose = x_hat[-1]
@@ -129,18 +104,19 @@ def uni_hierarchical(via_points: np.ndarray, cfg: DictConfig = None, interval: i
     return u_hat, x_hat, mu, idx_slices
 
 
-def bi(via_points_l: np.ndarray, via_points_r: np.ndarray, cfg: DictConfig = None):
+def bi(via_points_raw_l: np.ndarray, via_points_raw_r: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
 
     cfg = get_config("./", "lqt") if cfg is None else cfg
 
-    l_start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
-    r_start_pose = np.zeros((cfg.nbVar,), dtype=np.float32)
-    l_start_pose[:cfg.nbVarPos] = via_points_l[0]
-    r_start_pose[:cfg.nbVarPos] = via_points_r[0]
+    via_points_l = np.zeros((len(via_points_raw_l), cfg.nbVar))
+    via_points_l[:, :cfg.nbVarPos] = via_points_raw_l
+    via_points_r = np.zeros((len(via_points_raw_r), cfg.nbVar))
+    via_points_r[:, :cfg.nbVarPos] = via_points_raw_r
+    l_start_pose = via_points_l[0]
+    r_start_pose = via_points_r[0]
     via_point_pose_l = via_points_l[1:]
     via_point_pose_r = via_points_r[1:]
-    cfg.nbPoints = len(via_point_pose_l)
 
     mu_l, Q, R, idx_slices, tl = get_matrices(cfg, via_point_pose_l)
     mu_r, Q, R, idx_slices, tl = get_matrices(cfg, via_point_pose_r)
@@ -163,7 +139,7 @@ if __name__ == '__main__':
     #     '/home/ubuntu/Github/DGform/interactive/skylark/stretch-31-Aug-2022-08:48:15.683806/z_manipulator_poses.npy')
     # filter_indices = [0, 1, 5, 10, 22, 36]
     # via_points = via_points[filter_indices]
-    # u_hat, x_hat, mu, idx_slices = rf.lqt.uni(via_points)
+    # u_hat, x_hat, mu, idx_slices = uni(via_points)
     # rf.lqt.plot_3d_uni(x_hat, mu, idx_slices, ori=False, save=False)
     # </editor-fold>
 
@@ -175,13 +151,12 @@ if __name__ == '__main__':
     # rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)
     # </editor-fold>
 
-    # <editor-fold desc="Recursive example">
+    # <editor-fold desc="Hierarchical example">
     via_points_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    via_points = np.zeros((len(via_points_raw), 14))
-    via_points[:, :7] = via_points_raw
     filter_indices = [i for i in range(0, len(via_points_raw) - 10, 5)]
     filter_indices.append(len(via_points_raw) - 1)
-    via_points = via_points[filter_indices]
-    u_hat, x_hat, mu, idx_slices = uni_hierarchical(via_points, interval=2)
-    rf.lqt.plot_3d_uni([x_hat], ori=False, save=False, save_file_name='/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_r.npy')
+    via_points_raw = via_points_raw[filter_indices]
+    u_hat, x_hat, mu, idx_slices = uni_hierarchical(via_points_raw, interval=2)
+    rf.lqt.plot_3d_uni([x_hat], ori=False, save=False,
+                       save_file_name='/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_r.npy')
     # </editor-fold>
