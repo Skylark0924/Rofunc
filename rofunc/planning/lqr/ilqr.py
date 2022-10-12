@@ -14,7 +14,7 @@ def logmap(f, f0):
     return error
 
 
-def fkin(x, param):
+def fkin(param, x):
     L = np.tril(np.ones([param.nbVarX, param.nbVarX]))
     f = np.vstack([
         param.l @ np.cos(L @ x),
@@ -24,14 +24,13 @@ def fkin(x, param):
     return f
 
 
-def fk(x, param):
+def fk(param, x):
     """
     Forward kinematics for end-effector (in robot coordinate system)
     $f(x_t) = x_t$
     Args:
-        x:
         param:
-
+        x:
     Returns:
 
     """
@@ -45,7 +44,7 @@ def fk(x, param):
     return f
 
 
-def Jacobian(x, param):
+def Jacobian(param, x):
     """
     Jacobian with analytical computation (for single time step)
     $J(x_t)= \dfrac{\partial{f(x_t)}}{\partial{x_t}}$
@@ -66,21 +65,24 @@ def Jacobian(x, param):
     return J
 
 
-def f_reach(x, param):
+def f_reach(param, robot_state, specific_robot=None):
     """
     Error and Jacobian for a viapoints reaching task (in object coordinate system)
     Args:
-        x:
         param:
-
+        robot_state: joint state or Cartesian pose
     Returns:
 
     """
-    f = logmap(fk(x, param), param.Mu)
+    if specific_robot is not None:
+        ee_pose = specific_robot.fk(robot_state)
+    else:
+        ee_pose = fk(param, robot_state)
+    f = logmap(ee_pose, param.Mu)
     J = np.zeros([param.nbPoints * param.nbVarF, param.nbPoints * param.nbVarX])
     for t in range(param.nbPoints):
         f[:2, t] = param.A[:, :, t].T @ f[:2, t]  # Object-oriented forward kinematics
-        Jtmp = Jacobian(x[:, t], param)
+        Jtmp = Jacobian(robot_state[:, t], param)
         Jtmp[:2] = param.A[:, :, t].T @ Jtmp[:2]  # Object centered Jacobian
 
         if param.useBoundingBox:
@@ -192,6 +194,12 @@ def vis(x, param, tl):
 
 
 if __name__ == '__main__':
+    import hydra
+    from omegaconf import DictConfig, OmegaConf
+    from pathlib import Path
+
+
+    @hydra.main(config_path="config", config_name="config")
     # Parameters
     class Param:
         def __init__(self):

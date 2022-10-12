@@ -1,0 +1,7 @@
+nbData: 200  # Number of datapoints
+nbVarPos: 7  # Dimension of position data (here: x1,x2)
+nbDeriv: 2  # Number of static and dynamic features (nbDeriv=2 for [x,dx] and u=ddx)
+dt: 1E-2  # Time step duration
+rfactor: 1E-6  # control cost in LQR
+nbVar: ${multi:${nbVarPos},${nbDeriv}}  # Dimension of state vector
+nbVarX: ${add:${nbVar}, 1}  # Augmented state space
