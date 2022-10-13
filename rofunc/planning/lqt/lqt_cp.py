@@ -1,5 +1,7 @@
 """
     Linear Quadratic tracker with control primitives applied on a via-point example
+
+    Refers to https://gitlab.idiap.ch/rli/robotics-codes-from-scratch by Dr. Sylvain Calinon
 """
 from typing import Tuple
 
@@ -11,7 +13,7 @@ from rofunc.config.get_config import *
 
 def define_control_primitive(cfg):
     functions = {
-        "PIECEWEISE": rf.primitive.build_phi_piecewise,
+        "PIECEWISE": rf.primitive.build_phi_piecewise,
         "RBF": rf.primitive.build_phi_rbf,
         "BERNSTEIN": rf.primitive.build_phi_bernstein,
         "FOURIER": rf.primitive.build_phi_fourier
