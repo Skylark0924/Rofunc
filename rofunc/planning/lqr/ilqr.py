@@ -122,13 +122,9 @@ def set_dynamical_system(cfg: DictConfig):
     return Su0, Sx0
 
 
-def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, Q: np.ndarray, R: np.ndarray, Su0: np.ndarray,
-            Sx0: np.ndarray, idx: np.ndarray, tl: np.ndarray):
+def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0: np.ndarray, Q: np.ndarray,
+            R: np.ndarray, Su0: np.ndarray, Sx0: np.ndarray, idx: np.ndarray, tl: np.ndarray):
     Su = Su0[idx.flatten()]  # We remove the lines that are out of interest
-
-    u = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
-    x0 = np.array([3 * np.pi / 4, -np.pi / 2, -np.pi / 4])  # Initial state
-    # x0 = fkin(cfg, np.array([3 * np.pi / 4, -np.pi / 2, -np.pi / 4])).reshape((3,))  # Initial state
 
     for i in range(cfg.nbIter):
         x = Su0 @ u + Sx0 @ x0  # System evolution
@@ -155,10 +151,10 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, Q: np.ndarray, R: 
     return u, x
 
 
-def uni(Mu, Rot, cfg):
+def uni(Mu, Rot, u0, x0, cfg):
     Q, R, idx, tl = get_matrices(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
-    u, x = get_u_x(cfg, Mu, Rot, Q, R, Su0, Sx0, idx, tl)
+    u, x = get_u_x(cfg, Mu, Rot, u0, x0, Q, R, Su0, Sx0, idx, tl)
     vis(cfg, x, tl)
 
 
@@ -209,4 +205,8 @@ if __name__ == '__main__':
             [np.sin(orn_t), np.cos(orn_t)]
         ])
 
-    uni_ilqr(Mu, Rot, cfg)
+    u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
+    x0 = np.array([3 * np.pi / 4, -np.pi / 2, -np.pi / 4])  # Initial state
+    # x0 = fkin(cfg, np.array([3 * np.pi / 4, -np.pi / 2, -np.pi / 4])).reshape((3,))  # Initial state
+
+    uni(Mu, Rot, u0, x0, cfg)

@@ -72,7 +72,10 @@ The available functions and plans can be found as follows.
 |                                                 |                        | `lqt.uni_cp_dmp`        | LQT with control primitive and DMP form                                       | ✅      |
 |                                                 | iLQR                   | `ilqr.uni`              | Iterative LQR (iLQR) for one agent with several via-points                    | ✅      |
 |                                                 |                        | `ilqr.bi`               | Iterative LQR (iLQR) for two agents with several via-points                   | ✅      |
+|                                                 |                        | `ilqr.uni_fb`           | Iterative LQR (iLQR) with feedback                                            |        |
 |                                                 |                        | `ilqr.uni_cp`           | Iterative LQR (iLQR) with control primitive                                   | ✅      |
+|                                                 |                        | `ilqr.uni_com`          | Iterative LQR (iLQR) with center of mass                                      | ✅      |
+|                                                 |                        | `ilqr.uni_obstacle`     | Iterative LQR (iLQR) with obstacle avoidance                                  | ✅      |
 | **Tools**                                       | Logger                 | `logger.write`          | Custom tensorboard-based logger                                               |        |
 |                                                 | Config                 | `config.get_config`     | General config API by using `hydra`                                           | ✅      |
 |                                                 | Coordinate             | `coord.custom_class`    | Define the custom class of `Pose`                                             |        |
