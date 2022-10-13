@@ -1,0 +1,19 @@
+nbData: 101                              # Number of datapoints
+nbIter: 20                              # Maximum number of iterations for iLQR
+nbVarPos: 3                             # Dimension of position data (here: x1,x2)
+nbDeriv: 2                              # Number of static and dynamic features (nbDeriv=2 for [x,dx] and u=ddx)
+nbPoints: 1                             # Number of via-points to track
+nbObstacles: 2                             # Number of via-points to track
+nbVarX: 2                               # State space dimension (x1,x2,x3)
+nbVarU: 2                               #  Control space dimension (dx1,dx2,dx3)
+nbVarF: 4                               # Objective function dimension (f1,f2,f3, with f3 as orientation)
+dt: 1E-2                                # Time step duration
+rfactor: 1E-3                           # control cost in LQR
+
+# For robot
+l: [2, 2, 2, 2, 2]                         # Robot links lengths
+sizeObj: [.2,.2]                          # Size of objects
+sizeObstacle: [.4,.6]                          # Size of objects
+useBoundingBox: True                    # Consider bounding boxes for reaching cost
+Q_track: 1e2
+Q_avoid: 1e0
