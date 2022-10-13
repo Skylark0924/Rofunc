@@ -1,5 +1,7 @@
 """
     Linear Quadratic tracker
+
+    Refers to https://gitlab.idiap.ch/rli/robotics-codes-from-scratch by Dr. Sylvain Calinon
 """
 from math import factorial
 from typing import Tuple
@@ -135,12 +137,12 @@ if __name__ == '__main__':
     #     cfg = compose(config_name="lqt")
 
     # <editor-fold desc="Uni example">
-    # via_points = np.load(
-    #     '/home/ubuntu/Github/DGform/interactive/skylark/stretch-31-Aug-2022-08:48:15.683806/z_manipulator_poses.npy')
-    # filter_indices = [0, 1, 5, 10, 22, 36]
-    # via_points = via_points[filter_indices]
-    # u_hat, x_hat, mu, idx_slices = uni(via_points)
-    # rf.lqt.plot_3d_uni(x_hat, mu, idx_slices, ori=False, save=False)
+    via_points = np.load(
+        '/home/ubuntu/Github/DGform/interactive/skylark/stretch-31-Aug-2022-08:48:15.683806/z_manipulator_poses.npy')
+    filter_indices = [0, 1, 5, 10, 22, 36]
+    via_points = via_points[filter_indices]
+    u_hat, x_hat, mu, idx_slices = uni(via_points)
+    rf.lqt.plot_3d_uni(x_hat, mu, idx_slices, ori=False, save=False)
     # </editor-fold>
 
     # <editor-fold desc="Bi example">
@@ -152,11 +154,11 @@ if __name__ == '__main__':
     # </editor-fold>
 
     # <editor-fold desc="Hierarchical example">
-    via_points_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    filter_indices = [i for i in range(0, len(via_points_raw) - 10, 5)]
-    filter_indices.append(len(via_points_raw) - 1)
-    via_points_raw = via_points_raw[filter_indices]
-    u_hat, x_hat, mu, idx_slices = uni_hierarchical(via_points_raw, interval=2)
-    rf.lqt.plot_3d_uni([x_hat], ori=False, save=False,
-                       save_file_name='/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_r.npy')
+    # via_points_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
+    # filter_indices = [i for i in range(0, len(via_points_raw) - 10, 5)]
+    # filter_indices.append(len(via_points_raw) - 1)
+    # via_points_raw = via_points_raw[filter_indices]
+    # u_hat, x_hat, mu, idx_slices = uni_hierarchical(via_points_raw, interval=2)
+    # rf.lqt.plot_3d_uni([x_hat], ori=False, save=False,
+    #                    save_file_name='/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_r.npy')
     # </editor-fold>

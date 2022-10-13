@@ -1,5 +1,7 @@
 """
     Linear Quadratic tracker with control primitives applied on a via-point example
+
+    Refers to https://gitlab.idiap.ch/rli/robotics-codes-from-scratch by Dr. Sylvain Calinon
 """
 
 from math import factorial
