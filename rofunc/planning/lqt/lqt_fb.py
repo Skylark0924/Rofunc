@@ -1,5 +1,7 @@
 """
     LQT computed in a recursive way (via-point example)
+
+    Refers to https://gitlab.idiap.ch/rli/robotics-codes-from-scratch by Dr. Sylvain Calinon
 """
 import matplotlib.pyplot as plt
 import numpy as np
