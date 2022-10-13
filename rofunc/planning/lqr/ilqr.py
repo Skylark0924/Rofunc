@@ -155,7 +155,7 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, Q: np.ndarray, R: 
     return u, x
 
 
-def uni_ilqr(Mu, Rot, cfg):
+def uni(Mu, Rot, cfg):
     Q, R, idx, tl = get_matrices(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
     u, x = get_u_x(cfg, Mu, Rot, Q, R, Su0, Sx0, idx, tl)
