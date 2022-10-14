@@ -1,0 +1,13 @@
+nbData: 200                             # Number of datapoints
+nbVarPos: 2                             # Dimension of position data (here: x1,x2)
+nbDeriv: 2                              # Number of static and dynamic features (nbDeriv=2 for [x,dx] and u=ddx)
+nbPoints: 0                             # Number of via-points to track
+nbVar: ${multi:${nbVarPos},${nbDeriv}}  # Dimension of state vector
+nbVarX: ${add:${nbVar}, 1}              # Augmented state space
+dt: 1E-2                                # Time step duration
+rfactor: 1E-6                           # control cost in LQR
+
+# For control primitive version
+nbFct: 9                                # Number of basis function
+basisName: "RBF"                        # can be PIECEWEISE, RBF, BERNSTEIN, FOURIER
+nbVarU: 2                               # Control space dimension (dx1,dx2,dx3)

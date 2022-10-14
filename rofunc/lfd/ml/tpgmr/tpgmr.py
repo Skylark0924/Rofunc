@@ -82,6 +82,7 @@ def uni(demos_x, show_demo_idx, start_x, end_x, plot=False):
 
 
 def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
+    # TODO
     _, demos_left_xdx, _, _, demos_left_A_xdx, demos_left_b_xdx, demos_left_xdx_f, demos_left_xdx_augm = rf.tpgmm.get_related_matrix(
         demos_left_x)
     _, demos_right_xdx, _, _, demos_right_A_xdx, demos_right_b_xdx, demos_right_xdx_f, demos_right_xdx_augm = rf.tpgmm.get_related_matrix(
@@ -146,35 +147,3 @@ def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
         else:
             raise Exception('Dimension is less than 2, cannot plot')
     return model_l, model_r, xi_l, xi_r
-
-
-if __name__ == '__main__':
-    # Uni
-    # demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
-    #                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
-    #                         [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
-    # demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-    # start_pose, end_pose = [-1, -2], [6, 6]
-    # model, rep = uni(demos_x, 2, start_pose, end_pose, plot=True)
-
-    # Uni_3d
-    raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-057/LeftHand.npy')
-    raw_demo = np.expand_dims(raw_demo, axis=0)
-    # demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
-    # show_demo_idx = 2
-    demos_x = np.vstack((raw_demo[:, 367:427, :], raw_demo[:, 420:480, :], raw_demo[:, 475:535, :]))
-    show_demo_idx = 1
-    start_pose = demos_x[show_demo_idx][-1]
-    end_pose = demos_x[show_demo_idx][0]
-    model, rep = uni(demos_x, show_demo_idx, start_pose, end_pose, plot=True)
-    # rep = np.vstack((demos_x[show_demo_idx], rep[:, :7]))
-    # np.save('rep3_r.npy', rep)
-
-    # Bi_3d
-    # raw_demo = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
-    # raw_demo = np.expand_dims(raw_demo, axis=0)
-    # demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
-    # show_demo_idx = 2
-    # start_pose = demos_x[show_demo_idx][-1]
-    # end_pose = demos_x[show_demo_idx][0]
-    # model, rep = uni(demos_x, show_demo_idx, start_pose, end_pose, plot=True)

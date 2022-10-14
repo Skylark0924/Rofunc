@@ -18,11 +18,10 @@ import rofunc as rf
 from importlib_resources import files
 from isaacgym import gymutil
 
-args = gymutil.parse_arguments(description="CURI Attractor Example")
+args = gymutil.parse_arguments()
 traj_l = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))  # [traj_len, 7]
 traj_r = np.load(files('rofunc.data').joinpath('taichi_1r.npy'))  # [traj_len, 7]
 
-rf.curi.run_traj_bi(args, traj_l, traj_r)
+rf.curi.run_traj_bi(args, traj_l, traj_r, update_freq=0.001)
 ```
-
 
