@@ -96,7 +96,7 @@ if __name__ == '__main__':
     env = gym.make('Pendulum-v0')
     state_space_size = env.observation_space.shape[0]
     action_space_size = env.action_space.shape[0]
-    expert_states = torch.tensor(np.load('../../data/test_data_BCO/states_expert_Pendulum.npy'), dtype=torch.float)
+    expert_states = torch.tensor(np.load('../../data/BCO/states_expert_Pendulum.npy'), dtype=torch.float)
     transition_model = nn.Sequential(
         nn.Linear(state_space_size * 2, 128),
         nn.ReLU(),
