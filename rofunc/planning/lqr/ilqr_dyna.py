@@ -85,10 +85,8 @@ def forward_dynamics(cfg, x, u):
 def get_matrices(cfg: DictConfig):
     # Precision matrix
     Q = np.identity(cfg.nbVarF * cfg.nbPoints) * 1e5
-
     # Control weight matrix
     R = np.identity((cfg.nbData - 1) * cfg.nbVarU) * cfg.rfactor
-
     # Time occurrence of via-points
     tl = np.linspace(0, cfg.nbData, cfg.nbPoints + 1)
     tl = np.rint(tl[1:]).astype(np.int64) - 1

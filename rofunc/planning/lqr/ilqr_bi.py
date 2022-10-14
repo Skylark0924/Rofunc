@@ -32,7 +32,7 @@ def fkin0(cfg, x):
 def f_reach(cfg, x, Mu):
     f = fkin(cfg, x) - Mu
     f = f.ravel()
-    J = np.zeros((cfg.nbVarF * x.shape[0], x.shape[0] * cfg.nbVarX))
+    J = np.zeros([cfg.nbPoints * cfg.nbVarF, cfg.nbPoints * cfg.nbVarX])
     for t in range(x.shape[0]):
         Jtmp = Jkin(cfg, x[t])
         J[t * cfg.nbVarF:(t + 1) * cfg.nbVarF, t * cfg.nbVarX:(t + 1) * cfg.nbVarX] = Jtmp
@@ -107,6 +107,7 @@ def get_matrices(cfg: DictConfig):
 def get_u_x(cfg: DictConfig, Mu: np.ndarray, MuCoM: np.ndarray, u: np.ndarray, x0: np.ndarray, Q: np.ndarray,
             Qc: np.ndarray, R: np.ndarray, Su0: np.ndarray, Sx0: np.ndarray, idx: np.ndarray, tl: np.ndarray):
     Su = Su0[idx.flatten()]  # We remove the lines that are out of interest
+
     for i in range(cfg.nbIter):
         x = Su0 @ u + Sx0 @ x0
         x = x.reshape((cfg.nbData, cfg.nbVarX))
