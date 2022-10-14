@@ -120,7 +120,7 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0:
     for i in range(cfg.nbIter):
         x = Su0 @ u + Sx0 @ x0  # System evolution
         x = x.reshape([cfg.nbData, cfg.nbVarX])
-        f, J = f_reach(cfg, x[tl, :], Mu, Rot)  # Residuals and Jacobians
+        f, J = f_reach(cfg, x[tl], Mu, Rot)  # Residuals and Jacobians
         du = np.linalg.inv(Su.T @ J.T @ Q @ J @ Su + R) @ (
                 -Su.T @ J.T @ Q @ f.flatten() - u * cfg.rfactor)  # Gauss-Newton update
         # Estimate step size with backtracking line search method
@@ -130,7 +130,7 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0:
             utmp = u + du * alpha
             xtmp = Su0 @ utmp + Sx0 @ x0  # System evolution
             xtmp = xtmp.reshape([cfg.nbData, cfg.nbVarX])
-            ftmp, _ = f_reach(cfg, xtmp[tl, :], Mu, Rot)  # Residuals
+            ftmp, _ = f_reach(cfg, xtmp[tl], Mu, Rot)  # Residuals
             cost = ftmp.flatten() @ Q @ ftmp.flatten() + np.linalg.norm(utmp) ** 2 * cfg.rfactor  # Cost
             if cost < cost0 or alpha < 1e-3:
                 u = utmp
