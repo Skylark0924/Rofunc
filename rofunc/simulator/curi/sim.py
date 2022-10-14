@@ -1,9 +1,8 @@
-import math
 import os.path
 
-import numpy as np
 from isaacgym import gymapi
 from isaacgym import gymutil
+
 from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
 
 
@@ -13,17 +12,9 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
         pose = attractor_properties.target
         # pose.p: (x, y, z), pose.r: (w, x, y, z)
-        # pose.p.x = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs)
-        # pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
-        # pose.p.z = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs)
         pose.p.x = traj[index, 0]
         pose.p.y = traj[index, 2]
         pose.p.z = traj[index, 1]
-
-        # pose.p.y = -0.2 + 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs) + 1
-        # pose.p.x = 0.7 + 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs) + 0.1
-        # pose.p.z = 0.5
-
         gym.set_attractor_target(envs[i], attractor_handles[i], pose)
 
         # Draw axes and sphere at attractor location
@@ -227,33 +218,3 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
 
     gym.destroy_viewer(viewer)
     gym.destroy_sim(sim)
-
-
-if __name__ == '__main__':
-    args = gymutil.parse_arguments()
-
-    from importlib_resources import files
-
-    traj_r = np.load(files('rofunc.data').joinpath('taichi_1r.npy'))
-    traj_l = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))
-    # traj_r = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_l.npy')  # [traj_len, 7]
-    # traj_l = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')  # [traj_len, 7]
-
-    # run_traj(args, traj)
-    # run_traj_bi(args, traj_l, traj_r)
-    # show(args)
-
-    import rofunc as rf
-
-    x_hat_l = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep4_l.npy')[350:]
-    x_hat_r = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep4_r.npy')[350:]
-
-    rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, ori=False)
-
-    x_hat_l[:, 0] += 0.5
-    x_hat_r[:, 0] += 0.5
-    x_hat_l[:, 1] -= 0.2
-    x_hat_r[:, 1] -= 0.2
-    x_hat_l[:, 1] = -x_hat_l[:, 1]
-    x_hat_r[:, 1] = -x_hat_r[:, 1]
-    run_traj_bi(args, x_hat_l, x_hat_r, update_freq=0.001)

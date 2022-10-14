@@ -3,12 +3,13 @@
 
     Refers to https://gitlab.idiap.ch/rli/robotics-codes-from-scratch by Dr. Sylvain Calinon
 """
-from math import factorial
 from typing import Tuple
 
 import numpy as np
-from rofunc.config.get_config import *
+from math import factorial
 from tqdm import tqdm
+
+from rofunc.config.get_config import *
 
 
 def get_matrices(cfg: DictConfig, via_points: np.ndarray):
@@ -128,37 +129,3 @@ def bi(via_points_raw_l: np.ndarray, via_points_raw_r: np.ndarray, cfg: DictConf
     u_hat_l, x_hat_l = get_u_x(cfg, l_start_pose, mu_l, Q, R, Su, Sx)
     u_hat_r, x_hat_r = get_u_x(cfg, r_start_pose, mu_r, Q, R, Su, Sx)
     return u_hat_l, u_hat_r, x_hat_l, x_hat_r, mu_l, mu_r, idx_slices
-
-
-if __name__ == '__main__':
-    import rofunc as rf
-
-    # with initialize(config_path="../../config", version_base=None):
-    #     cfg = compose(config_name="lqt")
-
-    # <editor-fold desc="Uni example">
-    via_points = np.load(
-        '/home/ubuntu/Github/DGform/interactive/skylark/stretch-31-Aug-2022-08:48:15.683806/z_manipulator_poses.npy')
-    filter_indices = [0, 1, 5, 10, 22, 36]
-    via_points = via_points[filter_indices]
-    u_hat, x_hat, mu, idx_slices = uni(via_points)
-    rf.lqt.plot_3d_uni(x_hat, mu, idx_slices, ori=False, save=False)
-    # </editor-fold>
-
-    # <editor-fold desc="Bi example">
-    # via_points = np.loadtxt('/home/ubuntu/Github/DGform/controller/data/link7_loc_ori.txt', delimiter=', ')
-    # l_via_points = via_points[0:len(via_points):2]
-    # r_via_points = via_points[1:len(via_points):2]
-    # u_hat_l, u_hat_r, x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices = bi(l_via_points, r_via_points)
-    # rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=False)
-    # </editor-fold>
-
-    # <editor-fold desc="Hierarchical example">
-    # via_points_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    # filter_indices = [i for i in range(0, len(via_points_raw) - 10, 5)]
-    # filter_indices.append(len(via_points_raw) - 1)
-    # via_points_raw = via_points_raw[filter_indices]
-    # u_hat, x_hat, mu, idx_slices = uni_hierarchical(via_points_raw, interval=2)
-    # rf.lqt.plot_3d_uni([x_hat], ori=False, save=False,
-    #                    save_file_name='/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep3_r.npy')
-    # </editor-fold>

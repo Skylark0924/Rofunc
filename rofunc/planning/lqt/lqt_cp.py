@@ -125,13 +125,3 @@ def vis(cfg, x_hat, u_hat, muQ, idx_slices, tl, phi):
 
     plt.show()
 
-
-if __name__ == '__main__':
-    via_points_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    filter_indices = [i for i in range(0, len(via_points_raw) - 10, 5)]
-    filter_indices.append(len(via_points_raw) - 1)
-    via_points_raw = via_points_raw[filter_indices]
-
-    # via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0], [3, 6, 0, 0], [4, 2, 0, 0]])
-
-    uni_cp(via_points_raw)
