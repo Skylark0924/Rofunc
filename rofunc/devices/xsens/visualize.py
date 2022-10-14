@@ -31,7 +31,7 @@ def plot_skeleton(skeleton_data_path: str, save_gif=False):
     dim = len(data_dict['left_finger_LeftFirstPP'])
 
     fig = plt.figure()
-    ax = Axes3D(fig)
+    ax = Axes3D(fig, fc='white')
     ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
     ax.set_ylim(-0.5, 1)
     ax.set_zlim(-.5, 2)
@@ -41,6 +41,7 @@ def plot_skeleton(skeleton_data_path: str, save_gif=False):
         ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
         ax.set_ylim(-0.5, 1)
         ax.set_zlim(-.5, 2)
+        ax.text2D(0.05, 0.95, "Frame: {}".format(index), transform=ax.transAxes)
         for label in labels:
             # exec('{} = np.load(os.path.join(skeleton_data_path, "{}"))'.format(label.split('.')[0], label))
             # exec('x, y, z =  {}[index, :3]'.format(label.split('.')[0]))
