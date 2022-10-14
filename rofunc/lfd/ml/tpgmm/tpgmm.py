@@ -185,7 +185,7 @@ def uni(demos_x: Union[List, np.ndarray], show_demo_idx: int, plot: bool = False
 
     """
     print('\033[1;32m--------{}--------\033[0m'.format(
-        'Learning the trajectory representation from demonstration via TP-GMM.'))
+        'Learning the trajectory representation from demonstration via TP-GMM'))
 
     _, demos_xdx, _, _, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm = get_related_matrix(demos_x)
     model = HMM_learning(demos_xdx_f, demos_xdx_augm, plot=plot)
@@ -197,7 +197,7 @@ def uni(demos_x: Union[List, np.ndarray], show_demo_idx: int, plot: bool = False
 def bi(demos_left_x: Union[List, np.ndarray], demos_right_x: Union[List, np.ndarray], show_demo_idx: int,
        plot: bool = False) -> Tuple[pbd.HMM, pbd.HMM, np.ndarray, np.ndarray]:
     print('\033[1;32m--------{}--------\033[0m'.format(
-        'Learning the bimanual trajectory representation from demonstration via TP-GMM.'))
+        'Learning the bimanual trajectory representation from demonstration via TP-GMM'))
 
     _, demos_left_xdx, _, _, demos_left_A_xdx, demos_left_b_xdx, demos_left_xdx_f, demos_left_xdx_augm = get_related_matrix(
         demos_left_x)
