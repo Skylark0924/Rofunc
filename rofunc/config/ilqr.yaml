@@ -10,8 +10,9 @@ dt: 1E-2                                # Time step duration
 rfactor: 1E-6                           # control cost in LQR
 
 # For robot
-l: [ 2, 2, 1 ]                          # Robot links lengths
+l: [ 2, 2, 1 ]                          # Lengths of robot links
+lm: [ 2, 3, 4 ]                         # Masses of Robot links
 sz: [ .2, .3 ]                          # Size of objects
-useBoundingBox: False                    # Consider bounding boxes for reaching cost
+useBoundingBox: True                    # Consider bounding boxes for reaching cost
 basisName: "PIECEWISE"                        # can be PIECEWISE, RBF, BERNSTEIN, FOURIER
 nbFct: 5                                # Number of basis function
