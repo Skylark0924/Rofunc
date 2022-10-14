@@ -184,15 +184,3 @@ def vis(cfg, x, Mu, MuCoM, tl):
     plt.plot(ftmp[0, :], ftmp[1, :], c="black", marker="o", markevery=[0] + tl.tolist())
     plt.plot(ftmp[2, :], ftmp[3, :], c="black", marker="o", markevery=[0] + tl.tolist())
     plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'ilqr_bi')
-
-    Mu = np.array([[-1, -1.5, 4, 2]]).T  # Target
-    MuCoM = np.array([0, 1.4])
-
-    u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
-    x0 = np.array([np.pi / 2, np.pi / 2, np.pi / 3, -np.pi / 2, -np.pi / 3])  # Initial pose
-
-    uni_bi(Mu, MuCoM, u0, x0, cfg)

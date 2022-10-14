@@ -9,6 +9,7 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+import rofunc as rf
 from rofunc.planning.lqt.lqt_cp import define_control_primitive
 from rofunc.config.get_config import *
 from scipy.linalg import block_diag
@@ -143,35 +144,3 @@ def vis3d(data, x_hat):
     ax.scatter(data[:, 0], data[:, 1], data[:, 2], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
     plt.legend()
     plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'lqt_cp_dmp')
-    cfg.nbDeriv = 3
-
-    # <editor-fold desc="3d example">
-    # data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    # # filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
-    # # filter_indices.append(len(data_raw) - 1)
-    # MuPos = data_raw  # pose
-    # MuVel = np.gradient(MuPos)[0] / cfg.dt
-    # MuAcc = np.gradient(MuVel)[0] / cfg.dt
-    # via_points = np.hstack((MuPos, MuVel, MuAcc)).T
-    # </editor-fold>
-
-    # <editor-fold desc="2d letter example data">
-    from scipy.interpolate import interp1d
-    x = np.load(
-        '/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/planning/src/robotics-codes-from-scratch-master/data/2Dletters/S.npy')[
-        0, :, :2].T
-
-    f_pos = interp1d(np.linspace(0, np.size(x, 1) - 1, np.size(x, 1), dtype=int), x, kind='cubic')
-    MuPos = f_pos(np.linspace(0, np.size(x, 1) - 1, cfg.nbData))  # Position
-    MuVel = np.gradient(MuPos)[1] / cfg.dt
-    MuAcc = np.gradient(MuVel)[1] / cfg.dt
-    # Position, velocity and acceleration profiles as references
-    via_points = np.vstack((MuPos, MuVel, MuAcc))
-    # </editor-fold>
-
-    cfg.nbData = len(via_points[0])
-    uni_cp_dmp(via_points, cfg)

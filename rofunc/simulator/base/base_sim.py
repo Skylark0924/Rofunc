@@ -1,6 +1,5 @@
 import math
 
-import numpy as np
 from isaacgym import gymapi
 from isaacgym import gymutil
 
