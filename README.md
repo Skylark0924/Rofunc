@@ -31,6 +31,13 @@ import rofunc as rf
 
 Thus, have fun in the robotics world!
 
+> **Requirement installation**
+> ```python
+> pip install -r requirements.txt
+> ```
+> Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/) manually. (We have tried to
+> package it as a `.whl` file, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+
 ### [Documentation](./rofunc/)
 Currently, we provide a simple document; please refer to [here](./rofunc/). A comprehensive one with both English and 
 Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/). 

@@ -14,10 +14,7 @@ def fkin0(cfg, x):
         T2 @ np.cos(T @ x),
         T2 @ np.sin(T @ x)
     )).T
-    f = np.vstack((
-        np.zeros(2),
-        f
-    ))
+    f = np.vstack((np.zeros(2), f))
     return f
 
 
