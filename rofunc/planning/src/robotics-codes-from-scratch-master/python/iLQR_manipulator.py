@@ -167,6 +167,12 @@ for i in range(param.nbIter):
 # ===============================
 
 plt.figure()
+t = np.arange(0, len(x[0]))
+plt.plot(x[0], t)
+plt.plot(x[1], t)
+plt.plot(x[2], t)
+
+plt.figure()
 plt.axis('off')
 plt.gca().set_aspect('equal', adjustable='box')
 

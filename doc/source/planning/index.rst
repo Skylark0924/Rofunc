@@ -5,4 +5,6 @@ Planning and Control
    :maxdepth: 2
 
    lqt
+   lqt_fb
+   lqt_cp
 

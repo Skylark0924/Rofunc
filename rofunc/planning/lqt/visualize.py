@@ -3,7 +3,8 @@ import numpy as np
 import rofunc as rf
 
 
-def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
+def plot_2d(cfg, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
+    # TODO: check
     plt.figure()
     plt.title("2D Trajectory")
     plt.scatter(x_hat_l[0, 0], x_hat_l[0, 1], c='blue', s=100)
@@ -25,7 +26,7 @@ def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     axs[0].plot(x_hat_l[:, 0], c='blue')
     axs[0].plot(x_hat_r[:, 0], c='green')
     axs[0].set_ylabel("$x_1$")
-    axs[0].set_xticks([0, param["nbData"]])
+    axs[0].set_xticks([0, cfg.nbData])
     axs[0].set_xticklabels(["0", "T"])
 
     for i, t in enumerate(tl):
@@ -35,7 +36,7 @@ def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     axs[1].plot(x_hat_r[:, 1], c='green')
     axs[1].set_ylabel("$x_2$")
     axs[1].set_xlabel("$t$")
-    axs[1].set_xticks([0, param["nbData"]])
+    axs[1].set_xticks([0, cfg.nbData])
     axs[1].set_xticklabels(["0", "T"])
 
     dis_lst = []
@@ -47,7 +48,7 @@ def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     axs[2].plot(timestep, dis_lst)
     axs[2].set_ylabel("traj_dis")
     axs[2].set_xlabel("$t$")
-    axs[2].set_xticks([0, param["nbData"]])
+    axs[2].set_xticks([0, cfg.nbData])
     axs[2].set_xticklabels(["0", "T"])
 
     dis_lst = []
@@ -63,7 +64,8 @@ def plot_2d(param, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
     plt.show()
 
 
-def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_file_name=None, g_ax=None):
+def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_file_name=None, g_ax=None, title=None,
+                legend=None):
     if g_ax is None:
         fig = plt.figure(figsize=(4, 4))
         ax = fig.add_subplot(111, projection='3d', fc='white')
@@ -74,7 +76,12 @@ def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_fi
         for slice_t in idx_slices:
             ax.scatter(muQ[slice_t][0], muQ[slice_t][1], muQ[slice_t][2], c='red', s=10)
 
-    rf.visualab.traj_plot(x_hat, mode='3d', ori=ori, g_ax=ax)
+    if not isinstance(x_hat, list):
+        if len(x_hat.shape) == 2:
+            x_hat = np.expand_dims(x_hat, axis=0)
+
+    title = 'Unimanual trajectory' if title is None else title
+    rf.visualab.traj_plot(x_hat, legend=legend, title=title, mode='3d', ori=ori, g_ax=ax)
 
     if save:
         assert save_file_name is not None
@@ -84,7 +91,7 @@ def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_fi
 
 
 def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=False, save=False, save_file_name=None,
-               g_ax=None):
+               g_ax=None, title=None, legend_lst=None):
     if g_ax is None:
         fig = plt.figure(figsize=(4, 4))
         ax = fig.add_subplot(111, projection='3d', fc='white')
@@ -101,8 +108,11 @@ def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=Fa
             x_hat_l = np.expand_dims(x_hat_l, axis=0)
             x_hat_r = np.expand_dims(x_hat_r, axis=0)
 
-    rf.visualab.traj_plot(x_hat_l, title='left arm', mode='3d', ori=ori, g_ax=ax)
-    rf.visualab.traj_plot(x_hat_r, title='right arm', mode='3d', ori=ori, g_ax=ax)
+    title = 'Bimanual trajectory' if title is None else title
+    legend_l = 'left arm' if legend_lst is None else legend_lst[0]
+    legend_r = 'right arm' if legend_lst is None else legend_lst[1]
+    rf.visualab.traj_plot(x_hat_l, title=title, legend=legend_l, mode='3d', ori=ori, g_ax=ax)
+    rf.visualab.traj_plot(x_hat_r, legend=legend_r, mode='3d', ori=ori, g_ax=ax)
 
     if save:
         assert save_file_name is not None
