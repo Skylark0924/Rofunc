@@ -3,65 +3,65 @@ import numpy as np
 import rofunc as rf
 
 
-def plot_2d(cfg, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
-    # TODO: check
-    plt.figure()
-    plt.title("2D Trajectory")
-    plt.scatter(x_hat_l[0, 0], x_hat_l[0, 1], c='blue', s=100)
-    plt.scatter(x_hat_r[0, 0], x_hat_r[0, 1], c='green', s=100)
-    for slice_t in idx_slices:
-        plt.scatter(param["muQ_l"][slice_t][0], param["muQ_l"][slice_t][1], c='red', s=100)
-        plt.scatter(param["muQ_r"][slice_t][0], param["muQ_r"][slice_t][1], c='orange', s=100)
-        plt.plot([param["muQ_l"][slice_t][0], param["muQ_r"][slice_t][0]],
-                 [param["muQ_l"][slice_t][1], param["muQ_r"][slice_t][1]], linewidth=2, color='black')
-    plt.plot(x_hat_l[:, 0], x_hat_l[:, 1], c='blue')
-    plt.plot(x_hat_r[:, 0], x_hat_r[:, 1], c='green')
-    plt.axis("off")
-    plt.gca().set_aspect('equal', adjustable='box')
-
-    fig, axs = plt.subplots(3, 1)
-    for i, t in enumerate(tl):
-        axs[0].scatter(t, param["muQ_l"][idx_slices[i]][0], c='red')
-        axs[0].scatter(t, param["muQ_r"][idx_slices[i]][0], c='orange')
-    axs[0].plot(x_hat_l[:, 0], c='blue')
-    axs[0].plot(x_hat_r[:, 0], c='green')
-    axs[0].set_ylabel("$x_1$")
-    axs[0].set_xticks([0, cfg.nbData])
-    axs[0].set_xticklabels(["0", "T"])
-
-    for i, t in enumerate(tl):
-        axs[1].scatter(t, param["muQ_l"][idx_slices[i]][1], c='red')
-        axs[1].scatter(t, param["muQ_r"][idx_slices[i]][1], c='orange')
-    axs[1].plot(x_hat_l[:, 1], c='blue')
-    axs[1].plot(x_hat_r[:, 1], c='green')
-    axs[1].set_ylabel("$x_2$")
-    axs[1].set_xlabel("$t$")
-    axs[1].set_xticks([0, cfg.nbData])
-    axs[1].set_xticklabels(["0", "T"])
-
-    dis_lst = []
-    for i in range(len(x_hat_l)):
-        dis_lst.append(np.sqrt(np.sum(np.square(x_hat_l[i, :2] - x_hat_r[i, :2]))))
-
-    dis_lst = np.array(dis_lst)
-    timestep = np.arange(len(dis_lst))
-    axs[2].plot(timestep, dis_lst)
-    axs[2].set_ylabel("traj_dis")
-    axs[2].set_xlabel("$t$")
-    axs[2].set_xticks([0, cfg.nbData])
-    axs[2].set_xticklabels(["0", "T"])
-
-    dis_lst = []
-    via_point_l = np.array(via_point_l)
-    via_point_r = np.array(via_point_r)
-    for i in range(len(via_point_l)):
-        dis_lst.append(np.sqrt(np.sum(np.square(via_point_l[i, :2] - via_point_r[i, :2]))))
-
-    dis_lst = np.array(dis_lst)
-    timestep = np.arange(len(dis_lst))
-    axs[3].plot(timestep, dis_lst)
-
-    plt.show()
+# def plot_2d(cfg, x_hat_l, x_hat_r, idx_slices, tl, via_point_l, via_point_r):
+#     # TODO: check
+#     plt.figure()
+#     plt.title("2D Trajectory")
+#     plt.scatter(x_hat_l[0, 0], x_hat_l[0, 1], c='blue', s=100)
+#     plt.scatter(x_hat_r[0, 0], x_hat_r[0, 1], c='green', s=100)
+#     for slice_t in idx_slices:
+#         plt.scatter(param["muQ_l"][slice_t][0], param["muQ_l"][slice_t][1], c='red', s=100)
+#         plt.scatter(param["muQ_r"][slice_t][0], param["muQ_r"][slice_t][1], c='orange', s=100)
+#         plt.plot([param["muQ_l"][slice_t][0], param["muQ_r"][slice_t][0]],
+#                  [param["muQ_l"][slice_t][1], param["muQ_r"][slice_t][1]], linewidth=2, color='black')
+#     plt.plot(x_hat_l[:, 0], x_hat_l[:, 1], c='blue')
+#     plt.plot(x_hat_r[:, 0], x_hat_r[:, 1], c='green')
+#     plt.axis("off")
+#     plt.gca().set_aspect('equal', adjustable='box')
+#
+#     fig, axs = plt.subplots(3, 1)
+#     for i, t in enumerate(tl):
+#         axs[0].scatter(t, param["muQ_l"][idx_slices[i]][0], c='red')
+#         axs[0].scatter(t, param["muQ_r"][idx_slices[i]][0], c='orange')
+#     axs[0].plot(x_hat_l[:, 0], c='blue')
+#     axs[0].plot(x_hat_r[:, 0], c='green')
+#     axs[0].set_ylabel("$x_1$")
+#     axs[0].set_xticks([0, cfg.nbData])
+#     axs[0].set_xticklabels(["0", "T"])
+#
+#     for i, t in enumerate(tl):
+#         axs[1].scatter(t, param["muQ_l"][idx_slices[i]][1], c='red')
+#         axs[1].scatter(t, param["muQ_r"][idx_slices[i]][1], c='orange')
+#     axs[1].plot(x_hat_l[:, 1], c='blue')
+#     axs[1].plot(x_hat_r[:, 1], c='green')
+#     axs[1].set_ylabel("$x_2$")
+#     axs[1].set_xlabel("$t$")
+#     axs[1].set_xticks([0, cfg.nbData])
+#     axs[1].set_xticklabels(["0", "T"])
+#
+#     dis_lst = []
+#     for i in range(len(x_hat_l)):
+#         dis_lst.append(np.sqrt(np.sum(np.square(x_hat_l[i, :2] - x_hat_r[i, :2]))))
+#
+#     dis_lst = np.array(dis_lst)
+#     timestep = np.arange(len(dis_lst))
+#     axs[2].plot(timestep, dis_lst)
+#     axs[2].set_ylabel("traj_dis")
+#     axs[2].set_xlabel("$t$")
+#     axs[2].set_xticks([0, cfg.nbData])
+#     axs[2].set_xticklabels(["0", "T"])
+#
+#     dis_lst = []
+#     via_point_l = np.array(via_point_l)
+#     via_point_r = np.array(via_point_r)
+#     for i in range(len(via_point_l)):
+#         dis_lst.append(np.sqrt(np.sum(np.square(via_point_l[i, :2] - via_point_r[i, :2]))))
+#
+#     dis_lst = np.array(dis_lst)
+#     timestep = np.arange(len(dis_lst))
+#     axs[3].plot(timestep, dis_lst)
+#
+#     plt.show()
 
 
 def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_file_name=None, g_ax=None, title=None,
