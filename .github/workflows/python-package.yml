@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.6", "3.7", "3.8"]
-        os: [ubuntu-latest, ubuntu-18.04]
+        os: ubuntu-18.04
 
     steps:
     - uses: actions/checkout@v3
@@ -30,6 +30,24 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest pytest-cov
         pip install -r requirements.txt
+        python -m pip install cython numpy opencv-python pyopengl
+    - name: cuda-toolkit
+    - uses: Jimver/cuda-toolkit@v0.2.8
+      id: cuda-toolkit
+      with:
+        cuda: '11.3.0'
+    - run: |
+        echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
+        echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
+        nvcc -V
+    - name: Install ZED SDK
+      run: |
+        wget https://download.stereolabs.com/zedsdk/3.7/cu117/ubuntu18
+        cd ~/Downloads/
+        chmod +x ZED_SDK_Ubuntu18_cuda11.7_v3.7.7.run
+        ./ZED_SDK_Ubuntu18_cuda11.7_v3.7.7.run -s
+        cd "/usr/local/zed/"
+        python get_python_api.py
 #    - name: Lint with flake8
 #      run: |
 #        # stop the build if there are Python syntax errors or undefined names
