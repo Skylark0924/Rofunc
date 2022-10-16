@@ -44,6 +44,7 @@ jobs:
       run: |
         wget https://download.stereolabs.com/zedsdk/3.7/cu117/ubuntu18
         ls
+        cd ubuntu18
         chmod +x ZED_SDK_Ubuntu18_cuda11.7_v3.7.7.run
         ./ZED_SDK_Ubuntu18_cuda11.7_v3.7.7.run -s
         cd /usr/local/zed/
