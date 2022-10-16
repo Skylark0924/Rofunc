@@ -43,10 +43,9 @@ jobs:
     - name: Install ZED SDK
       run: |
         wget https://download.stereolabs.com/zedsdk/3.7/cu117/ubuntu18
-        cd ~/Downloads/
         chmod +x ZED_SDK_Ubuntu18_cuda11.7_v3.7.7.run
         ./ZED_SDK_Ubuntu18_cuda11.7_v3.7.7.run -s
-        cd "/usr/local/zed/"
+        cd /usr/local/zed/
         python get_python_api.py
 #    - name: Lint with flake8
 #      run: |
