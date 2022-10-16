@@ -32,11 +32,11 @@ jobs:
         pip install -r requirements.txt
         python -m pip install cython numpy opencv-python pyopengl
     - name: cuda-toolkit
-    - uses: Jimver/cuda-toolkit@v0.2.8
+      uses: Jimver/cuda-toolkit@v0.2.8
       id: cuda-toolkit
       with:
         cuda: '11.3.0'
-    - run: |
+      run: |
         echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
         echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
         nvcc -V
