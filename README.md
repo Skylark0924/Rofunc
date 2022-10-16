@@ -6,6 +6,7 @@
 ![](https://img.shields.io/pypi/dm/Rofunc)
 ![](https://img.shields.io/github/issues-closed-raw/Skylark0924/Rofunc)
 ![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
 ![](./img/logo2.png)
 
