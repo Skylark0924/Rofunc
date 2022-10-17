@@ -65,7 +65,7 @@ import rofunc as rf
 
 
 def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_file_name=None, g_ax=None, title=None,
-                legend=None):
+                legend=None, for_test=False):
     if g_ax is None:
         fig = plt.figure(figsize=(4, 4))
         ax = fig.add_subplot(111, projection='3d', fc='white')
@@ -86,12 +86,12 @@ def plot_3d_uni(x_hat, muQ=None, idx_slices=None, ori=False, save=False, save_fi
     if save:
         assert save_file_name is not None
         np.save(save_file_name, np.array(x_hat))
-    if g_ax is None:
+    if g_ax is None and not for_test:
         plt.show()
 
 
 def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=False, save=False, save_file_name=None,
-               g_ax=None, title=None, legend_lst=None):
+               g_ax=None, title=None, legend_lst=None, for_test=False):
     if g_ax is None:
         fig = plt.figure(figsize=(4, 4))
         ax = fig.add_subplot(111, projection='3d', fc='white')
@@ -118,5 +118,5 @@ def plot_3d_bi(x_hat_l, x_hat_r, muQ_l=None, muQ_r=None, idx_slices=None, ori=Fa
         assert save_file_name is not None
         np.save(save_file_name[0], np.array(x_hat_l))
         np.save(save_file_name[1], np.array(x_hat_r))
-    if g_ax is None:
+    if g_ax is None and not for_test:
         plt.show()

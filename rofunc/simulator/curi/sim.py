@@ -132,7 +132,7 @@ def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, up
     gym.destroy_sim(sim)
 
 
-def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, update_freq=0.001):
+def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, update_freq=0.001, for_test=False):
     """
 
     Args:
@@ -142,6 +142,7 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
         attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
         asset_root: the location of `assets` folder, e.g., /home/ubuntu/anaconda3/envs/plast/lib/python3.7/site-packages/rofunc/simulator/assets
         update_freq:
+        for_test:
 
     Returns:
 
@@ -149,7 +150,7 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
     print('\033[1;32m--------{}--------\033[0m'.format('Execute bimanual trajectory with the CURI simulator'))
 
     # Initial gym and sim
-    gym, sim_params, sim, viewer = init_sim(args)
+    gym, sim_params, sim, viewer = init_sim(args, for_test=for_test)
 
     # Load CURI asset and set the env
     if asset_root is None:
@@ -157,7 +158,7 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
-    envs, curi_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, fix_base_link=False)
+    envs, curi_handles = init_env(gym, sim, asset_root, asset_file, num_envs=1, fix_base_link=False)
 
     # Create the attractor
     if attracted_joints is None:
@@ -167,8 +168,8 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
         assert isinstance(attracted_joints, list)
         attracted_joint_l = attracted_joints[0]
         attracted_joint_r = attracted_joints[1]
-    attractor_handles_l, axes_geom_l, sphere_geom_l = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_l)
-    attractor_handles_r, axes_geom_r, sphere_geom_r = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_r)
+    attractor_handles_l, axes_geom_l, sphere_geom_l = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_l, for_test=for_test)
+    attractor_handles_r, axes_geom_r, sphere_geom_r = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_r, for_test=for_test)
 
     # get joint limits and ranges for Franka
     curi_dof_props = gym.get_actor_dof_properties(envs[0], curi_handles[0])
@@ -210,9 +211,10 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
         gym.fetch_results(sim, True)
 
         # Step rendering
-        gym.step_graphics(sim)
-        gym.draw_viewer(viewer, sim, False)
-        gym.sync_frame_time(sim)
+        if not for_test:
+            gym.step_graphics(sim)
+            gym.draw_viewer(viewer, sim, False)
+            gym.sync_frame_time(sim)
 
     print("Done")
 

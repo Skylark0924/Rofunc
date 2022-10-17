@@ -4,7 +4,7 @@ from isaacgym import gymapi
 from isaacgym import gymutil
 
 
-def init_sim(args):
+def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0), for_test=False):
     # Initialize gym
     gym = gymapi.acquire_gym()
 
@@ -37,20 +37,24 @@ def init_sim(args):
         quit()
 
     # Create viewer
-    camera_props = gymapi.CameraProperties()
-    camera_props.horizontal_fov = 75.0
-    camera_props.width = 1920
-    camera_props.height = 1080
-    # camera_props.use_collision_geometry = True
-    viewer = gym.create_viewer(sim, camera_props)
-    if viewer is None:
-        print("*** Failed to create viewer")
-        quit()
+    viewer = None
+    if not for_test:
+        camera_props = gymapi.CameraProperties()
+        camera_props.horizontal_fov = 75.0
+        camera_props.width = 1920
+        camera_props.height = 1080
+        # camera_props.use_collision_geometry = True
+        viewer = gym.create_viewer(sim, camera_props)
+        if viewer is None:
+            print("*** Failed to create viewer")
+            quit()
+
+        # Point camera at environments
+        gym.viewer_camera_look_at(viewer, None, cam_pos, cam_target)
     return gym, sim_params, sim, viewer
 
 
-def init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base_link=True,
-             cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0)):
+def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base_link=True):
     # Add ground plane
     plane_params = gymapi.PlaneParams()
     gym.add_ground(sim, plane_params)
@@ -69,9 +73,6 @@ def init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, spacing=1.0, 
 
     envs = []
     handles = []
-
-    # Point camera at environments
-    gym.viewer_camera_look_at(viewer, None, cam_pos, cam_target)
 
     print("Creating %d environments" % num_envs)
     num_per_row = int(math.sqrt(num_envs))
@@ -106,7 +107,7 @@ def init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, spacing=1.0, 
     return envs, handles
 
 
-def init_attractor(gym, envs, viewer, handles, attracted_joint):
+def init_attractor(gym, envs, viewer, handles, attracted_joint, for_test=False):
     # Attractor setup
     attractor_handles = []
     attractor_properties = gymapi.AttractorProperties()
@@ -139,8 +140,9 @@ def init_attractor(gym, envs, viewer, handles, attracted_joint):
         attractor_properties.rigid_handle = attracted_joint_handle
 
         # Draw axes and sphere at attractor location
-        gymutil.draw_lines(axes_geom, gym, viewer, env, attractor_properties.target)
-        gymutil.draw_lines(sphere_geom, gym, viewer, env, attractor_properties.target)
+        if not for_test:
+            gymutil.draw_lines(axes_geom, gym, viewer, env, attractor_properties.target)
+            gymutil.draw_lines(sphere_geom, gym, viewer, env, attractor_properties.target)
 
         attractor_handle = gym.create_rigid_body_attractor(env, attractor_properties)
         attractor_handles.append(attractor_handle)

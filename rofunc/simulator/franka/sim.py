@@ -46,11 +46,11 @@ def show(args, asset_root=None):
         gym.sync_frame_time(sim)
 
 
-def run_traj(args, traj, attracted_joint="panda_hand", asset_root=None):
+def run_traj(args, traj, attracted_joint="panda_hand", asset_root=None, for_test=False):
     print('\033[1;32m--------{}--------\033[0m'.format('Execute trajectory with the Franka simulator'))
 
     # Initial gym and sim
-    gym, sim_params, sim, viewer = init_sim(args)
+    gym, sim_params, sim, viewer = init_sim(args, for_test=for_test)
 
     # Load franka asset and set the env
     if asset_root is None:
@@ -58,10 +58,10 @@ def run_traj(args, traj, attracted_joint="panda_hand", asset_root=None):
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/franka_description/robots/franka_panda.urdf"
-    envs, franka_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1)
+    envs, franka_handles = init_env(gym, sim, asset_root, asset_file, num_envs=1)
 
     # Create the attractor
-    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles, attracted_joint)
+    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles, attracted_joint, for_test=for_test)
 
     # get joint limits and ranges for Franka
     franka_dof_props = gym.get_actor_dof_properties(envs[0], franka_handles[0])
@@ -99,9 +99,10 @@ def run_traj(args, traj, attracted_joint="panda_hand", asset_root=None):
         gym.fetch_results(sim, True)
 
         # Step rendering
-        gym.step_graphics(sim)
-        gym.draw_viewer(viewer, sim, False)
-        gym.sync_frame_time(sim)
+        if not for_test:
+            gym.step_graphics(sim)
+            gym.draw_viewer(viewer, sim, False)
+            gym.sync_frame_time(sim)
 
     print("Done")
 

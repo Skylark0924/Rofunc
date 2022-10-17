@@ -98,7 +98,7 @@ def get_u_x(cfg: DictConfig, state_noise: np.ndarray, Mu: np.ndarray, Qm: np.nda
     return u_hat, x_hat
 
 
-def uni_cp_dmp(data: np.ndarray, cfg: DictConfig = None):
+def uni_cp_dmp(data: np.ndarray, cfg: DictConfig = None, for_test=False):
     print(
         '\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT (control primitive and DMP)'))
     Qm, Rm = get_matrices(cfg, data)
@@ -115,11 +115,11 @@ def uni_cp_dmp(data: np.ndarray, cfg: DictConfig = None):
     # vis(param, x_hat, u_hat, Mu, idx_slices, tl, phi)
     # vis3d(data, x_hat)
     # rf.visualab.traj_plot([x_hat[:, :2]])
-    vis(x_hat, data)
+    vis(x_hat, data, for_test=for_test)
     return u_hat, x_hat
 
 
-def vis(x_hat, Mu):
+def vis(x_hat, Mu, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -131,7 +131,8 @@ def vis(x_hat, Mu):
     plt.plot(x_hat[1, 0, :], x_hat[1, 1, :], c='black', linestyle='-', linewidth=2)
     plt.scatter(x_hat[1, 0, 23:25], x_hat[1, 1, 23:25], c='green', s=30)
 
-    plt.show()
+    if not for_test:
+        plt.show()
 
 
 def vis3d(data, x_hat):

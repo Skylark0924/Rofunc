@@ -2,6 +2,7 @@ import rofunc as rf
 import numpy as np
 from importlib_resources import files
 
+
 # <editor-fold desc="2-dim Uni example">
 # demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
 #                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
@@ -29,14 +30,20 @@ from importlib_resources import files
 # model, rep = rf.tpgmm.uni(demos_x, show_demo_idx=1, plot=True)
 # </editor-fold>
 
-# <editor-fold desc="7-dim Bi example">
-left_raw_demo = np.load(files('rofunc.data.LFD_ML').joinpath('LeftHand.npy'))
-right_raw_demo = np.load(files('rofunc.data.LFD_ML').joinpath('RightHand.npy'))
-left_raw_demo = np.expand_dims(left_raw_demo, axis=0)
-right_raw_demo = np.expand_dims(right_raw_demo, axis=0)
-demos_left_x = np.vstack((left_raw_demo[:, 82:232, :], left_raw_demo[:, 233:383, :], left_raw_demo[:, 376:526, :]))
-demos_right_x = np.vstack(
-    (right_raw_demo[:, 82:232, :], right_raw_demo[:, 233:383, :], right_raw_demo[:, 376:526, :]))
 
-model_l, model_r, rep_l, rep_r = rf.tpgmm.bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
-# </editor-fold>
+def test_7d_bi_tpgmm():
+    # <editor-fold desc="7-dim Bi example">
+    left_raw_demo = np.load(files('rofunc.data.LFD_ML').joinpath('LeftHand.npy'))
+    right_raw_demo = np.load(files('rofunc.data.LFD_ML').joinpath('RightHand.npy'))
+    left_raw_demo = np.expand_dims(left_raw_demo, axis=0)
+    right_raw_demo = np.expand_dims(right_raw_demo, axis=0)
+    demos_left_x = np.vstack((left_raw_demo[:, 82:232, :], left_raw_demo[:, 233:383, :], left_raw_demo[:, 376:526, :]))
+    demos_right_x = np.vstack(
+        (right_raw_demo[:, 82:232, :], right_raw_demo[:, 233:383, :], right_raw_demo[:, 376:526, :]))
+
+    model_l, model_r, rep_l, rep_r = rf.tpgmm.bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=False)
+    # </editor-fold>
+
+
+if __name__ == '__main__':
+    test_7d_bi_tpgmm()
