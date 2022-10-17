@@ -87,15 +87,15 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Obst: np.ndarray, U_obst: np.ndarra
     return u, x
 
 
-def uni_obstacle(Mu, Obst, S_obst, U_obst, u0, x0, cfg):
+def uni_obstacle(Mu, Obst, S_obst, U_obst, u0, x0, cfg, for_test=False):
     Q, R, idx, tl = get_matrices(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
 
     u, x = get_u_x(cfg, Mu, Obst, U_obst, u0, x0, R, Su0, Sx0, idx, tl)
-    vis(cfg, x, Mu, Obst, S_obst)
+    vis(cfg, x, Mu, Obst, S_obst, for_test=for_test)
 
 
-def vis(cfg, x, Mu, Obst, S_obst):
+def vis(cfg, x, Mu, Obst, S_obst, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -120,5 +120,5 @@ def vis(cfg, x, Mu, Obst, S_obst):
 
     plt.plot(x[:, 0], x[:, 1], c='black')
     plt.scatter(x[::10, 0], x[::10, 1], c='black')
-
-    plt.show()
+    if not for_test:
+        plt.show()
