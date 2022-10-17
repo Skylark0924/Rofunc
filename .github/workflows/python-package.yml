@@ -40,6 +40,7 @@ jobs:
         echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
         echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
         nvcc -V
+        sudo apt install libcuda1
     - name: Install ZED SDK
       run: |
         wget https://download.stereolabs.com/zedsdk/3.7/cu117/ubuntu18
