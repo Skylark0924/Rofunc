@@ -40,10 +40,10 @@ jobs:
 #        echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
 #        echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
 #        nvcc -V
-    - name: Install ZED SDK
+    - name: Install ZED Python API
       run: |
-        wget https://download.stereolabs.com/zedsdk/3.7/cu117/ubuntu18
-        sh ubuntu18 --quiet --accept  -- silent
+#        wget https://download.stereolabs.com/zedsdk/3.7/cu117/ubuntu18
+#        sh ubuntu18 --quiet --accept  -- silent
         cd /usr/local/zed/
         python get_python_api.py
 #    - name: Lint with flake8
