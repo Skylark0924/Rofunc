@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     name: Test on Python ${{ matrix.python-version }} and ${{ matrix.os }}
-    runs-on: ubuntu-18.04
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -31,16 +31,15 @@ jobs:
         python -m pip install flake8 pytest pytest-cov
         pip install -r requirements.txt
         python -m pip install cython numpy opencv-python pyopengl
-    - name: cuda-toolkit
-      uses: Jimver/cuda-toolkit@v0.2.8
-      id: cuda-toolkit
-      with:
-        cuda: '11.3.0'
-    - run: |
-        echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
-        echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
-        nvcc -V
-        sudo apt install libcuda1
+#    - name: cuda-toolkit
+#      uses: Jimver/cuda-toolkit@v0.2.8
+#      id: cuda-toolkit
+#      with:
+#        cuda: '11.3.0'
+#    - run: |
+#        echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
+#        echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
+#        nvcc -V
     - name: Install ZED SDK
       run: |
         wget https://download.stereolabs.com/zedsdk/3.7/cu117/ubuntu18
