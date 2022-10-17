@@ -142,15 +142,15 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, MuCoM: np.ndarray, u: np.ndarray, x
     return u, x
 
 
-def uni_bi(Mu, MuCoM, u0, x0, cfg):
+def uni_bi(Mu, MuCoM, u0, x0, cfg, for_test=False):
     Q, Qc, R, idx, tl = get_matrices(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
     u, x = get_u_x(cfg, Mu, MuCoM, u0, x0, Q, Qc, R, Su0, Sx0, idx, tl)
 
-    vis(cfg, x, Mu, MuCoM, tl)
+    vis(cfg, x, Mu, MuCoM, tl, for_test=for_test)
 
 
-def vis(cfg, x, Mu, MuCoM, tl):
+def vis(cfg, x, Mu, MuCoM, tl, for_test):
     tl = np.array([0, tl.item()])
 
     plt.figure(figsize=(15, 9))
@@ -183,4 +183,5 @@ def vis(cfg, x, Mu, MuCoM, tl):
     ftmp = fkin(cfg, x)
     plt.plot(ftmp[0, :], ftmp[1, :], c="black", marker="o", markevery=[0] + tl.tolist())
     plt.plot(ftmp[2, :], ftmp[3, :], c="black", marker="o", markevery=[0] + tl.tolist())
-    plt.show()
+    if not for_test:
+        plt.show()

@@ -90,12 +90,13 @@ def get_u_x(cfg: DictConfig, state_noise: np.ndarray, P: np.ndarray, R: np.ndarr
     return u_hat, x_hat
 
 
-def uni_fb(via_points: np.ndarray, cfg: DictConfig = None):
+def uni_fb(via_points: np.ndarray, cfg: DictConfig = None, for_test=False):
     """
     LQR with recursive computation and augmented state space
     Args:
         via_points:
         cfg:
+        for_test:
 
     Returns:
 
@@ -121,7 +122,7 @@ def uni_fb(via_points: np.ndarray, cfg: DictConfig = None):
                 P[:, :, t + 1] @ np.dot(B, np.linalg.pinv(B.T @ P[:, :, t + 1] @ B + R))
                 @ B.T @ P[:, :, t + 1] - P[:, :, t + 1]) @ A
     u_hat, x_hat = get_u_x(cfg, state_noise, P, R, A, B)
-    vis3d(via_points, x_hat)
+    vis3d(via_points, x_hat, for_test=for_test)
     return u_hat, x_hat
 
 
@@ -136,7 +137,7 @@ def vis(via_points, x_hat):
     plt.show()
 
 
-def vis3d(via_points, x_hat):
+def vis3d(via_points, x_hat, for_test):
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111, projection='3d', fc='white')
 
@@ -146,5 +147,5 @@ def vis3d(via_points, x_hat):
     ax.scatter(via_points[:, 0], via_points[:, 1], via_points[:, 2], s=20 * 1.5 ** 2, marker='o', color="red",
                label="Via-points")
     plt.legend()
-    plt.show()
-
+    if not for_test:
+        plt.show()

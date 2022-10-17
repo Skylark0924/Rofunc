@@ -48,16 +48,16 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0:
     return u, x
 
 
-def uni_cp(Mu, Rot, u0, x0, cfg):
+def uni_cp(Mu, Rot, u0, x0, cfg, for_test=False):
     Q, R, idx, tl = get_matrices(cfg)
     PSI, phi = define_control_primitive(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
 
     u, x = get_u_x(cfg, Mu, Rot, u0, x0, Q, R, Su0, Sx0, idx, tl, PSI)
-    vis(cfg, u, x, Mu, Rot, tl, phi)
+    vis(cfg, u, x, Mu, Rot, tl, phi, for_test=for_test)
 
 
-def vis(cfg, u, x, Mu, Rot, tl, phi):
+def vis(cfg, u, x, Mu, Rot, tl, phi, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -133,4 +133,5 @@ def vis(cfg, u, x, Mu, Rot, tl, phi):
         axs[6].plot(phi[:, i])
     axs[6].set_xlabel("$t$")
 
-    plt.show()
+    if not for_test:
+        plt.show()

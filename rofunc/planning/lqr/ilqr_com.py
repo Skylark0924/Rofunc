@@ -106,16 +106,16 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, MuCoM: np.ndarray, u: np.ndarray, x
     return u, x
 
 
-def uni_com(Mu, MuCoM, u0, x0, cfg):
+def uni_com(Mu, MuCoM, u0, x0, cfg, for_test=False):
     Q, R, idx, tl = get_matrices(cfg)
     Qc = np.kron(np.identity(cfg.nbData), np.diag([1E0, 0]))
     Su0, Sx0 = set_dynamical_system(cfg)
     u, x = get_u_x(cfg, Mu, MuCoM, u0, x0, Q, Qc, R, Su0, Sx0, idx, tl)
 
-    vis(cfg, x, Mu, MuCoM)
+    vis(cfg, x, Mu, MuCoM, for_test=for_test)
 
 
-def vis(cfg, x, Mu, MuCoM):
+def vis(cfg, x, Mu, MuCoM, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -146,4 +146,5 @@ def vis(cfg, x, Mu, MuCoM):
             rect = patches.Rectangle(rect_origin, cfg.szCoM * 2, 3.5 * 2,
                                      facecolor=[.8, 0, 0], alpha=0.1, edgecolor=None)
             ax.add_patch(rect)
-    plt.show()
+    if not for_test:
+        plt.show()

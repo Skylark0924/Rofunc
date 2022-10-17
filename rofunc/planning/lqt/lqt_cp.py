@@ -71,7 +71,6 @@ def uni_cp(via_points_raw: np.ndarray, cfg: DictConfig = None):
     u_hat, x_hat = get_u_x(cfg, start_pose, mu, Q, R, Su, Sx, PSI)
 
     # vis(param, x_hat, u_hat, muQ, idx_slices, tl, phi)
-    rf.lqt.plot_3d_uni([x_hat], mu, idx_slices)
     # rf.visualab.traj_plot([x_hat[:, :2]])
     return u_hat, x_hat, mu, idx_slices
 
