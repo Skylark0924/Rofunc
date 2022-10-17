@@ -6,7 +6,7 @@ from isaacgym import gymutil
 args = gymutil.parse_arguments()
 
 
-def test_curi_run_traj():
+def curi_run_traj():
     # <editor-fold desc="Run trajectory">
     traj_l = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))
     traj_r = np.load(files('rofunc.data').joinpath('taichi_1r.npy'))
@@ -25,5 +25,5 @@ def test_curi_run_traj():
 # </editor-fold>
 
 
-if __name__ == '__main__':
-    test_curi_run_traj()
+# if __name__ == '__main__':
+#     test_curi_run_traj()
