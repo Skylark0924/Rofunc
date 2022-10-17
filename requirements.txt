@@ -6,7 +6,6 @@ pandas
 tqdm
 pillow
 pytransform3d
-numpy==1.21.6
 pynput
 nestle
 omegaconf
