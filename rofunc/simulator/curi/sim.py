@@ -15,6 +15,10 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         pose.p.x = traj[index, 0]
         pose.p.y = traj[index, 2]
         pose.p.z = traj[index, 1]
+        pose.r.w = traj[index, 6]
+        pose.r.x = traj[index, 3]
+        pose.r.y = traj[index, 5]
+        pose.r.z = traj[index, 4]
         gym.set_attractor_target(envs[i], attractor_handles[i], pose)
 
         # Draw axes and sphere at attractor location
@@ -168,8 +172,10 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
         assert isinstance(attracted_joints, list)
         attracted_joint_l = attracted_joints[0]
         attracted_joint_r = attracted_joints[1]
-    attractor_handles_l, axes_geom_l, sphere_geom_l = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_l, for_test=for_test)
-    attractor_handles_r, axes_geom_r, sphere_geom_r = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_r, for_test=for_test)
+    attractor_handles_l, axes_geom_l, sphere_geom_l = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_l,
+                                                                     for_test=for_test)
+    attractor_handles_r, axes_geom_r, sphere_geom_r = init_attractor(gym, envs, viewer, curi_handles, attracted_joint_r,
+                                                                     for_test=for_test)
 
     # get joint limits and ranges for Franka
     curi_dof_props = gym.get_actor_dof_properties(envs[0], curi_handles[0])
@@ -220,3 +226,17 @@ def run_traj_bi(args, traj_l, traj_r, attracted_joints=None, asset_root=None, up
 
     gym.destroy_viewer(viewer)
     gym.destroy_sim(sim)
+
+
+if __name__ == '__main__':
+    import numpy as np
+    from importlib_resources import files
+    import rofunc as rf
+    from isaacgym import gymutil
+
+    args = gymutil.parse_arguments()
+
+    traj_l = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))
+    traj_r = np.load(files('rofunc.data').joinpath('taichi_1r.npy'))
+    rf.lqt.plot_3d_bi(traj_l, traj_r, ori=False)
+    run_traj_bi(args, traj_l, traj_r, update_freq=0.001)
