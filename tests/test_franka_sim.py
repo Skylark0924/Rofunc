@@ -9,7 +9,7 @@ args = gymutil.parse_arguments(description="Franka Attractor Example")
 def franka_run_traj():
     # <editor-fold desc="Run trajectory">
     traj = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))
-    rf.franka.run_traj(args, traj, for_test=True)
+    rf.franka.run_traj(args, traj)
     # </editor-fold>
 
 
@@ -19,4 +19,4 @@ def franka_run_traj():
 
 
 # if __name__ == '__main__':
-#     test_franka_run_traj()
+#     franka_run_traj()
