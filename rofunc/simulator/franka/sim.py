@@ -16,6 +16,10 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         pose.p.x = traj[index, 0] * 0.5
         pose.p.y = traj[index, 2] * 0.5
         pose.p.z = traj[index, 1] * 0.5
+        pose.r.w = traj[index, 6]
+        pose.r.x = traj[index, 3]
+        pose.r.y = traj[index, 5]
+        pose.r.z = traj[index, 4]
         gym.set_attractor_target(envs[i], attractor_handles[i], pose)
 
         # Draw axes and sphere at attractor location
