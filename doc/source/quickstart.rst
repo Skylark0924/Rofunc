@@ -21,33 +21,12 @@ Demonstration collection
 .. figure:: ./img/demonstration_3.png
    :alt: 
 
-| Two types of Tai Chi pushing hand with fixed step are defined and
-  demonstrated by two individuals, which includes the motion of flat
-  circles (repetition of a → b → c → a) and vertical circles (repetition
-  of a → d → e → a). The person whose hand motions are supposed to be
-  learned by CURI was wearing the Xsens suit and the Optitrack markers
-  on his back for global localization while the partner was attached
-  with two markers on both hands for trajectory recording. Starting with
-  the initial phase a, the cycle of the confrontational pushing hand
-  movement is separated into two phases, which are the
-| ’Yin’ phase and the ’Yang’ phase from the perspective of one single
-  hand. The hands of demonstrators marked by the red solid circle
-  represent that they were in the ’Yang’ phase while the green solid
-  circle represents the ’Yin’ phase. The directions of hand motions were
-  indicated by the orange arrow. For instance, during the motion of a →
-  b → c → a, the left hand of the demonstrator on the left side performs
-  stiff to push the opponent’s hand as ’Yang’ motion and then becomes
-  compliant to comply with the opponent’s motion with a pulling back
-  action as ’Yin’ motion. (We declare that the individuals in this
-  figure are both authors and they gave permission for the use of their
-  image.)
+| Two types of Tai Chi pushing hand with fixed step are defined and demonstrated by two individuals, which includes the motion of flat circles (repetition of a → b → c → a) and vertical circles (repetition of a → d → e → a). The person whose hand motions are supposed to be learned by CURI was wearing the Xsens suit and the Optitrack markers on his back for global localization while the partner was attached with two markers on both hands for trajectory recording. Starting with the initial phase a, the cycle of the confrontational pushing hand movement is separated into two phases, which are the ’Yin’ phase and the ’Yang’ phase from the perspective of one single hand. The hands of demonstrators marked by the red solid circle represent that they were in the ’Yang’ phase while the green solid circle represents the ’Yin’ phase. The directions of hand motions were indicated by the orange arrow. For instance, during the motion of a → b → c → a, the left hand of the demonstrator on the left side performs stiff to push the opponent’s hand as ’Yang’ motion and then becomes compliant to comply with the opponent’s motion with a pulling back action as ’Yin’ motion. (We declare that the individuals in this figure are both authors and they gave  permission for the use of their image.)
 
 Data pre-processing
 ~~~~~~~~~~~~~~~~~~~
 
-As describing in the
-```Demonstration collection and pre-processing`` <./devices/index>`__
-section.
+As describing in the :doc:`/devices/index` section.
 
 Learning from demonstration
 ---------------------------
