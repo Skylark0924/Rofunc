@@ -1,0 +1,10 @@
+nbData: 100                             # Number of datapoints
+nbVarU: 2                               # Control space dimension (dx1,dx2,dx3)
+nbVarPos: 2                             # Control space dimension (dx1,dx2,dx3)
+nbDeriv: 3                              # Number of static and dynamic features (nbDeriv=2 for [x,dx] and u=ddx)
+nbVar: ${multi:${nbVarU},${nbDeriv}}  # Dimension of state vector
+nbVarX: ${add:${nbVar}, 1}              # Augmented state space
+dt: 1E-2                                # Time step duration
+rfactor: 1E-9                           # control cost in LQR
+nbFct: 9                                # Number of basis function
+basisName: "RBF"                        # can be PIECEWEISE, RBF, BERNSTEIN, FOURIER

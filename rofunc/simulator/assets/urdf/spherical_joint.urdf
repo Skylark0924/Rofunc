@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<robot name="spherical_joint_robot">
+  <link name="base_link" />
+  <link name="translation_x" />
+  <link name="translation_y" />
+  <link name="translation_z" />
+
+  <link name="object">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.2 0.5"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.2 0.5"/>
+      </geometry>
+    </collision>
+     <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.05" iyz="0.0" izz="0.05"/>
+    </inertial>
+  </link>
+  
+  <joint name="prismatic_joint_x" type="prismatic">
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="translation_x"/>
+    <limit effort="1000.0" lower="-2" upper="2" velocity="100"/>
+  </joint>
+  <joint name="prismatic_joint_y" type="prismatic">
+    <axis xyz="0 1 0"/>
+    <origin xyz="0 0 0"/>
+    <parent link="translation_x"/>
+    <child link="translation_y"/>
+    <limit effort="1000.0" lower="-2" upper="2" velocity="100"/>
+  </joint>
+  <joint name="prismatic_joint_z" type="prismatic">
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0"/>
+    <parent link="translation_y"/>
+    <child link="translation_z"/>
+    <limit effort="1000.0" lower="-2" upper="2" velocity="100"/>
+  </joint>
+
+  <joint name="spherical_joint" type="spherical">
+    <origin xyz="0 0 0"/>
+    <parent link="translation_z"/>
+    <child link="object"/>
+    <limit effort="1000.0" lower="-4" upper="4" velocity="100"/>
+  </joint>
+
+</robot>

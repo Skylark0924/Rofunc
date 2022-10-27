@@ -19,7 +19,6 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
@@ -139,3 +138,9 @@ doc/rofunc.blg
 doc/rofunc.out
 
 .idea/
+whl/
+
+scripts/update.sh
+/rofunc/planning/lqt/outputs/
+
+rofunc/planning/src/robotics-codes-from-scratch-master/
