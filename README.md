@@ -1,9 +1,13 @@
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration
 
 ![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)
+[![Documentation Status](https://readthedocs.org/projects/rofunc/badge/?version=latest)](https://rofunc.readthedocs.io/en/latest/?badge=latest)
 ![License](https://img.shields.io/github/license/Skylark0924/Rofunc)
+![](https://img.shields.io/pypi/dm/Rofunc)
+![](https://img.shields.io/github/issues-closed-raw/Skylark0924/Rofunc)
+![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)
 
-![](./img/logo2.png)
+![](./img/logo1.png)
 
 ## Rofunc
 
@@ -27,43 +31,91 @@ import rofunc as rf
 
 Thus, have fun in the robotics world!
 
+> **Requirement installation**
+> ```python
+> pip install -r requirements.txt
+> ```
+> Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/) manually. (We have tried to
+> package it as a `.whl` file, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+
 ### [Documentation](./rofunc/)
 Currently, we provide a simple document; please refer to [here](./rofunc/). A comprehensive one with both English and 
-Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/stable/). 
+Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/). 
 The available functions and plans can be found as follows.
 
 
-| Classes                         | Types        | Functions               | Description                                                          | Status |
-|---------------------------------|--------------|-------------------------|----------------------------------------------------------------------|--------|
-| **Devices**                     | Xsens        | `xsens.record`          | Record the human motion via network streaming                        |        |
-|                                 |              | `xsens.process`         | Decode the .mvnx file                                                | ✅      |
-|                                 |              | `xsens.visualize`       | Show or save gif about the motion                                    | ✅      |
-|                                 | Optitrack    | `optitrack.record`      | Record the motion of markers via network streaming                   |        |
-|                                 |              | `optitrack.process`     | Process the output .csv data                                         | ✅      |
-|                                 |              | `optitrack.visualize`   | Show or save gif about the motion                                    |        |
-|                                 | ZED          | `zed.record`            | Record with multiple cameras                                         | ✅      |
-|                                 |              | `zed.playback`          | Playback the recording and save snapshots                            | ✅      |
-|                                 |              | `zed.export`            | Export the recording to mp4                                          | ✅      |
-|                                 | Multimodal   | `mmodal.record`         | Record multi-modal demonstration data simultaneously                 |        |
-|                                 |              | `mmodal.export`         | Export multi-modal demonstration data in one line                    | ✅      |
-| **Learning from Demonstration** | DMP          | `dmp.uni`               | DMP for one agent with several (or one) demonstrated trajectories    |        |
-|                                 | GMR          | `gmr.uni`               | GMR for one agent with several (or one) demonstrated trajectories    | ✅      |
-|                                 | TP-GMM       | `tpgmm.uni`             | TP-GMM for one agent with several (or one) demonstrated trajectories | ✅      |
-|                                 |              | `tpgmm.bi`              | TP-GMM for two agent with coordination learned from demonstration    | ✅      |
-|                                 | TP-GMR       | `tpgmr.uni`             | TP-GMR for one agent with several (or one) demonstrated trajectories | ✅      |
-|                                 |              | `tpgmr.bi`              | TP-GMR for two agent with coordination learned from demonstration    | ✅      |
-| **Planning**                    | LQT          | `lqt.uni`               | LQT for one agent with several via-points                            | ✅      |
-|                                 |              | `lqt.bi`                | LQT for two agent with coordination constraints                      | ✅      |
-|                                 |              | `lqt.recursive`         | Generate smooth trajectories for robot execution recursively         | ✅      |
-| **Logger**                      |              | `logger.write`          | Custom tensorboard-based logger                                      |        |
-| **Coordinate**                  |              | `coord.custom_class`    | Define the custom class of `Pose`                                    |        |
-|                                 |              | `coord.transform`       | Useful functions about coordinate transformation                     | ✅      |
-| **VisuaLab**                    | Trajectory   | `visualab.trajectory`   | 2-dim/3-dim/with ori trajectory visualization                        | ✅      |
-|                                 | Distribution | `visualab.distribution` | 2-dim/3-dim distribution visualization                               | ✅      |
-|                                 | Ellipsoid    | `visualab.ellipsoid`    | 2-dim/3-dim ellipsoid visualization                                  | ✅      |
-| **RoboLab**                     | Kinematics   | `robolab.kinematics`    | ...                                                                  | ✅      |
+| Classes                                         | Types                  | Functions               | Description                                                                   | Status |
+|-------------------------------------------------|------------------------|-------------------------|-------------------------------------------------------------------------------|--------|
+| **Demonstration collection and pre-processing** | Xsens                  | `xsens.record`          | Record the human motion via network streaming                                 | ✅      |
+|                                                 |                        | `xsens.process`         | Decode the .mvnx file                                                         | ✅      |
+|                                                 |                        | `xsens.visualize`       | Show or save gif about the motion                                             | ✅      |
+|                                                 | Optitrack              | `optitrack.record`      | Record the motion of markers via network streaming                            |        |
+|                                                 |                        | `optitrack.process`     | Process the output .csv data                                                  | ✅      |
+|                                                 |                        | `optitrack.visualize`   | Show or save gif about the motion                                             |        |
+|                                                 | ZED                    | `zed.record`            | Record with multiple cameras                                                  | ✅      |
+|                                                 |                        | `zed.playback`          | Playback the recording and save snapshots                                     | ✅      |
+|                                                 |                        | `zed.export`            | Export the recording to mp4                                                   | ✅      |
+|                                                 | Delsys EMG             | `emg.record`            | Record real-time EMG data via network streaming                               | ✅      |
+|                                                 |                        | `emg.process`           | Filtering the EMG data                                                        | ✅      |
+|                                                 |                        | `emg.visualize`         | Some visualization functions for EMG data                                     | ✅      |
+|                                                 | Multimodal             | `mmodal.record`         | Record multi-modal demonstration data simultaneously                          |        |
+|                                                 |                        | `mmodal.export`         | Export multi-modal demonstration data in one line                             | ✅      |
+| **Learning from Demonstration**                 | DMP                    | `dmp.uni`               | DMP for one agent with several (or one) demonstrated trajectories             |        |
+|                                                 | GMR                    | `gmr.uni`               | GMR for one agent with several (or one) demonstrated trajectories             | ✅      |
+|                                                 | GMR                    | `gmm.uni`               | GMM for one agent with several (or one) demonstrated trajectories             |        |
+|                                                 | TP-GMM                 | `tpgmm.uni`             | TP-GMM for one agent with several (or one) demonstrated trajectories          | ✅      |
+|                                                 |                        | `tpgmm.bi`              | TP-GMM for two agents with coordination learned from demonstration            | ✅      |
+|                                                 | TP-GMR                 | `tpgmr.uni`             | TP-GMR for one agent with several (or one) demonstrated trajectories          | ✅      |
+|                                                 |                        | `tpgmr.bi`              | TP-GMR for two agents with coordination learned from demonstration            | ✅      |
+|                                                 | Behavior Cloning       | `bc.uni`                | NN-based baseline behavior cloning method                                     | ✅      |
+|                                                 | Structured-Transformer | `strans.uni`            | Structured-Transformer method propose in                                      |        |
+|                                                 | CQL                    | `cql.uni`               | Conservative Q-learning for fully offline learning                            |        |
+|                                                 |                        | `mcql.uni`              | Mixed conservative Q-learning for learning from demonstration with interation |        |
+| **Planning**                                    | LQT                    | `lqt.uni`               | LQT for one agent with several via-points                                     | ✅      |
+|                                                 |                        | `lqt.bi`                | LQT for two agents with coordination constraints                              | ✅      |
+|                                                 |                        | `lqt.uni_hierarchical`  | Generate smooth trajectories for robot execution hierarchically               | ✅      |
+|                                                 |                        | `lqt.uni_fb`            | Generate smooth trajectories with feedback                                    | ✅      |
+|                                                 |                        | `lqt.uni_cp`            | LQT with control primitive                                                    | ✅      |
+|                                                 |                        | `lqt.uni_cp_dmp`        | LQT with control primitive and DMP form                                       | ✅      |
+|                                                 | iLQR                   | `ilqr.uni`              | Iterative LQR (iLQR) for one agent with several via-points                    | ✅      |
+|                                                 |                        | `ilqr.bi`               | Iterative LQR (iLQR) for two agents with several via-points                   | ✅      |
+|                                                 |                        | `ilqr.uni_fb`           | Iterative LQR (iLQR) with feedback                                            |        |
+|                                                 |                        | `ilqr.uni_cp`           | Iterative LQR (iLQR) with control primitive                                   | ✅      |
+|                                                 |                        | `ilqr.uni_com`          | Iterative LQR (iLQR) with center of mass                                      | ✅      |
+|                                                 |                        | `ilqr.uni_obstacle`     | Iterative LQR (iLQR) with obstacle avoidance                                  | ✅      |
+| **Tools**                                       | Logger                 | `logger.write`          | Custom tensorboard-based logger                                               |        |
+|                                                 | Config                 | `config.get_config`     | General config API by using `hydra`                                           | ✅      |
+|                                                 | Coordinate             | `coord.custom_class`    | Define the custom class of `Pose`                                             |        |
+|                                                 |                        | `coord.transform`       | Useful functions about coordinate transformation                              | ✅      |
+|                                                 | VisuaLab               | `visualab.trajectory`   | 2-dim/3-dim/with ori trajectory visualization                                 | ✅      |
+|                                                 |                        | `visualab.distribution` | 2-dim/3-dim distribution visualization                                        | ✅      |
+|                                                 |                        | `visualab.ellipsoid`    | 2-dim/3-dim ellipsoid visualization                                           | ✅      |
+|                                                 | RoboLab                | `robolab.kinematics`    | Forward /inverse kinematics w.r.t URDF file                                   |        |
+| **Simulator**                                   | Franka                 | `franka.sim`            | Execute specific trajectory via single Franka Panda arm in Isaac Gym          | ✅      |
+|                                                 | DualFranka             | `dualfranka.sim`        | Execute specific trajectory via dual Franka Panda arm in Isaac Gym            |        |
+|                                                 | CURI                   | `curi.sim`              | Execute specific trajectory via human-like CURI robot in Isaac Gym            | ✅      |
+|                                                 | Walker                 | `walker.sim`            | Execute specific trajectory via UBTECH Walker robot  in Isaac Gym             |        |
 
 ## Roadmap
 
 Roadmap is a personal learning experience and also simple guidance about robotics and Learning from Demonstration (LfD) fields.
 
+
+## Cite
+
+If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
+
+```
+@misc{Junjia2022,
+	author = {Liu, Junjia and Li, Zhihao and Li, Chenzui},
+	title = {Rofunc: The full process python package for robot learning from demonstration},
+	year = {2022},
+	publisher = {GitHub},
+	journal = {GitHub repository},
+	howpublished = {\url{https://github.com/Skylark0924/Rofunc}},
+	commit = {689cb899f4640d3a2f769654b988c3a8a8c2bad5}
+}
+```
+
+## The Team
+Rofunc is developed and maintained by the CLOVER Lab (Collaborative and Versatile Robot Laboratory), CUHK.

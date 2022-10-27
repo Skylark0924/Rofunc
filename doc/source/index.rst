@@ -10,15 +10,17 @@ Rofunc
 ----------------
 :doc:`overview`
    Show motivation, pipeline and list the available functions of `rofunc` package.
-:doc:`devices/README`
+:doc:`quickstart`
+   A bimanual dough rolling example that takes you through the whole process of robot learning from demonstration.
+:doc:`devices/index`
    How to record, process, visual and export the multimodal demonstration data.
-:doc:`lfd/README`
+:doc:`lfd/index`
    Provide baseline methods that belong to various classes for learning from demonstration.
-:doc:`planning/README`
+:doc:`planning/index`
    Provide robot planning and control methods.
-:doc:`tools/README`
+:doc:`tools/index`
    Provide a basic visualization library `visualab`, a robotics library `robolab`, and tools like coordinate transform and a logger.
-:doc:`simulator/README`
+:doc:`simulator/index`
    Provide Isaac Gym based robot simulator.
 
 Roadmap
@@ -27,16 +29,18 @@ Roadmap
 .. Hidden TOCs
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Rofunc
    :hidden:
+   :glob:
 
    overview
-   devices/README
-   lfd/README
-   planning/README
-   tools/README
-   simulator/README
+   quickstart
+   devices/index
+   lfd/index
+   planning/index
+   tools/index
+   simulator/index
 
 .. toctree::
    :maxdepth: 1
