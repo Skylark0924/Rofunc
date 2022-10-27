@@ -138,24 +138,6 @@ def f_reach(cfg, robot_state, Mu, Rot, specific_robot=None):
     return f, J
 ```
 
-
-
-
-
-```python
-
-```
-
-
-
-
-
-
-
-
-
-
-
 ### Reference
 
 [1] Li, W., & Todorov, E. (2004, August). Iterative linear quadratic regulator design for nonlinear biological movement systems. In *ICINCO (1)* (pp. 222-229).
