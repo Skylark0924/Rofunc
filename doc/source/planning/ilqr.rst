@@ -118,134 +118,74 @@ with a specific end-effector). The main process is shown as follow:
 .. code:: python
 
    def uni(Mu, Rot, u0, x0, cfg, for_test=False):
-
        Q, R, idx, tl = get_matrices(cfg)
-
        Su0, Sx0 = set_dynamical_system(cfg)
-
        u, x = get_u_x(cfg, Mu, Rot, u0, x0, Q, R, Su0, Sx0, idx, tl)
-
        vis(cfg, Mu, Rot, x, tl, for_test=for_test)
 
 .. code:: python
 
-   def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0: np.ndarray, Q: np.ndarray,
+    def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0: np.ndarray, Q: np.ndarray,
+                R: np.ndarray, Su0: np.ndarray, Sx0: np.ndarray, idx: np.ndarray, tl: np.ndarray):
+        Su = Su0[idx.flatten()]  # We remove the lines that are out of interest
 
-               R: np.ndarray, Su0: np.ndarray, Sx0: np.ndarray, idx: np.ndarray, tl: np.ndarray):
-
-       Su = Su0[idx.flatten()]  # We remove the lines that are out of interest
-
-   
-
-       for i in range(cfg.nbIter):
-
-           x = Su0 @ u + Sx0 @ x0  # System evolution
-
-           x = x.reshape([cfg.nbData, cfg.nbVarX])
-
-           f, J = f_reach(cfg, x[tl], Mu, Rot)  # Residuals and Jacobians
-
-           du = np.linalg.inv(Su.T @ J.T @ Q @ J @ Su + R) @ (
-
-                   -Su.T @ J.T @ Q @ f.flatten() - u * cfg.rfactor)  # Gauss-Newton update
-
-           # Estimate step size with backtracking line search method
-
-           alpha = 2
-
-           cost0 = f.flatten() @ Q @ f.flatten() + np.linalg.norm(u) ** 2 * cfg.rfactor  # Cost
-
-           while True:
-
-               utmp = u + du * alpha
-
-               xtmp = Su0 @ utmp + Sx0 @ x0  # System evolution
-
-               xtmp = xtmp.reshape([cfg.nbData, cfg.nbVarX])
-
-               ftmp, _ = f_reach(cfg, xtmp[tl], Mu, Rot)  # Residuals
-
-               cost = ftmp.flatten() @ Q @ ftmp.flatten() + np.linalg.norm(utmp) ** 2 * cfg.rfactor  # Cost
-
-               if cost < cost0 or alpha < 1e-3:
-
-                   u = utmp
-
-                   print("Iteration {}, cost: {}".format(i, cost))
-
-                   break
-
-               alpha /= 2
-
-           if np.linalg.norm(du * alpha) < 1E-2:
-
-               break  # Stop iLQR iterations when solution is reached
-
-       return u, x
+        for i in range(cfg.nbIter):
+            x = Su0 @ u + Sx0 @ x0  # System evolution
+            x = x.reshape([cfg.nbData, cfg.nbVarX])
+            f, J = f_reach(cfg, x[tl], Mu, Rot)  # Residuals and Jacobians
+            du = np.linalg.inv(Su.T @ J.T @ Q @ J @ Su + R) @ (
+                    -Su.T @ J.T @ Q @ f.flatten() - u * cfg.rfactor)  # Gauss-Newton update
+            # Estimate step size with backtracking line search method
+            alpha = 2
+            cost0 = f.flatten() @ Q @ f.flatten() + np.linalg.norm(u) ** 2 * cfg.rfactor  # Cost
+            while True:
+                utmp = u + du * alpha
+                xtmp = Su0 @ utmp + Sx0 @ x0  # System evolution
+                xtmp = xtmp.reshape([cfg.nbData, cfg.nbVarX])
+                ftmp, _ = f_reach(cfg, xtmp[tl], Mu, Rot)  # Residuals
+                cost = ftmp.flatten() @ Q @ ftmp.flatten() + np.linalg.norm(utmp) ** 2 * cfg.rfactor  # Cost
+                if cost < cost0 or alpha < 1e-3:
+                    u = utmp
+                    print("Iteration {}, cost: {}".format(i, cost))
+                    break
+                alpha /= 2
+            if np.linalg.norm(du * alpha) < 1E-2:
+                break  # Stop iLQR iterations when solution is reached
+        return u, x
 
 .. code:: python
 
-   def f_reach(cfg, robot_state, Mu, Rot, specific_robot=None):
+    def f_reach(cfg, robot_state, Mu, Rot, specific_robot=None):
+        """
+        Error and Jacobian for a via-points reaching task (in object coordinate system)
+        Args:
+            cfg:
+            robot_state: joint state or Cartesian pose
+        Returns:
 
-       """
+        """
+        if specific_robot is not None:
+            ee_pose = specific_robot.fk(robot_state)
+        else:
+            ee_pose = fk(cfg, robot_state)
+        f = logmap_2d(ee_pose, Mu)
+        J = np.zeros([cfg.nbPoints * cfg.nbVarF, cfg.nbPoints * cfg.nbVarX])
+        for t in range(cfg.nbPoints):
+            f[t, :2] = Rot[t].T @ f[t, :2]  # Object-oriented forward kinematics
+            Jtmp = Jacobian(cfg, robot_state[t])
+            Jtmp[:2] = Rot[t].T @ Jtmp[:2]  # Object centered Jacobian
 
-       Error and Jacobian for a via-points reaching task (in object coordinate system)
+            if cfg.useBoundingBox:
+                for i in range(2):
+                    if abs(f[t, i]) < cfg.sz[i]:
+                        f[t, i] = 0
+                        Jtmp[i] = 0
+                    else:
+                        f[t, i] -= np.sign(f[t, i]) * cfg.sz[i]
 
-       Args:
+            J[t * cfg.nbVarF:(t + 1) * cfg.nbVarF, t * cfg.nbVarX:(t + 1) * cfg.nbVarX] = Jtmp
+        return f, J
 
-           cfg:
-
-           robot_state: joint state or Cartesian pose
-
-       Returns:
-
-   
-
-       """
-
-       if specific_robot is not None:
-
-           ee_pose = specific_robot.fk(robot_state)
-
-       else:
-
-           ee_pose = fk(cfg, robot_state)
-
-       f = logmap_2d(ee_pose, Mu)
-
-       J = np.zeros([cfg.nbPoints * cfg.nbVarF, cfg.nbPoints * cfg.nbVarX])
-
-       for t in range(cfg.nbPoints):
-
-           f[t, :2] = Rot[t].T @ f[t, :2]  # Object-oriented forward kinematics
-
-           Jtmp = Jacobian(cfg, robot_state[t])
-
-           Jtmp[:2] = Rot[t].T @ Jtmp[:2]  # Object centered Jacobian
-
-   
-
-           if cfg.useBoundingBox:
-
-               for i in range(2):
-
-                   if abs(f[t, i]) < cfg.sz[i]:
-
-                       f[t, i] = 0
-
-                       Jtmp[i] = 0
-
-                   else:
-
-                       f[t, i] -= np.sign(f[t, i]) * cfg.sz[i]
-
-   
-
-           J[t * cfg.nbVarF:(t + 1) * cfg.nbVarF, t * cfg.nbVarX:(t + 1) * cfg.nbVarX] = Jtmp
-
-       return f, J
-
-.. code:: python
 
 Reference
 ~~~~~~~~~

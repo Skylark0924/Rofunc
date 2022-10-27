@@ -1,5 +1,13 @@
 # Usage
 
+Import the necessary packages:
+
+```python
+import rofunc as rf
+import numpy as np
+from rofunc.config.get_config import *
+```
+
 ## LQT variants
 
 ### LQT
@@ -66,7 +74,7 @@ for t in range(cfg.nbPoints):
     ])
 u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
 x0 = np.array([3 * np.pi / 4, -np.pi / 2, -np.pi / 4])  # Initial state
-rf.lqr.uni_cp(Mu, Rot, u0, x0, cfg, for_test=True)
+rf.lqr.uni_cp(Mu, Rot, u0, x0, cfg)
 ```
 
 
