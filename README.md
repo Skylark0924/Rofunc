@@ -106,10 +106,6 @@ The available functions and plans can be found as follows.
 |                                                 | CURI                   | [`curi.sim`](https://rofunc.readthedocs.io/en/latest/simulator/curi.html)     | Execute specific trajectory via human-like CURI robot in Isaac Gym                       | ✅      |
 |                                                 | Walker                 | `walker.sim`                                                                  | Execute specific trajectory via UBTECH Walker robot  in Isaac Gym                        |        |
 
-## Roadmap
-
-Roadmap is a personal learning experience and also simple guidance about robotics and Learning from Demonstration (LfD) fields.
-
 
 ## Cite
 
