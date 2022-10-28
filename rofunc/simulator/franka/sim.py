@@ -37,7 +37,7 @@ def show(args, asset_root=None):
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/franka_description/robots/franka_panda.urdf"
-    init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1)
+    init_env(gym, sim, asset_root, asset_file, num_envs=1)
 
     while not gym.query_viewer_has_closed(viewer):
         # Step the physics

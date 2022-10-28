@@ -47,7 +47,7 @@ def show(args, asset_root=None):
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
-    init_env(gym, sim, viewer, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=False)
+    init_env(gym, sim, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=False)
 
     while not gym.query_viewer_has_closed(viewer):
         # Step the physics
@@ -84,7 +84,7 @@ def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, up
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
-    envs, curi_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1, fix_base_link=False)
+    envs, curi_handles = init_env(gym, sim, asset_root, asset_file, num_envs=1, fix_base_link=False)
 
     # Create the attractor
     attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, curi_handles, attracted_joint)

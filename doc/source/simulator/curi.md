@@ -9,6 +9,7 @@ args = gymutil.parse_arguments()
 rf.curi.show(args)
 ```
 
+![curi_interactive](../img/curi_interactive.gif)
 
 ### Run the bimanual trajectory in the Cartesian space
 
@@ -24,4 +25,6 @@ traj_r = np.load(files('rofunc.data').joinpath('taichi_1r.npy'))  # [traj_len, 7
 
 rf.curi.run_traj_bi(args, traj_l, traj_r, update_freq=0.001)
 ```
+
+![](../img/FormatFactoryPart1.gif)
 

@@ -41,7 +41,12 @@ Thus, have fun in the robotics world!
 ### [Documentation](https://rofunc.readthedocs.io/en/latest/)
 Currently, we provide a simple document; please refer to [here](./rofunc/).
 A comprehensive one with both English and Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
-The available functions and plans can be found as follows.
+We provide a simple but interesting example: learning to play
+Taichi by learning from human demonstration.
+
+To give you a quick overview of the pipeline of `rofunc`, we provide an interesting example of learning to play Taichi from human demonstration. You can find it in the [Quick start](https://rofunc.readthedocs.io/en/latest/quickstart.html) section of the documentation.
+
+The available functions and plans can be found as follows. 
 
 
 | Classes                                         | Types                  | Functions                                                                     | Description                                                                              | Status |
@@ -52,7 +57,7 @@ The available functions and plans can be found as follows.
 |                                                 | Optitrack              | `optitrack.record`                                                            | Record the motion of markers via network streaming                                       |        |
 |                                                 |                        | `optitrack.process`                                                           | Process the output `.csv` data                                                           | ✅      |
 |                                                 |                        | `optitrack.visualize`                                                         | Show or save gif about the motion                                                        |        |
-|                                                 | ZED                    | `zed.record`                                                                  | Record with multiple (0~n) cameras                                                       | ✅      |
+|                                                 | ZED                    | `zed.record`                                                                  | Record with multiple (1~n) cameras                                                       | ✅      |
 |                                                 |                        | `zed.playback`                                                                | Playback the recording and save snapshots                                                | ✅      |
 |                                                 |                        | `zed.export`                                                                  | Export the recording to mp4 or image sequences                                           | ✅      |
 |                                                 | Delsys EMG             | `emg.record`                                                                  | Record real-time EMG data via network streaming                                          | ✅      |
