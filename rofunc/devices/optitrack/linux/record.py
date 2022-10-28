@@ -35,7 +35,6 @@ class OptiTrackClient(object):
 
 
 def record(root_dir, exp_name, ip, port):
-
     if os.path.exists('{}/{}'.format(root_dir, exp_name)):
         raise Exception('There are already some files in {}, please rename the exp_name.'.format(
             '{}/{}'.format(root_dir, exp_name)))
