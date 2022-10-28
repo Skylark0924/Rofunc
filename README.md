@@ -8,7 +8,7 @@
 ![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
-![](./img/logo2.png)
+![](./img/logo3.png)
 
 ## Rofunc
 
@@ -78,16 +78,16 @@ The available functions and plans can be found as follows.
 |                                                 |                        | `lqt.bi`                                                                      | LQT for bimanual robot with coordination constraints                                     | ✅      |
 |                                                 |                        | [`lqt.uni_fb`](https://rofunc.readthedocs.io/en/latest/planning/lqt_fb.html)  | Generate smooth trajectories with feedback                                               | ✅      |
 |                                                 |                        | [`lqt.uni_cp`](https://rofunc.readthedocs.io/en/latest/planning/lqt_cp.html)  | LQT with control primitive                                                               | ✅      |
-|                                                 | iLQR                   | `ilqr.uni`                                                                    | Iterative Linear Quadratic Regulator (iLQR) for uni-manual robot with several via-points | ✅      |
+|                                                 | iLQR                   | [`ilqr.uni`](https://rofunc.readthedocs.io/en/latest/planning/ilqr.html)      | Iterative Linear Quadratic Regulator (iLQR) for uni-manual robot with several via-points | ✅      |
 |                                                 |                        | `ilqr.bi`                                                                     | iLQR for bimanual robots with several via-points                                         | ✅      |
 |                                                 |                        | `ilqr.uni_fb`                                                                 | iLQR with feedback                                                                       |        |
 |                                                 |                        | `ilqr.uni_cp`                                                                 | iLQR with control primitive                                                              | ✅      |
 |                                                 |                        | `ilqr.uni_obstacle`                                                           | iLQR with obstacle avoidance                                                             | ✅      |
 |                                                 |                        | `ilqr.uni_dyna`                                                               | iLQR with dynamics and force control                                                     | ✅      |
 |                                                 | MPC                    | `mpc.uni`                                                                     | Model Predictive Control (MPC)                                                           |        |
+|                                                 | CIO                    | `cio.whole`                                                                   | Contact-invariant Optimization (CIO)                                                     |        |
 | **Tools**                                       | Logger                 | `logger.write`                                                                | General logger based on `tensorboard`                                                    |        |
 |                                                 | Config                 | `config.get_config`                                                           | General config API based on `hydra`                                                      | ✅      |
-|                                                 |                        | `coord.transform`                                                             | Useful functions about coordinate transformation                                         | ✅      |
 |                                                 | VisuaLab               | `visualab.trajectory`                                                         | 2-dim/3-dim/with ori trajectory visualization                                            | ✅      |
 |                                                 |                        | `visualab.distribution`                                                       | 2-dim/3-dim distribution visualization                                                   | ✅      |
 |                                                 |                        | `visualab.ellipsoid`                                                          | 2-dim/3-dim ellipsoid visualization                                                      | ✅      |
