@@ -11,6 +11,7 @@ First, we need to import our package and some relative packages:
    import rofunc as rf
    import numpy as np
    from isaacgym import gymutil
+   from importlib_resources import files
 
 Start with human demonstration
 ------------------------------
@@ -37,8 +38,8 @@ TP-GMM
 .. code:: python
 
    # Demo
-   raw_demo_l = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/LeftHand.npy')
-   raw_demo_r = np.load('/home/ubuntu/Data/2022_09_09_Taichi/xsens_mvnx/010-058/RightHand.npy')
+   raw_demo_l = np.load(files('rofunc.data.RAW_DEMO').joinpath('taichi_raw_l.npy'))
+   raw_demo_r = np.load(files('rofunc.data.RAW_DEMO').joinpath('taichi_raw_r.npy'))
    demos_x_l = [raw_demo_l[300:435, :], raw_demo_l[435:570, :], raw_demo_l[570:705, :]]
    demos_x_r = [raw_demo_r[300:435, :], raw_demo_r[435:570, :], raw_demo_r[570:705, :]]
    rf.lqt.plot_3d_bi(demos_x_l, demos_x_r, ori=False, save=False)
@@ -47,7 +48,7 @@ TP-GMM
    show_demo_idx = 1
    _, _, gmm_rep_l, gmm_rep_r = rf.tpgmm.bi(demos_x_l, demos_x_r, show_demo_idx=show_demo_idx, plot=True)
 
-**Visualization of bimanual demonstration data**
+**Visualization of multiple bimanual demonstration data**
 
 .. figure:: ./img/taichi_test1.png
    :alt: 
@@ -108,15 +109,6 @@ Linear Quadratic Tracking (LQT)
 .. code:: python
 
    # LQT
-   param = {
-      "nbData": 200,  # Number of data points
-      "nbVarPos": 7,  # Dimension of position data
-      "nbDeriv": 2,  # Number of static and dynamic features (2 -> [x,dx])
-      "dt": 1e-2,  # Time step duration
-      "rfactor": 1e-8  # Control cost
-   }
-   param["nb_var"] = param["nbVarPos"] * param["nbDeriv"]  # Dimension of state vector
-
    data = np.zeros((len(rep_l), 14))
    data[:, :7] = rep_l[:, :7]
    filter_indices = [i for i in range(0, len(rep_l) - 10, 5)]
@@ -130,12 +122,6 @@ Linear Quadratic Tracking (LQT)
    filter_indices.append(len(rep_r) - 1)
    data = data[filter_indices]
    u_hat_r, x_hat_r, muQ_r, idx_slices_r = rf.lqt.uni_recursive(param, data, interval=2)
-   rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, ori=False, save=True,
-                     save_file_name=['/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep6_l.npy',
-                                    '/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep6_r.npy'])
-
-   x_hat_l = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep6_l.npy')[0]
-   x_hat_r = np.load('/home/ubuntu/Data/2022_09_09_Taichi/lqt_rep6_r.npy')[0]
    rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, ori=False, save=False)
 
 **Smooth trajectory interpolated by LQT**
