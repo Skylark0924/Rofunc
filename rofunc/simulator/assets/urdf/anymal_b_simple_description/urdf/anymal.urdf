@@ -14,7 +14,7 @@
         <visual>      
             <origin rpy="0 0 0" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_base.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_base.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -81,7 +81,7 @@
         <visual>      
             <origin rpy="0 0 0.0" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_hip_l.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_hip_l.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -118,7 +118,7 @@
         <visual>      
             <origin rpy="0 0 0.0" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_thigh_l.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_thigh_l.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -162,7 +162,7 @@
         <visual>      
             <origin rpy="0 0 0.0" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_shank_l.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_shank_l.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -198,7 +198,7 @@
         <visual>      
             <origin rpy="0 0 0.0" xyz="0 0 0.032"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_foot.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_foot.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -241,7 +241,7 @@
         <visual>      
             <origin rpy="0 0 0.0" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_hip_r.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_hip_r.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -278,7 +278,7 @@
         <visual>      
             <origin rpy="0 0 0.0" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_thigh_r.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_thigh_r.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -322,7 +322,7 @@
         <visual>      
             <origin rpy="0 0 0.0" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_shank_r.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_shank_r.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -358,7 +358,7 @@
         <visual>      
             <origin rpy="0 0 0.0" xyz="0 0 0.032"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_foot.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_foot.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -401,7 +401,7 @@
         <visual>      
             <origin rpy="0 0 -3.14159265359" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_hip_r.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_hip_r.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -438,7 +438,7 @@
         <visual>      
             <origin rpy="0 0 -3.14159265359" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_thigh_r.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_thigh_r.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -482,7 +482,7 @@
         <visual>      
             <origin rpy="0 0 -3.14159265359" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_shank_r.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_shank_r.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -518,7 +518,7 @@
         <visual>      
             <origin rpy="0 0 -3.14159265359" xyz="0 0 0.032"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_foot.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_foot.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -561,7 +561,7 @@
         <visual>      
             <origin rpy="0 0 -3.14159265359" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_hip_l.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_hip_l.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -598,7 +598,7 @@
         <visual>      
             <origin rpy="0 0 -3.14159265359" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_thigh_l.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_thigh_l.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -642,7 +642,7 @@
         <visual>      
             <origin rpy="0 0 -3.14159265359" xyz="0 0 0"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_shank_l.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_shank_l.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    
@@ -678,7 +678,7 @@
         <visual>      
             <origin rpy="0 0 -3.14159265359" xyz="0 0 0.032"/>      
             <geometry>        
-                <mesh filename="package://anymal_b_simple_description/meshes/anymal_foot.dae" scale="0.001 0.001     0.001"/>      
+                <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/anymal_b_simple_description/meshes/anymal_foot.dae" scale="0.001 0.001     0.001"/>
             </geometry>      
             <material name="anymal_material"/>    
         </visual>    

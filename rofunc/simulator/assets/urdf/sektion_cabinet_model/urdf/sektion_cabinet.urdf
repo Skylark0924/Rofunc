@@ -23,14 +23,14 @@
     <visual name="sektion_visual">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/sektion.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/sektion.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="White" />
     </visual>
     <collision name="sektion_collision">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/sektion_convexdecomposition.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/sektion_convexdecomposition.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <gazebo reference="link">
@@ -47,14 +47,14 @@
     <visual name="drawer_top_visual">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/drawer.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/drawer.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="Front" />
     </visual>
     <collision name="drawer_top_collision">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/drawer_convexdecomposition.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/drawer_convexdecomposition.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <gazebo reference="link">
@@ -71,7 +71,7 @@
     <visual name="drawer_handle_top_visual">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/drawer_handle.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/drawer_handle.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="Grey" />
     </visual>
@@ -82,7 +82,7 @@
         <box size="0.014 0.02 0.15"/>
         <!--box size="0.02 0.02 0.15"/-->
         <!--cylinder length="0.15" radius="0.01"/-->
-        <!--mesh filename="package://sektion_cabinet_model/meshes/drawer_handle_convexdecomposition.obj" scale="1.0 1.0 1.0"/-->
+        <!--mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/drawer_handle_convexdecomposition.obj" scale="1.0 1.0 1.0"/-->
       </geometry>
     </collision>
     <collision>
@@ -116,14 +116,14 @@
     <visual name="drawer_bottom_visual">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/drawer.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/drawer.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="Front" />
     </visual>
     <collision name="drawer_bottom_collision">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/drawer_convexdecomposition.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/drawer_convexdecomposition.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="White" />
     </collision>
@@ -141,14 +141,14 @@
     <visual name="drawer_top_visual">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/drawer_handle.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/drawer_handle.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="Grey" />
     </visual>
     <collision name="drawer_top_collision">
       <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/drawer_handle_convexdecomposition.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/drawer_handle_convexdecomposition.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="White" />
     </collision>
@@ -186,14 +186,14 @@
     <visual name="door_right_visual">
       <origin rpy="0  0  0" xyz="0  -0.184706  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/door_right.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/door_right.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="Front" />
     </visual>
     <collision name="door_right_collision">
       <origin rpy="0  0  0" xyz="0  -0.184706  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/door_right.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/door_right.stl" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="White" />
     </collision>
@@ -211,14 +211,14 @@
     <visual name="door_right_nob_visual">
       <origin rpy="0  0  0" xyz="0  -0.184706  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/door_right_nob.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/door_right_nob.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="Grey" />
     </visual>
     <collision name="door_right_nob_collision">
       <origin rpy="0  0  0" xyz="0  -0.184706  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/door_right_nob.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/door_right_nob.stl" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <gazebo reference="link">
@@ -252,14 +252,14 @@
     <visual name="door_left_visual">
       <origin rpy="0  0  0" xyz="0  0.184706  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/door_left.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/door_left.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="Front" />
     </visual>
     <collision name="door_left_collision">
       <origin rpy="0  0  0" xyz="0  0.184706  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/door_left.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/door_left.stl" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <gazebo reference="link">
@@ -276,14 +276,14 @@
     <visual name="door_left_nob_visual">
       <origin rpy="0  0  0" xyz="0  0.184706  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/door_left_nob.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/door_left_nob.obj" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="Grey" />
     </visual>
     <collision name="door_left_nob_collision">
       <origin rpy="0  0  0" xyz="0  0.184706  0"/>
       <geometry>
-        <mesh filename="package://sektion_cabinet_model/meshes/door_left_nob.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/sektion_cabinet_model/meshes/door_left_nob.stl" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <gazebo reference="link">

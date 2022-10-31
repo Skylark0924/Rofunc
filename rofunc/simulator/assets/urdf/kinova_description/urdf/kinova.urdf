@@ -5,7 +5,7 @@
   <link name="kinova_link_base">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/base_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/base_smoothed.obj"/>
       </geometry>
       <material name="carbon_fiber">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -13,7 +13,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/base.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/base.STL"/>
       </geometry>
     </collision>
     <inertial>
@@ -26,7 +26,7 @@
   <link name="kinova_link_1">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/shoulder_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/shoulder_smoothed.obj"/>
       </geometry>
       <material name="carbon_fiber">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -34,7 +34,7 @@
     </visual>
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/ring_big_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/ring_big_smoothed.obj"/>
       </geometry>
         <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -42,7 +42,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/shoulder.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/shoulder.STL"/>
       </geometry>
     </collision>                       
     <inertial>
@@ -62,7 +62,7 @@
   <link name="kinova_link_2">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/arm_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/arm_smoothed.obj"/>
       </geometry>
       <material name="carbon_fiber">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -70,7 +70,7 @@
     </visual>
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/ring_big_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/ring_big_smoothed.obj"/>
       </geometry>
        <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -78,7 +78,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/arm.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/arm.STL"/>
       </geometry>
     </collision>                        
     <inertial>
@@ -98,7 +98,7 @@
   <link name="kinova_link_3">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/forearm_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/forearm_smoothed.obj"/>
       </geometry>
       <material name="carbon_fiber">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -106,7 +106,7 @@
     </visual>
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/ring_big_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/ring_big_smoothed.obj"/>
       </geometry>
        <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -114,7 +114,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/forearm.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/forearm.STL"/>
       </geometry>
     </collision>     
     <inertial>
@@ -134,7 +134,7 @@
   <link name="kinova_link_4">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/wrist_spherical_1_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/wrist_spherical_1_smoothed.obj"/>
       </geometry>
       <material name="carbon_fiber">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -142,7 +142,7 @@
     </visual>
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/ring_small_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/ring_small_smoothed.obj"/>
       </geometry>
        <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -150,7 +150,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/wrist_spherical_1.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/wrist_spherical_1.STL"/>
       </geometry>
     </collision>          
     <inertial>
@@ -170,7 +170,7 @@
   <link name="kinova_link_5">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/wrist_spherical_2_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/wrist_spherical_2_smoothed.obj"/>
       </geometry>
       <material name="carbon_fiber">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -178,7 +178,7 @@
     </visual>
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/ring_small_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/ring_small_smoothed.obj"/>
       </geometry>
        <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -186,7 +186,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/wrist_spherical_2.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/wrist_spherical_2.STL"/>
       </geometry>
     </collision>           
     <inertial>
@@ -206,7 +206,7 @@
   <link name="kinova_link_6">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/hand_3finger_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/hand_3finger_smoothed.obj"/>
       </geometry>
       <material name="carbon_fiber">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -214,7 +214,7 @@
     </visual>
       <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/ring_small_smoothed.obj"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/ring_small_smoothed.obj"/>
       </geometry>
        <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -222,7 +222,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/hand_3finger.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/hand_3finger.STL"/>
       </geometry>
     </collision>              
     <inertial>
@@ -269,7 +269,7 @@
   <link name="kinova_link_finger_1">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_proximal.dae"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_proximal.dae"/>
       </geometry>
       <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -277,7 +277,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_proximal.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_proximal.STL"/>
       </geometry>
     </collision>              
     <inertial>
@@ -295,7 +295,7 @@
   <link name="kinova_link_finger_tip_1">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_distal.dae"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_distal.dae"/>
       </geometry>
       <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -303,7 +303,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_distal.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_distal.STL"/>
       </geometry>
     </collision>      
     <inertial>
@@ -322,7 +322,7 @@
   <link name="kinova_link_finger_2">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_proximal.dae"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_proximal.dae"/>
       </geometry>
       <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -330,7 +330,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_proximal.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_proximal.STL"/>
       </geometry>
     </collision>                  
     <inertial>
@@ -348,7 +348,7 @@
   <link name="kinova_link_finger_tip_2">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_distal.dae"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_distal.dae"/>
       </geometry>
       <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -356,7 +356,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_distal.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_distal.STL"/>
       </geometry>
     </collision>                 
     <inertial>
@@ -375,7 +375,7 @@
   <link name="kinova_link_finger_3">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_proximal.dae"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_proximal.dae"/>
       </geometry>
       <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -383,7 +383,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_proximal.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_proximal.STL"/>
       </geometry>
     </collision> 
     <inertial>
@@ -401,7 +401,7 @@
   <link name="kinova_link_finger_tip_3">
     <visual>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_distal.dae"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_distal.dae"/>
       </geometry>
       <material name="white">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1"/>
@@ -409,7 +409,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://kinova_description/meshes/finger_distal.STL"/>
+        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/kinova_description/meshes/finger_distal.STL"/>
       </geometry>
     </collision>     
     <inertial>
