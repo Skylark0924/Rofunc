@@ -1,5 +1,4 @@
 from urdfpy import URDF
-import numpy as np
 
 
 def check_urdf(urdf_path):
@@ -11,6 +10,7 @@ def check_urdf(urdf_path):
     for link in robot.links:
         str = link.name
         link_name.append(str)
+    print(link_name)
 
     joint_name = []
     for joint in robot.joints:
@@ -30,6 +30,6 @@ def check_urdf(urdf_path):
 
 
 if __name__ == '__main__':
-    urdf_path = '/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi.urdf'
+    urdf_path = '/home/lee/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi.urdf'
     actuated_joint_name = check_urdf(urdf_path)
-    print(actuated_joint_name)
+    # print(actuated_joint_name)
