@@ -26,12 +26,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
 import os
-import torch
 
 from rofunc.utils.file.path import get_rofunc_path
-from isaacgym import gymutil, gymtorch, gymapi
+from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
 from .base.vec_task import VecTask
 
