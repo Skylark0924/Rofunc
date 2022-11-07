@@ -4,7 +4,7 @@ from rofunc.config.get_config import *
 
 
 def test_2d_com_ilqr():
-    cfg = get_config('./', 'ilqr_com')
+    cfg = get_config('./planning', 'ilqr_com')
 
     Mu = np.asarray([3.5, 4])  # Target
     MuCoM = np.asarray([.4, 0])

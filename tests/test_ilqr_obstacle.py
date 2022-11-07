@@ -4,7 +4,7 @@ from rofunc.config.get_config import *
 
 
 def test_2d_obstacle_ilqr():
-    cfg = get_config('./', 'ilqr_obstacle')
+    cfg = get_config('./planning', 'ilqr_obstacle')
 
     Mu = np.array([[3, 3, np.pi / 6]])  # Via-point [x1,x2,o]
     Obst = np.array([

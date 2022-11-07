@@ -103,7 +103,7 @@ def uni_fb(via_points: np.ndarray, cfg: DictConfig = None, for_test=False):
     """
     print('\033[1;32m--------{}--------\033[0m'.format('LQT with feedback control'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
     # cfg.nbVarPos = 2
 
     Q, R, tl = get_matrices(cfg, via_points)
