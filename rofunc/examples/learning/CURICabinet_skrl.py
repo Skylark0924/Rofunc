@@ -63,7 +63,7 @@ rofunc_path = get_rofunc_path()
 config_path = os.path.join(rofunc_path, "config/learning/rl")
 
 # get hydra config without use @hydra.main
-sys.argv.append("task={}".format("FrankaCabinet"))
+sys.argv.append("task={}".format("CURICabinet"))
 args = get_args_parser().parse_args()
 search_path = create_automatic_config_search_path(config_file, None, config_path)
 hydra_object = Hydra.create_main_hydra2(task_name='load_isaacgymenv', config_search_path=search_path)
@@ -71,13 +71,13 @@ config = hydra_object.compose_config(config_file, args.overrides, run_mode=RunMo
 
 cfg = omegaconf_to_dict(config.task)
 
-env = task_map["FrankaCabinet"](cfg=cfg,
-                                rl_device=config.rl_device,
-                                sim_device=config.sim_device,
-                                graphics_device_id=config.graphics_device_id,
-                                headless=config.headless,
-                                virtual_screen_capture=config.capture_video,  # TODO: check
-                                force_render=config.force_render)
+env = task_map["CURICabinet"](cfg=cfg,
+                              rl_device=config.rl_device,
+                              sim_device=config.sim_device,
+                              graphics_device_id=config.graphics_device_id,
+                              headless=config.headless,
+                              virtual_screen_capture=config.capture_video,  # TODO: check
+                              force_render=config.force_render)
 env = wrap_env(env)
 
 device = env.device
