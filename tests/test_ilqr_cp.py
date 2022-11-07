@@ -4,7 +4,7 @@ from rofunc.config.get_config import *
 
 
 def test_2d_cp_ilqr():
-    cfg = get_config('./', 'ilqr')
+    cfg = get_config('./planning', 'ilqr')
 
     # Via-points
     Mu = np.array([[2, 1, -np.pi / 2], [3, 1, -np.pi / 2]])  # Via-points
