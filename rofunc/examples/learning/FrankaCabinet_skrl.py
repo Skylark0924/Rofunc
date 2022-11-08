@@ -3,7 +3,7 @@ import sys
 
 from rofunc.config.utils import omegaconf_to_dict
 from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
-from rofunc.lfd.rl.tasks import task_map
+from rofunc.examples.learning.tasks import task_map
 from rofunc.utils.file.path import get_rofunc_path
 
 from hydra._internal.hydra import Hydra
