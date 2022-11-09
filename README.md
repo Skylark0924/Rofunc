@@ -8,7 +8,7 @@
 ![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
-![](./img/logo3.png)
+![](./img/logo4.png)
 
 ## Rofunc
 
@@ -112,14 +112,13 @@ The available functions and plans can be found as follows.
 If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
 
 ```
-@misc{Junjia2022,
-	author = {Liu, Junjia and Li, Zhihao and Li, Chenzui},
-	title = {Rofunc: The full process python package for robot learning from demonstration},
-	year = {2022},
-	publisher = {GitHub},
-	journal = {GitHub repository},
-	howpublished = {\url{https://github.com/Skylark0924/Rofunc}},
-	commit = {689cb899f4640d3a2f769654b988c3a8a8c2bad5}
+@misc{Rofunc2022,
+      author = {Liu, Junjia and Li, Zhihao and Li, Chenzui},
+      title = {Rofunc: The full process python package for robot learning from demonstration},
+      year = {2022},
+      publisher = {GitHub},
+      journal = {GitHub repository},
+      howpublished = {\url{https://github.com/Skylark0924/Rofunc}},
 }
 ```
 
