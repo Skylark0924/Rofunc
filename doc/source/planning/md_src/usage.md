@@ -40,7 +40,7 @@ rf.lqt.plot_3d_uni([x_hat], mu, idx_slices)
 ### iLQR
 
 ```python
-cfg = get_config('./', 'ilqr')
+cfg = get_config('./planning', 'ilqr')
 # via-points
 Mu = np.array([[2, 1, -np.pi / 6], [3, 2, -np.pi / 3]])  # Via-points
 Rot = np.zeros([cfg.nbPoints, 2, 2])  # Object orientation matrices
@@ -59,7 +59,7 @@ rf.lqr.uni(Mu, Rot, u0, x0, cfg)
 ### iLQR with control primitive 
 
 ```python
-cfg = get_config('./', 'ilqr')
+cfg = get_config('./planning', 'ilqr')
 
 # Via-points
 Mu = np.array([[2, 1, -np.pi / 2], [3, 1, -np.pi / 2]])  # Via-points

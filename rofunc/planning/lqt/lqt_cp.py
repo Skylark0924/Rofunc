@@ -58,7 +58,7 @@ def get_u_x(cfg: DictConfig, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndar
 def uni_cp(via_points_raw: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT (control primitive)'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
 
     via_points = np.zeros((len(via_points_raw), cfg.nbVar))
     via_points[:, :cfg.nbVarPos] = via_points_raw
