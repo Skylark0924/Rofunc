@@ -1,3 +1,6 @@
+import datetime
+import os
+
 import torch
 import torch.nn as nn
 from skrl.agents.torch.ppo import PPO_DEFAULT_CONFIG
@@ -40,7 +43,7 @@ class Shared(GaussianMixin, DeterministicMixin, Model):
             return self.value_layer(self.net(states))
 
 
-def set_models_ppo(env, device):
+def set_models_ppo(cfg, env, device):
     """
     # Instantiate the agent's models (function approximators).
     # PPO requires 2 models, visit its documentation for more details
@@ -52,7 +55,7 @@ def set_models_ppo(env, device):
     return models_ppo
 
 
-def set_cfg_ppo(env, device):
+def set_cfg_ppo(cfg, env, device):
     """
     # Configure and instantiate the agent.
     # Only modify some default configuration, visit its documentation to see all the options
@@ -84,4 +87,7 @@ def set_cfg_ppo(env, device):
     # logging to TensorBoard and write checkpoints each 120 and 1200 timesteps respectively
     cfg_ppo["experiment"]["write_interval"] = 120
     cfg_ppo["experiment"]["checkpoint_interval"] = 1200
+    cfg_ppo["experiment"]["directory"] = os.path.join(os.getcwd(), "runs")
+    cfg_ppo["experiment"]["experiment_name"] = "{}_{}".format(cfg.train.params.config.name,
+        datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f"))
     return cfg_ppo
