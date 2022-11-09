@@ -71,7 +71,7 @@ def get_u_x(cfg: DictConfig, start_pose: np.ndarray, mu: np.ndarray, Q: np.ndarr
 def uni(via_points_raw: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
 
     via_points = np.zeros((len(via_points_raw), cfg.nbVar))
     via_points[:, :cfg.nbVarPos] = via_points_raw
@@ -87,7 +87,7 @@ def uni(via_points_raw: np.ndarray, cfg: DictConfig = None):
 def uni_hierarchical(via_points_raw: np.ndarray, cfg: DictConfig = None, interval: int = 3):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
 
     via_points = np.zeros((len(via_points_raw), cfg.nbVar))
     via_points[:, :cfg.nbVarPos] = via_points_raw[:, :cfg.nbVarPos]
@@ -110,7 +110,7 @@ def uni_hierarchical(via_points_raw: np.ndarray, cfg: DictConfig = None, interva
 def bi(via_points_raw_l: np.ndarray, via_points_raw_r: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
 
     via_points_l = np.zeros((len(via_points_raw_l), cfg.nbVar))
     via_points_l[:, :cfg.nbVarPos] = via_points_raw_l

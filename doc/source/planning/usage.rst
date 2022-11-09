@@ -46,7 +46,7 @@ iLQR
 
 .. code:: python
 
-    cfg = get_config('./', 'ilqr')
+    cfg = get_config('./planning', 'ilqr')
     # via-points
     Mu = np.array([[2, 1, -np.pi / 6], [3, 2, -np.pi / 3]])  # Via-points
     Rot = np.zeros([cfg.nbPoints, 2, 2])  # Object orientation matrices
@@ -66,7 +66,7 @@ iLQR with control primitive
 
 .. code:: python
 
-    cfg = get_config('./', 'ilqr')
+    cfg = get_config('./planning', 'ilqr')
 
     # Via-points
     Mu = np.array([[2, 1, -np.pi / 2], [3, 1, -np.pi / 2]])  # Via-points
