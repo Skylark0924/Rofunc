@@ -9,7 +9,7 @@ args = gymutil.parse_arguments()
 rf.curi.show(args)
 ```
 
-![curi_interactive](../img/curi_interactive.gif)
+![](../img/curi_interactive.gif)
 
 ### Run the bimanual trajectory in the Cartesian space
 

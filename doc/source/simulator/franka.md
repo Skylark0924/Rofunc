@@ -9,7 +9,7 @@ args = gymutil.parse_arguments()
 rf.franka.show(args)
 ```
 
-![franka_interative](../img/franka_interative.gif)
+![](../img/franka_interative.gif)
 
 ### Run the trajectory in the Cartesian space
 
