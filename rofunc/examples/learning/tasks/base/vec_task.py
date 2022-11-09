@@ -48,6 +48,7 @@ from abc import ABC
 EXISTING_SIM = None
 SCREEN_CAPTURE_RESOLUTION = (1027, 768)
 
+
 def _create_sim_once(gym, *args, **kwargs):
     global EXISTING_SIM
     if EXISTING_SIM is not None:
@@ -58,7 +59,8 @@ def _create_sim_once(gym, *args, **kwargs):
 
 
 class Env(ABC):
-    def __init__(self, config: Dict[str, Any], rl_device: str, sim_device: str, graphics_device_id: int, headless: bool):
+    def __init__(self, config: Dict[str, Any], rl_device: str, sim_device: str, graphics_device_id: int,
+                 headless: bool):
         """Initialise the env.
 
         Args:
@@ -99,15 +101,18 @@ class Env(ABC):
 
         self.control_freq_inv = config["env"].get("controlFrequencyInv", 1)
 
-        self.obs_space = spaces.Box(np.ones(self.num_obs) * -np.Inf, np.ones(self.num_obs) * np.Inf)
-        self.state_space = spaces.Box(np.ones(self.num_states) * -np.Inf, np.ones(self.num_states) * np.Inf)
+        self.obs_space = spaces.Box(np.ones(self.num_obs, dtype=np.float32) * -np.Inf,
+                                    np.ones(self.num_obs, dtype=np.float32) * np.Inf)
+        self.state_space = spaces.Box(np.ones(self.num_states, dtype=np.float32) * -np.Inf,
+                                      np.ones(self.num_states, dtype=np.float32) * np.Inf)
 
-        self.act_space = spaces.Box(np.ones(self.num_actions) * -1., np.ones(self.num_actions) * 1.)
+        self.act_space = spaces.Box(np.ones(self.num_actions, dtype=np.float32) * -1.,
+                                    np.ones(self.num_actions, dtype=np.float32) * 1.)
 
         self.clip_obs = config["env"].get("clipObservations", np.Inf)
         self.clip_actions = config["env"].get("clipActions", np.Inf)
 
-    @abc.abstractmethod 
+    @abc.abstractmethod
     def allocate_buffers(self):
         """Create torch buffers for observations, rewards, actions dones and any additional data."""
 
@@ -123,7 +128,7 @@ class Env(ABC):
         """
 
     @abc.abstractmethod
-    def reset(self)-> Dict[str, torch.Tensor]:
+    def reset(self) -> Dict[str, torch.Tensor]:
         """Reset the environment.
         Returns:
             Observation dictionary
@@ -163,10 +168,10 @@ class Env(ABC):
 
 
 class VecTask(Env):
-
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 24}
 
-    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture: bool = False, force_render: bool = False):
+    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless,
+                 virtual_screen_capture: bool = False, force_render: bool = False):
         """Initialise the `VecTask`.
 
         Args:
@@ -269,7 +274,7 @@ class VecTask(Env):
         self.reset_buf = torch.ones(
             self.num_envs, device=self.device, dtype=torch.long)
         self.timeout_buf = torch.zeros(
-             self.num_envs, device=self.device, dtype=torch.long)
+            self.num_envs, device=self.device, dtype=torch.long)
         self.progress_buf = torch.zeros(
             self.num_envs, device=self.device, dtype=torch.long)
         self.randomize_buf = torch.zeros(
@@ -371,7 +376,7 @@ class VecTask(Env):
     def reset_idx(self, env_idx):
         """Reset environment with indces in env_idx. 
         Should be implemented in an environment class inherited from VecTask.
-        """  
+        """
         pass
 
     def reset(self):
@@ -517,15 +522,15 @@ class VecTask(Env):
                     props = [props]
                 for prop_idx, prop in enumerate(props):
                     for attr, attr_randomization_params in prop_attrs.items():
-                        name = prop_name+'_' + str(prop_idx) + '_'+attr
+                        name = prop_name + '_' + str(prop_idx) + '_' + attr
                         lo_hi = attr_randomization_params['range']
                         distr = attr_randomization_params['distribution']
                         if 'uniform' not in distr:
-                            lo_hi = (-1.0*float('Inf'), float('Inf'))
+                            lo_hi = (-1.0 * float('Inf'), float('Inf'))
                         if isinstance(prop, np.ndarray):
                             for attr_idx in range(prop[attr].shape[0]):
                                 params.append(prop[attr][attr_idx])
-                                names.append(name+'_'+str(attr_idx))
+                                names.append(name + '_' + str(attr_idx))
                                 lows.append(lo_hi[0])
                                 highs.append(lo_hi[1])
                         else:
@@ -557,7 +562,8 @@ class VecTask(Env):
             env_ids = list(range(self.num_envs))
         else:
             do_nonenv_randomize = (self.last_step - self.last_rand_step) >= rand_freq
-            rand_envs = torch.where(self.randomize_buf >= rand_freq, torch.ones_like(self.randomize_buf), torch.zeros_like(self.randomize_buf))
+            rand_envs = torch.where(self.randomize_buf >= rand_freq, torch.ones_like(self.randomize_buf),
+                                    torch.zeros_like(self.randomize_buf))
             rand_envs = torch.logical_and(rand_envs, self.reset_buf)
             env_ids = torch.nonzero(rand_envs, as_tuple=False).squeeze(-1).tolist()
             self.randomize_buf[rand_envs] = 0
@@ -577,13 +583,15 @@ class VecTask(Env):
             if nonphysical_param in dr_params and do_nonenv_randomize:
                 dist = dr_params[nonphysical_param]["distribution"]
                 op_type = dr_params[nonphysical_param]["operation"]
-                sched_type = dr_params[nonphysical_param]["schedule"] if "schedule" in dr_params[nonphysical_param] else None
-                sched_step = dr_params[nonphysical_param]["schedule_steps"] if "schedule" in dr_params[nonphysical_param] else None
+                sched_type = dr_params[nonphysical_param]["schedule"] if "schedule" in dr_params[
+                    nonphysical_param] else None
+                sched_step = dr_params[nonphysical_param]["schedule_steps"] if "schedule" in dr_params[
+                    nonphysical_param] else None
                 op = operator.add if op_type == 'additive' else operator.mul
 
                 if sched_type == 'linear':
                     sched_scaling = 1.0 / sched_step * \
-                        min(self.last_step, sched_step)
+                                    min(self.last_step, sched_step)
                 elif sched_type == 'constant':
                     sched_scaling = 0 if self.last_step < sched_step else 1
                 else:
@@ -601,11 +609,11 @@ class VecTask(Env):
                     elif op_type == 'scaling':
                         var = var * sched_scaling  # scale up var over time
                         mu = mu * sched_scaling + 1.0 * \
-                            (1.0 - sched_scaling)  # linearly interpolate
+                             (1.0 - sched_scaling)  # linearly interpolate
 
                         var_corr = var_corr * sched_scaling  # scale up var over time
                         mu_corr = mu_corr * sched_scaling + 1.0 * \
-                            (1.0 - sched_scaling)  # linearly interpolate
+                                  (1.0 - sched_scaling)  # linearly interpolate
 
                     def noise_lambda(tensor, param_name=nonphysical_param):
                         params = self.dr_randomizations[param_name]
@@ -617,7 +625,8 @@ class VecTask(Env):
                         return op(
                             tensor, corr + torch.randn_like(tensor) * params['var'] + params['mu'])
 
-                    self.dr_randomizations[nonphysical_param] = {'mu': mu, 'var': var, 'mu_corr': mu_corr, 'var_corr': var_corr, 'noise_lambda': noise_lambda}
+                    self.dr_randomizations[nonphysical_param] = {'mu': mu, 'var': var, 'mu_corr': mu_corr,
+                                                                 'var_corr': var_corr, 'noise_lambda': noise_lambda}
 
                 elif dist == 'uniform':
                     lo, hi = dr_params[nonphysical_param]["range"]
@@ -643,7 +652,8 @@ class VecTask(Env):
                         corr = corr * (params['hi_corr'] - params['lo_corr']) + params['lo_corr']
                         return op(tensor, corr + torch.rand_like(tensor) * (params['hi'] - params['lo']) + params['lo'])
 
-                    self.dr_randomizations[nonphysical_param] = {'lo': lo, 'hi': hi, 'lo_corr': lo_corr, 'hi_corr': hi_corr, 'noise_lambda': noise_lambda}
+                    self.dr_randomizations[nonphysical_param] = {'lo': lo, 'hi': hi, 'lo_corr': lo_corr,
+                                                                 'hi_corr': hi_corr, 'noise_lambda': noise_lambda}
 
         if "sim_params" in dr_params and do_nonenv_randomize:
             prop_attrs = dr_params["sim_params"]
@@ -697,7 +707,8 @@ class VecTask(Env):
                             env, handle)
                         for n in range(num_bodies):
                             self.gym.set_rigid_body_color(env, handle, n, gymapi.MESH_VISUAL,
-                                                          gymapi.Vec3(random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)))
+                                                          gymapi.Vec3(random.uniform(0, 1), random.uniform(0, 1),
+                                                                      random.uniform(0, 1)))
                         continue
 
                     if prop_name == 'scale':
@@ -766,4 +777,3 @@ class VecTask(Env):
                         raise Exception("Invalid extern_sample size")
 
         self.first_randomization = False
-

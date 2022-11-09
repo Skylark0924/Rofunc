@@ -21,10 +21,10 @@ physics_engine: 'physx'
 # whether to use cpu or gpu pipeline
 pipeline: 'gpu'
 # device for running physics simulation
-sim_device: 'cuda:0'
+sim_device: 'cuda:1'
 # device to run RL
-rl_device: 'cuda:0'
-graphics_device_id: 0
+rl_device: 'cuda:1'
+graphics_device_id: 1
 
 ## PhysX arguments
 num_threads: 4 # Number of worker threads per scene used by PhysX - for CPU PhysX only.
@@ -54,9 +54,10 @@ headless: False
 
 # set default task and default training config based on task
 defaults:
+  - _self_
   - task: Ant
   - train: ${task}PPO
-  - hydra/job_logging: disabled
+  - override hydra/job_logging: disabled
 
 # set the directory where the output files get saved
 hydra:
