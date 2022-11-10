@@ -1,9 +1,11 @@
-import sys, argparse
+import argparse
+import sys
 
-from rofunc.config.utils import omegaconf_to_dict
-from rofunc.examples.learning.tasks import task_map
-from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
 from rofunc.config.get_config import get_config
+from rofunc.config.utils import omegaconf_to_dict
+from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
+from rofunc.examples.learning.tasks import task_map
+from rofunc.data.models import model_zoo
 
 from hydra._internal.utils import get_args_parser
 from skrl.agents.torch.ppo import PPO
@@ -73,7 +75,7 @@ def eval(custom_args, ckpt_path=None):
 
     # load checkpoint (agent)
     if ckpt_path is None:
-        ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/examples/learning/runs/CURICabinetPPO_22-11-09_06-36-17-823392/checkpoints/best_agent.pt"
+        ckpt_path = model_zoo(name="CURICabinet_right_arm.pt")
     agent.load(ckpt_path)
 
     # Configure and instantiate the RL trainer
@@ -91,4 +93,5 @@ if __name__ == '__main__':
     parser.add_argument("--graphics_device_id", type=int, default=1)
     custom_args = parser.parse_args()
 
+    # train(custom_args)
     eval(custom_args)
