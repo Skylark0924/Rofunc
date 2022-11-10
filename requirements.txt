@@ -1,5 +1,14 @@
-rofunc
+# rofunc
 sphinx!=5.2.0.post0
 sphinx_markdown_tables
+pillow==9.3.0
+neurokit2==0.2.1
+skrl==0.8.0
+gdown==4.5.3
+nestle==0.2.0
+hydra-core==1.2.0
+omegaconf==2.2.3
+pynput==1.7.6
+pytransform3d==2.0.0
 https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl
 https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4-py3-none-any.whl
