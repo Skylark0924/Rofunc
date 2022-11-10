@@ -8,15 +8,14 @@
 ![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
-![](./img/logo4.png)
-
-## Rofunc
+![](./img/logo5.png)
 
 Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and convenient python functions for robotics, including _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also plan to provide an Isaac Gym-based robot simulator for evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
 
 ![](./img/pipeline.png)
 
-### Installation
+## Installation
+### Install from PyPI
 The installation is very easy,
 
 ```
@@ -30,16 +29,20 @@ import rofunc as rf
 ```
 
 Thus, have fun in the robotics world!
+> Note: Several requirements need to be installed before using the package. Please refer to the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
 
-> **Requirement installation**
-> ```python
-> pip install -r requirements.txt
-> ```
-> Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/) manually. (We have tried to
-> package it as a `.whl` file, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+### Install from Source
+```python
+git clone https://github.com/Skylark0924/Rofunc.git
+cd Rofunc
+pip install -r requirements.txt
+pip install -e .
+```
+> Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to
+package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
 
-### [Documentation](https://rofunc.readthedocs.io/en/latest/)
-Currently, we provide a simple document; please refer to [here](./rofunc/).
+## [Documentation](https://rofunc.readthedocs.io/en/latest/)
+> Currently, we provide a simple document; please refer to [here](./rofunc/).
 A comprehensive one with both English and Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
 We provide a simple but interesting example: learning to play
 Taichi by learning from human demonstration.
