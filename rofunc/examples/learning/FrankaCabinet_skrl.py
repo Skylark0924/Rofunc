@@ -6,6 +6,7 @@ from rofunc.config.utils import omegaconf_to_dict
 from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
 from rofunc.examples.learning.tasks import task_map
 from rofunc.data.models import model_zoo
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 from hydra._internal.utils import get_args_parser
 from skrl.agents.torch.ppo import PPO
@@ -60,6 +61,8 @@ def setup(custom_args, eval_mode=False):
 
 
 def train(custom_args):
+    beauty_print("Start training")
+
     env, agent = setup(custom_args)
 
     # Configure and instantiate the RL trainer
@@ -71,6 +74,8 @@ def train(custom_args):
 
 
 def eval(custom_args, ckpt_path=None):
+    beauty_print("Start evaluating")
+
     env, agent = setup(custom_args, eval_mode=True)
 
     # load checkpoint (agent)
@@ -91,7 +96,10 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=str, default="cuda:0")
     parser.add_argument("--rl_device", type=str, default="cuda:0")
     parser.add_argument("--graphics_device_id", type=int, default=0)
+    parser.add_argument("--train", action="store_true", help="turn to train mode while adding this argument")
     custom_args = parser.parse_args()
 
-    # train(custom_args)
-    eval(custom_args)
+    if custom_args.train:
+        train(custom_args)
+    else:
+        eval(custom_args)
