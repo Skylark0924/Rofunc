@@ -1,7 +1,7 @@
 #!/bin/bash -i
 shopt -s expand_aliases
-alias pip3rf="/home/ubuntu/anaconda3/envs/plast/bin/pip"
-alias pyana3rf="/home/ubuntu/anaconda3/envs/plast/bin/python3.7"
+alias pip3rf="/home/ubuntu/anaconda3/envs/rofunc/bin/pip"
+alias pyana3rf="/home/ubuntu/anaconda3/envs/rofunc/bin/python3.8"
 # Expand aliases defined in the shell ~/.bashrc
 
 pip3rf uninstall -y rofunc
