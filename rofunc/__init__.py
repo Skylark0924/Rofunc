@@ -4,7 +4,7 @@ from .devices import zed, xsens, optitrack, mmodal, emg
 from .simulator import franka, dualfranka, curi, walker
 from .lfd import ml, dl, rl
 from .planning import lqt, lqr
-from .utils import visualab, robolab, data_generator, primitive
+from .utils import visualab, robolab, data_generator, primitive, logger, file
 
 from .lfd.ml import tpgmm, gmr, tpgmr
 from .lfd.dl import bc, strans
