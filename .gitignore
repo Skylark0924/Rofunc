@@ -152,3 +152,5 @@ runs
 /rofunc/simulator/curi/quadru.py
 /rofunc/simulator/curi/sim2.py
 /rofunc/simulator/curi/bullet_sim.py
+
+*.pt
