@@ -1,4 +1,4 @@
-Examples of leaning methods
----------------------------
+Examples of learning methods
+-----------------------------
 
-The following are examples of leaning methods that can be used to.
+The following are examples of learning methods that can be used to.
