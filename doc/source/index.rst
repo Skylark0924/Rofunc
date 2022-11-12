@@ -42,7 +42,7 @@ Core Modules
 
    overview
    quickstart
-   examples/index
+   auto_examples/index
 
 .. toctree::
    :maxdepth: 3
