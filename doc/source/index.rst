@@ -6,12 +6,20 @@
 Rofunc: The Full Process Python Package for Robot Learning from Demonstration
 ==================================
 
-Rofunc
-----------------
+
+Getting Started
+---------------
+
 :doc:`overview`
-   Show motivation, pipeline and list the available functions of `rofunc` package.
+   Show motivation, pipeline and list the available functions of :guilabel:`rofunc` package.
 :doc:`quickstart`
    A bimanual dough rolling example that takes you through the whole process of robot learning from demonstration.
+:doc:`auto_examples/index`
+   A list of examples that demonstrate the usage of :guilabel:`rofunc` package.
+
+Core Modules
+------------
+
 :doc:`devices/index`
    How to record, process, visual and export the multimodal demonstration data.
 :doc:`lfd/index`
@@ -23,33 +31,39 @@ Rofunc
 :doc:`simulator/index`
    Provide Isaac Gym based robot simulator.
 
-Roadmap
-----------------
 
 .. Hidden TOCs
 
 .. toctree::
    :maxdepth: 3
-   :caption: Rofunc
+   :caption: Get Started
    :hidden:
    :glob:
 
    overview
    quickstart
+   examples/index
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Core Modules
+   :hidden:
+   :glob:
+
    devices/index
    lfd/index
    planning/index
    tools/index
    simulator/index
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
+.. .. toctree::
+..    :maxdepth: 1
+..    :hidden:
 
-   releaselog
+..    releaselog
 
 Indices and tables
-==================
+-------------------  
 
 * :ref:`genindex`
 * :ref:`modindex`
