@@ -1,3 +1,10 @@
+"""
+CURICabinet
+===========================
+
+Open a cabinet with the left arm of humanoid CURI robot
+"""
+
 import argparse
 import sys
 

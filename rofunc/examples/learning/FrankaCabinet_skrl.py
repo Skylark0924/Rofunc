@@ -1,3 +1,10 @@
+"""
+FrankaCabinet
+===========================
+
+Open a cabinet with a single Franka arm
+"""
+
 import argparse
 import sys
 

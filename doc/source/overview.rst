@@ -1,4 +1,4 @@
-Overview
+Overview and Installation
 =====
 
 Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and 
@@ -11,7 +11,7 @@ Installation
 ------------------
 
 Install from PyPI
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 **Requirements need to be installed manually**
 
@@ -26,7 +26,7 @@ Then
    pip install rofunc
 
 Install from Source
-^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
