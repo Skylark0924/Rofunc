@@ -26,7 +26,7 @@ def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.
         sim_params.physx.num_threads = args.num_threads
         sim_params.physx.use_gpu = args.use_gpu
 
-    sim_params.use_gpu_pipeline = False
+    sim_params.use_gpu_pipeline = args.use_gpu_pipeline
     if args.use_gpu_pipeline:
         print("WARNING: Forcing CPU pipeline.")
 
@@ -91,14 +91,15 @@ def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base
     dof_props = gym.get_actor_dof_properties(envs[0], handles[0])
 
     # override default stiffness and damping values
-    dof_props['stiffness'].fill(1000.0)
-    dof_props['damping'].fill(1000.0)
+    # TODO: make this configurable
+    dof_props['stiffness'].fill(100000.0)
+    dof_props['damping'].fill(100000.0)
 
     # Give a desired pose for first 2 robot joints to improve stability
     dof_props["driveMode"][0:2] = gymapi.DOF_MODE_POS
 
     dof_props["driveMode"][7:] = gymapi.DOF_MODE_POS
-    dof_props['stiffness'][7:] = 1e10
+    dof_props['stiffness'][7:] = 10.0
     dof_props['damping'][7:] = 1.0
 
     for i in range(num_envs):
