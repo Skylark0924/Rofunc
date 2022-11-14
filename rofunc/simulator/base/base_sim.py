@@ -3,6 +3,8 @@ import math
 from isaacgym import gymapi
 from isaacgym import gymutil
 
+from rofunc.utils.logger.beauty_logger import beauty_print
+
 
 def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0), for_test=False):
     # Initialize gym
@@ -148,3 +150,10 @@ def init_attractor(gym, envs, viewer, handles, attracted_joint, for_test=False):
         attractor_handle = gym.create_rigid_body_attractor(env, attractor_properties)
         attractor_handles.append(attractor_handle)
     return attractor_handles, axes_geom, sphere_geom
+
+
+def get_num_bodies(gym, sim, asset_root, asset_file):
+    asset = gym.load_asset(sim, asset_root, asset_file, gymapi.AssetOptions())
+    num_bodies = gym.get_asset_rigid_body_count(asset)
+    beauty_print("The number of bodies in the CURI asset is {}".format(num_bodies), 2)
+    return num_bodies
