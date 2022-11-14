@@ -5,14 +5,16 @@ Apply Forces and Torques On CURI
 This example shows how to apply rigid body forces and torques using the tensor API.
 """
 
-from isaacgym import gymutil
-from isaacgym import gymapi
-from isaacgym import gymtorch
+import os
 
 import numpy as np
+from isaacgym import gymapi
+from isaacgym import gymtorch
+from isaacgym import gymutil
 import torch
 
 from rofunc.simulator.base.base_sim import init_sim, init_env
+from rofunc.utils.file import get_rofunc_path
 
 # parse arguments
 args = gymutil.parse_arguments(
@@ -21,8 +23,6 @@ args = gymutil.parse_arguments(
 # Initial gym and sim
 gym, sim_params, sim, viewer = init_sim(args)
 
-from rofunc.utils.file import get_rofunc_path
-import os
 asset_root = os.path.join(get_rofunc_path(), "simulator/assets")
 asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
 asset = gym.load_asset(sim, asset_root, asset_file, gymapi.AssetOptions())
@@ -35,7 +35,6 @@ print('num_bodies', num_bodies)
 np.random.seed(17)
 num_envs = 1
 device = args.sim_device if args.use_gpu_pipeline else 'cpu'
-
 
 gym.prepare_sim(sim)
 
