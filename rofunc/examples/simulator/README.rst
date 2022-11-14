@@ -1,4 +1,4 @@
-Examples of learning methods
+Examples of simulator usage
 -----------------------------
 
-The following are examples of learning methods that can be used to.
+The following examples show how to use the simulator.
