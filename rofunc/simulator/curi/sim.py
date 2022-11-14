@@ -1,12 +1,13 @@
 import os.path
 from typing import List
 
+import numpy as np
 from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym import gymutil
 import torch
 
-from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
+from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor, get_num_bodies
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
@@ -30,6 +31,19 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
 
 
+def get_robot_state(gym, sim, mode):
+    if mode == 'dof_force':
+        # One force value per each DOF
+        robot_dof_force = gym.acquire_dof_force_tensor(sim)
+        beauty_print('DOF forces:\n {}'.format(gymtorch.wrap_tensor(robot_dof_force)), 2)
+        return robot_dof_force
+    elif mode == 'dof_state':
+        # Each DOF state contains position and velocity
+        robot_dof_state = gym.acquire_dof_state_tensor(sim)
+        beauty_print('DOF states:\n {}'.format(gymtorch.wrap_tensor(robot_dof_state)), 2)
+        return robot_dof_state
+
+
 def setup_curi(args, asset_root, num_envs, for_test):
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args, for_test=for_test)
@@ -41,9 +55,7 @@ def setup_curi(args, asset_root, num_envs, for_test):
     asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     envs, curi_handles = init_env(gym, sim, asset_root, asset_file, num_envs=num_envs, fix_base_link=False)
 
-    asset = gym.load_asset(sim, asset_root, asset_file, gymapi.AssetOptions())
-    num_bodies = gym.get_asset_rigid_body_count(asset)
-    beauty_print("The number of bodies in the CURI asset is {}".format(num_bodies), 2)
+    num_bodies = get_num_bodies(gym, sim, asset_root, asset_file)
 
     # get joint limits and ranges for CURI
     curi_dof_props = gym.get_actor_dof_properties(envs[0], curi_handles[0])
@@ -207,7 +219,7 @@ def run_traj_multi_joints(args, traj: List, attracted_joints: List = None, asset
     """
     assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
 
-    print('\033[1;32m--------{}--------\033[0m'.format('Execute multi-joint trajectory with the CURI simulator'))
+    beauty_print('Execute multi-joint trajectory with the CURI simulator')
 
     # Initial gym, sim and envs
     gym, sim_params, sim, viewer, envs, curi_handles, num_bodies = setup_curi(args, asset_root, num_envs, for_test)
@@ -248,7 +260,10 @@ def run_traj_multi_joints(args, traj: List, attracted_joints: List = None, asset
     gym.destroy_sim(sim)
 
 
-def run_traj_multi_joints_with_interference(args, traj: List, attracted_joints: List = None, asset_root=None,
+def run_traj_multi_joints_with_interference(args, traj: List, intf_index: List, intf_mode: str,
+                                            intf_forces: torch.Tensor = None, intf_torques: torch.Tensor = None,
+                                            intf_joints: List = None, intf_efforts: np.ndarray = None,
+                                            attracted_joints: List = None, asset_root=None,
                                             update_freq=0.001, num_envs=1, for_test=False):
     """
     Run the trajectory with multiple joints with interference, the default is to run the trajectory with the left and
@@ -256,30 +271,44 @@ def run_traj_multi_joints_with_interference(args, traj: List, attracted_joints: 
     Args:
         args: the arguments for the Isaac Gym simulator
         traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
-        attracted_joints:
+        intf_index: a list of the timing indices of the interference occurs
+        intf_mode: the mode of the interference, ["actor_dof_efforts", "body_forces", "body_force_at_pos"]
+        intf_forces: a tensor of shape (num_envs, num_bodies, 3), the interference forces applied to the bodies
+        intf_torques: a tensor of shape (num_envs, num_bodies, 3), the interference torques applied to the bodies
+        intf_joints: [list], e.g. ["panda_left_hand"]
+        intf_efforts: array containing the efforts for all degrees of freedom of the actor.
+        attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
         asset_root: the location of `assets` folder, e.g., /home/ubuntu/anaconda3/envs/plast/lib/python3.7/site-packages/rofunc/simulator/assets
         update_freq: the frequency of updating the robot pose
         num_envs: the number of environments
         for_test: if True, the simulator will be shown in the headless mode
     """
     assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
+    assert intf_mode in ["actor_dof_efforts", "body_forces", "body_force_at_pos"], \
+        "The interference mode should be one of ['actor_dof_efforts', 'body_forces', 'body_force_at_pos']"
 
-    print('\033[1;32m--------{}--------\033[0m'.format(
-        'Execute multi-joint trajectory with interference with the CURI simulator'))
+    beauty_print('Execute multi-joint trajectory with interference with the CURI simulator')
 
     # Initial gym, sim and envs
     gym, sim_params, sim, viewer, envs, curi_handles, num_bodies = setup_curi(args, asset_root, num_envs, for_test)
+
+    device = args.sim_device if args.use_gpu_pipeline else 'cpu'
+    if intf_forces is not None:
+        assert intf_forces.shape == torch.Size([num_envs, num_bodies,
+                                                3]), "The shape of forces is not correct, it should be (num_envs, num_bodies, 3)"
+        intf_forces = intf_forces.to(device)
+    if intf_torques is not None:
+        assert intf_torques.shape == torch.Size([num_envs, num_bodies,
+                                                 3]), "The shape of torques is not correct, it should be (num_envs, num_bodies, 3)"
+        intf_torques = intf_torques.to(device)
 
     # Create the attractor
     attracted_joints, attractor_handles, axes_geoms, sphere_geoms = setup_attractor(gym, envs, viewer, curi_handles,
                                                                                     traj, attracted_joints, for_test)
 
-    device = args.sim_device if args.use_gpu_pipeline else 'cpu'
-
     # Time to wait in seconds before moving robot
     next_curi_update_time = 1
     index = 0
-    torque_amt = 100000
     while not gym.query_viewer_has_closed(viewer):
         # Every 0.01 seconds the pose of the attractor is updated
         t = gym.get_sim_time(sim)
@@ -294,14 +323,18 @@ def run_traj_multi_joints_with_interference(args, traj: List, attracted_joints: 
                 index = 0
 
             # Create the interference
-            if index % 100 == 0:
-                # set forces and force positions for ant root bodies (first body in each env)
-                forces = torch.zeros((num_envs, num_bodies, 3), device=device, dtype=torch.float)
-                torques = torch.zeros((num_envs, num_bodies, 3), device=device, dtype=torch.float)
-                forces[:, 9, 1] = 3000
-                torques[:, 9, 1] = torque_amt
-                gym.apply_rigid_body_force_tensors(sim, None, gymtorch.unwrap_tensor(torques), gymapi.ENV_SPACE)
-                torque_amt = -torque_amt
+            if index in intf_index:
+                if intf_mode == "actor_dof_efforts":
+                    # gym.set_dof_actuation_force_tensor(sim, gymtorch.unwrap_tensor(intf_efforts))
+                    for i in range(len(envs)):
+                        gym.apply_actor_dof_efforts(envs[i], curi_handles[i], intf_efforts)
+                elif intf_mode == "body_forces":
+                    # set intf_forces and intf_torques for the specific bodies
+                    gym.apply_rigid_body_force_tensors(sim, gymtorch.unwrap_tensor(intf_forces),
+                                                       gymtorch.unwrap_tensor(intf_torques), gymapi.ENV_SPACE)
+
+            # Get current robot state
+            get_robot_state(gym, sim, mode='dof_force')
 
         # Step the physics
         gym.simulate(sim)
