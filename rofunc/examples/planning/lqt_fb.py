@@ -1,3 +1,9 @@
+"""
+Tracking the trajectory with LQT feedback version
+============================================================
+
+This example shows how a feedback LQT works.
+"""
 import rofunc as rf
 import numpy as np
 from rofunc.config.get_config import *
