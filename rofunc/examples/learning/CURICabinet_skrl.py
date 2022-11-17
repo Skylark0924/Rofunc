@@ -24,12 +24,12 @@ from skrl.trainers.torch import SequentialTrainer
 from skrl.utils import set_seed
 
 
-def setup(custom_args, eval_mode=False):
+def setup(custom_args, task_name, eval_mode=False):
     # set the seed for reproducibility
     set_seed(42)
 
     # get config
-    sys.argv.append("task={}".format("CURICabinet"))
+    sys.argv.append("task={}".format(task_name))
     sys.argv.append("sim_device={}".format(custom_args.sim_device))
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
@@ -40,13 +40,13 @@ def setup(custom_args, eval_mode=False):
     if eval_mode:
         cfg_dict['env']['numEnvs'] = 16
 
-    env = task_map["CURICabinet"](cfg=cfg_dict,
-                                  rl_device=cfg.rl_device,
-                                  sim_device=cfg.sim_device,
-                                  graphics_device_id=cfg.graphics_device_id,
-                                  headless=cfg.headless,
-                                  virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                  force_render=cfg.force_render)
+    env = task_map[task_name](cfg=cfg_dict,
+                              rl_device=cfg.rl_device,
+                              sim_device=cfg.sim_device,
+                              graphics_device_id=cfg.graphics_device_id,
+                              headless=cfg.headless,
+                              virtual_screen_capture=cfg.capture_video,  # TODO: check
+                              force_render=cfg.force_render)
     env = wrap_env(env)
 
     device = env.device
@@ -55,7 +55,7 @@ def setup(custom_args, eval_mode=False):
     memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
 
     models_ppo = set_models_ppo(cfg, env, device)
-    cfg_ppo = set_cfg_ppo(cfg, env, device)
+    cfg_ppo = set_cfg_ppo(cfg, env, device, eval_mode)
 
     agent = PPO(models=models_ppo,
                 memory=memory,
@@ -67,27 +67,27 @@ def setup(custom_args, eval_mode=False):
     return env, agent
 
 
-def train(custom_args):
+def train(custom_args, task_name):
     beauty_print("Start training")
 
-    env, agent = setup(custom_args)
+    env, agent = setup(custom_args, task_name)
 
     # Configure and instantiate the RL trainer
-    cfg_trainer = {"timesteps": 24000, "headless": True}
+    cfg_trainer = {"timesteps": 40000, "headless": True}
     trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent)
 
     # start training
     trainer.train()
 
 
-def eval(custom_args, ckpt_path=None):
+def eval(custom_args, task_name, ckpt_path=None):
     beauty_print("Start evaluating")
 
-    env, agent = setup(custom_args, eval_mode=True)
+    env, agent = setup(custom_args, task_name, eval_mode=True)
 
     # load checkpoint (agent)
     if ckpt_path is None:
-        ckpt_path = model_zoo(name="CURICabinet_right_arm.pt")
+        ckpt_path = model_zoo(name="CURICabinetPPO_right_arm.pt")
     agent.load(ckpt_path)
 
     # Configure and instantiate the RL trainer
@@ -106,7 +106,10 @@ if __name__ == '__main__':
     parser.add_argument("--train", action="store_true", help="turn to train mode while adding this argument")
     custom_args = parser.parse_args()
 
+    task_name = "CURICabinetBimanual"
+
     if custom_args.train:
-        train(custom_args)
+        train(custom_args, task_name)
     else:
-        eval(custom_args)
+        ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/examples/learning/runs/CURICabinetBimanualPPO_22-11-16_17-46-07-677096/checkpoints/best_agent.pt"
+        eval(custom_args, task_name, ckpt_path=ckpt_path)

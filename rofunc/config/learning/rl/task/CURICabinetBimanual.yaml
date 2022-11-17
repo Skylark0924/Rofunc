@@ -1,5 +1,5 @@
 # used to create the object
-name: CURICabinet
+name: CURICabinetBimanual
 
 physics_engine: ${..physics_engine}
 
@@ -28,7 +28,7 @@ env:
   fingerDistRewardScale: 5.0
   actionPenaltyScale: 0.01
 
-  numObservations: 41
+  numObservations: 44
   numActions: 18
 
 #  asset:

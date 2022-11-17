@@ -1,15 +1,20 @@
 import os
 
+import torch
+
 from rofunc.utils.file.path import get_rofunc_path
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
 from .base.curi_base_task import CURIBaseTask
 
 
-class CURICabinetTask(CURIBaseTask):
+class CURICabinetBimanualTask(CURIBaseTask):
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
+
+        # self.cfg["env"]["numObservations"] = 44
+        # self.cfg["env"]["numActions"] = 18
 
         # get gym GPU state tensors
         actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
@@ -220,19 +225,33 @@ class CURICabinetTask(CURIBaseTask):
             self.curis.append(curi_actor)
             self.cabinets.append(cabinet_actor)
 
-        self.hand_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, "panda_left_link7")
-        self.drawer_handle = self.gym.find_actor_rigid_body_handle(env_ptr, cabinet_actor, "drawer_top")
-        self.lfinger_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, "panda_left_leftfinger")
-        self.rfinger_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, "panda_left_rightfinger")
+        # Left arm
+        self.hand_handle_l, self.lfinger_handle_l, self.rfinger_handle_l, self.curi_local_grasp_pos_l, \
+        self.curi_local_grasp_rot_l, self.curi_grasp_pos_l, self.curi_grasp_rot_l, self.curi_lfinger_pos_l, \
+        self.curi_rfinger_pos_l, self.curi_lfinger_rot_l, self.curi_rfinger_rot_l \
+            = self.init_data_curi("panda_left_link7", "panda_left_leftfinger", "panda_left_rightfinger", env_ptr,
+                                  curi_actor)
+        # Right arm
+        self.hand_handle_r, self.lfinger_handle_r, self.rfinger_handle_r, self.curi_local_grasp_pos_r, \
+        self.curi_local_grasp_rot_r, self.curi_grasp_pos_r, self.curi_grasp_rot_r, self.curi_lfinger_pos_r, \
+        self.curi_rfinger_pos_r, self.curi_lfinger_rot_r, self.curi_rfinger_rot_r \
+            = self.init_data_curi("panda_right_link7", "panda_right_leftfinger", "panda_right_rightfinger", env_ptr,
+                                  curi_actor)
+
+        self.init_data_cabinet(env_ptr, cabinet_actor)
+
         self.default_prop_states = to_torch(self.default_prop_states, device=self.device, dtype=torch.float).view(
             self.num_envs, self.num_props, 13)
 
-        self.init_data()
+    def init_data_curi(self, hand_dof_name, lfinger_dof_name, rfinger_dof_name, env_ptr, curi_actor):
+        hand_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, hand_dof_name)
 
-    def init_data(self):
-        hand = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], "panda_left_link7")
-        lfinger = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], "panda_left_leftfinger")
-        rfinger = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], "panda_left_rightfinger")
+        lfinger_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, lfinger_dof_name)
+        rfinger_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, rfinger_dof_name)
+
+        hand = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], hand_dof_name)
+        lfinger = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], lfinger_dof_name)
+        rfinger = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], rfinger_dof_name)
 
         hand_pose = self.gym.get_rigid_transform(self.envs[0], hand)
         lfinger_pose = self.gym.get_rigid_transform(self.envs[0], lfinger)
@@ -246,12 +265,29 @@ class CURICabinetTask(CURIBaseTask):
         grasp_pose_axis = 1
         curi_local_grasp_pose = hand_pose_inv * finger_pose
         curi_local_grasp_pose.p += gymapi.Vec3(*get_axis_params(0.04, grasp_pose_axis))
-        self.curi_local_grasp_pos = to_torch([curi_local_grasp_pose.p.x, curi_local_grasp_pose.p.y,
-                                              curi_local_grasp_pose.p.z], device=self.device).repeat(
+        curi_local_grasp_pos = to_torch([curi_local_grasp_pose.p.x, curi_local_grasp_pose.p.y,
+                                         curi_local_grasp_pose.p.z], device=self.device).repeat(
             (self.num_envs, 1))
-        self.curi_local_grasp_rot = to_torch([curi_local_grasp_pose.r.x, curi_local_grasp_pose.r.y,
-                                              curi_local_grasp_pose.r.z, curi_local_grasp_pose.r.w],
-                                             device=self.device).repeat((self.num_envs, 1))
+        curi_local_grasp_rot = to_torch([curi_local_grasp_pose.r.x, curi_local_grasp_pose.r.y,
+                                         curi_local_grasp_pose.r.z, curi_local_grasp_pose.r.w],
+                                        device=self.device).repeat((self.num_envs, 1))
+
+        curi_grasp_pos = torch.zeros_like(curi_local_grasp_pos)
+        curi_grasp_rot = torch.zeros_like(curi_local_grasp_rot)
+        curi_grasp_rot[..., -1] = 1  # xyzw
+
+        curi_lfinger_pos = torch.zeros_like(curi_local_grasp_pos)
+        curi_rfinger_pos = torch.zeros_like(curi_local_grasp_pos)
+        curi_lfinger_rot = torch.zeros_like(curi_local_grasp_rot)
+        curi_rfinger_rot = torch.zeros_like(curi_local_grasp_rot)
+
+        return hand_handle, lfinger_handle, rfinger_handle, curi_local_grasp_pos, curi_local_grasp_rot, curi_grasp_pos, \
+               curi_grasp_rot, curi_lfinger_pos, curi_rfinger_pos, curi_lfinger_rot, curi_rfinger_rot
+
+    def init_data_cabinet(self, env_ptr, cabinet_actor):
+        self.drawer_handle = self.gym.find_actor_rigid_body_handle(env_ptr, cabinet_actor, "drawer_top")
+
+        grasp_pose_axis = 1
 
         drawer_local_grasp_pose = gymapi.Transform()
         drawer_local_grasp_pose.p = gymapi.Vec3(*get_axis_params(0.01, grasp_pose_axis, 0.3))
@@ -268,93 +304,73 @@ class CURICabinetTask(CURIBaseTask):
         self.gripper_up_axis = to_torch([0, 1, 0], device=self.device).repeat((self.num_envs, 1))
         self.drawer_up_axis = to_torch([0, 0, 1], device=self.device).repeat((self.num_envs, 1))
 
-        self.curi_grasp_pos = torch.zeros_like(self.curi_local_grasp_pos)
-        self.curi_grasp_rot = torch.zeros_like(self.curi_local_grasp_rot)
-        self.curi_grasp_rot[..., -1] = 1  # xyzw
         self.drawer_grasp_pos = torch.zeros_like(self.drawer_local_grasp_pos)
         self.drawer_grasp_rot = torch.zeros_like(self.drawer_local_grasp_rot)
-        self.drawer_grasp_rot[..., -1] = 1
-        self.curi_lfinger_pos = torch.zeros_like(self.curi_local_grasp_pos)
-        self.curi_rfinger_pos = torch.zeros_like(self.curi_local_grasp_pos)
-        self.curi_lfinger_rot = torch.zeros_like(self.curi_local_grasp_rot)
-        self.curi_rfinger_rot = torch.zeros_like(self.curi_local_grasp_rot)
+        self.drawer_grasp_rot[..., -1] = 1  # xyzw
 
     def compute_reward(self, actions):
-        self.rew_buf[:], self.reset_buf[:] = compute_curi_reward(
+        rew_buf_l, reset_buf_l = compute_curi_reward(
             self.reset_buf, self.progress_buf, self.actions, self.cabinet_dof_pos,
-            self.curi_grasp_pos, self.drawer_grasp_pos, self.curi_grasp_rot, self.drawer_grasp_rot,
-            self.curi_lfinger_pos, self.curi_rfinger_pos,
+            self.curi_grasp_pos_l, self.drawer_grasp_pos, self.curi_grasp_rot_l, self.drawer_grasp_rot,
+            self.curi_lfinger_pos_l, self.curi_rfinger_pos_l,
+            self.gripper_forward_axis, self.drawer_inward_axis, self.gripper_up_axis, self.drawer_up_axis,
+            self.num_envs, self.dist_reward_scale, self.rot_reward_scale, self.around_handle_reward_scale,
+            self.open_reward_scale,
+            self.finger_dist_reward_scale, self.action_penalty_scale, self.distX_offset, self.max_episode_length
+        )
+        rew_buf_r, reset_buf_r = compute_curi_reward(
+            self.reset_buf, self.progress_buf, self.actions, self.cabinet_dof_pos,
+            self.curi_grasp_pos_r, self.drawer_grasp_pos, self.curi_grasp_rot_r, self.drawer_grasp_rot,
+            self.curi_lfinger_pos_r, self.curi_rfinger_pos_r,
             self.gripper_forward_axis, self.drawer_inward_axis, self.gripper_up_axis, self.drawer_up_axis,
             self.num_envs, self.dist_reward_scale, self.rot_reward_scale, self.around_handle_reward_scale,
             self.open_reward_scale,
             self.finger_dist_reward_scale, self.action_penalty_scale, self.distX_offset, self.max_episode_length
         )
 
-    def compute_observations(self):
+        self.rew_buf[:] = rew_buf_l + rew_buf_r
+        # self.rew_buf[:] = torch.maximum(rew_buf_l, rew_buf_r)
+        self.reset_buf[:] = reset_buf_l + reset_buf_r
 
+    def compute_observations(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
 
-        hand_pos = self.rigid_body_states[:, self.hand_handle][:, 0:3]
-        hand_rot = self.rigid_body_states[:, self.hand_handle][:, 3:7]
+        hand_pos_l = self.rigid_body_states[:, self.hand_handle_l][:, 0:3]
+        hand_rot_l = self.rigid_body_states[:, self.hand_handle_l][:, 3:7]
+        hand_pos_r = self.rigid_body_states[:, self.hand_handle_r][:, 0:3]
+        hand_rot_r = self.rigid_body_states[:, self.hand_handle_r][:, 3:7]
         drawer_pos = self.rigid_body_states[:, self.drawer_handle][:, 0:3]
         drawer_rot = self.rigid_body_states[:, self.drawer_handle][:, 3:7]
 
-        self.curi_grasp_rot[:], self.curi_grasp_pos[:], self.drawer_grasp_rot[:], self.drawer_grasp_pos[:] = \
-            compute_grasp_transforms(hand_rot, hand_pos, self.curi_local_grasp_rot, self.curi_local_grasp_pos,
+        self.curi_grasp_rot_l[:], self.curi_grasp_pos_l[:], self.drawer_grasp_rot[:], self.drawer_grasp_pos[:] = \
+            compute_grasp_transforms(hand_rot_l, hand_pos_l, self.curi_local_grasp_rot_l, self.curi_local_grasp_pos_l,
+                                     drawer_rot, drawer_pos, self.drawer_local_grasp_rot, self.drawer_local_grasp_pos
+                                     )
+        self.curi_grasp_rot_r[:], self.curi_grasp_pos_r[:], self.drawer_grasp_rot[:], self.drawer_grasp_pos[:] = \
+            compute_grasp_transforms(hand_rot_r, hand_pos_r, self.curi_local_grasp_rot_r, self.curi_local_grasp_pos_r,
                                      drawer_rot, drawer_pos, self.drawer_local_grasp_rot, self.drawer_local_grasp_pos
                                      )
 
-        self.curi_lfinger_pos = self.rigid_body_states[:, self.lfinger_handle][:, 0:3]
-        self.curi_rfinger_pos = self.rigid_body_states[:, self.rfinger_handle][:, 0:3]
-        self.curi_lfinger_rot = self.rigid_body_states[:, self.lfinger_handle][:, 3:7]
-        self.curi_rfinger_rot = self.rigid_body_states[:, self.rfinger_handle][:, 3:7]
+        self.curi_lfinger_pos_l = self.rigid_body_states[:, self.lfinger_handle_l][:, 0:3]
+        self.curi_rfinger_pos_l = self.rigid_body_states[:, self.rfinger_handle_l][:, 0:3]
+        self.curi_lfinger_rot_l = self.rigid_body_states[:, self.lfinger_handle_l][:, 3:7]
+        self.curi_rfinger_rot_l = self.rigid_body_states[:, self.rfinger_handle_l][:, 3:7]
+        self.curi_lfinger_pos_r = self.rigid_body_states[:, self.lfinger_handle_r][:, 0:3]
+        self.curi_rfinger_pos_r = self.rigid_body_states[:, self.rfinger_handle_r][:, 0:3]
+        self.curi_lfinger_rot_r = self.rigid_body_states[:, self.lfinger_handle_r][:, 3:7]
+        self.curi_rfinger_rot_r = self.rigid_body_states[:, self.rfinger_handle_r][:, 3:7]
 
         dof_pos_scaled = (2.0 * (self.curi_dof_pos - self.curi_dof_lower_limits)
                           / (self.curi_dof_upper_limits - self.curi_dof_lower_limits) - 1.0)
-        to_target = self.drawer_grasp_pos - self.curi_grasp_pos
-        self.obs_buf = torch.cat((dof_pos_scaled, self.curi_dof_vel * self.dof_vel_scale, to_target,
+        to_target_l = self.drawer_grasp_pos - self.curi_grasp_pos_l
+        to_target_r = self.drawer_grasp_pos - self.curi_grasp_pos_r
+        self.obs_buf = torch.cat((dof_pos_scaled, self.curi_dof_vel * self.dof_vel_scale, to_target_l, to_target_r,
                                   self.cabinet_dof_pos[:, 3].unsqueeze(-1), self.cabinet_dof_vel[:, 3].unsqueeze(-1)),
                                  dim=-1)
 
         return self.obs_buf
-
-    def reset_idx(self, env_ids):
-        env_ids_int32 = env_ids.to(dtype=torch.int32)
-
-        # reset curi
-        pos = tensor_clamp(
-            self.curi_default_dof_pos.unsqueeze(0) + 0.25 * (
-                    torch.rand((len(env_ids), self.num_curi_dofs), device=self.device) - 0.5),
-            self.curi_dof_lower_limits, self.curi_dof_upper_limits)
-        self.curi_dof_pos[env_ids, :] = pos
-        self.curi_dof_vel[env_ids, :] = torch.zeros_like(self.curi_dof_vel[env_ids])
-        self.curi_dof_targets[env_ids, :self.num_curi_dofs] = pos
-
-        # reset cabinet
-        self.cabinet_dof_state[env_ids, :] = torch.zeros_like(self.cabinet_dof_state[env_ids])
-
-        # reset props
-        if self.num_props > 0:
-            prop_indices = self.global_indices[env_ids, 2:].flatten()
-            self.prop_states[env_ids] = self.default_prop_states[env_ids]
-            self.gym.set_actor_root_state_tensor_indexed(self.sim,
-                                                         gymtorch.unwrap_tensor(self.root_state_tensor),
-                                                         gymtorch.unwrap_tensor(prop_indices), len(prop_indices))
-
-        multi_env_ids_int32 = self.global_indices[env_ids, :2].flatten()
-        self.gym.set_dof_position_target_tensor_indexed(self.sim,
-                                                        gymtorch.unwrap_tensor(self.curi_dof_targets),
-                                                        gymtorch.unwrap_tensor(multi_env_ids_int32),
-                                                        len(multi_env_ids_int32))
-
-        self.gym.set_dof_state_tensor_indexed(self.sim,
-                                              gymtorch.unwrap_tensor(self.dof_state),
-                                              gymtorch.unwrap_tensor(multi_env_ids_int32), len(multi_env_ids_int32))
-
-        self.progress_buf[env_ids] = 0
-        self.reset_buf[env_ids] = 0
 
     def post_physics_step(self):
         self.progress_buf += 1
@@ -422,6 +438,42 @@ class CURICabinetTask(CURIBaseTask):
                 self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
                 self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
                 self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
+
+    def reset_idx(self, env_ids):
+        env_ids_int32 = env_ids.to(dtype=torch.int32)
+
+        # reset curi
+        pos = tensor_clamp(
+            self.curi_default_dof_pos.unsqueeze(0) + 0.25 * (
+                    torch.rand((len(env_ids), self.num_curi_dofs), device=self.device) - 0.5),
+            self.curi_dof_lower_limits, self.curi_dof_upper_limits)
+        self.curi_dof_pos[env_ids, :] = pos
+        self.curi_dof_vel[env_ids, :] = torch.zeros_like(self.curi_dof_vel[env_ids])
+        self.curi_dof_targets[env_ids, :self.num_curi_dofs] = pos
+
+        # reset cabinet
+        self.cabinet_dof_state[env_ids, :] = torch.zeros_like(self.cabinet_dof_state[env_ids])
+
+        # reset props
+        if self.num_props > 0:
+            prop_indices = self.global_indices[env_ids, 2:].flatten()
+            self.prop_states[env_ids] = self.default_prop_states[env_ids]
+            self.gym.set_actor_root_state_tensor_indexed(self.sim,
+                                                         gymtorch.unwrap_tensor(self.root_state_tensor),
+                                                         gymtorch.unwrap_tensor(prop_indices), len(prop_indices))
+
+        multi_env_ids_int32 = self.global_indices[env_ids, :2].flatten()
+        self.gym.set_dof_position_target_tensor_indexed(self.sim,
+                                                        gymtorch.unwrap_tensor(self.curi_dof_targets),
+                                                        gymtorch.unwrap_tensor(multi_env_ids_int32),
+                                                        len(multi_env_ids_int32))
+
+        self.gym.set_dof_state_tensor_indexed(self.sim,
+                                              gymtorch.unwrap_tensor(self.dof_state),
+                                              gymtorch.unwrap_tensor(multi_env_ids_int32), len(multi_env_ids_int32))
+
+        self.progress_buf[env_ids] = 0
+        self.reset_buf[env_ids] = 0
 
 
 #####################################################################
