@@ -3,7 +3,7 @@ import pandas as pd
 from rofunc.devices.xsens.process import load_mvnx
 import datetime
 # 1. get the time of each device
-def get_optitrack_time(optitrack_time_path, init_unix_time):
+def get_optitrack_time(optitrack_time_path):
     '''
     Args:
         optitrack_time_path: the path of optitrack csv file
@@ -12,7 +12,7 @@ def get_optitrack_time(optitrack_time_path, init_unix_time):
     Returns: the time list of optitrack (np.array)
     '''
     # obtain the time of the first frame of optitrack
-    first_columns = pd.read_csv(optitrack_time_path, nrows = 0)
+    first_columns = pd.read_excel(optitrack_time_path, nrows = 0)
     optitrack_start_time = first_columns.columns[11][:23]
     year = int(optitrack_start_time[:4])
     month = int(optitrack_start_time[5:7])
@@ -21,16 +21,15 @@ def get_optitrack_time(optitrack_time_path, init_unix_time):
     minute = int(optitrack_start_time[14:16])
     second = int(optitrack_start_time[17:19])
     millisecond = int(optitrack_start_time[20:23])
-    optitrack_start_time = datetime.datetime(year, month, day, hour, minute, second, millisecond * 1000)
-
+    init_unix_time = datetime.datetime(year, month, day, hour, minute, second, millisecond * 1000)
+    init_unix_time = datetime.datetime.timestamp(init_unix_time) * 1000
     # obtain the time of each frame of optitrack
-    optitrack_time = pd.read_csv(optitrack_time_path, skiprows = 7, header = None)
-    optitrack_time = optitrack_time['MocapTime']
-    optitrack_time = np.array(optitrack_time)
+    timestamp_dataframe = pd.read_excel(optitrack_time_path, skiprows = 6, usecols = 'B')
+    optitrack_timestamp = timestamp_dataframe.to_numpy()
+    optitrack_timestamp = np.squeeze(optitrack_timestamp).tolist()
+    optitrack_time = [init_unix_time + i*1000 for i in optitrack_timestamp]
 
-
-    optitrack_time = optitrack_time + optitrack_start_time
-    return optitrack_time
+    return np.array(optitrack_time)
 
 
 def get_xsens_time(mvnx_path):
@@ -44,8 +43,9 @@ def get_xsens_time(mvnx_path):
     mvnx_file = load_mvnx(mvnx_path)
     xsens_time = [int(i) for i in mvnx_file.file_data['frames']['time']]
     init_unix_time = mvnx_file.file_data['meta_data']['start_time']
-    xsens_time = init_unix_time + xsens_time
-    return xsens_time
+    init_unix_time = int(init_unix_time)
+    xsens_time = [init_unix_time + i for i in xsens_time]
+    return np.array(xsens_time)
 
 
 
