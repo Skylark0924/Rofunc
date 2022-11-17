@@ -1,9 +1,11 @@
-from .franka_cabinet import FrankaCabinet
-from .curi_cabinet import CURICabinet
-from .curi_coffee_stirring import CURICoffeeStirring
+from .franka_cabinet import FrankaCabinetTask
+from .curi_cabinet import CURICabinetTask
+from .curi_cabinet_bimanual import CURICabinetBimanualTask
+from .curi_coffee_stirring import CURICoffeeStirringTask
 
 task_map = {
-    "FrankaCabinet": FrankaCabinet,
-    "CURICabinet": CURICabinet,
-    "CURICoffeeStirring": CURICoffeeStirring,
+    "FrankaCabinet": FrankaCabinetTask,
+    "CURICabinet": CURICabinetTask,
+    "CURICabinetBimanual": CURICabinetBimanualTask,
+    "CURICoffeeStirring": CURICoffeeStirringTask,
 }

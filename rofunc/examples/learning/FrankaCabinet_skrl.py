@@ -87,7 +87,7 @@ def eval(custom_args, ckpt_path=None):
 
     # load checkpoint (agent)
     if ckpt_path is None:
-        ckpt_path = model_zoo(name="FrankaCabinet.pt")
+        ckpt_path = model_zoo(name="FrankaCabinetPPO.pt")
     agent.load(ckpt_path)
 
     # Configure and instantiate the RL trainer
