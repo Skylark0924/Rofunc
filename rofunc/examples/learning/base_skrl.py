@@ -62,7 +62,7 @@ def set_models_ppo(cfg, env, device):
     return models_ppo
 
 
-def set_cfg_ppo(cfg, env, device):
+def set_cfg_ppo(cfg, env, device, eval_mode=False):
     """
     # Configure and instantiate the agent.
     # Only modify some default configuration, visit its documentation to see all the options
@@ -95,6 +95,10 @@ def set_cfg_ppo(cfg, env, device):
     cfg_ppo["experiment"]["write_interval"] = 120
     cfg_ppo["experiment"]["checkpoint_interval"] = 1200
     cfg_ppo["experiment"]["directory"] = os.path.join(os.getcwd(), "runs")
-    cfg_ppo["experiment"]["experiment_name"] = "{}_{}".format(cfg.train.params.config.name,
+    if eval_mode:
+        cfg_ppo["experiment"]["experiment_name"] = "Eval_{}_{}".format(cfg.train.params.config.name,
         datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f"))
+    else:
+        cfg_ppo["experiment"]["experiment_name"] = "{}_{}".format(cfg.train.params.config.name,
+            datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f"))
     return cfg_ppo
