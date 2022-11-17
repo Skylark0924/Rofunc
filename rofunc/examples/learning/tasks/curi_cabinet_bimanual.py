@@ -328,9 +328,11 @@ class CURICabinetBimanualTask(CURIBaseTask):
             self.finger_dist_reward_scale, self.action_penalty_scale, self.distX_offset, self.max_episode_length
         )
 
-        self.rew_buf[:] = rew_buf_l + rew_buf_r
-        # self.rew_buf[:] = torch.maximum(rew_buf_l, rew_buf_r)
-        self.reset_buf[:] = reset_buf_l + reset_buf_r
+        # self.rew_buf[:] = rew_buf_l + rew_buf_r
+        # # self.rew_buf[:] = torch.maximum(rew_buf_l, rew_buf_r)
+        # self.reset_buf[:] = reset_buf_l + reset_buf_r
+        self.rew_buf[:] = rew_buf_l
+        self.reset_buf[:] = reset_buf_l
 
     def compute_observations(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
