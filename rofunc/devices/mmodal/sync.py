@@ -1,5 +1,4 @@
-import pandas
-import numpy
+import numpy as np
 
 
 # 1. get the time of each device
@@ -15,16 +14,16 @@ def get_zed_time():
     pass
 
 
-# 2. get the time offset between each device and the master device
-def get_time_offset():
-    pass
 
-
-def get_time_offset_master():
-    pass
-
-
-# 3.time sync
+# time sync: get synced index table of each device
 def data_sync():
-    pass
+    zed_timelist = get_zed_time()
+    xsens_timelist = get_xsens_time()
+    optitrack_timelist = get_optitrack_time()
+    xsens_index_list = []
+    optitrack_index_list = []
+    for zed_time in zed_timelist:
+        xsens_index_list.append((np.abs(zed_time - xsens_timelist)).argmin())
+        optitrack_index_list.append((np.abs(zed_time - optitrack_timelist)).argmin())
+    return xsens_index_list, optitrack_index_list
 
