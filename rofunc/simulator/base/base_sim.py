@@ -8,7 +8,8 @@ import numpy as np
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
-def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0), for_test=False):
+def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0), up_axis="Y",
+             for_test=False):
     # Initialize gym
     gym = gymapi.acquire_gym()
 
@@ -16,7 +17,14 @@ def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.
     sim_params = gymapi.SimParams()
     sim_params.dt = 1.0 / 60.0
     sim_params.substeps = 2
-    sim_params.gravity.y = -9.80
+    if up_axis == "Y":
+        sim_params.gravity.y = -9.80
+        sim_params.gravity.z = 0.0
+        sim_params.up_axis = gymapi.UP_AXIS_Y
+    elif up_axis == "Z":
+        sim_params.gravity.y = 0.0
+        sim_params.gravity.z = -9.80
+        sim_params.up_axis = gymapi.UP_AXIS_Z
     if args.physics_engine == gymapi.SIM_FLEX:
         sim_params.flex.solver_type = 5
         sim_params.flex.num_outer_iterations = 4
@@ -58,14 +66,17 @@ def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.
     return gym, sim_params, sim, viewer
 
 
-def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base_link=True):
+def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base_link=True,
+             flip_visual_attachments=True, plane_vec=None, init_pose_vec=gymapi.Vec3(0, 0.0, 0.0)):
     # Add ground plane
     plane_params = gymapi.PlaneParams()
+    if plane_vec is not None:
+        plane_params.normal = plane_vec  # z-up! gymapi.Vec3(0, 0, 1)
     gym.add_ground(sim, plane_params)
 
     asset_options = gymapi.AssetOptions()
     asset_options.fix_base_link = fix_base_link
-    asset_options.flip_visual_attachments = True
+    asset_options.flip_visual_attachments = flip_visual_attachments
     asset_options.armature = 0.01
 
     print("Loading asset '%s' from '%s'" % (asset_file, asset_root))
@@ -81,7 +92,7 @@ def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base
     print("Creating %d environments" % num_envs)
     num_per_row = int(math.sqrt(num_envs))
     pose = gymapi.Transform()
-    pose.p = gymapi.Vec3(0, 0.0, 0.0)
+    pose.p = init_pose_vec
     pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
     for i in range(num_envs):
         # create env
@@ -200,5 +211,3 @@ def get_robot_state(gym, sim, envs, curi_handles, mode):
         return robot_dof_force
     else:
         raise ValueError("The mode {} is not supported".format(mode))
-
-
