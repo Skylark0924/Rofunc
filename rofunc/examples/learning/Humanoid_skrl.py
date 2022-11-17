@@ -2,7 +2,7 @@
 Humanoid
 ===========================
 
-This example doesn't do much, it just makes a simple plot
+Temp
 """
 
 import argparse
