@@ -11,6 +11,8 @@ class CURICabinetTask(CURIBaseTask):
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
 
+        self.visual_obs_flag = cfg['task']['visual_obs_flag']
+
         # get gym GPU state tensors
         actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
