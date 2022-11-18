@@ -6,6 +6,8 @@ from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym import gymutil
 import torch
+import matplotlib.pyplot as plt
+from PIL import Image as Im
 
 from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor, get_num_bodies, get_robot_state
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -97,11 +99,23 @@ def show(args, asset_root=None):
 
     # Load CURI asset and set the env
     if asset_root is None:
-        import site
-        pip_root_path = site.getsitepackages()[0]
-        asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
+        from rofunc.utils.file import get_rofunc_path
+        asset_root = os.path.join(get_rofunc_path(), "simulator/assets")
     asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
-    init_env(gym, sim, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=False)
+    envs, handles = init_env(gym, sim, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=False)
+
+    # Camera Sensor
+    camera_props = gymapi.CameraProperties()
+    camera_props.width = 1280
+    camera_props.height = 1280
+    camera_props.enable_tensors = True
+    camera_handle = gym.create_camera_sensor(envs[0], camera_props)
+
+    transform = gymapi.Transform()
+    transform.p = gymapi.Vec3(1, 1, 1)
+    transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.radians(45.0))
+    gym.set_camera_transform(camera_handle, envs[0], transform)
+    debug_fig = plt.figure("debug")
 
     while not gym.query_viewer_has_closed(viewer):
         # Step the physics
@@ -110,13 +124,33 @@ def show(args, asset_root=None):
 
         # Step rendering
         gym.step_graphics(sim)
+
+        # digest image
+        gym.render_all_camera_sensors(sim)
+        gym.start_access_image_tensors(sim)
+
+        camera_tensor = gym.get_camera_image_gpu_tensor(sim, envs[0], camera_handle, gymapi.IMAGE_COLOR)
+        torch_camera_tensor = gymtorch.wrap_tensor(camera_tensor)
+        cam_img = torch_camera_tensor.cpu().numpy()
+        cam_img = Im.fromarray(cam_img)
+        plt.imshow(cam_img)
+        plt.pause(1e-9)
+        debug_fig.clf()
+
+        gym.end_access_image_tensors(sim)
+
         gym.draw_viewer(viewer, sim, False)
         gym.sync_frame_time(sim)
+
+    print("Done")
+
+    gym.destroy_viewer(viewer)
+    gym.destroy_sim(sim)
 
 
 def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, update_freq=0.001):
     """
-
+    TODO: Refine the code to make it more general
     Args:
         args:
         traj:
@@ -134,9 +168,8 @@ def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, up
 
     # Load CURI asset and set the env
     if asset_root is None:
-        import site
-        pip_root_path = site.getsitepackages()[0]
-        asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
+        from rofunc.utils.file import get_rofunc_path
+        asset_root = os.path.join(get_rofunc_path(), "simulator/assets")
     asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
     envs, curi_handles = init_env(gym, sim, asset_root, asset_file, num_envs=1, fix_base_link=False)
 

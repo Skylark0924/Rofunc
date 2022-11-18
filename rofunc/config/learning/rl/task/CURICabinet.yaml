@@ -62,3 +62,4 @@ sim:
 
 task:
   randomize: False
+  visual_obs_flag: False
