@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from rofunc.planning.lqr.ilqr import get_matrices, set_dynamical_system
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
+from omegaconf import DictConfig
 
 
 def f_reach(x, Mu):

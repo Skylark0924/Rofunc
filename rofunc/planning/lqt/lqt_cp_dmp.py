@@ -11,8 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import rofunc as rf
 from rofunc.planning.lqt.lqt_cp import define_control_primitive
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 from scipy.linalg import block_diag
+from omegaconf import DictConfig
 
 
 def get_matrices(cfg: DictConfig, Mu: np.ndarray):

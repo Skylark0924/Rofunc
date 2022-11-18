@@ -1,248 +1,407 @@
+"""
+Modified from SKRL
+"""
+
+import copy
+import itertools
+import os.path
+from typing import Union, Tuple, Dict, Any
+
+import rofunc as rf
+import gym
 import torch
 import torch.nn as nn
-from torch.distributions import MultivariateNormal
-from torch.distributions import Categorical
-
-################################## set device ##################################
-print("============================================================================================")
-# set device to cpu or cuda
-device = torch.device('cpu')
-if (torch.cuda.is_available()):
-    device = torch.device('cuda:0')
-    torch.cuda.empty_cache()
-    print("Device set to : " + str(torch.cuda.get_device_name(device)))
-else:
-    print("Device set to : cpu")
-print("============================================================================================")
+import torch.nn.functional as F
+from omegaconf import OmegaConf
+from skrl.agents.torch import Agent
+from skrl.memories.torch import Memory
+from skrl.models.torch import Model
+from skrl.resources.schedulers.torch import KLAdaptiveRL
 
 
-################################## PPO Policy ##################################
-class RolloutBuffer:
-    def __init__(self):
-        self.actions = []
-        self.states = []
-        self.logprobs = []
-        self.rewards = []
-        self.is_terminals = []
+class PPO(Agent):
+    def __init__(self,
+                 models: Dict[str, Model],
+                 memory: Union[Memory, Tuple[Memory], None] = None,
+                 observation_space: Union[int, Tuple[int], gym.Space, None] = None,
+                 action_space: Union[int, Tuple[int], gym.Space, None] = None,
+                 device: Union[str, torch.device] = "cuda:0",
+                 cfg: dict = {}) -> None:
+        """Proximal Policy Optimization (PPO)
 
-    def clear(self):
-        del self.actions[:]
-        del self.states[:]
-        del self.logprobs[:]
-        del self.rewards[:]
-        del self.is_terminals[:]
+        https://arxiv.org/abs/1707.06347
 
+        :param models: Models used by the agent
+        :type models: dictionary of skrl.models.torch.Model
+        :param memory: Memory to storage the transitions.
+                       If it is a tuple, the first element will be used for training and 
+                       for the rest only the environment transitions will be added
+        :type memory: skrl.memory.torch.Memory, list of skrl.memory.torch.Memory or None
+        :param observation_space: Observation/state space or shape (default: None)
+        :type observation_space: int, tuple or list of integers, gym.Space or None, optional
+        :param action_space: Action space or shape (default: None)
+        :type action_space: int, tuple or list of integers, gym.Space or None, optional
+        :param device: Computing device (default: "cuda:0")
+        :type device: str or torch.device, optional
+        :param cfg: Configuration dictionary
+        :type cfg: dict
 
-class ActorCritic(nn.Module):
-    def __init__(self, state_dim, action_dim, has_continuous_action_space, action_std_init):
-        super(ActorCritic, self).__init__()
+        :raises KeyError: If the models dictionary is missing a required key
+        """
+        PPO_DEFAULT_CONFIG = rf.config.omegaconf_to_dict(OmegaConf.load(
+            os.path.join(rf.file.get_rofunc_path(), 'config/learning/rl/agent/ppo_default_config.yaml')))
+        _cfg = copy.deepcopy(PPO_DEFAULT_CONFIG)
+        _cfg.update(cfg)
+        super().__init__(models=models,
+                         memory=memory,
+                         observation_space=observation_space,
+                         action_space=action_space,
+                         device=device,
+                         cfg=_cfg)
 
-        self.has_continuous_action_space = has_continuous_action_space
+        # models
+        self.policy = self.models.get("policy", None)
+        self.value = self.models.get("value", None)
 
-        if has_continuous_action_space:
-            self.action_dim = action_dim
-            self.action_var = torch.full((action_dim,), action_std_init * action_std_init).to(device)
-        # actor
-        if has_continuous_action_space:
-            self.actor = nn.Sequential(
-                nn.Linear(state_dim, 64),
-                nn.Tanh(),
-                nn.Linear(64, 64),
-                nn.Tanh(),
-                nn.Linear(64, action_dim),
-            )
-        else:
-            self.actor = nn.Sequential(
-                nn.Linear(state_dim, 64),
-                nn.Tanh(),
-                nn.Linear(64, 64),
-                nn.Tanh(),
-                nn.Linear(64, action_dim),
-                nn.Softmax(dim=-1)
-            )
-        # critic
-        self.critic = nn.Sequential(
-            nn.Linear(state_dim, 64),
-            nn.Tanh(),
-            nn.Linear(64, 64),
-            nn.Tanh(),
-            nn.Linear(64, 1)
-        )
+        # checkpoint models
+        self.checkpoint_modules["policy"] = self.policy
+        self.checkpoint_modules["value"] = self.value
 
-    def set_action_std(self, new_action_std):
-        if self.has_continuous_action_space:
-            self.action_var = torch.full((self.action_dim,), new_action_std * new_action_std).to(device)
-        else:
-            print("--------------------------------------------------------------------------------------------")
-            print("WARNING : Calling ActorCritic::set_action_std() on discrete action space policy")
-            print("--------------------------------------------------------------------------------------------")
+        # configuration
+        self._learning_epochs = self.cfg["learning_epochs"]
+        self._mini_batches = self.cfg["mini_batches"]
+        self._rollouts = self.cfg["rollouts"]
+        self._rollout = 0
 
-    def forward(self):
-        raise NotImplementedError
+        self._grad_norm_clip = self.cfg["grad_norm_clip"]
+        self._ratio_clip = self.cfg["ratio_clip"]
+        self._value_clip = self.cfg["value_clip"]
+        self._clip_predicted_values = self.cfg["clip_predicted_values"]
 
-    def act(self, state):
-        if self.has_continuous_action_space:
-            action_mean = self.actor(state)
-            cov_mat = torch.diag(self.action_var).unsqueeze(dim=0)
-            dist = MultivariateNormal(action_mean, cov_mat)
-        else:
-            action_probs = self.actor(state)
-            dist = Categorical(action_probs)
+        self._value_loss_scale = self.cfg["value_loss_scale"]
+        self._entropy_loss_scale = self.cfg["entropy_loss_scale"]
 
-        action = dist.sample()
-        action_logprob = dist.log_prob(action)
+        self._kl_threshold = self.cfg["kl_threshold"]
 
-        return action.detach(), action_logprob.detach()
+        self._learning_rate = self.cfg["learning_rate"]
+        self._learning_rate_scheduler = self.cfg["learning_rate_scheduler"]
 
-    def evaluate(self, state, action):
+        self._state_preprocessor = self.cfg["state_preprocessor"]
+        self._value_preprocessor = self.cfg["value_preprocessor"]
 
-        if self.has_continuous_action_space:
-            action_mean = self.actor(state)
+        self._discount_factor = self.cfg["discount_factor"]
+        self._lambda = self.cfg["lambda"]
 
-            action_var = self.action_var.expand_as(action_mean)
-            cov_mat = torch.diag_embed(action_var).to(device)
-            dist = MultivariateNormal(action_mean, cov_mat)
+        self._random_timesteps = self.cfg["random_timesteps"]
+        self._learning_starts = self.cfg["learning_starts"]
 
-            # For Single Action Environments.
-            if self.action_dim == 1:
-                action = action.reshape(-1, self.action_dim)
-        else:
-            action_probs = self.actor(state)
-            dist = Categorical(action_probs)
-        action_logprobs = dist.log_prob(action)
-        dist_entropy = dist.entropy()
-        state_values = self.critic(state)
+        self._rewards_shaper = self.cfg["rewards_shaper"]
 
-        return action_logprobs, state_values, dist_entropy
-
-
-class PPO:
-    def __init__(self, state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip,
-                 has_continuous_action_space, action_std_init=0.6):
-
-        self.has_continuous_action_space = has_continuous_action_space
-
-        if has_continuous_action_space:
-            self.action_std = action_std_init
-
-        self.gamma = gamma
-        self.eps_clip = eps_clip
-        self.K_epochs = K_epochs
-
-        self.buffer = RolloutBuffer()
-
-        self.policy = ActorCritic(state_dim, action_dim, has_continuous_action_space, action_std_init).to(device)
-        self.optimizer = torch.optim.Adam([
-            {'params': self.policy.actor.parameters(), 'lr': lr_actor},
-            {'params': self.policy.critic.parameters(), 'lr': lr_critic}
-        ])
-
-        self.policy_old = ActorCritic(state_dim, action_dim, has_continuous_action_space, action_std_init).to(device)
-        self.policy_old.load_state_dict(self.policy.state_dict())
-
-        self.MseLoss = nn.MSELoss()
-
-    def set_action_std(self, new_action_std):
-        if self.has_continuous_action_space:
-            self.action_std = new_action_std
-            self.policy.set_action_std(new_action_std)
-            self.policy_old.set_action_std(new_action_std)
-        else:
-            print("--------------------------------------------------------------------------------------------")
-            print("WARNING : Calling PPO::set_action_std() on discrete action space policy")
-            print("--------------------------------------------------------------------------------------------")
-
-    def decay_action_std(self, action_std_decay_rate, min_action_std):
-        print("--------------------------------------------------------------------------------------------")
-        if self.has_continuous_action_space:
-            self.action_std = self.action_std - action_std_decay_rate
-            self.action_std = round(self.action_std, 4)
-            if (self.action_std <= min_action_std):
-                self.action_std = min_action_std
-                print("setting actor output action_std to min_action_std : ", self.action_std)
+        # set up optimizer and learning rate scheduler
+        if self.policy is not None and self.value is not None:
+            if self.policy is self.value:
+                self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self._learning_rate)
             else:
-                print("setting actor output action_std to : ", self.action_std)
-            self.set_action_std(self.action_std)
+                self.optimizer = torch.optim.Adam(itertools.chain(self.policy.parameters(), self.value.parameters()),
+                                                  lr=self._learning_rate)
+            if self._learning_rate_scheduler is not None:
+                self.scheduler = self._learning_rate_scheduler(self.optimizer,
+                                                               **self.cfg["learning_rate_scheduler_kwargs"])
 
+            self.checkpoint_modules["optimizer"] = self.optimizer
+
+        # set up preprocessors
+        if self._state_preprocessor:
+            self._state_preprocessor = self._state_preprocessor(**self.cfg["state_preprocessor_kwargs"])
+            self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
         else:
-            print("WARNING : Calling PPO::decay_action_std() on discrete action space policy")
-        print("--------------------------------------------------------------------------------------------")
+            self._state_preprocessor = self._empty_preprocessor
 
-    def select_action(self, state):
-
-        if self.has_continuous_action_space:
-            with torch.no_grad():
-                state = torch.FloatTensor(state).to(device)
-                action, action_logprob = self.policy_old.act(state)
-
-            self.buffer.states.append(state)
-            self.buffer.actions.append(action)
-            self.buffer.logprobs.append(action_logprob)
-
-            return action.detach().cpu().numpy().flatten()
+        if self._value_preprocessor:
+            self._value_preprocessor = self._value_preprocessor(**self.cfg["value_preprocessor_kwargs"])
+            self.checkpoint_modules["value_preprocessor"] = self._value_preprocessor
         else:
+            self._value_preprocessor = self._empty_preprocessor
+
+    def init(self) -> None:
+        """Initialize the agent
+        """
+        super().init()
+        self.set_mode("eval")
+
+        # create tensors in memory
+        if self.memory is not None:
+            self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
+            self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
+            self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
+            self.memory.create_tensor(name="dones", size=1, dtype=torch.bool)
+            self.memory.create_tensor(name="log_prob", size=1, dtype=torch.float32)
+            self.memory.create_tensor(name="values", size=1, dtype=torch.float32)
+            self.memory.create_tensor(name="returns", size=1, dtype=torch.float32)
+            self.memory.create_tensor(name="advantages", size=1, dtype=torch.float32)
+
+        self.tensors_names = ["states", "actions", "rewards", "dones", "log_prob", "values", "returns", "advantages"]
+
+        # create temporary variables needed for storage and computation
+        self._current_log_prob = None
+        self._current_next_states = None
+
+    def act(self, states: torch.Tensor, timestep: int, timesteps: int) -> torch.Tensor:
+        """Process the environment's states to make a decision (actions) using the main policy
+
+        :param states: Environment's states
+        :type states: torch.Tensor
+        :param timestep: Current timestep
+        :type timestep: int
+        :param timesteps: Number of timesteps
+        :type timesteps: int
+
+        :return: Actions
+        :rtype: torch.Tensor
+        """
+        states = self._state_preprocessor(states)
+
+        # sample random actions
+        # TODO, check for stochasticity
+        if timestep < self._random_timesteps:
+            return self.policy.random_act(states, taken_actions=None, role="policy")
+
+        # sample stochastic actions
+        actions, log_prob, actions_mean = self.policy.act(states, taken_actions=None, role="policy")
+        self._current_log_prob = log_prob
+
+        return actions, log_prob, actions_mean
+
+    def record_transition(self,
+                          states: torch.Tensor,
+                          actions: torch.Tensor,
+                          rewards: torch.Tensor,
+                          next_states: torch.Tensor,
+                          dones: torch.Tensor,
+                          infos: Any,
+                          timestep: int,
+                          timesteps: int) -> None:
+        """Record an environment transition in memory
+
+        :param states: Observations/states of the environment used to make the decision
+        :type states: torch.Tensor
+        :param actions: Actions taken by the agent
+        :type actions: torch.Tensor
+        :param rewards: Instant rewards achieved by the current actions
+        :type rewards: torch.Tensor
+        :param next_states: Next observations/states of the environment
+        :type next_states: torch.Tensor
+        :param dones: Signals to indicate that episodes have ended
+        :type dones: torch.Tensor
+        :param infos: Additional information about the environment
+        :type infos: Any type supported by the environment
+        :param timestep: Current timestep
+        :type timestep: int
+        :param timesteps: Number of timesteps
+        :type timesteps: int
+        """
+        super().record_transition(states, actions, rewards, next_states, dones, infos, timestep, timesteps)
+
+        # reward shaping
+        if self._rewards_shaper is not None:
+            rewards = self._rewards_shaper(rewards, timestep, timesteps)
+
+        self._current_next_states = next_states
+
+        if self.memory is not None:
             with torch.no_grad():
-                state = torch.FloatTensor(state).to(device)
-                action, action_logprob = self.policy_old.act(state)
+                values, _, _ = self.value.act(states=self._state_preprocessor(states), taken_actions=None, role="value")
+            values = self._value_preprocessor(values, inverse=True)
 
-            self.buffer.states.append(state)
-            self.buffer.actions.append(action)
-            self.buffer.logprobs.append(action_logprob)
+            self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
+                                    dones=dones,
+                                    log_prob=self._current_log_prob, values=values)
+            for memory in self.secondary_memories:
+                memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
+                                   dones=dones,
+                                   log_prob=self._current_log_prob, values=values)
 
-            return action.item()
+    def pre_interaction(self, timestep: int, timesteps: int) -> None:
+        """Callback called before the interaction with the environment
 
-    def update(self):
-        # Monte Carlo estimate of returns
-        rewards = []
-        discounted_reward = 0
-        for reward, is_terminal in zip(reversed(self.buffer.rewards), reversed(self.buffer.is_terminals)):
-            if is_terminal:
-                discounted_reward = 0
-            discounted_reward = reward + (self.gamma * discounted_reward)
-            rewards.insert(0, discounted_reward)
+        :param timestep: Current timestep
+        :type timestep: int
+        :param timesteps: Number of timesteps
+        :type timesteps: int
+        """
+        pass
 
-        # Normalizing the rewards
-        rewards = torch.tensor(rewards, dtype=torch.float32).to(device)
-        rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-7)
+    def post_interaction(self, timestep: int, timesteps: int) -> None:
+        """Callback called after the interaction with the environment
 
-        # convert list to tensor
-        old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(device)
-        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(device)
-        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(device)
+        :param timestep: Current timestep
+        :type timestep: int
+        :param timesteps: Number of timesteps
+        :type timesteps: int
+        """
+        self._rollout += 1
+        if not self._rollout % self._rollouts and timestep >= self._learning_starts:
+            self.set_mode("train")
+            self._update(timestep, timesteps)
+            self.set_mode("eval")
 
-        # Optimize policy for K epochs
-        for _ in range(self.K_epochs):
-            # Evaluating old actions and values
-            logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
+        # write tracking data and checkpoints
+        super().post_interaction(timestep, timesteps)
 
-            # match state_values tensor dimensions with rewards tensor
-            state_values = torch.squeeze(state_values)
+    def _update(self, timestep: int, timesteps: int) -> None:
+        """Algorithm's main update step
 
-            # Finding the ratio (pi_theta / pi_theta__old)
-            ratios = torch.exp(logprobs - old_logprobs.detach())
+        :param timestep: Current timestep
+        :type timestep: int
+        :param timesteps: Number of timesteps
+        :type timesteps: int
+        """
 
-            # Finding Surrogate Loss
-            advantages = rewards - state_values.detach()
-            surr1 = ratios * advantages
-            surr2 = torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages
+        def compute_gae(rewards: torch.Tensor,
+                        dones: torch.Tensor,
+                        values: torch.Tensor,
+                        next_values: torch.Tensor,
+                        discount_factor: float = 0.99,
+                        lambda_coefficient: float = 0.95) -> torch.Tensor:
+            """Compute the Generalized Advantage Estimator (GAE)
 
-            # final loss of clipped objective PPO
-            loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards) - 0.01 * dist_entropy
+            :param rewards: Rewards obtained by the agent
+            :type rewards: torch.Tensor
+            :param dones: Signals to indicate that episodes have ended
+            :type dones: torch.Tensor
+            :param values: Values obtained by the agent
+            :type values: torch.Tensor
+            :param next_values: Next values obtained by the agent
+            :type next_values: torch.Tensor
+            :param discount_factor: Discount factor
+            :type discount_factor: float
+            :param lambda_coefficient: Lambda coefficient
+            :type lambda_coefficient: float
 
-            # take gradient step
-            self.optimizer.zero_grad()
-            loss.mean().backward()
-            self.optimizer.step()
+            :return: Generalized Advantage Estimator
+            :rtype: torch.Tensor
+            """
+            advantage = 0
+            advantages = torch.zeros_like(rewards)
+            not_dones = dones.logical_not()
+            memory_size = rewards.shape[0]
 
-        # Copy new weights into old policy
-        self.policy_old.load_state_dict(self.policy.state_dict())
+            # advantages computation
+            for i in reversed(range(memory_size)):
+                next_values = values[i + 1] if i < memory_size - 1 else last_values
+                advantage = rewards[i] - values[i] + discount_factor * not_dones[i] * (
+                        next_values + lambda_coefficient * advantage)
+                advantages[i] = advantage
+            # returns computation
+            returns = advantages + values
+            # normalize advantages
+            advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
-        # clear buffer
-        self.buffer.clear()
+            return returns, advantages
 
-    def save(self, checkpoint_path):
-        torch.save(self.policy_old.state_dict(), checkpoint_path)
+        # compute returns and advantages
+        with torch.no_grad():
+            last_values, _, _ = self.value.act(self._state_preprocessor(self._current_next_states.float()),
+                                               taken_actions=None, role="value")
+        last_values = self._value_preprocessor(last_values, inverse=True)
 
-    def load(self, checkpoint_path):
-        self.policy_old.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
-        self.policy.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
+        values = self.memory.get_tensor_by_name("values")
+        returns, advantages = compute_gae(rewards=self.memory.get_tensor_by_name("rewards"),
+                                          dones=self.memory.get_tensor_by_name("dones"),
+                                          values=values,
+                                          next_values=last_values,
+                                          discount_factor=self._discount_factor,
+                                          lambda_coefficient=self._lambda)
+
+        self.memory.set_tensor_by_name("values", self._value_preprocessor(values, train=True))
+        self.memory.set_tensor_by_name("returns", self._value_preprocessor(returns, train=True))
+        self.memory.set_tensor_by_name("advantages", advantages)
+
+        # sample mini-batches from memory
+        sampled_batches = self.memory.sample_all(names=self.tensors_names, mini_batches=self._mini_batches)
+
+        cumulative_policy_loss = 0
+        cumulative_entropy_loss = 0
+        cumulative_value_loss = 0
+
+        # learning epochs
+        for epoch in range(self._learning_epochs):
+            kl_divergences = []
+
+            # mini-batches loop
+            for sampled_states, sampled_actions, _, _, sampled_log_prob, sampled_values, sampled_returns, sampled_advantages \
+                    in sampled_batches:
+
+                sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
+
+                _, next_log_prob, _ = self.policy.act(states=sampled_states, taken_actions=sampled_actions,
+                                                      role="policy")
+
+                # compute aproximate KL divergence
+                with torch.no_grad():
+                    ratio = next_log_prob - sampled_log_prob
+                    kl_divergence = ((torch.exp(ratio) - 1) - ratio).mean()
+                    kl_divergences.append(kl_divergence)
+
+                # early stopping with KL divergence
+                if self._kl_threshold and kl_divergence > self._kl_threshold:
+                    break
+
+                # compute entropy loss
+                if self._entropy_loss_scale:
+                    entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy(role="policy").mean()
+                else:
+                    entropy_loss = 0
+
+                # compute policy loss
+                ratio = torch.exp(next_log_prob - sampled_log_prob)
+                surrogate = sampled_advantages * ratio
+                surrogate_clipped = sampled_advantages * torch.clip(ratio, 1.0 - self._ratio_clip,
+                                                                    1.0 + self._ratio_clip)
+
+                policy_loss = -torch.min(surrogate, surrogate_clipped).mean()
+
+                # compute value loss
+                predicted_values, _, _ = self.value.act(states=sampled_states, taken_actions=None, role="value")
+
+                if self._clip_predicted_values:
+                    predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,
+                                                                   min=-self._value_clip,
+                                                                   max=self._value_clip)
+                value_loss = self._value_loss_scale * F.mse_loss(sampled_returns, predicted_values)
+
+                # optimization step
+                self.optimizer.zero_grad()
+                (policy_loss + entropy_loss + value_loss).backward()
+                if self._grad_norm_clip > 0:
+                    if self.policy is self.value:
+                        nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
+                    else:
+                        nn.utils.clip_grad_norm_(itertools.chain(self.policy.parameters(), self.value.parameters()),
+                                                 self._grad_norm_clip)
+                self.optimizer.step()
+
+                # update cumulative losses
+                cumulative_policy_loss += policy_loss.item()
+                cumulative_value_loss += value_loss.item()
+                if self._entropy_loss_scale:
+                    cumulative_entropy_loss += entropy_loss.item()
+
+            # update learning rate
+            if self._learning_rate_scheduler:
+                if isinstance(self.scheduler, KLAdaptiveRL):
+                    self.scheduler.step(torch.tensor(kl_divergences).mean())
+                else:
+                    self.scheduler.step()
+
+        # record data
+        self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._mini_batches))
+        self.track_data("Loss / Value loss", cumulative_value_loss / (self._learning_epochs * self._mini_batches))
+        if self._entropy_loss_scale:
+            self.track_data("Loss / Entropy loss",
+                            cumulative_entropy_loss / (self._learning_epochs * self._mini_batches))
+
+        self.track_data("Policy / Standard deviation", self.policy.distribution(role="policy").stddev.mean().item())
+
+        if self._learning_rate_scheduler:
+            self.track_data("Learning / Learning rate", self.scheduler.get_last_lr()[0])

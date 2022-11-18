@@ -8,7 +8,7 @@ Open a cabinet with the left arm of humanoid CURI robot
 import argparse
 import sys
 
-from rofunc.config.get_config import get_config
+from rofunc.config.utils import get_config
 from rofunc.config.utils import omegaconf_to_dict
 from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
 from rofunc.examples.learning.tasks import task_map
@@ -16,7 +16,7 @@ from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 from hydra._internal.utils import get_args_parser
-from skrl.agents.torch.ppo import PPO
+from rofunc.lfd.rl.online.ppo import PPO
 from skrl.agents.torch.sac import SAC
 from skrl.agents.torch.td3 import TD3
 from skrl.agents.torch.amp import AMP

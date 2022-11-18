@@ -1,4 +1,4 @@
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 from functools import reduce
 import operator
 

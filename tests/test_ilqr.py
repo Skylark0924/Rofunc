@@ -1,6 +1,6 @@
 import rofunc as rf
 import numpy as np
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def test_7d_uni_ilqr():

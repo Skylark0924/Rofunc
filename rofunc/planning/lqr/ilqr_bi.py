@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from rofunc.planning.lqr.ilqr import set_dynamical_system
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
+from omegaconf import DictConfig
 
 
 def fkin(cfg, x):

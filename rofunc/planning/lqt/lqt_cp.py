@@ -7,8 +7,10 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+from omegaconf import DictConfig
+
 import rofunc as rf
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def define_control_primitive(cfg):
@@ -123,4 +125,3 @@ def vis(cfg, x_hat, u_hat, muQ, idx_slices, tl, phi):
     axs[4].set_xlabel("$t$")
 
     plt.show()
-
