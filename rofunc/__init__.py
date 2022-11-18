@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from .devices import zed, xsens, optitrack, mmodal, emg
-from .simulator import franka, dualfranka, curi, walker
+from .simulator import franka, curi, walker, curi_mini
 from .lfd import ml, dl, rl
 from .planning import lqt, lqr
 from .utils import visualab, robolab, data_generator, primitive, logger, file
