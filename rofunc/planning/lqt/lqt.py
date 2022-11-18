@@ -3,13 +3,14 @@
 
     Refers to https://gitlab.idiap.ch/rli/robotics-codes-from-scratch by Dr. Sylvain Calinon
 """
+from math import factorial
 from typing import Tuple
 
 import numpy as np
-from math import factorial
+from omegaconf import DictConfig
 from tqdm import tqdm
 
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def get_matrices(cfg: DictConfig, via_points: np.ndarray):
