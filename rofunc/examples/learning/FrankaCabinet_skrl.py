@@ -8,7 +8,7 @@ Open a cabinet with a single Franka arm
 import argparse
 import sys
 
-from rofunc.config.get_config import get_config
+from rofunc.config.utils import get_config
 from rofunc.config.utils import omegaconf_to_dict
 from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
 from rofunc.examples.learning.tasks import task_map

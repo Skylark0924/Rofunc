@@ -5,9 +5,10 @@
 """
 import matplotlib.pyplot as plt
 import numpy as np
+from omegaconf import DictConfig
 
 import rofunc as rf
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def get_matrices(cfg: DictConfig, via_points: np.ndarray):

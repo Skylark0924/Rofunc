@@ -5,6 +5,7 @@ from .simulator import franka, dualfranka, curi, walker
 from .lfd import ml, dl, rl
 from .planning import lqt, lqr
 from .utils import visualab, robolab, data_generator, primitive, logger, file
+from . import config
 
 from .lfd.ml import tpgmm, gmr, tpgmr
 from .lfd.dl import bc, strans
