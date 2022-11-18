@@ -31,7 +31,7 @@ def show(args, asset_root=None):
         import site
         pip_root_path = site.getsitepackages()[0]
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
-    asset_file = "urdf/walker/urdf/walker_cartesio.urdf"
+    asset_file = "urdf/walker/urdf/walker.urdf"
     init_env(gym, sim, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=True,
              flip_visual_attachments=False, init_pose_vec=gymapi.Vec3(0, 2.0, 0.0))
 
@@ -44,9 +44,3 @@ def show(args, asset_root=None):
         gym.step_graphics(sim)
         gym.draw_viewer(viewer, sim, False)
         gym.sync_frame_time(sim)
-
-
-if __name__ == '__main__':
-    args = gymutil.parse_arguments()
-    args.use_gpu_pipeline = False
-    show(args)
