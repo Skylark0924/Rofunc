@@ -144,5 +144,6 @@ if __name__ == '__main__':
     if custom_args.train:
         train(custom_args, task_name)
     else:
-        ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/examples/learning/runs/CURICabinetBimanualPPO_22-11-16_17-46-07-677096/checkpoints/best_agent.pt"
+        folder = 'CURICabinetBimanualPPO_22-11-19_00-31-45-841011'
+        ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/examples/learning/runs/{}/checkpoints/best_agent.pt".format(folder)
         eval(custom_args, task_name, ckpt_path=ckpt_path)
