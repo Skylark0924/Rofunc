@@ -1,5 +1,10 @@
 <robot
     name="walker">
+  <link name="world"/>
+  <joint name="reference" type="floating">
+    <parent link="world"/>
+    <child link="base_link"/>
+  </joint>
   <link name="base_link"/>
   <link name="torso">
     <inertial>
@@ -1042,7 +1047,7 @@
     <limit
         lower="0"
         upper="1.5708"
-        effort="0"
+        effort=""
         velocity="0"/>
   </joint>
   <link

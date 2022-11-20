@@ -82,7 +82,7 @@ def setup_attractor(gym, envs, viewer, curi_handles, traj, attracted_joints, for
     return attracted_joints, attractor_handles, axes_geoms, sphere_geoms
 
 
-def show(args, asset_root=None):
+def show(args, asset_root=None, visual_obs_flag=False):
     """
 
     Args:
@@ -92,7 +92,7 @@ def show(args, asset_root=None):
     Returns:
 
     """
-    print('\033[1;32m--------{}--------\033[0m'.format('Show the CURI simulator in the interactive mode'))
+    beauty_print("Show the CURI simulator in the interactive mode", 1)
 
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
@@ -108,14 +108,23 @@ def show(args, asset_root=None):
     camera_props = gymapi.CameraProperties()
     camera_props.width = 1280
     camera_props.height = 1280
-    camera_props.enable_tensors = True
+    # camera_props.enable_tensors = True
     camera_handle = gym.create_camera_sensor(envs[0], camera_props)
 
-    transform = gymapi.Transform()
-    transform.p = gymapi.Vec3(1, 1, 1)
-    transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.radians(45.0))
-    gym.set_camera_transform(camera_handle, envs[0], transform)
-    debug_fig = plt.figure("debug")
+    # transform = gymapi.Transform()
+    # transform.p = gymapi.Vec3(1, 1, 1)
+    # transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.radians(45.0))
+    # gym.set_camera_transform(camera_handle, envs[0], transform)
+
+    local_transform = gymapi.Transform()
+    local_transform.p = gymapi.Vec3(0.12, 0, 0.18)
+    local_transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(1, 0, 0),
+                                                    np.radians(90.0)) * gymapi.Quat.from_axis_angle(
+        gymapi.Vec3(0, 1, 0), np.radians(-90.0))
+    body_handle = gym.find_actor_rigid_body_handle(envs[0], handles[0], "head_link2")
+    gym.attach_camera_to_body(camera_handle, envs[0], body_handle, local_transform, gymapi.FOLLOW_TRANSFORM)
+
+    debug_fig = plt.figure("debug", figsize=(8, 8))
 
     while not gym.query_viewer_has_closed(viewer):
         # Step the physics
@@ -125,19 +134,23 @@ def show(args, asset_root=None):
         # Step rendering
         gym.step_graphics(sim)
 
-        # digest image
-        gym.render_all_camera_sensors(sim)
-        gym.start_access_image_tensors(sim)
+        if visual_obs_flag:
+            # digest image
+            gym.render_all_camera_sensors(sim)
+            gym.start_access_image_tensors(sim)
 
-        camera_tensor = gym.get_camera_image_gpu_tensor(sim, envs[0], camera_handle, gymapi.IMAGE_COLOR)
-        torch_camera_tensor = gymtorch.wrap_tensor(camera_tensor)
-        cam_img = torch_camera_tensor.cpu().numpy()
-        cam_img = Im.fromarray(cam_img)
-        plt.imshow(cam_img)
-        plt.pause(1e-9)
-        debug_fig.clf()
+            # camera_tensor = gym.get_camera_image_gpu_tensor(sim, envs[0], camera_handle, gymapi.IMAGE_COLOR)
+            # torch_camera_tensor = gymtorch.wrap_tensor(camera_tensor)
 
-        gym.end_access_image_tensors(sim)
+            cam_img = gym.get_camera_image(sim, envs[0], camera_handle, gymapi.IMAGE_COLOR).reshape(1280, 1280, 4)
+            # cam_img = torch_camera_tensor.cpu().numpy()
+            cam_img = Im.fromarray(cam_img)
+            plt.imshow(cam_img)
+            plt.axis('off')
+            plt.pause(1e-9)
+            debug_fig.clf()
+
+            gym.end_access_image_tensors(sim)
 
         gym.draw_viewer(viewer, sim, False)
         gym.sync_frame_time(sim)
