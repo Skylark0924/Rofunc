@@ -19,7 +19,6 @@ def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.
     sim_params.substeps = 2
     if up_axis == "Y":
         sim_params.gravity.y = -9.80
-        sim_params.gravity.z = 0.0
         sim_params.up_axis = gymapi.UP_AXIS_Y
     elif up_axis == "Z":
         sim_params.gravity.y = 0.0
@@ -115,8 +114,8 @@ def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base
     dof_props["driveMode"][0:2] = gymapi.DOF_MODE_EFFORT
 
     dof_props["driveMode"][7:] = gymapi.DOF_MODE_EFFORT
-    dof_props['stiffness'][7:] = 0.01
-    dof_props['damping'][7:] = 0.01
+    dof_props['stiffness'][7:] = 1e10
+    dof_props['damping'][7:] = 1
 
     for i in range(num_envs):
         gym.set_actor_dof_properties(envs[i], handles[i], dof_props)

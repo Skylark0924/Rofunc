@@ -16,7 +16,7 @@ env:
   startPositionNoise: 0.0
   startRotationNoise: 0.0
 
-  numProps: 16
+  numProps: 0
   aggregateMode: 3
 
   actionScale: 7.5
@@ -28,7 +28,7 @@ env:
   fingerDistRewardScale: 5.0
   actionPenaltyScale: 0.01
 
-  numObservations: 44
+  numObservations: 46
   numActions: 18
 
 #  asset:
