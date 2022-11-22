@@ -1,9 +1,17 @@
+import sys
+import datetime
+
 import numpy as np
 import pandas as pd
+import pyzed.sl as sl
+
 from rofunc.devices.xsens.process import load_mvnx
-import datetime
+from rofunc.devices.zed.export import progress_bar
+from rofunc.devices.xsens.process import export
+
+
 # 1. get the time of each device
-def get_optitrack_time(optitrack_time_path):
+def get_optitrack_time(optitrack_input_path):
     '''
     Args:
         optitrack_time_path: the path of optitrack csv file
@@ -12,7 +20,7 @@ def get_optitrack_time(optitrack_time_path):
     Returns: the time list of optitrack (np.array)
     '''
     # obtain the time of the first frame of optitrack
-    first_columns = pd.read_excel(optitrack_time_path, nrows = 0)
+    first_columns = pd.read_csv(optitrack_input_path, nrows=0)
     optitrack_start_time = first_columns.columns[11][:23]
     year = int(optitrack_start_time[:4])
     month = int(optitrack_start_time[5:7])
@@ -22,17 +30,22 @@ def get_optitrack_time(optitrack_time_path):
     second = int(optitrack_start_time[17:19])
     millisecond = int(optitrack_start_time[20:23])
     init_unix_time = datetime.datetime(year, month, day, hour, minute, second, millisecond * 1000)
+    print(init_unix_time)
     init_unix_time = datetime.datetime.timestamp(init_unix_time) * 1000
     # obtain the time of each frame of optitrack
-    timestamp_dataframe = pd.read_excel(optitrack_time_path, skiprows = 6, usecols = 'B')
+    timestamp_dataframe = pd.read_csv(optitrack_input_path, skiprows=6, usecols=['Time (Seconds)'])
     optitrack_timestamp = timestamp_dataframe.to_numpy()
     optitrack_timestamp = np.squeeze(optitrack_timestamp).tolist()
-    optitrack_time = [init_unix_time + i*1000 for i in optitrack_timestamp]
+    print(optitrack_timestamp)
+    print(init_unix_time)
 
+    optitrack_time = [int(init_unix_time + i * 1000) for i in optitrack_timestamp]
+
+    # print(np.array(optitrack_time))
     return np.array(optitrack_time)
 
 
-def get_xsens_time(mvnx_path):
+def get_xsens_time(mvnx_input_path):
     '''
     Args:
         mvnx_path: the path of xsens mvnx file
@@ -40,7 +53,7 @@ def get_xsens_time(mvnx_path):
 
     Returns: the time list of xsens (np.array)
     '''
-    mvnx_file = load_mvnx(mvnx_path)
+    mvnx_file = load_mvnx(mvnx_input_path)
     xsens_time = [int(i) for i in mvnx_file.file_data['frames']['time']]
     init_unix_time = mvnx_file.file_data['meta_data']['start_time']
     init_unix_time = int(init_unix_time)
@@ -48,20 +61,63 @@ def get_xsens_time(mvnx_path):
     return np.array(xsens_time)
 
 
+def get_zed_time(svo_input_path):
+    # Specify SVO path parameter
+    init_params = sl.InitParameters()
+    init_params.set_from_svo_file(str(svo_input_path))
+    init_params.svo_real_time_mode = False  # Don't convert in realtime
+    init_params.coordinate_units = sl.UNIT.MILLIMETER  # Use milliliter units (for depth measurements)
 
-def get_zed_time():
-    pass
+    # Create ZED objects
+    zed = sl.Camera()
+
+    # Open the SVO file specified as a parameter
+    err = zed.open(init_params)
+    if err != sl.ERROR_CODE.SUCCESS:
+        sys.stdout.write(repr(err))
+        zed.close()
+        exit()
+
+    rt_param = sl.RuntimeParameters()
+    rt_param.sensing_mode = sl.SENSING_MODE.FILL
+
+    nb_frames = zed.get_svo_number_of_frames()
+
+    zed_timelist = []
+    while True:
+        if zed.grab(rt_param) == sl.ERROR_CODE.SUCCESS:
+            svo_position = zed.get_svo_position()
+
+            zed_time = zed.get_timestamp(sl.TIME_REFERENCE.IMAGE)
+            zed_time = zed_time.get_milliseconds()
+            zed_timelist.append(zed_time)
+
+            progress_bar((svo_position + 1) / nb_frames * 100, 30)
+
+            # Check if we have reached the end of the video
+            if svo_position >= (nb_frames - 1):  # End of SVO
+                sys.stdout.write("\nSVO end has been reached. Exiting now.\n")
+                break
+        elif zed.grab(rt_param) == sl.ERROR_CODE.END_OF_SVOFILE_REACHED:
+            sys.stdout.write("\nSVO end has been reached. Exiting now.\n")
+            break
+
+    return np.array(zed_timelist)
 
 
 # time sync: get synced index table of each device
-def data_sync():
-    zed_timelist = get_zed_time()
-    xsens_timelist = get_xsens_time()
-    optitrack_timelist = get_optitrack_time()
+def data_sync(optitrack_input_path, mvnx_input_path, svo_input_path):
+    zed_time_array = get_zed_time(svo_input_path)
+    xsens_time_array = get_xsens_time(mvnx_input_path)
+    optitrack_time_array = get_optitrack_time(optitrack_input_path)
     xsens_index_list = []
     optitrack_index_list = []
-    for zed_time in zed_timelist:
-        xsens_index_list.append((np.abs(zed_time - xsens_timelist)).argmin())
-        optitrack_index_list.append((np.abs(zed_time - optitrack_timelist)).argmin())
+    print(zed_time_array)
+    print(xsens_time_array)
+    print(optitrack_time_array)
+    for zed_time in zed_time_array:
+        xsens_index_list.append((np.abs(zed_time - xsens_time_array)).argmin())
+        optitrack_index_list.append((np.abs(zed_time - optitrack_time_array)).argmin())
     return xsens_index_list, optitrack_index_list
+
 
