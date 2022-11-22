@@ -12,7 +12,7 @@ import pinocchio
 
 # Load the urdf model
 # model = pinocchio.buildModelFromUrdf("/home/lee/Rofunc/rofunc/utils/robolab/franka_description/robots/franka_panda.urdf")
-model = pinocchio.buildModelFromUrdf("/home/lee/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
+model = pinocchio.buildModelFromUrdf("/home/lee/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio.urdf")
 print('model name: ' + model.name)
 
 # Create data required by the algorithms
@@ -31,7 +31,7 @@ for name, oMi in zip(model.names, data.oMi):
            .format(name, *oMi.translation.T.flat)))
 
 JOINT_ID = 9
-oMdes = pinocchio.SE3(np.eye(3), np.array([-0.2, 0.2, 0.1]))
+oMdes = pinocchio.SE3(np.eye(3), np.array([1., 0., 1.]))
 
 q = pinocchio.neutral(model)
 eps = 1e-4
