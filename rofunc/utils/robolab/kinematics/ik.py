@@ -5,23 +5,16 @@ import pinocchio
 from numpy.linalg import norm, solve
 
 eps = 1e-6
-IT_MAX = 1000
+IT_MAX = 10000
 DT = 1e-1
 damp = 1e-12
 
 
-def ik(model, POSE, JOINT_ID):
+def ik(model, POSE, ORI, JOINT_ID):
     data = model.createData()
-    # q = pinocchio.randomConfiguration(model)
-    # print('q: %s' % q.T)
-    # pinocchio.forwardKinematics(model, data, q)
-    # for name, oMi in zip(model.names, data.oMi):
-    #     print(("{:<24} : {: .2f} {: .2f} {: .2f}"
-    #            .format(name, *oMi.translation.T.flat)))
 
-    oMdes = pinocchio.SE3(np.eye(3), np.array(POSE))
+    oMdes = pinocchio.SE3(ORI, np.array(POSE))
     q = pinocchio.neutral(model)
-
     i = 0
     while True:
         pinocchio.forwardKinematics(model, data, q)
@@ -58,11 +51,12 @@ def ik(model, POSE, JOINT_ID):
 
 if __name__ == '__main__':
     model = pinocchio.buildModelFromUrdf(
-        "/home/lee/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
+        "/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
     print('model name: ' + model.name)
-    POSE = [1., 1.0, 0]
+    POSE = [1, 0, 1]
+    ORI = np.array([-1, 0, 0, 0, -1, 0, 0, 0, 1]).reshape(3, 3)
     JOINT_ID = 18
-    q_rearrange = ik(model, POSE, JOINT_ID)
+    q_rearrange = ik(model, POSE, ORI, JOINT_ID)
     a = q_rearrange.take(
         [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 21, 11, 13, 22, 23, 14, 15, 24, 16, 25, 26, 17, 18, 27, 19, 28])
     print('\nresult: %s' % a.flatten().tolist())
