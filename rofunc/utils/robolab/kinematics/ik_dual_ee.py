@@ -11,14 +11,8 @@ DT = 1e-1
 damp = 1e-12
 
 
-def ik(model, POSE_L, POSE_R, JOINT_ID_L, JOINT_ID_R):
+def ik_dual(model, POSE_L, POSE_R, JOINT_ID_L, JOINT_ID_R):
     data = model.createData()
-    # q = pinocchio.randomConfiguration(model)
-    # print('q: %s' % q.T)
-    # pinocchio.forwardKinematics(model, data, q)
-    # for name, oMi in zip(model.names, data.oMi):
-    #     print(("{:<24} : {: .2f} {: .2f} {: .2f}"
-    #            .format(name, *oMi.translation.T.flat)))
 
     oMdes_l = pinocchio.SE3(np.eye(3), np.array(POSE_L))
     oMdes_r = pinocchio.SE3(np.eye(3), np.array(POSE_R))
@@ -65,11 +59,11 @@ def ik(model, POSE_L, POSE_R, JOINT_ID_L, JOINT_ID_R):
 
 if __name__ == '__main__':
     model = pinocchio.buildModelFromUrdf(
-        "/home/lee/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
+        "/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
     print('model name: ' + model.name)
     POSE_L = [1, 0.5, 0.5]
     POSE_R = [1, -0.5, 0.5]
-    q_rearrange = ik(model, POSE_L, POSE_R, JOINT_ID_L=18, JOINT_ID_R=27)
+    q_rearrange = ik_dual(model, POSE_L, POSE_R, JOINT_ID_L=18, JOINT_ID_R=27)
     a = q_rearrange.take(
         [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 21, 11, 13, 22, 23, 14, 15, 24, 16, 25, 26, 17, 18, 27, 19, 28])
     print('\nresult: %s' % a.flatten().tolist())
