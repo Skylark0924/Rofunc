@@ -1,11 +1,11 @@
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration
 
-![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)
+[![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)](https://pypi.org/project/rofunc/)
 [![Documentation Status](https://readthedocs.org/projects/rofunc/badge/?version=latest)](https://rofunc.readthedocs.io/en/latest/?badge=latest)
 ![License](https://img.shields.io/github/license/Skylark0924/Rofunc)
 ![](https://img.shields.io/pypi/dm/Rofunc)
-![](https://img.shields.io/github/issues-closed-raw/Skylark0924/Rofunc)
-![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)
+[![](https://img.shields.io/github/issues-closed-raw/Skylark0924/Rofunc)](https://github.com/Skylark0924/Rofunc/issues?q=is%3Aissue+is%3Aclosed)
+[![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)](https://github.com/Skylark0924/Rofunc/issues?q=is%3Aopen+is%3Aissue)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
 ![](./img/logo5.png)
