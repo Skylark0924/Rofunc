@@ -49,7 +49,7 @@ class PPO(Agent):
         :raises KeyError: If the models dictionary is missing a required key
         """
         PPO_DEFAULT_CONFIG = rf.config.omegaconf_to_dict(OmegaConf.load(
-            os.path.join(rf.file.get_rofunc_path(), 'config/learning/rl/agent/ppo_default_config.yaml')))
+            os.path.join(rf.file.get_rofunc_path(), 'config/learning/rl/agent/ppo_default_config_skrl.yaml')))
         _cfg = copy.deepcopy(PPO_DEFAULT_CONFIG)
         _cfg.update(cfg)
         super().__init__(models=models,
