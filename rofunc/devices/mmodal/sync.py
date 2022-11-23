@@ -7,15 +7,15 @@ import pyzed.sl as sl
 
 from rofunc.devices.xsens.process import load_mvnx
 from rofunc.devices.zed.export import progress_bar
-from rofunc.devices.xsens.process import export
-
+from pytz import timezone
 
 # 1. get the time of each device
-def get_optitrack_time(optitrack_input_path):
+def get_optitrack_time(optitrack_input_path, time_reference = 'PM', time_zone = 'Etc/GMT-8'):
     '''
     Args:
         optitrack_time_path: the path of optitrack csv file
-        init_unix_time: the unix time of the first frame of optitrack (millisecond)
+        time_reference: the time reference of optitrack csv file, 'PM' or 'AM'
+        time_zone: the time zone of optitrack csv file, check your timezone name by pytz.all_timezones
 
     Returns: the time list of optitrack (np.array)
     '''
@@ -25,23 +25,27 @@ def get_optitrack_time(optitrack_input_path):
     year = int(optitrack_start_time[:4])
     month = int(optitrack_start_time[5:7])
     day = int(optitrack_start_time[8:10])
-    hour = int(optitrack_start_time[11:13])
+    if time_reference == 'PM':
+        hour = int(optitrack_start_time[11:13]) + 12
+    elif time_reference == 'AM':
+        hour = int(optitrack_start_time[11:13])
+    else:
+        raise ValueError('time_reference should be PM or AM')
     minute = int(optitrack_start_time[14:16])
     second = int(optitrack_start_time[17:19])
     millisecond = int(optitrack_start_time[20:23])
+    tz = timezone(time_zone)
+
     init_unix_time = datetime.datetime(year, month, day, hour, minute, second, millisecond * 1000)
-    print(init_unix_time)
-    init_unix_time = datetime.datetime.timestamp(init_unix_time) * 1000
+    init_unix_time = init_unix_time.replace(tzinfo=tz).astimezone(timezone('UTC'))
+    init_unix_time = int(init_unix_time.timestamp() * 1000)
+
     # obtain the time of each frame of optitrack
     timestamp_dataframe = pd.read_csv(optitrack_input_path, skiprows=6, usecols=['Time (Seconds)'])
     optitrack_timestamp = timestamp_dataframe.to_numpy()
     optitrack_timestamp = np.squeeze(optitrack_timestamp).tolist()
-    print(optitrack_timestamp)
-    print(init_unix_time)
-
     optitrack_time = [int(init_unix_time + i * 1000) for i in optitrack_timestamp]
 
-    # print(np.array(optitrack_time))
     return np.array(optitrack_time)
 
 
@@ -91,7 +95,6 @@ def get_zed_time(svo_input_path):
             zed_time = zed.get_timestamp(sl.TIME_REFERENCE.IMAGE)
             zed_time = zed_time.get_milliseconds()
             zed_timelist.append(zed_time)
-
             progress_bar((svo_position + 1) / nb_frames * 100, 30)
 
             # Check if we have reached the end of the video
@@ -112,9 +115,7 @@ def data_sync(optitrack_input_path, mvnx_input_path, svo_input_path):
     optitrack_time_array = get_optitrack_time(optitrack_input_path)
     xsens_index_list = []
     optitrack_index_list = []
-    print(zed_time_array)
-    print(xsens_time_array)
-    print(optitrack_time_array)
+
     for zed_time in zed_time_array:
         xsens_index_list.append((np.abs(zed_time - xsens_time_array)).argmin())
         optitrack_index_list.append((np.abs(zed_time - optitrack_time_array)).argmin())
