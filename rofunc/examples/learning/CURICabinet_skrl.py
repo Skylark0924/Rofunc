@@ -10,7 +10,8 @@ import sys
 
 from rofunc.config.utils import get_config
 from rofunc.config.utils import omegaconf_to_dict
-from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
+from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_cfg_td3, set_models_ddpg, set_models_sac, \
+    set_models_ppo, set_models_sac, set_models_td3, set_models_ddpg
 from rofunc.examples.learning.tasks import task_map
 from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -19,6 +20,7 @@ from hydra._internal.utils import get_args_parser
 from rofunc.lfd.rl.online.ppo import PPO
 from skrl.agents.torch.sac import SAC
 from skrl.agents.torch.td3 import TD3
+from skrl.agents.torch.ddpg import DDPG
 from skrl.agents.torch.amp import AMP
 from skrl.envs.torch import wrap_env
 from skrl.memories.torch import RandomMemory
@@ -68,28 +70,28 @@ def setup(custom_args, task_name, eval_mode=False):
                     device=device)
     elif custom_args.agent == "sac":
         models_sac = set_models_sac(cfg, env, device)
-        cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
+        # cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
         agent = SAC(models=models_sac,
                     memory=memory,
-                    cfg=cfg_sac,
+                    # cfg=cfg_sac,
                     observation_space=env.observation_space,
                     action_space=env.action_space,
                     device=device)
+    elif custom_args.agent == "ddpg":
+        models_ddpg = set_models_ddpg(cfg, env, device)
+        # cfg_ddpg = set_cfg_ddpg(cfg, env, device, eval_mode)
+        agent = DDPG(models=models_ddpg,
+                     memory=memory,
+                     # cfg=cfg_ddpg,
+                     observation_space=env.observation_space,
+                     action_space=env.action_space,
+                     device=device)
     elif custom_args.agent == "td3":
         models_td3 = set_models_td3(cfg, env, device)
         cfg_td3 = set_cfg_td3(cfg, env, device, eval_mode)
         agent = TD3(models=models_td3,
                     memory=memory,
                     cfg=cfg_td3,
-                    observation_space=env.observation_space,
-                    action_space=env.action_space,
-                    device=device)
-    elif custom_args.agent == "amp":
-        models_amp = set_models_amp(cfg, env, device)
-        cfg_amp = set_cfg_amp(cfg, env, device, eval_mode)
-        agent = AMP(models=models_amp,
-                    memory=memory,
-                    cfg=cfg_amp,
                     observation_space=env.observation_space,
                     action_space=env.action_space,
                     device=device)
@@ -132,7 +134,7 @@ def eval(custom_args, task_name, ckpt_path=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--agent", type=str, default="ppo")
+    parser.add_argument("--agent", type=str, default="td3")
     parser.add_argument("--sim_device", type=str, default="cuda:1")
     parser.add_argument("--rl_device", type=str, default="cuda:1")
     parser.add_argument("--graphics_device_id", type=int, default=1)
@@ -145,5 +147,6 @@ if __name__ == '__main__':
         train(custom_args, task_name)
     else:
         folder = 'CURICabinetBimanualPPO_22-11-19_00-31-45-841011'
-        ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/examples/learning/runs/{}/checkpoints/best_agent.pt".format(folder)
+        ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/examples/learning/runs/{}/checkpoints/best_agent.pt".format(
+            folder)
         eval(custom_args, task_name, ckpt_path=ckpt_path)
