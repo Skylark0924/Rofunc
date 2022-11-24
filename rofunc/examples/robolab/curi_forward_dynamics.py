@@ -1,3 +1,9 @@
+"""
+CURI forward dynamics
+========================
+
+Forward dynamics of the CURI robot.
+"""
 import os
 
 import numpy as np
