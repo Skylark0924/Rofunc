@@ -153,3 +153,5 @@ runs
 /rofunc/simulator/curi/bullet_sim.py
 
 *.pt
+
+rofunc/examples/learning/rllib_example.py
