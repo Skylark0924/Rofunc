@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 from tqdm import tqdm
-
+import numpy as np
 
 def delete_lines(in_path, out_path, head, tail=0):
     with open(in_path, 'r') as fin:
@@ -13,6 +13,13 @@ def delete_lines(in_path, out_path, head, tail=0):
 
 
 def data_clean(input_path):
+    """
+    Args:
+        input_path: csv file path
+
+    Returns: csv file without the first 6 lines
+
+    """
     demo_csvs = os.listdir(input_path)
     demo_csvs = sorted(demo_csvs)
     for demo_csv in demo_csvs:
@@ -44,3 +51,37 @@ def data_clean_batch(input_dir):
     for demo in tqdm(demos):
         input_path = os.path.join(input_dir, demo)
         data_clean(input_path)
+
+
+def export(input_dir):
+    csv_data = pd.read_csv(input_dir, skiprows=7, header=None)
+
+    type_data = pd.read_csv(input_dir, skiprows=2, nrows=0)
+    type_list = list(type_data.columns)
+
+    name_data = pd.read_csv(input_dir, skiprows=3, nrows=0)
+    name_list = list(name_data.columns)
+
+    time_data = pd.read_csv(input_dir, skiprows=6, usecols=['Frame'])
+    time_data_list = list(time_data.index)
+
+    rigid_body_index_list = []
+    for i in range(len(type_list)):
+        if (":Marker" not in name_list[i]) and ("Rigid Body" in type_list[i]):
+            rigid_body_index_list.append(i)
+
+    num_rigid_body = int(len(rigid_body_index_list) / 7)
+    optitrack_data_list = []
+
+    for i in time_data_list:
+        frame_data = []
+        for j in range(num_rigid_body):
+            rigid_body_index_start = 7 * j
+            rigid_body_index_end = 7 + 7 * j
+            frame_data.append(
+                list(csv_data.values[i, rigid_body_index_list[rigid_body_index_start:rigid_body_index_end]]))
+        optitrack_data_list.append(frame_data)
+    return np.array(optitrack_data_list)
+
+
+
