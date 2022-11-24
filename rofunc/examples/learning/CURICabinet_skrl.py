@@ -10,7 +10,7 @@ import sys
 
 from rofunc.config.utils import get_config
 from rofunc.config.utils import omegaconf_to_dict
-from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_cfg_td3, set_models_ddpg, set_models_sac, \
+from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_cfg_td3, set_cfg_ddpg, set_cfg_sac, \
     set_models_ppo, set_models_sac, set_models_td3, set_models_ddpg
 from rofunc.examples.learning.tasks import task_map
 from rofunc.data.models import model_zoo
@@ -70,19 +70,19 @@ def setup(custom_args, task_name, eval_mode=False):
                     device=device)
     elif custom_args.agent == "sac":
         models_sac = set_models_sac(cfg, env, device)
-        # cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
+        cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
         agent = SAC(models=models_sac,
                     memory=memory,
-                    # cfg=cfg_sac,
+                    cfg=cfg_sac,
                     observation_space=env.observation_space,
                     action_space=env.action_space,
                     device=device)
     elif custom_args.agent == "ddpg":
         models_ddpg = set_models_ddpg(cfg, env, device)
-        # cfg_ddpg = set_cfg_ddpg(cfg, env, device, eval_mode)
+        cfg_ddpg = set_cfg_ddpg(cfg, env, device, eval_mode)
         agent = DDPG(models=models_ddpg,
                      memory=memory,
-                     # cfg=cfg_ddpg,
+                     cfg=cfg_ddpg,
                      observation_space=env.observation_space,
                      action_space=env.action_space,
                      device=device)
@@ -107,7 +107,7 @@ def train(custom_args, task_name):
     env, agent = setup(custom_args, task_name)
 
     # Configure and instantiate the RL trainer
-    cfg_trainer = {"timesteps": 40000, "headless": True}
+    cfg_trainer = {"timesteps": 30000, "headless": True}
     trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent)
 
     # start training
@@ -134,10 +134,10 @@ def eval(custom_args, task_name, ckpt_path=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--agent", type=str, default="td3")
-    parser.add_argument("--sim_device", type=str, default="cuda:1")
-    parser.add_argument("--rl_device", type=str, default="cuda:1")
-    parser.add_argument("--graphics_device_id", type=int, default=1)
+    parser.add_argument("--agent", type=str, default="sac")
+    parser.add_argument("--sim_device", type=str, default="cuda:0")
+    parser.add_argument("--rl_device", type=str, default="cuda:0")
+    parser.add_argument("--graphics_device_id", type=int, default=0)
     parser.add_argument("--train", action="store_false", help="turn to train mode while adding this argument")
     custom_args = parser.parse_args()
 

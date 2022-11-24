@@ -50,7 +50,7 @@ capture_video_len: 100
 force_render: True
 
 # disables rendering
-headless: False
+headless: True
 
 # set default task and default training config based on task
 defaults:
