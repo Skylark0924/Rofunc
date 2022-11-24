@@ -140,7 +140,8 @@ doc/rofunc.out
 .idea/
 whl/
 
-scripts/update.sh
 /rofunc/planning/lqt/outputs/
 
 rofunc/planning/src/robotics-codes-from-scratch-master/
+
+rofunc/data/
