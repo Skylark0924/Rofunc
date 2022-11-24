@@ -123,7 +123,7 @@ def plot_abs_and_mvc(data_abs, data_mvc, k):
 
 
 if __name__ == '__main__':
-    emg = np.load('./data/emg_data.npy')
+    emg = np.load('../../data/emg_data.npy')
     data_filter, data_clean, data_mvc, data_abs = process_all_channels(emg, n, SAMPING_RATE, k)
 
     for i in range(n):
