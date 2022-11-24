@@ -160,6 +160,37 @@ def export(mvnx_path, output_dir=None):
         np.save(os.path.join(output_dir, "right_finger_{}.npy".format(label)), pose)
 
 
+def export_time(mvnx_path, output_dir=None):
+    """
+    Example:
+        import rofunc as rf
+
+        mvnx_file = '/home/ubuntu/Data/06_24/Xsens/dough_01.mvnx'
+        rf.xsens.export(mvnx_file)
+    """
+    if mvnx_path.split('.')[-1] == 'mvnx':
+        mvnx_file = load_mvnx(mvnx_path)
+    else:
+        raise Exception('Wrong file type, only support .mvnx')
+
+    if output_dir is None:
+        output_dir = mvnx_path.split('.mvnx')[0]
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+    else:
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+            print('{} not exist, created.'.format(output_dir))
+
+    segment_count = mvnx_file.segment_count
+    dim = mvnx_file.frame_count
+
+    time = [int(i) for i in mvnx_file.file_data['frames']['time']]
+
+    np.save(os.path.join(output_dir, "time.npy"), np.array(time))
+
+
+
 def export_batch(mvnx_dir):
     """
     Example:

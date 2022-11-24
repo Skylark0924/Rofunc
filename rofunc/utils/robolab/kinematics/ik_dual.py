@@ -4,33 +4,41 @@ import numpy as np
 import pinocchio
 from numpy.linalg import norm, solve
 
-eps = 1e-6
+eps = 1e-4
+eps_r = 1e-4
 IT_MAX = 10000
 DT = 1e-1
 damp = 1e-12
 
 
-def ik(model, POSE, ORI, JOINT_ID):
+def ik_dual(model, POSE_L, POSE_R, JOINT_ID_L, JOINT_ID_R):
     data = model.createData()
 
-    oMdes = pinocchio.SE3(ORI, np.array(POSE))
+    oMdes_l = pinocchio.SE3(np.eye(3), np.array(POSE_L))
+    oMdes_r = pinocchio.SE3(np.eye(3), np.array(POSE_R))
     q = pinocchio.neutral(model)
+
     i = 0
     while True:
         pinocchio.forwardKinematics(model, data, q)
-        dMi = oMdes.actInv(data.oMi[JOINT_ID])
-        err = pinocchio.log(dMi).vector
-        if norm(err) < eps:
+        dMi_l = oMdes_l.actInv(data.oMi[JOINT_ID_L])
+        err_l = pinocchio.log(dMi_l).vector
+        dMi_r = oMdes_r.actInv(data.oMi[JOINT_ID_R])
+        err_r = pinocchio.log(dMi_r).vector
+        if norm(err_l) < eps and norm(err_r) < eps_r:
             success = True
             break
         if i >= IT_MAX:
             success = False
             break
-        J = pinocchio.computeJointJacobian(model, data, q, JOINT_ID)
-        v = - J.T.dot(solve(J.dot(J.T) + damp * np.eye(6), err))
-        q = pinocchio.integrate(model, q, v * DT)
+        J_l = pinocchio.computeJointJacobian(model, data, q, JOINT_ID_L)
+        v_l = - J_l.T.dot(solve(J_l.dot(J_l.T) + damp * np.eye(6), err_l))
+        J_r = pinocchio.computeJointJacobian(model, data, q, JOINT_ID_R)
+        v_r = - J_r.T.dot(solve(J_r.dot(J_r.T) + damp * np.eye(6), err_r))
+        q = pinocchio.integrate(model, q, 0.5 * v_l * DT + 0.5 * v_r * DT)
         if not i % 10:
-            print('%d: error = %s' % (i, err.T))
+            print('%d: error = %s' % (i, err_l.T))
+            print('%d: error = %s' % (i, err_r.T))
         i += 1
 
     if success:
@@ -45,7 +53,7 @@ def ik(model, POSE, ORI, JOINT_ID):
                .format(i, name, value)))
         i += 1
     print('\nresult: %s' % q_rearrange.flatten().tolist())
-    print('\nfinal error: %s' % err.T)
+    print('\nfinal error: %s, %s' % (err_l.T, err_r.T))
     return q_rearrange
 
 
@@ -53,10 +61,9 @@ if __name__ == '__main__':
     model = pinocchio.buildModelFromUrdf(
         "/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
     print('model name: ' + model.name)
-    POSE = [1, 0, 1]
-    ORI = np.array([-1, 0, 0, 0, -1, 0, 0, 0, 1]).reshape(3, 3)
-    JOINT_ID = 18
-    q_rearrange = ik(model, POSE, ORI, JOINT_ID)
+    POSE_L = [1, 0.5, 0.5]
+    POSE_R = [1, -0.5, 0.5]
+    q_rearrange = ik_dual(model, POSE_L, POSE_R, JOINT_ID_L=18, JOINT_ID_R=27)
     a = q_rearrange.take(
         [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 21, 11, 13, 22, 23, 14, 15, 24, 16, 25, 26, 17, 18, 27, 19, 28])
     print('\nresult: %s' % a.flatten().tolist())
