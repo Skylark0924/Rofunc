@@ -46,7 +46,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/robotnik/bases/summit_xls_chassis.dae"/>
+        <mesh filename="../meshes/robotnik/bases/summit_xls_chassis.dae"/>
       </geometry>
       <material name="black">
         <color rgba="0.0 0.0 0.0 1"/>
@@ -55,7 +55,7 @@
     <collision>
       <origin rpy="0 0 0 " xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/robotnik/bases/summit_xls_chassis.stl"/>
+        <mesh filename="../meshes/robotnik/bases/summit_xls_chassis.stl"/>
       </geometry>
     </collision>
   </link>
@@ -71,7 +71,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/robotnik/wheels/omni_wheel_2.dae"/>
+        <mesh filename="../meshes/robotnik/wheels/omni_wheel_2.dae"/>
       </geometry>
       <material name="darkgrey">
         <color rgba="0.2 0.2 0.2 1"/>
@@ -101,7 +101,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/robotnik/wheels/omni_wheel_1.dae"/>
+        <mesh filename="../meshes/robotnik/wheels/omni_wheel_1.dae"/>
       </geometry>
       <material name="darkgrey">
         <color rgba="0.2 0.2 0.2 1"/>
@@ -131,7 +131,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/robotnik/wheels/omni_wheel_1.dae"/>
+        <mesh filename="../meshes/robotnik/wheels/omni_wheel_1.dae"/>
       </geometry>
       <material name="darkgrey">
         <color rgba="0.2 0.2 0.2 1"/>
@@ -161,7 +161,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/robotnik/wheels/omni_wheel_2.dae"/>
+        <mesh filename="../meshes/robotnik/wheels/omni_wheel_2.dae"/>
       </geometry>
       <material name="darkgrey">
         <color rgba="0.2 0.2 0.2 1"/>
@@ -188,13 +188,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/control_box.dae"/>
+        <mesh filename="../meshes/clover/visual/control_box.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/control_box.stl"/>
+        <mesh filename="../meshes/clover/collision/control_box.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -208,13 +208,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/torso_base1.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_base1.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/torso_base1.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_base1.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -232,13 +232,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/torso_base2.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_base2.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/torso_base2.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_base2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -260,13 +260,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/torso_link_b2.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_link_b2.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/torso_link_b2.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_link_b2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -288,13 +288,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/torso_middle.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_middle.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/torso_middle.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_middle.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -317,13 +317,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/torso_link_c1.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_link_c1.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/torso_link_c1.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_link_c1.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -345,13 +345,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/torso_end.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_end.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/torso_end.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_end.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -374,13 +374,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/torso_link_b1.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_link_b1.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/torso_link_b1.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_link_b1.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -403,13 +403,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/torso_link_c2.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_link_c2.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/torso_link_c2.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_link_c2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -437,13 +437,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/head_base.dae"/>
+        <mesh filename="../meshes/clover/visual/head_base.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/head_base.stl"/>
+        <mesh filename="../meshes/clover/collision/head_base.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -466,13 +466,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/head_link1.dae"/>
+        <mesh filename="../meshes/clover/visual/head_link1.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/head_link1.stl"/>
+        <mesh filename="../meshes/clover/collision/head_link1.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -495,13 +495,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/visual/head_link2.dae"/>
+        <mesh filename="../meshes/clover/visual/head_link2.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/clover/collision/head_link2.stl"/>
+        <mesh filename="../meshes/clover/collision/head_link2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -520,13 +520,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link0.dae"/>
+        <mesh filename="../meshes/franka/visual/link0.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link0.stl"/>
+        <mesh filename="../meshes/franka/collision/link0.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -540,13 +540,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link1.dae"/>
+        <mesh filename="../meshes/franka/visual/link1.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link1.stl"/>
+        <mesh filename="../meshes/franka/collision/link1.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -568,13 +568,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link2.dae"/>
+        <mesh filename="../meshes/franka/visual/link2.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link2.stl"/>
+        <mesh filename="../meshes/franka/collision/link2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -596,13 +596,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link3.dae"/>
+        <mesh filename="../meshes/franka/visual/link3.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link3.stl"/>
+        <mesh filename="../meshes/franka/collision/link3.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -624,13 +624,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link4.dae"/>
+        <mesh filename="../meshes/franka/visual/link4.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link4.stl"/>
+        <mesh filename="../meshes/franka/collision/link4.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -652,13 +652,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link5.dae"/>
+        <mesh filename="../meshes/franka/visual/link5.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link5.stl"/>
+        <mesh filename="../meshes/franka/collision/link5.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -680,13 +680,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link6.dae"/>
+        <mesh filename="../meshes/franka/visual/link6.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link6.stl"/>
+        <mesh filename="../meshes/franka/collision/link6.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -708,13 +708,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link7.dae"/>
+        <mesh filename="../meshes/franka/visual/link7.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link7.stl"/>
+        <mesh filename="../meshes/franka/collision/link7.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -741,13 +741,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link0.dae"/>
+        <mesh filename="../meshes/franka/visual/link0.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link0.stl"/>
+        <mesh filename="../meshes/franka/collision/link0.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -761,13 +761,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link1.dae"/>
+        <mesh filename="../meshes/franka/visual/link1.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link1.stl"/>
+        <mesh filename="../meshes/franka/collision/link1.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -789,13 +789,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link2.dae"/>
+        <mesh filename="../meshes/franka/visual/link2.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link2.stl"/>
+        <mesh filename="../meshes/franka/collision/link2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -817,13 +817,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link3.dae"/>
+        <mesh filename="../meshes/franka/visual/link3.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link3.stl"/>
+        <mesh filename="../meshes/franka/collision/link3.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -845,13 +845,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link4.dae"/>
+        <mesh filename="../meshes/franka/visual/link4.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link4.stl"/>
+        <mesh filename="../meshes/franka/collision/link4.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -873,13 +873,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link5.dae"/>
+        <mesh filename="../meshes/franka/visual/link5.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link5.stl"/>
+        <mesh filename="../meshes/franka/collision/link5.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -901,13 +901,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link6.dae"/>
+        <mesh filename="../meshes/franka/visual/link6.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link6.stl"/>
+        <mesh filename="../meshes/franka/collision/link6.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -929,13 +929,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/link7.dae"/>
+        <mesh filename="../meshes/franka/visual/link7.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/link7.stl"/>
+        <mesh filename="../meshes/franka/collision/link7.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -961,12 +961,12 @@
   <link name="panda_left_hand">
     <visual>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/hand.dae"/>
+        <mesh filename="../meshes/franka/visual/hand.dae"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/hand.stl"/>
+        <mesh filename="../meshes/franka/collision/hand.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -982,7 +982,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/finger.dae"/>
+        <mesh filename="../meshes/franka/visual/finger.dae"/>
       </geometry>
     </visual>
     <!-- screw mount -->
@@ -1022,7 +1022,7 @@
     <visual>
       <origin rpy="0 0 3.141592653589793" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/finger.dae"/>
+        <mesh filename="../meshes/franka/visual/finger.dae"/>
       </geometry>
     </visual>
     <!-- screw mount -->
@@ -1079,12 +1079,12 @@
   <link name="panda_right_hand">
     <visual>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/hand.dae"/>
+        <mesh filename="../meshes/franka/visual/hand.dae"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/collision/hand.stl"/>
+        <mesh filename="../meshes/franka/collision/hand.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -1100,7 +1100,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/finger.dae"/>
+        <mesh filename="../meshes/franka/visual/finger.dae"/>
       </geometry>
     </visual>
     <!-- screw mount -->
@@ -1140,7 +1140,7 @@
     <visual>
       <origin rpy="0 0 3.141592653589793" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi_description/meshes/franka/visual/finger.dae"/>
+        <mesh filename="../meshes/franka/visual/finger.dae"/>
       </geometry>
     </visual>
     <!-- screw mount -->
