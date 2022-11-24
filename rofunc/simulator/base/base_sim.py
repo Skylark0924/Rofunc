@@ -1,10 +1,15 @@
 import math
 
 from isaacgym import gymapi
+from isaacgym import gymtorch
 from isaacgym import gymutil
+import numpy as np
+
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
-def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0), for_test=False):
+def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0), up_axis="Y",
+             for_test=False):
     # Initialize gym
     gym = gymapi.acquire_gym()
 
@@ -12,7 +17,13 @@ def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.
     sim_params = gymapi.SimParams()
     sim_params.dt = 1.0 / 60.0
     sim_params.substeps = 2
-    sim_params.gravity.y = -9.80
+    if up_axis == "Y":
+        sim_params.gravity.y = -9.80
+        sim_params.up_axis = gymapi.UP_AXIS_Y
+    elif up_axis == "Z":
+        sim_params.gravity.y = 0.0
+        sim_params.gravity.z = -9.80
+        sim_params.up_axis = gymapi.UP_AXIS_Z
     if args.physics_engine == gymapi.SIM_FLEX:
         sim_params.flex.solver_type = 5
         sim_params.flex.num_outer_iterations = 4
@@ -26,7 +37,7 @@ def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.
         sim_params.physx.num_threads = args.num_threads
         sim_params.physx.use_gpu = args.use_gpu
 
-    sim_params.use_gpu_pipeline = False
+    sim_params.use_gpu_pipeline = args.use_gpu_pipeline
     if args.use_gpu_pipeline:
         print("WARNING: Forcing CPU pipeline.")
 
@@ -54,14 +65,17 @@ def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.
     return gym, sim_params, sim, viewer
 
 
-def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base_link=True):
+def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base_link=True,
+             flip_visual_attachments=True, plane_vec=None, init_pose_vec=gymapi.Vec3(0, 0.0, 0.0)):
     # Add ground plane
     plane_params = gymapi.PlaneParams()
+    if plane_vec is not None:
+        plane_params.normal = plane_vec  # z-up! gymapi.Vec3(0, 0, 1)
     gym.add_ground(sim, plane_params)
 
     asset_options = gymapi.AssetOptions()
     asset_options.fix_base_link = fix_base_link
-    asset_options.flip_visual_attachments = True
+    asset_options.flip_visual_attachments = flip_visual_attachments
     asset_options.armature = 0.01
 
     print("Loading asset '%s' from '%s'" % (asset_file, asset_root))
@@ -77,7 +91,7 @@ def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base
     print("Creating %d environments" % num_envs)
     num_per_row = int(math.sqrt(num_envs))
     pose = gymapi.Transform()
-    pose.p = gymapi.Vec3(0, 0.0, 0.0)
+    pose.p = init_pose_vec
     pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
     for i in range(num_envs):
         # create env
@@ -86,20 +100,22 @@ def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base
 
         # add robot
         handle = gym.create_actor(env, asset, pose, "robot", i, 2)
+        gym.enable_actor_dof_force_sensors(env, handle)
         handles.append(handle)
 
     dof_props = gym.get_actor_dof_properties(envs[0], handles[0])
 
     # override default stiffness and damping values
-    dof_props['stiffness'].fill(1000.0)
-    dof_props['damping'].fill(1000.0)
+    # TODO: make this configurable
+    dof_props['stiffness'].fill(100000.0)
+    dof_props['damping'].fill(100000.0)
 
     # Give a desired pose for first 2 robot joints to improve stability
-    dof_props["driveMode"][0:2] = gymapi.DOF_MODE_POS
+    dof_props["driveMode"][0:2] = gymapi.DOF_MODE_EFFORT
 
-    dof_props["driveMode"][7:] = gymapi.DOF_MODE_POS
+    dof_props["driveMode"][7:] = gymapi.DOF_MODE_EFFORT
     dof_props['stiffness'][7:] = 1e10
-    dof_props['damping'][7:] = 1.0
+    dof_props['damping'][7:] = 1
 
     for i in range(num_envs):
         gym.set_actor_dof_properties(envs[i], handles[i], dof_props)
@@ -147,3 +163,50 @@ def init_attractor(gym, envs, viewer, handles, attracted_joint, for_test=False):
         attractor_handle = gym.create_rigid_body_attractor(env, attractor_properties)
         attractor_handles.append(attractor_handle)
     return attractor_handles, axes_geom, sphere_geom
+
+
+def get_num_bodies(gym, sim, asset_root, asset_file):
+    asset = gym.load_asset(sim, asset_root, asset_file, gymapi.AssetOptions())
+    num_bodies = gym.get_asset_rigid_body_count(asset)
+    beauty_print("The number of bodies in the CURI asset is {}".format(num_bodies), 2)
+    return num_bodies
+
+
+def get_robot_state(gym, sim, envs, curi_handles, mode):
+    if mode == 'dof_force':
+        # One force value per each DOF
+        robot_dof_force = np.array(gymtorch.wrap_tensor(gym.acquire_dof_force_tensor(sim)))
+        beauty_print('DOF forces:\n {}'.format(robot_dof_force), 2)
+        return robot_dof_force
+    elif mode == 'dof_state':
+        # Each DOF state contains position and velocity and force sensor value
+        for i in range(len(envs)):
+            # TODO: multi envs
+            robot_dof_force = np.array(gym.get_actor_dof_forces(envs[i], curi_handles[i])).reshape((-1, 1))
+        robot_dof_pose_vel = np.array(gymtorch.wrap_tensor(gym.acquire_dof_state_tensor(sim)))
+        robot_dof_state = np.hstack((robot_dof_pose_vel, robot_dof_force))
+        beauty_print('DOF states:\n {}'.format(robot_dof_state), 2)
+        return robot_dof_state
+    elif mode == 'dof_pose_vel':
+        # Each DOF state contains position and velocity
+        robot_dof_pose_vel = np.array(gymtorch.wrap_tensor(gym.acquire_dof_state_tensor(sim)))
+        beauty_print('DOF poses and velocities:\n {}'.format(robot_dof_pose_vel), 2)
+        return robot_dof_pose_vel
+    elif mode == 'dof_pose':
+        # Each DOF pose contains position
+        robot_dof_pose_vel = np.array(gymtorch.wrap_tensor(gym.acquire_dof_state_tensor(sim)))
+        beauty_print('DOF poses:\n {}'.format(robot_dof_pose_vel[:, 0]), 2)
+        return robot_dof_pose_vel[:, 0]
+    elif mode == 'dof_vel':
+        # Each DOF velocity contains velocity
+        robot_dof_pose_vel = np.array(gymtorch.wrap_tensor(gym.acquire_dof_state_tensor(sim)))
+        beauty_print('DOF velocities:\n {}'.format(robot_dof_pose_vel[:, 1]), 2)
+        return robot_dof_pose_vel[:, 1]
+    elif mode == 'dof_force_np':
+        for i in range(len(envs)):
+            # TODO: multi envs
+            robot_dof_force = gym.get_actor_dof_forces(envs[i], curi_handles[i])
+            beauty_print('DOF forces:\n {}'.format(robot_dof_force), 2)
+        return robot_dof_force
+    else:
+        raise ValueError("The mode {} is not supported".format(mode))

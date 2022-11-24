@@ -1,34 +1,47 @@
-Overview
+Overview and Installation
 =====
 
 Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and 
-convenient python functions for robotics, including _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also plan to provide an Isaac Gym-based robot simulator for evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
+convenient python functions for robotics, including _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods. We also plan to provide an Isaac Gym-based robot simulator for evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
 
 .. image:: ../../img/pipeline.png
 
+
 Installation
-----
-The installation is very easy,
+------------------
+
+Install from PyPI
+^^^^^^^^^^^^^^^^^^^^
+
+**Requirements need to be installed manually**
+
+1. pbdlib
+2. Isaac Gym
+3. ZED SDK
+
+Then
 
 .. code-block:: python
 
    pip install rofunc
 
-and as you'll find later, it's easy to use as well!
+Install from Source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
-   import rofunc as rf
+   git clone https://github.com/Skylark0924/Rofunc.git
+   cd Rofunc
+   pip install -r requirements.txt
+   pip install -e .
 
+.. note::
 
-Thus, have fun in the robotics world!
+   Besides, you need to install `ZED SDK <https://www.stereolabs.com/developers/release/#downloads>`_ manually. (We have tried to package it as a :guilabel:`.whl` file to add it to :guilabel:`requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
 
 
 Available functions
----
-Currently, we provide a simple document; please refer to [here](./rofunc/). A comprehensive one with both English and 
-Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/stable/). 
-The available functions and plans can be found as follows.
+------------------
 
 +----------------------------------+---------------+--------------------------+-----------------------------------------------------------------------+
 | Classes                          | Types         | Functions                | Description                                                           |

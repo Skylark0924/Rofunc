@@ -1,11 +1,11 @@
 import rofunc as rf
 import numpy as np
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def test_7d_uni_ilqr():
     # <editor-fold desc="7-dim Uni example">
-    cfg = get_config('./', 'ilqr')
+    cfg = get_config('./planning', 'ilqr')
     # via-points
     Mu = np.array([[2, 1, -np.pi / 6], [3, 2, -np.pi / 3]])  # Via-points
     Rot = np.zeros([cfg.nbPoints, 2, 2])  # Object orientation matrices

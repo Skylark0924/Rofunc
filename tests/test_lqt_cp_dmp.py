@@ -1,9 +1,9 @@
 import rofunc as rf
 import numpy as np
 from importlib_resources import files
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
-cfg = get_config('./', 'lqt_cp_dmp')
+cfg = get_config('./planning', 'lqt_cp_dmp')
 cfg.nbDeriv = 3
 
 

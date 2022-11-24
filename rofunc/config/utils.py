@@ -1,16 +1,106 @@
+import os
 from typing import Dict
 
+import hydra
+from hydra import compose, initialize
+from hydra._internal.hydra import Hydra
+from hydra._internal.utils import create_automatic_config_search_path
+from hydra.core.hydra_config import HydraConfig
+from hydra.types import RunMode
 from omegaconf import DictConfig
 
+from rofunc.config.custom_resolvers import *
+from rofunc.utils.file.path import get_rofunc_path
 
-def omegaconf_to_dict(d: DictConfig) -> Dict:
+
+def get_config(config_path=None, config_name=None, args=None, debug=False) -> DictConfig:
+    # reset current hydra config if already parsed (but not passed in here)
+    if HydraConfig.initialized():
+        hydra.core.global_hydra.GlobalHydra.instance().clear()
+    if config_path is not None and config_name is not None:
+        if args is None:
+            with initialize(config_path=config_path, version_base=None):
+                cfg = compose(config_name=config_name)
+        else:
+            rofunc_path = get_rofunc_path()
+            absl_config_path = os.path.join(rofunc_path, "config/{}".format(config_path))
+            search_path = create_automatic_config_search_path(config_name, None, absl_config_path)
+            hydra_object = Hydra.create_main_hydra2(task_name='load_isaacgymenv', config_search_path=search_path)
+            cfg = hydra_object.compose_config(config_name, args.overrides, run_mode=RunMode.RUN)
+    else:
+        with initialize(config_path="./", version_base=None):
+            cfg = compose(config_name="lqt")
+    if debug:
+        print(OmegaConf.to_yaml(cfg))
+    return cfg
+
+
+def omegaconf_to_dict(config: DictConfig) -> Dict:
     """
     Converts an omegaconf DictConfig to a python Dict, respecting variable interpolation.
     """
-    ret = {}
-    for k, v in d.items():
-        if isinstance(v, DictConfig):
-            ret[k] = omegaconf_to_dict(v)
-        else:
-            ret[k] = v
-    return ret
+    d = {}
+    for k, v in config.items():
+        d[k] = omegaconf_to_dict(v) if isinstance(v, DictConfig) else v
+    return d
+
+
+def dict_to_omegaconf(d: Dict, save_path: str = None) -> DictConfig:
+    """
+    Converts a python Dict to an omegaconf DictConfig, respecting variable interpolation.
+    """
+    conf = OmegaConf.create(d)
+    if save_path is not None:
+        with open(save_path, 'w') as fp:
+            OmegaConf.save(config=conf, f=fp.name)
+            loaded = OmegaConf.load(fp.name)
+            assert conf == loaded
+    else:
+        return conf
+
+
+if __name__ == '__main__':
+    PPO_DEFAULT_CONFIG = {
+        "rollouts": 16,  # number of rollouts before updating
+        "learning_epochs": 8,  # number of learning epochs during each update
+        "mini_batches": 2,  # number of mini batches during each learning epoch
+
+        "discount_factor": 0.99,  # discount factor (gamma)
+        "lambda": 0.95,  # TD(lambda) coefficient (lam) for computing returns and advantages
+
+        "learning_rate": 1e-3,  # learning rate
+        "learning_rate_scheduler": None,  # learning rate scheduler class (see torch.optim.lr_scheduler)
+        "learning_rate_scheduler_kwargs": {},  # learning rate scheduler's kwargs (e.g. {"step_size": 1e-3})
+
+        "state_preprocessor": None,  # state preprocessor class (see skrl.resources.preprocessors)
+        "state_preprocessor_kwargs": {},  # state preprocessor's kwargs (e.g. {"size": env.observation_space})
+        "value_preprocessor": None,  # value preprocessor class (see skrl.resources.preprocessors)
+        "value_preprocessor_kwargs": {},  # value preprocessor's kwargs (e.g. {"size": 1})
+
+        "random_timesteps": 0,  # random exploration steps
+        "learning_starts": 0,  # learning starts after this many steps
+
+        "grad_norm_clip": 0.5,  # clipping coefficient for the norm of the gradients
+        "ratio_clip": 0.2,  # clipping coefficient for computing the clipped surrogate objective
+        "value_clip": 0.2,  # clipping coefficient for computing the value loss (if clip_predicted_values is True)
+        "clip_predicted_values": False,  # clip predicted values during value loss computation
+
+        "entropy_loss_scale": 0.0,  # entropy loss scaling factor
+        "value_loss_scale": 1.0,  # value loss scaling factor
+
+        "kl_threshold": 0,  # KL divergence threshold for early stopping
+
+        "rewards_shaper": None,  # rewards shaping function: Callable(reward, timestep, timesteps) -> reward
+
+        "experiment": {
+            "directory": "",  # experiment's parent directory
+            "experiment_name": "",  # experiment name
+            "write_interval": 250,  # TensorBoard writing interval (timesteps)
+
+            "checkpoint_interval": 1000,  # interval for checkpoints (timesteps)
+            "store_separately": False,  # whether to store checkpoints separately
+        }
+    }
+
+    dict_to_omegaconf(PPO_DEFAULT_CONFIG,
+                      save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/ppo_default_config.yaml")

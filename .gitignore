@@ -140,10 +140,16 @@ doc/rofunc.out
 .idea/
 whl/
 
-scripts/update.sh
 /rofunc/planning/lqt/outputs/
 
 rofunc/planning/src/robotics-codes-from-scratch-master/
 
 
 doc/source/_build
+
+runs
+/rofunc/simulator/curi/quadru.py
+/rofunc/simulator/curi/sim2.py
+/rofunc/simulator/curi/bullet_sim.py
+
+*.pt
