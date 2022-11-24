@@ -1,8 +1,5 @@
-import argparse
 import os
-
 import numpy as np
-
 from .src import pytrigno
 
 
@@ -37,18 +34,3 @@ def record(host, n, samples_per_read, t):
 
     data_sensor = np.reshape(np.transpose(np.array(data_sensor), (0, 2, 1)), (-1, n))
     np.save(os.path.join('./data', 'emg_data.npy'), data_sensor)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument(
-        '-a', '--addr',
-        dest='host',
-        default='10.13.166.60',
-        help="IP address of the machine running TCU. Default is localhost.")
-    args = parser.parse_args()
-
-    # For instance, 4 channels, 2000 samples per read and 10 batches are chosen.
-    import rofunc as rf
-    rf.emg.record(args.host, 4, 2000, 10)

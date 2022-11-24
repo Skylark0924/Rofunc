@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from rofunc.planning.lqr.ilqr import get_matrices, set_dynamical_system
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
+from omegaconf import DictConfig
 
 
 def f_reach(x, Mu):
@@ -87,15 +88,15 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Obst: np.ndarray, U_obst: np.ndarra
     return u, x
 
 
-def uni_obstacle(Mu, Obst, S_obst, U_obst, u0, x0, cfg):
+def uni_obstacle(Mu, Obst, S_obst, U_obst, u0, x0, cfg, for_test=False):
     Q, R, idx, tl = get_matrices(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
 
     u, x = get_u_x(cfg, Mu, Obst, U_obst, u0, x0, R, Su0, Sx0, idx, tl)
-    vis(cfg, x, Mu, Obst, S_obst)
+    vis(cfg, x, Mu, Obst, S_obst, for_test=for_test)
 
 
-def vis(cfg, x, Mu, Obst, S_obst):
+def vis(cfg, x, Mu, Obst, S_obst, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -120,36 +121,5 @@ def vis(cfg, x, Mu, Obst, S_obst):
 
     plt.plot(x[:, 0], x[:, 1], c='black')
     plt.scatter(x[::10, 0], x[::10, 1], c='black')
-
-    plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'ilqr_obstacle')
-
-    Mu = np.array([[3, 3, np.pi / 6]])  # Via-point [x1,x2,o]
-    Obst = np.array([
-        [1, 0.6, np.pi / 4],  # [x1,x2,o]
-        [2, 2.5, -np.pi / 6]  # [x1,x2,o]
-    ])
-
-    A_obst = np.zeros((cfg.nbObstacles, 2, 2))
-    S_obst = np.zeros((cfg.nbObstacles, 2, 2))
-    Q_obst = np.zeros((cfg.nbObstacles, 2, 2))
-    U_obst = np.zeros((cfg.nbObstacles, 2, 2))  # Q_obs[t] = U_obs[t].T @ U_obs[t]
-    for i in range(cfg.nbObstacles):
-        orn_t = Obst[i][-1]
-        A_obst[i] = np.array([  # Orientation in matrix form
-            [np.cos(orn_t), -np.sin(orn_t)],
-            [np.sin(orn_t), np.cos(orn_t)]
-        ])
-
-        S_obst[i] = A_obst[i] @ np.diag(cfg.sizeObstacle) ** 2 @ A_obst[i].T  # Covariance matrix
-        Q_obst[i] = np.linalg.inv(S_obst[i])  # Precision matrix
-        U_obst[i] = A_obst[i] @ np.diag(
-            1 / np.array(cfg.sizeObstacle))  # "Square root" of cfg.Q_obst[i]
-
-    u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
-    x0 = np.zeros(cfg.nbVarX)  # Initial state
-
-    uni_obstacle(Mu, Obst, S_obst, U_obst, u0, x0, cfg)
+    if not for_test:
+        plt.show()

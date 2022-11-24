@@ -6,7 +6,6 @@ import threading
 from typing import List
 from pynput.keyboard import Key, Listener
 
-
 event = threading.Event()
 
 
@@ -168,6 +167,7 @@ class Datagram(object):
         pose = [x, y, z, qx, qy, qz, qw]
         return pose
 
+
 class XsensInterface(object):
     def __init__(
             self,
@@ -282,7 +282,7 @@ class XsensInterface(object):
             return None
         id_str = byte_to_str(data[0:6], 6)
         sample_counter = byte_to_uint32(data[6:10])
-        datagram_counter = struct.unpack("!B", data[10].to_bytes(1,'big'))
+        datagram_counter = struct.unpack("!B", data[10].to_bytes(1, 'big'))
         item_number = byte_to_uint8(data[11:12])
         time_code = byte_to_uint32(data[12:16])
         character_id = byte_to_uint8(data[16:17])
@@ -342,22 +342,9 @@ def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str = No
         os.mkdir('{}/{}'.format(root_dir, exp_name))
         print('Recording folder: {}/{}'.format(root_dir, exp_name))
         interface = XsensInterface(ip, port, ref_frame=ref_frame)
-        listener = Listener(on_press = on_press)
+        listener = Listener(on_press=on_press)
         listener.start()
-        xsens_thread = threading.Thread(target = interface.save_file_thread, args=(root_dir, exp_name))
+        xsens_thread = threading.Thread(target=interface.save_file_thread, args=(root_dir, exp_name))
         xsens_thread.start()
         xsens_thread.join()
         print('Xsens record finished')
-
-
-
-if __name__ == "__main__":
-    root_dir = '/home/skylark/Data/xsens_record'
-    ip = '192.168.13.20'
-    port = 9763
-
-    from datetime import datetime
-
-    exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
-    record(root_dir, exp_name, ip, port)
-
