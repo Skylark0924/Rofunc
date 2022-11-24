@@ -7,8 +7,10 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+from omegaconf import DictConfig
+
 import rofunc as rf
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def define_control_primitive(cfg):
@@ -58,7 +60,7 @@ def get_u_x(cfg: DictConfig, start_pose: np.ndarray, muQ: np.ndarray, Q: np.ndar
 def uni_cp(via_points_raw: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT (control primitive)'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
 
     via_points = np.zeros((len(via_points_raw), cfg.nbVar))
     via_points[:, :cfg.nbVarPos] = via_points_raw
@@ -71,7 +73,6 @@ def uni_cp(via_points_raw: np.ndarray, cfg: DictConfig = None):
     u_hat, x_hat = get_u_x(cfg, start_pose, mu, Q, R, Su, Sx, PSI)
 
     # vis(param, x_hat, u_hat, muQ, idx_slices, tl, phi)
-    rf.lqt.plot_3d_uni([x_hat], mu, idx_slices)
     # rf.visualab.traj_plot([x_hat[:, :2]])
     return u_hat, x_hat, mu, idx_slices
 
@@ -124,14 +125,3 @@ def vis(cfg, x_hat, u_hat, muQ, idx_slices, tl, phi):
     axs[4].set_xlabel("$t$")
 
     plt.show()
-
-
-if __name__ == '__main__':
-    via_points_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    filter_indices = [i for i in range(0, len(via_points_raw) - 10, 5)]
-    filter_indices.append(len(via_points_raw) - 1)
-    via_points_raw = via_points_raw[filter_indices]
-
-    # via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0], [3, 6, 0, 0], [4, 2, 0, 0]])
-
-    uni_cp(via_points_raw)

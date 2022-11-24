@@ -1,8 +1,9 @@
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
+from omegaconf import DictConfig
 
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 from rofunc.planning.lqr.ilqr import fk, fkin0, f_reach, set_dynamical_system
 
 
@@ -94,8 +95,8 @@ def get_matrices(cfg: DictConfig):
     return Q, R, idx, tl
 
 
-def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0: np.ndarray, Q: np.ndarray,
-            R: np.ndarray, Su0: np.ndarray, Sx0: np.ndarray, idx: np.ndarray, tl: np.ndarray):
+def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0: np.ndarray, v0: np.ndarray,
+            Q: np.ndarray, R: np.ndarray, idx: np.ndarray, tl: np.ndarray):
     x = np.zeros([cfg.nbData, 2 * cfg.nbVarX, ])
     x[0, :cfg.nbVarX] = x0
     x[0, cfg.nbVarX:] = v0
@@ -128,14 +129,14 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0:
     return u, x
 
 
-def uni_dyna(Mu, Rot, u0, x0, cfg):
+def uni_dyna(Mu, Rot, u0, x0, v0, cfg, for_test=False):
     Q, R, idx, tl = get_matrices(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
-    u, x = get_u_x(cfg, Mu, Rot, u0, x0, Q, R, Su0, Sx0, idx, tl)
-    vis(cfg, x, tl)
+    u, x = get_u_x(cfg, Mu, Rot, u0, x0, v0, Q, R, idx, tl)
+    vis(cfg, Mu, Rot, x, tl, for_test=for_test)
 
 
-def vis(cfg, x, tl):
+def vis(cfg, Mu, Rot, x, tl, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -165,26 +166,5 @@ def vis(cfg, x, tl):
         else:
             plt.scatter(Mu[i, 0], Mu[i, 1], s=100, marker="X", c=color_map[i])
 
-    plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'ilqr')
-
-    # via-points
-    Mu = np.array([[2, 1, -np.pi / 3], [3, 2, -np.pi / 3]])  # Via-points [x, y, orientation]
-    Rot = np.zeros([cfg.nbPoints, 2, 2])  # Object orientation matrices
-
-    # Object rotation matrices
-    for t in range(cfg.nbPoints):
-        orn_t = Mu[t, -1]
-        Rot[t, :, :] = np.asarray([
-            [np.cos(orn_t), -np.sin(orn_t)],
-            [np.sin(orn_t), np.cos(orn_t)]
-        ])
-
-    u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
-    x0 = np.array([3 * np.pi / 4, -np.pi / 2, -np.pi / 4])  # Initial state
-    v0 = np.array([0, 0, 0])  # initial velocity (in joint space)
-
-    uni_dyna(Mu, Rot, u0, x0, cfg)
+    if not for_test:
+        plt.show()

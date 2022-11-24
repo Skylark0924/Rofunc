@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from rofunc.planning.lqr.ilqr import set_dynamical_system
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
+from omegaconf import DictConfig
 
 
 def fkin(cfg, x):
@@ -142,15 +143,15 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, MuCoM: np.ndarray, u: np.ndarray, x
     return u, x
 
 
-def uni_bi(Mu, MuCoM, u0, x0, cfg):
+def uni_bi(Mu, MuCoM, u0, x0, cfg, for_test=False):
     Q, Qc, R, idx, tl = get_matrices(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
     u, x = get_u_x(cfg, Mu, MuCoM, u0, x0, Q, Qc, R, Su0, Sx0, idx, tl)
 
-    vis(cfg, x, Mu, MuCoM, tl)
+    vis(cfg, x, Mu, MuCoM, tl, for_test=for_test)
 
 
-def vis(cfg, x, Mu, MuCoM, tl):
+def vis(cfg, x, Mu, MuCoM, tl, for_test):
     tl = np.array([0, tl.item()])
 
     plt.figure(figsize=(15, 9))
@@ -183,16 +184,5 @@ def vis(cfg, x, Mu, MuCoM, tl):
     ftmp = fkin(cfg, x)
     plt.plot(ftmp[0, :], ftmp[1, :], c="black", marker="o", markevery=[0] + tl.tolist())
     plt.plot(ftmp[2, :], ftmp[3, :], c="black", marker="o", markevery=[0] + tl.tolist())
-    plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'ilqr_bi')
-
-    Mu = np.array([[-1, -1.5, 4, 2]]).T  # Target
-    MuCoM = np.array([0, 1.4])
-
-    u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
-    x0 = np.array([np.pi / 2, np.pi / 2, np.pi / 3, -np.pi / 2, -np.pi / 3])  # Initial pose
-
-    uni_bi(Mu, MuCoM, u0, x0, cfg)
+    if not for_test:
+        plt.show()

@@ -9,6 +9,7 @@ args = gymutil.parse_arguments()
 rf.franka.show(args)
 ```
 
+![](../img/franka_interative.gif)
 
 ### Run the trajectory in the Cartesian space
 
@@ -23,3 +24,5 @@ traj = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))
 
 rf.franka.run_traj(args, traj)
 ```
+
+![](../img/taichi_franka.gif)

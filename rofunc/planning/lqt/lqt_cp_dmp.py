@@ -9,9 +9,11 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+import rofunc as rf
 from rofunc.planning.lqt.lqt_cp import define_control_primitive
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 from scipy.linalg import block_diag
+from omegaconf import DictConfig
 
 
 def get_matrices(cfg: DictConfig, Mu: np.ndarray):
@@ -97,7 +99,7 @@ def get_u_x(cfg: DictConfig, state_noise: np.ndarray, Mu: np.ndarray, Qm: np.nda
     return u_hat, x_hat
 
 
-def uni_cp_dmp(data: np.ndarray, cfg: DictConfig = None):
+def uni_cp_dmp(data: np.ndarray, cfg: DictConfig = None, for_test=False):
     print(
         '\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT (control primitive and DMP)'))
     Qm, Rm = get_matrices(cfg, data)
@@ -114,11 +116,11 @@ def uni_cp_dmp(data: np.ndarray, cfg: DictConfig = None):
     # vis(param, x_hat, u_hat, Mu, idx_slices, tl, phi)
     # vis3d(data, x_hat)
     # rf.visualab.traj_plot([x_hat[:, :2]])
-    vis(x_hat, data)
+    vis(x_hat, data, for_test=for_test)
     return u_hat, x_hat
 
 
-def vis(x_hat, Mu):
+def vis(x_hat, Mu, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -130,7 +132,8 @@ def vis(x_hat, Mu):
     plt.plot(x_hat[1, 0, :], x_hat[1, 1, :], c='black', linestyle='-', linewidth=2)
     plt.scatter(x_hat[1, 0, 23:25], x_hat[1, 1, 23:25], c='green', s=30)
 
-    plt.show()
+    if not for_test:
+        plt.show()
 
 
 def vis3d(data, x_hat):
@@ -143,35 +146,3 @@ def vis3d(data, x_hat):
     ax.scatter(data[:, 0], data[:, 1], data[:, 2], s=20 * 1.5 ** 2, marker='o', color="red", label="Via-points")
     plt.legend()
     plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'lqt_cp_dmp')
-    cfg.nbDeriv = 3
-
-    # <editor-fold desc="3d example">
-    # data_raw = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_r.npy')
-    # # filter_indices = [i for i in range(0, len(data_raw) - 10, 5)]
-    # # filter_indices.append(len(data_raw) - 1)
-    # MuPos = data_raw  # pose
-    # MuVel = np.gradient(MuPos)[0] / cfg.dt
-    # MuAcc = np.gradient(MuVel)[0] / cfg.dt
-    # via_points = np.hstack((MuPos, MuVel, MuAcc)).T
-    # </editor-fold>
-
-    # <editor-fold desc="2d letter example data">
-    from scipy.interpolate import interp1d
-    x = np.load(
-        '/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/planning/src/robotics-codes-from-scratch-master/data/2Dletters/S.npy')[
-        0, :, :2].T
-
-    f_pos = interp1d(np.linspace(0, np.size(x, 1) - 1, np.size(x, 1), dtype=int), x, kind='cubic')
-    MuPos = f_pos(np.linspace(0, np.size(x, 1) - 1, cfg.nbData))  # Position
-    MuVel = np.gradient(MuPos)[1] / cfg.dt
-    MuAcc = np.gradient(MuVel)[1] / cfg.dt
-    # Position, velocity and acceleration profiles as references
-    via_points = np.vstack((MuPos, MuVel, MuAcc))
-    # </editor-fold>
-
-    cfg.nbData = len(via_points[0])
-    uni_cp_dmp(via_points, cfg)

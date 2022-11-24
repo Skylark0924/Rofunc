@@ -1,8 +1,8 @@
-import math
+import os
 
-import numpy as np
 from isaacgym import gymapi
 from isaacgym import gymutil
+
 from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
 
 
@@ -13,13 +13,13 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
         pose = attractor_properties.target
         # pose.p: (x, y, z), pose.r: (w, x, y, z)
-        # pose.p.x = 0.2 * math.sin(1.5 * t - math.pi * float(i) / num_envs)
-        # pose.p.y = 0.7 + 0.1 * math.cos(2.5 * t - math.pi * float(i) / num_envs)
-        # pose.p.z = 0.2 * math.cos(1.5 * t - math.pi * float(i) / num_envs)
         pose.p.x = traj[index, 0] * 0.5
         pose.p.y = traj[index, 2] * 0.5
         pose.p.z = traj[index, 1] * 0.5
-
+        pose.r.w = traj[index, 6]
+        pose.r.x = traj[index, 3]
+        pose.r.y = traj[index, 5]
+        pose.r.z = traj[index, 4]
         gym.set_attractor_target(envs[i], attractor_handles[i], pose)
 
         # Draw axes and sphere at attractor location
@@ -27,16 +27,17 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
 
 
-def show(args):
+def show(args, asset_root=None):
     print('\033[1;32m--------{}--------\033[0m'.format('Show the Franka simulator in the interactive mode'))
 
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
-
-    # Load franka asset and set the env
-    asset_root = "../assets"
+    if asset_root is None:
+        import site
+        pip_root_path = site.getsitepackages()[0]
+        asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/franka_description/robots/franka_panda.urdf"
-    envs, franka_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1)
+    init_env(gym, sim, asset_root, asset_file, num_envs=1)
 
     while not gym.query_viewer_has_closed(viewer):
         # Step the physics
@@ -49,19 +50,22 @@ def show(args):
         gym.sync_frame_time(sim)
 
 
-def run_traj(args, traj, attracted_joint="panda_hand"):
+def run_traj(args, traj, attracted_joint="panda_hand", asset_root=None, for_test=False):
     print('\033[1;32m--------{}--------\033[0m'.format('Execute trajectory with the Franka simulator'))
 
     # Initial gym and sim
-    gym, sim_params, sim, viewer = init_sim(args)
+    gym, sim_params, sim, viewer = init_sim(args, for_test=for_test)
 
     # Load franka asset and set the env
-    asset_root = "../assets"
+    if asset_root is None:
+        import site
+        pip_root_path = site.getsitepackages()[0]
+        asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/franka_description/robots/franka_panda.urdf"
-    envs, franka_handles = init_env(gym, sim, viewer, asset_root, asset_file, num_envs=1)
+    envs, franka_handles = init_env(gym, sim, asset_root, asset_file, num_envs=1)
 
     # Create the attractor
-    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles, attracted_joint)
+    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles, attracted_joint, for_test=for_test)
 
     # get joint limits and ranges for Franka
     franka_dof_props = gym.get_actor_dof_properties(envs[0], franka_handles[0])
@@ -99,23 +103,12 @@ def run_traj(args, traj, attracted_joint="panda_hand"):
         gym.fetch_results(sim, True)
 
         # Step rendering
-        gym.step_graphics(sim)
-        gym.draw_viewer(viewer, sim, False)
-        gym.sync_frame_time(sim)
+        if not for_test:
+            gym.step_graphics(sim)
+            gym.draw_viewer(viewer, sim, False)
+            gym.sync_frame_time(sim)
 
     print("Done")
 
     gym.destroy_viewer(viewer)
     gym.destroy_sim(sim)
-
-
-if __name__ == '__main__':
-    args = gymutil.parse_arguments(description="Franka Attractor Example")
-
-    traj = np.load('/home/ubuntu/Data/2022_09_09_Taichi/rep3_l.npy')
-    run_traj(args, traj, )
-    # show(args)
-
-    # import rofunc as rf
-    #
-    # rf.franka.run_traj(args, traj)

@@ -122,17 +122,3 @@ def record(root_dir, exp_name):
         thread_list[index].join()
 
     print("\nFINISH")
-
-
-if __name__ == "__main__":
-    root_dir = '/home/skylark/Data/zed_record'
-    # exp_name = '20220916_1552'
-    # from time import gmtime, strftime
-    # exp_name = strftime("%Y%m%d_%H%M%S", gmtime())
-    from datetime import datetime
-    exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
-
-    # record(root_dir, exp_name)
-    import rofunc as rf
-
-    rf.zed.record(root_dir, exp_name)
