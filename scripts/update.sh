@@ -1,13 +1,15 @@
 #!/bin/bash -i
 shopt -s expand_aliases
-alias pip3p="/home/ubuntu/anaconda3/envs/plast/bin/pip"
-alias pyana3p="/home/ubuntu/anaconda3/envs/plast/bin/python3.7"
+
+alias pip3rf="/home/ubuntu/anaconda3/envs/rofunc/bin/pip"
+alias pyana3rf="/home/ubuntu/anaconda3/envs/rofunc/bin/python3.8"
 # Expand aliases defined in the shell ~/.bashrc
 
-pip3p uninstall -y rofunc
+pip3rf uninstall -y rofunc
 cd ..
 rm -rf ./build
 rm -rf ./dist
-pyana3p setup.py bdist_wheel sdist
+pip3rf install -r requirements.txt
+pyana3rf setup.py bdist_wheel sdist
 cd ./dist
-pip3p install rofunc-0.0.0.9-py3-none-any.whl
+pip3rf install *.whl

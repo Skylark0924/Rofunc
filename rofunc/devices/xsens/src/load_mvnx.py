@@ -50,6 +50,7 @@ def load_mvnx(file_name):
     mvnx_file.file_data['meta_data']['configuration'] = subject_element.get('configuration')
     mvnx_file.file_data['meta_data']['scenario'] = subject_element.get('userScenario')
     mvnx_file.file_data['meta_data']['quality'] = subject_element.get('processingQuality')
+    mvnx_file.file_data['meta_data']['start_time'] = subject_element.get('recDateMSecsSinceEpoch')
 
     # Parse the segments and their points
     segments_element = subject_element.find('mvn:segments', ns)

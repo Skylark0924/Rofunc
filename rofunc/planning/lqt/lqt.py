@@ -3,13 +3,14 @@
 
     Refers to https://gitlab.idiap.ch/rli/robotics-codes-from-scratch by Dr. Sylvain Calinon
 """
+from math import factorial
 from typing import Tuple
 
 import numpy as np
-from math import factorial
+from omegaconf import DictConfig
 from tqdm import tqdm
 
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def get_matrices(cfg: DictConfig, via_points: np.ndarray):
@@ -71,7 +72,7 @@ def get_u_x(cfg: DictConfig, start_pose: np.ndarray, mu: np.ndarray, Q: np.ndarr
 def uni(via_points_raw: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
 
     via_points = np.zeros((len(via_points_raw), cfg.nbVar))
     via_points[:, :cfg.nbVarPos] = via_points_raw
@@ -87,7 +88,7 @@ def uni(via_points_raw: np.ndarray, cfg: DictConfig = None):
 def uni_hierarchical(via_points_raw: np.ndarray, cfg: DictConfig = None, interval: int = 3):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
 
     via_points = np.zeros((len(via_points_raw), cfg.nbVar))
     via_points[:, :cfg.nbVarPos] = via_points_raw[:, :cfg.nbVarPos]
@@ -110,7 +111,7 @@ def uni_hierarchical(via_points_raw: np.ndarray, cfg: DictConfig = None, interva
 def bi(via_points_raw_l: np.ndarray, via_points_raw_r: np.ndarray, cfg: DictConfig = None):
     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
 
     via_points_l = np.zeros((len(via_points_raw_l), cfg.nbVar))
     via_points_l[:, :cfg.nbVarPos] = via_points_raw_l

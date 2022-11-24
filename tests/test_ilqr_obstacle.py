@@ -1,10 +1,10 @@
 import rofunc as rf
 import numpy as np
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def test_2d_obstacle_ilqr():
-    cfg = get_config('./', 'ilqr_obstacle')
+    cfg = get_config('./planning', 'ilqr_obstacle')
 
     Mu = np.array([[3, 3, np.pi / 6]])  # Via-point [x1,x2,o]
     Obst = np.array([

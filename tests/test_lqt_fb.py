@@ -1,6 +1,6 @@
 import rofunc as rf
 import numpy as np
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def test_7d_uni_fb_lqt():
@@ -15,7 +15,7 @@ def test_7d_uni_fb_lqt():
 
 # <editor-fold desc="2-dim example">
 # TODO: need to modify the definition of state noise
-# cfg = get_config("./", "lqt_2d")
+# cfg = get_config("./planning", "lqt_2d")
 # via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0]])
 # rf.lqt.uni_fb(via_points, cfg=cfg)
 # </editor-fold>
