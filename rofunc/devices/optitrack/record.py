@@ -65,17 +65,3 @@ def record(root_dir: str, exp_name: str, ip: str, port: int) -> None:
         opti_thread.start()
         opti_thread.join()
         print('Optitrack record finished')
-
-
-if __name__ == "__main__":
-    root_dir = '/home/skylark/Data/optitrack_record'
-    ip = '192.168.13.118'
-    port = 6688
-
-    from datetime import datetime
-
-    exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
-    record(root_dir, exp_name, ip, port)
-    # filename = '/home/skylark/Data/optitrack_record/20220929_134531/opti_data.npy'
-    # data = np.load(filename).reshape((-1, 7))
-    # print(data[7:])

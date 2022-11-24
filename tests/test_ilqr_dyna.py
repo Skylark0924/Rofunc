@@ -1,10 +1,10 @@
 import rofunc as rf
 import numpy as np
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def test_2d_dyna_ilqr():
-    cfg = get_config('./', 'ilqr')
+    cfg = get_config('./planning', 'ilqr')
 
     # via-points
     Mu = np.array([[2, 1, -np.pi / 3], [3, 2, -np.pi / 3]])  # Via-points [x, y, orientation]

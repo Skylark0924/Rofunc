@@ -31,6 +31,7 @@ jobs:
         python -m pip install flake8 pytest pytest-cov
         pip install -r requirements.txt
         python -m pip install cython numpy opencv-python pyopengl
+        pip install torch==1.10.2+cu113 torchvision==0.11.3+cu113 torchaudio==0.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
 #    - name: cuda-toolkit
 #      uses: Jimver/cuda-toolkit@v0.2.8
 #      id: cuda-toolkit

@@ -1,10 +1,10 @@
 import rofunc as rf
 import numpy as np
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def test_2d_bi_ilqr():
-    cfg = get_config('./', 'ilqr_bi')
+    cfg = get_config('./planning', 'ilqr_bi')
 
     Mu = np.array([[-1, -1.5, 4, 2]]).T  # Target
     MuCoM = np.array([0, 1.4])

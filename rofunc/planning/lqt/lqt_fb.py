@@ -5,9 +5,10 @@
 """
 import matplotlib.pyplot as plt
 import numpy as np
+from omegaconf import DictConfig
 
 import rofunc as rf
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 
 
 def get_matrices(cfg: DictConfig, via_points: np.ndarray):
@@ -103,7 +104,7 @@ def uni_fb(via_points: np.ndarray, cfg: DictConfig = None, for_test=False):
     """
     print('\033[1;32m--------{}--------\033[0m'.format('LQT with feedback control'))
 
-    cfg = get_config("./", "lqt") if cfg is None else cfg
+    cfg = get_config("./planning", "lqt") if cfg is None else cfg
     # cfg.nbVarPos = 2
 
     Q, R, tl = get_matrices(cfg, via_points)
