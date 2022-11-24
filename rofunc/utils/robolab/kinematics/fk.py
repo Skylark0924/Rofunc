@@ -1,6 +1,6 @@
 import numpy as np
 from urdfpy import URDF
-from utils import check_urdf
+from .utils import check_urdf
 
 
 def fk(urdf_path, joint_name, joint_value, export_link='panda_left_link7'):
