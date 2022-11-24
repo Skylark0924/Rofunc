@@ -3,11 +3,11 @@
 
     Refers to https://gitlab.idiap.ch/rli/robotics-codes-from-scratch by Dr. Sylvain Calinon
 """
-from typing import Dict
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from rofunc.config.get_config import *
+import matplotlib.pyplot as plt
+import numpy as np
+from rofunc.config.utils import get_config
+from omegaconf import DictConfig
 
 
 def logmap_2d(f, f0):
@@ -142,14 +142,14 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0:
     return u, x
 
 
-def uni(Mu, Rot, u0, x0, cfg):
+def uni(Mu, Rot, u0, x0, cfg, for_test=False):
     Q, R, idx, tl = get_matrices(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
     u, x = get_u_x(cfg, Mu, Rot, u0, x0, Q, R, Su0, Sx0, idx, tl)
-    vis(cfg, x, tl)
+    vis(cfg, Mu, Rot, x, tl, for_test=for_test)
 
 
-def vis(cfg, x, tl):
+def vis(cfg, Mu, Rot, x, tl, for_test):
     plt.figure()
     plt.axis('off')
     plt.gca().set_aspect('equal', adjustable='box')
@@ -178,25 +178,5 @@ def vis(cfg, x, tl):
         else:
             plt.scatter(Mu[t, 0], Mu[t, 1], s=100, marker='X', c=color_map[t])
 
-    plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'ilqr')
-
-    # via-points
-    Mu = np.array([[2, 1, -np.pi / 6], [3, 2, -np.pi / 3]])  # Via-points
-    Rot = np.zeros([cfg.nbPoints, 2, 2])  # Object orientation matrices
-
-    # Object rotation matrices
-    for t in range(cfg.nbPoints):
-        orn_t = Mu[t, -1]
-        Rot[t, :, :] = np.asarray([
-            [np.cos(orn_t), -np.sin(orn_t)],
-            [np.sin(orn_t), np.cos(orn_t)]
-        ])
-
-    u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
-    x0 = np.array([3 * np.pi / 4, -np.pi / 2, -np.pi / 4])  # Initial state
-
-    uni(Mu, Rot, u0, x0, cfg)
+    if not for_test:
+        plt.show()

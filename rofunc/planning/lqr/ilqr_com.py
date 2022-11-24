@@ -2,8 +2,9 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.matlib
+from omegaconf import DictConfig
 
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 from rofunc.planning.lqr.ilqr import get_matrices, set_dynamical_system
 
 
@@ -106,16 +107,16 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, MuCoM: np.ndarray, u: np.ndarray, x
     return u, x
 
 
-def uni_com(Mu, MuCoM, u0, x0, cfg):
+def uni_com(Mu, MuCoM, u0, x0, cfg, for_test=False):
     Q, R, idx, tl = get_matrices(cfg)
     Qc = np.kron(np.identity(cfg.nbData), np.diag([1E0, 0]))
     Su0, Sx0 = set_dynamical_system(cfg)
     u, x = get_u_x(cfg, Mu, MuCoM, u0, x0, Q, Qc, R, Su0, Sx0, idx, tl)
 
-    vis(cfg, x, Mu, MuCoM)
+    vis(cfg, x, Mu, MuCoM, for_test=for_test)
 
 
-def vis(cfg, x, Mu, MuCoM):
+def vis(cfg, x, Mu, MuCoM, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -146,17 +147,5 @@ def vis(cfg, x, Mu, MuCoM):
             rect = patches.Rectangle(rect_origin, cfg.szCoM * 2, 3.5 * 2,
                                      facecolor=[.8, 0, 0], alpha=0.1, edgecolor=None)
             ax.add_patch(rect)
-    plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'ilqr_com')
-
-    Mu = np.asarray([3.5, 4])  # Target
-    MuCoM = np.asarray([.4, 0])
-
-    u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
-    a = .7
-    x0 = np.array([np.pi / 2 - a, 2 * a, - a, np.pi - np.pi / 4, 3 * np.pi / 4])  # Initial state (in joint space)
-
-    uni_com(Mu, MuCoM, u0, x0, cfg)
+    if not for_test:
+        plt.show()

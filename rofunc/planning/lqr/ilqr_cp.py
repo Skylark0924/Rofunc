@@ -6,8 +6,9 @@
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
+from omegaconf import DictConfig
 
-from rofunc.config.get_config import *
+from rofunc.config.utils import get_config
 from rofunc.planning.lqr.ilqr import fk, f_reach, get_matrices, set_dynamical_system
 from rofunc.planning.lqr.ilqr_com import fkin0
 from rofunc.planning.lqt.lqt_cp import define_control_primitive
@@ -48,16 +49,16 @@ def get_u_x(cfg: DictConfig, Mu: np.ndarray, Rot: np.ndarray, u: np.ndarray, x0:
     return u, x
 
 
-def uni_cp(Mu, Rot, u0, x0, cfg):
+def uni_cp(Mu, Rot, u0, x0, cfg, for_test=False):
     Q, R, idx, tl = get_matrices(cfg)
     PSI, phi = define_control_primitive(cfg)
     Su0, Sx0 = set_dynamical_system(cfg)
 
     u, x = get_u_x(cfg, Mu, Rot, u0, x0, Q, R, Su0, Sx0, idx, tl, PSI)
-    vis(cfg, u, x, Mu, Rot, tl, phi)
+    vis(cfg, u, x, Mu, Rot, tl, phi, for_test=for_test)
 
 
-def vis(cfg, u, x, Mu, Rot, tl, phi):
+def vis(cfg, u, x, Mu, Rot, tl, phi, for_test):
     plt.figure()
     plt.axis("off")
     plt.gca().set_aspect('equal', adjustable='box')
@@ -133,25 +134,5 @@ def vis(cfg, u, x, Mu, Rot, tl, phi):
         axs[6].plot(phi[:, i])
     axs[6].set_xlabel("$t$")
 
-    plt.show()
-
-
-if __name__ == '__main__':
-    cfg = get_config('./', 'ilqr')
-
-    # Via-points
-    Mu = np.array([[2, 1, -np.pi / 2], [3, 1, -np.pi / 2]])  # Via-points
-    Rot = np.zeros([2, 2, cfg.nbPoints])  # Object orientation matrices
-
-    # Object rotation matrices
-    for t in range(cfg.nbPoints):
-        orn_t = Mu[t, -1]
-        Rot[t] = np.asarray([
-            [np.cos(orn_t), -np.sin(orn_t)],
-            [np.sin(orn_t), np.cos(orn_t)]
-        ])
-
-    u0 = np.zeros(cfg.nbVarU * (cfg.nbData - 1))  # Initial control command
-    x0 = np.array([3 * np.pi / 4, -np.pi / 2, -np.pi / 4])  # Initial state
-
-    uni_cp(Mu, Rot, u0, x0, cfg)
+    if not for_test:
+        plt.show()
