@@ -1,10 +1,10 @@
 import rofunc as rf
 import numpy as np
-from importlib_resources import files
+import os
 
 
 def test_7d_uni_cp_lqt():
-    via_points_raw = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))
+    via_points_raw = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/taichi_1l.npy'))
     filter_indices = [i for i in range(0, len(via_points_raw) - 10, 5)]
     filter_indices.append(len(via_points_raw) - 1)
     via_points_raw = via_points_raw[filter_indices]

@@ -1,7 +1,6 @@
 import rofunc as rf
 import numpy as np
-from importlib_resources import files
-
+import os
 
 # <editor-fold desc="2-dim Uni example">
 # demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
@@ -33,8 +32,8 @@ from importlib_resources import files
 
 def test_7d_bi_tpgmm():
     # <editor-fold desc="7-dim Bi example">
-    left_raw_demo = np.load(files('rofunc.data.LFD_ML').joinpath('LeftHand.npy'))
-    right_raw_demo = np.load(files('rofunc.data.LFD_ML').joinpath('RightHand.npy'))
+    left_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
+    right_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/RightHand.npy'))
     left_raw_demo = np.expand_dims(left_raw_demo, axis=0)
     right_raw_demo = np.expand_dims(right_raw_demo, axis=0)
     demos_left_x = np.vstack((left_raw_demo[:, 82:232, :], left_raw_demo[:, 233:383, :], left_raw_demo[:, 376:526, :]))

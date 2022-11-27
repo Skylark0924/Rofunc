@@ -1,5 +1,5 @@
 """
-Tracking the trajectory with LQT feedback version
+LQT feedback version
 ============================================================
 
 This example shows how a feedback LQT works.

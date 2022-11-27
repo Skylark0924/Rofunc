@@ -323,6 +323,8 @@ class VecTask(Env):
             Observations, rewards, resets, info
             Observations are dict of observations (currently only one member called 'obs')
         """
+        # if self.clip_actions:
+        #     actions =
 
         # randomize actions
         if self.dr_randomizations.get('actions', None):
