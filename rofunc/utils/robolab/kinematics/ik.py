@@ -38,15 +38,15 @@ def ik(model, POSE, ORI, JOINT_ID):
     else:
         print("\nWarning: the iterative algorithm has not reached convergence to the desired precision")
 
-    q_rearrange = np.append(0, np.delete(q, [1, 3, 5, 7]))
+    q_ik = np.append(0, np.delete(q, [1, 3, 5, 7]))
     i = 0
-    for name, value in zip(model.names, q_rearrange):
+    for name, value in zip(model.names, q_ik):
         print(("{: .0f} {:<24} : {: .4f}"
                .format(i, name, value)))
         i += 1
-    print('\nresult: %s' % q_rearrange.flatten().tolist())
+    print('\nresult: %s' % q_ik.flatten().tolist())
     print('\nfinal error: %s' % err.T)
-    return q_rearrange
+    return q_ik
 
 
 if __name__ == '__main__':
