@@ -1,3 +1,10 @@
+"""
+LQT
+=====
+
+This example shows how to use the LQT controller to track a trajectory.
+"""
+
 import os
 import numpy as np
 import rofunc as rf
