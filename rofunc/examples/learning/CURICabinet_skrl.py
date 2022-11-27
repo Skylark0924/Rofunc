@@ -135,11 +135,12 @@ def eval(custom_args, task_name, ckpt_path=None):
 
 
 if __name__ == '__main__':
+    gpu_id = 0
     parser = argparse.ArgumentParser()
     parser.add_argument("--agent", type=str, default="sac")
-    parser.add_argument("--sim_device", type=str, default="cuda:0")
-    parser.add_argument("--rl_device", type=str, default="cuda:0")
-    parser.add_argument("--graphics_device_id", type=int, default=0)
+    parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
+    parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
+    parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--train", action="store_false", help="turn to train mode while adding this argument")
     custom_args = parser.parse_args()
@@ -149,7 +150,7 @@ if __name__ == '__main__':
     if custom_args.train:
         train(custom_args, task_name)
     else:
-        folder = 'CURICabinetBimanualPPO_22-11-19_00-31-45-841011'
+        folder = 'CURICabinetSAC_22-11-27_18-38-53-296354'
         ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/examples/learning/runs/{}/checkpoints/best_agent.pt".format(
             folder)
         eval(custom_args, task_name, ckpt_path=ckpt_path)
