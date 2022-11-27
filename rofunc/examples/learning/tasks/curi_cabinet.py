@@ -482,8 +482,9 @@ def compute_curi_reward(
     open_reward = cabinet_dof_pos[:, 3] * around_handle_reward + cabinet_dof_pos[:, 3]  # drawer_top_joint
 
     rewards = dist_reward_scale * dist_reward + rot_reward_scale * rot_reward \
-              + around_handle_reward_scale * around_handle_reward + open_reward_scale * open_reward \
-              + finger_dist_reward_scale * finger_dist_reward - action_penalty_scale * action_penalty
+              + around_handle_reward_scale * around_handle_reward + 10 * open_reward_scale * open_reward \
+              + finger_dist_reward_scale * finger_dist_reward \
+              # - action_penalty_scale * action_penalty
 
     # bonus for opening drawer properly
     rewards = torch.where(cabinet_dof_pos[:, 3] > 0.01, rewards + 0.5, rewards)
