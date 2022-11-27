@@ -155,3 +155,5 @@ runs
 *.pt
 
 rofunc/examples/learning/rllib_example.py
+rofunc/examples/learning/skrl_example.py
+rofunc/examples/learning/skrl_example2.py
