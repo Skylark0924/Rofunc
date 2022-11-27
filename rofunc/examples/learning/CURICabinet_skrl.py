@@ -38,6 +38,7 @@ def setup(custom_args, task_name, eval_mode=False):
     sys.argv.append("sim_device={}".format(custom_args.sim_device))
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
+    sys.argv.append("headless={}".format(custom_args.headless))
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
     cfg_dict = omegaconf_to_dict(cfg.task)
@@ -56,10 +57,8 @@ def setup(custom_args, task_name, eval_mode=False):
 
     device = env.device
 
-    # Instantiate a RandomMemory as rollout buffer (any memory can be used for this)
-    memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
-
     if custom_args.agent == "ppo":
+        memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
         models_ppo = set_models_ppo(cfg, env, device)
         cfg_ppo = set_cfg_ppo(cfg, env, device, eval_mode)
         agent = PPO(models=models_ppo,
@@ -69,6 +68,7 @@ def setup(custom_args, task_name, eval_mode=False):
                     action_space=env.action_space,
                     device=device)
     elif custom_args.agent == "sac":
+        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
         models_sac = set_models_sac(cfg, env, device)
         cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
         agent = SAC(models=models_sac,
@@ -78,6 +78,7 @@ def setup(custom_args, task_name, eval_mode=False):
                     action_space=env.action_space,
                     device=device)
     elif custom_args.agent == "ddpg":
+        memory = RandomMemory(memory_size=8000, num_envs=env.num_envs, device=device, replacement=True)
         models_ddpg = set_models_ddpg(cfg, env, device)
         cfg_ddpg = set_cfg_ddpg(cfg, env, device, eval_mode)
         agent = DDPG(models=models_ddpg,
@@ -87,6 +88,7 @@ def setup(custom_args, task_name, eval_mode=False):
                      action_space=env.action_space,
                      device=device)
     elif custom_args.agent == "td3":
+        memory = RandomMemory(memory_size=50000, num_envs=env.num_envs, device=device, replacement=True)
         models_td3 = set_models_td3(cfg, env, device)
         cfg_td3 = set_cfg_td3(cfg, env, device, eval_mode)
         agent = TD3(models=models_td3,
@@ -107,7 +109,7 @@ def train(custom_args, task_name):
     env, agent = setup(custom_args, task_name)
 
     # Configure and instantiate the RL trainer
-    cfg_trainer = {"timesteps": 30000, "headless": True}
+    cfg_trainer = {"timesteps": 100000, "headless": True}
     trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent)
 
     # start training
@@ -138,10 +140,11 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=str, default="cuda:0")
     parser.add_argument("--rl_device", type=str, default="cuda:0")
     parser.add_argument("--graphics_device_id", type=int, default=0)
+    parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--train", action="store_false", help="turn to train mode while adding this argument")
     custom_args = parser.parse_args()
 
-    task_name = "CURICabinetBimanual"
+    task_name = "CURICabinet"
 
     if custom_args.train:
         train(custom_args, task_name)

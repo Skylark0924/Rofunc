@@ -1,7 +1,6 @@
 import rofunc as rf
 import numpy as np
-from importlib_resources import files
-
+import os
 
 # Uni
 # demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
@@ -14,7 +13,7 @@ from importlib_resources import files
 
 def test_7d_uni_tpgmr():
     # Uni_3d
-    raw_demo = np.load(files('rofunc.data.LFD_ML').joinpath('LeftHand.npy'))
+    raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
     raw_demo = np.expand_dims(raw_demo, axis=0)
     demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
     show_demo_idx = 2

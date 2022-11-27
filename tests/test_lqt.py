@@ -1,11 +1,12 @@
 import rofunc as rf
 import numpy as np
-from importlib_resources import files
+import os
+from rofunc.utils.file.path import get_rofunc_path
 
 
 def test_7d_uni_lqt():
     # <editor-fold desc="7-dim Uni example">
-    via_points = np.load(files('rofunc.data.LQT_LQR').joinpath('rolling_pin_1.npy'))
+    via_points = np.load(os.path.join(get_rofunc_path(), 'data/LQT_LQR/rolling_pin_1.npy'))
     filter_indices = [0, 1, 5, 10, 22, 36]
     via_points = via_points[filter_indices]
     u_hat, x_hat, mu, idx_slices = rf.lqt.uni(via_points)
