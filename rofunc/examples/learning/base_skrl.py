@@ -64,15 +64,23 @@ class StochasticActor(GaussianMixin, Model):
         Model.__init__(self, observation_space, action_space, device)
         GaussianMixin.__init__(self, clip_actions, clip_log_std, min_log_std, max_log_std)
 
-        self.net = nn.Sequential(nn.Linear(self.num_observations, 32),
+        # self.net = nn.Sequential(nn.Linear(self.num_observations, 32),
+        #                          nn.ELU(),
+        #                          nn.Linear(32, 32),
+        #                          nn.ELU(),
+        #                          nn.Linear(32, self.num_actions))
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 256),
                                  nn.ELU(),
-                                 nn.Linear(32, 32),
+                                 nn.Linear(256, 128),
                                  nn.ELU(),
-                                 nn.Linear(32, self.num_actions))
+                                 nn.Linear(128, 64),
+                                 nn.ELU())
+        self.mean_layer = nn.Linear(64, self.num_actions)
+
         self.log_std_parameter = nn.Parameter(torch.zeros(self.num_actions))
 
     def compute(self, states, taken_actions, role):
-        return self.net(states), self.log_std_parameter
+        return torch.tanh(self.mean_layer(self.net(states))), self.log_std_parameter
 
 
 class DeterministicActor(DeterministicMixin, Model):
@@ -80,14 +88,21 @@ class DeterministicActor(DeterministicMixin, Model):
         Model.__init__(self, observation_space, action_space, device)
         DeterministicMixin.__init__(self, clip_actions)
 
-        self.net = nn.Sequential(nn.Linear(self.num_observations, 32),
+        # self.net = nn.Sequential(nn.Linear(self.num_observations, 32),
+        #                          nn.ELU(),
+        #                          nn.Linear(32, 32),
+        #                          nn.ELU(),
+        #                          nn.Linear(32, self.num_actions))
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 256),
                                  nn.ELU(),
-                                 nn.Linear(32, 32),
+                                 nn.Linear(256, 128),
                                  nn.ELU(),
-                                 nn.Linear(32, self.num_actions))
+                                 nn.Linear(128, 64),
+                                 nn.ELU())
+        self.mean_layer = nn.Linear(64, self.num_actions)
 
     def compute(self, states, taken_actions, role):
-        return self.net(states)
+        return self.mean_layer(self.net(states))
 
 
 class Critic(DeterministicMixin, Model):
@@ -95,14 +110,21 @@ class Critic(DeterministicMixin, Model):
         Model.__init__(self, observation_space, action_space, device)
         DeterministicMixin.__init__(self, clip_actions)
 
-        self.net = nn.Sequential(nn.Linear(self.num_observations + self.num_actions, 32),
+        # self.net = nn.Sequential(nn.Linear(self.num_observations + self.num_actions, 32),
+        #                          nn.ELU(),
+        #                          nn.Linear(32, 32),
+        #                          nn.ELU(),
+        #                          nn.Linear(32, 1))
+        self.net = nn.Sequential(nn.Linear(self.num_observations + self.num_actions, 256),
                                  nn.ELU(),
-                                 nn.Linear(32, 32),
+                                 nn.Linear(256, 128),
                                  nn.ELU(),
-                                 nn.Linear(32, 1))
+                                 nn.Linear(128, 64),
+                                 nn.ELU())
+        self.value_layer = nn.Linear(64, 1)
 
     def compute(self, states, taken_actions, role):
-        return self.net(torch.cat([states, taken_actions], dim=1))
+        return self.value_layer(self.net(torch.cat([states, taken_actions], dim=1)))
 
 
 def set_models_ppo(cfg, env, device):
@@ -196,8 +218,8 @@ def set_cfg_ppo(cfg, env, device, eval_mode=False):
     cfg_ppo["value_preprocessor"] = RunningStandardScaler
     cfg_ppo["value_preprocessor_kwargs"] = {"size": 1, "device": device}
     # logging to TensorBoard and write checkpoints each 120 and 1200 timesteps respectively
-    cfg_ppo["experiment"]["write_interval"] = 120
-    cfg_ppo["experiment"]["checkpoint_interval"] = 1200
+    cfg_ppo["experiment"]["write_interval"] = 100
+    cfg_ppo["experiment"]["checkpoint_interval"] = 1000
     cfg_ppo["experiment"]["directory"] = os.path.join(os.getcwd(), "runs")
     if eval_mode:
         cfg_ppo["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "PPO",
@@ -223,7 +245,7 @@ def set_cfg_td3(cfg, env, device, eval_mode=False):
     cfg_td3["random_timesteps"] = 0
     cfg_td3["learning_starts"] = 0
     # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
-    cfg_td3["experiment"]["write_interval"] = 25
+    cfg_td3["experiment"]["write_interval"] = 100
     cfg_td3["experiment"]["checkpoint_interval"] = 1000
     if eval_mode:
         cfg_td3["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "TD3",
@@ -247,7 +269,7 @@ def set_cfg_ddpg(cfg, env, device, eval_mode=False):
     cfg_ddpg["random_timesteps"] = 0
     cfg_ddpg["learning_starts"] = 0
     # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
-    cfg_ddpg["experiment"]["write_interval"] = 25
+    cfg_ddpg["experiment"]["write_interval"] = 100
     cfg_ddpg["experiment"]["checkpoint_interval"] = 1000
     if eval_mode:
         cfg_ddpg["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "DDPG",
@@ -266,12 +288,20 @@ def set_cfg_sac(cfg, env, device, eval_mode=False):
     """
     cfg_sac = SAC_DEFAULT_CONFIG.copy()
     cfg_sac["gradient_steps"] = 1
-    cfg_sac["batch_size"] = 512
+    cfg_sac["batch_size"] = 256
     cfg_sac["random_timesteps"] = 0
-    cfg_sac["learning_starts"] = 0
+    cfg_sac["learning_starts"] = 10000
+    # cfg_sac["actor_learning_rate"] = 5e-4
+    # cfg_sac["critic_learning_rate"] = 5e-4
+    # cfg_sac["learning_rate_scheduler"] = KLAdaptiveRL
+    # cfg_sac["learning_rate_scheduler_kwargs"] = {"kl_threshold": 0.008}
+    # cfg_sac["state_preprocessor"] = RunningStandardScaler
+    # cfg_sac["state_preprocessor_kwargs"] = {"size": env.observation_space, "device": device}
+    #
     cfg_sac["learn_entropy"] = True
+    # cfg_sac["rewards_shaper"] = lambda rewards, timestep, timesteps: rewards * 0.01
     # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
-    cfg_sac["experiment"]["write_interval"] = 25
+    cfg_sac["experiment"]["write_interval"] = 100
     cfg_sac["experiment"]["checkpoint_interval"] = 1000
     if eval_mode:
         cfg_sac["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "SAC",

@@ -500,7 +500,7 @@ def compute_curi_reward(
     reset_buf = torch.where(cabinet_dof_pos[:, 3] > 0.39, torch.ones_like(reset_buf), reset_buf)
     reset_buf = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(reset_buf), reset_buf)
 
-    return rewards, reset_buf
+    return rewards * 0.01, reset_buf
 
 
 @torch.jit.script
