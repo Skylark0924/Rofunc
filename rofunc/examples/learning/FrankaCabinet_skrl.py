@@ -44,7 +44,7 @@ def setup(custom_args, eval_mode=False):
                                     sim_device=cfg.sim_device,
                                     graphics_device_id=cfg.graphics_device_id,
                                     headless=cfg.headless,
-                                    virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                    virtual_screen_capture=cfg.capture_video,
                                     force_render=cfg.force_render)
     env = wrap_env(env)
 

@@ -31,8 +31,14 @@ def get_config(config_path=None, config_name=None, args=None, debug=False) -> Di
         with initialize(config_path="./", version_base=None):
             cfg = compose(config_name="lqt")
     if debug:
-        print(OmegaConf.to_yaml(cfg))
+        print_config(cfg)
     return cfg
+
+
+def print_config(config: DictConfig):
+    print("-----------------------------")
+    print(OmegaConf.to_yaml(config))
+    print("-----------------------------")
 
 
 def omegaconf_to_dict(config: DictConfig) -> Dict:
