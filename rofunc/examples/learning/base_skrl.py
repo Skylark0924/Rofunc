@@ -290,8 +290,8 @@ def set_cfg_sac(cfg, env, device, eval_mode=False):
     cfg_sac = SAC_DEFAULT_CONFIG.copy()
     cfg_sac["gradient_steps"] = 1
     cfg_sac["batch_size"] = 256
-    cfg_sac["random_timesteps"] = 10000
-    cfg_sac["learning_starts"] = 10000
+    cfg_sac["random_timesteps"] = 5000
+    cfg_sac["learning_starts"] = 5000
     cfg_sac["actor_learning_rate"] = 1e-3
     cfg_sac["critic_learning_rate"] = 1e-3
     cfg_sac["learning_rate_scheduler"] = KLAdaptiveRL
@@ -300,7 +300,7 @@ def set_cfg_sac(cfg, env, device, eval_mode=False):
     cfg_sac["state_preprocessor_kwargs"] = {"size": env.observation_space, "device": device}
     #
     cfg_sac["learn_entropy"] = True
-    # cfg_sac["entropy_learning_rate"] = 5e-4
+    # cfg_sac["entropy_learning_rate"] = 5e-3
     # cfg_sac["rewards_shaper"] = lambda rewards, timestep, timesteps: rewards * 0.01
     # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
     cfg_sac["experiment"]["write_interval"] = 100
