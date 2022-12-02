@@ -9,7 +9,7 @@ import rofunc as rf
 import numpy as np
 import matplotlib.pyplot as plt
 
-emg = np.load('./data/emg_data.npy')
+emg = np.load('/home/ubuntu/Data/emg_record/20221202_181154.npy')
 SAMPING_RATE = 2000
 k = 4
 n = 4
