@@ -3,7 +3,7 @@ import numpy as np
 from .src import pytrigno
 
 
-def record(host, n, samples_per_read, t):
+def record(host, n, samples_per_read, t, save_path):
     """
     Communication with and data acquisition from a Delsys Trigno wireless EMG system.
     Delsys Trigno Control Utility needs to be installed and running on, and the device
@@ -33,7 +33,7 @@ def record(host, n, samples_per_read, t):
     dev.stop()
 
     data_sensor = np.reshape(np.transpose(np.array(data_sensor), (0, 2, 1)), (-1, n))
-    np.save(os.path.join('./data', 'emg_data.npy'), data_sensor)
+    np.save(os.path.join(save_path, 'emg_data.npy'), data_sensor)
 
 
 if __name__ == '__main__':
