@@ -1,12 +1,12 @@
 #!/bin/bash -i
 shopt -s expand_aliases
-alias pip3a="/home/skylark/anaconda3/bin/pip"
-alias pyana3="/home/skylark/anaconda3/bin/python3.9"
+alias pip3rf="/home/skylark/anaconda3/envs/rofunc/bin/pip"
+alias pyana3rf="/home/skylark/anaconda3/envs/rofunc/bin/python3.8"
 
 cd ../dist
-pip3a uninstall -y rofunc
+pip3rf uninstall -y rofunc
 cd ..
-pyana3 setup.py bdist_wheel sdist
+pyana3rf setup.py bdist_wheel sdist
 cd ./dist
-pip3a install rofunc-0.0.0.9-py3-none-any.whl
-pip3a install numpy==1.23.3
+pip3rf install rofunc-0.0.0.9-py3-none-any.whl
+pip3rf install numpy==1.23.3

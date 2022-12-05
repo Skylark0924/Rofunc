@@ -15,7 +15,7 @@ def show(args, asset_root=None):
     from rofunc.simulator.base.base_sim import init_sim, init_env
     from rofunc.utils.logger.beauty_logger import beauty_print
 
-    beauty_print("Show the CURI mini simulator in the interactive mode", 1)
+    beauty_print("Show the Ubtech Walker in the interactive mode", 1)
 
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args)
@@ -27,7 +27,7 @@ def show(args, asset_root=None):
         asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
     asset_file = "urdf/walker/urdf/walker.urdf"
     init_env(gym, sim, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=True,
-             flip_visual_attachments=False, init_pose_vec=gymapi.Vec3(0, 2.0, 0.0))
+             flip_visual_attachments=False, init_pose_vec=(0, 2.0, 0.0))
 
     while not gym.query_viewer_has_closed(viewer):
         # Step the physics
