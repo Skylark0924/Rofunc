@@ -9,21 +9,23 @@ import argparse
 import sys
 
 import isaacgym
+from hydra._internal.utils import get_args_parser
+# from rofunc.lfd.rl.online import PPOAgent
+# from rofunc.lfd.rl.online import SACAgent
+# from rofunc.lfd.rl.online import TD3Agent
 from rofunc.config.utils import get_config
 from rofunc.config.utils import omegaconf_to_dict
-from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_cfg_td3, set_cfg_ddpg, set_cfg_sac, \
-    set_models_ppo, set_models_sac, set_models_td3, set_models_ddpg
+from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_cfg_td3, set_cfg_sac, set_models_ppo, set_models_sac, \
+    set_models_td3
 from rofunc.examples.learning.tasks import task_map
 from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
 
-from hydra._internal.utils import get_args_parser
-from rofunc.lfd.rl.online import PPOAgent
-from rofunc.lfd.rl.online import SACAgent
-from rofunc.lfd.rl.online import TD3Agent
+from skrl.agents.torch.ppo import PPO as PPOAgent
+from skrl.agents.torch.sac import SAC as SACAgent
+from skrl.agents.torch.td3 import TD3 as TD3Agent
 from skrl.envs.torch import wrap_env
 from skrl.memories.torch import RandomMemory
-# Import the skrl components to build the RL system
 from skrl.trainers.torch import SequentialTrainer
 from skrl.utils import set_seed
 
