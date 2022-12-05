@@ -66,7 +66,7 @@ def dict_to_omegaconf(d: Dict, save_path: str = None) -> DictConfig:
 
 
 if __name__ == '__main__':
-    SAC_DEFAULT_CONFIG = {
+    TD3_DEFAULT_CONFIG = {
         "gradient_steps": 1,  # gradient steps
         "batch_size": 64,  # training batch size
 
@@ -84,15 +84,21 @@ if __name__ == '__main__':
         "random_timesteps": 0,  # random exploration steps
         "learning_starts": 0,  # learning starts after this many steps
 
-        "learn_entropy": True,  # learn entropy
-        "entropy_learning_rate": 1e-3,  # entropy learning rate
-        "initial_entropy_value": 0.2,  # initial entropy value
-        "target_entropy": None,  # target entropy
+        "exploration": {
+            "noise": None,  # exploration noise
+            "initial_scale": 1.0,  # initial scale for noise
+            "final_scale": 1e-3,  # final scale for noise
+            "timesteps": None,  # timesteps for noise decay
+        },
+
+        "policy_delay": 2,  # policy delay update with respect to critic update
+        "smooth_regularization_noise": None,  # smooth noise for regularization
+        "smooth_regularization_clip": 0.5,  # clip for smooth regularization
 
         "rewards_shaper": None,  # rewards shaping function: Callable(reward, timestep, timesteps) -> reward
 
         "experiment": {
-            "base_directory": "",  # base directory for the experiment
+            "directory": "",  # experiment's parent directory
             "experiment_name": "",  # experiment name
             "write_interval": 250,  # TensorBoard writing interval (timesteps)
 
@@ -101,5 +107,5 @@ if __name__ == '__main__':
         }
     }
 
-    dict_to_omegaconf(SAC_DEFAULT_CONFIG,
-                      save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/sac_default_config_skrl.yaml")
+    dict_to_omegaconf(TD3_DEFAULT_CONFIG,
+                      save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/td3_default_config_skrl.yaml")

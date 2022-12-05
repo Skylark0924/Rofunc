@@ -1,8 +1,8 @@
 """
-"This" is my example-script
+Base SKRL Models
 ===========================
 
-This example doesn't do much, it just makes a simple plot
+This file contains the base models and configs for using the SKRL library with Isaac Gym environments.
 """
 
 import datetime

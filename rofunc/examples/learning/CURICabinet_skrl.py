@@ -19,10 +19,8 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 from hydra._internal.utils import get_args_parser
 from rofunc.lfd.rl.online import PPOAgent
-from skrl.agents.torch.sac import SAC
-from skrl.agents.torch.td3 import TD3
-from skrl.agents.torch.ddpg import DDPG
-from skrl.agents.torch.amp import AMP
+from rofunc.lfd.rl.online import SACAgent
+from rofunc.lfd.rl.online import TD3Agent
 from skrl.envs.torch import wrap_env
 from skrl.memories.torch import RandomMemory
 # Import the skrl components to build the RL system
@@ -72,32 +70,22 @@ def setup(custom_args, task_name, eval_mode=False):
         memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
         models_sac = set_models_sac(cfg, env, device)
         cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
-        agent = SAC(models=models_sac,
-                    memory=memory,
-                    cfg=cfg_sac,
-                    observation_space=env.observation_space,
-                    action_space=env.action_space,
-                    device=device)
-    elif custom_args.agent == "ddpg":
-        memory = RandomMemory(memory_size=8000, num_envs=env.num_envs, device=device, replacement=True)
-        models_ddpg = set_models_ddpg(cfg, env, device)
-        cfg_ddpg = set_cfg_ddpg(cfg, env, device, eval_mode)
-        agent = DDPG(models=models_ddpg,
-                     memory=memory,
-                     cfg=cfg_ddpg,
-                     observation_space=env.observation_space,
-                     action_space=env.action_space,
-                     device=device)
+        agent = SACAgent(models=models_sac,
+                         memory=memory,
+                         cfg=cfg_sac,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device)
     elif custom_args.agent == "td3":
-        memory = RandomMemory(memory_size=50000, num_envs=env.num_envs, device=device, replacement=True)
+        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
         models_td3 = set_models_td3(cfg, env, device)
         cfg_td3 = set_cfg_td3(cfg, env, device, eval_mode)
-        agent = TD3(models=models_td3,
-                    memory=memory,
-                    cfg=cfg_td3,
-                    observation_space=env.observation_space,
-                    action_space=env.action_space,
-                    device=device)
+        agent = TD3Agent(models=models_td3,
+                         memory=memory,
+                         cfg=cfg_td3,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device)
     else:
         raise ValueError("Agent not supported")
 
@@ -138,7 +126,7 @@ def eval(custom_args, task_name, ckpt_path=None):
 if __name__ == '__main__':
     gpu_id = 0
     parser = argparse.ArgumentParser()
-    parser.add_argument("--agent", type=str, default="sac")
+    parser.add_argument("--agent", type=str, default="td3")
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
