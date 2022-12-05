@@ -1,12 +1,9 @@
 import os
 
-from isaacgym import gymapi
-from isaacgym import gymutil
-
-from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
-
 
 def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index):
+    from isaacgym import gymutil
+
     gym.clear_lines(viewer)
     for i in range(num_envs):
         # Update attractor target from current franka state
@@ -28,6 +25,8 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
 
 
 def show(args, asset_root=None):
+    from rofunc.simulator.base.base_sim import init_sim, init_env
+
     print('\033[1;32m--------{}--------\033[0m'.format('Show the Franka simulator in the interactive mode'))
 
     # Initial gym and sim
@@ -51,6 +50,9 @@ def show(args, asset_root=None):
 
 
 def run_traj(args, traj, attracted_joint="panda_hand", asset_root=None, for_test=False):
+    from isaacgym import gymapi
+    from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
+
     print('\033[1;32m--------{}--------\033[0m'.format('Execute trajectory with the Franka simulator'))
 
     # Initial gym and sim
@@ -65,7 +67,8 @@ def run_traj(args, traj, attracted_joint="panda_hand", asset_root=None, for_test
     envs, franka_handles = init_env(gym, sim, asset_root, asset_file, num_envs=1)
 
     # Create the attractor
-    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles, attracted_joint, for_test=for_test)
+    attractor_handles, axes_geom, sphere_geom = init_attractor(gym, envs, viewer, franka_handles, attracted_joint,
+                                                               for_test=for_test)
 
     # get joint limits and ranges for Franka
     franka_dof_props = gym.get_actor_dof_properties(envs[0], franka_handles[0])

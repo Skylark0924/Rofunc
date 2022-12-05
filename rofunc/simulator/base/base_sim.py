@@ -1,15 +1,10 @@
 import math
-
-from isaacgym import gymapi
-from isaacgym import gymtorch
-from isaacgym import gymutil
 import numpy as np
 
-from rofunc.utils.logger.beauty_logger import beauty_print
 
+def init_sim(args, cam_pos=(3.0, 2.0, 0.0), cam_target=(0.0, 0.0, 0.0), up_axis="Y", for_test=False):
+    from isaacgym import gymapi
 
-def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.0, 0.0, 0.0), up_axis="Y",
-             for_test=False):
     # Initialize gym
     gym = gymapi.acquire_gym()
 
@@ -61,12 +56,15 @@ def init_sim(args, cam_pos=gymapi.Vec3(3.0, 2.0, 0.0), cam_target=gymapi.Vec3(0.
             quit()
 
         # Point camera at environments
-        gym.viewer_camera_look_at(viewer, None, cam_pos, cam_target)
+        gym.viewer_camera_look_at(viewer, None, gymapi.Vec3(cam_pos[0], cam_pos[1], cam_pos[2]),
+                                  gymapi.Vec3(cam_target[0], cam_target[1], cam_target[2]))
     return gym, sim_params, sim, viewer
 
 
 def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base_link=True,
-             flip_visual_attachments=True, plane_vec=None, init_pose_vec=gymapi.Vec3(0, 0.0, 0.0)):
+             flip_visual_attachments=True, plane_vec=None, init_pose_vec=(0, 0.0, 0.0)):
+    from isaacgym import gymapi
+
     # Add ground plane
     plane_params = gymapi.PlaneParams()
     if plane_vec is not None:
@@ -91,7 +89,7 @@ def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base
     print("Creating %d environments" % num_envs)
     num_per_row = int(math.sqrt(num_envs))
     pose = gymapi.Transform()
-    pose.p = init_pose_vec
+    pose.p = gymapi.Vec3(init_pose_vec[0], init_pose_vec[1], init_pose_vec[2])
     pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
     for i in range(num_envs):
         # create env
@@ -124,6 +122,9 @@ def init_env(gym, sim, asset_root, asset_file, num_envs=1, spacing=1.0, fix_base
 
 
 def init_attractor(gym, envs, viewer, handles, attracted_joint, for_test=False):
+    from isaacgym import gymapi
+    from isaacgym import gymutil
+
     # Attractor setup
     attractor_handles = []
     attractor_properties = gymapi.AttractorProperties()
@@ -166,6 +167,9 @@ def init_attractor(gym, envs, viewer, handles, attracted_joint, for_test=False):
 
 
 def get_num_bodies(gym, sim, asset_root, asset_file):
+    from isaacgym import gymapi
+    from rofunc.utils.logger.beauty_logger import beauty_print
+
     asset = gym.load_asset(sim, asset_root, asset_file, gymapi.AssetOptions())
     num_bodies = gym.get_asset_rigid_body_count(asset)
     beauty_print("The number of bodies in the CURI asset is {}".format(num_bodies), 2)
@@ -173,6 +177,9 @@ def get_num_bodies(gym, sim, asset_root, asset_file):
 
 
 def get_robot_state(gym, sim, envs, curi_handles, mode):
+    from isaacgym import gymtorch
+    from rofunc.utils.logger.beauty_logger import beauty_print
+
     if mode == 'dof_force':
         # One force value per each DOF
         robot_dof_force = np.array(gymtorch.wrap_tensor(gym.acquire_dof_force_tensor(sim)))

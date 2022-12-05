@@ -1,17 +1,9 @@
-import os.path
-from typing import List
-
-import numpy as np
-from isaacgym import gymapi
-from isaacgym import gymtorch
-from isaacgym import gymutil
-import torch
-
-from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor, get_num_bodies, get_robot_state
-from rofunc.utils.logger.beauty_logger import beauty_print
+import os
 
 
 def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index, t):
+    from isaacgym import gymutil
+
     for i in range(num_envs):
         # Update attractor target from current franka state
         attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
@@ -32,6 +24,9 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
 
 
 def setup_curi(args, asset_root, num_envs, for_test):
+    from isaacgym import gymapi
+    from rofunc.simulator.base.base_sim import init_sim, init_env, get_num_bodies
+
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args, for_test=for_test)
 
@@ -64,6 +59,8 @@ def setup_curi(args, asset_root, num_envs, for_test):
 
 
 def setup_attractor(gym, envs, viewer, curi_handles, traj, attracted_joints, for_test):
+    from rofunc.simulator.base.base_sim import init_attractor
+
     if attracted_joints is None:
         attracted_joints = ["panda_left_hand", "panda_right_hand"]
     else:
@@ -90,6 +87,10 @@ def show(args, asset_root=None):
     Returns:
 
     """
+
+    from rofunc.simulator.base.base_sim import init_sim, init_env
+    from rofunc.utils.logger.beauty_logger import beauty_print
+
     beauty_print("Show the CURI mini simulator in the interactive mode", 1)
 
     # Initial gym and sim
@@ -128,6 +129,9 @@ def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, up
     Returns:
 
     """
+    from isaacgym import gymapi
+    from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
+
     print('\033[1;32m--------{}--------\033[0m'.format('Execute trajectory with the CURI simulator'))
 
     # Initial gym and sim
@@ -189,9 +193,3 @@ def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, up
 
     gym.destroy_viewer(viewer)
     gym.destroy_sim(sim)
-
-
-if __name__ == '__main__':
-    args = gymutil.parse_arguments()
-    args.use_gpu_pipeline = False
-    show(args)

@@ -1,19 +1,14 @@
 import os.path
 from typing import List
 
-import numpy as np
-from isaacgym import gymapi
-from isaacgym import gymtorch
-from isaacgym import gymutil
-import torch
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image as Im
-
-from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor, get_num_bodies, get_robot_state
-from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index, t):
+    from isaacgym import gymutil
+
     for i in range(num_envs):
         # Update attractor target from current franka state
         attractor_properties = gym.get_attractor_properties(envs[i], attractor_handles[i])
@@ -34,6 +29,10 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
 
 
 def setup_curi(args, asset_root, num_envs, for_test):
+    from isaacgym import gymapi
+
+    from rofunc.simulator.base.base_sim import init_sim, init_env, get_num_bodies
+
     # Initial gym and sim
     gym, sim_params, sim, viewer = init_sim(args, for_test=for_test)
 
@@ -66,6 +65,8 @@ def setup_curi(args, asset_root, num_envs, for_test):
 
 
 def setup_attractor(gym, envs, viewer, curi_handles, traj, attracted_joints, for_test):
+    from rofunc.simulator.base.base_sim import init_attractor
+
     if attracted_joints is None:
         attracted_joints = ["panda_left_hand", "panda_right_hand"]
     else:
@@ -92,6 +93,11 @@ def show(args, asset_root=None, visual_obs_flag=False):
     Returns:
 
     """
+    from isaacgym import gymapi
+
+    from rofunc.simulator.base.base_sim import init_sim, init_env
+    from rofunc.utils.logger.beauty_logger import beauty_print
+
     beauty_print("Show the CURI simulator in the interactive mode", 1)
 
     # Initial gym and sim
@@ -174,6 +180,10 @@ def run_traj(args, traj, attracted_joint="panda_right_hand", asset_root=None, up
     Returns:
 
     """
+    from isaacgym import gymapi
+
+    from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
+
     print('\033[1;32m--------{}--------\033[0m'.format('Execute trajectory with the CURI simulator'))
 
     # Initial gym and sim
@@ -250,6 +260,8 @@ def run_traj_multi_joints(args, traj: List, attracted_joints: List = None, asset
         num_envs: the number of environments
         for_test: if True, the simulator will be shown in the headless mode
     """
+    from rofunc.utils.logger.beauty_logger import beauty_print
+
     assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
 
     beauty_print('Execute multi-joint trajectory with the CURI simulator')
@@ -294,7 +306,7 @@ def run_traj_multi_joints(args, traj: List, attracted_joints: List = None, asset
 
 
 def run_traj_multi_joints_with_interference(args, traj: List, intf_index: List, intf_mode: str,
-                                            intf_forces: torch.Tensor = None, intf_torques: torch.Tensor = None,
+                                            intf_forces=None, intf_torques=None,
                                             intf_joints: List = None, intf_efforts: np.ndarray = None,
                                             attracted_joints: List = None, asset_root=None,
                                             update_freq=0.001, num_envs=1, save_name=None, for_test=False):
@@ -316,6 +328,13 @@ def run_traj_multi_joints_with_interference(args, traj: List, intf_index: List, 
         num_envs: the number of environments
         for_test: if True, the simulator will be shown in the headless mode
     """
+    from isaacgym import gymapi
+    from isaacgym import gymtorch
+    import torch
+
+    from rofunc.simulator.base.base_sim import get_robot_state
+    from rofunc.utils.logger.beauty_logger import beauty_print
+
     assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
     assert intf_mode in ["actor_dof_efforts", "body_forces", "body_force_at_pos"], \
         "The interference mode should be one of ['actor_dof_efforts', 'body_forces', 'body_force_at_pos']"

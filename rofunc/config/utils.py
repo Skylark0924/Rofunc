@@ -66,40 +66,33 @@ def dict_to_omegaconf(d: Dict, save_path: str = None) -> DictConfig:
 
 
 if __name__ == '__main__':
-    PPO_DEFAULT_CONFIG = {
-        "rollouts": 16,  # number of rollouts before updating
-        "learning_epochs": 8,  # number of learning epochs during each update
-        "mini_batches": 2,  # number of mini batches during each learning epoch
+    SAC_DEFAULT_CONFIG = {
+        "gradient_steps": 1,  # gradient steps
+        "batch_size": 64,  # training batch size
 
         "discount_factor": 0.99,  # discount factor (gamma)
-        "lambda": 0.95,  # TD(lambda) coefficient (lam) for computing returns and advantages
+        "polyak": 0.005,  # soft update hyperparameter (tau)
 
-        "learning_rate": 1e-3,  # learning rate
+        "actor_learning_rate": 1e-3,  # actor learning rate
+        "critic_learning_rate": 1e-3,  # critic learning rate
         "learning_rate_scheduler": None,  # learning rate scheduler class (see torch.optim.lr_scheduler)
         "learning_rate_scheduler_kwargs": {},  # learning rate scheduler's kwargs (e.g. {"step_size": 1e-3})
 
         "state_preprocessor": None,  # state preprocessor class (see skrl.resources.preprocessors)
         "state_preprocessor_kwargs": {},  # state preprocessor's kwargs (e.g. {"size": env.observation_space})
-        "value_preprocessor": None,  # value preprocessor class (see skrl.resources.preprocessors)
-        "value_preprocessor_kwargs": {},  # value preprocessor's kwargs (e.g. {"size": 1})
 
         "random_timesteps": 0,  # random exploration steps
         "learning_starts": 0,  # learning starts after this many steps
 
-        "grad_norm_clip": 0.5,  # clipping coefficient for the norm of the gradients
-        "ratio_clip": 0.2,  # clipping coefficient for computing the clipped surrogate objective
-        "value_clip": 0.2,  # clipping coefficient for computing the value loss (if clip_predicted_values is True)
-        "clip_predicted_values": False,  # clip predicted values during value loss computation
-
-        "entropy_loss_scale": 0.0,  # entropy loss scaling factor
-        "value_loss_scale": 1.0,  # value loss scaling factor
-
-        "kl_threshold": 0,  # KL divergence threshold for early stopping
+        "learn_entropy": True,  # learn entropy
+        "entropy_learning_rate": 1e-3,  # entropy learning rate
+        "initial_entropy_value": 0.2,  # initial entropy value
+        "target_entropy": None,  # target entropy
 
         "rewards_shaper": None,  # rewards shaping function: Callable(reward, timestep, timesteps) -> reward
 
         "experiment": {
-            "directory": "",  # experiment's parent directory
+            "base_directory": "",  # base directory for the experiment
             "experiment_name": "",  # experiment name
             "write_interval": 250,  # TensorBoard writing interval (timesteps)
 
@@ -108,5 +101,5 @@ if __name__ == '__main__':
         }
     }
 
-    dict_to_omegaconf(PPO_DEFAULT_CONFIG,
-                      save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/ppo_default_config.yaml")
+    dict_to_omegaconf(SAC_DEFAULT_CONFIG,
+                      save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/sac_default_config_skrl.yaml")
