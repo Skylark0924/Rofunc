@@ -40,7 +40,7 @@ def show(args, object_name, asset_root=None):
         asset_file = "urdf/ycb/061_foam_brick/061_foam_brick.urdf"
 
     init_env(gym, sim, asset_root, asset_file, num_envs=5, spacing=3.0, fix_base_link=False,
-             flip_visual_attachments=False, init_pose_vec=gymapi.Vec3(0, 0.4, 0.0))
+             flip_visual_attachments=False, init_pose_vec=(0, 0.4, 0.0))
 
     while not gym.query_viewer_has_closed(viewer):
         # Step the physics

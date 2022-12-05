@@ -1,4 +1,10 @@
 import os
+from rofunc.simulator.base.base_sim import RobotSim
+
+
+class CURIminiSim(RobotSim):
+    def __init__(self, args):
+        super().__init__(args, robot_name="CURI-mini")
 
 
 def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, viewer, num_envs, index, t):

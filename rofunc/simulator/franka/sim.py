@@ -24,31 +24,6 @@ def update_robot(traj, gym, envs, attractor_handles, axes_geom, sphere_geom, vie
         gymutil.draw_lines(sphere_geom, gym, viewer, envs[i], pose)
 
 
-def show(args, asset_root=None):
-    from rofunc.simulator.base.base_sim import init_sim, init_env
-
-    print('\033[1;32m--------{}--------\033[0m'.format('Show the Franka simulator in the interactive mode'))
-
-    # Initial gym and sim
-    gym, sim_params, sim, viewer = init_sim(args)
-    if asset_root is None:
-        import site
-        pip_root_path = site.getsitepackages()[0]
-        asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
-    asset_file = "urdf/franka_description/robots/franka_panda.urdf"
-    init_env(gym, sim, asset_root, asset_file, num_envs=1)
-
-    while not gym.query_viewer_has_closed(viewer):
-        # Step the physics
-        gym.simulate(sim)
-        gym.fetch_results(sim, True)
-
-        # Step rendering
-        gym.step_graphics(sim)
-        gym.draw_viewer(viewer, sim, False)
-        gym.sync_frame_time(sim)
-
-
 def run_traj(args, traj, attracted_joint="panda_hand", asset_root=None, for_test=False):
     from isaacgym import gymapi
     from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor
