@@ -8,6 +8,7 @@ Temp
 import argparse
 import sys
 
+import isaacgym
 from rofunc.config.utils import get_config
 from rofunc.config.utils import omegaconf_to_dict
 from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo

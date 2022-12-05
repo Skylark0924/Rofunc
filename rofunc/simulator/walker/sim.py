@@ -1,14 +1,4 @@
 import os.path
-from typing import List
-
-import numpy as np
-from isaacgym import gymapi
-from isaacgym import gymtorch
-from isaacgym import gymutil
-import torch
-
-from rofunc.simulator.base.base_sim import init_sim, init_env, init_attractor, get_num_bodies, get_robot_state
-from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def show(args, asset_root=None):
@@ -21,6 +11,10 @@ def show(args, asset_root=None):
     Returns:
 
     """
+    from isaacgym import gymapi
+    from rofunc.simulator.base.base_sim import init_sim, init_env
+    from rofunc.utils.logger.beauty_logger import beauty_print
+
     beauty_print("Show the CURI mini simulator in the interactive mode", 1)
 
     # Initial gym and sim

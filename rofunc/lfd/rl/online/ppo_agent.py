@@ -19,7 +19,7 @@ from skrl.models.torch import Model
 from skrl.resources.schedulers.torch import KLAdaptiveRL
 
 
-class PPO(Agent):
+class PPOAgent(Agent):
     def __init__(self,
                  models: Dict[str, Model],
                  memory: Union[Memory, Tuple[Memory], None] = None,

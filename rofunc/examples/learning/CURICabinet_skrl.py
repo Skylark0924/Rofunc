@@ -8,6 +8,7 @@ Open a cabinet with the left arm of humanoid CURI robot
 import argparse
 import sys
 
+import isaacgym
 from rofunc.config.utils import get_config
 from rofunc.config.utils import omegaconf_to_dict
 from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_cfg_td3, set_cfg_ddpg, set_cfg_sac, \
@@ -17,7 +18,7 @@ from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 from hydra._internal.utils import get_args_parser
-from rofunc.lfd.rl.online.ppo import PPO
+from rofunc.lfd.rl.online import PPOAgent
 from skrl.agents.torch.sac import SAC
 from skrl.agents.torch.td3 import TD3
 from skrl.agents.torch.ddpg import DDPG
@@ -61,12 +62,12 @@ def setup(custom_args, task_name, eval_mode=False):
         memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
         models_ppo = set_models_ppo(cfg, env, device)
         cfg_ppo = set_cfg_ppo(cfg, env, device, eval_mode)
-        agent = PPO(models=models_ppo,
-                    memory=memory,
-                    cfg=cfg_ppo,
-                    observation_space=env.observation_space,
-                    action_space=env.action_space,
-                    device=device)
+        agent = PPOAgent(models=models_ppo,
+                         memory=memory,
+                         cfg=cfg_ppo,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device)
     elif custom_args.agent == "sac":
         memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
         models_sac = set_models_sac(cfg, env, device)
