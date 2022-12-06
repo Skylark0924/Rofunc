@@ -1,12 +1,12 @@
 import os.path
-
-import pyzed.sl as sl
 import cv2
 
 saving_cnt = 0
 
 
 def playback(filepath):
+    import pyzed.sl as sl
+
     global saving_cnt
     print("Reading SVO file: {0}".format(filepath))
     root_path = filepath.split('.')[0]
@@ -69,6 +69,8 @@ def print_camera_information(cam):
 
 
 def saving_image(root_path, key, mat):
+    import pyzed.sl as sl
+
     global saving_cnt
     if key == 115:
         img = sl.ERROR_CODE.FAILURE
@@ -84,9 +86,3 @@ def saving_image(root_path, key, mat):
                 break
             else:
                 print("Help: you must enter the filepath + filename + PNG extension.")
-
-
-if __name__ == '__main__':
-    import rofunc as rf
-
-    rf.zed.playback('/home/ubuntu/Data/06_24/Video/20220624_1649/38709363.svo')
