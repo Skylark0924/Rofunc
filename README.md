@@ -35,17 +35,14 @@ Thus, have fun in the robotics world!
 ```python
 git clone https://github.com/Skylark0924/Rofunc.git
 cd Rofunc
+
+# Create a conda environment
+conda create -n rofunc python=3.8
+conda activate rofunc
+
+# Install the requirements and rofunc
 pip install -r requirements.txt
 pip install -e .
-```
-> Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to
-package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
-
-### Install via Conda
-```python
-git clone https://github.com/Skylark0924/Rofunc.git
-cd Rofunc
-conda env create -f environment.yml
 ```
 > Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to
 package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
