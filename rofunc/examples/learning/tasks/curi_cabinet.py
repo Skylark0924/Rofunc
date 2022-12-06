@@ -1,9 +1,10 @@
 import os
 
-from rofunc.utils.file.path import get_rofunc_path
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
-from .base.curi_base_task import CURIBaseTask
+
+from rofunc.utils.file.path import get_rofunc_path
+from rofunc.examples.learning.tasks.base.curi_base_task import CURIBaseTask
 
 
 class CURICabinetTask(CURIBaseTask):
@@ -484,7 +485,7 @@ def compute_curi_reward(
     rewards = dist_reward_scale * dist_reward + rot_reward_scale * rot_reward \
               + around_handle_reward_scale * around_handle_reward + 10 * open_reward_scale * open_reward \
               + finger_dist_reward_scale * finger_dist_reward \
-              # - action_penalty_scale * action_penalty
+        # - action_penalty_scale * action_penalty
 
     # bonus for opening drawer properly
     rewards = torch.where(cabinet_dof_pos[:, 3] > 0.01, rewards + 0.5, rewards)
