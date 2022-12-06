@@ -50,6 +50,11 @@ pip install .
 > If you want to use functions related to ZED camera, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
 
 ## [Documentation](https://rofunc.readthedocs.io/en/latest/)
+[![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)
+
+**[Example Gallery](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)**
+
+> **Note**
 > Currently, we provide a simple document; please refer to [here](./rofunc/).
 A comprehensive one with both English and Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
 We provide a simple but interesting example: learning to play
