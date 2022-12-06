@@ -13,25 +13,25 @@ args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
 
 # CURI
-CURIsim = rf.curi.CURISim(args)
+CURIsim = rf.sim.CURISim(args)
 CURIsim.show(visual_obs_flag=True)
 
 # walker
-# walkersim = rf.simulator.RobotSim(args, robot_name="walker")
+# walkersim = rf.sim.WalkerSim(args)
 # walkersim.show()
 
 # CURI-mini
-# CURIminisim = rf.simulator.RobotSim(args, robot_name="CURI-mini")
+# CURIminisim = rf.sim.CURIminiSim(args)
 # CURIminisim.show()
 
 # franka
-# frankasim = rf.simulator.RobotSim(args, robot_name="franka", fix_base_link=True)
+# frankasim = rf.sim.FrankaSim(args)
 # frankasim.show()
 
 # baxter
-# baxtersim = rf.simulator.RobotSim(args, robot_name="baxter")
+# baxtersim = rf.sim.BaxterSim(args)
 # baxtersim.show()
 
 # sawyer
-# sawyersim = rf.simulator.RobotSim(args, robot_name="sawyer")
+# sawyersim = rf.sim.SawyerSim(args)
 # sawyersim.show()

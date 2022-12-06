@@ -1,69 +1,42 @@
 from typing import List
-
 import numpy as np
-
 from rofunc.simulator.base.base_sim import RobotSim
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 class CURISim(RobotSim):
     def __init__(self, args, **kwargs):
         super().__init__(args, robot_name="CURI", **kwargs)
-        self._setup_curi()
+        self._setup_robot()
 
-    def _setup_curi(self):
-        from isaacgym import gymapi
-
-        self.curi_handles = self.handles
-        # get joint limits and ranges for CURI
-        curi_dof_props = self.gym.get_actor_dof_properties(self.envs[0], self.curi_handles[0])
-        curi_lower_limits = curi_dof_props['lower']
-        curi_upper_limits = curi_dof_props['upper']
-        curi_mids = 0.5 * (curi_upper_limits + curi_lower_limits)
-        curi_num_dofs = len(curi_dof_props)
-
-        for i in range(len(self.envs)):
-            # Set updated stiffness and damping properties
-            self.gym.set_actor_dof_properties(self.envs[i], self.curi_handles[i], curi_dof_props)
-
-            # Set ranka pose so that each joint is in the middle of its actuation range
-            curi_dof_states = self.gym.get_actor_dof_states(self.envs[i], self.curi_handles[i], gymapi.STATE_NONE)
-            for j in range(curi_num_dofs):
-                curi_dof_states['pos'][j] = curi_mids[j]
-            self.gym.set_actor_dof_states(self.envs[i], self.curi_handles[i], curi_dof_states, gymapi.STATE_POS)
-
-    def setup_attractors(self, traj, attracted_joints):
-        if attracted_joints is None:
-            attracted_joints = ["panda_left_hand", "panda_right_hand"]
-        else:
-            assert isinstance(attracted_joints, list), "The attracted joints should be a list"
-            assert len(attracted_joints) > 0, "The length of the attracted joints should be greater than 0"
-        assert len(attracted_joints) == len(traj), "The first dimension of trajectory should equal to attracted_joints"
-
-        attractor_handles, axes_geoms, sphere_geoms = [], [], []
-        for i in range(len(attracted_joints)):
-            attractor_handle, axes_geom, sphere_geom = self._init_attractor(attracted_joints[i])
-            attractor_handles.append(attractor_handle)
-            axes_geoms.append(axes_geom)
-            sphere_geoms.append(sphere_geom)
-        return attracted_joints, attractor_handles, axes_geoms, sphere_geoms
-
-    def show(self, visual_obs_flag=False):
+    def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
         Visualize the CURI robot
         :param visual_obs_flag: if True, show visual observation
+        :param camera_props: If visual_obs_flag is True, use this camera_props to config the camera
+        :param attached_body: If visual_obs_flag is True, use this to refer the body the camera attached to
+        :param local_transform: If visual_obs_flag is True, use this local transform to adjust the camera pose
         """
         from isaacgym import gymapi
 
-        # Camera Sensor
-        camera_props = gymapi.CameraProperties()
-        camera_props.width = 1280
-        camera_props.height = 1280
+        if visual_obs_flag:
+            # Setup a first-person camera embedded in CURI's head
+            if camera_props is None:
+                # Camera Sensor
+                camera_props = gymapi.CameraProperties()
+                camera_props.width = 1280
+                camera_props.height = 1280
 
-        local_transform = gymapi.Transform()
-        local_transform.p = gymapi.Vec3(0.12, 0, 0.18)
-        local_transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(1, 0, 0), np.radians(90.0)) * \
-                            gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.radians(-90.0))
-        super(CURISim, self).show(visual_obs_flag, camera_props, "head_link2", local_transform)
+            if attached_body is None:
+                attached_body = "head_link2"
+
+            if local_transform is None:
+                local_transform = gymapi.Transform()
+                local_transform.p = gymapi.Vec3(0.12, 0, 0.18)
+                local_transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(1, 0, 0), np.radians(90.0)) * \
+                                    gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.radians(-90.0))
+
+        super(CURISim, self).show(visual_obs_flag, camera_props, attached_body, local_transform)
 
     # def run_traj(self, traj, attracted_joint="panda_right_hand", asset_root=None, update_freq=0.001):
     #     from isaacgym import gymapi
@@ -129,6 +102,32 @@ class CURISim(RobotSim):
     #     gym.destroy_viewer(viewer)
     #     gym.destroy_sim(sim)
 
+    def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index):
+        from isaacgym import gymutil
+
+        for i in range(self.num_envs):
+            # Update attractor target from current franka state
+            attractor_properties = self.gym.get_attractor_properties(self.envs[i], attractor_handles[i])
+            pose = attractor_properties.target
+            # pose.p: (x, y, z), pose.r: (w, x, y, z)
+            pose.p.x = traj[index, 0]
+            pose.p.y = traj[index, 2]
+            pose.p.z = traj[index, 1]
+            pose.r.w = traj[index, 6]
+            pose.r.x = traj[index, 3]
+            pose.r.y = traj[index, 5]
+            pose.r.z = traj[index, 4]
+            self.gym.set_attractor_target(self.envs[i], attractor_handles[i], pose)
+
+            # Draw axes and sphere at attractor location
+            gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
+            gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
+
+    def run_traj(self, traj, attracted_joints=None, update_freq=0.001):
+        if attracted_joints is None:
+            attracted_joints = ["panda_left_hand", "panda_right_hand"]
+        self.run_traj_multi_joints(traj, attracted_joints, update_freq)
+
     def run_traj_multi_joints_with_interference(self, traj: List, intf_index: List, intf_mode: str,
                                                 intf_forces=None, intf_torques=None, intf_joints: List = None,
                                                 intf_efforts: np.ndarray = None, attracted_joints: List = None,
@@ -145,14 +144,11 @@ class CURISim(RobotSim):
             intf_joints: [list], e.g. ["panda_left_hand"]
             intf_efforts: array containing the efforts for all degrees of freedom of the actor.
             attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
-            asset_root: the location of `assets` folder, e.g., /home/ubuntu/anaconda3/envs/plast/lib/python3.7/site-packages/rofunc/simulator/assets
             update_freq: the frequency of updating the robot pose
-            num_envs: the number of environments
         """
         from isaacgym import gymapi
         from isaacgym import gymtorch
         import torch
-        from rofunc.utils.logger.beauty_logger import beauty_print
 
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
         assert intf_mode in ["actor_dof_efforts", "body_forces", "body_force_at_pos"], \
@@ -195,7 +191,7 @@ class CURISim(RobotSim):
                     if intf_mode == "actor_dof_efforts":
                         # gym.set_dof_actuation_force_tensor(sim, gymtorch.unwrap_tensor(intf_efforts))
                         for i in range(len(self.envs)):
-                            self.gym.apply_actor_dof_efforts(self.envs[i], self.curi_handles[i], intf_efforts)
+                            self.gym.apply_actor_dof_efforts(self.envs[i], self.robot_handles[i], intf_efforts)
                     elif intf_mode == "body_forces":
                         # set intf_forces and intf_torques for the specific bodies
                         self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(intf_forces),
