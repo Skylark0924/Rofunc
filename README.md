@@ -42,7 +42,7 @@ conda activate rofunc
 
 # Install the requirements and rofunc
 pip install -r requirements.txt
-pip install -e .
+pip install .
 ```
 > Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to
 package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
