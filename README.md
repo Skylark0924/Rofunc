@@ -41,6 +41,15 @@ pip install -e .
 > Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to
 package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
 
+### Install via Conda
+```python
+git clone https://github.com/Skylark0924/Rofunc.git
+cd Rofunc
+conda env create -f environment.yml
+```
+> Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to
+package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+
 ## [Documentation](https://rofunc.readthedocs.io/en/latest/)
 > Currently, we provide a simple document; please refer to [here](./rofunc/).
 A comprehensive one with both English and Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
