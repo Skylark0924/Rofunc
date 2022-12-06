@@ -1,11 +1,9 @@
 import os
 
-import torch
-
-from rofunc.utils.file.path import get_rofunc_path
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
-from .base.curi_base_task import CURIBaseTask
+from rofunc.utils.file.path import get_rofunc_path
+from rofunc.examples.learning.tasks.base.curi_base_task import CURIBaseTask
 
 
 class CURICabinetBimanualTask(CURIBaseTask):
