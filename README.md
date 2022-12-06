@@ -29,7 +29,8 @@ import rofunc as rf
 ```
 
 Thus, have fun in the robotics world!
-> Note: Several requirements need to be installed before using the package. Please refer to the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
+> **Note**
+> Several requirements need to be installed before using the package. Please refer to the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
 
 ### Install from Source (Recommended)
 ```python
@@ -44,8 +45,8 @@ conda activate rofunc
 pip install -r requirements.txt
 pip install .
 ```
-> Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to
-package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+> **Note**
+> If you want to use functions related to ZED camera, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
 
 ## [Documentation](https://rofunc.readthedocs.io/en/latest/)
 > Currently, we provide a simple document; please refer to [here](./rofunc/).
@@ -132,4 +133,4 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 ```
 
 ## The Team
-Rofunc is developed and maintained by the CLOVER Lab (Collaborative and Versatile Robot Laboratory), CUHK.
+Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robot Laboratory)](https://feichenlab.com), CUHK.
