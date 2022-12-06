@@ -52,8 +52,6 @@ pip install .
 ## [Documentation](https://rofunc.readthedocs.io/en/latest/)
 [![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)
 
-**[Example Gallery](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)**
-
 > **Note**
 > Currently, we provide a simple document; please refer to [here](./rofunc/).
 A comprehensive one with both English and Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
