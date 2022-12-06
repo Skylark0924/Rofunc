@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="rofunc",
-    version="0.0.0.9.1",
+    version="0.0.0.9.3",
     description='The Full Process Python Package for Robot Learning from Demonstration',
     author="Junjia Liu",
     author_email="jjliu@mae.cuhk.edu.hk",
