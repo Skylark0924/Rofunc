@@ -5,6 +5,8 @@ import numpy as np
 from PIL import Image as Im
 from typing import List
 
+from rofunc.utils.logger.beauty_logger import beauty_print
+
 
 class RobotSim:
     def __init__(self, args, robot_name, asset_root=None, fix_base_link=False, flip_visual_attachments=True,
@@ -35,6 +37,7 @@ class RobotSim:
             self.flip_visual_attachments = False
         elif self.robot_name == "franka":
             self.asset_file = "urdf/franka_description/robots/franka_panda.urdf"
+            self.fix_base_link = True
             self.init_pose_vec = (0, 0.0, 0.0)
         elif self.robot_name == "baxter":
             self.asset_file = "urdf/baxter/robot.xml"
@@ -172,7 +175,7 @@ class RobotSim:
             self.gym.set_actor_dof_properties(envs[i], handles[i], dof_props)
 
         self.envs = envs
-        self.handles = handles
+        self.robot_handles = handles
 
     def _init_attractor(self, attracted_joint):
         from isaacgym import gymapi
@@ -197,7 +200,7 @@ class RobotSim:
 
         for i in range(len(self.envs)):
             env = self.envs[i]
-            handle = self.handles[i]
+            handle = self.robot_handles[i]
 
             body_dict = self.gym.get_actor_rigid_body_dict(env, handle)
             props = self.gym.get_actor_rigid_body_states(env, handle, gymapi.STATE_POS)
@@ -217,8 +220,38 @@ class RobotSim:
             attractor_handles.append(attractor_handle)
         return attractor_handles, axes_geom, sphere_geom
 
-    def setup_attractors(self, *args, **kwargs):
-        raise NotImplementedError
+    def _setup_robot(self):
+        from isaacgym import gymapi
+
+        # get joint limits and ranges for the robot
+        dof_props = self.gym.get_actor_dof_properties(self.envs[0], self.robot_handles[0])
+        lower_limits = dof_props['lower']
+        upper_limits = dof_props['upper']
+        mids = 0.5 * (upper_limits + lower_limits)
+        num_dofs = len(dof_props)
+
+        for i in range(len(self.envs)):
+            # Set updated stiffness and damping properties
+            self.gym.set_actor_dof_properties(self.envs[i], self.robot_handles[i], dof_props)
+
+            # Set robot pose so that each joint is in the middle of its actuation range
+            dof_states = self.gym.get_actor_dof_states(self.envs[i], self.robot_handles[i], gymapi.STATE_NONE)
+            for j in range(num_dofs):
+                dof_states['pos'][j] = mids[j]
+            self.gym.set_actor_dof_states(self.envs[i], self.robot_handles[i], dof_states, gymapi.STATE_POS)
+
+    def _setup_attractors(self, traj, attracted_joints):
+        assert isinstance(attracted_joints, list), "The attracted joints should be a list"
+        assert len(attracted_joints) > 0, "The length of the attracted joints should be greater than 0"
+        assert len(attracted_joints) == len(traj), "The first dimension of trajectory should equal to attracted_joints"
+
+        attractor_handles, axes_geoms, sphere_geoms = [], [], []
+        for i in range(len(attracted_joints)):
+            attractor_handle, axes_geom, sphere_geom = self._init_attractor(attracted_joints[i])
+            attractor_handles.append(attractor_handle)
+            axes_geoms.append(axes_geom)
+            sphere_geoms.append(sphere_geom)
+        return attracted_joints, attractor_handles, axes_geoms, sphere_geoms
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
@@ -229,14 +262,13 @@ class RobotSim:
         :param local_transform: If visual_obs_flag is True, use this local transform to adjust the camera pose
         """
         from isaacgym import gymapi
-        from rofunc.utils.logger.beauty_logger import beauty_print
 
         beauty_print("Show the {} simulator in the interactive mode".format(self.robot_name), 1)
 
         if visual_obs_flag:
             fig = plt.figure("Visual observation", figsize=(8, 8))
             camera_handle = self.gym.create_camera_sensor(self.envs[0], camera_props)
-            body_handle = self.gym.find_actor_rigid_body_handle(self.envs[0], self.handles[0], attached_body)
+            body_handle = self.gym.find_actor_rigid_body_handle(self.envs[0], self.robot_handles[0], attached_body)
             self.gym.attach_camera_to_body(camera_handle, self.envs[0], body_handle, local_transform,
                                            gymapi.FOLLOW_TRANSFORM)
 
@@ -272,7 +304,6 @@ class RobotSim:
 
     def get_num_bodies(self):
         from isaacgym import gymapi
-        from rofunc.utils.logger.beauty_logger import beauty_print
 
         asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, gymapi.AssetOptions())
         num_bodies = self.gym.get_asset_rigid_body_count(asset)
@@ -281,7 +312,6 @@ class RobotSim:
 
     def get_robot_state(self, mode):
         from isaacgym import gymtorch
-        from rofunc.utils.logger.beauty_logger import beauty_print
 
         if mode == 'dof_force':
             # One force value per each DOF
@@ -292,7 +322,7 @@ class RobotSim:
             # Each DOF state contains position and velocity and force sensor value
             for i in range(len(self.envs)):
                 # TODO: multi envs
-                robot_dof_force = np.array(self.gym.get_actor_dof_forces(self.envs[i], self.handles[i])).reshape(
+                robot_dof_force = np.array(self.gym.get_actor_dof_forces(self.envs[i], self.robot_handles[i])).reshape(
                     (-1, 1))
             robot_dof_pose_vel = np.array(gymtorch.wrap_tensor(self.gym.acquire_dof_state_tensor(self.sim)))
             robot_dof_state = np.hstack((robot_dof_pose_vel, robot_dof_force))
@@ -316,32 +346,14 @@ class RobotSim:
         elif mode == 'dof_force_np':
             for i in range(len(self.envs)):
                 # TODO: multi envs
-                robot_dof_force = self.gym.get_actor_dof_forces(self.envs[i], self.handles[i])
+                robot_dof_force = self.gym.get_actor_dof_forces(self.envs[i], self.robot_handles[i])
                 beauty_print('DOF force s:\n {}'.format(robot_dof_force), 2)
             return robot_dof_force
         else:
             raise ValueError("The mode {} is not supported".format(mode))
 
     def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index):
-        from isaacgym import gymutil
-
-        for i in range(self.num_envs):
-            # Update attractor target from current franka state
-            attractor_properties = self.gym.get_attractor_properties(self.envs[i], attractor_handles[i])
-            pose = attractor_properties.target
-            # pose.p: (x, y, z), pose.r: (w, x, y, z)
-            pose.p.x = traj[index, 0]
-            pose.p.y = traj[index, 2]
-            pose.p.z = traj[index, 1]
-            pose.r.w = traj[index, 6]
-            pose.r.x = traj[index, 3]
-            pose.r.y = traj[index, 5]
-            pose.r.z = traj[index, 4]
-            self.gym.set_attractor_target(self.envs[i], attractor_handles[i], pose)
-
-            # Draw axes and sphere at attractor location
-            gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
-            gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
+        raise NotImplementedError
 
     def run_traj_multi_joints(self, traj: List, attracted_joints: List = None, update_freq=0.001):
         """
@@ -352,14 +364,12 @@ class RobotSim:
             attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
             update_freq: the frequency of updating the robot pose
         """
-        from rofunc.utils.logger.beauty_logger import beauty_print
-
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
 
         beauty_print('Execute multi-joint trajectory with the CURI simulator')
 
         # Create the attractor
-        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self.setup_attractors(traj, attracted_joints)
+        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attracted_joints)
 
         # Time to wait in seconds before moving robot
         next_update_time = 1
