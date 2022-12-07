@@ -34,14 +34,14 @@ class IkeaSim:
         furniture_poses = []
 
         for asset_file in os.listdir(os.path.join(self.asset_root, self.furniture_asset_folder)):
-            # if asset_file.endswith(".urdf"):
-            asset_file = os.path.join(self.furniture_asset_folder, asset_file)
-            furniture_asset = self.robot_sim.gym.load_asset(self.robot_sim.sim, self.asset_root, asset_file,
-                                                            asset_options)
-            furniture_pose = gymapi.Transform()
-            furniture_pose.p = gymapi.Vec3(0, 1, 0)
-            furniture_assets.append(furniture_asset)
-            furniture_poses.append(furniture_pose)
+            if asset_file.endswith(".urdf"):
+                asset_file = os.path.join(self.furniture_asset_folder, asset_file)
+                furniture_asset = self.robot_sim.gym.load_asset(self.robot_sim.sim, self.asset_root, asset_file,
+                                                                asset_options)
+                furniture_pose = gymapi.Transform()
+                furniture_pose.p = gymapi.Vec3(0, 1, 0)
+                furniture_assets.append(furniture_asset)
+                furniture_poses.append(furniture_pose)
 
         furniture_handles = []
         for i in range(self.robot_sim.num_envs):
