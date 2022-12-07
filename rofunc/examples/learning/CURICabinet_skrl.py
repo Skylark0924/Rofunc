@@ -6,92 +6,13 @@ Open a cabinet with the left arm of humanoid CURI robot
 """
 
 import argparse
-import sys
-
 import isaacgym
-from hydra._internal.utils import get_args_parser
-# from rofunc.lfd.rl.online import PPOAgent
-# from rofunc.lfd.rl.online import SACAgent
-# from rofunc.lfd.rl.online import TD3Agent
-from rofunc.config.utils import get_config
-from rofunc.config.utils import omegaconf_to_dict
-from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_cfg_td3, set_cfg_sac, set_models_ppo, set_models_sac, \
-    set_models_td3
-from rofunc.examples.learning.tasks import task_map
+
+from skrl.trainers.torch import SequentialTrainer
+
 from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
-
-from skrl.agents.torch.ppo import PPO as PPOAgent
-from skrl.agents.torch.sac import SAC as SACAgent
-from skrl.agents.torch.td3 import TD3 as TD3Agent
-from skrl.envs.torch import wrap_env
-from skrl.memories.torch import RandomMemory
-from skrl.trainers.torch import SequentialTrainer
-from skrl.utils import set_seed
-
-
-def setup(custom_args, task_name, eval_mode=False):
-    # set the seed for reproducibility
-    set_seed(42)
-
-    # get config
-    sys.argv.append("task={}".format(task_name))
-    sys.argv.append("sim_device={}".format(custom_args.sim_device))
-    sys.argv.append("rl_device={}".format(custom_args.rl_device))
-    sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
-    sys.argv.append("headless={}".format(custom_args.headless))
-    args = get_args_parser().parse_args()
-    cfg = get_config('./learning/rl', 'config', args=args)
-    cfg_dict = omegaconf_to_dict(cfg.task)
-
-    if eval_mode:
-        cfg_dict['env']['numEnvs'] = 16
-
-    env = task_map[task_name](cfg=cfg_dict,
-                              rl_device=cfg.rl_device,
-                              sim_device=cfg.sim_device,
-                              graphics_device_id=cfg.graphics_device_id,
-                              headless=cfg.headless,
-                              virtual_screen_capture=cfg.capture_video,  # TODO: check
-                              force_render=cfg.force_render)
-    env = wrap_env(env)
-
-    device = env.device
-
-    if custom_args.agent == "ppo":
-        memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
-        models_ppo = set_models_ppo(cfg, env, device)
-        cfg_ppo = set_cfg_ppo(cfg, env, device, eval_mode)
-        agent = PPOAgent(models=models_ppo,
-                         memory=memory,
-                         cfg=cfg_ppo,
-                         observation_space=env.observation_space,
-                         action_space=env.action_space,
-                         device=device)
-    elif custom_args.agent == "sac":
-        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
-        models_sac = set_models_sac(cfg, env, device)
-        cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
-        agent = SACAgent(models=models_sac,
-                         memory=memory,
-                         cfg=cfg_sac,
-                         observation_space=env.observation_space,
-                         action_space=env.action_space,
-                         device=device)
-    elif custom_args.agent == "td3":
-        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
-        models_td3 = set_models_td3(cfg, env, device)
-        cfg_td3 = set_cfg_td3(cfg, env, device, eval_mode)
-        agent = TD3Agent(models=models_td3,
-                         memory=memory,
-                         cfg=cfg_td3,
-                         observation_space=env.observation_space,
-                         action_space=env.action_space,
-                         device=device)
-    else:
-        raise ValueError("Agent not supported")
-
-    return env, agent
+from rofunc.examples.learning.base_skrl import setup
 
 
 def train(custom_args, task_name):
@@ -112,7 +33,7 @@ def eval(custom_args, task_name, ckpt_path=None):
 
     env, agent = setup(custom_args, task_name, eval_mode=True)
 
-    # load checkpoint (agent)
+    # load checkpoint
     if ckpt_path is None:
         ckpt_path = model_zoo(name="CURICabinetPPO_right_arm.pt")
     agent.load(ckpt_path)
@@ -132,7 +53,7 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="True")
+    parser.add_argument("--headless", type=str, default="False")
     parser.add_argument("--train", action="store_false", help="turn to train mode while adding this argument")
     custom_args = parser.parse_args()
 
