@@ -132,8 +132,8 @@ class RobotSim:
         asset_options.flip_visual_attachments = self.flip_visual_attachments
         asset_options.armature = 0.01
 
-        print("Loading asset '%s' from '%s'" % (self.asset_file, self.asset_root))
-        asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, asset_options)
+        beauty_print("Loading robot asset {} from {}".format(self.asset_file, self.asset_root), type="info")
+        robot_asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, asset_options)
 
         # Set up the env grid
         env_lower = gymapi.Vec3(-spacing, 0.0, -spacing)
@@ -153,7 +153,7 @@ class RobotSim:
             envs.append(env)
 
             # add robot
-            handle = self.gym.create_actor(env, asset, pose, "robot", i, 2)
+            handle = self.gym.create_actor(env, robot_asset, pose, "robot", i, 2)
             self.gym.enable_actor_dof_force_sensors(env, handle)
             handles.append(handle)
 
@@ -305,9 +305,9 @@ class RobotSim:
     def get_num_bodies(self):
         from isaacgym import gymapi
 
-        asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, gymapi.AssetOptions())
-        num_bodies = self.gym.get_asset_rigid_body_count(asset)
-        beauty_print("The number of bodies in the CURI asset is {}".format(num_bodies), 2)
+        robot_asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, gymapi.AssetOptions())
+        num_bodies = self.gym.get_asset_rigid_body_count(robot_asset)
+        beauty_print("The number of bodies in the robot asset is {}".format(num_bodies), 2)
         return num_bodies
 
     def get_robot_state(self, mode):

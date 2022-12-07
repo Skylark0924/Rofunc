@@ -1,4 +1,4 @@
-def beauty_print(content, level=1, type="module"):
+def beauty_print(content, level=None, type=None):
     if level == 0 or type == "warning":
         print("\033[1;31m[Rofunc:WARNING] {}\033[0m".format(content))  # For error and warning (red)
     elif level == 1 or type == "module":
