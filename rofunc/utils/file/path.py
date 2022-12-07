@@ -1,4 +1,5 @@
 import rofunc as rf
+import elegantrl as erl
 import os
 import shutil
 
@@ -8,6 +9,13 @@ def get_rofunc_path():
         raise RuntimeError("rofunc package is not installed")
     rofunc_path = list(rf.__path__)[0]
     return rofunc_path
+
+
+def get_elegantrl_path():
+    if not hasattr(erl, "__path__"):
+        raise RuntimeError("elegantrl package is not installed")
+    elegantrl_path = list(erl.__path__)[0]
+    return elegantrl_path
 
 
 def check_ckpt_exist(ckpt_name):
