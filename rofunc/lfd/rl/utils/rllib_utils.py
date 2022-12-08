@@ -13,7 +13,7 @@ from typing import Dict, Tuple
 Source: https://github.com/NVIDIA-Omniverse/IsaacGymEnvs (I hate `import hydra` in IsaacGym Preview 3)
 Modify: https://github.com/hmomin (hmomin's code is quite good!)
 Modify: https://github.com/Yonv1943 (I make a little change based on hmomin's code)
-
+a
 There are still cuda:0 BUG in Isaac Gym Preview 3:
     Isaac Gym Preview 3 will force the cuda:0 to be used even you set the `sim_device_id=1, rl_device_id=1`
     You can only use `export CUDA_VISIBLE_DEVICES=1,2,3` to let Isaac Gym use a specified GPU.
@@ -273,7 +273,7 @@ def check_isaac_gym(env_name):
     return reward_list, steps_list
 
 
-class MyEnv(gym.Env):
+class RLlibEnvWrapper(gym.Env):
     def __init__(self, env_config):
         self.env = IsaacVecEnv(env_name=env_config["env_name"], env_num=1, sim_device_id=env_config["gpu_id"],
                                rl_device_id=env_config["gpu_id"], should_print=True)
@@ -289,19 +289,52 @@ class MyEnv(gym.Env):
         return np.array(observations.cpu())[0], np.array(rewards.cpu())[0], np.array(dones.cpu())[0], info_dict
 
 
+from ray.rllib.env import VectorEnv
+from ray.rllib.utils.annotations import override
+
+
+class RLlibVecEnvWrapper(VectorEnv):
+    def __init__(self, env_config):
+        self.env = IsaacVecEnv(env_name=env_config["env_name"], env_num=1024, sim_device_id=env_config["gpu_id"],
+                               rl_device_id=env_config["gpu_id"], should_print=True)
+        self.action_space = self.env.env.action_space
+        self.observation_space = self.env.env.observation_space
+        self.num_envs = self.env.env_num
+
+    # @override(VectorEnv)
+    # def reset_at(self, index):
+    #     return self.env.env.reset_idx(index, index)
+
+    def vector_reset(self):
+        return np.array(self.env.reset().cpu()).tolist()
+
+    def vector_step(self, actions):
+        actions = torch.tensor(np.array(actions)).to(self.env.device)
+        observations, rewards, dones, info_dict_raw = self.env.step(actions)
+        info_dict_raw["time_outs"] = np.array(info_dict_raw["time_outs"].cpu())
+        info_dict = {i: {"agent_0": {"training_enabled": False}} for i in range(self.num_envs)}
+        # info_dict = {i: {} for i in range(self.num_envs)}
+
+        return np.array(observations.cpu()), np.array(rewards.cpu()), np.array(
+            dones.cpu()), info_dict
+
+    # @override(VectorEnv)
+    # def get_sub_environments(self):
+    #     return self.env
+
+
 def ray_test(env_name):
     import ray
     from ray.rllib.agents import ppo
 
     gpu_id = 0
-    # states = env.reset()
-    # print('\n\nstates.shape', states.shape)
 
     ray.init()
-    trainer = ppo.PPOTrainer(env=MyEnv, config={
-        "env_config": {"gpu_id": 0, "env_name": env_name},  # config to pass to env class
+    trainer = ppo.PPOTrainer(env=RLlibEnvWrapper, config={
+        "env_config": {"gpu_id": gpu_id, "env_name": env_name},  # config to pass to env class
         # "framework": "torch",
-        "num_workers": 0
+        "num_workers": 0,
+        "num_envs_per_worker": 1,
     })
 
     while True:
@@ -310,5 +343,6 @@ def ray_test(env_name):
 
 if __name__ == '__main__':
     import isaacgym
+
     # check_isaac_gym("Ant")
     ray_test("Ant")
