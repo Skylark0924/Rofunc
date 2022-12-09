@@ -2,17 +2,17 @@ import os
 
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
+
 from rofunc.utils.file.path import get_rofunc_path
-from rofunc.examples.learning.tasks.base.curi_base_task import CURIBaseTask
+from rofunc.lfd.rl.tasks.base.curi_base_task import CURIBaseTask
 
 
-class CURICabinetBimanualTask(CURIBaseTask):
+class CURICabinetTask(CURIBaseTask):
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
 
-        # self.cfg["env"]["numObservations"] = 44
-        # self.cfg["env"]["numActions"] = 18
+        self.visual_obs_flag = cfg['task']['visual_obs_flag']
 
         # get gym GPU state tensors
         actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
@@ -61,7 +61,7 @@ class CURICabinetBimanualTask(CURIBaseTask):
         asset_root = os.path.join(rofunc_path, "simulator/assets")
 
         curi_asset_file = "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
-        cabinet_asset_file = "urdf/sektion_cabinet_model/urdf/sektion_cabinet.urdf"
+        cabinet_asset_file = "urdf/sektion_cabinet_model/urdf/sektion_cabinet_2.urdf"
 
         # load curi asset
         asset_options = gymapi.AssetOptions()
@@ -160,7 +160,9 @@ class CURICabinetBimanualTask(CURIBaseTask):
 
         for i in range(self.num_envs):
             # create env instance
-            env_ptr = self.gym.create_env(self.sim, lower, upper, num_per_row)
+            env_ptr = self.gym.create_env(
+                self.sim, lower, upper, num_per_row
+            )
 
             if self.aggregate_mode >= 3:
                 self.gym.begin_aggregate(env_ptr, max_agg_bodies, max_agg_shapes, True)
@@ -221,33 +223,19 @@ class CURICabinetBimanualTask(CURIBaseTask):
             self.curis.append(curi_actor)
             self.cabinets.append(cabinet_actor)
 
-        # Left arm
-        self.hand_handle_l, self.lfinger_handle_l, self.rfinger_handle_l, self.curi_local_grasp_pos, \
-        self.curi_local_grasp_rot, self.curi_grasp_pos_l, self.curi_grasp_rot_l, self.curi_lfinger_pos_l, \
-        self.curi_rfinger_pos_l, self.curi_lfinger_rot_l, self.curi_rfinger_rot_l \
-            = self.init_data_curi("panda_left_link7", "panda_left_leftfinger", "panda_left_rightfinger", env_ptr,
-                                  curi_actor)
-        # Right arm
-        self.hand_handle_r, self.lfinger_handle_r, self.rfinger_handle_r, self.curi_local_grasp_pos, \
-        self.curi_local_grasp_rot, self.curi_grasp_pos_r, self.curi_grasp_rot_r, self.curi_lfinger_pos_r, \
-        self.curi_rfinger_pos_r, self.curi_lfinger_rot_r, self.curi_rfinger_rot_r \
-            = self.init_data_curi("panda_right_link7", "panda_right_leftfinger", "panda_right_rightfinger", env_ptr,
-                                  curi_actor)
-
-        self.init_data_cabinet(env_ptr, cabinet_actor)
-
+        self.hand_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, "panda_left_link7")
+        self.drawer_handle = self.gym.find_actor_rigid_body_handle(env_ptr, cabinet_actor, "drawer_top")
+        self.lfinger_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, "panda_left_leftfinger")
+        self.rfinger_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, "panda_left_rightfinger")
         self.default_prop_states = to_torch(self.default_prop_states, device=self.device, dtype=torch.float).view(
             self.num_envs, self.num_props, 13)
 
-    def init_data_curi(self, hand_dof_name, lfinger_dof_name, rfinger_dof_name, env_ptr, curi_actor):
-        hand_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, hand_dof_name)
+        self.init_data()
 
-        lfinger_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, lfinger_dof_name)
-        rfinger_handle = self.gym.find_actor_rigid_body_handle(env_ptr, curi_actor, rfinger_dof_name)
-
-        hand = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], hand_dof_name)
-        lfinger = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], lfinger_dof_name)
-        rfinger = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], rfinger_dof_name)
+    def init_data(self):
+        hand = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], "panda_left_link7")
+        lfinger = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], "panda_left_leftfinger")
+        rfinger = self.gym.find_actor_rigid_body_handle(self.envs[0], self.curis[0], "panda_left_rightfinger")
 
         hand_pose = self.gym.get_rigid_transform(self.envs[0], hand)
         lfinger_pose = self.gym.get_rigid_transform(self.envs[0], lfinger)
@@ -261,29 +249,12 @@ class CURICabinetBimanualTask(CURIBaseTask):
         grasp_pose_axis = 1
         curi_local_grasp_pose = hand_pose_inv * finger_pose
         curi_local_grasp_pose.p += gymapi.Vec3(*get_axis_params(0.04, grasp_pose_axis))
-        curi_local_grasp_pos = to_torch([curi_local_grasp_pose.p.x, curi_local_grasp_pose.p.y,
-                                         curi_local_grasp_pose.p.z], device=self.device).repeat((self.num_envs, 1))
-        curi_local_grasp_rot = to_torch([curi_local_grasp_pose.r.x, curi_local_grasp_pose.r.y,
-                                         curi_local_grasp_pose.r.z, curi_local_grasp_pose.r.w],
-                                        device=self.device).repeat((self.num_envs, 1))
-
-        curi_grasp_pos = torch.zeros_like(curi_local_grasp_pos)
-        curi_grasp_rot = torch.zeros_like(curi_local_grasp_rot)
-        curi_grasp_rot[..., -1] = 1  # xyzw
-
-        curi_lfinger_pos = torch.zeros_like(curi_local_grasp_pos)
-        curi_rfinger_pos = torch.zeros_like(curi_local_grasp_pos)
-        curi_lfinger_rot = torch.zeros_like(curi_local_grasp_rot)
-        curi_rfinger_rot = torch.zeros_like(curi_local_grasp_rot)
-
-        return hand_handle, lfinger_handle, rfinger_handle, curi_local_grasp_pos, curi_local_grasp_rot, curi_grasp_pos, \
-               curi_grasp_rot, curi_lfinger_pos, curi_rfinger_pos, curi_lfinger_rot, curi_rfinger_rot
-
-    def init_data_cabinet(self, env_ptr, cabinet_actor):
-        self.drawer_handle_top = self.gym.find_actor_rigid_body_handle(env_ptr, cabinet_actor, "drawer_top")
-        self.drawer_handle_bottom = self.gym.find_actor_rigid_body_handle(env_ptr, cabinet_actor, "drawer_bottom")
-
-        grasp_pose_axis = 1
+        self.curi_local_grasp_pos = to_torch([curi_local_grasp_pose.p.x, curi_local_grasp_pose.p.y,
+                                              curi_local_grasp_pose.p.z], device=self.device).repeat(
+            (self.num_envs, 1))
+        self.curi_local_grasp_rot = to_torch([curi_local_grasp_pose.r.x, curi_local_grasp_pose.r.y,
+                                              curi_local_grasp_pose.r.z, curi_local_grasp_pose.r.w],
+                                             device=self.device).repeat((self.num_envs, 1))
 
         drawer_local_grasp_pose = gymapi.Transform()
         drawer_local_grasp_pose.p = gymapi.Vec3(*get_axis_params(0.01, grasp_pose_axis, 0.3))
@@ -300,211 +271,57 @@ class CURICabinetBimanualTask(CURIBaseTask):
         self.gripper_up_axis = to_torch([0, 1, 0], device=self.device).repeat((self.num_envs, 1))
         self.drawer_up_axis = to_torch([0, 0, 1], device=self.device).repeat((self.num_envs, 1))
 
-        self.drawer_grasp_pos_top = torch.zeros_like(self.drawer_local_grasp_pos)
-        self.drawer_grasp_rot_top = torch.zeros_like(self.drawer_local_grasp_rot)
-        self.drawer_grasp_rot_top[..., -1] = 1  # xyzw
-        self.drawer_grasp_pos_bottom = torch.zeros_like(self.drawer_local_grasp_pos)
-        self.drawer_grasp_rot_bottom = torch.zeros_like(self.drawer_local_grasp_rot)
-        self.drawer_grasp_rot_bottom[..., -1] = 1  # xyzw
+        self.curi_grasp_pos = torch.zeros_like(self.curi_local_grasp_pos)
+        self.curi_grasp_rot = torch.zeros_like(self.curi_local_grasp_rot)
+        self.curi_grasp_rot[..., -1] = 1  # xyzw
+        self.drawer_grasp_pos = torch.zeros_like(self.drawer_local_grasp_pos)
+        self.drawer_grasp_rot = torch.zeros_like(self.drawer_local_grasp_rot)
+        self.drawer_grasp_rot[..., -1] = 1
+        self.curi_lfinger_pos = torch.zeros_like(self.curi_local_grasp_pos)
+        self.curi_rfinger_pos = torch.zeros_like(self.curi_local_grasp_pos)
+        self.curi_lfinger_rot = torch.zeros_like(self.curi_local_grasp_rot)
+        self.curi_rfinger_rot = torch.zeros_like(self.curi_local_grasp_rot)
 
     def compute_reward(self, actions):
-        rew_buf_l, reset_buf_l = compute_curi_reward(
-            self.reset_buf, self.progress_buf, self.actions, self.cabinet_dof_pos[:, 3],  # drawer_top_joint
-            self.curi_grasp_pos_l, self.drawer_grasp_pos_top, self.curi_grasp_rot_l, self.drawer_grasp_rot_top,
-            self.curi_lfinger_pos_l, self.curi_rfinger_pos_l,
+        self.rew_buf[:], self.reset_buf[:] = compute_curi_reward(
+            self.reset_buf, self.progress_buf, self.actions, self.cabinet_dof_pos,
+            self.curi_grasp_pos, self.drawer_grasp_pos, self.curi_grasp_rot, self.drawer_grasp_rot,
+            self.curi_lfinger_pos, self.curi_rfinger_pos,
             self.gripper_forward_axis, self.drawer_inward_axis, self.gripper_up_axis, self.drawer_up_axis,
             self.num_envs, self.dist_reward_scale, self.rot_reward_scale, self.around_handle_reward_scale,
             self.open_reward_scale,
             self.finger_dist_reward_scale, self.action_penalty_scale, self.distX_offset, self.max_episode_length
         )
-        rew_buf_r, reset_buf_r = compute_curi_reward(
-            self.reset_buf, self.progress_buf, self.actions, self.cabinet_dof_pos[:, 2],  # drawer_bottom_joint
-            self.curi_grasp_pos_r, self.drawer_grasp_pos_bottom, self.curi_grasp_rot_r, self.drawer_grasp_rot_bottom,
-            self.curi_lfinger_pos_r, self.curi_rfinger_pos_r,
-            self.gripper_forward_axis, self.drawer_inward_axis, self.gripper_up_axis, self.drawer_up_axis,
-            self.num_envs, self.dist_reward_scale, self.rot_reward_scale, self.around_handle_reward_scale,
-            self.open_reward_scale,
-            self.finger_dist_reward_scale, self.action_penalty_scale, self.distX_offset, self.max_episode_length
-        )
-
-        self.rew_buf[:] = rew_buf_l * (self.cabinet_dof_pos[:, 2] / 0.39) + rew_buf_r
-        # self.rew_buf[:] = torch.maximum(rew_buf_l, rew_buf_r)
-        self.reset_buf[:] = reset_buf_l
-        # self.reset_buf[:] = torch.minimum(reset_buf_l, reset_buf_r)
-
-        # self.rew_buf[:] = rew_buf_l
-        # self.reset_buf[:] = reset_buf_l
 
     def compute_observations(self):
+
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
 
-        hand_pos_l = self.rigid_body_states[:, self.hand_handle_l][:, 0:3]
-        hand_rot_l = self.rigid_body_states[:, self.hand_handle_l][:, 3:7]
-        hand_pos_r = self.rigid_body_states[:, self.hand_handle_r][:, 0:3]
-        hand_rot_r = self.rigid_body_states[:, self.hand_handle_r][:, 3:7]
-        drawer_pos_top = self.rigid_body_states[:, self.drawer_handle_top][:, 0:3]
-        drawer_rot_top = self.rigid_body_states[:, self.drawer_handle_top][:, 3:7]
-        drawer_pos_bottom = self.rigid_body_states[:, self.drawer_handle_bottom][:, 0:3]
-        drawer_rot_bottom = self.rigid_body_states[:, self.drawer_handle_bottom][:, 3:7]
+        hand_pos = self.rigid_body_states[:, self.hand_handle][:, 0:3]
+        hand_rot = self.rigid_body_states[:, self.hand_handle][:, 3:7]
+        drawer_pos = self.rigid_body_states[:, self.drawer_handle][:, 0:3]
+        drawer_rot = self.rigid_body_states[:, self.drawer_handle][:, 3:7]
 
-        self.curi_grasp_rot_l[:], self.curi_grasp_pos_l[:], self.drawer_grasp_rot_top[:], self.drawer_grasp_pos_top[:] = \
-            compute_grasp_transforms(hand_rot_l, hand_pos_l, self.curi_local_grasp_rot, self.curi_local_grasp_pos,
-                                     drawer_rot_top, drawer_pos_top, self.drawer_local_grasp_rot,
-                                     self.drawer_local_grasp_pos
-                                     )
-        self.curi_grasp_rot_r[:], self.curi_grasp_pos_r[:], self.drawer_grasp_rot_bottom[
-                                                            :], self.drawer_grasp_pos_bottom[:] = \
-            compute_grasp_transforms(hand_rot_r, hand_pos_r, self.curi_local_grasp_rot, self.curi_local_grasp_pos,
-                                     drawer_rot_bottom, drawer_pos_bottom, self.drawer_local_grasp_rot,
-                                     self.drawer_local_grasp_pos
+        self.curi_grasp_rot[:], self.curi_grasp_pos[:], self.drawer_grasp_rot[:], self.drawer_grasp_pos[:] = \
+            compute_grasp_transforms(hand_rot, hand_pos, self.curi_local_grasp_rot, self.curi_local_grasp_pos,
+                                     drawer_rot, drawer_pos, self.drawer_local_grasp_rot, self.drawer_local_grasp_pos
                                      )
 
-        self.curi_lfinger_pos_l = self.rigid_body_states[:, self.lfinger_handle_l][:, 0:3]
-        self.curi_rfinger_pos_l = self.rigid_body_states[:, self.rfinger_handle_l][:, 0:3]
-        self.curi_lfinger_rot_l = self.rigid_body_states[:, self.lfinger_handle_l][:, 3:7]
-        self.curi_rfinger_rot_l = self.rigid_body_states[:, self.rfinger_handle_l][:, 3:7]
-        self.curi_lfinger_pos_r = self.rigid_body_states[:, self.lfinger_handle_r][:, 0:3]
-        self.curi_rfinger_pos_r = self.rigid_body_states[:, self.rfinger_handle_r][:, 0:3]
-        self.curi_lfinger_rot_r = self.rigid_body_states[:, self.lfinger_handle_r][:, 3:7]
-        self.curi_rfinger_rot_r = self.rigid_body_states[:, self.rfinger_handle_r][:, 3:7]
+        self.curi_lfinger_pos = self.rigid_body_states[:, self.lfinger_handle][:, 0:3]
+        self.curi_rfinger_pos = self.rigid_body_states[:, self.rfinger_handle][:, 0:3]
+        self.curi_lfinger_rot = self.rigid_body_states[:, self.lfinger_handle][:, 3:7]
+        self.curi_rfinger_rot = self.rigid_body_states[:, self.rfinger_handle][:, 3:7]
 
         dof_pos_scaled = (2.0 * (self.curi_dof_pos - self.curi_dof_lower_limits)
                           / (self.curi_dof_upper_limits - self.curi_dof_lower_limits) - 1.0)
-        to_target_l = self.drawer_grasp_pos_top - self.curi_grasp_pos_l
-        to_target_r = self.drawer_grasp_pos_bottom - self.curi_grasp_pos_r
-        self.obs_buf = torch.cat((dof_pos_scaled, self.curi_dof_vel * self.dof_vel_scale, to_target_l, to_target_r,
-                                  self.cabinet_dof_pos[:, 3].unsqueeze(-1), self.cabinet_dof_pos[:, 2].unsqueeze(-1),
-                                  self.cabinet_dof_vel[:, 3].unsqueeze(-1), self.cabinet_dof_vel[:, 2].unsqueeze(-1)),
+        to_target = self.drawer_grasp_pos - self.curi_grasp_pos
+        self.obs_buf = torch.cat((dof_pos_scaled, self.curi_dof_vel * self.dof_vel_scale, to_target,
+                                  self.cabinet_dof_pos[:, 3].unsqueeze(-1), self.cabinet_dof_vel[:, 3].unsqueeze(-1)),
                                  dim=-1)
 
         return self.obs_buf
-
-    def post_physics_step(self):
-        self.progress_buf += 1
-
-        env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
-        if len(env_ids) > 0:
-            self.reset_idx(env_ids)
-
-        self.compute_observations()
-        self.compute_reward(self.actions)
-
-        # debug viz
-        # if self.viewer:
-        if self.viewer and self.debug_viz:
-            self.gym.clear_lines(self.viewer)
-            self.gym.refresh_rigid_body_state_tensor(self.sim)
-
-            for i in range(self.num_envs):
-                # Debug vis of the left arm
-                px = (self.curi_grasp_pos_l[i] + quat_apply(self.curi_grasp_rot_l[i], to_torch([1, 0, 0],
-                                                                                               device=self.device) * 0.2)).cpu().numpy()
-                py = (self.curi_grasp_pos_l[i] + quat_apply(self.curi_grasp_rot_l[i], to_torch([0, 1, 0],
-                                                                                               device=self.device) * 0.2)).cpu().numpy()
-                pz = (self.curi_grasp_pos_l[i] + quat_apply(self.curi_grasp_rot_l[i], to_torch([0, 0, 1],
-                                                                                               device=self.device) * 0.2)).cpu().numpy()
-
-                p0 = self.curi_grasp_pos_l[i].cpu().numpy()
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]],
-                                   [0.85, 0.1, 0.1])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]],
-                                   [0.1, 0.85, 0.1])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]],
-                                   [0.1, 0.1, 0.85])
-
-                # Debug vis of the right arm
-                px = (self.curi_grasp_pos_r[i] + quat_apply(self.curi_grasp_rot_r[i], to_torch([1, 0, 0],
-                                                                                               device=self.device) * 0.2)).cpu().numpy()
-                py = (self.curi_grasp_pos_r[i] + quat_apply(self.curi_grasp_rot_r[i], to_torch([0, 1, 0],
-                                                                                               device=self.device) * 0.2)).cpu().numpy()
-                pz = (self.curi_grasp_pos_r[i] + quat_apply(self.curi_grasp_rot_r[i], to_torch([0, 0, 1],
-                                                                                               device=self.device) * 0.2)).cpu().numpy()
-
-                p0 = self.curi_grasp_pos_r[i].cpu().numpy()
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]],
-                                   [0.85, 0.1, 0.1])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]],
-                                   [0.1, 0.85, 0.1])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]],
-                                   [0.1, 0.1, 0.85])
-
-                # Debug vis of the top drawer
-                px = (self.drawer_grasp_pos_top[i] + quat_apply(self.drawer_grasp_rot_top[i], to_torch([1, 0, 0],
-                                                                                                       device=self.device) * 0.2)).cpu().numpy()
-                py = (self.drawer_grasp_pos_top[i] + quat_apply(self.drawer_grasp_rot_top[i], to_torch([0, 1, 0],
-                                                                                                       device=self.device) * 0.2)).cpu().numpy()
-                pz = (self.drawer_grasp_pos_top[i] + quat_apply(self.drawer_grasp_rot_top[i], to_torch([0, 0, 1],
-                                                                                                       device=self.device) * 0.2)).cpu().numpy()
-
-                p0 = self.drawer_grasp_pos_top[i].cpu().numpy()
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
-
-                # Debug vis of the down drawer
-                px = (self.drawer_grasp_pos_bottom[i] + quat_apply(self.drawer_grasp_rot_bottom[i], to_torch([1, 0, 0],
-                                                                                                             device=self.device) * 0.2)).cpu().numpy()
-                py = (self.drawer_grasp_pos_bottom[i] + quat_apply(self.drawer_grasp_rot_bottom[i], to_torch([0, 1, 0],
-                                                                                                             device=self.device) * 0.2)).cpu().numpy()
-                pz = (self.drawer_grasp_pos_bottom[i] + quat_apply(self.drawer_grasp_rot_bottom[i], to_torch([0, 0, 1],
-                                                                                                             device=self.device) * 0.2)).cpu().numpy()
-
-                p0 = self.drawer_grasp_pos_bottom[i].cpu().numpy()
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
-
-                # Debug vis of the gripper of the left arm
-                px = (self.curi_lfinger_pos_l[i] + quat_apply(self.curi_lfinger_rot_l[i], to_torch([1, 0, 0],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-                py = (self.curi_lfinger_pos_l[i] + quat_apply(self.curi_lfinger_rot_l[i], to_torch([0, 1, 0],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-                pz = (self.curi_lfinger_pos_l[i] + quat_apply(self.curi_lfinger_rot_l[i], to_torch([0, 0, 1],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-
-                p0 = self.curi_lfinger_pos_l[i].cpu().numpy()
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
-
-                px = (self.curi_rfinger_pos_l[i] + quat_apply(self.curi_rfinger_rot_l[i], to_torch([1, 0, 0],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-                py = (self.curi_rfinger_pos_l[i] + quat_apply(self.curi_rfinger_rot_l[i], to_torch([0, 1, 0],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-                pz = (self.curi_rfinger_pos_l[i] + quat_apply(self.curi_rfinger_rot_l[i], to_torch([0, 0, 1],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-
-                p0 = self.curi_rfinger_pos_l[i].cpu().numpy()
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
-
-                # Debug vis of the gripper of the right arm
-                px = (self.curi_lfinger_pos_r[i] + quat_apply(self.curi_lfinger_rot_r[i], to_torch([1, 0, 0],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-                py = (self.curi_lfinger_pos_r[i] + quat_apply(self.curi_lfinger_rot_r[i], to_torch([0, 1, 0],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-                pz = (self.curi_lfinger_pos_r[i] + quat_apply(self.curi_lfinger_rot_r[i], to_torch([0, 0, 1],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-
-                p0 = self.curi_lfinger_pos_r[i].cpu().numpy()
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
-
-                px = (self.curi_rfinger_pos_r[i] + quat_apply(self.curi_rfinger_rot_r[i], to_torch([1, 0, 0],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-                py = (self.curi_rfinger_pos_r[i] + quat_apply(self.curi_rfinger_rot_r[i], to_torch([0, 1, 0],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-                pz = (self.curi_rfinger_pos_r[i] + quat_apply(self.curi_rfinger_rot_r[i], to_torch([0, 0, 1],
-                                                                                                   device=self.device) * 0.2)).cpu().numpy()
-
-                p0 = self.curi_rfinger_pos_r[i].cpu().numpy()
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
-                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
 
     def reset_idx(self, env_ids):
         env_ids_int32 = env_ids.to(dtype=torch.int32)
@@ -541,6 +358,73 @@ class CURICabinetBimanualTask(CURIBaseTask):
 
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
+
+    def post_physics_step(self):
+        self.progress_buf += 1
+
+        env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
+        if len(env_ids) > 0:
+            self.reset_idx(env_ids)
+
+        self.compute_observations()
+        self.compute_reward(self.actions)
+
+        # debug viz
+        if self.viewer and self.debug_viz:
+            self.gym.clear_lines(self.viewer)
+            self.gym.refresh_rigid_body_state_tensor(self.sim)
+
+            for i in range(self.num_envs):
+                px = (self.curi_grasp_pos[i] + quat_apply(self.curi_grasp_rot[i], to_torch([1, 0, 0],
+                                                                                           device=self.device) * 0.2)).cpu().numpy()
+                py = (self.curi_grasp_pos[i] + quat_apply(self.curi_grasp_rot[i], to_torch([0, 1, 0],
+                                                                                           device=self.device) * 0.2)).cpu().numpy()
+                pz = (self.curi_grasp_pos[i] + quat_apply(self.curi_grasp_rot[i], to_torch([0, 0, 1],
+                                                                                           device=self.device) * 0.2)).cpu().numpy()
+
+                p0 = self.curi_grasp_pos[i].cpu().numpy()
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]],
+                                   [0.85, 0.1, 0.1])
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]],
+                                   [0.1, 0.85, 0.1])
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]],
+                                   [0.1, 0.1, 0.85])
+
+                px = (self.drawer_grasp_pos[i] + quat_apply(self.drawer_grasp_rot[i], to_torch([1, 0, 0],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+                py = (self.drawer_grasp_pos[i] + quat_apply(self.drawer_grasp_rot[i], to_torch([0, 1, 0],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+                pz = (self.drawer_grasp_pos[i] + quat_apply(self.drawer_grasp_rot[i], to_torch([0, 0, 1],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+
+                p0 = self.drawer_grasp_pos[i].cpu().numpy()
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
+
+                px = (self.curi_lfinger_pos[i] + quat_apply(self.curi_lfinger_rot[i], to_torch([1, 0, 0],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+                py = (self.curi_lfinger_pos[i] + quat_apply(self.curi_lfinger_rot[i], to_torch([0, 1, 0],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+                pz = (self.curi_lfinger_pos[i] + quat_apply(self.curi_lfinger_rot[i], to_torch([0, 0, 1],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+
+                p0 = self.curi_lfinger_pos[i].cpu().numpy()
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
+
+                px = (self.curi_rfinger_pos[i] + quat_apply(self.curi_rfinger_rot[i], to_torch([1, 0, 0],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+                py = (self.curi_rfinger_pos[i] + quat_apply(self.curi_rfinger_rot[i], to_torch([0, 1, 0],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+                pz = (self.curi_rfinger_pos[i] + quat_apply(self.curi_rfinger_rot[i], to_torch([0, 0, 1],
+                                                                                               device=self.device) * 0.2)).cpu().numpy()
+
+                p0 = self.curi_rfinger_pos[i].cpu().numpy()
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [1, 0, 0])
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0, 1, 0])
+                self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0, 0, 1])
 
 
 #####################################################################
@@ -596,16 +480,17 @@ def compute_curi_reward(
     action_penalty = torch.sum(actions ** 2, dim=-1)
 
     # how far the cabinet has been opened out
-    open_reward = cabinet_dof_pos * around_handle_reward + cabinet_dof_pos
+    open_reward = cabinet_dof_pos[:, 3] * around_handle_reward + cabinet_dof_pos[:, 3]  # drawer_top_joint
 
     rewards = dist_reward_scale * dist_reward + rot_reward_scale * rot_reward \
-              + around_handle_reward_scale * around_handle_reward + open_reward_scale * open_reward \
-              + finger_dist_reward_scale * finger_dist_reward - action_penalty_scale * action_penalty
+              + around_handle_reward_scale * around_handle_reward + 10 * open_reward_scale * open_reward \
+              + finger_dist_reward_scale * finger_dist_reward \
+        # - action_penalty_scale * action_penalty
 
     # bonus for opening drawer properly
-    rewards = torch.where(cabinet_dof_pos > 0.01, rewards + 0.5, rewards)
-    rewards = torch.where(cabinet_dof_pos > 0.2, rewards + around_handle_reward, rewards)
-    rewards = torch.where(cabinet_dof_pos > 0.39, rewards + (2.0 * around_handle_reward), rewards)
+    rewards = torch.where(cabinet_dof_pos[:, 3] > 0.01, rewards + 0.5, rewards)
+    rewards = torch.where(cabinet_dof_pos[:, 3] > 0.2, rewards + around_handle_reward, rewards)
+    rewards = torch.where(cabinet_dof_pos[:, 3] > 0.39, rewards + (2.0 * around_handle_reward), rewards)
 
     # prevent bad style in opening drawer
     rewards = torch.where(curi_lfinger_pos[:, 0] < drawer_grasp_pos[:, 0] - distX_offset,
@@ -614,10 +499,10 @@ def compute_curi_reward(
                           torch.ones_like(rewards) * -1, rewards)
 
     # reset if drawer is open or max length reached
-    reset_buf = torch.where(cabinet_dof_pos > 0.39, torch.ones_like(reset_buf), reset_buf)
+    reset_buf = torch.where(cabinet_dof_pos[:, 3] > 0.39, torch.ones_like(reset_buf), reset_buf)
     reset_buf = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(reset_buf), reset_buf)
 
-    return rewards, reset_buf
+    return rewards * 0.01, reset_buf
 
 
 @torch.jit.script
