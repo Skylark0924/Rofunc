@@ -3,6 +3,7 @@ import os
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
+import rofunc as rf
 
 
 def data_clean(input_path):
@@ -23,7 +24,7 @@ def data_clean(input_path):
                     os.mkdir(out_path)
                 demo_path = os.path.join(input_path, demo_csv)
                 out_file_path = os.path.join(out_path, demo_csv)
-                delete_lines(demo_path, out_file_path, 14)
+                rf.utils.delete_lines(demo_path, out_file_path, 14)
                 csv_data = pd.read_csv(out_file_path)
                 # csv_data = pd.read_csv(demo_path, skiprows=6)
                 if '3f6ec26f' in demo_csv:
