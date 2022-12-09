@@ -1,8 +1,8 @@
 """
-FrankaCabinet with Stable Baseline3
-==================================
+FrankaCabinet (Stable Baseline 3)
+===========================
 
-This example shows how to use Stable Baseline3 with the FrankaCabinet environment.
+Open a cabinet with a single Franka arm, trained by Stable Baseline 3
 """
 
 from autolab_core import YamlConfig
@@ -11,7 +11,7 @@ import sys
 
 import isaacgym
 from rofunc.config.utils import get_config, omegaconf_to_dict
-from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
+from rofunc.lfd.rl.utils.skrl_utils import set_cfg_ppo, set_models_ppo
 from rofunc.lfd.rl.tasks import task_map
 from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print

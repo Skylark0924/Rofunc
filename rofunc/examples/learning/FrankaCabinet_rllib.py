@@ -1,8 +1,8 @@
 """
-FrankaCabinet
+FrankaCabinet (RLlib)
 ===========================
 
-Open a cabinet with a single Franka arm
+Open a cabinet with a single Franka arm, trained by RLlib
 """
 
 import argparse
@@ -12,7 +12,7 @@ import isaacgym
 import torch
 
 from rofunc.config.utils import get_config, omegaconf_to_dict, dict_to_omegaconf
-from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
+from rofunc.lfd.rl.utils.skrl_utils import set_cfg_ppo, set_models_ppo
 from rofunc.lfd.rl.tasks import task_map
 from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
