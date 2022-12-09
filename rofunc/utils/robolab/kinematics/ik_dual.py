@@ -57,13 +57,13 @@ def ik_dual(model, POSE_L, POSE_R, JOINT_ID_L, JOINT_ID_R):
     return q_ik_dual
 
 
-if __name__ == '__main__':
-    model = pinocchio.buildModelFromUrdf(
-        "/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
-    print('model name: ' + model.name)
-    POSE_L = [1, 0.5, 0.5]
-    POSE_R = [1, -0.5, 0.5]
-    q_rearrange = ik_dual(model, POSE_L, POSE_R, JOINT_ID_L=18, JOINT_ID_R=27)
-    a = q_rearrange.take(
-        [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 21, 11, 13, 22, 23, 14, 15, 24, 16, 25, 26, 17, 18, 27, 19, 28])
-    print('\nresult: %s' % a.flatten().tolist())
+# if __name__ == '__main__':
+#     model = pinocchio.buildModelFromUrdf(
+#         "/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
+#     print('model name: ' + model.name)
+#     POSE_L = [1, 0.5, 0.5]
+#     POSE_R = [1, -0.5, 0.5]
+#     q_rearrange = ik_dual(model, POSE_L, POSE_R, JOINT_ID_L=18, JOINT_ID_R=27)
+#     a = q_rearrange.take(
+#         [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 21, 11, 13, 22, 23, 14, 15, 24, 16, 25, 26, 17, 18, 27, 19, 28])
+#     print('\nresult: %s' % a.flatten().tolist())
