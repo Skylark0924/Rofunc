@@ -13,7 +13,7 @@ import torch
 
 from rofunc.config.utils import get_config, omegaconf_to_dict, dict_to_omegaconf
 from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
-from rofunc.examples.learning.tasks import task_map
+from rofunc.lfd.rl.tasks import task_map
 from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
 from rofunc.lfd.utils.utils import set_seed

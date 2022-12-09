@@ -15,9 +15,8 @@ from rofunc.utils.file.path import shutil_exp_files
 # from rofunc.lfd.rl.online import PPOAgent
 # from rofunc.lfd.rl.online import SACAgent
 # from rofunc.lfd.rl.online import TD3Agent
-from rofunc.config.utils import get_config
-from rofunc.config.utils import omegaconf_to_dict
-from rofunc.examples.learning.tasks import task_map
+from rofunc.config.utils import get_config, omegaconf_to_dict
+from rofunc.lfd.rl.tasks import task_map
 from hydra._internal.utils import get_args_parser
 
 from skrl.agents.torch.ppo import PPO_DEFAULT_CONFIG
