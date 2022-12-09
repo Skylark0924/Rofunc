@@ -85,5 +85,5 @@ def demo(task, agent):
 
 if __name__ == '__main__':
     task = "Ant"
-    agent = "SAC"
+    agent = "PPO"
     demo(task, agent)

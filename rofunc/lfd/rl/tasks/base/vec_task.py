@@ -32,7 +32,7 @@ import gym
 from gym import spaces
 
 from isaacgym import gymtorch, gymapi
-from rofunc.examples.learning.tasks.base.dr_utils import get_property_setter_map, get_property_getter_map, \
+from rofunc.lfd.rl.tasks.base.dr_utils import get_property_setter_map, get_property_getter_map, \
     get_default_setter_args, apply_random_samples, check_buckets, generate_random_samples
 
 import torch
