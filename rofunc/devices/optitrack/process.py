@@ -4,13 +4,6 @@ import pandas as pd
 from tqdm import tqdm
 import numpy as np
 
-def delete_lines(in_path, out_path, head, tail=0):
-    with open(in_path, 'r') as fin:
-        a = fin.readlines()
-    with open(out_path, 'w') as fout:
-        b = ''.join(a[head:])
-        fout.write(b)
-
 
 def data_clean(input_path):
     """
@@ -82,6 +75,3 @@ def export(input_dir):
                 list(csv_data.values[i, rigid_body_index_list[rigid_body_index_start:rigid_body_index_end]]))
         optitrack_data_list.append(frame_data)
     return np.array(optitrack_data_list)
-
-
-
