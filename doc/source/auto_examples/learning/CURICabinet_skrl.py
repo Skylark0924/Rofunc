@@ -10,7 +10,7 @@ import sys
 
 from rofunc.config.utils import get_config
 from rofunc.config.utils import omegaconf_to_dict
-from rofunc.examples.learning.base_skrl import set_cfg_ppo, set_models_ppo
+from rofunc.lfd.rl.utils.skrl_utils import set_cfg_ppo, set_models_ppo
 from rofunc.lfd.rl.tasks import task_map
 from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
