@@ -236,12 +236,9 @@ class VecTask(Env):
         # if running with a viewer, set up keyboard shortcuts and camera
         if self.headless == False:
             # subscribe to keyboard shortcuts
-            self.viewer = self.gym.create_viewer(
-                self.sim, gymapi.CameraProperties())
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_ESCAPE, "QUIT")
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
+            self.viewer = self.gym.create_viewer(self.sim, gymapi.CameraProperties())
+            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_ESCAPE, "QUIT")
+            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
 
             # set the camera position based on up axis
             sim_params = self.gym.get_sim_params(self.sim)
@@ -252,8 +249,7 @@ class VecTask(Env):
                 cam_pos = gymapi.Vec3(-3.0, 3.0, -3.0)
                 cam_target = gymapi.Vec3(10.0, 0.0, 15.0)
 
-            self.gym.viewer_camera_look_at(
-                self.viewer, None, cam_pos, cam_target)
+            self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
 
     def allocate_buffers(self):
         """Allocate the observation, states, etc. buffers.
@@ -264,21 +260,32 @@ class VecTask(Env):
         """
 
         # allocate buffers
-        self.obs_buf = torch.zeros(
-            (self.num_envs, self.num_obs), device=self.device, dtype=torch.float)
-        self.states_buf = torch.zeros(
-            (self.num_envs, self.num_states), device=self.device, dtype=torch.float)
-        self.rew_buf = torch.zeros(
-            self.num_envs, device=self.device, dtype=torch.float)
-        self.reset_buf = torch.ones(
-            self.num_envs, device=self.device, dtype=torch.long)
-        self.timeout_buf = torch.zeros(
-            self.num_envs, device=self.device, dtype=torch.long)
-        self.progress_buf = torch.zeros(
-            self.num_envs, device=self.device, dtype=torch.long)
-        self.randomize_buf = torch.zeros(
-            self.num_envs, device=self.device, dtype=torch.long)
+        self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=torch.float)
+        self.states_buf = torch.zeros((self.num_envs, self.num_states), device=self.device, dtype=torch.float)
+        self.rew_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.float)
+        self.reset_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
+        self.timeout_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+        self.progress_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+        self.randomize_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
         self.extras = {}
+
+
+    def set_sim_params_up_axis(self, sim_params: gymapi.SimParams, axis: str) -> int:
+        """Set gravity based on up axis and return axis index.
+
+        Args:
+            sim_params: sim params to modify the axis for.
+            axis: axis to set sim params for.
+        Returns:
+            axis index for up axis.
+        """
+        if axis == "z":
+            sim_params.up_axis = gymapi.UP_AXIS_Z
+            sim_params.gravity.x = 0
+            sim_params.gravity.y = 0
+            sim_params.gravity.z = -9.81
+            return 2
+        return 1
 
     def create_sim(self, compute_device: int, graphics_device: int, physics_engine, sim_params: gymapi.SimParams):
         """Create an Isaac Gym sim object.
@@ -323,12 +330,10 @@ class VecTask(Env):
             Observations, rewards, resets, info
             Observations are dict of observations (currently only one member called 'obs')
         """
-        # if self.clip_actions:
-        #     actions =
 
         # randomize actions
-        if self.dr_randomizations.get('actions', None):
-            actions = self.dr_randomizations['actions']['noise_lambda'](actions)
+        if self.dr_randomizations.get("actions", None):
+            actions = self.dr_randomizations["actions"]["noise_lambda"](actions)
 
         action_tensor = torch.clamp(actions, -self.clip_actions, self.clip_actions)
         # apply actions
@@ -341,8 +346,15 @@ class VecTask(Env):
             self.gym.simulate(self.sim)
 
         # to fix!
-        if self.device == 'cpu':
+        if self.device == "cpu":
             self.gym.fetch_results(self.sim, True)
+
+        # fill time out buffer # TODO
+        self.timeout_buf = torch.where(
+            self.progress_buf >= self.max_episode_length - 1,
+            torch.ones_like(self.timeout_buf),
+            torch.zeros_like(self.timeout_buf),
+        )
 
         # compute observations, rewards, resets, ...
         self.post_physics_step()
@@ -351,8 +363,8 @@ class VecTask(Env):
         self.timeout_buf = (self.progress_buf >= self.max_episode_length - 1) & (self.reset_buf != 0)
 
         # randomize observations
-        if self.dr_randomizations.get('observations', None):
-            self.obs_buf = self.dr_randomizations['observations']['noise_lambda'](self.obs_buf)
+        if self.dr_randomizations.get("observations", None):
+            self.obs_buf = self.dr_randomizations["observations"]["noise_lambda"](self.obs_buf)
 
         self.extras["time_outs"] = self.timeout_buf.to(self.rl_device)
 
@@ -386,6 +398,11 @@ class VecTask(Env):
         Returns:
             Observation dictionary
         """
+        zero_actions = self.zero_actions()
+
+        # step the simulator
+        self.step(zero_actions)
+
         self.obs_dict["obs"] = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
 
         # asymmetric actor-critic
@@ -426,7 +443,7 @@ class VecTask(Env):
                     self.enable_viewer_sync = not self.enable_viewer_sync
 
             # fetch results
-            if self.device != 'cpu':
+            if self.device != "cpu":
                 self.gym.fetch_results(self.sim, True)
 
             # step graphics
@@ -516,22 +533,22 @@ class VecTask(Env):
         for actor, actor_properties in dr_params["actor_params"].items():
             handle = self.gym.find_actor_handle(env, actor)
             for prop_name, prop_attrs in actor_properties.items():
-                if prop_name == 'color':
+                if prop_name == "color":
                     continue  # this is set randomly
                 props = param_getters_map[prop_name](env, handle)
                 if not isinstance(props, list):
                     props = [props]
                 for prop_idx, prop in enumerate(props):
                     for attr, attr_randomization_params in prop_attrs.items():
-                        name = prop_name + '_' + str(prop_idx) + '_' + attr
-                        lo_hi = attr_randomization_params['range']
-                        distr = attr_randomization_params['distribution']
-                        if 'uniform' not in distr:
-                            lo_hi = (-1.0 * float('Inf'), float('Inf'))
+                        name = prop_name + "_" + str(prop_idx) + "_" + attr
+                        lo_hi = attr_randomization_params["range"]
+                        distr = attr_randomization_params["distribution"]
+                        if "uniform" not in distr:
+                            lo_hi = (-1.0 * float("Inf"), float("Inf"))
                         if isinstance(prop, np.ndarray):
                             for attr_idx in range(prop[attr].shape[0]):
                                 params.append(prop[attr][attr_idx])
-                                names.append(name + '_' + str(attr_idx))
+                                names.append(name + "_" + str(attr_idx))
                                 lows.append(lo_hi[0])
                                 highs.append(lo_hi[1])
                         else:
@@ -590,55 +607,67 @@ class VecTask(Env):
                     nonphysical_param] else None
                 op = operator.add if op_type == 'additive' else operator.mul
 
-                if sched_type == 'linear':
-                    sched_scaling = 1.0 / sched_step * \
-                                    min(self.last_step, sched_step)
-                elif sched_type == 'constant':
+                if sched_type == "linear":
+                    sched_scaling = 1.0 / sched_step * min(self.last_step, sched_step)
+                elif sched_type == "constant":
                     sched_scaling = 0 if self.last_step < sched_step else 1
                 else:
                     sched_scaling = 1
 
-                if dist == 'gaussian':
+                if dist == "gaussian":
                     mu, var = dr_params[nonphysical_param]["range"]
-                    mu_corr, var_corr = dr_params[nonphysical_param].get("range_correlated", [0., 0.])
+                    mu_corr, var_corr = dr_params[nonphysical_param].get(
+                        "range_correlated", [0.0, 0.0]
+                    )
 
-                    if op_type == 'additive':
+                    if op_type == "additive":
                         mu *= sched_scaling
                         var *= sched_scaling
                         mu_corr *= sched_scaling
                         var_corr *= sched_scaling
-                    elif op_type == 'scaling':
+                    elif op_type == "scaling":
                         var = var * sched_scaling  # scale up var over time
-                        mu = mu * sched_scaling + 1.0 * \
-                             (1.0 - sched_scaling)  # linearly interpolate
+                        mu = mu * sched_scaling + 1.0 * (
+                            1.0 - sched_scaling
+                        )  # linearly interpolate
 
                         var_corr = var_corr * sched_scaling  # scale up var over time
-                        mu_corr = mu_corr * sched_scaling + 1.0 * \
-                                  (1.0 - sched_scaling)  # linearly interpolate
+                        mu_corr = mu_corr * sched_scaling + 1.0 * (
+                            1.0 - sched_scaling
+                        )  # linearly interpolate
 
                     def noise_lambda(tensor, param_name=nonphysical_param):
                         params = self.dr_randomizations[param_name]
-                        corr = params.get('corr', None)
+                        corr = params.get("corr", None)
                         if corr is None:
                             corr = torch.randn_like(tensor)
-                            params['corr'] = corr
-                        corr = corr * params['var_corr'] + params['mu_corr']
+                            params["corr"] = corr
+                        corr = corr * params["var_corr"] + params["mu_corr"]
                         return op(
-                            tensor, corr + torch.randn_like(tensor) * params['var'] + params['mu'])
+                            tensor,
+                            corr + torch.randn_like(tensor) * params["var"] + params["mu"],
+                        )
 
-                    self.dr_randomizations[nonphysical_param] = {'mu': mu, 'var': var, 'mu_corr': mu_corr,
-                                                                 'var_corr': var_corr, 'noise_lambda': noise_lambda}
+                    self.dr_randomizations[nonphysical_param] = {
+                        "mu": mu,
+                        "var": var,
+                        "mu_corr": mu_corr,
+                        "var_corr": var_corr,
+                        "noise_lambda": noise_lambda,
+                    }
 
-                elif dist == 'uniform':
+                elif dist == "uniform":
                     lo, hi = dr_params[nonphysical_param]["range"]
-                    lo_corr, hi_corr = dr_params[nonphysical_param].get("range_correlated", [0., 0.])
+                    lo_corr, hi_corr = dr_params[nonphysical_param].get(
+                        "range_correlated", [0.0, 0.0]
+                    )
 
-                    if op_type == 'additive':
+                    if op_type == "additive":
                         lo *= sched_scaling
                         hi *= sched_scaling
                         lo_corr *= sched_scaling
                         hi_corr *= sched_scaling
-                    elif op_type == 'scaling':
+                    elif op_type == "scaling":
                         lo = lo * sched_scaling + 1.0 * (1.0 - sched_scaling)
                         hi = hi * sched_scaling + 1.0 * (1.0 - sched_scaling)
                         lo_corr = lo_corr * sched_scaling + 1.0 * (1.0 - sched_scaling)
@@ -646,23 +675,35 @@ class VecTask(Env):
 
                     def noise_lambda(tensor, param_name=nonphysical_param):
                         params = self.dr_randomizations[param_name]
-                        corr = params.get('corr', None)
+                        corr = params.get("corr", None)
                         if corr is None:
                             corr = torch.randn_like(tensor)
-                            params['corr'] = corr
-                        corr = corr * (params['hi_corr'] - params['lo_corr']) + params['lo_corr']
-                        return op(tensor, corr + torch.rand_like(tensor) * (params['hi'] - params['lo']) + params['lo'])
+                            params["corr"] = corr
+                        corr = (
+                            corr * (params["hi_corr"] - params["lo_corr"])
+                            + params["lo_corr"]
+                        )
+                        return op(
+                            tensor,
+                            corr
+                            + torch.rand_like(tensor) * (params["hi"] - params["lo"])
+                            + params["lo"],
+                        )
 
-                    self.dr_randomizations[nonphysical_param] = {'lo': lo, 'hi': hi, 'lo_corr': lo_corr,
-                                                                 'hi_corr': hi_corr, 'noise_lambda': noise_lambda}
+                    self.dr_randomizations[nonphysical_param] = {
+                        "lo": lo,
+                        "hi": hi,
+                        "lo_corr": lo_corr,
+                        "hi_corr": hi_corr,
+                        "noise_lambda": noise_lambda,
+                    }
 
         if "sim_params" in dr_params and do_nonenv_randomize:
             prop_attrs = dr_params["sim_params"]
             prop = self.gym.get_sim_params(self.sim)
 
             if self.first_randomization:
-                self.original_props["sim_params"] = {
-                    attr: getattr(prop, attr) for attr in dir(prop)}
+                self.original_props["sim_params"] = {attr: getattr(prop, attr) for attr in dir(prop)}
 
             for attr, attr_randomization_params in prop_attrs.items():
                 apply_random_samples(
@@ -678,8 +719,7 @@ class VecTask(Env):
         extern_offsets = {}
         if self.actor_params_generator is not None:
             for env_id in env_ids:
-                self.extern_actor_params[env_id] = \
-                    self.actor_params_generator.sample()
+                self.extern_actor_params[env_id] = self.actor_params_generator.sample()
                 extern_offsets[env_id] = 0
 
         # randomise all attributes of each actor (hand, cube etc..)
@@ -703,25 +743,24 @@ class VecTask(Env):
                 #               {'damping': {'range': [0.3, 3.0], 'operation': 'scaling', 'distribution': 'loguniform'}
                 #               {'stiffness': {'range': [0.75, 1.5], 'operation': 'scaling', 'distribution': 'loguniform'}
                 for prop_name, prop_attrs in actor_properties.items():
-                    if prop_name == 'color':
-                        num_bodies = self.gym.get_actor_rigid_body_count(
-                            env, handle)
+                    if prop_name == "color":
+                        num_bodies = self.gym.get_actor_rigid_body_count(env, handle)
                         for n in range(num_bodies):
                             self.gym.set_rigid_body_color(env, handle, n, gymapi.MESH_VISUAL,
                                                           gymapi.Vec3(random.uniform(0, 1), random.uniform(0, 1),
                                                                       random.uniform(0, 1)))
                         continue
-
-                    if prop_name == 'scale':
-                        setup_only = prop_attrs.get('setup_only', False)
+                    if prop_name == "scale":
+                        setup_only = prop_attrs.get("setup_only", False)
                         if (setup_only and not self.sim_initialized) or not setup_only:
                             attr_randomization_params = prop_attrs
-                            sample = generate_random_samples(attr_randomization_params, 1,
-                                                             self.last_step, None)
+                            sample = generate_random_samples(
+                                attr_randomization_params, 1, self.last_step, None
+                            )
                             og_scale = 1
-                            if attr_randomization_params['operation'] == 'scaling':
+                            if attr_randomization_params["operation"] == "scaling":
                                 new_scale = og_scale * sample
-                            elif attr_randomization_params['operation'] == 'additive':
+                            elif attr_randomization_params["operation"] == "additive":
                                 new_scale = og_scale + sample
                             self.gym.set_actor_scale(env, handle, new_scale)
                         continue
@@ -735,8 +774,12 @@ class VecTask(Env):
                                 {attr: getattr(p, attr) for attr in dir(p)} for p in prop]
                         for p, og_p in zip(prop, self.original_props[prop_name]):
                             for attr, attr_randomization_params in prop_attrs.items():
-                                setup_only = attr_randomization_params.get('setup_only', False)
-                                if (setup_only and not self.sim_initialized) or not setup_only:
+                                setup_only = attr_randomization_params.get(
+                                    "setup_only", False
+                                )
+                                if (
+                                    setup_only and not self.sim_initialized
+                                ) or not setup_only:
                                     smpl = None
                                     if self.actor_params_generator is not None:
                                         smpl, extern_offsets[env_id] = get_attr_val_from_sample(
@@ -772,9 +815,14 @@ class VecTask(Env):
                 if extern_offsets[env_id] > 0:
                     extern_sample = self.extern_actor_params[env_id]
                     if extern_offsets[env_id] != extern_sample.shape[0]:
-                        print('env_id', env_id,
-                              'extern_offset', extern_offsets[env_id],
-                              'vs extern_sample.shape', extern_sample.shape)
+                        print(
+                            "env_id",
+                            env_id,
+                            "extern_offset",
+                            extern_offsets[env_id],
+                            "vs extern_sample.shape",
+                            extern_sample.shape,
+                        )
                         raise Exception("Invalid extern_sample size")
 
         self.first_randomization = False
