@@ -1,55 +1,24 @@
 import isaacgym
-import torch, sys
+import torch
+import sys
 
-from elegantrl.train.run import train_and_evaluate
-from elegantrl.train.config import Arguments, build_env
-from elegantrl.agents.AgentPPO import AgentPPO
-from elegantrl.agents.AgentSAC import AgentSAC
 import gym.spaces
 import numpy as np
-from elegantrl.envs.isaac_tasks import isaacgym_task_map
-from elegantrl.envs.isaac_tasks.base.vec_task import VecTask
-from elegantrl.envs.utils.utils import set_seed
-from elegantrl.envs.utils.config_utils import load_task_config, get_max_step_from_config
 from pprint import pprint
 from typing import Dict, Tuple
-from rofunc.lfd.rl.tasks import task_map
-from elegantrl.envs.IsaacGym import IsaacVecEnv
+
 from hydra._internal.utils import get_args_parser
+
+from elegantrl.train.config import Arguments
+from elegantrl.agents.AgentPPO import AgentPPO
+from elegantrl.agents.AgentSAC import AgentSAC
+
 from rofunc.config.utils import get_config, omegaconf_to_dict
-import argparse
+from rofunc.lfd.rl.tasks import task_map
 
 
 class ElegantRLIsaacGymEnvWrapper:
-    def __init__(
-            self,
-            custom_args,
-            task_name: str,
-            env=None,
-            env_num=-1,
-            sim_device_id=0,
-            rl_device_id=0,
-            headless=True,
-            should_print=False,
-    ):
-        # get config
-        sys.argv.append("task={}".format(task_name))
-        sys.argv.append("sim_device={}".format(custom_args.sim_device))
-        sys.argv.append("rl_device={}".format(custom_args.rl_device))
-        sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
-        sys.argv.append("headless={}".format(custom_args.headless))
-        args = get_args_parser().parse_args()
-        cfg = get_config('./learning/rl', 'config', args=args)
-        cfg_dict = omegaconf_to_dict(cfg.task)
-
-        env = task_map[task_name](cfg=cfg_dict,
-                                  rl_device=cfg.rl_device,
-                                  sim_device=cfg.sim_device,
-                                  graphics_device_id=cfg.graphics_device_id,
-                                  headless=cfg.headless,
-                                  virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                  force_render=cfg.force_render)
-
+    def __init__(self, env, cfg, should_print=False):
         is_discrete = isinstance(env.action_space, gym.spaces.Discrete)
         # is_discrete = not isinstance(env.action_space, gym.spaces.Box)  # Continuous action space
 
@@ -63,14 +32,11 @@ class ElegantRLIsaacGymEnvWrapper:
 
         target_return = 10 ** 10  # TODO:  plan to make `target_returns` optional
 
-        env_config = cfg_dict["env"]
-        max_step = get_max_step_from_config(env_config)
-
-        self.device = torch.device(rl_device_id)
+        self.device = torch.device(cfg.graphics_device_id)
         self.env = env
         self.env_num = env.num_envs
-        self.env_name = custom_args.task
-        self.max_step = max_step
+        self.env_name = cfg.task_name
+        self.max_step = cfg.task.env.episodeLength
         self.state_dim = state_dimension
         self.action_dim = action_dim
         self.if_discrete = is_discrete
@@ -80,8 +46,8 @@ class ElegantRLIsaacGymEnvWrapper:
             pprint(
                 {
                     "num_envs": env.num_envs,
-                    "env_name": custom_args.task,
-                    "max_step": max_step,
+                    "env_name": cfg.task_name,
+                    "max_step": cfg.task.env.episodeLength,
                     "state_dim": state_dimension,
                     "action_dim": action_dim,
                     "if_discrete": is_discrete,
@@ -127,30 +93,37 @@ class ElegantRLIsaacGymEnvWrapper:
         return observations, rewards.to(self.device), dones.to(self.device), info_dict
 
 
-def demo(custom_args):
-    env_name = custom_args.task
+def setup(custom_args, eval_mode=False):
+    # get config
+    sys.argv.append("task={}".format(custom_args.task))
+    sys.argv.append("sim_device={}".format(custom_args.sim_device))
+    sys.argv.append("rl_device={}".format(custom_args.rl_device))
+    sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
+    sys.argv.append("headless={}".format(custom_args.headless))
+    args = get_args_parser().parse_args()
+    cfg = get_config('./learning/rl', 'config', args=args)
+    task_cfg_dict = omegaconf_to_dict(cfg.task)
+
+    if eval_mode:
+        task_cfg_dict['env']['numEnvs'] = 16
+
+    env = task_map[custom_args.task](cfg=task_cfg_dict,
+                                     rl_device=cfg.rl_device,
+                                     sim_device=cfg.sim_device,
+                                     graphics_device_id=cfg.graphics_device_id,
+                                     headless=cfg.headless,
+                                     virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                     force_render=cfg.force_render)
+
+    env = ElegantRLIsaacGymEnvWrapper(env, cfg)
+
     if custom_args.agent.lower() == "ppo":
         agent_class = AgentPPO
     elif custom_args.agent.lower() == "sac":
         agent_class = AgentSAC
     else:
-        raise ValueError("Unknown agent")
-    env_func = IsaacVecEnv
-    gpu_id = 0
+        raise ValueError("Agent not supported")
 
-    env_args = {
-        'env_num': 2048,
-        'env_name': env_name,
-        'max_step': 1000,
-        'state_dim': 41,
-        'action_dim': 18,
-        'if_discrete': False,
-        'target_return': 60000.,
-
-        'sim_device_id': gpu_id,
-        'rl_device_id': gpu_id,
-    }
-    env = build_env(env=ElegantRLIsaacGymEnvWrapper(custom_args, "CURICabinet"), env_func=env_func, env_args=env_args)
     args = Arguments(agent_class, env=env)
     args.if_Isaac = True
     args.if_use_old_traj = True
@@ -167,22 +140,7 @@ def demo(custom_args):
 
     args.eval_gap = 1e6
     args.target_step = 3e8
-    args.learner_gpus = 0
-    args.random_seed = 0
+    args.learner_gpus = cfg.graphics_device_id
+    args.random_seed = 42
 
-    train_and_evaluate(args)
-
-
-if __name__ == '__main__':
-    gpu_id = 1
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="CURICabinetBimanual")
-    parser.add_argument("--agent", type=str, default="ppo")
-    parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
-    parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
-    parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="False")
-    parser.add_argument("--train", action="store_false", help="turn to train mode while adding this argument")
-    custom_args = parser.parse_args()
-
-    demo(custom_args)
+    return env, args
