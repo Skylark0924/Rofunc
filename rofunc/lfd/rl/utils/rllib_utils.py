@@ -2,281 +2,19 @@ import gym.spaces
 import isaacgym
 import numpy as np
 import torch
-from elegantrl.envs.isaac_tasks import isaacgym_task_map
-from elegantrl.envs.isaac_tasks.base.vec_task import VecTask
-from elegantrl.envs.utils.utils import set_seed
-from elegantrl.envs.utils.config_utils import load_task_config, get_max_step_from_config
-from pprint import pprint
-from typing import Dict, Tuple
+from ray.rllib.env import VectorEnv
 
-"""
-Source: https://github.com/NVIDIA-Omniverse/IsaacGymEnvs (I hate `import hydra` in IsaacGym Preview 3)
-Modify: https://github.com/hmomin (hmomin's code is quite good!)
-Modify: https://github.com/Yonv1943 (I make a little change based on hmomin's code)
-a
-There are still cuda:0 BUG in Isaac Gym Preview 3:
-    Isaac Gym Preview 3 will force the cuda:0 to be used even you set the `sim_device_id=1, rl_device_id=1`
-    You can only use `export CUDA_VISIBLE_DEVICES=1,2,3` to let Isaac Gym use a specified GPU.
-
-
-isaacgym/gymdeps.py", line 21, in _import_deps
-raise ImportError("PyTorch was imported before isaacgym modules.  
-                   Please import torch after isaacgym modules.")             
-
-run the following code in bash before running.
-export LD_LIBRARY_PATH=/xfs/home/podracer_steven/anaconda3/envs/rlgpu/lib
-can't use os.environ['LD_LIBRARY_PATH'] = /xfs/home/podracer_steven/anaconda3/envs/rlgpu/lib
-
-cd isaacgym/python/ElegantRL-1212
-conda activate rlgpu
-export LD_LIBRARY_PATH=~/anaconda3/envs/rlgpu/lib
-"""
-
-
-class IsaacVecEnv:
-    def __init__(
-            self,
-            env_name: str,
-            env_num=-1,
-            sim_device_id=0,
-            rl_device_id=0,
-            headless=True,
-            should_print=False,
-    ):
-        """Preprocesses a vectorized Isaac Gym environment for RL training.
-        [Isaac Gym - Preview 3 Release](https://developer.nvidia.com/isaac-gym)
-
-        Args:
-            env_name (str): the name of the environment to be processed.
-            env_num (int, optional): the number of environments to simulate on the
-                device. Defaults to whatever is specified in the corresponding config
-                file.
-            sim_device_id (int, optional): the GPU device id to render physics on.
-                Defaults to 0.
-            rl_device_id (int, optional): the GPU device id to perform RL training on.
-                Defaults to 0.
-            headless (bool, optional): whether or not the Isaac Gym environment should
-                render on-screen. Defaults to False.
-            should_print (bool, optional): whether or not the arguments should be
-                printed. Defaults to False.
-        """
-        task_config = load_task_config(env_name)
-        sim_device = f"cuda:{sim_device_id}" if sim_device_id >= 0 else "cpu"
-        self.device = sim_device
-        isaac_task = isaacgym_task_map[env_name]
-        self._override_default_env_num(env_num, task_config)
-        set_seed(-1, False)
-
-        env: VecTask = isaac_task(
-            cfg=task_config,
-            sim_device=sim_device,
-            graphics_device_id=rl_device_id,
-            headless=headless,
-        )
-
-        is_discrete = isinstance(env.action_space, gym.spaces.Discrete)
-        # is_discrete = not isinstance(env.action_space, gym.spaces.Box)  # Continuous action space
-
-        state_dimension = env.num_obs
-        assert isinstance(state_dimension, int)
-
-        action_dim = getattr(env.action_space, 'n') if is_discrete else env.num_acts
-        if not is_discrete:
-            assert all(getattr(env.action_space, 'high') == np.ones(action_dim))
-            assert all(-getattr(env.action_space, 'low') == np.ones(action_dim))
-
-        target_return = 10 ** 10  # TODO:  plan to make `target_returns` optional
-
-        env_config = task_config["env"]
-        max_step = get_max_step_from_config(env_config)
-
-        self.device = torch.device(rl_device_id)
-        self.env = env
-        self.env_num = env.num_envs
-        self.env_name = env_name
-        self.max_step = max_step
-        self.state_dim = state_dimension
-        self.action_dim = action_dim
-        self.if_discrete = is_discrete
-        self.target_return = target_return
-
-        if should_print:
-            pprint(
-                {
-                    "num_envs": env.num_envs,
-                    "env_name": env_name,
-                    "max_step": max_step,
-                    "state_dim": state_dimension,
-                    "action_dim": action_dim,
-                    "if_discrete": is_discrete,
-                    "target_return": target_return,
-                }
-            )
-
-    @staticmethod
-    def _override_default_env_num(num_envs: int, config_args: Dict):
-        """Overrides the default number of environments if it's passed in.
-
-        Args:
-            num_envs (int): new number of environments.
-            config_args (Dict): configuration retrieved.
-        """
-        if num_envs > 0:
-            config_args["env"]["numEnvs"] = num_envs
-
-    def reset(self) -> torch.Tensor:
-        """Resets the environments in the VecTask that need to be reset.
-
-        Returns:
-            torch.Tensor: the next states in the simulation.
-        """
-        observations = self.env.reset()['obs'].to(self.device)
-        return observations
-
-    def step(
-            self, actions: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, Dict]:
-        """Steps through the vectorized environment.
-
-        Args:
-            actions (torch.Tensor): a multidimensional tensor of actions to perform on
-                *each* environment.
-
-        Returns:
-            Tuple[torch.Tensor, torch.Tensor, torch.Tensor, Dict]: a tuple containing
-                observations, rewards, dones, and extra info.
-        """
-        observations_dict, rewards, dones, info_dict = self.env.step(actions)
-        observations = observations_dict["obs"].to(self.device)
-        return observations, rewards.to(self.device), dones.to(self.device), info_dict
-
-
-class IsaacOneEnv(IsaacVecEnv):
-    def __init__(self, env_name: str, device_id=0, headless=False, should_print=False):
-        """Preprocesses a single Isaac Gym environment for RL evaluating.
-        [Isaac Gym - Preview 3 Release](https://developer.nvidia.com/isaac-gym)
-
-        Args:
-            env_name (str): the name of the environment to be processed.
-            device_id (int, optional): the GPU device id to render physics and perform
-                RL training. Defaults to 0.
-            headless (bool, optional): whether or not the Isaac Gym environment should
-                render on-screen. Defaults to False.
-            should_print (bool, optional): whether or not the arguments should be
-                printed. Defaults to False.
-        """
-        super().__init__(
-            env_name=env_name,
-            env_num=1,
-            sim_device_id=device_id,
-            rl_device_id=device_id,
-            headless=True,
-            should_print=should_print,
-        )
-
-    def reset(self) -> np.ndarray:
-        """Resets the environments in the VecTask that need to be reset.
-
-        Returns:
-            np.ndarray: a numpy array containing the new state of the single
-                environment.
-        """
-        tensor_state_dict = self.env.reset()
-        tensor_states = tensor_state_dict["obs"]
-        first_state = tensor_states[0]
-        return first_state.cpu().detach().numpy()  # state
-
-    def step(
-            self, action: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict]:
-        """Steps through the single environment.
-
-        Args:
-            action (np.ndarray): a (possibly multidimensional) numpy array of actions
-                to perform on the single environment.
-
-        Returns:
-            Tuple[np.ndarray, np.ndarray, np.ndarray, Dict]: a tuple containing
-                observations, rewards, dones, and extra info.
-        """
-        tensor_action = torch.as_tensor(action, dtype=torch.float32).unsqueeze(0)
-        tensor_state_dict, tensor_reward, tensor_done, info_dict = self.env.step(
-            tensor_action
-        )
-        tensor_state = tensor_state_dict["obs"]
-        state = tensor_state[0].cpu().detach().numpy()
-        reward = tensor_reward[0].item()
-        done = tensor_done[0].item()
-        return state, reward, done, info_dict
-
-
-def check_isaac_gym(env_name):
-    gpu_id = 0
-    env = IsaacVecEnv(env_name=env_name, env_num=1024, sim_device_id=gpu_id, rl_device_id=gpu_id, should_print=True)
-    states = env.reset()
-    print('\n\nstates.shape', states.shape)
-
-    import torch
-
-    action = torch.rand((env.env_num, env.action_dim), dtype=torch.float32)
-    print('\n\naction.shape', action.shape)
-
-    states, rewards, dones, info_dict = env.step(action)
-    print(f'\nstates.shape  {states.shape}'
-          f'\nrewards.shape {rewards.shape}'
-          f'\ndones.shape   {dones.shape}'
-          f'\nrepr(info.dict) {repr(info_dict)}')
-
-    from tqdm import trange
-
-    device = torch.device(f"cuda:{gpu_id}")
-    rewards_ary = list()
-    dones_ary = list()
-    env.reset()
-    for _ in trange(env.max_step * 2):
-        action = torch.rand((env.env_num, env.action_dim), dtype=torch.float32, device=device)
-        states, rewards, dones, info_dict = env.step(action)
-
-        rewards_ary.append(rewards)
-        dones_ary.append(dones)
-
-    rewards_ary = torch.stack(rewards_ary)  # rewards_ary.shape == (env.max_step, env.env_num)
-    dones_ary = torch.stack(dones_ary)
-    print(f'\nrewards_ary.shape {rewards_ary.shape}'
-          f'\ndones_ary.shape   {dones_ary.shape}')
-
-    reward_list = list()
-    steps_list = list()
-    print()
-    for i in trange(env.env_num):
-        dones_where = torch.where(dones_ary[:, i])[0]
-        episode_num = dones_where.shape[0]
-
-        if episode_num == 0:
-            continue
-
-        j0 = 0
-        rewards_env = rewards_ary[:, i]
-        for j1 in dones_where + 1:
-            reward_list.append(rewards_env[j0:j1].sum())
-            steps_list.append(j1 - j0 + 1)
-            j0 = j1
-
-    reward_list = torch.tensor(reward_list, dtype=torch.float32)
-    steps_list = torch.tensor(steps_list, dtype=torch.float32)
-
-    print(f'\n reward_list avg {reward_list.mean(0):9.2f}'
-          f'\n             std {reward_list.std(0):9.2f}'
-          f'\n  steps_list avg {steps_list.mean(0):9.2f}'
-          f'\n             std {steps_list.std(0):9.2f}'
-          f'\n     episode_num {steps_list.shape[0]}')
-    return reward_list, steps_list
+from elegantrl.envs.IsaacGym import IsaacVecEnv
+from rofunc.lfd.rl.tasks import task_map
+from rofunc.lfd.rl.utils.elegantrl_utils import ElegantRLIsaacGymEnvWrapper
+from rofunc.config.utils import get_config, omegaconf_to_dict
+from hydra._internal.utils import get_args_parser
+from tqdm.auto import tqdm
 
 
 class RLlibEnvWrapper(gym.Env):
     def __init__(self, env_config):
-        self.env = IsaacVecEnv(env_name=env_config["env_name"], env_num=1, sim_device_id=env_config["gpu_id"],
-                               rl_device_id=env_config["gpu_id"], should_print=True)
+        self.env = ElegantRLIsaacGymEnvWrapper(env=env, cfg=env_config)
         self.action_space = self.env.env.action_space
         self.observation_space = self.env.env.observation_space
 
@@ -289,60 +27,151 @@ class RLlibEnvWrapper(gym.Env):
         return np.array(observations.cpu())[0], np.array(rewards.cpu())[0], np.array(dones.cpu())[0], info_dict
 
 
-from ray.rllib.env import VectorEnv
-from ray.rllib.utils.annotations import override
-
-
-class RLlibVecEnvWrapper(VectorEnv):
+class RLlibIsaacGymEnvWrapper(VectorEnv):
     def __init__(self, env_config):
-        self.env = IsaacVecEnv(env_name=env_config["env_name"], env_num=1024, sim_device_id=env_config["gpu_id"],
-                               rl_device_id=env_config["gpu_id"], should_print=True)
+        # self.env = IsaacVecEnv(env_name=env_config["task_name"], env_num=1024, sim_device_id=env_config["gpu_id"],
+        #                        rl_device_id=env_config["gpu_id"], should_print=True)
+
+        env = task_map[env_config["task_name"]](cfg=env_config["task_cfg_dict"],
+                                                rl_device=env_config["cfg"].rl_device,
+                                                sim_device=env_config["cfg"].sim_device,
+                                                graphics_device_id=env_config["cfg"].graphics_device_id,
+                                                headless=env_config["cfg"].headless,
+                                                virtual_screen_capture=env_config["cfg"].capture_video,  # TODO: check
+                                                force_render=env_config["cfg"].force_render)
+        self.env = ElegantRLIsaacGymEnvWrapper(env=env, cfg=env_config["cfg"])
+        # self.sub_env = IsaacOneEnv(env_name=env_config["env_name"])
         self.action_space = self.env.env.action_space
         self.observation_space = self.env.env.observation_space
         self.num_envs = self.env.env_num
+        super().__init__(self.observation_space, self.action_space, self.num_envs)
 
-    # @override(VectorEnv)
-    # def reset_at(self, index):
-    #     return self.env.env.reset_idx(index, index)
+        self._prv_obs = [None for _ in range(self.num_envs)]
+
+    def reset_at(self, index=None):
+        return self._prv_obs[index]
 
     def vector_reset(self):
-        return np.array(self.env.reset().cpu()).tolist()
+        self._prv_obs = np.array(self.env.reset().cpu()).reshape((self.num_envs, -1))
+        return self._prv_obs
 
+    # @override(VectorEnv)
     def vector_step(self, actions):
         actions = torch.tensor(np.array(actions)).to(self.env.device)
         observations, rewards, dones, info_dict_raw = self.env.step(actions)
         info_dict_raw["time_outs"] = np.array(info_dict_raw["time_outs"].cpu())
-        info_dict = {i: {"agent_0": {"training_enabled": False}} for i in range(self.num_envs)}
+        # info_dict = [{"agent_0": {"training_enabled": False}} for i in range(self.num_envs)]
         # info_dict = {i: {} for i in range(self.num_envs)}
+        info_dict = [{} for i in range(self.num_envs)]
+        obs = np.array(observations.cpu()).reshape((self.num_envs, -1))
+        self._prv_obs = obs
 
-        return np.array(observations.cpu()), np.array(rewards.cpu()), np.array(
-            dones.cpu()), info_dict
+        return obs, np.array(rewards.cpu()), np.array(dones.cpu()), info_dict
 
     # @override(VectorEnv)
     # def get_sub_environments(self):
-    #     return self.env
+    #     return self.sub_env
 
 
-def ray_test(env_name):
-    import ray
+def ray_test(custom_args):
+    import ray, sys
     from ray.rllib.agents import ppo
 
     gpu_id = 0
 
     ray.init()
-    trainer = ppo.PPOTrainer(env=RLlibEnvWrapper, config={
-        "env_config": {"gpu_id": gpu_id, "env_name": env_name},  # config to pass to env class
+
+    sys.argv.append("task={}".format(custom_args.task))
+    sys.argv.append("sim_device={}".format(custom_args.sim_device))
+    sys.argv.append("rl_device={}".format(custom_args.rl_device))
+    sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
+    sys.argv.append("headless={}".format(custom_args.headless))
+    args = get_args_parser().parse_args()
+    cfg = get_config('./learning/rl', 'config', args=args)
+    task_cfg_dict = omegaconf_to_dict(cfg.task)
+
+    trainer = ppo.PPOTrainer(env=RLlibIsaacGymEnvWrapper, config={
+        "env_config": {"gpu_id": gpu_id,
+                       "task_name": custom_args.task,
+                       "task_cfg_dict": task_cfg_dict,
+                       "cfg": cfg},  # config to pass to env class
         # "framework": "torch",
         "num_workers": 0,
-        "num_envs_per_worker": 1,
+        # 'explore': True,
+        # 'exploration_config': {
+        #     'type': 'StochasticSampling'
+        #     # 'type': 'Curiosity',
+        #     # 'eta': 1.0,
+        #     # 'lr': 0.001,
+        #     # 'feature_dim': 288,
+        #     # "feature_net_config": {
+        #     #    "fcnet_hiddens": [],
+        #     #    "fcnet_activation": "relu",
+        #     # },
+        #     # "inverse_net_hiddens": [256],
+        #     # "inverse_net_activation": "relu",
+        #     # "forward_net_hiddens": [256],
+        #     # "forward_net_activation": "relu",
+        #     # "beta": 0.2,
+        #     # "sub_exploration": {
+        #     #    "type": "StochasticSampling",
+        #     # }
+        # },
+        # "num_envs_per_worker": 1,
+        'gamma': 0.998,
+
+        'train_batch_size': 2048,
+        'sgd_minibatch_size': 2048,
+        'rollout_fragment_length': 64,
+        'num_sgd_iter': 3,
+        'lr': 5e-5,
+
+        'vf_loss_coeff': 0.5,
+        'vf_share_layers': True,
+        'kl_coeff': 0.0,
+        'kl_target': 0.1,
+        'clip_param': 0.1,
+        'entropy_coeff': 0.005,
+
+        'grad_clip': 1.0,
+        'lambda': 0.8,
     })
 
-    while True:
-        print(trainer.train())
+    # config = ppo.DEFAULT_CONFIG.copy()
+    # config["num_gpus"] = 0
+    # config["num_workers"] = 1
+    # config["eager"] = False
+    # trainer = ppo.PPOTrainer(config=config, env="CartPole-v0")
+
+    try:
+        with tqdm(range(32768)) as pbar:
+            for i in pbar:
+                results = trainer.train()
+                if i % 64 == 0:
+                    avg_reward = results['episode_reward_mean']
+                    pbar.set_description(
+                        F'Iter: {i}; avg.rew={avg_reward:02f}')
+                if i % 1024 == 0:
+                    ckpt = trainer.save()
+                    print(F'saved ckpt = {ckpt}')
+    finally:
+        ckpt = trainer.save()
+        print(F'saved ckpt = {ckpt}')
 
 
 if __name__ == '__main__':
-    import isaacgym
+    import argparse
 
-    # check_isaac_gym("Ant")
-    ray_test("Ant")
+    gpu_id = 0
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--task", type=str, default="CURICabinet")
+    parser.add_argument("--agent", type=str, default="ppo")
+    parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
+    parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
+    parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
+    parser.add_argument("--headless", type=str, default="False")
+    parser.add_argument("--test", action="store_true", help="turn to test mode while adding this argument")
+    custom_args = parser.parse_args()
+
+    if not custom_args.test:
+        ray_test(custom_args)
