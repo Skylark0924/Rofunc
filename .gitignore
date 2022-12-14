@@ -159,3 +159,7 @@ rofunc/examples/learning/skrl_example.py
 rofunc/examples/learning/skrl_example2.py
 
 rofunc/lfd/rl/utils/result
+
+rofunc/examples/learning/result/CURICabinetBimanual_PPO_0/tensorboard/
+
+rofunc/examples/learning/result/CURICabinet_PPO_42/tensorboard/
