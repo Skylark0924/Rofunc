@@ -20,13 +20,11 @@ def data_process(data: str):
     Returns:
         position, orientation: position and orientation of the rigidbody
     """
-    # print(type(data))
     data = data.split('ID')
     print(len(data[1:]))
     position_list = []
     orientation_list = []
     for i in data[1:]:
-        # print(i)
         position = re.findall(r"Position\s*:\s*(.*)", i)[0]
         orientation = re.findall(r"Orientation\s*:\s*(.*)", i)[0]
         position_list.append(eval(position))
