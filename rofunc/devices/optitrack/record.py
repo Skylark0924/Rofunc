@@ -6,7 +6,7 @@ import numpy as np
 from typing import Tuple, List
 
 
-def data_process(data: str) -> Tuple[List, List]:
+def data_process(data: str):
     """
     Args:
         data: string received from optitrack win server
@@ -14,9 +14,16 @@ def data_process(data: str) -> Tuple[List, List]:
     Returns:
         position, orientation: position and orientation of the rigidbody
     """
-    position = re.findall(r"Position\s*:\s*(.*)", data)[0]
-    orientation = re.findall(r"Orientation\s*:\s*(.*)", data)[0]
-    return eval(position), eval(orientation)
+    data = data.split('ID')
+    print(len(data[1:]))
+    position_list = []
+    orientation_list = []
+    for i in data[1:]:
+        position = re.findall(r"Position\s*:\s*(.*)", i)[0]
+        orientation = re.findall(r"Orientation\s*:\s*(.*)", i)[0]
+        position_list.append(eval(position))
+        orientation_list.append(eval(orientation))
+    return position_list, orientation_list
 
 
 def opti_run(root_dir: str, exp_name: str, ip: str, port: int) -> None:
@@ -33,11 +40,9 @@ def opti_run(root_dir: str, exp_name: str, ip: str, port: int) -> None:
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((ip, port))
     print("Connected to socket: {}:{}".format(ip, port))
-    # receive optitrack data
     opti_data = np.array([])
     while True:
         utf_data = client.recv(1024).decode("utf-8")
-        print(utf_data)
         raw_position, raw_orientation = data_process(utf_data)
         client.send("ok".encode("utf-8"))
         raw_pose = np.append(raw_position, raw_orientation)
