@@ -152,9 +152,9 @@ class NatNetClient:
         """checks to see if stream version can change, then changes it with position reset"""
         return_code = -1
         if (
-            self.__can_change_bitstream_version
-            and (major != self.__nat_net_requested_version[0])
-            and (minor != self.__nat_net_requested_version[1])
+                self.__can_change_bitstream_version
+                and (major != self.__nat_net_requested_version[0])
+                and (minor != self.__nat_net_requested_version[1])
         ):
             sz_command = "Bitstream,%1.1d.%1.1d" % (major, minor)
             return_code = self.send_command(sz_command)
@@ -208,10 +208,10 @@ class NatNetClient:
         elif self.get_application_name() == "Not Set":
             ret_value = False
         elif (
-            (self.__server_version[0] == 0)
-            and (self.__server_version[1] == 0)
-            and (self.__server_version[2] == 0)
-            and (self.__server_version[3] == 0)
+                (self.__server_version[0] == 0)
+                and (self.__server_version[1] == 0)
+                and (self.__server_version[2] == 0)
+                and (self.__server_version[3] == 0)
         ):
             ret_value = False
         return ret_value
@@ -347,17 +347,17 @@ class NatNetClient:
         offset = 0
 
         # ID (4 bytes)
-        new_id = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        new_id = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
 
         trace_mf("RB: %3.1d ID: %3.1d" % (rb_num, new_id))
 
         # Position and orientation
-        pos = Vector3.unpack(data[offset : offset + 12])
+        pos = Vector3.unpack(data[offset: offset + 12])
         offset += 12
         trace_mf("\tPosition    : [%3.2f, %3.2f, %3.2f]" % (pos[0], pos[1], pos[2]))
 
-        rot = Quaternion.unpack(data[offset : offset + 16])
+        rot = Quaternion.unpack(data[offset: offset + 16])
         offset += 16
         trace_mf(
             "\tOrientation : [%3.2f, %3.2f, %3.2f, %3.2f]"
@@ -370,10 +370,12 @@ class NatNetClient:
         if self.rigid_body_listener is not None:
             self.rigid_body_listener(new_id, pos, rot)
 
+        offset += 6
+
         # RB Marker Data ( Before version 3.0.  After Version 3.0 Marker data is in description )
         if major < 3 and major != 0:
             # Marker count (4 bytes)
-            marker_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            marker_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             marker_count_range = range(0, marker_count)
             trace_mf("\tMarker Count:", marker_count)
@@ -384,7 +386,7 @@ class NatNetClient:
 
             # Marker positions
             for i in marker_count_range:
-                pos = Vector3.unpack(data[offset : offset + 12])
+                pos = Vector3.unpack(data[offset: offset + 12])
                 offset += 12
                 trace_mf("\tMarker", i, ":", pos[0], ",", pos[1], ",", pos[2])
                 rb_marker_list[i].pos = pos
@@ -393,7 +395,7 @@ class NatNetClient:
                 # Marker ID's
                 for i in marker_count_range:
                     new_id = int.from_bytes(
-                        data[offset : offset + 4], byteorder="little"
+                        data[offset: offset + 4], byteorder="little"
                     )
                     offset += 4
                     trace_mf("\tMarker ID", i, ":", new_id)
@@ -401,7 +403,7 @@ class NatNetClient:
 
                 # Marker sizes
                 for i in marker_count_range:
-                    size = FloatValue.unpack(data[offset : offset + 4])
+                    size = FloatValue.unpack(data[offset: offset + 4])
                     offset += 4
                     trace_mf("\tMarker Size", i, ":", size[0])
                     rb_marker_list[i].size = size
@@ -409,14 +411,14 @@ class NatNetClient:
             for i in marker_count_range:
                 rigid_body.add_rigid_body_marker(rb_marker_list[i])
         if major >= 2:
-            (marker_error,) = FloatValue.unpack(data[offset : offset + 4])
+            (marker_error,) = FloatValue.unpack(data[offset: offset + 4])
             offset += 4
             trace_mf("\tMarker Error: %3.2f" % marker_error)
             rigid_body.error = marker_error
 
         # Version 2.6 and later
         if ((major == 2) and (minor >= 6)) or major > 2:
-            (param,) = struct.unpack("h", data[offset : offset + 2])
+            (param,) = struct.unpack("h", data[offset: offset + 2])
             tracking_valid = (param & 0x01) != 0
             offset += 2
             is_valid_str = "False"
@@ -434,12 +436,12 @@ class NatNetClient:
     def __unpack_skeleton(self, data, major, minor):
 
         offset = 0
-        new_id = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        new_id = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         trace_mf("ID:", new_id)
         skeleton = MoCapData.Skeleton(new_id)
 
-        rigid_body_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        rigid_body_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         trace_mf("Rigid Body Count : %3.1d" % rigid_body_count)
         for rb_num in range(0, rigid_body_count):
@@ -455,7 +457,7 @@ class NatNetClient:
     def __unpack_frame_prefix_data(self, data):
         offset = 0
         # Frame number (4 bytes)
-        frame_number = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        frame_number = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         trace_mf("Frame #:", frame_number)
         frame_prefix_data = MoCapData.FramePrefixData(frame_number)
@@ -465,7 +467,7 @@ class NatNetClient:
         marker_set_data = MoCapData.MarkerSetData()
         offset = 0
         # Marker set count (4 bytes)
-        marker_set_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        marker_set_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         trace_mf("Marker Set Count:", marker_set_count)
 
@@ -477,12 +479,12 @@ class NatNetClient:
             trace_mf("Model Name      : ", model_name.decode("utf-8"))
             marker_data.set_model_name(model_name)
             # Marker count (4 bytes)
-            marker_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            marker_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             trace_mf("Marker Count    : ", marker_count)
 
             for j in range(0, marker_count):
-                pos = Vector3.unpack(data[offset : offset + 12])
+                pos = Vector3.unpack(data[offset: offset + 12])
                 offset += 12
                 trace_mf(
                     "\tMarker %3.1d : [%3.2f,%3.2f,%3.2f]" % (j, pos[0], pos[1], pos[2])
@@ -492,13 +494,13 @@ class NatNetClient:
 
         # Unlabeled markers count (4 bytes)
         unlabeled_markers_count = int.from_bytes(
-            data[offset : offset + 4], byteorder="little"
+            data[offset: offset + 4], byteorder="little"
         )
         offset += 4
         trace_mf("Unlabeled Markers Count:", unlabeled_markers_count)
 
         for i in range(0, unlabeled_markers_count):
-            pos = Vector3.unpack(data[offset : offset + 12])
+            pos = Vector3.unpack(data[offset: offset + 12])
             offset += 12
             trace_mf(
                 "\tMarker %3.1d : [%3.2f,%3.2f,%3.2f]" % (i, pos[0], pos[1], pos[2])
@@ -510,7 +512,7 @@ class NatNetClient:
         rigid_body_data = MoCapData.RigidBodyData()
         offset = 0
         # Rigid body count (4 bytes)
-        rigid_body_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        rigid_body_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         trace_mf("Rigid Body Count:", rigid_body_count)
 
@@ -531,7 +533,7 @@ class NatNetClient:
         skeleton_count = 0
         if (major == 2 and minor > 0) or major > 2:
             skeleton_count = int.from_bytes(
-                data[offset : offset + 4], byteorder="little"
+                data[offset: offset + 4], byteorder="little"
             )
             offset += 4
             trace_mf("Skeleton Count:", skeleton_count)
@@ -558,19 +560,19 @@ class NatNetClient:
         labeled_marker_count = 0
         if (major == 2 and minor > 3) or major > 2:
             labeled_marker_count = int.from_bytes(
-                data[offset : offset + 4], byteorder="little"
+                data[offset: offset + 4], byteorder="little"
             )
             offset += 4
             trace_mf("Labeled Marker Count:", labeled_marker_count)
             for _ in range(0, labeled_marker_count):
                 model_id = 0
                 marker_id = 0
-                tmp_id = int.from_bytes(data[offset : offset + 4], byteorder="little")
+                tmp_id = int.from_bytes(data[offset: offset + 4], byteorder="little")
                 offset += 4
                 model_id, marker_id = self.__decode_marker_id(tmp_id)
-                pos = Vector3.unpack(data[offset : offset + 12])
+                pos = Vector3.unpack(data[offset: offset + 12])
                 offset += 12
-                size = FloatValue.unpack(data[offset : offset + 4])
+                size = FloatValue.unpack(data[offset: offset + 4])
                 offset += 4
                 trace_mf(
                     "ID     : [MarkerID: %3.1d] [ModelID: %3.1d]"
@@ -582,7 +584,7 @@ class NatNetClient:
                 # Version 2.6 and later
                 param = 0
                 if (major == 2 and minor >= 6) or major > 2:
-                    (param,) = struct.unpack("h", data[offset : offset + 2])
+                    (param,) = struct.unpack("h", data[offset: offset + 2])
                     offset += 2
                     # occluded = ( param & 0x01 ) != 0
                     # point_cloud_solved = ( param & 0x02 ) != 0
@@ -591,7 +593,7 @@ class NatNetClient:
                 # Version 3.0 and later
                 residual = 0.0
                 if major >= 3:
-                    (residual,) = FloatValue.unpack(data[offset : offset + 4])
+                    (residual,) = FloatValue.unpack(data[offset: offset + 4])
                     offset += 4
                     trace_mf("  err  : [%3.2f]" % residual)
 
@@ -610,21 +612,21 @@ class NatNetClient:
         force_plate_count = 0
         if (major == 2 and minor >= 9) or major > 2:
             force_plate_count = int.from_bytes(
-                data[offset : offset + 4], byteorder="little"
+                data[offset: offset + 4], byteorder="little"
             )
             offset += 4
             trace_mf("Force Plate Count:", force_plate_count)
             for i in range(0, force_plate_count):
                 # ID
                 force_plate_id = int.from_bytes(
-                    data[offset : offset + 4], byteorder="little"
+                    data[offset: offset + 4], byteorder="little"
                 )
                 offset += 4
                 force_plate = MoCapData.ForcePlate(force_plate_id)
 
                 # Channel Count
                 force_plate_channel_count = int.from_bytes(
-                    data[offset : offset + 4], byteorder="little"
+                    data[offset: offset + 4], byteorder="little"
                 )
                 offset += 4
 
@@ -637,7 +639,7 @@ class NatNetClient:
                 for j in range(force_plate_channel_count):
                     fp_channel_data = MoCapData.ForcePlateChannelData()
                     force_plate_channel_frame_count = int.from_bytes(
-                        data[offset : offset + 4], byteorder="little"
+                        data[offset: offset + 4], byteorder="little"
                     )
                     offset += 4
                     out_string = "\tChannel %3.1d: " % (j)
@@ -651,7 +653,7 @@ class NatNetClient:
                     )
                     for k in range(force_plate_channel_frame_count):
                         force_plate_channel_val = FloatValue.unpack(
-                            data[offset : offset + 4]
+                            data[offset: offset + 4]
                         )
                         offset += 4
                         fp_channel_data.add_frame_entry(force_plate_channel_val)
@@ -675,20 +677,20 @@ class NatNetClient:
         # Device data (version 2.11 and later)
         device_count = 0
         if (major == 2 and minor >= 11) or (major > 2):
-            device_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            device_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             trace_mf("Device Count:", device_count)
             for i in range(0, device_count):
 
                 # ID
                 device_id = int.from_bytes(
-                    data[offset : offset + 4], byteorder="little"
+                    data[offset: offset + 4], byteorder="little"
                 )
                 offset += 4
                 device = MoCapData.Device(device_id)
                 # Channel Count
                 device_channel_count = int.from_bytes(
-                    data[offset : offset + 4], byteorder="little"
+                    data[offset: offset + 4], byteorder="little"
                 )
                 offset += 4
 
@@ -701,22 +703,22 @@ class NatNetClient:
                 for j in range(0, device_channel_count):
                     device_channel_data = MoCapData.DeviceChannelData()
                     device_channel_frame_count = int.from_bytes(
-                        data[offset : offset + 4], byteorder="little"
+                        data[offset: offset + 4], byteorder="little"
                     )
                     offset += 4
                     out_string = "\tChannel %3.1d " % (j)
                     out_string += (
-                        "  %3.1d Frames - Frame Data: " % device_channel_frame_count
+                            "  %3.1d Frames - Frame Data: " % device_channel_frame_count
                     )
 
                     # Device Frame Data
                     n_frames_show = min(device_channel_frame_count, n_frames_show_max)
                     for k in range(0, device_channel_frame_count):
                         device_channel_val = int.from_bytes(
-                            data[offset : offset + 4], byteorder="little"
+                            data[offset: offset + 4], byteorder="little"
                         )
                         device_channel_val = FloatValue.unpack(
-                            data[offset : offset + 4]
+                            data[offset: offset + 4]
                         )
                         offset += 4
                         if k < n_frames_show:
@@ -738,20 +740,20 @@ class NatNetClient:
         offset = 0
 
         # Timecode
-        timecode = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        timecode = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         frame_suffix_data.timecode = timecode
 
-        timecode_sub = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        timecode_sub = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         frame_suffix_data.timecode_sub = timecode_sub
 
         # Timestamp (increased to double precision in 2.7 and later)
         if (major == 2 and minor >= 7) or (major > 2):
-            (timestamp,) = DoubleValue.unpack(data[offset : offset + 8])
+            (timestamp,) = DoubleValue.unpack(data[offset: offset + 8])
             offset += 8
         else:
-            (timestamp,) = FloatValue.unpack(data[offset : offset + 4])
+            (timestamp,) = FloatValue.unpack(data[offset: offset + 4])
             offset += 4
         trace_mf("Timestamp : %3.2f" % timestamp)
         frame_suffix_data.timestamp = timestamp
@@ -759,7 +761,7 @@ class NatNetClient:
         # Hires Timestamp (Version 3.0 and later)
         if major >= 3:
             stamp_camera_mid_exposure = int.from_bytes(
-                data[offset : offset + 8], byteorder="little"
+                data[offset: offset + 8], byteorder="little"
             )
             trace_mf(
                 "Mid-exposure timestamp         : %3.1d" % stamp_camera_mid_exposure
@@ -768,21 +770,21 @@ class NatNetClient:
             frame_suffix_data.stamp_camera_mid_exposure = stamp_camera_mid_exposure
 
             stamp_data_received = int.from_bytes(
-                data[offset : offset + 8], byteorder="little"
+                data[offset: offset + 8], byteorder="little"
             )
             offset += 8
             frame_suffix_data.stamp_data_received = stamp_data_received
             trace_mf("Camera data received timestamp : %3.1d" % stamp_data_received)
 
             stamp_transmit = int.from_bytes(
-                data[offset : offset + 8], byteorder="little"
+                data[offset: offset + 8], byteorder="little"
             )
             offset += 8
             trace_mf("Transmit timestamp             : %3.1d" % stamp_transmit)
             frame_suffix_data.stamp_transmit = stamp_transmit
 
         # Frame parameters
-        (param,) = struct.unpack("h", data[offset : offset + 2])
+        (param,) = struct.unpack("h", data[offset: offset + 2])
         is_recording = (param & 0x01) != 0
         tracked_models_changed = (param & 0x02) != 0
         offset += 2
@@ -896,7 +898,7 @@ class NatNetClient:
         trace_dd("Marker Set Name: %s" % (name.decode("utf-8")))
         ms_desc.set_name(name)
 
-        marker_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        marker_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         trace_dd("Marker Count : %3.1d" % marker_count)
         for i in range(0, marker_count):
@@ -920,19 +922,19 @@ class NatNetClient:
             trace_dd("\tRigid Body Name   : ", name.decode("utf-8"))
 
         # ID
-        new_id = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        new_id = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         rb_desc.set_id(new_id)
         trace_dd("\tID                : ", str(new_id))
 
         # Parent ID
-        parent_id = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        parent_id = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         rb_desc.set_parent_id(parent_id)
         trace_dd("\tParent ID         : ", parent_id)
 
         # Position Offsets
-        pos = Vector3.unpack(data[offset : offset + 12])
+        pos = Vector3.unpack(data[offset: offset + 12])
         offset += 12
         rb_desc.set_pos(pos[0], pos[1], pos[2])
 
@@ -943,7 +945,7 @@ class NatNetClient:
         # Version 3.0 and higher, rigid body marker information contained in description
         if (major >= 3) or (major == 0):
             # Marker Count
-            marker_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            marker_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             trace_dd("\tNumber of Markers : ", marker_count)
 
@@ -955,12 +957,12 @@ class NatNetClient:
             marker_name = ""
             for marker in marker_count_range:
                 # Offset
-                marker_offset = Vector3.unpack(data[offset1 : offset1 + 12])
+                marker_offset = Vector3.unpack(data[offset1: offset1 + 12])
                 offset1 += 12
 
                 # Active Label
                 active_label = int.from_bytes(
-                    data[offset2 : offset2 + 4], byteorder="little"
+                    data[offset2: offset2 + 4], byteorder="little"
                 )
                 offset2 += 4
 
@@ -1006,13 +1008,13 @@ class NatNetClient:
         trace_dd("Name : %s" % name.decode("utf-8"))
 
         # ID
-        new_id = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        new_id = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         skeleton_desc.set_id(new_id)
         trace_dd("ID : %3.1d" % new_id)
 
         # # of RigidBodies
-        rigid_body_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        rigid_body_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         trace_dd("Rigid Body (Bone) Count : %3.1d" % rigid_body_count)
 
@@ -1032,7 +1034,7 @@ class NatNetClient:
         if major >= 3:
             fp_desc = DataDescriptions.ForcePlateDescription()
             # ID
-            new_id = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            new_id = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             fp_desc.set_id(new_id)
             trace_dd("\tID : ", str(new_id))
@@ -1044,16 +1046,16 @@ class NatNetClient:
             trace_dd("\tSerial Number : ", serial_number.decode("utf-8"))
 
             # Dimensions
-            f_width = FloatValue.unpack(data[offset : offset + 4])
+            f_width = FloatValue.unpack(data[offset: offset + 4])
             offset += 4
             trace_dd("\tWidth  : %3.2f" % f_width)
-            f_length = FloatValue.unpack(data[offset : offset + 4])
+            f_length = FloatValue.unpack(data[offset: offset + 4])
             offset += 4
             fp_desc.set_dimensions(f_width[0], f_length[0])
             trace_dd("\tLength : %3.2f" % f_length)
 
             # Origin
-            origin = Vector3.unpack(data[offset : offset + 12])
+            origin = Vector3.unpack(data[offset: offset + 12])
             offset += 12
             fp_desc.set_origin(origin[0], origin[1], origin[2])
             trace_dd(
@@ -1065,7 +1067,7 @@ class NatNetClient:
             cal_matrix_tmp = [[0.0 for col in range(12)] for row in range(12)]
 
             for i in range(0, 12):
-                cal_matrix_row = FPCalMatrixRow.unpack(data[offset : offset + (12 * 4)])
+                cal_matrix_row = FPCalMatrixRow.unpack(data[offset: offset + (12 * 4)])
                 trace_dd(
                     "\t%3.1d %3.3e %3.3e %3.3e %3.3e %3.3e %3.3e %3.3e %3.3e %3.3e %3.3e %3.3e %3.3e"
                     % (
@@ -1088,7 +1090,7 @@ class NatNetClient:
                 offset += 12 * 4
             fp_desc.set_cal_matrix(cal_matrix_tmp)
             # Corners 4x3 floats
-            corners = FPCorners.unpack(data[offset : offset + (12 * 4)])
+            corners = FPCorners.unpack(data[offset: offset + (12 * 4)])
             offset += 12 * 4
             o_2 = 0
             trace_dd("Corners:")
@@ -1105,21 +1107,21 @@ class NatNetClient:
             fp_desc.set_corners(corners_tmp)
 
             # Plate Type int
-            plate_type = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            plate_type = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             fp_desc.set_plate_type(plate_type)
             trace_dd("Plate Type : ", plate_type)
 
             # Channel Data Type int
             channel_data_type = int.from_bytes(
-                data[offset : offset + 4], byteorder="little"
+                data[offset: offset + 4], byteorder="little"
             )
             offset += 4
             fp_desc.set_channel_data_type(channel_data_type)
             trace_dd("Channel Data Type : ", channel_data_type)
 
             # Number of Channels int
-            num_channels = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            num_channels = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             trace_dd("Number of Channels : ", num_channels)
 
@@ -1140,7 +1142,7 @@ class NatNetClient:
         offset = 0
         if major >= 3:
             # new_id
-            new_id = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            new_id = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             trace_dd("\tID : ", str(new_id))
 
@@ -1155,13 +1157,13 @@ class NatNetClient:
             trace_dd("\tSerial Number : ", serial_number.decode("utf-8"))
 
             # Device Type int
-            device_type = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            device_type = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             trace_dd("Device Type : ", device_type)
 
             # Channel Data Type int
             channel_data_type = int.from_bytes(
-                data[offset : offset + 4], byteorder="little"
+                data[offset: offset + 4], byteorder="little"
             )
             offset += 4
             trace_dd("Channel Data Type : ", channel_data_type)
@@ -1171,7 +1173,7 @@ class NatNetClient:
             )
 
             # Number of Channels int
-            num_channels = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            num_channels = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             trace_dd("Number of Channels ", num_channels)
 
@@ -1194,7 +1196,7 @@ class NatNetClient:
         offset += len(name) + 1
         trace_dd("\tName       : %s" % name.decode("utf-8"))
         # Position
-        position = Vector3.unpack(data[offset : offset + 12])
+        position = Vector3.unpack(data[offset: offset + 12])
         offset += 12
         trace_dd(
             "\tPosition   : [%3.2f, %3.2f, %3.2f]"
@@ -1202,7 +1204,7 @@ class NatNetClient:
         )
 
         # Orientation
-        orientation = Quaternion.unpack(data[offset : offset + 16])
+        orientation = Quaternion.unpack(data[offset: offset + 16])
         offset += 16
         trace_dd(
             "\tOrientation: [%3.2f, %3.2f, %3.2f, %3.2f]"
@@ -1218,12 +1220,12 @@ class NatNetClient:
         data_descs = DataDescriptions.DataDescriptions()
         offset = 0
         # # of data sets to process
-        dataset_count = int.from_bytes(data[offset : offset + 4], byteorder="little")
+        dataset_count = int.from_bytes(data[offset: offset + 4], byteorder="little")
         offset += 4
         trace_dd("Dataset Count : ", str(dataset_count))
         for i in range(0, dataset_count):
             trace_dd("Dataset ", str(i))
-            data_type = int.from_bytes(data[offset : offset + 4], byteorder="little")
+            data_type = int.from_bytes(data[offset: offset + 4], byteorder="little")
             offset += 4
             data_tmp = None
             if data_type == 0:
@@ -1280,12 +1282,12 @@ class NatNetClient:
         # Server name
         # szName = data[offset: offset+256]
         self.__application_name, separator, remainder = bytes(
-            data[offset : offset + 256]
+            data[offset: offset + 256]
         ).partition(b"\0")
         self.__application_name = str(self.__application_name, "utf-8")
         offset += 256
         # Server Version info
-        server_version = struct.unpack("BBBB", data[offset : offset + 4])
+        server_version = struct.unpack("BBBB", data[offset: offset + 4])
         offset += 4
         self.__server_version[0] = server_version[0]
         self.__server_version[1] = server_version[1]
@@ -1293,14 +1295,14 @@ class NatNetClient:
         self.__server_version[3] = server_version[3]
 
         # NatNet Version info
-        nnsvs = struct.unpack("BBBB", data[offset : offset + 4])
+        nnsvs = struct.unpack("BBBB", data[offset: offset + 4])
         offset += 4
         self.__nat_net_stream_version_server[0] = nnsvs[0]
         self.__nat_net_stream_version_server[1] = nnsvs[1]
         self.__nat_net_stream_version_server[2] = nnsvs[2]
         self.__nat_net_stream_version_server[3] = nnsvs[3]
         if (self.__nat_net_requested_version[0] == 0) and (
-            self.__nat_net_requested_version[1] == 0
+                self.__nat_net_requested_version[1] == 0
         ):
             self.__nat_net_requested_version[0] = self.__nat_net_stream_version_server[
                 0
@@ -1316,7 +1318,7 @@ class NatNetClient:
             ]
             # Determine if the bitstream version can be changed
             if (self.__nat_net_stream_version_server[0] >= 4) and (
-                self.use_multicast == False
+                    self.use_multicast == False
             ):
                 self.__can_change_bitstream_version = True
 
@@ -1509,7 +1511,7 @@ class NatNetClient:
             trace("Packet Size : ", packet_size)
             if packet_size == 4:
                 command_response = int.from_bytes(
-                    data[offset : offset + 4], byteorder="little"
+                    data[offset: offset + 4], byteorder="little"
                 )
                 offset += 4
                 trace("Command response: %d" % command_response)
@@ -1550,8 +1552,8 @@ class NatNetClient:
         # Compose the message in our known message format
         packet_size = 0
         if (
-            command == self.NAT_REQUEST_MODELDEF
-            or command == self.NAT_REQUEST_FRAMEOFDATA
+                command == self.NAT_REQUEST_MODELDEF
+                or command == self.NAT_REQUEST_FRAMEOFDATA
         ):
             packet_size = 0
             command_str = ""
