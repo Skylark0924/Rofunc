@@ -39,7 +39,7 @@ def setup(custom_args, eval_mode=False):
     cfg = get_config('./learning/rl', 'config', args=args)
     task_cfg_dict = omegaconf_to_dict(cfg.task)
     agent_cfg_dict = omegaconf_to_dict(cfg.train)
-    task_cfg_dict['env']['numEnvs'] = 16
+    task_cfg_dict['env']['numEnvs'] = 64
 
     if eval_mode:
         task_cfg_dict['env']['numEnvs'] = 16
