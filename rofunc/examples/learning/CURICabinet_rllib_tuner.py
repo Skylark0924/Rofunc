@@ -62,14 +62,14 @@ env_config = {"task_name": custom_args.task,
 # ).fit()
 algo = (
     SACConfig()
-    .training(train_batch_size=2048)
+    .training(train_batch_size=1024)
     .rollouts(num_rollout_workers=0)
     .resources(num_gpus=1)
     .environment(env=RLlibIsaacGymVecEnvWrapper, env_config=env_config)
     .build()
 )
 
-for i in range(10):
+for i in range(100):
     result = algo.train()
     # print(pretty_print(result))
     print(result["episode_reward_mean"])

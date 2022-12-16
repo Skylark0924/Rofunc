@@ -22,6 +22,7 @@ from tqdm.auto import tqdm
 import ray
 from ray.rllib.algorithms.ppo import PPO
 from ray.rllib.algorithms.sac import SAC
+from ray.rllib.agents.ppo import PPOTrainer
 
 
 def setup(custom_args, eval_mode=False):
@@ -34,9 +35,11 @@ def setup(custom_args, eval_mode=False):
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
     sys.argv.append("headless={}".format(custom_args.headless))
     args = get_args_parser().parse_args()
+    beauty_print("Agent: {}{}RLlib".format(custom_args.task, custom_args.agent.upper()), 2)
     cfg = get_config('./learning/rl', 'config', args=args)
     task_cfg_dict = omegaconf_to_dict(cfg.task)
     agent_cfg_dict = omegaconf_to_dict(cfg.train)
+    task_cfg_dict['env']['numEnvs'] = 16
 
     if eval_mode:
         task_cfg_dict['env']['numEnvs'] = 16
@@ -46,9 +49,12 @@ def setup(custom_args, eval_mode=False):
                   "cfg": cfg}  # config to pass to env class
     agent_cfg_dict["env"] = RLlibIsaacGymVecEnvWrapper
     agent_cfg_dict["env_config"] = env_config
+    agent_cfg_dict["train_batch_size"] = 1024
+    agent_cfg_dict["sgd_minibatch_size"] = 1024
+    agent_cfg_dict["rollout_fragment_length"] = 1024
 
     if custom_args.agent.lower() == "ppo":
-        agent = PPO(config=agent_cfg_dict)
+        agent = PPOTrainer(config=agent_cfg_dict)
     elif custom_args.agent.lower() == "sac":
         agent = SAC(config=agent_cfg_dict)
     else:
@@ -109,7 +115,7 @@ if __name__ == '__main__':
     gpu_id = 0
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="CURICabinet")
-    parser.add_argument("--agent", type=str, default="ppo")
+    parser.add_argument("--agent", type=str, default="sac")
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
