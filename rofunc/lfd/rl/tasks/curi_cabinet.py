@@ -94,6 +94,7 @@ class CURICabinetTask(CURIBaseTask):
         self.num_cabinet_bodies = self.gym.get_asset_rigid_body_count(cabinet_asset)
         self.num_cabinet_dofs = self.gym.get_asset_dof_count(cabinet_asset)
 
+        print("num env: ", num_envs)
         print("num curi bodies: ", self.num_curi_bodies)
         print("num curi dofs: ", self.num_curi_dofs)
         print("num cabinet bodies: ", self.num_cabinet_bodies)
