@@ -8,22 +8,29 @@ from rofunc.lfd.rl.tasks import task_map
 from rofunc.lfd.rl.utils.elegantrl_utils import ElegantRLIsaacGymEnvWrapper
 
 
-# class RLlibEnvWrapper(gym.Env):
-#     def __init__(self, env_config):
-#         self.env = ElegantRLIsaacGymEnvWrapper(env=env, cfg=env_config)
-#         self.action_space = self.env.env.action_space
-#         self.observation_space = self.env.env.observation_space
-#
-#     def reset(self):
-#         return np.array(self.env.reset().cpu())[0]
-#
-#     def step(self, action):
-#         action = torch.tensor(np.array([action])).to(self.env.device)
-#         observations, rewards, dones, info_dict = self.env.step(action)
-#         return np.array(observations.cpu())[0], np.array(rewards.cpu())[0], np.array(dones.cpu())[0], info_dict
+class RLlibIsaacGymEnvWrapper(gym.Env):
+    def __init__(self, env_config):
+        env = task_map[env_config["task_name"]](cfg=env_config["task_cfg_dict"],
+                                                rl_device=env_config["cfg"].rl_device,
+                                                sim_device=env_config["cfg"].sim_device,
+                                                graphics_device_id=env_config["cfg"].graphics_device_id,
+                                                headless=env_config["cfg"].headless,
+                                                virtual_screen_capture=env_config["cfg"].capture_video,
+                                                force_render=env_config["cfg"].force_render)
+        self.env = ElegantRLIsaacGymEnvWrapper(env=env, cfg=env_config["cfg"])
+        self.action_space = self.env.env.action_space
+        self.observation_space = self.env.env.observation_space
+
+    def reset(self):
+        return np.array(self.env.reset().cpu())[0]
+
+    def step(self, action):
+        action = torch.tensor(np.array([action])).to(self.env.device)
+        observations, rewards, dones, info_dict = self.env.step(action)
+        return np.array(observations.cpu())[0], np.array(rewards.cpu())[0], np.array(dones.cpu())[0], info_dict
 
 
-class RLlibIsaacGymEnvWrapper(VectorEnv):
+class RLlibIsaacGymVecEnvWrapper(VectorEnv):
     def __init__(self, env_config):
         # self.env = IsaacVecEnv(env_name=env_config["task_name"], env_num=1024, sim_device_id=env_config["gpu_id"],
         #                        rl_device_id=env_config["gpu_id"], should_print=True)

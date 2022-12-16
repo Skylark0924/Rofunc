@@ -13,13 +13,15 @@ import isaacgym
 from rofunc.config.utils import get_config, omegaconf_to_dict
 from rofunc.data.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
-from rofunc.lfd.rl.utils.rllib_utils import RLlibIsaacGymEnvWrapper
+from rofunc.lfd.rl.utils.rllib_utils import RLlibIsaacGymVecEnvWrapper
+from rofunc.lfd.rl.tasks import task_map
 
 from hydra._internal.utils import get_args_parser
 from tqdm.auto import tqdm
 
 import ray
-from ray.rllib.agents import ppo
+from ray.rllib.algorithms.ppo import PPO
+from ray.rllib.algorithms.sac import SAC
 
 
 def setup(custom_args, eval_mode=False):
@@ -42,10 +44,13 @@ def setup(custom_args, eval_mode=False):
     env_config = {"task_name": custom_args.task,
                   "task_cfg_dict": task_cfg_dict,
                   "cfg": cfg}  # config to pass to env class
+    agent_cfg_dict["env"] = RLlibIsaacGymVecEnvWrapper
     agent_cfg_dict["env_config"] = env_config
 
     if custom_args.agent.lower() == "ppo":
-        agent = ppo.PPOTrainer(env=RLlibIsaacGymEnvWrapper, config=agent_cfg_dict)
+        agent = PPO(config=agent_cfg_dict)
+    elif custom_args.agent.lower() == "sac":
+        agent = SAC(config=agent_cfg_dict)
     else:
         raise ValueError("Agent not supported")
 
@@ -58,7 +63,7 @@ def train(custom_args):
     agent, _ = setup(custom_args)
 
     try:
-        with tqdm(range(32768)) as pbar:
+        with tqdm(range(100000)) as pbar:
             for i in pbar:
                 results = agent.train()
                 if i % 64 == 0:
@@ -77,13 +82,19 @@ def test(custom_args, ckpt_path):
     beauty_print("Start testing")
 
     agent, env_config = setup(custom_args, eval_mode=True)
+    env = task_map[env_config["task_name"]](cfg=env_config["task_cfg_dict"],
+                                            rl_device=env_config["cfg"].rl_device,
+                                            sim_device=env_config["cfg"].sim_device,
+                                            graphics_device_id=env_config["cfg"].graphics_device_id,
+                                            headless=env_config["cfg"].headless,
+                                            virtual_screen_capture=env_config["cfg"].capture_video,  # TODO: check
+                                            force_render=env_config["cfg"].force_render)
     agent.restore(ckpt_path)
-    env = RLlibIsaacGymEnvWrapper(env_config)
 
-    done: bool = True
+    done = True
 
     steps = 0
-    while True:
+    while steps < 20000:
         if done:
             obs = env.reset()
         action = agent.compute_single_action(obs, explore=False)  # TODO
@@ -102,13 +113,13 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="False")
+    parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--test", action="store_true", help="turn to test mode while adding this argument")
     custom_args = parser.parse_args()
 
     if not custom_args.test:
         train(custom_args)
     else:
-        ckpt_path = "/home/ubuntu/ray_results/PPO_RLlibIsaacGymEnvWrapper_2022-12-14_17-28-420ve1a92i/checkpoint_32768/checkpoint-32768"
+        ckpt_path = "/home/ubuntu/ray_results/PPO_RLlibIsaacGymEnvWrapper_2022-12-16_20-10-43n0xkd71_/checkpoint_21505/checkpoint-21505"
 
         test(custom_args, ckpt_path=ckpt_path)
