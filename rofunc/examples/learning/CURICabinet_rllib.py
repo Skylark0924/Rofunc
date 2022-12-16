@@ -26,6 +26,7 @@ def setup(custom_args, eval_mode=False):
     ray.init()
 
     sys.argv.append("task={}".format(custom_args.task))
+    sys.argv.append("train={}{}RLlib".format(custom_args.task, custom_args.agent.upper()))
     sys.argv.append("sim_device={}".format(custom_args.sim_device))
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
@@ -33,6 +34,7 @@ def setup(custom_args, eval_mode=False):
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
     task_cfg_dict = omegaconf_to_dict(cfg.task)
+    agent_cfg_dict = omegaconf_to_dict(cfg.train)
 
     if eval_mode:
         task_cfg_dict['env']['numEnvs'] = 16
@@ -40,51 +42,10 @@ def setup(custom_args, eval_mode=False):
     env_config = {"task_name": custom_args.task,
                   "task_cfg_dict": task_cfg_dict,
                   "cfg": cfg}  # config to pass to env class
+    agent_cfg_dict["env_config"] = env_config
 
     if custom_args.agent.lower() == "ppo":
-        agent = ppo.PPOTrainer(env=RLlibIsaacGymEnvWrapper, config={
-            "env_config": env_config,
-            # "framework": "torch",
-            "num_workers": 0,
-            # 'explore': True,
-            # 'exploration_config': {
-            #     'type': 'StochasticSampling'
-            #     # 'type': 'Curiosity',
-            #     # 'eta': 1.0,
-            #     # 'lr': 0.001,
-            #     # 'feature_dim': 288,
-            #     # "feature_net_config": {
-            #     #    "fcnet_hiddens": [],
-            #     #    "fcnet_activation": "relu",
-            #     # },
-            #     # "inverse_net_hiddens": [256],
-            #     # "inverse_net_activation": "relu",
-            #     # "forward_net_hiddens": [256],
-            #     # "forward_net_activation": "relu",
-            #     # "beta": 0.2,
-            #     # "sub_exploration": {
-            #     #    "type": "StochasticSampling",
-            #     # }
-            # },
-            # "num_envs_per_worker": 1,
-            'gamma': 0.998,
-
-            'train_batch_size': 2048,
-            'sgd_minibatch_size': 2048,
-            'rollout_fragment_length': 64,
-            'num_sgd_iter': 3,
-            'lr': 5e-5,
-
-            'vf_loss_coeff': 0.5,
-            'vf_share_layers': True,
-            'kl_coeff': 0.0,
-            'kl_target': 0.1,
-            'clip_param': 0.1,
-            'entropy_coeff': 0.005,
-
-            'grad_clip': 1.0,
-            'lambda': 0.8,
-        })
+        agent = ppo.PPOTrainer(env=RLlibIsaacGymEnvWrapper, config=agent_cfg_dict)
     else:
         raise ValueError("Agent not supported")
 
@@ -142,7 +103,7 @@ if __name__ == '__main__':
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="False")
-    parser.add_argument("--test", action="store_false", help="turn to test mode while adding this argument")
+    parser.add_argument("--test", action="store_true", help="turn to test mode while adding this argument")
     custom_args = parser.parse_args()
 
     if not custom_args.test:
