@@ -43,7 +43,7 @@ if __name__ == '__main__':
     gpu_id = 1
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="CURICabinet")
-    parser.add_argument("--agent", type=str, default="ppo")
+    parser.add_argument("--agent", type=str, default="sac")
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)

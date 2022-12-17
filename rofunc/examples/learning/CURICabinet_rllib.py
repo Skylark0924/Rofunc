@@ -4,11 +4,20 @@ CURICabinet (RLlib)
 
 Open drawers with a humanoid CURI robot, trained by RLlib
 """
+# For every ray version, add `import isaacgym` before ray.__init__.py
+# If you use ray==0.8.6, you need to change the line 608 in ray.rllib.evaluation.sampler.py
+# `atari_metrics = _fetch_atari_metrics(base_env)` to `atari_metrics = None`
+# And also add `.cpu()` after line 182 of ray.rllib.agents.ppo.ppo_tf_policy.py
+# If you use ray==2.2.0, you need to comment out line 23 in ray.rllib.agents.sac.__init__.py
 
 import argparse
 import sys
 
 import isaacgym
+
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from rofunc.config.utils import get_config, omegaconf_to_dict
 from rofunc.data.models import model_zoo
@@ -20,9 +29,10 @@ from hydra._internal.utils import get_args_parser
 from tqdm.auto import tqdm
 
 import ray
-from ray.rllib.algorithms.ppo import PPO
-from ray.rllib.algorithms.sac import SAC
+# from ray.rllib.algorithms.ppo import PPO
+# from ray.rllib.algorithms.sac import SAC
 from ray.rllib.agents.ppo import PPOTrainer
+from ray.rllib.agents.sac import SACTrainer
 
 
 def setup(custom_args, eval_mode=False):
@@ -39,7 +49,7 @@ def setup(custom_args, eval_mode=False):
     cfg = get_config('./learning/rl', 'config', args=args)
     task_cfg_dict = omegaconf_to_dict(cfg.task)
     agent_cfg_dict = omegaconf_to_dict(cfg.train)
-    task_cfg_dict['env']['numEnvs'] = 64
+    # task_cfg_dict['env']['numEnvs'] = 64
 
     if eval_mode:
         task_cfg_dict['env']['numEnvs'] = 16
@@ -49,14 +59,16 @@ def setup(custom_args, eval_mode=False):
                   "cfg": cfg}  # config to pass to env class
     agent_cfg_dict["env"] = RLlibIsaacGymVecEnvWrapper
     agent_cfg_dict["env_config"] = env_config
-    agent_cfg_dict["train_batch_size"] = 1024
-    agent_cfg_dict["sgd_minibatch_size"] = 1024
-    agent_cfg_dict["rollout_fragment_length"] = 1024
+    # agent_cfg_dict["train_batch_size"] = 4096
+    # agent_cfg_dict["framework"] = "tf"
+    # agent_cfg_dict["sgd_minibatch_size"] = 4096
+    # agent_cfg_dict["rollout_fragment_length"] = 1024
 
     if custom_args.agent.lower() == "ppo":
         agent = PPOTrainer(config=agent_cfg_dict)
     elif custom_args.agent.lower() == "sac":
-        agent = SAC(config=agent_cfg_dict)
+        agent_cfg_dict["normalize_actions"] = False
+        agent = SACTrainer(config=agent_cfg_dict)
     else:
         raise ValueError("Agent not supported")
 
