@@ -12,9 +12,12 @@ from hydra._internal.utils import get_args_parser
 from elegantrl.train.config import Arguments
 from elegantrl.agents.AgentPPO import AgentPPO
 from elegantrl.agents.AgentSAC import AgentSAC
+from elegantrl.agents.AgentTD3 import AgentTD3
+from elegantrl.train.run import init_agent
 
 from rofunc.config.utils import get_config, omegaconf_to_dict
 from rofunc.lfd.rl.tasks import task_map
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 class ElegantRLIsaacGymEnvWrapper:
@@ -96,6 +99,7 @@ class ElegantRLIsaacGymEnvWrapper:
 def setup(custom_args, eval_mode=False):
     # get config
     sys.argv.append("task={}".format(custom_args.task))
+    beauty_print("Agent: {}{}ElegantRL".format(custom_args.task, custom_args.agent.upper()), 2)
     sys.argv.append("sim_device={}".format(custom_args.sim_device))
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
@@ -106,6 +110,7 @@ def setup(custom_args, eval_mode=False):
 
     if eval_mode:
         task_cfg_dict['env']['numEnvs'] = 16
+        cfg.headless = False
 
     env = task_map[custom_args.task](cfg=task_cfg_dict,
                                      rl_device=cfg.rl_device,
@@ -121,6 +126,8 @@ def setup(custom_args, eval_mode=False):
         agent_class = AgentPPO
     elif custom_args.agent.lower() == "sac":
         agent_class = AgentSAC
+    elif custom_args.agent.lower() == "td3":
+        agent_class = AgentTD3
     else:
         raise ValueError("Agent not supported")
 
@@ -142,5 +149,9 @@ def setup(custom_args, eval_mode=False):
     args.target_step = 3e8
     args.learner_gpus = cfg.graphics_device_id
     args.random_seed = 42
+
+    if eval_mode:
+        agent = init_agent(args, args.learner_gpus, env)
+        return env, agent
 
     return env, args
