@@ -51,6 +51,9 @@ class RLlibIsaacGymVecEnvWrapper(VectorEnv):
 
         self._prv_obs = [None for _ in range(self.num_envs)]
 
+    def seed(self, seed):
+        pass
+
     def reset_at(self, index=None):
         return self._prv_obs[index]
 
