@@ -1,15 +1,15 @@
-![](./img/logo7.png)
+![](./img/logo8.png)
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration
 
 [![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)](https://pypi.org/project/rofunc/)
 [![Documentation Status](https://readthedocs.org/projects/rofunc/badge/?version=latest)](https://rofunc.readthedocs.io/en/latest/?badge=latest)
 ![License](https://img.shields.io/github/license/Skylark0924/Rofunc)
-![](https://img.shields.io/pypi/dm/Rofunc)
+![](https://img.shields.io/github/downloads/skylark0924/Rofunc/total)
 [![](https://img.shields.io/github/issues-closed-raw/Skylark0924/Rofunc)](https://github.com/Skylark0924/Rofunc/issues?q=is%3Aissue+is%3Aclosed)
 [![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)](https://github.com/Skylark0924/Rofunc/issues?q=is%3Aopen+is%3Aissue)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
-
+> **Repository address: https://github.com/Skylark0924/Rofunc**
 
 Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and convenient python functions for robotics, including _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an Isaac Gym-based robot simulator for evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
 
@@ -48,6 +48,12 @@ pip install .
 ```
 > **Note**
 > If you want to use functions related to ZED camera, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Skylark0924/Rofunc&type=Date)](https://star-history.com/#Skylark0924/Rofunc&Date)
+
 
 ## Documentation
 [![Documentation](https://img.shields.io/badge/Documentation-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/)
@@ -91,8 +97,8 @@ The available functions and plans can be found as follows.
 |                                                 |                        | `strans`                                                                      | Structured-Transformer method proposed in [IEEE RAL](https://arxiv.org/abs/2205.05960)   |        |
 |                                                 | Reinforcement learning | SKRL (`ppo`, `sac`, `tq3`)                                                    | Provide API for SKRL framework and robot examples in Isaac Gym                           | ✅      |
 |                                                 |                        | StableBaseline3 (`ppo`, `sac`, `tq3`)                                         | Provide API for StableBaseline3 framework and robot examples in Isaac Gym                |        |
-|                                                 |                        | RLlib (`ppo`, `sac`, `tq3`)                                                   | Provide API for Ray RLlib framework and robot examples in Isaac Gym                      |        |
-|                                                 |                        | ElegantRL (`ppo`, `sac`, `tq3`)                                               | Provide API for ElegantRL framework and robot examples in Isaac Gym                      |        |
+|                                                 |                        | RLlib (`ppo`, `sac`, `tq3`)                                                   | Provide API for Ray RLlib framework and robot examples in Isaac Gym                      | ✅      |
+|                                                 |                        | ElegantRL (`ppo`, `sac`, `tq3`)                                               | Provide API for ElegantRL framework and robot examples in Isaac Gym                      | ✅      |
 |                                                 |                        | `cql`                                                                         | Conservative Q-learning for fully offline learning                                       |        |
 | **Planning**                                    | LQT                    | [`lqt.uni`](https://rofunc.readthedocs.io/en/latest/planning/lqt.html)        | Linear Quadratic Tracking (LQT) for uni-manual robot with several via-points             | ✅      |
 |                                                 |                        | `lqt.bi`                                                                      | LQT for bimanual robot with coordination constraints                                     | ✅      |

@@ -9,7 +9,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 from omegaconf import DictConfig
 
-from rofunc.config.custom_resolvers import *
+from rofunc.config import *
 from rofunc.utils.file.path import get_rofunc_path
 
 
