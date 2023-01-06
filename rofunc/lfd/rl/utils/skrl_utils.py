@@ -335,6 +335,7 @@ def setup(custom_args, eval_mode=False):
 
     # get config
     sys.argv.append("task={}".format(custom_args.task))
+    sys.argv.append("train={}{}SKRL".format(custom_args.task, custom_args.agent.upper()))
     sys.argv.append("sim_device={}".format(custom_args.sim_device))
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
