@@ -134,7 +134,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 ```
 @misc{Rofunc2022,
-      author = {Liu, Junjia and Li, Zhihao and Li, Chenzui},
+      author = {Liu, Junjia and Li, Zhihao and Li, Chenzui and Chen, Fei},
       title = {Rofunc: The full process python package for robot learning from demonstration},
       year = {2022},
       publisher = {GitHub},
@@ -144,4 +144,4 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 ```
 
 ## The Team
-Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robot Laboratory)](https://feichenlab.com), CUHK.
+Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robots Laboratory)](), CUHK.
