@@ -145,3 +145,17 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 ## The Team
 Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robots Laboratory)](), CUHK.
+
+
+## Acknowledge
+We would like to acknowledge the following projects:
+
+### Learning from Demonstration
+1. [pbdlib](https://gitlab.idiap.ch/rli/pbdlib-python)
+2. [Ray RLlib](https://docs.ray.io/en/latest/rllib/index.html)
+3. [ElegantRL](https://github.com/AI4Finance-Foundation/ElegantRL)
+4. [SKRL](https://github.com/Toni-SM/skrl)
+
+### Planning and Control 
+1. [Robotics codes from scratch (RCFS)](https://gitlab.idiap.ch/rli/robotics-codes-from-scratch)
+2. [pddlstream](https://github.com/caelan/pddlstream)
