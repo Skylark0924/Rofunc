@@ -48,6 +48,13 @@ def data_clean_batch(input_dir):
 
 
 def export(input_dir):
+    """
+    Export rigid body motion data.
+    Args:
+        input_dir: csv file path
+
+    Returns: [number of frames, number of rigid bodies, pose dimension = 7]
+    """
     csv_data = pd.read_csv(input_dir, skiprows=7, header=None)
 
     type_data = pd.read_csv(input_dir, skiprows=2, nrows=0)
