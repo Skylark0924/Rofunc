@@ -4,12 +4,12 @@ import numpy as np
 import torch
 from ray.rllib.env import VectorEnv
 
-from rofunc.lfd.rl.tasks import task_map
 from rofunc.lfd.rl.utils.elegantrl_utils import ElegantRLIsaacGymEnvWrapper
 
 
 class RLlibIsaacGymEnvWrapper(gym.Env):
     def __init__(self, env_config):
+        from rofunc.lfd.rl.tasks import task_map
         env = task_map[env_config["task_name"]](cfg=env_config["task_cfg_dict"],
                                                 rl_device=env_config["cfg"].rl_device,
                                                 sim_device=env_config["cfg"].sim_device,
@@ -34,7 +34,7 @@ class RLlibIsaacGymVecEnvWrapper(VectorEnv):
     def __init__(self, env_config):
         # self.env = IsaacVecEnv(env_name=env_config["task_name"], env_num=1024, sim_device_id=env_config["gpu_id"],
         #                        rl_device_id=env_config["gpu_id"], should_print=True)
-
+        from rofunc.lfd.rl.tasks import task_map
         env = task_map[env_config["task_name"]](cfg=env_config["task_cfg_dict"],
                                                 rl_device=env_config["cfg"].rl_device,
                                                 sim_device=env_config["cfg"].sim_device,

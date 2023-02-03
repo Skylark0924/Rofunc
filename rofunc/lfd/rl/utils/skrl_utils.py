@@ -9,7 +9,6 @@ from rofunc.utils.file.path import shutil_exp_files
 # from rofunc.lfd.rl.online import SACAgent
 # from rofunc.lfd.rl.online import TD3Agent
 from rofunc.config.utils import get_config, omegaconf_to_dict
-from rofunc.lfd.rl.tasks import task_map
 from hydra._internal.utils import get_args_parser
 
 from skrl.agents.torch.ppo import PPO_DEFAULT_CONFIG
@@ -347,6 +346,7 @@ def setup(custom_args, eval_mode=False):
     if eval_mode:
         cfg_dict['env']['numEnvs'] = 16
 
+    from rofunc.lfd.rl.tasks import task_map
     env = task_map[custom_args.task](cfg=cfg_dict,
                                      rl_device=cfg.rl_device,
                                      sim_device=cfg.sim_device,
