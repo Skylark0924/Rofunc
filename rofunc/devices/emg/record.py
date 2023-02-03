@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from .src import pytrigno
+import time
 
 
 def record(host, n, samples_per_read, t, root_path, exp_name):
@@ -23,11 +24,15 @@ def record(host, n, samples_per_read, t, root_path, exp_name):
     dev.set_channel_range((0, n - 1))
     dev.start()
     data_sensor = []
+    data_w_time = np.zeros((n + 1, samples_per_read))
     for i in range(int(t)):
         # while True:
         data = dev.read() * 1e6
-        print(data)
-        assert data.shape == (n, samples_per_read)
+        t = time.time()
+        data_w_time[0, :] = t
+        data_w_time[1:, :] = data
+        print(data_w_time)
+        assert data_w_time.shape == (n + 1, samples_per_read)
         data_sensor.append(data)
     print(n, '-channel achieved')
     dev.stop()
