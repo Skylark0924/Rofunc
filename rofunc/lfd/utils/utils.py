@@ -7,7 +7,7 @@ import torch
 import random
 import numpy as np
 
-from rofunc.utils.logger import logger
+# from rofunc.utils.logger import logger
 
 
 def set_seed(seed: Optional[int] = None, deterministic: bool = False) -> int:
@@ -71,7 +71,7 @@ def set_seed(seed: Optional[int] = None, deterministic: bool = False) -> int:
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-    logger.info("Seed: {}".format(seed))
+    # logger.info("Seed: {}".format(seed))
 
     if deterministic:
         torch.backends.cudnn.benchmark = False
@@ -80,6 +80,6 @@ def set_seed(seed: Optional[int] = None, deterministic: bool = False) -> int:
         # On CUDA 10.1, set environment variable CUDA_LAUNCH_BLOCKING=1
         # On CUDA 10.2 or later, set environment variable CUBLAS_WORKSPACE_CONFIG=:16:8 or CUBLAS_WORKSPACE_CONFIG=:4096:2
 
-        logger.warning("PyTorch/cuDNN deterministic algorithms are enabled. This may affect performance")
+        # logger.warning("PyTorch/cuDNN deterministic algorithms are enabled. This may affect performance")
 
     return seed

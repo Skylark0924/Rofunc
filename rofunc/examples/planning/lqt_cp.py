@@ -1,3 +1,10 @@
+"""
+LQT with control primitives
+===========================
+
+This example shows how to use the LQT controller with control primitives to track a trajectory.
+"""
+
 import os
 import numpy as np
 import rofunc as rf

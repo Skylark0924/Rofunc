@@ -1,0 +1,16 @@
+<?xml version="0.0" ?>
+<robot name="three_blocks">
+	<link name="3_block_r">
+		<inertial>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<mass value="0.24000"/>
+			<inertia ixx="0.00010" ixy="0" ixz="0" iyy="0.00027" iyz="0" izz="0.00023"/>
+		</inertial>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<geometry>
+				<box size="0.10000 0.04000 0.06000"/>
+			</geometry>
+		</collision>
+	</link>
+</robot>

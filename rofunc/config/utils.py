@@ -9,7 +9,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 from omegaconf import DictConfig
 
-from rofunc.config.custom_resolvers import *
+from rofunc.config import *
 from rofunc.utils.file.path import get_rofunc_path
 
 
@@ -31,8 +31,14 @@ def get_config(config_path=None, config_name=None, args=None, debug=False) -> Di
         with initialize(config_path="./", version_base=None):
             cfg = compose(config_name="lqt")
     if debug:
-        print(OmegaConf.to_yaml(cfg))
+        print_config(cfg)
     return cfg
+
+
+def print_config(config: DictConfig):
+    print("-----------------------------")
+    print(OmegaConf.to_yaml(config))
+    print("-----------------------------")
 
 
 def omegaconf_to_dict(config: DictConfig) -> Dict:
@@ -60,35 +66,34 @@ def dict_to_omegaconf(d: Dict, save_path: str = None) -> DictConfig:
 
 
 if __name__ == '__main__':
-    PPO_DEFAULT_CONFIG = {
-        "rollouts": 16,  # number of rollouts before updating
-        "learning_epochs": 8,  # number of learning epochs during each update
-        "mini_batches": 2,  # number of mini batches during each learning epoch
+    TD3_DEFAULT_CONFIG = {
+        "gradient_steps": 1,  # gradient steps
+        "batch_size": 64,  # training batch size
 
         "discount_factor": 0.99,  # discount factor (gamma)
-        "lambda": 0.95,  # TD(lambda) coefficient (lam) for computing returns and advantages
+        "polyak": 0.005,  # soft update hyperparameter (tau)
 
-        "learning_rate": 1e-3,  # learning rate
+        "actor_learning_rate": 1e-3,  # actor learning rate
+        "critic_learning_rate": 1e-3,  # critic learning rate
         "learning_rate_scheduler": None,  # learning rate scheduler class (see torch.optim.lr_scheduler)
         "learning_rate_scheduler_kwargs": {},  # learning rate scheduler's kwargs (e.g. {"step_size": 1e-3})
 
         "state_preprocessor": None,  # state preprocessor class (see skrl.resources.preprocessors)
         "state_preprocessor_kwargs": {},  # state preprocessor's kwargs (e.g. {"size": env.observation_space})
-        "value_preprocessor": None,  # value preprocessor class (see skrl.resources.preprocessors)
-        "value_preprocessor_kwargs": {},  # value preprocessor's kwargs (e.g. {"size": 1})
 
         "random_timesteps": 0,  # random exploration steps
         "learning_starts": 0,  # learning starts after this many steps
 
-        "grad_norm_clip": 0.5,  # clipping coefficient for the norm of the gradients
-        "ratio_clip": 0.2,  # clipping coefficient for computing the clipped surrogate objective
-        "value_clip": 0.2,  # clipping coefficient for computing the value loss (if clip_predicted_values is True)
-        "clip_predicted_values": False,  # clip predicted values during value loss computation
+        "exploration": {
+            "noise": None,  # exploration noise
+            "initial_scale": 1.0,  # initial scale for noise
+            "final_scale": 1e-3,  # final scale for noise
+            "timesteps": None,  # timesteps for noise decay
+        },
 
-        "entropy_loss_scale": 0.0,  # entropy loss scaling factor
-        "value_loss_scale": 1.0,  # value loss scaling factor
-
-        "kl_threshold": 0,  # KL divergence threshold for early stopping
+        "policy_delay": 2,  # policy delay update with respect to critic update
+        "smooth_regularization_noise": None,  # smooth noise for regularization
+        "smooth_regularization_clip": 0.5,  # clip for smooth regularization
 
         "rewards_shaper": None,  # rewards shaping function: Callable(reward, timestep, timesteps) -> reward
 
@@ -102,5 +107,5 @@ if __name__ == '__main__':
         }
     }
 
-    dict_to_omegaconf(PPO_DEFAULT_CONFIG,
-                      save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/ppo_default_config.yaml")
+    dict_to_omegaconf(TD3_DEFAULT_CONFIG,
+                      save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/td3_default_config_skrl.yaml")

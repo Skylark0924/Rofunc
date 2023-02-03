@@ -4,8 +4,6 @@ import signal
 import threading
 import time
 
-import pyzed.sl as sl
-
 zed_list = []
 
 
@@ -34,6 +32,8 @@ def signal_handler(signal, frame):
 
 
 def grab_run(zed_list, recording_param_list, index):
+    import pyzed.sl as sl
+
     err = zed_list[index].enable_recording(recording_param_list[index])
     if err != sl.ERROR_CODE.SUCCESS:
         print('Wrong', index)
@@ -51,6 +51,8 @@ def grab_run(zed_list, recording_param_list, index):
 
 
 def record(root_dir, exp_name):
+    import pyzed.sl as sl
+
     global zed_list
 
     if os.path.exists('{}/{}'.format(root_dir, exp_name)):
