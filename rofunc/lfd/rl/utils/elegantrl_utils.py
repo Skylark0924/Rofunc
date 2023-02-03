@@ -16,7 +16,6 @@ from elegantrl.agents.AgentTD3 import AgentTD3
 from elegantrl.train.run import init_agent
 
 from rofunc.config.utils import get_config, omegaconf_to_dict
-from rofunc.lfd.rl.tasks import task_map
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
@@ -112,6 +111,7 @@ def setup(custom_args, eval_mode=False):
         task_cfg_dict['env']['numEnvs'] = 16
         cfg.headless = False
 
+    from rofunc.lfd.rl.tasks import task_map
     env = task_map[custom_args.task](cfg=task_cfg_dict,
                                      rl_device=cfg.rl_device,
                                      sim_device=cfg.sim_device,
