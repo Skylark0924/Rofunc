@@ -157,3 +157,6 @@ runs
 rofunc/examples/learning/rllib_example.py
 rofunc/examples/learning/skrl_example.py
 rofunc/examples/learning/skrl_example2.py
+
+rofunc/lfd/rl/utils/result
+rofunc/examples/learning/result

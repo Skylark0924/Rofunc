@@ -1,3 +1,3 @@
-from .dqn.dqn import DQN
-from .ppo.ppo import PPO
-from .sac.sac import SAC
+from .ppo_agent import PPOAgent
+from .sac_agent import SACAgent
+from .td3_agent import TD3Agent

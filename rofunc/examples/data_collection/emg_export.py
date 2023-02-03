@@ -13,7 +13,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 import rofunc as rf
 
-
 def save_multi_image(filename):
     pp = PdfPages(filename)
     fig_nums = plt.get_fignums()
