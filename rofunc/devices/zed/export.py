@@ -5,7 +5,6 @@ import sys
 
 import cv2
 import numpy as np
-import pyzed.sl as sl
 
 
 class AppType(enum.Enum):
@@ -35,6 +34,7 @@ def export(filepath, mode=1):
     Returns:
 
     """
+    import pyzed.sl as sl
 
     # Get input parameters
     svo_input_path = filepath
@@ -155,7 +155,7 @@ def export(filepath, mode=1):
                 filename1 = os.path.join(output_path, "left_{}.png".format(str(svo_position).zfill(6)))
                 filename2 = os.path.join(output_path, "right_{}.png".format(
                     str(svo_position).zfill(6))) if app_type == AppType.LEFT_AND_RIGHT \
-                    else os.path.join(output_path, "depth_{}.png".format( str(svo_position).zfill(6)))
+                    else os.path.join(output_path, "depth_{}.png".format(str(svo_position).zfill(6)))
 
                 # Save Left images
                 cv2.imwrite(str(filename1), left_image.get_data())
