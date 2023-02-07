@@ -8,17 +8,30 @@ zed_list = []
 
 
 def get_intrinsic_parameters(cam):
+    """Get the intrinsic parameters of the camera.
+    :param cam: the camera object
+    :return: F, C, K, P, T : the focal length, the principal point, the radial distortion coefficients, the tangential distortion coefficients, the translation vector
+    """
     calibration_params = cam.get_camera_information().camera_configuration.calibration_parameters
     # Focal length of the left eye in pixels
-    focal_left_x = calibration_params.left_cam.fx
+    fx = calibration_params.left_cam.fx
+    fy = calibration_params.left_cam.fy
+
+    # Principal point of the left eye in pixels
+    cx = calibration_params.left_cam.cx
+    cy = calibration_params.left_cam.cy
+
     # First radial distortion coefficient
     k1 = calibration_params.left_cam.disto[0]
-    # Translation between left and right eye on z-axis
+    k2 = calibration_params.left_cam.disto[1]
+    k3 = calibration_params.left_cam.disto[2]
+    p1 = calibration_params.left_cam.disto[3]
+    p2 = calibration_params.left_cam.disto[4]
 
-    t = calibration_params.T
-    # Horizontal field of view of the left eye in degrees
-    h_fov = calibration_params.left_cam.h_fov
-    return focal_left_x, k1, t, h_fov
+    # Translation between left and right eye on z-axis
+    T = calibration_params.T
+
+    return (fx, fy), (cx, cy), (k1, k2, k3), (p1, p2), T
 
 
 def signal_handler(signal, frame):
@@ -104,12 +117,13 @@ def record(root_dir, exp_name):
             zed_list[index].close()
 
         # Log the intrinsic_parameters of each camera
-        focal_left_x, k1, t, h_fov = get_intrinsic_parameters(zed_list[index])
+        F, C, K, P, T = get_intrinsic_parameters(zed_list[index])
         logging.info('Serial_number: {}'.format(cam.serial_number))
-        logging.info('focal_left_x: {}'.format(focal_left_x))
-        logging.info('k1: {}'.format(k1))
-        logging.info('tz: {}'.format(t))
-        logging.info('h_fov: {}'.format(h_fov))
+        logging.info('focal_length: {}'.format(F))
+        logging.info('principal_point: {}'.format(C))
+        logging.info('radial_dist: {}'.format(K))
+        logging.info('tangent_dist: {}'.format(P))
+        logging.info('T: {}'.format(T))
 
         index = index + 1
 
