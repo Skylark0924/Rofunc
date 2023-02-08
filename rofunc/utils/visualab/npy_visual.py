@@ -1,10 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-data = np.load('/home/ubuntu/Xsens_data/HKSI/bench_press#Chenzui/RightHand.npy')
-pos_x = data[:, 0]
-pos_y = data[:, 1]
-pos_z = data[:, 2]
+
+def filter(interval, windowsize):
+    window = np.ones(int(windowsize)) / float(windowsize)
+    re = np.convolve(interval, window, 'same')
+    return re
+
+data = np.load('/home/lee/Xsens_data/HKSI/jump_squat#Chenzui/RightHand.npy')
+pos_x = filter(data[:, 0], 10)
+pos_y = filter(data[:, 1], 10)
+pos_z = filter(data[:, 2], 10)
 vel_x = [0] * len(data)
 vel_y = [0] * len(data)
 vel_z = [0] * len(data)
@@ -12,9 +18,9 @@ for i in range(1, len(data)):
     vel_x[i - 1] = (data[i, 0] - data[i - 1, 0]) * 60
     vel_y[i - 1] = (data[i, 1] - data[i - 1, 1]) * 60
     vel_z[i - 1] = (data[i, 2] - data[i - 1, 2]) * 60
-vel_x = np.array(vel_x)
-vel_y = np.array(vel_y)
-vel_z = np.array(vel_z)
+vel_x = filter(np.array(vel_x), 10)
+vel_y = filter(np.array(vel_y), 10)
+vel_z = filter(np.array(vel_z), 10)
 
 acc_x = [0] * len(data)
 acc_y = [0] * len(data)
@@ -23,27 +29,31 @@ for i in range(1, len(data)):
     acc_x[i - 1] = (vel_x[i] - vel_x[i - 1]) * 60
     acc_y[i - 1] = (vel_y[i] - vel_y[i - 1]) * 60
     acc_z[i - 1] = (vel_z[i] - vel_z[i - 1]) * 60
-t = np.arange(0, 3200/60, 1/60)
+acc_x = filter(np.array(acc_x), 10)
+acc_y = filter(np.array(acc_y), 10)
+acc_z = filter(np.array(acc_z), 10)
+t = np.arange(0, 1100/60, 1/60)
 
-# fig, ax0 = plt.subplots(nrows=1, ncols=1, sharex=True)
-# ax0.set_xlabel("Time", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
-# ax0.set_ylabel("(m)", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
-# plt.subplots_adjust(hspace=0.2)
-# legend_font = {"family": "Times New Roman"}
-# ax0.plot(t, pos_z[400:3600], color="#B0BEC5", label="pos", zorder=1)
-# ax1 = ax0.twinx()
-# ax1.set_ylabel("(m/s)", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
-# ax1.plot(t, vel_z[400:3600], color="#FA6839", label="vel", linewidth=1.5)
-# ax0.legend(loc="upper right", frameon=True, prop=legend_font)
-# ax1.legend(loc="upper left", frameon=True, prop=legend_font)
-# plt.show()
+fig, ax0 = plt.subplots(nrows=1, ncols=1, figsize=(10, 6), tight_layout=True)
+ax0.set_xlabel("Time", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
+ax0.set_ylabel("(m)", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
+plt.subplots_adjust(hspace=0.2)
+legend_font = {"family": "Times New Roman"}
+ax0.plot(t, pos_x[1300:2400], color="#B0BEC5", label="pos", zorder=1)
+ax1 = ax0.twinx()
+ax1.set_ylabel("(m/s)", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
+ax1.plot(t, vel_x[1300:2400], color="#FA6839", label="vel", linewidth=1.5)
+ax0.legend(loc="upper left", frameon=True, prop=legend_font)
+ax1.legend(loc="upper right", frameon=True, prop=legend_font)
+plt.savefig('/home/lee/Xsens_data/HKSI/figures_20230208/jump/pos_and_vel_x.png', dpi=300, bbox_inch='tight')
+plt.show()
 
-fig, ax0 = plt.subplots(nrows=1, ncols=1, sharex=True)
-ax0.set_ylim((-10, 10))
+fig, ax0 = plt.subplots(nrows=1, ncols=1, figsize=(10, 6), tight_layout=True)
 ax0.set_xlabel("Time", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
 ax0.set_ylabel("(m/s^2)", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
 plt.subplots_adjust(hspace=0.2)
 legend_font = {"family": "Times New Roman"}
-ax0.plot(t, acc_z[400:3600], color="#B0BEC5", label="acc", zorder=1)
-ax0.legend(loc="upper right", frameon=True, prop=legend_font)
+ax0.plot(t, acc_x[1300:2400], color="#349BEB", label="acc", zorder=1)
+ax0.legend(loc="up:t", frameon=True, prop=legend_font)
+plt.savefig('/home/lee/Xsens_data/HKSI/figures_20230208/jump/acc_x.png', dpi=300, bbox_inch='tight')
 plt.show()
