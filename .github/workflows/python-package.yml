@@ -16,7 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8"]
+#        python-version: ["3.6", "3.7", "3.8"]
+        python-version: ["3.7", "3.8"]
         os: [ubuntu-18.04]
 
     steps:
@@ -25,6 +26,10 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install ZED Python API
+      run: |
+        cd /usr/local/zed/
+        python get_python_api.py
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -41,10 +46,6 @@ jobs:
 #        echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
 #        echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
 #        nvcc -V
-    - name: Install ZED Python API
-      run: |
-        cd /usr/local/zed/
-        python get_python_api.py
 #    - name: Lint with flake8
 #      run: |
 #        # stop the build if there are Python syntax errors or undefined names

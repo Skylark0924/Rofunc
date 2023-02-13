@@ -3,8 +3,8 @@ from urdfpy import URDF
 
 def check_urdf(urdf_path):
     robot = URDF.load(urdf_path)
-    link_number = len(robot.links)
-    joint_number = len(robot.joints)
+    # link_number = len(robot.links)
+    # joint_number = len(robot.joints)
 
     link_name = []
     for link in robot.links:
@@ -26,10 +26,4 @@ def check_urdf(urdf_path):
     #     print('{} connects {} to {}'.format(
     #         joint.name, joint.parent, joint.child))
 
-    return actuated_joint_name
-
-
-if __name__ == '__main__':
-    urdf_path = '/home/lee/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi.urdf'
-    actuated_joint_name = check_urdf(urdf_path)
-    # print(actuated_joint_name)
+    return link_name, joint_name, actuated_joint_name

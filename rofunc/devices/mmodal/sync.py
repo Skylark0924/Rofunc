@@ -3,14 +3,14 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import pyzed.sl as sl
 
 from rofunc.devices.xsens.process import load_mvnx
 from rofunc.devices.zed.export import progress_bar
 from pytz import timezone
 
+
 # 1. get the time of each device
-def get_optitrack_time(optitrack_input_path, time_reference = 'PM', time_zone = 'Etc/GMT-8'):
+def get_optitrack_time(optitrack_input_path, time_reference='PM', time_zone='Etc/GMT-8'):
     '''
     Args:
         optitrack_time_path: the path of optitrack csv file
@@ -66,6 +66,8 @@ def get_xsens_time(mvnx_input_path):
 
 
 def get_zed_time(svo_input_path):
+    import pyzed.sl as sl
+
     # Specify SVO path parameter
     init_params = sl.InitParameters()
     init_params.set_from_svo_file(str(svo_input_path))
@@ -120,5 +122,3 @@ def data_sync(optitrack_input_path, mvnx_input_path, svo_input_path):
         xsens_index_list.append((np.abs(zed_time - xsens_time_array)).argmin())
         optitrack_index_list.append((np.abs(zed_time - optitrack_time_array)).argmin())
     return xsens_index_list, optitrack_index_list
-
-

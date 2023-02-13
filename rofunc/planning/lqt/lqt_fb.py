@@ -9,6 +9,7 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.config.utils import get_config
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def get_matrices(cfg: DictConfig, via_points: np.ndarray):
@@ -102,8 +103,7 @@ def uni_fb(via_points: np.ndarray, cfg: DictConfig = None, for_test=False):
     Returns:
 
     """
-    print('\033[1;32m--------{}--------\033[0m'.format('LQT with feedback control'))
-
+    beauty_print('LQT with feedback control', type='module')
     cfg = get_config("./planning", "lqt") if cfg is None else cfg
     # cfg.nbVarPos = 2
 

@@ -1,0 +1,11 @@
+<mujoco model="cursor">
+<worldbody>
+    <body name="cursor0" pos="0 0 0">
+        <geom size="0.01 0.01 0.01" type="box" condim="3" name="cursor0" rgba="1 0 0 0.5" margin="0.05" gap="10"/>
+    </body>
+    <body name="cursor1" pos="0 0 0">
+        <geom size="0.01 0.01 0.01" type="box" condim="3" name="cursor1" rgba="0 1 0 0.5" margin="0.05" gap="10"/>
+    </body>
+</worldbody>
+</mujoco>
+

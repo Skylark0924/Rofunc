@@ -12,6 +12,7 @@ import numpy as np
 import rofunc as rf
 from rofunc.planning.lqt.lqt_cp import define_control_primitive
 from rofunc.config.utils import get_config
+from rofunc.utils.logger.beauty_logger import beauty_print
 from scipy.linalg import block_diag
 from omegaconf import DictConfig
 
@@ -100,8 +101,7 @@ def get_u_x(cfg: DictConfig, state_noise: np.ndarray, Mu: np.ndarray, Qm: np.nda
 
 
 def uni_cp_dmp(data: np.ndarray, cfg: DictConfig = None, for_test=False):
-    print(
-        '\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT (control primitive and DMP)'))
+    beauty_print('Planning smooth trajectory via LQT (control primitive and DMP)', type='module')
     Qm, Rm = get_matrices(cfg, data)
     PSI, phi = define_control_primitive(cfg)
     Su, Sx, A, B = set_dynamical_system(cfg)

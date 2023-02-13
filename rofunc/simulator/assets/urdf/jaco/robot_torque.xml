@@ -1,0 +1,108 @@
+<!--
+    Modified by Youngwoon Lee for IKEA Furniture Assembly Environment.
+        - Remove fingers
+        - Add sites for compatibility with Robosuite
+        - Change initial pose and joint axes
+        - Add velocity actuators
+-->
+
+<!-- ======================================================
+    This file is part of MuJoCo.
+    Copyright 2009-2016 Roboti LLC.
+
+    Model         :: Jaco Arm from Kinova Robotics
+        Source        : www.github.com/Kinovarobotics
+        Downloaded    : July 25, 2015
+
+    Mujoco        :: Advanced physics simulation engine
+        Source        : www.roboti.us
+        Version        : 1.31
+        Released     : 23Apr16
+
+    Author        :: Vikash Kumar
+        Contacts     : kumar@roboti.us
+        Last edits     : 30Apr16, 30Nov15, 26Sept'15, 26July'15
+====================================================== -->
+
+<mujoco model="jaco(v1.31)">
+    <!-- <compiler angle="radian" />-->
+
+    <asset>
+        <mesh file="meshes/jaco_link_base.stl"/>
+        <mesh file="meshes/jaco_link_1.stl"/>
+        <mesh file="meshes/jaco_link_2.stl"/>
+        <mesh file="meshes/jaco_link_3.stl"/>
+        <mesh file="meshes/jaco_link_4.stl"/>
+        <mesh file="meshes/jaco_link_5.stl"/>
+        <mesh file="meshes/jaco_link_hand.stl"/>
+
+        <material name="MatViz" specular="1" shininess=".1" reflectance="0.5" rgba=".07 .07 .1 1"/>
+    </asset>
+
+   <default>
+        <joint damping="0.2" armature=".01"/>
+   </default>
+
+    <worldbody>
+        <body name="jaco_link_base" pos="0 0 0.25">
+            <body name="base" pos="0 0 0">
+                <inertial pos="-3.14012e-008 0.000451919 0.0770704" quat="1 -0.000920048 6.51183e-006 5.62643e-005" mass="0.787504" diaginertia="0.00187445 0.00186316 0.000676952" />
+                <geom name="jaco_link_geom_0" mesh="jaco_link_base" material="MatViz" type="mesh" conaffinity="0" margin="0.001"/>
+                <geom name="jaco_link_geom_0_1" type="capsule" pos="0 0 -0.125" size=".045 0.125" material="MatViz" conaffinity="0" margin="0.001"/>
+
+
+                <body name="jaco_link_1" pos="0 0 0.1535" quat="0 1 0 0">
+                    <inertial pos="-1.14317e-006 0.0102141 -0.0637045" quat="0.702792 0.0778988 -0.0778994 0.702813" mass="0.613151" diaginertia="0.00149348 0.00144012 0.000401632" />
+                    <joint name="jaco_joint_1" axis="0 0 1" />
+                    <geom name="jaco_link_geom_1" mesh="jaco_link_1" material="MatViz" type="mesh" conaffinity="0" margin="0.001"/>
+
+                    <body name="jaco_link_2" pos="0 0 -0.1185" quat="0.5 -0.5 -0.5 -0.5">
+                        <inertial pos="0.206657 -1.55187e-007 -0.030675" quat="8.97411e-006 0.707331 5.06696e-006 0.706883" mass="1.85031" diaginertia="0.0402753 0.0398125 0.00121953" />
+                        <joint name="jaco_joint_2" axis="0 0 1" />
+                        <geom name="jaco_link_geom_2" mesh="jaco_link_2" material="MatViz" type="mesh" conaffinity="0" margin="0.001"/>
+
+                        <body name="jaco_link_3" pos="0.41 0 0" quat="0 0 1 0">
+                            <inertial pos="0.0847979 -1.18469e-007 -0.020283" quat="2.33799e-005 0.694869 1.96996e-005 0.719136" mass="0.70372" diaginertia="0.00386732 0.00373181 0.000358773" />
+                            <joint name="jaco_joint_3" axis="0 0 1" />
+                            <geom name="jaco_link_geom_3"  mesh="jaco_link_3" material="MatViz" type="mesh" conaffinity="0" margin="0.001"/>
+
+                            <body name="jaco_link_4" pos="0.207 0 -0.01125" quat="0.707107 0 -0.707107 0">
+                                <inertial pos="0.00914824 4.53141e-008 -0.0370941" quat="0.971237 -1.92989e-005 -0.238115 3.23646e-005" mass="0.227408" diaginertia="0.000176463 0.00017225 0.000108303" />
+                                <joint name="jaco_joint_4" axis="0 0 1" />
+                                <geom name="jaco_link_geom_4"  mesh="jaco_link_4" material="MatViz" type="mesh" conaffinity="0" margin="0.001"/>
+
+                                <body name="jaco_link_5" pos="0.0343 0 -0.06588" quat="0 -0.461749 0 0.887011">
+                                    <inertial pos="0.00914824 4.53141e-008 -0.0370941" quat="0.971237 -1.92989e-005 -0.238115 3.23646e-005" mass="0.227408" diaginertia="0.000176463 0.00017225 0.000108303" />
+                                    <joint name="jaco_joint_5" axis="0 0 1" />
+                                    <geom name="jaco_link_geom_5"  mesh="jaco_link_5" material="MatViz" type="mesh" conaffinity="0" margin="0.001"/>
+
+                                    <!-- to add gripper -->
+                                    <body name="right_hand" pos="0.0343 0 -0.06588" quat="0 -0.461749 0 0.887011">
+                                        <inertial pos="0.0036132 -6.2241e-005 -0.0583749" quat="0.669114 -0.237618 -0.23799 0.66271" mass="0.58074" diaginertia="0.000817146 0.000671192 0.000606807" />
+                                        <joint name="jaco_joint_6" axis="0 0 1" />
+                                        <geom name="jaco_link_geom_6"  mesh="jaco_link_hand" rgba=".13 .13 .13 1" material="MatViz" type="mesh" conaffinity="0" margin="0.001"/>
+                                        <!-- This sites were added for visualization. -->
+                                        <site name="ee" pos="0 0 0" size="0.01 0.01 0.01" rgba="0 0 1 1" type="sphere" group="1"/>
+                                        <site name="ee_x" pos="0 0 0" size="0.005 .1"  quat="0.707105 0.707108 0 0 " rgba="1 0 0 1" type="cylinder" group="1"/>
+                                        <site name="ee_z" pos="0 0 0" size="0.005 .1" quat="0.707105 0 0 0.707108" rgba="0 0 1 1" type="cylinder" group="1"/>
+                                        <site name="ee_y" pos="0 0 0" size="0.005 .1" quat="0.707105 0 0.707108 0 " rgba="0 1 0 1" type="cylinder" group="1"/>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+    <actuator>
+        <!--  ================= Torque actuators (Weren't present in the URDF. Added seperately)================= /-->
+        <motor joint='jaco_joint_1'     name='torq_right_j1' gear="50"/>
+        <motor joint='jaco_joint_2'     name='torq_right_j2' gear="100"/>
+        <motor joint='jaco_joint_3'     name='torq_right_j3' gear="100"/>
+        <motor joint='jaco_joint_4'     name='torq_right_j4' gear="50"/>
+        <motor joint='jaco_joint_5'     name='torq_right_j5' gear="50"/>
+        <motor joint='jaco_joint_6'     name='torq_right_j6' gear="50"/>
+    </actuator>
+</mujoco>

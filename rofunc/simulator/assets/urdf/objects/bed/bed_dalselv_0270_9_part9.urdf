@@ -1,0 +1,22 @@
+<?xml version="0.0" ?>
+<robot name="bed_dalselv_0270">
+	<link name="9_part9">
+		<inertial>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<mass value="0.05491"/>
+			<inertia ixx="676.35839" ixy="0" ixz="0" iyy="676.35839" iyz="0" izz="23.69322"/>
+		</inertial>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<geometry>
+				<mesh filename="./9.stl" scale="0.00100 0.00100 0.00100"/>
+			</geometry>
+		</collision>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="-0.00010 0.00010 0.00129"/>
+			<geometry>
+				<box size="0.001911 0.001950 0.014736"/>
+			</geometry>
+		</collision>
+	</link>
+</robot>

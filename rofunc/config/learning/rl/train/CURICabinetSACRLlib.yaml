@@ -1,0 +1,35 @@
+# ========== Common Config ==========
+num_workers: 0
+num_gpus: 1
+framework: torch
+seed: 42
+create_env_on_driver: True
+horizon: 500
+
+# ========== SAC Config ==========
+# Works for both torch and tf.
+q_model_config:
+  fcnet_activation: relu
+  fcnet_hiddens: [256, 256]
+policy_model_config:
+  fcnet_activation: relu
+  fcnet_hiddens: [256, 256]
+tau: 0.005
+target_entropy: auto
+no_done_at_end: True
+n_step: 1
+rollout_fragment_length: 1024
+train_batch_size: 4096
+target_network_update_freq: 1
+min_sample_timesteps_per_iteration: 1000
+#replay_buffer_config:
+#  type: MultiAgentPrioritizedReplayBuffer
+num_steps_sampled_before_learning_starts: 10000
+optimization:
+  actor_learning_rate: 0.0003
+  critic_learning_rate: 0.0003
+  entropy_learning_rate: 0.0003
+#clip_actions: False
+#normalize_actions: True
+#evaluation_interval: 1
+#metrics_num_episodes_for_smoothing: 5

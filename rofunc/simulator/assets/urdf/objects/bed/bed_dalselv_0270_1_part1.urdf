@@ -1,0 +1,58 @@
+<?xml version="0.0" ?>
+<robot name="bed_dalselv_0270">
+	<link name="1_part1">
+		<inertial>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<mass value="0.08162"/>
+			<inertia ixx="3086.73446" ixy="0" ixz="0" iyy="8770.35994" iyz="0" izz="5692.45851"/>
+		</inertial>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<geometry>
+				<mesh filename="./1.stl" scale="0.00100 0.00100 0.00100"/>
+			</geometry>
+		</collision>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<geometry>
+				<box size="0.034960 0.000988 0.001824"/>
+			</geometry>
+		</collision>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="-0.02850 0.00000 0.00000"/>
+			<geometry>
+				<mesh filename="./4.stl" scale="0.00100 0.00100 0.00100"/>
+			</geometry>
+		</collision>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="-0.02850 0.00000 -0.00600"/>
+			<geometry>
+				<cylinder length="0.24320" radius="0.00285"/>
+			</geometry>
+		</collision>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<geometry>
+				<mesh filename="./3.stl" scale="0.00100 0.00100 0.00100"/>
+			</geometry>
+		</collision>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 -0.00600"/>
+			<geometry>
+				<cylinder length="0.24320" radius="0.00285"/>
+			</geometry>
+		</collision>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.02850 0.00000 0.00000"/>
+			<geometry>
+				<mesh filename="./2.stl" scale="0.00100 0.00100 0.00100"/>
+			</geometry>
+		</collision>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.02850 0.00000 -0.00600"/>
+			<geometry>
+				<cylinder length="0.24320" radius="0.00285"/>
+			</geometry>
+		</collision>
+	</link>
+</robot>

@@ -1,14 +1,15 @@
+![](./img/logo8.png)
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration
 
 [![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)](https://pypi.org/project/rofunc/)
 [![Documentation Status](https://readthedocs.org/projects/rofunc/badge/?version=latest)](https://rofunc.readthedocs.io/en/latest/?badge=latest)
 ![License](https://img.shields.io/github/license/Skylark0924/Rofunc)
-![](https://img.shields.io/pypi/dm/Rofunc)
+![](https://img.shields.io/github/downloads/skylark0924/Rofunc/total)
 [![](https://img.shields.io/github/issues-closed-raw/Skylark0924/Rofunc)](https://github.com/Skylark0924/Rofunc/issues?q=is%3Aissue+is%3Aclosed)
 [![](https://img.shields.io/github/issues-raw/Skylark0924/Rofunc)](https://github.com/Skylark0924/Rofunc/issues?q=is%3Aopen+is%3Aissue)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
-![](./img/logo5.png)
+> **Repository address: https://github.com/Skylark0924/Rofunc**
 
 Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and convenient python functions for robotics, including _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an Isaac Gym-based robot simulator for evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
 
@@ -29,19 +30,36 @@ import rofunc as rf
 ```
 
 Thus, have fun in the robotics world!
-> Note: Several requirements need to be installed before using the package. Please refer to the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
+> **Note**
+> Several requirements need to be installed before using the package. Please refer to the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
 
 ### Install from Source (Recommended)
 ```python
 git clone https://github.com/Skylark0924/Rofunc.git
 cd Rofunc
-pip install -r requirements.txt
-pip install -e .
-```
-> Besides, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to
-package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
 
-## [Documentation](https://rofunc.readthedocs.io/en/latest/)
+# Create a conda environment
+conda create -n rofunc python=3.8
+conda activate rofunc
+
+# Install the requirements and rofunc
+pip install -r requirements.txt
+pip install .
+```
+> **Note**
+> If you want to use functions related to ZED camera, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Skylark0924/Rofunc&type=Date)](https://star-history.com/#Skylark0924/Rofunc&Date)
+
+
+## Documentation
+[![Documentation](https://img.shields.io/badge/Documentation-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/)
+[![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)
+
+> **Note**
 > Currently, we provide a simple document; please refer to [here](./rofunc/).
 A comprehensive one with both English and Chinese versions is built via the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
 We provide a simple but interesting example: learning to play
@@ -79,8 +97,8 @@ The available functions and plans can be found as follows.
 |                                                 |                        | `strans`                                                                      | Structured-Transformer method proposed in [IEEE RAL](https://arxiv.org/abs/2205.05960)   |        |
 |                                                 | Reinforcement learning | SKRL (`ppo`, `sac`, `tq3`)                                                    | Provide API for SKRL framework and robot examples in Isaac Gym                           | ✅      |
 |                                                 |                        | StableBaseline3 (`ppo`, `sac`, `tq3`)                                         | Provide API for StableBaseline3 framework and robot examples in Isaac Gym                |        |
-|                                                 |                        | RLlib (`ppo`, `sac`, `tq3`)                                                   | Provide API for Ray RLlib framework and robot examples in Isaac Gym                      |        |
-|                                                 |                        | ElegantRL (`ppo`, `sac`, `tq3`)                                               | Provide API for ElegantRL framework and robot examples in Isaac Gym                      |        |
+|                                                 |                        | RLlib (`ppo`, `sac`, `tq3`)                                                   | Provide API for Ray RLlib framework and robot examples in Isaac Gym                      | ✅      |
+|                                                 |                        | ElegantRL (`ppo`, `sac`, `tq3`)                                               | Provide API for ElegantRL framework and robot examples in Isaac Gym                      | ✅      |
 |                                                 |                        | `cql`                                                                         | Conservative Q-learning for fully offline learning                                       |        |
 | **Planning**                                    | LQT                    | [`lqt.uni`](https://rofunc.readthedocs.io/en/latest/planning/lqt.html)        | Linear Quadratic Tracking (LQT) for uni-manual robot with several via-points             | ✅      |
 |                                                 |                        | `lqt.bi`                                                                      | LQT for bimanual robot with coordination constraints                                     | ✅      |
@@ -116,7 +134,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 ```
 @misc{Rofunc2022,
-      author = {Liu, Junjia and Li, Zhihao and Li, Chenzui},
+      author = {Liu, Junjia and Li, Zhihao and Li, Chenzui and Chen, Fei},
       title = {Rofunc: The full process python package for robot learning from demonstration},
       year = {2022},
       publisher = {GitHub},
@@ -126,4 +144,18 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 ```
 
 ## The Team
-Rofunc is developed and maintained by the CLOVER Lab (Collaborative and Versatile Robot Laboratory), CUHK.
+Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robots Laboratory)](), CUHK.
+
+
+## Acknowledge
+We would like to acknowledge the following projects:
+
+### Learning from Demonstration
+1. [pbdlib](https://gitlab.idiap.ch/rli/pbdlib-python)
+2. [Ray RLlib](https://docs.ray.io/en/latest/rllib/index.html)
+3. [ElegantRL](https://github.com/AI4Finance-Foundation/ElegantRL)
+4. [SKRL](https://github.com/Toni-SM/skrl)
+
+### Planning and Control 
+1. [Robotics codes from scratch (RCFS)](https://gitlab.idiap.ch/rli/robotics-codes-from-scratch)
+2. [pddlstream](https://github.com/caelan/pddlstream)
