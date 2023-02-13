@@ -82,7 +82,9 @@ def send_to_ubuntu(server, rbd_dict, connection):
 
 if __name__ == "__main__":
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(("192.168.13.118", 6688))
+    # server.bind(("192.168.13.118", 6688))
+    server.bind(("127.0.0.1", 6689))
+
     server.listen(5)
     connect, (host, port) = server.accept()
     print("the client %s:%s has connected." % (host, port))
