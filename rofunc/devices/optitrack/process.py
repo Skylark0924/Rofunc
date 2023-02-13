@@ -3,13 +3,7 @@ import os
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
-
-def delete_lines(in_path, out_path, head, tail=0):
-    with open(in_path, 'r') as fin:
-        a = fin.readlines()
-    with open(out_path, 'w') as fout:
-        b = ''.join(a[head:])
-        fout.write(b)
+import rofunc as rf
 
 
 def data_clean(input_path):
@@ -30,7 +24,7 @@ def data_clean(input_path):
                     os.mkdir(out_path)
                 demo_path = os.path.join(input_path, demo_csv)
                 out_file_path = os.path.join(out_path, demo_csv)
-                delete_lines(demo_path, out_file_path, 14)
+                rf.utils.delete_lines(demo_path, out_file_path, 14)
                 csv_data = pd.read_csv(out_file_path)
                 # csv_data = pd.read_csv(demo_path, skiprows=6)
                 if '3f6ec26f' in demo_csv:
@@ -54,6 +48,13 @@ def data_clean_batch(input_dir):
 
 
 def export(input_dir):
+    """
+    Export rigid body motion data.
+    Args:
+        input_dir: csv file path
+
+    Returns: [number of frames, number of rigid bodies, pose dimension = 7]
+    """
     csv_data = pd.read_csv(input_dir, skiprows=7, header=None)
 
     type_data = pd.read_csv(input_dir, skiprows=2, nrows=0)
@@ -82,6 +83,3 @@ def export(input_dir):
                 list(csv_data.values[i, rigid_body_index_list[rigid_body_index_start:rigid_body_index_end]]))
         optitrack_data_list.append(frame_data)
     return np.array(optitrack_data_list)
-
-
-

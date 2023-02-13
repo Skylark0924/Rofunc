@@ -1,7 +1,8 @@
 import numpy as np
+import isaacgym
+from isaacgym import gymutil
 import rofunc as rf
 from importlib_resources import files
-from isaacgym import gymutil
 
 args = gymutil.parse_arguments(description="Franka Attractor Example")
 
