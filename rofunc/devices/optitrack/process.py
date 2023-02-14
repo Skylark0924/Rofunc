@@ -1,9 +1,59 @@
 import os
+import csv
 
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
 import rofunc as rf
+
+def get_objects(input_path):
+    objs = {}
+    meta = {}
+    demo_csvs = os.listdir(input_path)
+    demo_csvs = sorted(demo_csvs)
+    for demo_csv in demo_csvs:
+        if 'Take' in demo_csv:
+            out_path = os.path.join(input_path, 'process')
+            if not os.path.exists(out_path):
+                os.mkdir(out_path)
+            demo_path = os.path.join(input_path, demo_csv)
+            with open(demo_path) as f:
+                data = csv.reader(f)
+                row = next(data)
+                meta = dict(zip(row[::2], row[1::2]))
+                next(data)
+                t = next(data)
+                n = next(data)
+                id = next(data)
+                tr = next(data)
+                ax = next(data)
+
+                for i, o in enumerate(n):
+                    if o and o != 'Name':
+                        if o[-7:-1] == 'Marker':
+                            obj = o[:-8]
+                            m = o[-1]
+                            if obj not in objs:
+                                objs[obj] = {'markers': {}}
+                            if str(m) not in objs[obj]['markers']:
+                                objs[obj]['markers'][str(m)] = {'pose': {tr[i]: {ax[i]: i}}}
+                            else:
+                                if tr[i] not in objs[obj]['markers'][str(m)]['pose']:
+                                    objs[obj]['markers'][str(m)]['pose'][tr[i]] = {}
+                                objs[obj]['markers'][str(m)]['pose'][tr[i]][ax[i]] = i
+                        elif not o in objs:
+                            objs[o] = {
+                                'type': t[i],
+                                'pose': { tr[i]: { ax[i]: i} },
+                                'markers': {},
+                                'id': {id[i]}
+                            }
+                        else:
+                            if tr[i] not in objs[o]['pose']:
+                                objs[o]['pose'][tr[i]] = {}
+                            objs[o]['pose'][tr[i]][ax[i]] = i
+
+    return objs, meta
 
 
 def data_clean(input_path):
