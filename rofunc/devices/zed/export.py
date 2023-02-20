@@ -158,7 +158,7 @@ def export(filepath, mode=1):
                 filename2 = os.path.join(output_path, "right_{}.png".format(
                     str(svo_position).zfill(6))) if app_type == AppType.LEFT_AND_RIGHT \
                     else os.path.join(output_path, "depth_{}.png".format(str(svo_position).zfill(6)))
-                time_table.append((filename1, str(timestamp)))
+                time_table.append((filename1, str(timestamp.get_milliseconds())))
 
                 # Save Left images
                 cv2.imwrite(str(filename1), left_image.get_data())
@@ -182,7 +182,7 @@ def export(filepath, mode=1):
             break
 
     with open(os.path.join(output_dir, "time_table.txt"), "w") as f:
-        f.write("frame,timestamp\n")
+        f.write("filename,timestamp\n")
         for frame, timestamp in time_table:
             f.write("{},{}\n".format(frame, timestamp))
 
