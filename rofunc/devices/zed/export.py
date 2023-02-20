@@ -123,6 +123,7 @@ def export(filepath, mode=1):
     sys.stdout.write("Converting SVO to {}. Use Ctrl-C to interrupt conversion.\n".format(mode_name))
 
     nb_frames = zed.get_svo_number_of_frames()
+    time_table = []
 
     while True:
         if zed.grab(rt_param) == sl.ERROR_CODE.SUCCESS:
@@ -130,6 +131,7 @@ def export(filepath, mode=1):
 
             # Retrieve SVO images
             zed.retrieve_image(left_image, sl.VIEW.LEFT)
+            timestamp = zed.get_timestamp(sl.TIME_REFERENCE.IMAGE)  # Get the image timestamp
 
             if app_type == AppType.LEFT_AND_RIGHT:
                 zed.retrieve_image(right_image, sl.VIEW.RIGHT)
@@ -156,6 +158,7 @@ def export(filepath, mode=1):
                 filename2 = os.path.join(output_path, "right_{}.png".format(
                     str(svo_position).zfill(6))) if app_type == AppType.LEFT_AND_RIGHT \
                     else os.path.join(output_path, "depth_{}.png".format(str(svo_position).zfill(6)))
+                time_table.append((filename1, str(timestamp)))
 
                 # Save Left images
                 cv2.imwrite(str(filename1), left_image.get_data())
@@ -177,6 +180,11 @@ def export(filepath, mode=1):
         elif zed.grab(rt_param) == sl.ERROR_CODE.END_OF_SVOFILE_REACHED:
             sys.stdout.write("\nSVO end has been reached. Exiting now.\n")
             break
+
+    with open(os.path.join(output_dir, "time_table.txt"), "w") as f:
+        f.write("frame,timestamp\n")
+        for frame, timestamp in time_table:
+            f.write("{},{}\n".format(frame, timestamp))
 
     if output_as_video:
         # Close the video writer
