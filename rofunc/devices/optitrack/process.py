@@ -29,8 +29,9 @@ def get_objects(input_path):
                 ax = next(data)
 
                 for i, o in enumerate(n):
-                    if o and o != 'Name':
-                        if o[-7:-1] == 'Marker':
+                    o = o.lower()
+                    if o and o != 'name':
+                        if o[-7:-1] == 'marker':
                             obj = o[:-8]
                             m = o[-1]
                             if obj not in objs:
@@ -44,7 +45,7 @@ def get_objects(input_path):
                         elif not o in objs:
                             objs[o] = {
                                 'type': t[i],
-                                'pose': { tr[i]: { ax[i]: i} },
+                                'pose': {tr[i]: {ax[i]: i}},
                                 'markers': {},
                                 'id': {id[i]}
                             }
@@ -95,6 +96,14 @@ def data_clean_batch(input_dir):
     for demo in tqdm(demos):
         input_path = os.path.join(input_dir, demo)
         data_clean(input_path)
+
+
+def get_time_series(input_dir, meta):
+    print('[get_time_series] Loading data...')
+    print('[get_time_series] data path: ', os.path.join(input_dir, f"{meta['Take Name']}.csv"))
+    data = pd.read_csv(os.path.join(input_dir, f"{meta['Take Name']}.csv"), skiprows=6)
+
+    return data
 
 
 def export(input_dir):

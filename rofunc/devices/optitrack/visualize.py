@@ -9,8 +9,8 @@ from mpl_toolkits.mplot3d import Axes3D
 COLORS = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
 
 def plot_objects(csv_path: str, objs: dict, meta: dict, show_markers=True, save_gif=False):
-    print('Loading data...')
-    print('data path: ', osp.join(csv_path, f"{meta['Take Name']}.csv"))
+    print('[plot_objects] Loading data...')
+    print('[plot_objects] data path: ', osp.join(csv_path, f"{meta['Take Name']}.csv"))
     data = pd.read_csv(osp.join(csv_path, f"{meta['Take Name']}.csv"), skiprows=6)
 
     # TODO: Better normalization technique
@@ -45,7 +45,7 @@ def plot_objects(csv_path: str, objs: dict, meta: dict, show_markers=True, save_
                         ptrs = objs[obj]['markers'][marker]['pose']['Position']
                         pt = np.array((d[ptrs['X']], d[ptrs['Y']], d[ptrs['Z']]))
                         if not np.isnan(pt).any():
-                                ax.scatter(pt[0], pt[1], pt[2], marker=".", color=COLORS[n % len(COLORS)])
+                                ax.scatter(pt[0], pt[1], pt[2], marker=f"${marker}$", color=COLORS[n % len(COLORS)])
         ax.legend()
 
     ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
