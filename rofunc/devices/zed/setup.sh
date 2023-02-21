@@ -18,7 +18,7 @@ install_zed(){
     return
   fi
 
-## Download the zed SDK and set its name as ZED.SDK.run
+## Download the zed SDK and set its name as ZED_SDK.run
   cd $HOME/$hostname\Downloads || exit 1
   wget $SDK_ADDRESS -O ZED_SDK.run
   sudo apt install zstd
