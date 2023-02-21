@@ -7,31 +7,34 @@ source "$COMMON_SCRIPT"
 
 install_zed(){
   print_divider "Install Zed" started
-  if [$(lsb_release -sc) == jammy ]; then #ubuntu 22.04
+  if [ $(lsb_release -sc) == jammy ]; then #ubuntu 22.04
     SDK_ADDRESS=https://download.stereolabs.com/zedsdk/3.8/cu117/ubuntu22
-  elif [$(lsb_release -sc) == focal ]; then #ubuntu 20.04
+  elif [ $(lsb_release -sc) == focal ]; then #ubuntu 20.04
     SDK_ADDRESS=https://download.stereolabs.com/zedsdk/3.8/cu117/ubuntu20
-  elif [$(lsb_release -sc) == bionic ]; then #ubuntu 18.04
+  elif [ $(lsb_release -sc) == bionic ]; then #ubuntu 18.04
     SDK_ADDRESS=https://download.stereolabs.com/zedsdk/3.8/cu117/ubuntu18
   else
     echo_failure "Only Ubuntu 22.04, 20.04 and 18.04 are supported in Rofunc right now."
     return
   fi
-  ## Download the zed SDK
-  cd $(HOME)/Downloads || exit 1
-  # get the file name
-  curl -o ZED_SDK.run SDK_ADDRESS
+
+## Download the zed SDK and set its name as ZED.SDK.run
+  cd $HOME/$hostname\Downloads || exit 1
+  wget $SDK_ADDRESS -O ZED_SDK.run
   sudo apt install zstd
   chmod +x ZED_SDK.run
   ./ZED_SDK.run
+  print_divider "Install Zed" finished
+  sudo rm ZED_SDK.run
+
 }
 
 help() {
   echo "===== Setup Script User Guide ====="
   echo "Syntax: setup.sh [option]"
   echo "options:"
-  echo "no option      Install all packages and do the tests, recommended for new machine."
-  echo "-h | --help    Print this help and exit."
+  echo "no option     Install all packages and do the tests, recommended for new machine."
+  echo "-h | --help   This is the ZED camera setup tool"
 }
 
 if [ $# -eq 0 ]; then
