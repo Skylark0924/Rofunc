@@ -22,12 +22,12 @@ We provide a one-step setup tool to help you simple the installation process of 
 ### Run
 Under the main source folder 
 ```shell
-cd rofunc/devices/zed
-bash setup.sh
+cd scripts
+bash zed_setup.sh
 ```
 
 ### Show Helps
 ```shell
-cd rofunc/devices/zed
-bash setup.sh -h
+cd scripts
+bash zed_setup.sh -h
 ```
