@@ -6,12 +6,14 @@ The website of Zed camera:
 > https://www.stereolabs.com/
 
 - [Zed](#zed)
-  - [Usage](#usage)
+  - [Installation](#installation)
     - [System Requirements](#system-requirements)
     - [Run](#run)
     - [Show Helps](#show-helps)
+  - [Usage](#usage)
+    - [ZED Explorer](#zed-explorer)
 
-## Usage
+##  Installation
 
 ### System Requirements
 The script can be run on:
@@ -30,4 +32,14 @@ bash zed_setup.sh
 ```shell
 cd scripts
 bash zed_setup.sh -h
+```
+## Usage
+### ZED Explorer
+The ZED Explorer is an application for ZED live preview and recording. It lets you change video resolution, aspect ratio, camera parameters, and capture high resolution snapshots and 3D video.
+
+If the ZED is recognized by your computer, you’ll see the 3D video from your camera.
+
+You just need to type the below command in your terminal under any path.
+```shell
+ZED_Explorer
 ```
