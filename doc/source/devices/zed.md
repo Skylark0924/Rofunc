@@ -11,7 +11,7 @@ The website of Zed camera:
     - [Run](#run)
     - [Show Helps](#show-helps)
   - [Usage](#usage)
-    - [ZED Explorer](#zed-explorer)
+    - [ZED Explorer and Depth Viewer](#zed-explorer-and-depth-viewer)
 
 ##  Installation
 
@@ -34,12 +34,17 @@ cd scripts
 bash zed_setup.sh -h
 ```
 ## Usage
-### ZED Explorer
+### ZED Explorer and Depth Viewer
 The ZED Explorer is an application for ZED live preview and recording. It lets you change video resolution, aspect ratio, camera parameters, and capture high resolution snapshots and 3D video.
+The ZED Depth Viewer uses the SDK to capture and display the depth map and 3D point cloud. Run the ZED Depth Viewer to check that the depth map is displayed correctly.
 
-If the ZED is recognized by your computer, you’ll see the 3D video from your camera.
 
 You just need to type the below command in your terminal under any path.
 ```shell
+# Open the ZED_Explorer
 ZED_Explorer
+```
+```shell
+# Open the ZED_Depth_viewer
+ZED_Depth_Viewer
 ```
