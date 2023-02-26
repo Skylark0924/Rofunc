@@ -26,7 +26,7 @@ install_zed(){
   ./ZED_SDK.run
   print_divider "Install Zed" finished
   sudo rm ZED_SDK.run
-
+  echo "export PATH=/usr/local/zed/tools:$PATH" >> $HOME/.bashrc
 }
 
 help() {
