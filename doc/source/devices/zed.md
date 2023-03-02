@@ -28,10 +28,22 @@ cd scripts
 bash zed_setup.sh
 ```
 
-### Show Helps
+### Optional installation
+#### help
 ```shell
 cd scripts
 bash zed_setup.sh -h
+```
+#### python api
+```shell
+cd scripts
+bash zed_setup.sh -api
+```
+
+#### python dependence
+```shell
+cd scripts
+bash zed_setup.sh -d
 ```
 ## Usage
 ### ZED Explorer and Depth Viewer
