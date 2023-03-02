@@ -29,8 +29,14 @@ install_zed(){
   echo "export PATH=/usr/local/zed/tools:$PATH" >> $HOME/.bashrc
 }
 
-install_python_api(){
+install_python_dependence(){
   source $HOME/tools/anaconda3/bin/activate rofunc
+  pip3 install shutup
+  python -m pip install cython numpy opencv-python pyopengl
+}
+
+install_python_api(){
+  install_python_dependence
   print_divider "Install zed's python api" started
   cd $HOME
   cd "/usr/local/zed/"
@@ -58,8 +64,11 @@ else
   -h | --help)
    help
    ;;
-  -p | --python)
+  -api | --python_api)
    install_python_api
+   ;;
+  -d | --dependence)
+   install_python_dependence
    ;;
   esac
 fi
