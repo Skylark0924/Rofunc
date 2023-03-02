@@ -34,3 +34,4 @@ print_divider() {
     printf "\n"
   fi
 }
+G_SOFTWARE_NAME=zed

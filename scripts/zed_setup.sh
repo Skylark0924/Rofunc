@@ -29,20 +29,37 @@ install_zed(){
   echo "export PATH=/usr/local/zed/tools:$PATH" >> $HOME/.bashrc
 }
 
+install_python_api(){
+  source $HOME/tools/anaconda3/bin/activate rofunc
+  print_divider "Install zed's python api" started
+  cd $HOME
+  cd "/usr/local/zed/"
+  python3 get_python_api.py
+  print_divider "Install zed's python api" finished
+}
+
+
+
 help() {
   echo "===== Setup Script User Guide ====="
   echo "Syntax: setup.sh [option]"
   echo "options:"
   echo "no option     Install all packages and do the tests, recommended for new machine."
   echo "-h | --help   This is the ZED camera setup tool"
+  echo "-p | --python Install zed's python api"
 }
 
 if [ $# -eq 0 ]; then
+  create_virtual_env
   install_zed
+  install_python_api
 else
   case "$1" in
   -h | --help)
    help
+   ;;
+  -p | --python)
+   install_python_api
    ;;
   esac
 fi
