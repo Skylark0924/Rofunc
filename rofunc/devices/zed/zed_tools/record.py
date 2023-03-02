@@ -138,3 +138,7 @@ def record(root_dir, exp_name):
         thread_list[index].join()
 
     print("\nFINISH")
+
+
+if __name__ == "__main__":
+    record("/home/clover/Downloads", "1")

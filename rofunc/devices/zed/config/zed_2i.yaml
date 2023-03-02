@@ -1,0 +1,19 @@
+#==> id is the SN number, represents a unique identity of camera.
+id: 38709363
+
+#==> camera_fps :Controls frame rate. optional values(int):[15,30,60,100]
+camera_fps: 30
+
+#==>Resolution: Controls camera resolution.
+# optional_values(str):[sl.RESOLUTION.HD2K, sl.RESOLUTION.HD1080,sl.RESOLUTION.HD720, sl.RESOLUTION.VGA]
+Resolution: sl.RESOLUTION.HD1080
+
+#==>depth_mode: Controls depth mode. optional values(str):[PERFORMANCE, QUALITY, ULTRA, NEURAL]
+depth_mode: PERFORMANCE
+
+#==>sdk_gpu_id: Camera using an ID from 0 to n-1 GPUs in your PC. optional values(int):[0,n-1], default: -1.
+sdk_gpu_id: 0
+
+#==>camera_image_flip: Controls whether horizontally flipped. optional values(str):[FLIP_MODE.ON, FLIP_MODE.AUTO] default:FLIP_MODE.AUTO
+camera_image_flip: FLIP_MODE.AUTO
+
