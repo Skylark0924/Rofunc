@@ -22,7 +22,7 @@ Ubuntu 22.04, 20.04 and 18.04.
 We provide a one-step setup tool to help you simple the installation process of Zed camera's SDK.
 
 ### Run
-Under the main source folder 
+Under the main source folder, the default installation method contains zed's python API installation. Optional installation is available.
 ```shell
 cd scripts
 bash zed_setup.sh
