@@ -144,7 +144,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 ```
 
 ## The Team
-Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robots Laboratory)](), CUHK.
+Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robots Laboratory)](https://feichenlab.com/), CUHK.
 
 
 ## Acknowledge
