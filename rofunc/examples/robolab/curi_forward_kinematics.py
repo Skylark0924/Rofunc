@@ -11,7 +11,7 @@ import numpy as np
 import rofunc as rf
 from rofunc.utils.file.path import get_rofunc_path
 
-urdf_path = os.path.join(get_rofunc_path(), 'simulator/assets/urdf/curi/urdf/curi.urdf')
+urdf_path = os.path.join(get_rofunc_path(), 'simulator/assets/urdf/curi/urdf/curi_w_softhand.urdf')
 link_name, joint_name, actuated_joint_name = rf.robolab.check_urdf(urdf_path)
 
 # ['reference', 'summit_xls_front_right_wheel_joint', 'summit_xls_front_left_wheel_joint', 'summit_xls_back_left_wheel_joint',
