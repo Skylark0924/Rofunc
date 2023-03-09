@@ -9,124 +9,127 @@ from typing import Tuple
 import numpy as np
 from omegaconf import DictConfig
 from tqdm import tqdm
+import rofunc as rf
 
-from rofunc.config.utils import get_config
-
-
-def get_matrices(cfg: DictConfig, via_points: np.ndarray):
-    cfg.nbPoints = len(via_points)
-
-    # Control cost matrix
-    R = np.identity((cfg.nbData - 1) * cfg.nbVarPos, dtype=np.float32) * cfg.rfactor
-
-    tl = np.linspace(0, cfg.nbData, cfg.nbPoints + 1)
-    tl = np.rint(tl[1:]).astype(np.int64) - 1
-    idx_slices = [slice(i, i + cfg.nbVar, 1) for i in (tl * cfg.nbVar)]
-
-    # Target
-    mu = np.zeros((cfg.nbVar * cfg.nbData, 1), dtype=np.float32)
-    # Task precision
-    Q = np.zeros((cfg.nbVar * cfg.nbData, cfg.nbVar * cfg.nbData), dtype=np.float32)
-
-    for i in range(len(idx_slices)):
-        slice_t = idx_slices[i]
-        x_t = via_points[i].reshape((cfg.nbVar, 1))
-        mu[slice_t] = x_t
-
-        Q[slice_t, slice_t] = np.diag(np.hstack((np.ones(cfg.nbVarPos), np.zeros(cfg.nbVar - cfg.nbVarPos))))
-    return mu, Q, R, idx_slices, tl
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
-def set_dynamical_system(cfg: DictConfig):
-    A1d = np.zeros((cfg.nbDeriv, cfg.nbDeriv), dtype=np.float32)
-    B1d = np.zeros((cfg.nbDeriv, 1), dtype=np.float32)
-    for i in range(cfg.nbDeriv):
-        A1d += np.diag(np.ones(cfg.nbDeriv - i), i) * cfg.dt ** i * 1 / factorial(i)
-        B1d[cfg.nbDeriv - i - 1] = cfg.dt ** (i + 1) * 1 / factorial(i + 1)
+class LQT:
+    def __init__(self, all_points, cfg: DictConfig = None):
+        self.cfg = rf.config.utils.get_config("./planning", "lqt") if cfg is None else cfg
+        self.all_points = all_points
+        self.start_point, self.via_points = self._data_process()
+        self.cfg.nbPoints = len(self.via_points)
 
-    A = np.kron(A1d, np.identity(cfg.nbVarPos, dtype=np.float32))
-    B = np.kron(B1d, np.identity(cfg.nbVarPos, dtype=np.float32))
+    def _data_process(self):
+        all_points = np.zeros((len(self.all_points), self.cfg.nbVar))
+        all_points[:, :self.cfg.nbVarPos] = self.all_points
+        start_point = all_points[0]
+        via_points = all_points[1:]
+        return start_point, via_points
 
-    # Build Sx and Su transfer matrices
-    Su = np.zeros((cfg.nbVar * cfg.nbData, cfg.nbVarPos * (cfg.nbData - 1)))
-    Sx = np.kron(np.ones((cfg.nbData, 1)), np.eye(cfg.nbVar, cfg.nbVar))
+    def get_matrices(self):
+        # Control cost matrix
+        R = np.identity((self.cfg.nbData - 1) * self.cfg.nbVarPos, dtype=np.float32) * self.cfg.rfactor
 
-    M = B
-    for i in range(1, cfg.nbData):
-        Sx[i * cfg.nbVar:cfg.nbData * cfg.nbVar, :] = np.dot(Sx[i * cfg.nbVar:cfg.nbData * cfg.nbVar, :], A)
-        Su[cfg.nbVar * i:cfg.nbVar * i + M.shape[0], 0:M.shape[1]] = M
-        M = np.hstack((np.dot(A, M), B))  # [0,nb_state_var-1]
-    return Su, Sx
+        tl = np.linspace(0, self.cfg.nbData, self.cfg.nbPoints + 1)
+        tl = np.rint(tl[1:]).astype(np.int64) - 1
+        idx_slices = [slice(i, i + self.cfg.nbVar, 1) for i in (tl * self.cfg.nbVar)]
 
+        # Target
+        mu = np.zeros((self.cfg.nbVar * self.cfg.nbData, 1), dtype=np.float32)
+        # Task precision
+        Q = np.zeros((self.cfg.nbVar * self.cfg.nbData, self.cfg.nbVar * self.cfg.nbData), dtype=np.float32)
 
-def get_u_x(cfg: DictConfig, start_pose: np.ndarray, mu: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray,
-            Sx: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    x0 = start_pose.reshape((cfg.nbVar, 1))
-    # Equ. 18
-    u_hat = np.linalg.inv(Su.T @ Q @ Su + R) @ Su.T @ Q @ (mu - Sx @ x0)
-    # x= S_x x_1 + S_u u
-    x_hat = (Sx @ x0 + Su @ u_hat).reshape((-1, cfg.nbVar))
-    return u_hat, x_hat
+        for i in range(len(idx_slices)):
+            slice_t = idx_slices[i]
+            x_t = self.via_points[i].reshape((self.cfg.nbVar, 1))
+            mu[slice_t] = x_t
 
+            Q[slice_t, slice_t] = np.diag(
+                np.hstack((np.ones(self.cfg.nbVarPos), np.zeros(self.cfg.nbVar - self.cfg.nbVarPos))))
+        return mu, Q, R, idx_slices, tl
 
-def uni(via_points_raw: np.ndarray, cfg: DictConfig = None):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT'))
+    def set_dynamical_system(self):
+        A1d = np.zeros((self.cfg.nbDeriv, self.cfg.nbDeriv), dtype=np.float32)
+        B1d = np.zeros((self.cfg.nbDeriv, 1), dtype=np.float32)
+        for i in range(self.cfg.nbDeriv):
+            A1d += np.diag(np.ones(self.cfg.nbDeriv - i), i) * self.cfg.dt ** i * 1 / factorial(i)
+            B1d[self.cfg.nbDeriv - i - 1] = self.cfg.dt ** (i + 1) * 1 / factorial(i + 1)
 
-    cfg = get_config("./planning", "lqt") if cfg is None else cfg
+        A = np.kron(A1d, np.identity(self.cfg.nbVarPos, dtype=np.float32))
+        B = np.kron(B1d, np.identity(self.cfg.nbVarPos, dtype=np.float32))
 
-    via_points = np.zeros((len(via_points_raw), cfg.nbVar))
-    via_points[:, :cfg.nbVarPos] = via_points_raw
-    start_pose = via_points[0]
-    via_point_pose = via_points[1:]
+        # Build Sx and Su transfer matrices
+        Su = np.zeros((self.cfg.nbVar * self.cfg.nbData, self.cfg.nbVarPos * (self.cfg.nbData - 1)))
+        Sx = np.kron(np.ones((self.cfg.nbData, 1)), np.eye(self.cfg.nbVar, self.cfg.nbVar))
 
-    mu, Q, R, idx_slices, tl = get_matrices(cfg, via_point_pose)
-    Su, Sx = set_dynamical_system(cfg)
-    u_hat, x_hat = get_u_x(cfg, start_pose, mu, Q, R, Su, Sx)
-    return u_hat, x_hat, mu, idx_slices
+        M = B
+        for i in range(1, self.cfg.nbData):
+            Sx[i * self.cfg.nbVar:self.cfg.nbData * self.cfg.nbVar, :] = np.dot(
+                Sx[i * self.cfg.nbVar:self.cfg.nbData * self.cfg.nbVar, :], A)
+            Su[self.cfg.nbVar * i:self.cfg.nbVar * i + M.shape[0], 0:M.shape[1]] = M
+            M = np.hstack((np.dot(A, M), B))  # [0,nb_state_var-1]
+        return Su, Sx
 
+    def get_u_x(self, mu: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray, Sx: np.ndarray) -> Tuple[
+        np.ndarray, np.ndarray]:
+        x0 = self.start_point.reshape((self.cfg.nbVar, 1))
+        # Equ. 18
+        u_hat = np.linalg.inv(Su.T @ Q @ Su + R) @ Su.T @ Q @ (mu - Sx @ x0)
+        # x= S_x x_1 + S_u u
+        x_hat = (Sx @ x0 + Su @ u_hat).reshape((-1, self.cfg.nbVar))
+        return u_hat, x_hat
 
-def uni_hierarchical(via_points_raw: np.ndarray, cfg: DictConfig = None, interval: int = 3):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
+    def solve(self):
+        beauty_print("Planning smooth trajectory via LQT", type='module')
 
-    cfg = get_config("./planning", "lqt") if cfg is None else cfg
+        mu, Q, R, idx_slices, tl = self.get_matrices()
+        Su, Sx = self.set_dynamical_system()
+        u_hat, x_hat = self.get_u_x(mu, Q, R, Su, Sx)
+        return u_hat, x_hat, mu, idx_slices
 
-    via_points = np.zeros((len(via_points_raw), cfg.nbVar))
-    via_points[:, :cfg.nbVarPos] = via_points_raw[:, :cfg.nbVarPos]
-    start_pose = via_points[0]
+    # def uni_hierarchical(self, via_points_raw: np.ndarray, self.cfg: DictConfig = None, interval: int = 3):
+    #     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth trajectory via LQT hierarchically'))
+    #
+    #     self.cfg = get_config("./planning", "lqt") if self.cfg is None else self.cfg
+    #
+    #     via_points = np.zeros((len(via_points_raw), self.cfg.nbVar))
+    #     via_points[:, :self.cfg.nbVarPos] = via_points_raw[:, :self.cfg.nbVarPos]
+    #     start_pose = via_points[0]
+    #
+    #     x_hat_lst = []
+    #     for i in tqdm(range(0, len(via_points), interval)):
+    #         via_point_pose = via_points[i + 1:i + interval + 1]
+    #
+    #         mu, Q, R, idx_slices, tl = get_matrices(self.cfg, via_point_pose)
+    #         Su, Sx = set_dynamical_system(self.cfg)
+    #         u_hat, x_hat = get_u_x(self.cfg, start_pose, mu, Q, R, Su, Sx)
+    #         start_pose = x_hat[-1]
+    #         x_hat_lst.append(x_hat)
+    #
+    #     x_hat = np.array(x_hat_lst).reshape((-1, self.cfg.nbVar))
+    #     return u_hat, x_hat, mu, idx_slices
 
-    x_hat_lst = []
-    for i in tqdm(range(0, len(via_points), interval)):
-        via_point_pose = via_points[i + 1:i + interval + 1]
-
-        mu, Q, R, idx_slices, tl = get_matrices(cfg, via_point_pose)
-        Su, Sx = set_dynamical_system(cfg)
-        u_hat, x_hat = get_u_x(cfg, start_pose, mu, Q, R, Su, Sx)
-        start_pose = x_hat[-1]
-        x_hat_lst.append(x_hat)
-
-    x_hat = np.array(x_hat_lst).reshape((-1, cfg.nbVar))
-    return u_hat, x_hat, mu, idx_slices
-
-
-def bi(via_points_raw_l: np.ndarray, via_points_raw_r: np.ndarray, cfg: DictConfig = None):
-    print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
-
-    cfg = get_config("./planning", "lqt") if cfg is None else cfg
-
-    via_points_l = np.zeros((len(via_points_raw_l), cfg.nbVar))
-    via_points_l[:, :cfg.nbVarPos] = via_points_raw_l
-    via_points_r = np.zeros((len(via_points_raw_r), cfg.nbVar))
-    via_points_r[:, :cfg.nbVarPos] = via_points_raw_r
-    l_start_pose = via_points_l[0]
-    r_start_pose = via_points_r[0]
-    via_point_pose_l = via_points_l[1:]
-    via_point_pose_r = via_points_r[1:]
-
-    mu_l, Q, R, idx_slices, tl = get_matrices(cfg, via_point_pose_l)
-    mu_r, Q, R, idx_slices, tl = get_matrices(cfg, via_point_pose_r)
-
-    Su, Sx = set_dynamical_system(cfg)
-
-    u_hat_l, x_hat_l = get_u_x(cfg, l_start_pose, mu_l, Q, R, Su, Sx)
-    u_hat_r, x_hat_r = get_u_x(cfg, r_start_pose, mu_r, Q, R, Su, Sx)
-    return u_hat_l, u_hat_r, x_hat_l, x_hat_r, mu_l, mu_r, idx_slices
+    # def bi(via_points_raw_l: np.ndarray, via_points_raw_r: np.ndarray, self.cfg: DictConfig = None):
+    #     print('\033[1;32m--------{}--------\033[0m'.format('Planning smooth bimanual trajectory via LQT'))
+    #
+    #     self.cfg = get_config("./planning", "lqt") if self.cfg is None else self.cfg
+    #
+    #     via_points_l = np.zeros((len(via_points_raw_l), self.cfg.nbVar))
+    #     via_points_l[:, :self.cfg.nbVarPos] = via_points_raw_l
+    #     via_points_r = np.zeros((len(via_points_raw_r), self.cfg.nbVar))
+    #     via_points_r[:, :self.cfg.nbVarPos] = via_points_raw_r
+    #     l_start_pose = via_points_l[0]
+    #     r_start_pose = via_points_r[0]
+    #     via_point_pose_l = via_points_l[1:]
+    #     via_point_pose_r = via_points_r[1:]
+    #
+    #     mu_l, Q, R, idx_slices, tl = get_matrices(self.cfg, via_point_pose_l)
+    #     mu_r, Q, R, idx_slices, tl = get_matrices(self.cfg, via_point_pose_r)
+    #
+    #     Su, Sx = set_dynamical_system(self.cfg)
+    #
+    #     u_hat_l, x_hat_l = get_u_x(self.cfg, l_start_pose, mu_l, Q, R, Su, Sx)
+    #     u_hat_r, x_hat_r = get_u_x(self.cfg, r_start_pose, mu_r, Q, R, Su, Sx)
+    #     return u_hat_l, u_hat_r, x_hat_l, x_hat_r, mu_l, mu_r, idx_slices
