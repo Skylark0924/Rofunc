@@ -33,7 +33,7 @@ Thus, have fun in the robotics world!
 > **Note**
 > Several requirements need to be installed before using the package. Please refer to the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
 
-### Install from Source (Recommended)
+### Install from Source (Nightly version)
 ```python
 git clone https://github.com/Skylark0924/Rofunc.git
 cd Rofunc
