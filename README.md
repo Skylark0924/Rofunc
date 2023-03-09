@@ -16,7 +16,7 @@ Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning fro
 ![](./img/pipeline.png)
 
 ## Installation
-### Install from PyPI
+### Install from PyPI (stable version)
 The installation is very easy,
 
 ```
@@ -33,7 +33,7 @@ Thus, have fun in the robotics world!
 > **Note**
 > Several requirements need to be installed before using the package. Please refer to the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
 
-### Install from Source (Nightly version)
+### Install from Source (nightly version)
 ```python
 git clone https://github.com/Skylark0924/Rofunc.git
 cd Rofunc
