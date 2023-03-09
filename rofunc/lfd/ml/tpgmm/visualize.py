@@ -34,6 +34,7 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
         ax.plot(p[:, 0, 0], p[:, 0, 1], p[:, 0, 2])
     rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i for i in range(3)], color='steelblue', scale=scale,
                          alpha=0.1)
+    rf.visualab.set_axis(ax)
 
     ax = fig.add_subplot(1, 2, 2, projection='3d', fc='white')
     ax.set_title('pos - coord. %d' % 2)
@@ -41,6 +42,7 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
         ax.plot(p[:, 1, 0], p[:, 1, 1], p[:, 1, 2])
     rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[i + 14 for i in range(3)], color='orangered', scale=scale,
                          alpha=0.1)
+    rf.visualab.set_axis(ax)
 
     plt.tight_layout()
     plt.show()
@@ -77,15 +79,20 @@ def poe_plot_3d(mod1, mod2, prod, demos_x, demo_idx):
     ax = fig.add_subplot(1, 3, 1, projection='3d', fc='white')
     ax.set_title('model 1')
     rf.visualab.gmm_plot(mod1.mu, mod1.sigma, swap=True, ax=ax, dim=[0, 1, 2], color='steelblue', alpha=0.05)
+    rf.visualab.set_axis(ax)
+
     ax = fig.add_subplot(1, 3, 2, projection='3d', fc='white')
     ax.set_title('model 2')
     rf.visualab.gmm_plot(mod2.mu, mod2.sigma, swap=True, ax=ax, dim=[0, 1, 2], color='orangered', alpha=0.05)
+    rf.visualab.set_axis(ax)
+
     ax = fig.add_subplot(1, 3, 3, projection='3d', fc='white')
     ax.set_title('transformed models and product')
     rf.visualab.gmm_plot(mod1.mu, mod1.sigma, swap=True, ax=ax, dim=[0, 1, 2], color='steelblue', alpha=0.05)
     rf.visualab.gmm_plot(mod2.mu, mod2.sigma, swap=True, ax=ax, dim=[0, 1, 2], color='orangered', alpha=0.05)
     rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, ax=ax, dim=[0, 1, 2], color='gold', alpha=0.05)
     ax.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2], color="b")
+    rf.visualab.set_axis(ax)
 
     patches = [mpatches.Patch(color='steelblue', label='transformed model 1'),
                mpatches.Patch(color='orangered', label='transformed model 2'),
@@ -116,6 +123,7 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, pl
     if plot_gmm:
         rf.visualab.gmm_plot(prod.mu, prod.sigma, dim=[0, 1, 2], color='gold', scale=0.01, ax=ax)
     ax.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2], 'k--', lw=2, label='demo line')
+    rf.visualab.set_axis(ax)
     plt.legend()
     plt.show()
 
