@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from .src.load_mvnx import load_mvnx
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def data_clean(input_path, output_dir):
@@ -122,7 +123,7 @@ def export(mvnx_path, output_dir=None):
             os.mkdir(output_dir)
         else:
             raise Exception('There are already some files in {}, please delete this directory.'.format(output_dir))
-        print('Save .npys in {}'.format(output_dir))
+        beauty_print('Save .npys in {}'.format(output_dir), level=2)
     else:
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)

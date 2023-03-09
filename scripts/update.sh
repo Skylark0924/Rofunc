@@ -9,7 +9,7 @@ pip3rf uninstall -y rofunc
 cd ..
 rm -rf ./build
 rm -rf ./dist
-pip3rf install -r requirements.txt
+#pip3rf install -r requirements.txt
 pyana3rf setup.py bdist_wheel sdist
 cd ./dist
 pip3rf install *.whl

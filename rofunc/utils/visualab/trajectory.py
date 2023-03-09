@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes._axes import _log as matplotlib_axes_logger
 from matplotlib.pyplot import cm
 from pytransform3d.rotations import matrix_from_quaternion, plot_basis
+from rofunc.utils.visualab.utils import set_axis
 
 matplotlib_axes_logger.setLevel('ERROR')
 
@@ -74,9 +75,23 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
                 ax = plot_basis(ax=ax, R=R, p=p, s=0.01)
     if title is not None:
         ax.set_title(title, fontsize=12, fontweight='bold')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
+
+    # # Create cubic bounding box to simulate equal aspect ratio
+    # X_max = max([data_lst[i][:, 0].max() for i in range(len(data_lst))])
+    # X_min = min([data_lst[i][:, 0].min() for i in range(len(data_lst))])
+    # Y_max = max([data_lst[i][:, 1].max() for i in range(len(data_lst))])
+    # Y_min = min([data_lst[i][:, 1].min() for i in range(len(data_lst))])
+    # Z_max = max([data_lst[i][:, 2].max() for i in range(len(data_lst))])
+    # Z_min = min([data_lst[i][:, 2].min() for i in range(len(data_lst))])
+    # max_range = np.array([X_max - X_min, Y_max - Y_min, Z_max - Z_min]).max()
+    # Xb = 0.5 * max_range * np.mgrid[-1:2:2, -1:2:2, -1:2:2][0].flatten() + 0.5 * (X_max + X_min)
+    # Yb = 0.5 * max_range * np.mgrid[-1:2:2, -1:2:2, -1:2:2][1].flatten() + 0.5 * (Y_max + Y_min)
+    # Zb = 0.5 * max_range * np.mgrid[-1:2:2, -1:2:2, -1:2:2][2].flatten() + 0.5 * (Z_max + Z_min)
+    # # Comment or uncomment following both lines to test the fake bounding box:
+    # for xb, yb, zb in zip(Xb, Yb, Zb):
+    #     ax.plot([xb], [yb], [zb], 'w')
+
+    set_axis(ax)
     plt.tight_layout()
     if g_ax is None:
         plt.show()
