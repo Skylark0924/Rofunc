@@ -13,6 +13,7 @@ class TPGMM:
         Task-parameterized Gaussian Mixture Model (TP-GMM)
         :param demos_x: demo displacement
         """
+        # TODO: Check list input with different length
         self.demos_x = demos_x
 
         """
@@ -94,17 +95,21 @@ class TPGMM:
                 raise Exception('Dimension is less than 2, cannot plot')
         return model
 
-    def poe(self, model: pbd.HMM, show_demo_idx: int, plot: bool = False) -> pbd.GMM:
+    def poe(self, model: pbd.HMM, show_demo_idx: int, task_params: dict = None, plot: bool = False) -> pbd.GMM:
         """
         Product of Expert/Gaussian (PoE), which calculates the mixture distribution from multiple coordinates
         :param model: learned model
         :param show_demo_idx: index of the specific demo to be reproduced
+        :param task_params: [dict], task parameters for including transformation matrix A and bias b
         :param plot: [bool], whether to plot the PoE
         :return: The product of experts
         """
         # get transformation for given demonstration.
-        # We use the transformation of the first timestep as they are constant
-        A, b = self.demos_A_xdx[show_demo_idx][0], self.demos_b_xdx[show_demo_idx][0]
+        if task_params is not None:
+            A, b = task_params['A'], task_params['b']
+        else:
+            # We use the transformation of the first timestep as they are constant
+            A, b = self.demos_A_xdx[show_demo_idx][0], self.demos_b_xdx[show_demo_idx][0]
         # transformed model for coordinate system 1
         mod1 = model.marginal_model(slice(0, len(b[0]))).lintrans(A[0], b[0])
         # transformed model for coordinate system 2
@@ -168,14 +173,14 @@ class TPGMM:
         trajectory = self._reproduce(model, prod, show_demo_idx, plot=plot)
         return trajectory
 
-    def generate(self, model: pbd.HMM, plot: bool = False) -> np.ndarray:
+    def generate(self, model: pbd.HMM, ref_demo_idx: int, task_params: dict, plot: bool = False) -> np.ndarray:
         """
         Generate a new trajectory from the learned model
         """
         beauty_print('generate a new demo from learned representation', type='info')
 
-        prod = self.poe(model, 0, plot=plot)
-        trajectory = self._generate(model, prod, plot=plot)
+        prod = self.poe(model, ref_demo_idx, task_params, plot=plot)
+        trajectory = self._reproduce(model, prod, ref_demo_idx, plot=plot)
         return trajectory
 
 
