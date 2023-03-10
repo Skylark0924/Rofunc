@@ -37,6 +37,15 @@ jobs:
         pip install -r requirements.txt
         python -m pip install cython numpy opencv-python pyopengl
         pip install torch==1.10.2+cu113 torchvision==0.11.3+cu113 torchaudio==0.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+    - name: Install rofunc
+      run: |
+        cd /home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science
+        pip uninstall -y rofunc
+        rm -rf ./build
+        rm -rf ./dist
+        python setup.py bdist_wheel sdist
+        cd ./dist
+        pip install *.whl
 #    - name: cuda-toolkit
 #      uses: Jimver/cuda-toolkit@v0.2.8
 #      id: cuda-toolkit

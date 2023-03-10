@@ -1,7 +1,9 @@
-from typing import Union, List
+from typing import Union, List, Tuple
 
 import numpy as np
 import pbdlib as pbd
+from numpy import ndarray
+from pbdlib import HMM
 
 import rofunc as rf
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -31,45 +33,56 @@ class TPGMM:
         demos_xdx_f: states and their first derivative in P frames, [M, T, P, nb_dim * 2]
         demos_xdx_augm: reshape demos_xdx_f, [M, T, nb_dim * 2 * P]
         """
-        self.demos_dx = self.get_dx()
-        self.demos_A, self.demos_b, self.demos_A_xdx, self.demos_b_xdx = self.get_A_b()
-        self.demos_xdx, self.demos_xdx_f, self.demos_xdx_augm = self.get_related_matrix()
+        self.demos_dx, self.demos_A, self.demos_b, self.demos_A_xdx, self.demos_b_xdx, self.demos_xdx, \
+            self.demos_xdx_f, self.demos_xdx_augm = self.get_related_matrix()
 
-    def get_dx(self):
+    def get_dx(self, demos_x=None):
+        if demos_x is None:
+            demos_x = self.demos_x
+
         demos_dx = []
-        for i in range(len(self.demos_x)):
+        for i in range(len(demos_x)):
             demo_dx = []
-            for j in range(len(self.demos_x[i])):
-                if 0 < j < len(self.demos_x[i]) - 1:
-                    dx = (self.demos_x[i][j + 1] - self.demos_x[i][j - 1]) / 2
-                elif j == len(self.demos_x[i]) - 1:
-                    dx = self.demos_x[i][j] - self.demos_x[i][j - 1]
+            for j in range(len(demos_x[i])):
+                if 0 < j < len(demos_x[i]) - 1:
+                    dx = (demos_x[i][j + 1] - demos_x[i][j - 1]) / 2
+                elif j == len(demos_x[i]) - 1:
+                    dx = demos_x[i][j] - demos_x[i][j - 1]
                 else:
-                    dx = self.demos_x[i][j + 1] - self.demos_x[i][j]
+                    dx = demos_x[i][j + 1] - demos_x[i][j]
                 dx = dx / 0.01
                 demo_dx.append(dx)
             demos_dx.append(np.array(demo_dx))
         return demos_dx
 
-    def get_A_b(self):
+    def get_A_b(self, demos_x=None):
+        if demos_x is None:
+            demos_x = self.demos_x
+
         demos_b = []
         demos_A = []
-        for i in range(len(self.demos_x)):
+        for i in range(len(demos_x)):
             demos_b.append(
-                np.tile(np.vstack([self.demos_x[i][0], self.demos_x[i][-1], ]), (len(self.demos_x[i]), 1, 1)))
-            demos_A.append(np.tile([[[1., 0.], [-0., -1.]], [[1., 0.], [-0., -1.]]], (len(self.demos_x[i]), 1, 1, 1)))
-        demos_A_xdx = [np.kron(np.eye(len(self.demos_x[0][0])), d) for d in demos_A]
+                np.tile(np.vstack([demos_x[i][0], demos_x[i][-1], ]), (len(demos_x[i]), 1, 1)))
+            demos_A.append(np.tile([[[1., 0.], [-0., -1.]], [[1., 0.], [-0., -1.]]], (len(demos_x[i]), 1, 1, 1)))
+        demos_A_xdx = [np.kron(np.eye(len(demos_x[0][0])), d) for d in demos_A]
         demos_b_xdx = [np.concatenate([d, np.zeros(d.shape)], axis=-1) for d in demos_b]
         return demos_A, demos_b, demos_A_xdx, demos_b_xdx
 
-    def get_related_matrix(self):
+    def get_related_matrix(self, demos_x=None):
+        if demos_x is None:
+            demos_x = self.demos_x
+
+        demos_dx = self.get_dx(demos_x)
+        demos_A, demos_b, demos_A_xdx, demos_b_xdx = self.get_A_b(demos_x)
+
         demos_xdx = [np.hstack([_x, _dx]) for _x, _dx in
-                     zip(self.demos_x, self.demos_dx)]  # Position and velocity (num_of_points, 14)
+                     zip(demos_x, demos_dx)]  # Position and velocity (num_of_points, 14)
         demos_xdx_f = [np.einsum('taji,taj->tai', _A, _x[:, None] - _b) for _x, _A, _b in
-                       zip(demos_xdx, self.demos_A_xdx, self.demos_b_xdx)]
+                       zip(demos_xdx, demos_A_xdx, demos_b_xdx)]
         demos_xdx_augm = [d.reshape(-1, len(demos_xdx[0][0]) * 2) for d in
                           demos_xdx_f]  # (num_of_points, 28): 0~13 pos-vel in coord 1, 14~27 pos-vel in coord 2
-        return demos_xdx, demos_xdx_f, demos_xdx_augm
+        return demos_dx, demos_A, demos_b, demos_A_xdx, demos_b_xdx, demos_xdx, demos_xdx_f, demos_xdx_augm
 
     def hmm_learning(self, nb_states: int = 4, reg: float = 1e-3, plot: bool = False) -> pbd.HMM:
         """
@@ -170,8 +183,8 @@ class TPGMM:
         beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
 
         prod = self.poe(model, show_demo_idx, plot=plot)
-        trajectory = self._reproduce(model, prod, show_demo_idx, plot=plot)
-        return trajectory
+        traj = self._reproduce(model, prod, show_demo_idx, plot=plot)
+        return traj
 
     def generate(self, model: pbd.HMM, ref_demo_idx: int, task_params: dict, plot: bool = False) -> np.ndarray:
         """
@@ -180,15 +193,71 @@ class TPGMM:
         beauty_print('generate a new demo from learned representation', type='info')
 
         prod = self.poe(model, ref_demo_idx, task_params, plot=plot)
-        trajectory = self._reproduce(model, prod, ref_demo_idx, plot=plot)
-        return trajectory
+        traj = self._reproduce(model, prod, ref_demo_idx, plot=plot)
+        return traj
 
 
 class TPGMMBi(TPGMM):
     def __init__(self, demos_left_x: Union[List, np.ndarray], demos_right_x: Union[List, np.ndarray]):
-        super().__init__(demos_left_x)
-        super().__init__(demos_right_x)
-        # TODO
+        self.demos_left_x = demos_left_x
+        self.demos_right_x = demos_right_x
+
+        self.repr_l = TPGMM(demos_left_x)
+        self.repr_r = TPGMM(demos_right_x)
+
+        # self.demos_left_dx, self.demos_left_A, self.demos_left_b, self.demos_left_A_xdx, self.demos_left_b_xdx, \
+        #     self.demos_left_xdx, self.demos_left_xdx_f, self.demos_left_xdx_augm = self.get_related_matrix(
+        #     self.demos_left_x)
+        #
+        # self.demos_right_dx, self.demos_right_A, self.demos_right_b, self.demos_right_A_xdx, self.demos_right_b_xdx, \
+        #     self.demos_right_xdx, self.demos_right_xdx_f, self.demos_right_xdx_augm = self.get_related_matrix(
+        #     self.demos_right_x)
+
+    def fit(self, plot: bool = False) -> Tuple[HMM, HMM]:
+        """
+        Learning the single arm/agent trajectory representation from demonstration via TP-GMM.
+        """
+        beauty_print('Learning the trajectory representation from demonstration via TP-GMM')
+
+        model_l = self.repr_l.hmm_learning(plot=plot)
+        model_r = self.repr_r.hmm_learning(plot=plot)
+        return model_l, model_r
+
+    def reproduce(self, model_l: pbd.HMM, model_r: pbd.HMM, show_demo_idx: int, plot: bool = False) -> Tuple[
+        ndarray, ndarray]:
+        """
+        Reproduce the specific demo_idx from the learned model
+        """
+        beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
+
+        prod_l = self.repr_l.poe(model_l, show_demo_idx, plot=plot)
+        prod_r = self.repr_r.poe(model_r, show_demo_idx, plot=plot)
+        traj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, plot=plot)
+        traj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, plot=plot)
+
+        if plot:
+            nb_dim = int(traj_l.shape[1] / 2)
+            data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
+            rf.visualab.traj_plot(data_lst)
+        return traj_l, traj_r
+
+    def generate(self, model_l: pbd.HMM, model_r: pbd.HMM, ref_demo_idx: int, task_params: dict, plot: bool = False) -> \
+            Tuple[ndarray, ndarray]:
+        """
+        Generate a new trajectory from the learned model
+        """
+        beauty_print('generate a new demo from learned representation', type='info')
+
+        prod_l = self.repr_l.poe(model_l, ref_demo_idx, task_params['Left'], plot=plot)
+        prod_r = self.repr_r.poe(model_r, ref_demo_idx, task_params['Right'], plot=plot)
+        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, plot=plot)
+        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, plot=plot)
+
+        if plot:
+            nb_dim = int(traj_l.shape[1] / 2)
+            data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
+            rf.visualab.traj_plot(data_lst)
+        return traj_l, traj_r
 
     # def bi(self, demos_left_x: Union[List, np.ndarray], demos_right_x: Union[List, np.ndarray], show_demo_idx: int,
     #        plot: bool = False) -> Tuple[pbd.HMM, pbd.HMM, np.ndarray, np.ndarray]:

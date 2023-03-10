@@ -19,6 +19,7 @@ class LQT:
         self.cfg = rf.config.utils.get_config("./planning", "lqt") if cfg is None else cfg
         self.all_points = all_points
         self.start_point, self.via_points = self._data_process()
+        self.cfg.nbData = 500
         self.cfg.nbPoints = len(self.via_points)
 
     def _data_process(self):
