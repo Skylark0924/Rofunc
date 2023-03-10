@@ -258,30 +258,3 @@ class TPGMMBi(TPGMM):
             data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
             rf.visualab.traj_plot(data_lst)
         return traj_l, traj_r
-
-    # def bi(self, demos_left_x: Union[List, np.ndarray], demos_right_x: Union[List, np.ndarray], show_demo_idx: int,
-    #        plot: bool = False) -> Tuple[pbd.HMM, pbd.HMM, np.ndarray, np.ndarray]:
-    #     print('\033[1;32m--------{}--------\033[0m'.format(
-    #         'Learning the bimanual trajectory representation from demonstration via TP-GMM'))
-    #
-    #     _, demos_left_xdx, _, _, demos_left_A_xdx, demos_left_b_xdx, demos_left_xdx_f, demos_left_xdx_augm = self.get_related_matrix(
-    #         demos_left_x)
-    #     _, demos_right_xdx, _, _, demos_right_A_xdx, demos_right_b_xdx, demos_right_xdx_f, demos_right_xdx_augm = self.get_related_matrix(
-    #         demos_right_x)
-    #
-    #     model_l = self.hmm_learning(demos_left_xdx_f, demos_left_xdx_augm, plot=plot)
-    #     model_r = self.hmm_learning(demos_right_xdx_f, demos_right_xdx_augm, plot=plot)
-    #
-    #     prod_l = self.poe(model_l, demos_left_A_xdx, demos_left_b_xdx, demos_left_x, show_demo_idx, plot=plot)
-    #     prod_r = self.poe(model_r, demos_right_A_xdx, demos_right_b_xdx, demos_right_x, show_demo_idx, plot=plot)
-    #
-    #     rep_l = self.reproduce(model_l, prod_l, demos_left_x, demos_left_xdx, demos_left_xdx_augm, show_demo_idx,
-    #                            plot=plot)
-    #     rep_r = self.reproduce(model_r, prod_r, demos_right_x, demos_right_xdx, demos_right_xdx_augm, show_demo_idx,
-    #                            plot=plot)
-    #
-    #     if plot:
-    #         nb_dim = int(rep_l.shape[1] / 2)
-    #         data_lst = [rep_l[:, :nb_dim], rep_r[:, :nb_dim]]
-    #         rf.visualab.traj_plot(data_lst)
-    #     return model_l, model_r, rep_l, rep_r
