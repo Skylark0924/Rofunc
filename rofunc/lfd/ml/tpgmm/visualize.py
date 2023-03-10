@@ -44,7 +44,6 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
                          alpha=0.1)
     rf.visualab.set_axis(ax)
 
-    plt.tight_layout()
     plt.show()
 
 
