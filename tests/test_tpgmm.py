@@ -35,9 +35,9 @@ def test_7d_uni_tpgmm():
 
     # Reproductions for new situations
     ref_demo_idx = 2
-    A, b = representation.demos_A_xdx[ref_demo_idx][0], representation.demos_b_xdx[ref_demo_idx][0]
-    b[1] = b[0]
-    task_params = {'A': A, 'b': b}
+    start_xdx = representation.demos_xdx[ref_demo_idx][0]
+    end_xdx = representation.demos_xdx[ref_demo_idx][0]
+    task_params = {'start_xdx': start_xdx, 'end_xdx': end_xdx}
     traj = representation.generate(model, ref_demo_idx, task_params)
 
 
@@ -55,11 +55,12 @@ def test_7d_bi_tpgmm():
 
     # Reproductions for new situations
     ref_demo_idx = 2
-    A_l, b_l = representation.repr_l.demos_A_xdx[ref_demo_idx][0], representation.repr_l.demos_b_xdx[ref_demo_idx][0]
-    b_l[1] = b_l[0]
-    A_r, b_r = representation.repr_r.demos_A_xdx[ref_demo_idx][0], representation.repr_r.demos_b_xdx[ref_demo_idx][0]
-    b_r[1] = b_r[0]
-    task_params = {'Left': {'A': A_l, 'b': b_l}, 'Right': {'A': A_r, 'b': b_r}}
+    start_xdx_l = representation.repr_l.demos_xdx[ref_demo_idx][0]
+    end_xdx_l = representation.repr_l.demos_xdx[ref_demo_idx][0]
+    start_xdx_r = representation.repr_r.demos_xdx[ref_demo_idx][0]
+    end_xdx_r = representation.repr_r.demos_xdx[ref_demo_idx][0]
+    task_params = {'Left': {'start_xdx': start_xdx_l, 'end_xdx': end_xdx_l},
+                   'Right': {'start_xdx': start_xdx_r, 'end_xdx': end_xdx_r}}
     traj_l, traj_r = representation.generate(model_l, model_r, ref_demo_idx, task_params)
 
 

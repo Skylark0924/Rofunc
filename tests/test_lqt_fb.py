@@ -2,14 +2,14 @@ import numpy as np
 import rofunc as rf
 
 
-def test_2d_fb_lqt():
-    # TODO: need to modify the definition of state noise
-    cfg = rf.config.utils.get_config("./planning", "lqt_2d")
-    via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0]])
-    state_noise = ...
-
-    controller = rf.lqt.LQTFb(via_points)
-    controller.solve(state_noise, for_test=True)
+# def test_2d_fb_lqt():
+#     # TODO: need to modify the definition of state noise
+#     cfg = rf.config.utils.get_config("./planning", "lqt_2d")
+#     via_points = np.array([[2, 5, 0, 0], [3, 1, 0, 0]])
+#     state_noise = ...
+#
+#     controller = rf.lqt.LQTFb(via_points)
+#     controller.solve(state_noise, for_test=True)
 
 
 def test_7d_uni_fb_lqt():
