@@ -9,18 +9,18 @@ import numpy as np
 import rofunc as rf
 
 raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
-raw_demo = np.expand_dims(raw_demo, axis=0)
-demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
-representation = rf.lfd.tpgmm.TPGMM(demos_x)
-model = representation.fit(plot=True)
+# TP-GMM
+representation = rf.lfd.tpgmm.TPGMM(demos_x, plot=True)
+model = representation.fit()
 
 # Reproductions for the same situations
-traj = representation.reproduce(model, show_demo_idx=2, plot=True)
+traj = representation.reproduce(model, show_demo_idx=2)
 
-# Reproductions for new situations
+# Reproductions for new situations: set the endpoint as the start point to make a cycled motion
 ref_demo_idx = 2
-A, b = representation.demos_A_xdx[ref_demo_idx][0], representation.demos_b_xdx[ref_demo_idx][0]
-b[1] = b[0]
-task_params = {'A': A, 'b': b}
-traj = representation.generate(model, ref_demo_idx, task_params, plot=True)
+start_xdx = representation.demos_xdx[ref_demo_idx][0]
+end_xdx = representation.demos_xdx[ref_demo_idx][0]
+task_params = {'start_xdx': start_xdx, 'end_xdx': end_xdx}
+traj = representation.generate(model, ref_demo_idx, task_params)
