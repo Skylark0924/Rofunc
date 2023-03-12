@@ -14,12 +14,14 @@ import os
 def test_7d_uni_tpgmr():
     # Uni_3d
     raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
-    raw_demo = np.expand_dims(raw_demo, axis=0)
-    demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
-    show_demo_idx = 2
-    start_pose = demos_x[show_demo_idx][-1]
-    end_pose = demos_x[show_demo_idx][0]
-    model, rep = rf.tpgmr.uni(demos_x, show_demo_idx, start_pose, end_pose, plot=False)
+    demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
+
+    # TP-GMR
+    representation = rf.lfd.tpgmr.TPGMR(demos_x, plot=True)
+    model = representation.fit()
+
+    # Reproductions for the same situations
+    traj = representation.reproduce(model, show_demo_idx=2)
 
 
 if __name__ == '__main__':

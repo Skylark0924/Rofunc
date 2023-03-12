@@ -7,6 +7,7 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 from omegaconf import DictConfig
+import rofunc as rf
 
 from rofunc.config.utils import get_config
 from rofunc.planning.lqr.ilqr import fk, f_reach, get_matrices, set_dynamical_system
