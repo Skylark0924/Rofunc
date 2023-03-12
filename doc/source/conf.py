@@ -21,12 +21,12 @@ source_suffix = ['.rst', '.md']
 
 # -- Project information -----------------------------------------------------
 
-project = 'RoFunc'
+project = 'Rofunc'
 copyright = '2022, Junjia Liu'
 author = 'Junjia Liu'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.0.9'
+release = '0.0.1.2'
 
 # -- General configuration ---------------------------------------------------
 
