@@ -25,6 +25,7 @@ class TPGMR(TPGMM):
         t = np.linspace(0, 10, self.demos_x[0].shape[0])
         demos = [np.hstack([t[:, None], d]) for d in self.demos_xdx_augm]
         model = rf.gmr.GMM_learning(demos)
+        # TODO: Check
         mu_gmr, sigma_gmr = rf.gmr.estimate(model, self.demos_xdx_f, t[:, None], dim_in=slice(0, 1),
                                             dim_out=slice(1, 4 * len(self.demos_x[0]) + 1))
         model = pbd.GMM(mu=mu_gmr, sigma=sigma_gmr)
