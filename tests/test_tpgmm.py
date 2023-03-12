@@ -25,34 +25,44 @@ import os
 
 def test_7d_uni_tpgmm():
     raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
-    raw_demo = np.expand_dims(raw_demo, axis=0)
-    demos_x = np.vstack((raw_demo[:, 82:232, :], raw_demo[:, 233:383, :], raw_demo[:, 376:526, :]))
+    demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
-    representation = rf.lfd.tpgmm.TPGMM(demos_x)
-    model = representation.fit(plot=False)
+    representation = rf.lfd.tpgmm.TPGMM(demos_x, plot=False)
+    model = representation.fit()
 
     # Reproductions for the same situations
-    traj = representation.reproduce(model, show_demo_idx=2, plot=False)
+    traj = representation.reproduce(model, show_demo_idx=2)
 
     # Reproductions for new situations
     ref_demo_idx = 2
     A, b = representation.demos_A_xdx[ref_demo_idx][0], representation.demos_b_xdx[ref_demo_idx][0]
     b[1] = b[0]
     task_params = {'A': A, 'b': b}
-    traj = representation.generate(model, ref_demo_idx, task_params, plot=False)
+    traj = representation.generate(model, ref_demo_idx, task_params)
 
 
-# def test_7d_bi_tpgmm():
-#     left_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
-#     right_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/RightHand.npy'))
-#     left_raw_demo = np.expand_dims(left_raw_demo, axis=0)
-#     right_raw_demo = np.expand_dims(right_raw_demo, axis=0)
-#     demos_left_x = np.vstack((left_raw_demo[:, 82:232, :], left_raw_demo[:, 233:383, :], left_raw_demo[:, 376:526, :]))
-#     demos_right_x = np.vstack(
-#         (right_raw_demo[:, 82:232, :], right_raw_demo[:, 233:383, :], right_raw_demo[:, 376:526, :]))
-#
-#     model_l, model_r, rep_l, rep_r = rf.tpgmm.bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=False)
+def test_7d_bi_tpgmm():
+    left_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
+    right_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/RightHand.npy'))
+    demos_left_x = [left_raw_demo[500:635, :], left_raw_demo[635:770, :], left_raw_demo[770:905, :]]
+    demos_right_x = [right_raw_demo[500:635, :], right_raw_demo[635:770, :], right_raw_demo[770:905, :]]
+
+    representation = rf.lfd.tpgmm.TPGMMBi(demos_left_x, demos_right_x, plot=False)
+    model_l, model_r = representation.fit()
+
+    # Reproductions for the same situations
+    traj_l, traj_r = representation.reproduce(model_l, model_r, show_demo_idx=2)
+
+    # Reproductions for new situations
+    ref_demo_idx = 2
+    A_l, b_l = representation.repr_l.demos_A_xdx[ref_demo_idx][0], representation.repr_l.demos_b_xdx[ref_demo_idx][0]
+    b_l[1] = b_l[0]
+    A_r, b_r = representation.repr_r.demos_A_xdx[ref_demo_idx][0], representation.repr_r.demos_b_xdx[ref_demo_idx][0]
+    b_r[1] = b_r[0]
+    task_params = {'Left': {'A': A_l, 'b': b_l}, 'Right': {'A': A_r, 'b': b_r}}
+    traj_l, traj_r = representation.generate(model_l, model_r, ref_demo_idx, task_params)
 
 
 if __name__ == '__main__':
     test_7d_uni_tpgmm()
+    test_7d_bi_tpgmm()
