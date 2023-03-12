@@ -19,3 +19,4 @@ elegantrl
 https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl
 https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4-py3-none-any.whl
 numpy==1.21.6
+matplotlib==3.7.0
