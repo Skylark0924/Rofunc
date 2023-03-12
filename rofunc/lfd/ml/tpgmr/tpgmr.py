@@ -1,149 +1,130 @@
+from typing import Tuple
+
 import numpy as np
-import rofunc as rf
+import pbdlib as pbd
+from numpy import ndarray
 from scipy.linalg import block_diag
 
-import pbdlib as pbd
+import rofunc as rf
+from rofunc.lfd.ml.tpgmm.tpgmm import TPGMM
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
-def poe_gmr(mu_gmr, sigma_gmr, start_x, end_x, demos_x, demo_idx, horzion=150, plot=False):
-    print('{}'.format('product of expert'))
+class TPGMR(TPGMM):
+    def __init__(self, demos_x, horizon=150, plot=False):
+        """
+        Task-parameterized Gaussian Mixture Regression (TP-GMR)
+        :param demos_x: demo displacement
+        :param horizon: horizon of the reproduced trajectory
+        :param plot: whether to plot the result
+        """
+        super().__init__(demos_x, horizon=horizon, plot=plot)
 
-    gmm = pbd.GMM(mu=mu_gmr, sigma=sigma_gmr)
+    def gmm_learning(self):
+        # Learn the time-dependent GMR from demonstration
+        t = np.linspace(0, 10, self.demos_x[0].shape[0])
+        demos = [np.hstack([t[:, None], d]) for d in self.demos_xdx_augm]
+        model = rf.gmr.GMM_learning(demos)
+        mu_gmr, sigma_gmr = rf.gmr.estimate(model, self.demos_xdx_f, t[:, None], dim_in=slice(0, 1),
+                                            dim_out=slice(1, 4 * len(self.demos_x[0]) + 1))
+        model = pbd.GMM(mu=mu_gmr, sigma=sigma_gmr)
+        return model
 
-    # get transformation for new situation
-    b = np.tile(np.vstack([start_x, end_x, ]), (horzion, 1, 1))
-    A = np.tile([[[1., 0.], [-0., -1.]], [[1., 0.], [-0., -1.]]], (horzion, 1, 1, 1))
+    def _reproduce(self, model: pbd.HMM, prod: pbd.GMM, show_demo_idx: int, start_xdx: np.ndarray) -> np.ndarray:
+        """
+        Reproduce the specific demo_idx from the learned model
+        :param model: learned model
+        :param prod: result of PoE
+        :param show_demo_idx: index of the specific demo to be reproduced
+        :return:
+        """
+        lqr = pbd.PoGLQR(nb_dim=len(self.demos_x[0][0]), dt=0.01, horizon=self.demos_xdx[show_demo_idx].shape[0])
 
-    b_xdx = np.concatenate([b, np.zeros(b.shape)], axis=-1)
-    A_xdx = np.kron(np.eye(len(demos_x[0][0])), A)
+        mvn = pbd.MVN()
+        mvn.mu = np.concatenate([i for i in prod.mu])
+        mvn._sigma = block_diag(*[i for i in prod.sigma])
 
-    A, b = A_xdx[0], b_xdx[0]
+        lqr.mvn_xi = mvn
+        lqr.mvn_u = -4
+        lqr.x0 = start_xdx
 
-    # transformed model for coordinate system 1
-    mod1 = gmm.marginal_model(slice(0, len(b[0]))).lintrans(A[0], b[0])
-    # transformed model for coordinate system 2
-    mod2 = gmm.marginal_model(slice(len(b[0]), len(b[0]) * 2)).lintrans(A[1], b[1])
-    # product
-    prod = mod1 * mod2
+        xi = lqr.seq_xi
+        if self.plot:
+            if len(self.demos_x[0][0]) == 2:
+                rf.tpgmm.generate_plot(xi, prod, self.demos_x, show_demo_idx)
+            elif len(self.demos_x[0][0]) > 2:
+                rf.tpgmm.generate_plot_3d(xi, prod, self.demos_x, show_demo_idx, scale=0.1)
+            else:
+                raise Exception('Dimension is less than 2, cannot plot')
+        return xi
 
-    if plot:
-        if len(demos_x[0][0]) == 2:
-            rf.tpgmm.poe_plot(mod1, mod2, prod, demos_x, demo_idx)
-        elif len(demos_x[0][0]) > 2:
-            rf.tpgmm.poe_plot_3d(mod1, mod2, prod, demos_x, demo_idx)
-        else:
-            raise Exception('Dimension is less than 2, cannot plot')
-    return prod
+    def fit(self):
+        beauty_print('Learning the trajectory representation from demonstration via TP-GMR')
 
+        model = self.gmm_learning()
+        return model
 
-def uni(demos_x, show_demo_idx, start_x, end_x, plot=False):
-    print('\033[1;32m--------{}--------\033[0m'.format(
-        'Learning the trajectory representation from demonstration via TP-GMR'))
+    def reproduce(self, model, show_demo_idx):
+        beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
 
-    # Learn the time-dependent GMR from demonstration
-    demos_dx, demos_xdx, demos_A, demos_b, demos_A_xdx, demos_b_xdx, demos_xdx_f, demos_xdx_augm = rf.tpgmm.get_related_matrix(
-        demos_x)
-    # demos_xdx_augm, demos_dx, demos_xdx, t = rf.gmr.traj_align(demos_xdx_augm, demos_dx, demos_xdx, plot=plot)
-    t = np.linspace(0, 10, demos_x[0].shape[0])
-    demos = [np.hstack([t[:, None], d]) for d in demos_xdx_augm]
+        prod = self.poe(model, show_demo_idx)
+        traj = self._reproduce(model, prod, show_demo_idx, self.demos_xdx[show_demo_idx][0])
+        return traj
 
-    model = rf.gmr.GMM_learning(demos, plot=plot)
-    mu_gmr, sigma_gmr = rf.gmr.estimate(model, demos_xdx_f, t[:, None], dim_in=slice(0, 1),
-                                        dim_out=slice(1, 4 * len(start_x) + 1), plot=plot)
+    def generate(self, model: pbd.HMM, ref_demo_idx: int, task_params: dict) -> np.ndarray:
+        beauty_print('generate new demo from learned representation', type='info')
 
-    # Generate for new situation
-    prod = poe_gmr(mu_gmr, sigma_gmr, start_x, end_x, demos_x, show_demo_idx,
-                   horzion=demos_xdx[show_demo_idx].shape[0], plot=plot)
+        task_params_A_b = self.get_task_params_A_b(task_params)
 
-    lqr = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_xdx[show_demo_idx].shape[0])
-
-    mvn = pbd.MVN()
-    mvn.mu = np.concatenate([i for i in prod.mu])
-    mvn._sigma = block_diag(*[i for i in prod.sigma])
-
-    lqr.mvn_xi = mvn
-    lqr.mvn_u = -4
-    start_xdx = np.zeros(len(start_x) * 2)
-    start_xdx[:len(start_x)] = start_x
-    lqr.x0 = start_xdx
-
-    xi = lqr.seq_xi
-    end_xdx = np.zeros(len(end_x) * 2)
-    end_xdx[:len(start_x)] = end_x
-    xi = np.append(xi, end_xdx.reshape((1, -1)), axis=0)
-    if plot:
-        if len(demos_x[0][0]) == 2:
-            rf.tpgmm.generate_plot(xi, prod, demos_x, show_demo_idx)
-        elif len(demos_x[0][0]) > 2:
-            rf.tpgmm.generate_plot_3d(xi, prod, demos_x, show_demo_idx, scale=0.1)
-        else:
-            raise Exception('Dimension is less than 2, cannot plot')
-    return prod, xi
+        prod = self.poe(model, ref_demo_idx, task_params_A_b)
+        traj = self._reproduce(model, prod, ref_demo_idx, task_params['start_xdx'])
+        return traj
 
 
-# def bi(demos_left_x, demos_right_x, show_demo_idx, plot=False):
-#     # TODO
-#     _, demos_left_xdx, _, _, demos_left_A_xdx, demos_left_b_xdx, demos_left_xdx_f, demos_left_xdx_augm = rf.tpgmm.get_related_matrix(
-#         demos_left_x)
-#     _, demos_right_xdx, _, _, demos_right_A_xdx, demos_right_b_xdx, demos_right_xdx_f, demos_right_xdx_augm = rf.tpgmm.get_related_matrix(
-#         demos_right_x)
-#
-#     t = np.linspace(0, 50, demos_left_x[0].shape[0])
-#     demos_l = [np.hstack([t[:, None], d]) for d in demos_left_xdx_augm]
-#     demos_r = [np.hstack([t[:, None], d]) for d in demos_right_xdx_augm]
-#
-#     model_l = rf.gmr.GMM_learning(demos_l, plot=plot)
-#     model_r = rf.gmr.GMM_learning(demos_r, plot=plot)
-#     mu_gmr_l, sigma_gmr_l = rf.gmr.estimate(model_l, demos_left_xdx_f, t[:, None], dim_in=slice(0, 1),
-#                                             dim_out=slice(1, 4 * len(start_x_l) + 1), plot=plot)
-#     mu_gmr_r, sigma_gmr_r = rf.gmr.estimate(model_r, demos_right_xdx_f, t[:, None], dim_in=slice(0, 1),
-#                                             dim_out=slice(1, 4 * len(start_x_r) + 1), plot=plot)
-#
-#     # Generate for new situation
-#     prod_l = poe_gmr(mu_gmr_l, sigma_gmr_l, start_x_l, end_x_l, demos_x, show_demo_idx,
-#                    horzion=demos_left_xdx_f[show_demo_idx].shape[0], plot=plot)
-#     prod_r = poe_gmr(mu_gmr_r, sigma_gmr_r, start_x_r, end_x_r, demos_x, show_demo_idx,
-#                    horzion=demos_right_xdx_f[show_demo_idx].shape[0], plot=plot)
-#
-#     lqr_l = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_left_xdx_f[show_demo_idx].shape[0])
-#     lqr_r = pbd.PoGLQR(nb_dim=len(demos_x[0][0]), dt=0.01, horizon=demos_right_xdx_f[show_demo_idx].shape[0])
-#
-#     mvn = pbd.MVN()
-#     mvn.mu = np.concatenate([i for i in prod_l.mu])
-#     mvn._sigma = block_diag(*[i for i in prod_l.sigma])
-#
-#     lqr_l.mvn_xi = mvn
-#     lqr_l.mvn_u = -4
-#     start_xdx_l = np.zeros(len(start_x_l) * 2)
-#     start_xdx_l[:len(start_x_l)] = start_x_l
-#     lqr_l.x0 = start_xdx_l
-#
-#     xi_l = lqr_l.seq_xi
-#     end_xdx_l = np.zeros(len(end_x_l) * 2)
-#     end_xdx_l[:len(start_x_l)] = end_x_l
-#     xi_l = np.append(xi_l, end_xdx_l.reshape((1, -1)), axis=0)
-#
-#     mvn = pbd.MVN()
-#     mvn.mu = np.concatenate([i for i in prod_r.mu])
-#     mvn._sigma = block_diag(*[i for i in prod_r.sigma])
-#
-#     lqr_r.mvn_xi = mvn
-#     lqr_r.mvn_u = -4
-#     start_xdx_r = np.zeros(len(start_x_r) * 2)
-#     start_xdx_r[:len(start_x_r)] = start_x_r
-#     lqr_r.x0 = start_xdx_r
-#
-#     xi_r = lqr_r.seq_xi
-#     end_xdx_r = np.zeros(len(end_x_r) * 2)
-#     end_xdx_r[:len(start_x_r)] = end_x_r
-#     xi_r = np.append(xi_r, end_xdx_r.reshape((1, -1)), axis=0)
-#
-#     if plot:
-#         if len(demos_x[0][0]) == 2:
-#             rf.tpgmm.generate_plot(xi, prod, demos_x, show_demo_idx)
-#         elif len(demos_x[0][0]) > 2:
-#             rf.tpgmm.generate_plot_3d(xi_l, prod_l, demos_left_x, show_demo_idx, scale=0.001)
-#             rf.tpgmm.generate_plot_3d(xi_r, prod_r, demos_right_x, show_demo_idx, scale=0.001)
-#         else:
-#             raise Exception('Dimension is less than 2, cannot plot')
-#     return model_l, model_r, xi_l, xi_r
+class TPGMRBi(TPGMR):
+    def __init__(self, demos_left_x, demos_right_x, horizon=150, plot=False):
+        self.demos_left_x = demos_left_x
+        self.demos_right_x = demos_right_x
+        self.plot = plot
+
+        self.repr_l = TPGMR(demos_left_x)
+        self.repr_r = TPGMR(demos_right_x)
+
+    def fit(self):
+        beauty_print('Learning the trajectory representation from demonstration via TP-GMR')
+
+        model_l = self.repr_l.gmm_learning()
+        model_r = self.repr_r.gmm_learning()
+        return model_l, model_r
+
+    def reproduce(self, model_l, model_r, show_demo_idx):
+        beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
+
+        prod_l = self.repr_l.poe(model_l, show_demo_idx)
+        prod_r = self.repr_r.poe(model_r, show_demo_idx)
+        traj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
+        traj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
+
+        if self.plot:
+            nb_dim = int(traj_l.shape[1] / 2)
+            data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
+            rf.visualab.traj_plot(data_lst)
+        return traj_l, traj_r
+
+    def generate(self, model_l: pbd.HMM, model_r: pbd.HMM, ref_demo_idx: int, task_params: dict) -> \
+            Tuple[ndarray, ndarray]:
+        beauty_print('generate new demo from learned representation', type='info')
+
+        task_params_A_b_l = self.repr_l.get_task_params_A_b(task_params['Left'])
+        task_params_A_b_r = self.repr_r.get_task_params_A_b(task_params['Right'])
+
+        prod_l = self.repr_l.poe(model_l, ref_demo_idx, task_params_A_b_l)
+        prod_r = self.repr_r.poe(model_r, ref_demo_idx, task_params_A_b_r)
+        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, task_params['Left']['start_xdx'])
+        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, task_params['Right']['start_xdx'])
+
+        if self.plot:
+            nb_dim = int(traj_l.shape[1] / 2)
+            data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
+            rf.visualab.traj_plot(data_lst)
+        return traj_l, traj_r
