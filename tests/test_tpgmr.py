@@ -17,7 +17,7 @@ def test_7d_uni_tpgmr():
     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
     # TP-GMR
-    representation = rf.lfd.tpgmr.TPGMR(demos_x, plot=True)
+    representation = rf.lfd.tpgmr.TPGMR(demos_x, plot=False)
     model = representation.fit()
 
     # Reproductions for the same situations
