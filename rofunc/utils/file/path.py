@@ -1,5 +1,4 @@
 import rofunc as rf
-import elegantrl as erl
 import os
 import shutil
 
@@ -12,6 +11,7 @@ def get_rofunc_path():
 
 
 def get_elegantrl_path():
+    import elegantrl as erl
     if not hasattr(erl, "__path__"):
         raise RuntimeError("elegantrl package is not installed")
     elegantrl_path = list(erl.__path__)[0]

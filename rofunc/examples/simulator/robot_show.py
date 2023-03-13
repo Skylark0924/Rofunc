@@ -13,8 +13,8 @@ args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
 
 # CURI
-CURIsim = rf.sim.CURISim(args)
-CURIsim.show(visual_obs_flag=True)
+# CURIsim = rf.sim.CURISim(args)
+# CURIsim.show(visual_obs_flag=True)
 
 # walker
 # walkersim = rf.sim.WalkerSim(args)
@@ -35,3 +35,7 @@ CURIsim.show(visual_obs_flag=True)
 # sawyer
 # sawyersim = rf.sim.SawyerSim(args)
 # sawyersim.show()
+
+Gluonsim = rf.sim.GluonSim(args)
+Gluonsim.show(visual_obs_flag=False)
+
