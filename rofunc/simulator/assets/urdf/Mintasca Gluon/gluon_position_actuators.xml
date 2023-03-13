@@ -1,0 +1,11 @@
+<mujocoinclude>
+  <actuator>
+    <position joint="axis_joint_1" />
+    <position joint="axis_joint_2" />
+    <position joint="axis_joint_3" />
+    <position joint="axis_joint_4" />
+    <position joint="axis_joint_5" />
+    <position joint="axis_joint_6" />
+  </actuator>
+</mujocoinclude>
+

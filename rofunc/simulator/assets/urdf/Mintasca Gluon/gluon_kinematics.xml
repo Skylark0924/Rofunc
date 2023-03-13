@@ -1,0 +1,45 @@
+<mujocoinclude>
+    <asset>
+        <mesh name="base_link" file="meshes/base_link.STL" />
+        <mesh name="1_Link" file="meshes/1_Link.STL" />
+        <mesh name="2_Link" file="meshes/2_Link.STL" />
+        <mesh name="3_Link" file="meshes/3_Link.STL" />
+        <mesh name="4_Link" file="meshes/4_Link.STL" />
+        <mesh name="5_Link" file="meshes/5_Link.STL" />
+        <mesh name="6_Link" file="meshes/6_Link.STL" />
+    </asset>
+    <worldbody>
+        <geom type="mesh" rgba="1 1 1 1" mesh="base_link" />
+        <body name="1_Link" pos="-2.4327e-05 2.2695e-05 0.105">
+            <inertial pos="0.00464247 -3.55801e-05 -0.000556507" quat="0.958876 0.000192415 0.283807 -0.00318548" mass="0.16626" diaginertia="7.29454e-05 6.70384e-05 5.50764e-05" />
+            <joint name="axis_joint_1" pos="0 0 0" axis="0 0 -1" limited="true" range="-2.79 2.79" />
+            <geom type="mesh" rgba="1 1 1 1" mesh="1_Link" />
+            <body name="2_Link" pos="0.080113 -2.2695E-05 0">
+                <inertial pos="-0.00354399 6.83167e-06 0.0535596" quat="0.705666 0.00117979 0.00102925 0.708542" mass="0.316094" diaginertia="0.000184936 0.000174639 0.00010778" />
+                <joint name="axis_joint_2" pos="0 0 0" axis="-1 0 0" limited="true" range="-1.54 1.54" />
+                <geom type="mesh" rgba="1 1 1 1" mesh="2_Link" />
+                <body name="3_Link" pos="0 0 0.17447">
+                    <inertial pos="-0.0465528 -6.6826e-06 0.0523243" quat="0.708693 -0.00102245 -0.00115475 0.705516" mass="0.323136" diaginertia="0.000185932 0.000176612 0.000108776" />
+                    <joint name="axis_joint_3" pos="0 0 0" axis="1 0 0" limited="true" range="-2.79 2.79" />
+                    <geom type="mesh" rgba="1 1 1 1" mesh="3_Link" />
+                    <body name="4_Link" pos="-0.084516 0 0.17442">
+                        <inertial pos="0.0182269 1.24413e-05 0.00395855" quat="0.938648 0.00202068 0.344855 0.00335461" mass="0.174948" diaginertia="7.30348e-05 6.76309e-05 5.64991e-05" />
+                        <joint name="axis_joint_4" pos="0 0 0" axis="-1 0 0" limited="true" range="-2.79 2.79" />
+                        <geom type="mesh" rgba="1 1 1 1" mesh="4_Link" />
+                        <body name="5_Link" pos="0.080113 2.2695E-05 0">
+                            <inertial pos="0.00395855 -3.51379e-05 0.0182026" quat="-0.00380067 0.419875 -0.000942727 0.907574" mass="0.174948" diaginertia="7.30348e-05 6.76309e-05 5.64991e-05" />
+                            <joint name="axis_joint_5" pos="0 0 0" axis="0 0 1" limited="true" range="-2.79 2.79" />
+                            <geom type="mesh" rgba="1 1 1 1" mesh="5_Link" />
+                            <body name="6_Link" pos="-4.5391E-05 0 0.080089">
+                                <inertial pos="-0.00231633 4.0382e-05 -5.08516e-05" quat="0.548578 0.459714 0.49055 0.497077" mass="0.122092" diaginertia="4.00445e-05 3.98153e-05 3.76353e-05" />
+                                <joint name="axis_joint_6" pos="0 0 0" axis="-1 0 0" limited="true" range="-2.79 2.79" />
+                                <geom type="mesh" rgba="1 1 1 1" mesh="6_Link" />
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+</mujocoinclude>
+

@@ -1,0 +1,10 @@
+<mujocoinclude>
+  <actuator>
+    <position ctrllimited="true" ctrlrange="-1 1" gear="100" joint="axis_joint_1" />
+    <position ctrllimited="true" ctrlrange="-1 1" gear="100" joint="axis_joint_2" />
+    <position ctrllimited="true" ctrlrange="-1 1" gear="100" joint="axis_joint_3" />
+    <position ctrllimited="true" ctrlrange="-1 1" gear="100" joint="axis_joint_4" />
+    <position ctrllimited="true" ctrlrange="-1 1" gear="100" joint="axis_joint_5" />
+    <position ctrllimited="true" ctrlrange="-1 1" gear="100" joint="axis_joint_6" />
+  </actuator>
+</mujocoinclude>
