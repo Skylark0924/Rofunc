@@ -51,11 +51,6 @@ pip install .
 > If you want to use functions related to ZED camera, you need to install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to package it as a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
 
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Skylark0924/Rofunc&type=Date)](https://star-history.com/#Skylark0924/Rofunc&Date)
-
-
 ## Documentation
 [![Documentation](https://img.shields.io/badge/Documentation-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/)
 [![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)
@@ -69,6 +64,10 @@ Taichi by learning from human demonstration.
 To give you a quick overview of the pipeline of `rofunc`, we provide an interesting example of learning to play Taichi from human demonstration. You can find it in the [Quick start](https://rofunc.readthedocs.io/en/latest/quickstart.html) section of the documentation.
 
 The available functions and plans can be found as follows. 
+
+> **Note**
+> ✅: Achieved 🔃: Reformatting ⛔: TODO
+
 
 |      Data       |      |   Learning   |      |    P&C     |      |      Tools       |      |  Simulator  |      |
 | :-------------: | ---- | :----------: | ---- | :--------: | ---- | :--------------: | ---- | :---------: | ---- |
@@ -93,6 +92,10 @@ The available functions and plans can be found as follows.
 |                 |      | `SAC(ElRL)`  | ✅    |            |      |                  |      |             |      |
 |                 |      | `TD3(ElRL)`  | ✅    |            |      |                  |      |             |      |
 |                 |      |    `CQL`     | ⛔    |            |      |                  |      |             |      |
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Skylark0924/Rofunc&type=Date)](https://star-history.com/#Skylark0924/Rofunc&Date)
 
 ## Cite
 
