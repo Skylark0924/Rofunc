@@ -1,72 +1,68 @@
-import os
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import pbdlib as pbd
-import rofunc as rf
 
 
-def traj_align(demos_x, demos_dx, demos_xdx, horizon=100, plot=False):
-    demos_x, demos_dx, demos_xdx = pbd.utils.align_trajectories(demos_x, [demos_dx, demos_xdx])
+class GMR:
+    def __init__(self, demos_x, demos_dx=None, demos_xdx=None, nb_states=4, reg=1e-3, horizon=100, plot=False):
+        self.demos_x = demos_x
+        self.demos_dx = demos_dx
+        self.demos_xdx = demos_xdx
+        self.nb_states = nb_states
+        self.reg = reg
+        self.horizon = horizon
+        self.plot = plot
 
-    t = np.linspace(0, horizon, demos_x[0].shape[0])
-    if plot:
-        fig, ax = plt.subplots(nrows=2)
-        for d in demos_x:
-            ax[0].set_prop_cycle(None)
-            ax[0].plot(d)
+        self.t = self.traj_align()
+        self.demos = [np.hstack([self.t[:, None], d]) for d in self.demos_xdx]
 
-        ax[1].plot(t)
-        plt.show()
-    return demos_x, demos_dx, demos_xdx, t
+    def traj_align(self):
+        self.demos_x, self.demos_dx, self.demos_xdx = pbd.utils.align_trajectories(self.demos_x,
+                                                                                   [self.demos_dx, self.demos_xdx])
 
+        t = np.linspace(0, self.horizon, self.demos_x[0].shape[0])
+        if self.plot:
+            fig, ax = plt.subplots(nrows=2)
+            for d in self.demos_x:
+                ax[0].set_prop_cycle(None)
+                ax[0].plot(d)
 
-def GMM_learning(demos, reg=1e-3, plot=False):
-    model = pbd.GMM(nb_states=4)
-    model.init_hmm_kbins(demos)  # initializing model
+            ax[1].plot(t)
+            plt.show()
+        return t
 
-    data = np.vstack([d for d in demos])
-    model.em(data, reg=reg)
+    def GMM_learning(self):
+        model = pbd.GMM(nb_states=self.nb_states)
+        model.init_hmm_kbins(self.demos)  # initializing model
 
-    # plotting
-    if plot:
-        fig, ax = plt.subplots(nrows=4)
-        fig.set_size_inches(12, 7.5)
+        data = np.vstack([d for d in self.demos])
+        model.em(data, reg=self.reg)
 
-        # position plotting
-        for i in range(4):
-            for p in demos:
-                ax[i].plot(p[:, 0], p[:, i + 1])
+        # plotting
+        if self.plot:
+            fig, ax = plt.subplots(nrows=4)
+            fig.set_size_inches(12, 7.5)
 
-            pbd.plot_gmm(model.mu, model.sigma, ax=ax[i], dim=[0, i + 1])
-        plt.show()
-    return model
+            # position plotting
+            for i in range(4):
+                for p in self.demos:
+                    ax[i].plot(p[:, 0], p[:, i + 1])
 
+                pbd.plot_gmm(model.mu, model.sigma, ax=ax[i], dim=[0, i + 1])
+            plt.show()
+        return model
 
-def estimate(model, demos_x, cond_input, dim_in, dim_out, plot=False):
-    mu, sigma = model.condition(cond_input, dim_in=dim_in, dim_out=dim_out)
+    def estimate(self, model, cond_input, dim_in, dim_out):
+        mu, sigma = model.condition(cond_input, dim_in=dim_in, dim_out=dim_out)
 
-    if plot:
-        pbd.plot_gmm(mu, sigma, dim=[0, 1], color='orangered', alpha=0.3)
-        for d in demos_x:
-            plt.plot(d[:, 0, 0], d[:, 0, 1])
-        plt.show()
-    return mu, sigma
+        if self.plot:
+            pbd.plot_gmm(mu, sigma, dim=[0, 1], color='orangered', alpha=0.3)
+            for d in self.demos_x:
+                plt.plot(d[:, 0], d[:, 1])
+            plt.show()
+        return mu, sigma
 
-
-def uni(demos_x, demos_dx, demos_xdx, plot=False):
-    demos_x, demos_dx, demos_xdx, t = traj_align(demos_x, demos_dx, demos_xdx, plot=plot)
-    demos = [np.hstack([t[:, None], d]) for d in demos_xdx]
-
-    model = GMM_learning(demos, plot=plot)
-    mu, sigma = estimate(model, demos_x, t[:, None], plot=plot)
-    return model, mu, sigma
-
-
-if __name__ == '__main__':
-    datapath = '/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/lfd/src/pbd/pbdlib/data/gui/'
-    data = np.load(datapath + 'test_001.npy', allow_pickle=True, encoding="latin1")[()]
-
-    demos_x = data['x']  # Position data
-    demos_dx = data['dx']  # Velocity data
-    demos_xdx = [np.hstack([_x, _dx]) for _x, _dx in zip(demos_x, demos_dx)]  # Position-velocity
-    uni(demos_x, demos_dx, demos_xdx, plot=True)
+    def fit(self):
+        model = self.GMM_learning()
+        mu, sigma = self.estimate(model, self.t[:, None], dim_in=slice(0, 1), dim_out=slice(1, 5))
+        return model, mu, sigma
