@@ -35,6 +35,68 @@ import rofunc as rf
       - [Unimanual](#unimanual-1)
       - [Bimanual](#bimanual-1)
 
+
+
+The available functions and plans can be found as follows. 
+
+
+| Classes                                         | Types                  | Functions                                                    | Description                                                  | Status |
+| ----------------------------------------------- | ---------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------ |
+| **Demonstration collection and pre-processing** | Xsens                  | `xsens.record`                                               | Record the human motion via network streaming                | ✅      |
+|                                                 |                        | `xsens.process`                                              | Decode the `.mvnx` file                                      | ✅      |
+|                                                 |                        | `xsens.visualize`                                            | Show or save gif about the motion                            | ✅      |
+|                                                 | Optitrack              | `optitrack.record`                                           | Record the motion of markers via network streaming           | ✅      |
+|                                                 |                        | `optitrack.process`                                          | Process the output `.csv` data                               | ✅      |
+|                                                 |                        | `optitrack.visualize`                                        | Show or save gif about the motion                            |        |
+|                                                 | ZED                    | `zed.record`                                                 | Record with multiple (1~n) cameras                           | ✅      |
+|                                                 |                        | `zed.playback`                                               | Playback the recording and save snapshots                    | ✅      |
+|                                                 |                        | `zed.export`                                                 | Export the recording to mp4 or image sequences               | ✅      |
+|                                                 | Delsys EMG             | `emg.record`                                                 | Record real-time EMG data via network streaming              | ✅      |
+|                                                 |                        | `emg.process`                                                | Filtering the EMG data                                       | ✅      |
+|                                                 |                        | `emg.visualize`                                              | Some visualization functions for EMG data                    | ✅      |
+|                                                 | Multimodal             | `mmodal.record`                                              | Record multi-modal demonstration data simultaneously         |        |
+|                                                 |                        | `mmodal.export`                                              | Export multi-modal demonstration data in one line            | ✅      |
+| **Learning from Demonstration**                 | Machine learning       | `dmp.uni`                                                    | DMP for uni-manual robot with several (or one) demonstrated trajectories |        |
+|                                                 |                        | `gmr.uni`                                                    | GMR for uni-manual robot with several (or one) demonstrated trajectories | ✅      |
+|                                                 |                        | `gmm.uni`                                                    | GMM for uni-manual robot with several (or one) demonstrated trajectories |        |
+|                                                 |                        | `tpgmm.uni`                                                  | TP-GMM for uni-manual robot with several (or one) demonstrated trajectories | ✅      |
+|                                                 |                        | `tpgmm.bi`                                                   | TP-GMM for bimanual robot with coordination learned from demonstration | ✅      |
+|                                                 |                        | `tpgmr.uni`                                                  | TP-GMR for uni-manual robot with several (or one) demonstrated trajectories | ✅      |
+|                                                 |                        | `tpgmr.bi`                                                   | TP-GMR for bimanual robot with coordination learned from demonstration | ✅      |
+|                                                 | Deep learning          | `bco`                                                        | Behavior cloning from observation                            | ✅      |
+|                                                 |                        | `strans`                                                     | Structured-Transformer method proposed in [IEEE RAL](https://arxiv.org/abs/2205.05960) |        |
+|                                                 | Reinforcement learning | SKRL (`ppo`, `sac`, `tq3`)                                   | Provide API for SKRL framework and robot examples in Isaac Gym | ✅      |
+|                                                 |                        | StableBaseline3 (`ppo`, `sac`, `tq3`)                        | Provide API for StableBaseline3 framework and robot examples in Isaac Gym |        |
+|                                                 |                        | RLlib (`ppo`, `sac`, `tq3`)                                  | Provide API for Ray RLlib framework and robot examples in Isaac Gym | ✅      |
+|                                                 |                        | ElegantRL (`ppo`, `sac`, `tq3`)                              | Provide API for ElegantRL framework and robot examples in Isaac Gym | ✅      |
+|                                                 |                        | `cql`                                                        | Conservative Q-learning for fully offline learning           |        |
+| **Planning**                                    | LQT                    | [`lqt.uni`](https://rofunc.readthedocs.io/en/latest/planning/lqt.html) | Linear Quadratic Tracking (LQT) for uni-manual robot with several via-points | ✅      |
+|                                                 |                        | `lqt.bi`                                                     | LQT for bimanual robot with coordination constraints         | ✅      |
+|                                                 |                        | [`lqt.uni_fb`](https://rofunc.readthedocs.io/en/latest/planning/lqt_fb.html) | Generate smooth trajectories with feedback                   | ✅      |
+|                                                 |                        | [`lqt.uni_cp`](https://rofunc.readthedocs.io/en/latest/planning/lqt_cp.html) | LQT with control primitive                                   | ✅      |
+|                                                 | iLQR                   | [`ilqr.uni`](https://rofunc.readthedocs.io/en/latest/planning/ilqr.html) | Iterative Linear Quadratic Regulator (iLQR) for uni-manual robot with several via-points | ✅      |
+|                                                 |                        | `ilqr.bi`                                                    | iLQR for bimanual robots with several via-points             | ✅      |
+|                                                 |                        | `ilqr.uni_fb`                                                | iLQR with feedback                                           |        |
+|                                                 |                        | `ilqr.uni_cp`                                                | iLQR with control primitive                                  | ✅      |
+|                                                 |                        | `ilqr.uni_obstacle`                                          | iLQR with obstacle avoidance                                 | ✅      |
+|                                                 |                        | `ilqr.uni_dyna`                                              | iLQR with dynamics and force control                         | ✅      |
+|                                                 | MPC                    | `mpc.uni`                                                    | Model Predictive Control (MPC)                               |        |
+|                                                 | CIO                    | `cio.whole`                                                  | Contact-invariant Optimization (CIO)                         |        |
+| **Tools**                                       | Logger                 | `logger.write`                                               | General logger based on `tensorboard`                        |        |
+|                                                 | Config                 | `config.get_config`                                          | General config API based on `hydra`                          | ✅      |
+|                                                 | VisuaLab               | `visualab.trajectory`                                        | 2-dim/3-dim/with ori trajectory visualization                | ✅      |
+|                                                 |                        | `visualab.distribution`                                      | 2-dim/3-dim distribution visualization                       | ✅      |
+|                                                 |                        | `visualab.ellipsoid`                                         | 2-dim/3-dim ellipsoid visualization                          | ✅      |
+|                                                 | RoboLab                | `robolab.transform`                                          | Useful functions about coordinate transformation             | ✅      |
+|                                                 |                        | `robolab.fk`                                                 | Forward kinematics w.r.t URDF file                           | ✅      |
+|                                                 |                        | `robolab.ik`                                                 | Inverse kinematics w.r.t URDF file                           | ✅      |
+|                                                 |                        | `robolab.fd`                                                 | Forward dynamics w.r.t URDF file                             |        |
+|                                                 |                        | `robolab.id`                                                 | Inverse dynamics w.r.t URDF file                             |        |
+| **Simulator**                                   | Franka                 | [`franka.sim`](https://rofunc.readthedocs.io/en/latest/simulator/franka.html) | Execute specific trajectory via single Franka Panda arm in Isaac Gym | ✅      |
+|                                                 | CURI mini              | `curi_mini.sim`                                              | Execute specific trajectory via dual Franka Panda arm in Isaac Gym |        |
+|                                                 | CURI                   | [`curi.sim`](https://rofunc.readthedocs.io/en/latest/simulator/curi.html) | Execute specific trajectory via human-like CURI robot in Isaac Gym | ✅      |
+|                                                 | Walker                 | `walker.sim`                                                 | Execute specific trajectory via UBTECH Walker robot  in Isaac Gym | ✅      |
+
 ## Devices
 
 ### Xsens
@@ -311,38 +373,3 @@ rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, muQ_l, muQ_r, idx_slices, ori=False, save=Fa
 ```
 
 ![](../img/lqt_bi.png)
-
-
-## Learning from Demonstration
-
-### TP-GMM
-
-#### Unimanual
-
-```python
-import rofunc as rf
-import numpy as np
-
-demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
-                        [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
-                        [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
-demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-rf.tpgmm.uni(demos_x, show_demo_idx=2, plot=True)
-```
-
-#### Bimanual
-
-```python
-import rofunc as rf
-import numpy as np
-
-left_demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
-                             [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
-                             [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
-right_demo_points = np.array([[[8, 8], [7, 1], [4, 3], [6, 8], [4, 3]],
-                              [[8, 7], [7, 1], [3, 3], [6, 6], [4, 3]],
-                              [[8, 8], [7, 1], [4, 5], [6, 8], [4, 3.5]]])
-demos_left_x = rf.data_generator.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
-demos_right_x = rf.data_generator.multi_bezier_demos(right_demo_points)
-rf.tpgmm.bi(demos_left_x, demos_right_x, show_demo_idx=2, plot=True)
-```
