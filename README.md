@@ -69,29 +69,29 @@ The available functions and plans can be found as follows.
 > ✅: Achieved 🔃: Reformatting ⛔: TODO
 
 
-|      Data       |      |   Learning   |      |    P&C     |      |      Tools       |      |  Simulator  |      |
-| :-------------: | ---- | :----------: | ---- | :--------: | ---- | :--------------: | ---- | :---------: | ---- |
-| `xsens.record`  | ✅    |    `DMP`     | ✅    |   `LQT`    | ✅    |     `Config`     | ✅    |  `Franka`   | ✅    |
-| `xsens.export`  | ✅    |    `GMR`     | ✅    |  `LQTBi`   | 🔃    |   `robolab.fk`   | ✅    |   `CURI`    | ✅    |
-| `xsens.visual`  | ✅    |   `TPGMM`    | ✅    |  `LQTFb`   | ✅    |   `robolab.ik`   | ✅    | `CURI_mini` | 🔃    |
-|  `opti.record`  | ✅    |  `TPGMMBi`   | 🔃    |  `LQTCP`   | ✅    |   `robolab.fd`   | ⛔    |  `Walker`   | ✅    |
-|  `opti.export`  | ✅    |   `TPGMR`    | ✅    | `LQTCPDMP` | ✅    |   `robolab.id`   | ⛔    |             |      |
-|  `opti.visual`  | ✅    |  `TPGMRBi`   | 🔃    |   `iLQR`   | 🔃    |  `robolab.tran`  | ✅    |             |      |
-|  `zed.record`   | ✅    |    `BCO`     | ✅    |  `iLQRBi`  | 🔃    | `visualab.dist`  | ✅    |             |      |
-|  `zed.export`   | ✅    |   `STrans`   | ⛔    |  `iLQRFb`  | 🔃    | `visualab.ellip` | ✅    |             |      |
-|  `zed.visual`   | ✅    | `PPO(SKRL)`  | ✅    |  `iLQRCP`  | 🔃    | `visualab.traj`  | ✅    |             |      |
-|  `emg.record`   | ✅    | `SAC(SKRL)`  | ✅    | `iLQRDyna` | 🔃    |                  |      |             |      |
-|  `emg.export`   | ✅    | `TD3(SKRL)`  | ✅    | `iLQRObs`  | 🔃    |                  |      |             |      |
-|  `emg.visual`   | ✅    |  `PPO(SB3)`  | ⛔    |   `MPC`    | ⛔    |                  |      |             |      |
-| `mmodal.record` | ⛔    |  `SAC(SB3)`  | ⛔    |   `CIO`    | ⛔    |                  |      |             |      |
-| `mmodal.export` | ✅    |  `TD3(SB3)`  | ⛔    |            |      |                  |      |             |      |
-|                 |      | `PPO(RLlib)` | ✅    |            |      |                  |      |             |      |
-|                 |      | `SAC(RLlib)` | ✅    |            |      |                  |      |             |      |
-|                 |      | `TD3(RLlib)` | ✅    |            |      |                  |      |             |      |
-|                 |      | `PPO(ElRL)`  | ✅    |            |      |                  |      |             |      |
-|                 |      | `SAC(ElRL)`  | ✅    |            |      |                  |      |             |      |
-|                 |      | `TD3(ElRL)`  | ✅    |            |      |                  |      |             |      |
-|                 |      |    `CQL`     | ⛔    |            |      |                  |      |             |      |
+|      Data       |      |   Learning   |      |    P&C     |      |      Tools       |      |   Simulator    |      |
+| :-------------: | ---- | :----------: | ---- | :--------: | ---- | :--------------: | ---- | :------------: | ---- |
+| `xsens.record`  | ✅    |    `DMP`     | ✅    |   `LQT`    | ✅    |     `Config`     | ✅    |    `Franka`    | ✅    |
+| `xsens.export`  | ✅    |    `GMR`     | ✅    |  `LQTBi`   | 🔃    |   `robolab.fk`   | ✅    |     `CURI`     | ✅    |
+| `xsens.visual`  | ✅    |   `TPGMM`    | ✅    |  `LQTFb`   | ✅    |   `robolab.ik`   | ✅    |   `CURIMini`   | 🔃    |
+|  `opti.record`  | ✅    |  `TPGMMBi`   | 🔃    |  `LQTCP`   | ✅    |   `robolab.fd`   | ⛔    | `CURISoftHand` | 🔃    |
+|  `opti.export`  | ✅    |   `TPGMR`    | ✅    | `LQTCPDMP` | ✅    |   `robolab.id`   | ⛔    |    `Walker`    | ✅    |
+|  `opti.visual`  | ✅    |  `TPGMRBi`   | 🔃    |   `iLQR`   | 🔃    |  `robolab.tran`  | ✅    |                |      |
+|  `zed.record`   | ✅    |    `BCO`     | ✅    |  `iLQRBi`  | 🔃    | `visualab.dist`  | ✅    |                |      |
+|  `zed.export`   | ✅    |   `STrans`   | ⛔    |  `iLQRFb`  | 🔃    | `visualab.ellip` | ✅    |                |      |
+|  `zed.visual`   | ✅    | `PPO(SKRL)`  | ✅    |  `iLQRCP`  | 🔃    | `visualab.traj`  | ✅    |                |      |
+|  `emg.record`   | ✅    | `SAC(SKRL)`  | ✅    | `iLQRDyna` | 🔃    |                  |      |                |      |
+|  `emg.export`   | ✅    | `TD3(SKRL)`  | ✅    | `iLQRObs`  | 🔃    |                  |      |                |      |
+|  `emg.visual`   | ✅    |  `PPO(SB3)`  | ⛔    |   `MPC`    | ⛔    |                  |      |                |      |
+| `mmodal.record` | ⛔    |  `SAC(SB3)`  | ⛔    |   `CIO`    | ⛔    |                  |      |                |      |
+| `mmodal.export` | ✅    |  `TD3(SB3)`  | ⛔    |            |      |                  |      |                |      |
+|                 |      | `PPO(RLlib)` | ✅    |            |      |                  |      |                |      |
+|                 |      | `SAC(RLlib)` | ✅    |            |      |                  |      |                |      |
+|                 |      | `TD3(RLlib)` | ✅    |            |      |                  |      |                |      |
+|                 |      | `PPO(ElRL)`  | ✅    |            |      |                  |      |                |      |
+|                 |      | `SAC(ElRL)`  | ✅    |            |      |                  |      |                |      |
+|                 |      | `TD3(ElRL)`  | ✅    |            |      |                  |      |                |      |
+|                 |      |    `CQL`     | ⛔    |            |      |                  |      |                |      |
 
 ## Star History
 
