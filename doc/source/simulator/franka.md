@@ -6,23 +6,30 @@ import rofunc as rf
 from isaacgym import gymutil
 
 args = gymutil.parse_arguments()
-rf.franka.show(args)
+args.use_gpu_pipeline = False
+
+frankasim = rf.sim.FrankaSim(args)
+frankasim.show()
 ```
 
-![](../img/franka_interative.gif)
+![](../img/Videos/franka_interative.gif)
 
 ### Run the trajectory in the Cartesian space
 
 ```python
+import os
 import numpy as np
-import rofunc as rf
-from importlib_resources import files
 from isaacgym import gymutil
+import rofunc as rf
 
-args = gymutil.parse_arguments(description="Franka Attractor Example")
-traj = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))
+args = gymutil.parse_arguments()
+args.use_gpu_pipeline = False
 
-rf.franka.run_traj(args, traj)
+traj = np.load(os.path.join(rf.file.get_rofunc_path(), 'data/taichi_1l.npy'))
+rf.lqt.plot_3d_uni(traj, ori=False)
+
+frankasim = rf.sim.FrankaSim(args)
+frankasim.run_traj(traj)
 ```
 
-![](../img/taichi_franka.gif)
+![](../img/Videos/FrankaTaichi.gif)

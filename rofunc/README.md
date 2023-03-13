@@ -1,4 +1,6 @@
-# Robotics Functions (RoFunc)
+# Robotics functions (Rofunc)
+> **Note**
+> Deprecated README. Please refer to the [documentation](https://rofunc.readthedocs.io/en/latest/).
 
 
 ## Hello, robot world!
