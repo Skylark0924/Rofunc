@@ -44,6 +44,11 @@ class RobotSim:
             self.init_pose_vec = (0, 1.0, 0.0)
         elif self.robot_name == "sawyer":
             self.asset_file = "urdf/sawyer/robot.xml"
+        elif self.robot_name == "gluon":
+            self.asset_file = "urdf/gluon/gluon.urdf"
+            self.flip_visual_attachments = False
+            self.fix_base_link = True
+            self.init_pose_vec = (0, 0.0, 0.0)
         else:
             raise ValueError(
                 "The robot {} is not supported. Please choose a robot in [CURI, walker, CURI-mini, baxter, sawyer]".format(
