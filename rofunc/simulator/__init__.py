@@ -5,3 +5,4 @@ from .curi_sim import CURISim
 from .franka_sim import FrankaSim
 from .sawyer_sim import SawyerSim
 from .walker_sim import WalkerSim
+from .gluon_sim import GluonSim
