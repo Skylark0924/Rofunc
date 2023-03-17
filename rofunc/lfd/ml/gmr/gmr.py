@@ -31,7 +31,7 @@ class GMR:
             plt.show()
         return t
 
-    def GMM_learning(self):
+    def gmm_learning(self):
         model = pbd.GMM(nb_states=self.nb_states)
         model.init_hmm_kbins(self.demos)  # initializing model
 
@@ -63,6 +63,6 @@ class GMR:
         return mu, sigma
 
     def fit(self):
-        model = self.GMM_learning()
+        model = self.gmm_learning()
         mu, sigma = self.estimate(model, self.t[:, None], dim_in=slice(0, 1), dim_out=slice(1, 5))
         return model, mu, sigma
