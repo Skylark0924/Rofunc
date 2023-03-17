@@ -11,23 +11,26 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 class TPGMR(TPGMM):
-    def __init__(self, demos_x, horizon=150, plot=False):
+    def __init__(self, demos_x, nb_states: int = 4, reg: float = 1e-3, horizon=150, plot=False):
         """
         Task-parameterized Gaussian Mixture Regression (TP-GMR)
         :param demos_x: demo displacement
+        :param nb_states: number of states in the HMM
+        :param reg: regularization term
         :param horizon: horizon of the reproduced trajectory
         :param plot: whether to plot the result
         """
-        super().__init__(demos_x, horizon=horizon, plot=plot)
+        super().__init__(demos_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
+        self.gmr = rf.lfd.gmr.GMR(self.demos_x, self.demos_dx, self.demos_xdx, nb_states=nb_states, reg=reg, plot=False)
 
     def gmm_learning(self):
         # Learn the time-dependent GMR from demonstration
         t = np.linspace(0, 10, self.demos_x[0].shape[0])
         demos = [np.hstack([t[:, None], d]) for d in self.demos_xdx_augm]
-        model = rf.gmr.GMM_learning(demos)
-        # TODO: Check
-        mu_gmr, sigma_gmr = rf.gmr.estimate(model, self.demos_xdx_f, t[:, None], dim_in=slice(0, 1),
-                                            dim_out=slice(1, 4 * len(self.demos_x[0]) + 1))
+        self.gmr.demos = demos
+        model = self.gmr.gmm_learning()
+        mu_gmr, sigma_gmr = self.gmr.estimate(model, t[:, None], dim_in=slice(0, 1),
+                                              dim_out=slice(1, 4 * len(self.demos_x[0]) + 1))
         model = pbd.GMM(mu=mu_gmr, sigma=sigma_gmr)
         return model
 
