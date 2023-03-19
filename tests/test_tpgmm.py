@@ -9,7 +9,7 @@ def test_2d_uni_tpgmm():
                             [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
     demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
 
-    representation = rf.lfd.tpgmm.TPGMM(demos_x, plot=False)
+    representation = rf.learning.tpgmm.TPGMM(demos_x, plot=False)
     model = representation.fit()
 
     # Reproductions for the same situations
@@ -26,7 +26,7 @@ def test_2d_bi_tpgmm():
     demos_left_x = rf.data_generator.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
     demos_right_x = rf.data_generator.multi_bezier_demos(right_demo_points)
 
-    representation = rf.lfd.tpgmm.TPGMMBi(demos_left_x, demos_right_x, plot=False)
+    representation = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, plot=False)
     model_l, model_r = representation.fit()
 
     traj_l, traj_r = representation.reproduce(model_l, model_r, show_demo_idx=2)
@@ -36,7 +36,7 @@ def test_7d_uni_tpgmm():
     raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
-    representation = rf.lfd.tpgmm.TPGMM(demos_x, plot=False)
+    representation = rf.learning.tpgmm.TPGMM(demos_x, plot=False)
     model = representation.fit()
 
     # Reproductions for the same situations
@@ -56,7 +56,7 @@ def test_7d_bi_tpgmm():
     demos_left_x = [left_raw_demo[500:635, :], left_raw_demo[635:770, :], left_raw_demo[770:905, :]]
     demos_right_x = [right_raw_demo[500:635, :], right_raw_demo[635:770, :], right_raw_demo[770:905, :]]
 
-    representation = rf.lfd.tpgmm.TPGMMBi(demos_left_x, demos_right_x, plot=False)
+    representation = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, plot=False)
     model_l, model_r = representation.fit()
 
     # Reproductions for the same situations
