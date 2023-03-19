@@ -9,7 +9,7 @@ def test_2d_uni_tpgmr():
                             [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
     demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
 
-    representation = rf.lfd.tpgmr.TPGMR(demos_x, plot=False)
+    representation = rf.learning.tpgmr.TPGMR(demos_x, plot=False)
     model = representation.fit()
 
     traj = representation.reproduce(model, show_demo_idx=2)
@@ -21,7 +21,7 @@ def test_7d_uni_tpgmr():
     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
     # TP-GMR
-    representation = rf.lfd.tpgmr.TPGMR(demos_x, plot=False)
+    representation = rf.learning.tpgmr.TPGMR(demos_x, plot=False)
     model = representation.fit()
 
     # Reproductions for the same situations

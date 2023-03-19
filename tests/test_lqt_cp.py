@@ -10,7 +10,7 @@ def test_7d_uni_cp_lqt():
     filter_indices.append(len(via_points) - 1)
     via_points = via_points[filter_indices]
 
-    controller = rf.planning.lqt.LQTCP(via_points)
+    controller = rf.planning_control.lqt.LQTCP(via_points)
     u_hat, x_hat, mu, idx_slices = controller.solve()
 
     rf.lqt.plot_3d_uni(x_hat, mu, idx_slices, for_test=True)

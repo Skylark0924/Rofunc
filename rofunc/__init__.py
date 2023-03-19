@@ -10,11 +10,11 @@ warnings.simplefilter('ignore', DeprecationWarning)
 
 from .devices import zed, xsens, optitrack, mmodal, emg
 from . import simulator as sim
-from .lfd import ml, dl, rl
-from .planning import lqt, lqr
+from .learning import ml, dl, rl
+from .planning_control import lqt, lqr
 from .utils import visualab, robolab, data_generator, primitive, logger, file
 from . import config
 
-from .lfd.ml import tpgmm, gmr, tpgmr
-from .lfd.dl import bc, strans
-from .lfd.rl import PPOAgent
+from .learning.ml import tpgmm, gmr, tpgmr
+from .learning.dl import bc, strans
+from .learning.rl import PPOAgent
