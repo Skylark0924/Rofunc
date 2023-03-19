@@ -4,6 +4,7 @@ import numpy as np
 import pbdlib as pbd
 from numpy import ndarray
 from pbdlib import HMM
+import matplotlib.pyplot as plt
 
 import rofunc as rf
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -153,7 +154,7 @@ class TPGMM:
         sq = model.viterbi(self.demos_xdx_augm[show_demo_idx])
 
         # solving LQR with Product of Gaussian, see notebook on LQR
-        lqr = pbd.PoGLQR(nb_dim=len(self.demos_x[0][0]), dt=0.01, horizon=self.demos_xdx[show_demo_idx].shape[0])
+        lqr = rf.lqr.PoGLQR(nb_dim=len(self.demos_x[0][0]), dt=0.01, horizon=self.demos_xdx[show_demo_idx].shape[0])
         lqr.mvn_xi = prod.concatenate_gaussian(sq)  # augmented version of gaussian
         lqr.mvn_u = -4
         lqr.x0 = start_xdx
@@ -257,3 +258,101 @@ class TPGMMBi(TPGMM):
             data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
             rf.visualab.traj_plot(data_lst)
         return traj_l, traj_r
+
+
+class TPGMMBiCoordLQR(TPGMM):
+    def __init__(self, demos_left_x, demos_right_x, nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
+                 plot: bool = False):
+        self.plot = plot
+        self.demos_left_x, self.demos_right_x = demos_left_x, demos_right_x
+        self.demos_com_x = self.get_rel_demos()
+
+        self.repr_l = rf.tpgmm.TPGMM(self.demos_left_x, nb_states, reg, horizon, plot)
+        self.repr_r = rf.tpgmm.TPGMM(self.demos_right_x, nb_states, reg, horizon, plot)
+        self.repr_c = rf.tpgmm.TPGMM(self.demos_com_x, nb_states, reg, horizon, plot)
+
+    def get_rel_demos(self):
+        # calculate the relative movement of each demo
+        rel_demos = np.zeros_like(self.demos_left_x)
+        if self.plot:
+            plt.figure()
+            for i in range(self.demos_left_x.shape[0]):
+                for j in range(self.demos_left_x.shape[1]):
+                    # rel_demos[i, j] = np.linalg.norm(left_x[i, j] - right_x[i, j])
+                    rel_demos[i, j] = self.demos_left_x[i, j] - self.demos_right_x[i, j]
+
+                plt.plot(rel_demos[i, :, 0], rel_demos[i, :, 1])
+            plt.axis('equal')
+            plt.legend()
+            plt.show()
+        return rel_demos
+
+    def _bi_reproduce(self, model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx):
+        # get the most probable sequence of state for this demonstration
+        sq_l = model_l.viterbi(self.repr_l.demos_xdx_augm[show_demo_idx])
+        sq_r = model_r.viterbi(self.repr_r.demos_xdx_augm[show_demo_idx])
+        sq_c = model_c.viterbi(self.repr_c.demos_xdx_augm[show_demo_idx])
+
+        # solving LQR with Product of Gaussian, see notebook on LQR
+        lqr = rf.lqr.PoGLQRBi(nb_dim=2, dt=0.01, horizon=self.demos_left_x[show_demo_idx].shape[0])
+        lqr.mvn_xi_l = prod_l.concatenate_gaussian(sq_l)  # augmented version of gaussian
+        lqr.mvn_xi_r = prod_r.concatenate_gaussian(sq_r)  # augmented version of gaussian
+        lqr.mvn_xi_c = prod_c.concatenate_gaussian(sq_c)  # augmented version of gaussian
+        lqr.mvn_u = -4  # N(0, R_s) R_s: R^{DTxDT}
+        lqr.x0_l = self.repr_l.demos_xdx[show_demo_idx][0]  # zeta_0 R^DC => 4
+        lqr.x0_r = self.repr_r.demos_xdx[show_demo_idx][0]
+        lqr.x0_c = self.repr_c.demos_xdx[show_demo_idx][0]
+
+        xi_l, xi_r = lqr.seq_xi
+
+        if self.plot:
+            plt.figure()
+            plt.title('Trajectory reproduction')
+            plt.plot(xi_l[:, 0], xi_l[:, 1], color='r', lw=2, label='generated left line')
+            plt.plot(xi_r[:, 0], xi_r[:, 1], color='b', lw=2, label='generated right line')
+            # pbd.plot_gmm(mod1.mu, mod1.sigma, swap=True, ax=ax[0], dim=[0, 1], color='steelblue', alpha=0.3)
+            # pbd.plot_gmm(mod2.mu, mod2.sigma, swap=True, ax=ax[0], dim=[0, 1], color='orangered', alpha=0.3)
+            # pbd.plot_gmm(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold')
+            # plt.plot(self.demos_left_x[demo_idx][:, 0], self.demos_left_x[demo_idx][:, 1], 'k--', lw=2, label='demo left line')
+            # plt.plot(self.demos_right_x[demo_idx][:, 0], self.demos_right_x[demo_idx][:, 1], 'g--', lw=2, label='demo right line')
+            # draw_connect(xi_l, xi_r, '--')
+
+            plt.axis('equal')
+            plt.legend()
+            plt.show()
+
+            plt.figure()
+            plt.plot(self.demos_left_x[show_demo_idx, :, 0], self.demos_left_x[show_demo_idx, :, 1], color='darkblue',
+                     label='demo left')
+            plt.plot(self.demos_right_x[show_demo_idx, :, 0], self.demos_right_x[show_demo_idx, :, 1], color='darkred',
+                     label='demo right')
+            # draw_connect(self.demos_left_x[demo_idx], self.demos_right_x[demo_idx], '--')
+            plt.legend()
+            plt.axis('equal')
+            plt.show()
+
+    def fit(self):
+        model_l = self.repr_l.hmm_learning()
+        model_r = self.repr_r.hmm_learning()
+        model_c = self.repr_c.hmm_learning()
+        return model_l, model_r, model_c
+
+    def reproduce(self, model_l, model_r, model_c, show_demo_idx: int) -> np.ndarray:
+        prod_l = self.repr_l.poe(model_l, show_demo_idx=show_demo_idx)
+        prod_r = self.repr_r.poe(model_r, show_demo_idx=show_demo_idx)
+        prod_c = self.repr_c.poe(model_c, show_demo_idx=show_demo_idx)
+
+        if self.plot:
+            gen_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
+            gen_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
+            # # gen_c = generate(model_c, prod_c, self.demos_com_x, self.demos_com_xdx, self.demos_com_xdx_augm)
+            # plt.figure()
+            plt.plot(gen_l[:, 0], gen_l[:, 1], color='lightblue', label='generated left')
+            plt.plot(gen_r[:, 0], gen_r[:, 1], color='lightsalmon', label='generated right')
+            # # plt.plot(gen_c[:, 0], gen_c[:, 1], color='lightsalmon', label='generated right')
+            # draw_connect(gen_l, gen_r, '--')
+            plt.legend()
+            plt.axis('equal')
+            plt.show()
+
+        self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
