@@ -38,7 +38,7 @@ def test_2d_cp_dmp_lqt():
         (np.array([[3], [-0.5]]), np.zeros((cfg.nbVarX - cfg.nbVarU, 1))))  # Simulated noise on 2d state
 
     cfg.nbData = len(via_points[0])
-    controller = rf.planning.lqt.LQTCPDMP(via_points, cfg)
+    controller = rf.planning_control.lqt.LQTCPDMP(via_points, cfg)
     u_hat, x_hat = controller.solve(state_noise, for_test=True)
 
 
