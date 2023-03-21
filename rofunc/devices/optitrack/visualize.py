@@ -8,28 +8,33 @@ from mpl_toolkits.mplot3d import Axes3D
 
 COLORS = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
 
-def plot_objects(csv_path: str, objs: dict, meta: dict, show_markers=True, save_gif=False):
+
+def plot_objects(csv_path: str, objs: dict, meta: dict,
+                 show_markers=True, save_gif=False, normalize=False):
     print('[plot_objects] Loading data...')
     print('[plot_objects] data path: ', osp.join(csv_path, f"{meta['Take Name']}.csv"))
     data = pd.read_csv(osp.join(csv_path, f"{meta['Take Name']}.csv"), skiprows=6)
+    xlim = (-1200, 1200)
+    ylim = (-0.5, 2000)
+    zlim = (-1200, 1200)
 
-    # TODO: Better normalization technique
-    data /= data.max().max()
+    if normalize == 'max_divide':
+        # Get abosuluete max value
+        data /= data.max().max()
 
-    fig = plt.figure()
-    ax = Axes3D(fig, fc='white')
-    ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
-    ax.set_ylim(-0.5, 1)
-    ax.set_zlim(-.5, 2)
-    fig.canvas.set_window_title(f'Optitrack data visualization - {meta["Take Name"]}')
+    fig = plt.figure(num=f'Optitrack data visualization - {meta["Take Name"]}')
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_xlim(*xlim)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
+    ax.set_ylim(*ylim)
+    ax.set_zlim(*zlim)
 
     dim = len(data)
 
     def update(i):
         ax.cla()
-        ax.set_xlim(-0.5, 1)
-        ax.set_ylim(-0.5, 1)
-        ax.set_zlim(-.5, 2)
+        ax.set_xlim(*xlim)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
+        ax.set_ylim(*ylim)
+        ax.set_zlim(*zlim)
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_zlabel('z')
@@ -48,9 +53,9 @@ def plot_objects(csv_path: str, objs: dict, meta: dict, show_markers=True, save_
                                 ax.scatter(pt[0], pt[1], pt[2], marker=f"${marker}$", color=COLORS[n % len(COLORS)])
         ax.legend()
 
-    ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
-    ax.set_ylim(-0.5, 1)
-    ax.set_zlim(-.5, 2)
+    ax.set_xlim(*xlim)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
+    ax.set_ylim(*ylim)
+    ax.set_zlim(*zlim)
     ani = animation.FuncAnimation(fig, update, np.arange(0, dim, 10), interval=100, blit=False)
     if save_gif:
         print('Saving animation...')
