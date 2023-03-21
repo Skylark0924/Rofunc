@@ -151,12 +151,12 @@ CURI simulation
    args = gymutil.parse_arguments()
    rf.curi.run_traj_bi(args, x_hat_l, x_hat_r)
 
-.. figure:: ./img/FormatFactoryPart1-1666885625444-4.gif
+.. figure:: ./img/Videos/CURITaichiFlat.gif
    :alt: 
 
 **Another types of Taichi pushing hand**
 
-.. figure:: ./img/FormatFactoryPart1.gif
+.. figure:: ./img/Videos/CURITaichiVertical.gif
    :alt: 
 
 .. |image0| image:: ./img/taichi_test4.png
