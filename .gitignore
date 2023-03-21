@@ -140,9 +140,9 @@ doc/rofunc.out
 .idea/
 whl/
 
-/rofunc/planning/lqt/outputs/
+/rofunc/planning_control/lqt/outputs/
 
-rofunc/planning/src/robotics-codes-from-scratch-master/
+rofunc/planning_control/src/robotics-codes-from-scratch-master/
 
 
 doc/source/_build
@@ -154,12 +154,13 @@ runs
 
 *.pt
 
-rofunc/examples/learning/rllib_example.py
-rofunc/examples/learning/skrl_example.py
-rofunc/examples/learning/skrl_example2.py
+examples/learning/rllib_example.py
+examples/learning/skrl_example.py
+examples/learning/skrl_example2.py
 
-rofunc/lfd/rl/utils/result
-rofunc/examples/learning/result
+rofunc/learning/rl/utils/result
+examples/learning/result
 
 others/
 /rofunc/simulator/assets/urdf/objects/
+/rofunc/planning_control/src/
