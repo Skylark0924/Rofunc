@@ -45,8 +45,6 @@ def plot_objects(csv_path: str, objs: dict, meta: dict,
         save_gif (bool, optional): Whether to save the gif. Defaults to False.
         scale (str, optional): Normalization method. Defaults to ''.
     """
-    print('[plot_objects] Loading data...')
-    print('[plot_objects] data path: ', osp.join(csv_path, f"{meta['Take Name']}.csv"))
     data = pd.read_csv(osp.join(csv_path, f"{meta['Take Name']}.csv"), skiprows=6)
     xlim = (-1200, 1200)
     ylim = (-0.5, 2000)
