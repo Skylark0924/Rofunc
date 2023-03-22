@@ -73,7 +73,7 @@ class TPGMR(TPGMM):
 
         prod = self.poe(model, show_demo_idx)
         traj = self._reproduce(model, prod, show_demo_idx, self.demos_xdx[show_demo_idx][0])
-        return traj
+        return traj, prod
 
     def generate(self, model: pbd.HMM, ref_demo_idx: int, task_params: dict) -> np.ndarray:
         beauty_print('generate new demo from learned representation', type='info')
@@ -82,7 +82,7 @@ class TPGMR(TPGMM):
 
         prod = self.poe(model, ref_demo_idx, task_params_A_b)
         traj = self._reproduce(model, prod, ref_demo_idx, task_params['start_xdx'])
-        return traj
+        return traj, prod
 
 
 class TPGMRBi(TPGMR):
@@ -113,7 +113,7 @@ class TPGMRBi(TPGMR):
             nb_dim = int(traj_l.shape[1] / 2)
             data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
             rf.visualab.traj_plot(data_lst)
-        return traj_l, traj_r
+        return traj_l, traj_r, prod_l, prod_r
 
     def generate(self, model_l: pbd.HMM, model_r: pbd.HMM, ref_demo_idx: int, task_params: dict) -> \
             Tuple[ndarray, ndarray]:
@@ -131,4 +131,4 @@ class TPGMRBi(TPGMR):
             nb_dim = int(traj_l.shape[1] / 2)
             data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
             rf.visualab.traj_plot(data_lst)
-        return traj_l, traj_r
+        return traj_l, traj_r, prod_l, prod_r

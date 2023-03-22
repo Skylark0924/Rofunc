@@ -12,7 +12,7 @@ def test_2d_uni_tpgmr():
     representation = rf.learning.tpgmr.TPGMR(demos_x, plot=False)
     model = representation.fit()
 
-    traj = representation.reproduce(model, show_demo_idx=2)
+    traj, _ = representation.reproduce(model, show_demo_idx=2)
 
 
 def test_7d_uni_tpgmr():
@@ -25,7 +25,7 @@ def test_7d_uni_tpgmr():
     model = representation.fit()
 
     # Reproductions for the same situations
-    traj = representation.reproduce(model, show_demo_idx=2)
+    traj, _ = representation.reproduce(model, show_demo_idx=2)
 
 
 if __name__ == '__main__':
