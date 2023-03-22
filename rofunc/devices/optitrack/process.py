@@ -119,14 +119,14 @@ def data_clean(input_path, legacy=True, objs=None, save=False):
                 out_list.append(def_data_clean_legacy(input_path, demo_csv, out_path))
             else:
                 if objs is None:
-                    out_data = pd.read_csv(os.path.join(input_dir, demo_csv), skiprows=6)
+                    out_data = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
                     if save:
                         out_data.to_csv(os.path.join(out_path, demo_csv))
                     out_list.append(out_data)
                 else:
                     labels = ['frame', 'time']
                     out_data = []
-                    data_raw = pd.read_csv(os.path.join(input_dir, demo_csv), skiprows=6)
+                    data_raw = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
                     out_data.append(data_raw[:, 0])
                     out_data.append(data_raw[:, 1])
                     for obj in objs:
