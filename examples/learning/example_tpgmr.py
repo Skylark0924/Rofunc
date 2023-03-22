@@ -16,14 +16,14 @@ representation = rf.learning.tpgmr.TPGMR(demos_x, plot=True)
 model = representation.fit()
 
 # Reproductions for the same situations
-traj = representation.reproduce(model, show_demo_idx=2)
+traj, _ = representation.reproduce(model, show_demo_idx=2)
 
 # Reproductions for new situations
 ref_demo_idx = 2
 start_xdx = representation.demos_xdx[ref_demo_idx][0]
 end_xdx = representation.demos_xdx[ref_demo_idx][0]
 task_params = {'start_xdx': start_xdx, 'end_xdx': end_xdx}
-traj = representation.generate(model, ref_demo_idx, task_params)
+traj, _ = representation.generate(model, ref_demo_idx, task_params)
 
 
 # raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))

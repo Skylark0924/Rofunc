@@ -86,7 +86,8 @@ class TPGMM:
     def get_task_params_A_b(self, task_params: dict):
         start_xdx, end_xdx = task_params['start_xdx'], task_params['end_xdx']
 
-        b = np.tile(np.vstack([start_xdx[: 7], end_xdx[: 7]]), (self.horizon, 1, 1))
+        b = np.tile(np.vstack([start_xdx[: len(self.demos_x[0][0])], end_xdx[: len(self.demos_x[0][0])]]),
+                    (self.horizon, 1, 1))
         A = np.tile([[[1., 0.], [-0., -1.]], [[1., 0.], [-0., -1.]]], (self.horizon, 1, 1, 1))
 
         b_xdx = np.concatenate([b, np.zeros(b.shape)], axis=-1)
@@ -178,7 +179,7 @@ class TPGMM:
         model = self.hmm_learning()
         return model
 
-    def reproduce(self, model: pbd.HMM, show_demo_idx: int) -> np.ndarray:
+    def reproduce(self, model: pbd.HMM, show_demo_idx: int) -> Tuple[np.ndarray, pbd.GMM]:
         """
         Reproduce the specific demo_idx from the learned model
         """
@@ -186,9 +187,9 @@ class TPGMM:
 
         prod = self.poe(model, show_demo_idx)
         traj = self._reproduce(model, prod, show_demo_idx, self.demos_xdx[show_demo_idx][0])
-        return traj
+        return traj, prod
 
-    def generate(self, model: pbd.HMM, ref_demo_idx: int, task_params: dict) -> np.ndarray:
+    def generate(self, model: pbd.HMM, ref_demo_idx: int, task_params: dict) -> Tuple[np.ndarray, pbd.GMM]:
         """
         Generate a new trajectory from the learned model
         """
@@ -198,10 +199,14 @@ class TPGMM:
 
         prod = self.poe(model, ref_demo_idx, task_params_A_b)
         traj = self._reproduce(model, prod, ref_demo_idx, task_params['start_xdx'])
-        return traj
+        return traj, prod
 
 
 class TPGMMBi(TPGMM):
+    """
+    Simple TPGMMBi (no coordination)
+    """
+
     def __init__(self, demos_left_x: Union[List, np.ndarray], demos_right_x: Union[List, np.ndarray],
                  nb_states: int = 4, reg: float = 1e-3, horizon: int = 150, plot: bool = False):
         self.demos_left_x = demos_left_x
@@ -221,7 +226,8 @@ class TPGMMBi(TPGMM):
         model_r = self.repr_r.hmm_learning()
         return model_l, model_r
 
-    def reproduce(self, model_l: pbd.HMM, model_r: pbd.HMM, show_demo_idx: int) -> Tuple[ndarray, ndarray]:
+    def reproduce(self, model_l: pbd.HMM, model_r: pbd.HMM, show_demo_idx: int) -> Tuple[
+        ndarray, ndarray, pbd.GMM, pbd.GMM]:
         """
         Reproduce the specific demo_idx from the learned model
         """
@@ -236,10 +242,10 @@ class TPGMMBi(TPGMM):
             nb_dim = int(traj_l.shape[1] / 2)
             data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
             rf.visualab.traj_plot(data_lst)
-        return traj_l, traj_r
+        return traj_l, traj_r, prod_l, prod_r
 
     def generate(self, model_l: pbd.HMM, model_r: pbd.HMM, ref_demo_idx: int, task_params: dict) -> \
-            Tuple[ndarray, ndarray]:
+            Tuple[ndarray, ndarray, pbd.GMM, pbd.GMM]:
         """
         Generate a new trajectory from the learned model
         """
@@ -257,18 +263,19 @@ class TPGMMBi(TPGMM):
             nb_dim = int(traj_l.shape[1] / 2)
             data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
             rf.visualab.traj_plot(data_lst)
-        return traj_l, traj_r
+        return traj_l, traj_r, prod_l, prod_r
 
 
-class TPGMMBiCoordLQR(TPGMM):
+class TPGMMBiLQRBiCoord(TPGMMBi):
+    """
+    Simple TPGMMBi (no coordination) with bimanual coordination in the LQR controller
+    """
+
     def __init__(self, demos_left_x, demos_right_x, nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
                  plot: bool = False):
-        self.plot = plot
-        self.demos_left_x, self.demos_right_x = demos_left_x, demos_right_x
-        self.demos_com_x = self.get_rel_demos()
+        super().__init__(demos_left_x, demos_right_x, nb_states, reg, horizon, plot)
 
-        self.repr_l = rf.tpgmm.TPGMM(self.demos_left_x, nb_states, reg, horizon, plot)
-        self.repr_r = rf.tpgmm.TPGMM(self.demos_right_x, nb_states, reg, horizon, plot)
+        self.demos_com_x = self.get_rel_demos()
         self.repr_c = rf.tpgmm.TPGMM(self.demos_com_x, nb_states, reg, horizon, plot)
 
     def get_rel_demos(self):
@@ -331,28 +338,32 @@ class TPGMMBiCoordLQR(TPGMM):
             plt.axis('equal')
             plt.show()
 
-    def fit(self):
-        model_l = self.repr_l.hmm_learning()
-        model_r = self.repr_r.hmm_learning()
+        return xi_l, xi_r
+
+    def fit(self) -> Tuple[HMM, HMM, HMM]:
+        model_l, model_r = super().fit()
         model_c = self.repr_c.hmm_learning()
         return model_l, model_r, model_c
 
-    def reproduce(self, model_l, model_r, model_c, show_demo_idx: int) -> np.ndarray:
+    def reproduce(self, model_l, model_r, model_c, show_demo_idx: int) -> Tuple[ndarray, ndarray, pbd.GMM, pbd.GMM]:
         prod_l = self.repr_l.poe(model_l, show_demo_idx=show_demo_idx)
         prod_r = self.repr_r.poe(model_r, show_demo_idx=show_demo_idx)
         prod_c = self.repr_c.poe(model_c, show_demo_idx=show_demo_idx)
 
         if self.plot:
-            gen_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
-            gen_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
+            traj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
+            traj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
             # # gen_c = generate(model_c, prod_c, self.demos_com_x, self.demos_com_xdx, self.demos_com_xdx_augm)
             # plt.figure()
-            plt.plot(gen_l[:, 0], gen_l[:, 1], color='lightblue', label='generated left')
-            plt.plot(gen_r[:, 0], gen_r[:, 1], color='lightsalmon', label='generated right')
+            plt.plot(traj_l[:, 0], traj_l[:, 1], color='lightblue', label='generated left')
+            plt.plot(traj_r[:, 0], traj_r[:, 1], color='lightsalmon', label='generated right')
             # # plt.plot(gen_c[:, 0], gen_c[:, 1], color='lightsalmon', label='generated right')
             # draw_connect(gen_l, gen_r, '--')
             plt.legend()
             plt.axis('equal')
             plt.show()
 
-        self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
+        # Coordinated trajectory
+        ctraj_l, ctraj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
+
+        return ctraj_l, ctraj_r, prod_l, prod_r

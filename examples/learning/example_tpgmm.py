@@ -16,11 +16,11 @@ representation = rf.learning.tpgmm.TPGMM(demos_x, plot=True)
 model = representation.fit()
 
 # Reproductions for the same situations
-traj = representation.reproduce(model, show_demo_idx=2)
+traj, _ = representation.reproduce(model, show_demo_idx=2)
 
 # Reproductions for new situations: set the endpoint as the start point to make a cycled motion
 ref_demo_idx = 2
 start_xdx = representation.demos_xdx[ref_demo_idx][0]
 end_xdx = representation.demos_xdx[ref_demo_idx][0]
 task_params = {'start_xdx': start_xdx, 'end_xdx': end_xdx}
-traj = representation.generate(model, ref_demo_idx, task_params)
+traj, _ = representation.generate(model, ref_demo_idx, task_params)
