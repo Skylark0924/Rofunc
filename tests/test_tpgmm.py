@@ -13,7 +13,7 @@ def test_2d_uni_tpgmm():
     model = representation.fit()
 
     # Reproductions for the same situations
-    traj = representation.reproduce(model, show_demo_idx=2)
+    traj, _ = representation.reproduce(model, show_demo_idx=2)
 
 
 def test_2d_bi_tpgmm():
@@ -29,7 +29,7 @@ def test_2d_bi_tpgmm():
     representation = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, plot=False)
     model_l, model_r = representation.fit()
 
-    traj_l, traj_r = representation.reproduce(model_l, model_r, show_demo_idx=2)
+    traj_l, traj_r, _, _ = representation.reproduce(model_l, model_r, show_demo_idx=2)
 
 
 def test_7d_uni_tpgmm():
@@ -40,14 +40,14 @@ def test_7d_uni_tpgmm():
     model = representation.fit()
 
     # Reproductions for the same situations
-    traj = representation.reproduce(model, show_demo_idx=2)
+    traj, _ = representation.reproduce(model, show_demo_idx=2)
 
     # Reproductions for new situations
     ref_demo_idx = 2
     start_xdx = representation.demos_xdx[ref_demo_idx][0]
     end_xdx = representation.demos_xdx[ref_demo_idx][0]
     task_params = {'start_xdx': start_xdx, 'end_xdx': end_xdx}
-    traj = representation.generate(model, ref_demo_idx, task_params)
+    traj, _ = representation.generate(model, ref_demo_idx, task_params)
 
 
 def test_7d_bi_tpgmm():
@@ -60,7 +60,7 @@ def test_7d_bi_tpgmm():
     model_l, model_r = representation.fit()
 
     # Reproductions for the same situations
-    traj_l, traj_r = representation.reproduce(model_l, model_r, show_demo_idx=2)
+    traj_l, traj_r, _, _ = representation.reproduce(model_l, model_r, show_demo_idx=2)
 
     # Reproductions for new situations
     ref_demo_idx = 2
@@ -70,7 +70,7 @@ def test_7d_bi_tpgmm():
     end_xdx_r = representation.repr_r.demos_xdx[ref_demo_idx][0]
     task_params = {'Left': {'start_xdx': start_xdx_l, 'end_xdx': end_xdx_l},
                    'Right': {'start_xdx': start_xdx_r, 'end_xdx': end_xdx_r}}
-    traj_l, traj_r = representation.generate(model_l, model_r, ref_demo_idx, task_params)
+    traj_l, traj_r, _, _ = representation.generate(model_l, model_r, ref_demo_idx, task_params)
 
 
 if __name__ == '__main__':
