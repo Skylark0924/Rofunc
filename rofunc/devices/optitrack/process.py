@@ -33,7 +33,7 @@ from tqdm import tqdm
 import numpy as np
 import rofunc as rf
 
-def get_objects(input_path):
+def get_objects(input_path: str):
     """Returns a dictionary of objects from the Optitrack data.
     The Optitack csv must have the original name format (e.g. "Take 2020-06-03 15-00-00.csv").
     The reutrned list does not necessarly have the same order as your file explorer, but the meta ond objects list do.\
@@ -96,14 +96,17 @@ def get_objects(input_path):
     return objs_list, meta_list
 
 
-def data_clean(input_path, legacy=True, objs=None, save=False):
+def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=False):
     """
     Cleans the Optitrack data.
     Args:
         input_path (str): path to the Optitrack data.
         legacy (:obj:`bool`, optional): if True, it will use the legacy version of the function.\
-                                       Defaults to True.
-        objs (:obj:`list`, optional): dictionary of objects to keep. If set to None, save all data.\
+                                        Defaults to True.
+        objs (:obj:`dict`, optional): dictionary of objects to keep. If set to None, export all data.\
+                                        Defaults to None.
+        save (:obj:`bool`, optional): if True, it will save the cleaned data to disk.\
+                                        Defaults to False.
     Returns:
         list: list of cleaned data for all csv in folder. Type of elements in list depend on args.
     """
@@ -155,16 +158,16 @@ def data_clean(input_path, legacy=True, objs=None, save=False):
     return out_list
 
 
-def def_data_clean_legacy(input_path, demo_csv, out_path):
+def def_data_clean_legacy(input_path: str, demo_csv: str, out_path: str):
     """
     Cleans the Optitrack data. legacy version
     Args:
-        input_path: path to the Optitrack data.
-        demo_csv: name of the csv file
-        out_path: path to save the cleaned data for Manus
+        input_path (str): path to the Optitrack data.
+        demo_csv (str): name of the csv file
+        out_path (str): path to save the cleaned data for Manus
 
     Returns:
-        csv_data: cleaned data as a pandas dataframe
+        csv_data (:pandas:`DataFrame`): cleaned data as a pandas dataframe
     """
     if 'Manus' in demo_csv:
         demo_path = os.path.join(input_path, demo_csv)
@@ -185,7 +188,7 @@ def def_data_clean_legacy(input_path, demo_csv, out_path):
     return csv_data
 
 
-def data_clean_batch(input_dir):
+def data_clean_batch(input_dir: str):
     demos = os.listdir(input_dir)
     demos = sorted(demos)
     for demo in tqdm(demos):
@@ -193,13 +196,13 @@ def data_clean_batch(input_dir):
         data_clean(input_path)
 
 
-def get_time_series(input_dir, meta):
+def get_time_series(input_dir: str, meta: dict):
     data = pd.read_csv(os.path.join(input_dir, f"{meta['Take Name']}.csv"), skiprows=6)
 
     return data
 
 
-def export(input_dir):
+def export(input_dir: str):
     """
     Export rigid body motion data.
     Args:

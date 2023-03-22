@@ -24,7 +24,7 @@ class PauseAnimation(object):
         self.paused = not self.paused
 
 def plot_objects(csv_path: str, objs: dict, meta: dict,
-                 show_markers=True, save_gif=False, scale=''):
+                 show_markers:bool =True, save_gif: bool=False, scale: str=''):
     """Plots the objects in the objs dict.
     The default bounding box for the plot is:
     xlim = (-1200, 1200)
