@@ -18,7 +18,7 @@ objs, meta = get_objects(input_path)
 for obj in del_objects:
     del objs[obj]
 
-data, labels = data_clean(input_path, legacy=False, objs)[0]
+data, labels = data_clean(input_path, legacy=False, objs=objs)[0]
 
 label_idx = labels.index('table.pose.x')
 table_pos_x = data[label_idx, :]
@@ -197,6 +197,7 @@ def data_clean_batch(input_dir: str):
 
 
 def get_time_series(input_dir: str, meta: dict):
+    print(meta['Take Name'])
     data = pd.read_csv(os.path.join(input_dir, f"{meta['Take Name']}.csv"), skiprows=6)
 
     return data
