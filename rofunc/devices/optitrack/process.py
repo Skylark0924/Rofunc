@@ -45,6 +45,7 @@ def get_objects(input_path: str):
     Returns:
         tuple: (objects, meta)
     """
+    #TODO: Must work for **file** or folder input path
     objs_list = list()
     meta_list = list()
     demo_csvs = os.listdir(input_path)
@@ -110,6 +111,7 @@ def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=F
     Returns:
         list: list of cleaned data for all csv in folder. Type of elements in list depend on args.
     """
+    #TODO: Must work for **file** or folder input path
     out_path = os.path.join(input_path, 'process')
     if not os.path.exists(out_path):
         os.mkdir(out_path)
@@ -130,25 +132,26 @@ def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=F
                     labels = ['frame', 'time']
                     out_data = []
                     data_raw = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
-                    out_data.append(data_raw[:, 0])
-                    out_data.append(data_raw[:, 1])
+                    out_data.append(data_raw.iloc[:, 0])
+                    out_data.append(data_raw.iloc[:, 1])
                     for obj in objs:
-                        labels.extend([f"{obj}.pose.x", f"{obj}.pose.y", f"{obj}.pose.z",
-                                       f"{obj}.pose.qx", f"{obj}.pose.qy", f"{obj}.pose.qz", f"{obj}.pose.qw"])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['X']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['Y']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['Z']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['X']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['Y']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['Z']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['W']])
+                        labels.extend([f"{obj}.pose.x", f"{obj}.pose.y", f"{obj}.pose.z"]),
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['X']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Y']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Z']])
+                        if objs[obj]['type'] == 'RigidBody':
+                            labels.extend([f"{obj}.pose.qx", f"{obj}.pose.qy", f"{obj}.pose.qz", f"{obj}.pose.qw"])
+                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['X']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Y']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Z']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['W']])
                         for marker in objs[obj]['markers']:
                             labels.extend([f"{obj}.marker.{marker}.x", f"{obj}.marker.{marker}.y", f"{obj}.marker.{marker}.z"])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['X']])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['Y']])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['Z']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['X']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Y']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Z']])
                     out_data = np.array(out_data).T
-                    out_list.append(out_data, labels)
+                    out_list.append((out_data, labels))
                     if save:
                         with open(os.path.join(out_path, demo_csv.replace('.csv', '_labels.pkl')), 'wb') as f:
                             pkl.dump(labels, f)
