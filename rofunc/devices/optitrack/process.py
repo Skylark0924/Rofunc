@@ -139,7 +139,7 @@ def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=F
                         out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['X']])
                         out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Y']])
                         out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Z']])
-                        if objs[obj]['type'] == 'RigidBody':
+                        if objs[obj]['type'] == 'Rigid Body':
                             labels.extend([f"{obj}.pose.qx", f"{obj}.pose.qy", f"{obj}.pose.qz", f"{obj}.pose.qw"])
                             out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['X']])
                             out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Y']])
