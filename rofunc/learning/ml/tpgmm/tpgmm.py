@@ -1,14 +1,14 @@
 from typing import Union, List, Tuple
 
-import math
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray
-import matplotlib.pyplot as plt
+import scipy
 
 import rofunc as rf
-from rofunc.utils.logger.beauty_logger import beauty_print
 from rofunc.learning.ml.gmm.gmm import GMM
 from rofunc.learning.ml.hmm.hmm import HMM
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 class TPGMM:
@@ -152,20 +152,14 @@ class TPGMM:
         # get transformation for given demonstration.
         if task_params is not None:
             A, b = task_params['A'], task_params['b']
-            for p in range(self.P):
-                # transformed model for coordinate system p
-                mod_list.append(model.marginal_model(slice(p * len(b[0]), (p + 1) * len(b[0]))).lintrans(A[p], b[p]))
+
         else:
             # We use the transformation of the first timestep as they are constant
-            A, b = self.demos_A_xdx[show_demo_idx][::math.ceil(len(self.demos_A_xdx[show_demo_idx]) / 4)], \
-                self.demos_b_xdx[show_demo_idx][::math.ceil(len(self.demos_A_xdx[show_demo_idx]) / 4)]
-            for p in range(self.P):
-                # transformed model for coordinate system p
-                # mod_list.append(model.marginal_model(slice(p * len(b[0]), (p + 1) * len(b[0]))).lintrans(A[p], b[p]))
-                mod_list.append(
-                    model.marginal_model(
-                        slice(p * self.nb_deriv * self.nb_dim, (p + 1) * self.nb_deriv * self.nb_dim)).lintrans_dyna(
-                        A[:, p], b[:, p]))
+            A, b = self.demos_A_xdx[show_demo_idx][0], self.demos_b_xdx[show_demo_idx][0]
+
+        for p in range(self.P):
+            # transformed model for coordinate system p
+            mod_list.append(model.marginal_model(slice(p * len(b[0]), (p + 1) * len(b[0]))).lintrans(A[p], b[p]))
 
         # product
         prod = mod_list[0]
@@ -174,9 +168,9 @@ class TPGMM:
 
         if self.plot:
             if self.nb_dim == 2:
-                rf.tpgmm.poe_plot(mod_list[0], mod_list[1], prod, self.demos_x, show_demo_idx)
+                rf.tpgmm.poe_plot(mod_list, prod, self.demos_x, show_demo_idx)
             elif self.nb_dim > 2:
-                rf.tpgmm.poe_plot_3d(mod_list[0], mod_list[1], prod, self.demos_x, show_demo_idx)
+                rf.tpgmm.poe_plot_3d(mod_list, prod, self.demos_x, show_demo_idx)
             else:
                 raise Exception('Dimension is less than 2, cannot plot')
         return prod
@@ -255,10 +249,11 @@ class TPGMMBi(TPGMM):
             demos_right_x[0]), 'The number of timesteps for left and right arm should be the same'
         self.demos_left_x = demos_left_x
         self.demos_right_x = demos_right_x
+        self.nb_dim = len(demos_left_x[0][0])
         self.plot = plot
 
-        self.repr_l = TPGMM(demos_left_x, nb_states, reg, horizon, plot)
-        self.repr_r = TPGMM(demos_right_x, nb_states, reg, horizon, plot)
+        self.repr_l = TPGMM(demos_left_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
+        self.repr_r = TPGMM(demos_right_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
 
     def fit(self) -> Tuple[HMM, HMM]:
         """
@@ -308,17 +303,17 @@ class TPGMMBi(TPGMM):
         return traj_l, traj_r, prod_l, prod_r
 
 
-class TPGMMBiLQRBiCoord(TPGMMBi):
+class TPGMMLQRBiCoord(TPGMMBi):
     """
     Simple TPGMMBi (no coordination) with bimanual coordination in the LQR controller
     """
 
     def __init__(self, demos_left_x, demos_right_x, nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
                  plot: bool = False):
-        super().__init__(demos_left_x, demos_right_x, nb_states, reg, horizon, plot)
+        super().__init__(demos_left_x, demos_right_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
 
         self.demos_com_x = self.get_rel_demos()
-        self.repr_c = rf.tpgmm.TPGMM(self.demos_com_x, nb_states, reg, horizon, plot)
+        self.repr_c = TPGMM(self.demos_com_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
 
     def get_rel_demos(self):
         # calculate the relative movement of each demo
@@ -343,7 +338,7 @@ class TPGMMBiLQRBiCoord(TPGMMBi):
         sq_c = model_c.viterbi(self.repr_c.demos_xdx_augm[show_demo_idx])
 
         # solving LQR with Product of Gaussian, see notebook on LQR
-        lqr = rf.lqr.PoGLQRBi(nb_dim=self.nb_dim, dt=0.01, horizon=self.demos_left_x[show_demo_idx].shape[0])
+        lqr = rf.lqr.PoGLQRBi(nb_dim=2, dt=0.01, horizon=self.demos_left_x[show_demo_idx].shape[0])
         lqr.mvn_xi_l = prod_l.concatenate_gaussian(sq_l)  # augmented version of gaussian
         lqr.mvn_xi_r = prod_r.concatenate_gaussian(sq_r)  # augmented version of gaussian
         lqr.mvn_xi_c = prod_c.concatenate_gaussian(sq_c)  # augmented version of gaussian
@@ -393,18 +388,18 @@ class TPGMMBiLQRBiCoord(TPGMMBi):
         prod_r = self.repr_r.poe(model_r, show_demo_idx=show_demo_idx)
         prod_c = self.repr_c.poe(model_c, show_demo_idx=show_demo_idx)
 
-        if self.plot:
-            traj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
-            traj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
-            # # gen_c = generate(model_c, prod_c, self.demos_com_x, self.demos_com_xdx, self.demos_com_xdx_augm)
-            # plt.figure()
-            plt.plot(traj_l[:, 0], traj_l[:, 1], color='lightblue', label='generated left')
-            plt.plot(traj_r[:, 0], traj_r[:, 1], color='lightsalmon', label='generated right')
-            # # plt.plot(gen_c[:, 0], gen_c[:, 1], color='lightsalmon', label='generated right')
-            # draw_connect(gen_l, gen_r, '--')
-            plt.legend()
-            plt.axis('equal')
-            plt.show()
+        # if self.plot:
+        #     traj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
+        #     traj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
+        #     # # gen_c = generate(model_c, prod_c, self.demos_com_x, self.demos_com_xdx, self.demos_com_xdx_augm)
+        #     # plt.figure()
+        #     plt.plot(traj_l[:, 0], traj_l[:, 1], color='lightblue', label='generated left')
+        #     plt.plot(traj_r[:, 0], traj_r[:, 1], color='lightsalmon', label='generated right')
+        #     # # plt.plot(gen_c[:, 0], gen_c[:, 1], color='lightsalmon', label='generated right')
+        #     # draw_connect(gen_l, gen_r, '--')
+        #     plt.legend()
+        #     plt.axis('equal')
+        #     plt.show()
 
         # Coordinated trajectory
         ctraj_l, ctraj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
@@ -461,6 +456,121 @@ class TPGMMBiCoord(TPGMMBi):
                                  'demos_A_xdx': demos_A_xdx_r, 'demos_b_xdx': demos_b_xdx_r}}
         return task_params
 
+    def poe(self, model_l: HMM, model_r: HMM, show_demo_idx: int, task_params: dict = None) -> Tuple[GMM, GMM]:
+        """
+        Product of Expert/Gaussian (PoE), which calculates the mixture distribution from multiple coordinates
+        :param model_l: learned model
+        :param model_r: learned model
+        :param show_demo_idx: index of the specific demo to be reproduced
+        :param task_params: [dict], task parameters for including transformation matrix A and bias b
+        :return: The product of experts
+        """
+        #  ----------------------------- Left arm -----------------------------
+        # get transformation for given demonstration.
+        mus = model_l._mu[:, 8:10]
+        tmp = self.repr_l.demos_xdx_f[show_demo_idx][:, 2, :2]
+        a_list = []
+        for mu in mus:
+            c = list(scipy.spatial.distance.cdist([mu], tmp)[0])
+            a = c.index(min(c))
+            a_list.append(a)
+        # We use the transformation of the first timestep as they are constant
+        A, b = self.repr_l.demos_A_xdx[show_demo_idx][a_list], \
+            self.repr_l.demos_b_xdx[show_demo_idx][a_list]
+        mod_list = []
+        for p in range(self.P):
+            mod_list.append(
+                model_l.marginal_model(
+                    slice(p * self.nb_deriv * self.nb_dim, (p + 1) * self.nb_deriv * self.nb_dim)).lintrans_dyna(
+                    A[:, p], b[:, p]))
+        # product
+        prod_l = mod_list[0]
+        for p in range(1, self.P):
+            prod_l *= mod_list[p]
+
+        if self.plot:
+            if self.nb_dim == 2:
+                rf.tpgmm.poe_plot(mod_list, prod_l, self.repr_l.demos_x, show_demo_idx)
+            elif self.nb_dim > 2:
+                rf.tpgmm.poe_plot_3d(mod_list, prod_l, self.repr_l.demos_x, show_demo_idx)
+            else:
+                raise Exception('Dimension is less than 2, cannot plot')
+
+        #  ----------------------------- Right arm -----------------------------
+        # get transformation for given demonstration.
+        mus = model_r._mu[:, 8:10]
+        from scipy.spatial import distance
+        tmp = self.repr_r.demos_xdx_f[show_demo_idx][:, 2, :2]
+        a_list = []
+        for mu in mus:
+            c = list(distance.cdist([mu], tmp)[0])
+            a = c.index(min(c))
+            a_list.append(a)
+        # We use the transformation of the first timestep as they are constant
+        A, b = self.repr_r.demos_A_xdx[show_demo_idx][a_list], \
+            self.repr_r.demos_b_xdx[show_demo_idx][a_list]
+        mod_list = []
+        for p in range(self.P):
+            mod_list.append(
+                model_r.marginal_model(
+                    slice(p * self.nb_deriv * self.nb_dim, (p + 1) * self.nb_deriv * self.nb_dim)).lintrans_dyna(
+                    A[:, p], b[:, p]))
+
+        # product
+        prod_r = mod_list[0]
+        for p in range(1, self.P):
+            prod_r *= mod_list[p]
+
+        if self.plot:
+            if self.nb_dim == 2:
+                rf.tpgmm.poe_plot(mod_list, prod_r, self.repr_r.demos_x, show_demo_idx)
+            elif self.nb_dim > 2:
+                rf.tpgmm.poe_plot_3d(mod_list, prod_r, self.repr_r.demos_x, show_demo_idx)
+            else:
+                raise Exception('Dimension is less than 2, cannot plot')
+        return prod_l, prod_r
+
     def fit(self) -> Tuple[HMM, HMM]:
         model_l, model_r = super().fit()
         return model_l, model_r
+
+    def reproduce(self, model_l: HMM, model_r: HMM, show_demo_idx: int) -> Tuple[
+        ndarray, ndarray, GMM, GMM]:
+        """
+        Reproduce the specific demo_idx from the learned model
+        """
+        beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
+
+        # prod_l = self.repr_l.poe(model_l, show_demo_idx)
+        # prod_r = self.repr_r.poe(model_r, show_demo_idx)
+
+        prod_l, prod_r = self.poe(model_l, model_r, show_demo_idx)
+        ctraj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
+        ctraj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
+
+        if self.plot:
+            data_lst = [ctraj_l[:, :self.repr_l.nb_dim], ctraj_r[:, :self.repr_r.nb_dim]]
+            rf.visualab.traj_plot(data_lst)
+        return ctraj_l, ctraj_r, prod_l, prod_r
+
+
+class TPGMMBothBiCoord(TPGMMBiCoord, TPGMMLQRBiCoord):
+    def __init__(self, demos_left_x, demos_right_x, nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
+                 plot: bool = False):
+        TPGMMBiCoord.__init__(self, demos_left_x, demos_right_x, nb_states, reg, horizon, plot)
+
+        self.demos_com_x = self.get_rel_demos()
+        self.repr_c = TPGMM(self.demos_com_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
+
+    def fit(self):
+        return TPGMMLQRBiCoord.fit(self)
+
+    def reproduce(self, model_l: HMM, model_r: HMM, model_c: HMM, show_demo_idx: int) -> Tuple[
+        ndarray, ndarray, GMM, GMM]:
+        prod_l, prod_r = self.poe(model_l, model_r, show_demo_idx)
+        prod_c = self.repr_c.poe(model_c, show_demo_idx=show_demo_idx)
+
+        # Coordinated trajectory
+        ctraj_l, ctraj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
+
+        return ctraj_l, ctraj_r, prod_l, prod_r
