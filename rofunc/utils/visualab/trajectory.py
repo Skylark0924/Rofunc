@@ -99,17 +99,14 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
 
 def traj_plot(data_lst: List, legend: str = None, title: str = None, mode: str = None, ori: bool = False, g_ax=None):
     """
-
-    Args:
-        data_lst: list with 2d array or 3d array
-        legend:
-        title:
-        mode:
-        ori:
-        g_ax:
-
-    Returns:
-
+    Plot 2d or 3d trajectories
+    :param data_lst: list with 2d array or 3d array
+    :param legend: legend of the figure
+    :param title: title of the figure
+    :param mode: '2d' or '3d'
+    :param ori: plot orientation or not
+    :param g_ax: global axis
+    :return:
     """
     if mode is None:
         mode = '2d' if len(data_lst[0][0]) == 2 else '3d'

@@ -23,6 +23,7 @@ class PauseAnimation(object):
             self.anim.pause()
         self.paused = not self.paused
 
+
 def plot_objects(csv_path: str, objs: dict, meta: dict,
                  show_markers=True, save_gif=False, scale=''):
     """Plots the objects in the objs dict.
@@ -94,7 +95,6 @@ def plot_objects(csv_path: str, objs: dict, meta: dict,
 
     dim = len(data)
 
-
     def update(i):
         ax.cla()
         ax.set_xlim(*xlim)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
@@ -114,7 +114,7 @@ def plot_objects(csv_path: str, objs: dict, meta: dict,
                         pts = objs_loc[obj]['markers'][marker]['data']
                         pts = (pts - t) * s
                         if not np.isnan(pt[i]).any():
-                                ax.scatter(*pts[i], marker=f"${marker}$", color=COLORS[n % len(COLORS)])
+                            ax.scatter(*pts[i], marker=f"${marker}$", color=COLORS[n % len(COLORS)])
         ax.legend()
 
     ax.set_xlim(*xlim)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
