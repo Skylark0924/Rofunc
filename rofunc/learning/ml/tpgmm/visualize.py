@@ -38,7 +38,16 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
     plt.show()
 
 
-def poe_plot(mod_list, prod, demos_x, demo_idx):
+def poe_plot(nb_dim, mod_list, prod, demos_x, show_demo_idx):
+    if nb_dim == 2:
+        rf.tpgmm.poe_plot2d(mod_list, prod, demos_x, show_demo_idx)
+    elif nb_dim > 2:
+        rf.tpgmm.poe_plot_3d(mod_list, prod, demos_x, show_demo_idx)
+    else:
+        raise Exception('Dimension is less than 2, cannot plot')
+
+
+def poe_plot2d(mod_list, prod, demos_x, demo_idx):
     P = len(mod_list)
     fig, ax = plt.subplots(ncols=P + 1, nrows=1)
     fig.set_size_inches((4 * (P + 1), 6))
