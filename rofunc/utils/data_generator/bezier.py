@@ -17,35 +17,39 @@ def get_bezier_curve(points):
 def evaluate_bezier(points, total):
     bezier = get_bezier_curve(points)
     new_points = np.array([bezier(t) for t in np.linspace(0, 1, total)])
-    return new_points[:, 0], new_points[:, 1]
+    return new_points
 
 
-def plot_bezier(bx, by, x, y):
-    if type(bx) is list:
+def plot_bezier(bx, by, x, y, bz=None, z=None, ax=None):
+    assert isinstance(bx, list)
+    if bz is not None and z is not None:
+        for i in range(len(bx)):
+            ax.plot(bx[i], by[i], bz[i])
+            ax.plot(x[i], y[i], z[i], 'r.')
+    else:
         for i in range(len(bx)):
             plt.plot(bx[i], by[i])
             plt.plot(x[i], y[i], 'r.')
-        # plt.show()
+
+
+def multi_bezier_demos(demo_points, ax=None):
+    bx_lst = [evaluate_bezier(demo_point, 50)[:, 0] for demo_point in demo_points]
+    by_lst = [evaluate_bezier(demo_point, 50)[:, 1] for demo_point in demo_points]
+    x_lst = [demo_point[:, 0] for demo_point in demo_points]
+    y_lst = [demo_point[:, 1] for demo_point in demo_points]
+
+    if len(demo_points[0][0]) == 3:
+        bz_lst = [evaluate_bezier(demo_point, 50)[:, 2] for demo_point in demo_points]
+        z_lst = [demo_point[:, 2] for demo_point in demo_points]
+        plot_bezier(bx_lst, by_lst, x_lst, y_lst, bz_lst, z_lst, ax)
+        demos_x = np.concatenate(
+            (np.array(bx_lst).reshape((len(demo_points), -1, 1)), np.array(by_lst).reshape((len(demo_points), -1, 1)),
+             np.array(bz_lst).reshape((len(demo_points), -1, 1))), axis=2)
     else:
-        plt.plot(bx, by, 'b-')
-        plt.plot(x, y, 'r.')
-        plt.show()
-
-
-def multi_bezier_demos(demo_points):
-    bx_lst, by_lst, x_lst, y_lst = [], [], [], []
-    for demo_point in demo_points:
-        x, y = demo_point[:, 0], demo_point[:, 1]
-        bx, by = evaluate_bezier(demo_point, 50)
-        bx_lst.append(bx)
-        by_lst.append(by)
-        x_lst.append(x)
-        y_lst.append(y)
-    plt.ylim((-2.5, 8.5))
-    plot_bezier(bx_lst, by_lst, x_lst, y_lst)
-    demos_x = np.concatenate(
-        (np.array(bx_lst).reshape((len(demo_points), -1, 1)), np.array(by_lst).reshape((len(demo_points), -1, 1))),
-        axis=2)
+        plot_bezier(bx_lst, by_lst, x_lst, y_lst)
+        demos_x = np.concatenate(
+            (np.array(bx_lst).reshape((len(demo_points), -1, 1)), np.array(by_lst).reshape((len(demo_points), -1, 1))),
+            axis=2)
     return demos_x
 
 
