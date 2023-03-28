@@ -189,13 +189,13 @@ class TPGMM:
         lqr.x0 = start_xdx
 
         xi = lqr.seq_xi
-        if self.plot:
-            if self.nb_dim == 2:
-                rf.tpgmm.generate_plot(xi, prod, self.demos_x, show_demo_idx)
-            elif self.nb_dim > 2:
-                rf.tpgmm.generate_plot_3d(xi, prod, self.demos_x, show_demo_idx)
-            else:
-                raise Exception('Dimension is less than 2, cannot plot')
+        # if self.plot:
+        #     if self.nb_dim == 2:
+        #         rf.tpgmm.generate_plot(xi, prod, self.demos_x, show_demo_idx)
+        #     elif self.nb_dim > 2:
+        #         rf.tpgmm.generate_plot_3d(xi, prod, self.demos_x, show_demo_idx)
+        #     else:
+        #         raise Exception('Dimension is less than 2, cannot plot')
         return xi
 
     def fit(self) -> HMM:
@@ -342,6 +342,8 @@ class TPGMM_RPCtl(TPGMMBi):
         return model_l, model_r, model_c
 
     def reproduce(self, model_l, model_r, model_c, show_demo_idx: int) -> Tuple[ndarray, ndarray, GMM, GMM]:
+        beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
+
         prod_l = self.repr_l.poe(model_l, show_demo_idx=show_demo_idx)
         prod_r = self.repr_r.poe(model_r, show_demo_idx=show_demo_idx)
         prod_c = self.repr_c.poe(model_c, show_demo_idx=show_demo_idx)
@@ -471,9 +473,6 @@ class TPGMM_RPRepr(TPGMMBi):
 
     def reproduce(self, model_l: HMM, model_r: HMM, show_demo_idx: int) -> Tuple[
         ndarray, ndarray, GMM, GMM]:
-        """
-        Reproduce the specific demo_idx from the learned model
-        """
         beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
 
         prod_l, prod_r = self._bi_poe(model_l, model_r, show_demo_idx)
@@ -508,14 +507,16 @@ class TPGMM_RPRepr(TPGMMBi):
         self.repr_l.P = self.repr_r.P = 3
         for i in range(nb_iter):
             task_params['left']['traj'] = traj_l[:, :self.nb_dim]
-            ctraj_r, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader='left')
+            _, ctraj_r, _, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
+                                                              leader='left')
             task_params['right']['traj'] = traj_r[:, :self.nb_dim]
-            ctraj_l, prod_l = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader='right')
+            _, ctraj_l, _, prod_l = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
+                                                              leader='right')
             traj_l, traj_r = ctraj_l, ctraj_r
 
-            # if self.plot:
-            #     data_lst = [traj_l[:, :self.nb_dim], traj_r[:, :self.nb_dim]]
-            #     rf.visualab.traj_plot(data_lst, title='Iterative Generation: {}-th Iteration'.format(i + 1))
+            if self.plot:
+                data_lst = [traj_l[:, :self.nb_dim], traj_r[:, :self.nb_dim]]
+                rf.visualab.traj_plot(data_lst, title='Iterative Generation: {}-th Iteration'.format(i + 1))
 
         return ctraj_l, ctraj_r, prod_l, prod_r
 
@@ -562,12 +563,13 @@ class TPGMM_RPAll(TPGMM_RPRepr, TPGMM_RPCtl):
 
     def reproduce(self, model_l: HMM, model_r: HMM, model_c: HMM, show_demo_idx: int) -> Tuple[
         ndarray, ndarray, GMM, GMM]:
+        beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
+
         prod_l, prod_r = self._bi_poe(model_l, model_r, show_demo_idx)
         prod_c = self.repr_c.poe(model_c, show_demo_idx=show_demo_idx)
 
         # Coordinated trajectory
         ctraj_l, ctraj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
-
         return ctraj_l, ctraj_r, prod_l, prod_r
 
     def generate(self, model_l: HMM, model_r: HMM, model_c: HMM, ref_demo_idx: int, task_params: dict,
