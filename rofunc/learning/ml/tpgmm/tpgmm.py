@@ -86,7 +86,6 @@ class TPGMM:
         """
         Define custom task parameters
         :param task_params: task parameters
-        :param show_demo_idx: the index of the demo to show
         :return: demos_A, demos_b, demos_A_xdx, demos_b_xdx
         """
         if 'start_xdx' in task_params and 'end_xdx' in task_params:
@@ -540,9 +539,6 @@ class TPGMMBiCoord(TPGMMBi):
         Reproduce the specific demo_idx from the learned model
         """
         beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
-
-        # prod_l = self.repr_l.poe(model_l, show_demo_idx)
-        # prod_r = self.repr_r.poe(model_r, show_demo_idx)
 
         prod_l, prod_r = self.poe(model_l, model_r, show_demo_idx)
         ctraj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
