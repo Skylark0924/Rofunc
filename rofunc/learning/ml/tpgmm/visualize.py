@@ -23,6 +23,7 @@ def hmm_plot(demos_xdx_f, model):
 
 def hmm_plot_3d(demos_xdx_f, model, scale=1):
     P = len(demos_xdx_f[0][0])
+    nb_dim_deriv = len(demos_xdx_f[0][0][0])
     fig = plt.figure(figsize=(4, 4))
     fig.set_size_inches((4 * P, 6))
 
@@ -31,7 +32,8 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
         ax.set_title('pos - coord. %d' % (p + 1))
         for d in demos_xdx_f:
             ax.plot(d[:, p, 0], d[:, p, 1], d[:, p, 2])
-        rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax, dim=[14 * p, 14 * p + 1, 14 * p + 2], color=color_list[p],
+        rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax,
+                             dim=[nb_dim_deriv * p, nb_dim_deriv * p + 1, nb_dim_deriv * p + 2], color=color_list[p],
                              scale=scale, alpha=0.1)
         rf.visualab.set_axis(ax)
 
@@ -128,7 +130,7 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, pl
     plt.legend()
     plt.show()
 
-    if plot_ori:
+    if plot_ori and xi.shape[1] == 7:
         t = np.arange(len(xi))
         plt.figure()
         plt.subplot(2, 2, 1)
