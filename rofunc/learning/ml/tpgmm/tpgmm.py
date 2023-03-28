@@ -282,13 +282,13 @@ class TPGMMBi(TPGMM):
         """
         beauty_print('generate trajectories from learned representation with new task parameters', type='info')
 
-        _, _, _, _, task_params_A_b_l = self.repr_l.get_A_b_from_task_params(task_params['Left'])
-        _, _, _, _, task_params_A_b_r = self.repr_r.get_A_b_from_task_params(task_params['Right'])
+        _, _, _, _, task_params_A_b_l = self.repr_l.get_A_b_from_task_params(task_params['left'])
+        _, _, _, _, task_params_A_b_r = self.repr_r.get_A_b_from_task_params(task_params['right'])
 
         prod_l = self.repr_l.poe(model_l, ref_demo_idx, task_params_A_b_l)
         prod_r = self.repr_r.poe(model_r, ref_demo_idx, task_params_A_b_r)
-        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, task_params['Left']['start_xdx'])
-        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, task_params['Right']['start_xdx'])
+        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, task_params['left']['start_xdx'])
+        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, task_params['right']['start_xdx'])
 
         if self.plot:
             data_lst = [traj_l[:, :self.repr_l.nb_dim], traj_r[:, :self.repr_r.nb_dim]]
@@ -296,7 +296,7 @@ class TPGMMBi(TPGMM):
         return traj_l, traj_r, prod_l, prod_r
 
 
-class TPGMM_RPLQR(TPGMMBi):
+class TPGMM_RPCtl(TPGMMBi):
     """
     Simple TPGMMBi (no coordination) with bimanual coordination in the LQR controller
     """
@@ -311,17 +311,10 @@ class TPGMM_RPLQR(TPGMMBi):
     def get_rel_demos(self):
         # calculate the relative movement of each demo
         rel_demos = np.zeros_like(self.demos_left_x)
-        if self.plot:
-            plt.figure()
-            for i in range(self.demos_left_x.shape[0]):
-                for j in range(self.demos_left_x.shape[1]):
-                    # rel_demos[i, j] = np.linalg.norm(left_x[i, j] - right_x[i, j])
-                    rel_demos[i, j] = self.demos_left_x[i, j] - self.demos_right_x[i, j]
-
-                plt.plot(rel_demos[i, :, 0], rel_demos[i, :, 1])
-            plt.axis('equal')
-            plt.legend()
-            plt.show()
+        for i in range(self.demos_left_x.shape[0]):
+            for j in range(self.demos_left_x.shape[1]):
+                # rel_demos[i, j] = np.linalg.norm(left_x[i, j] - right_x[i, j])
+                rel_demos[i, j] = self.demos_left_x[i, j] - self.demos_right_x[i, j]
         return rel_demos
 
     def _bi_reproduce(self, model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx):
@@ -331,7 +324,7 @@ class TPGMM_RPLQR(TPGMMBi):
         sq_c = model_c.viterbi(self.repr_c.demos_xdx_augm[show_demo_idx])
 
         # solving LQR with Product of Gaussian, see notebook on LQR
-        lqr = rf.lqr.PoGLQRBi(nb_dim=2, dt=0.01, horizon=self.demos_left_x[show_demo_idx].shape[0])
+        lqr = rf.lqr.PoGLQRBi(nb_dim=self.nb_dim, dt=0.01, horizon=self.demos_left_x[show_demo_idx].shape[0])
         lqr.mvn_xi_l = prod_l.concatenate_gaussian(sq_l)  # augmented version of gaussian
         lqr.mvn_xi_r = prod_r.concatenate_gaussian(sq_r)  # augmented version of gaussian
         lqr.mvn_xi_c = prod_c.concatenate_gaussian(sq_c)  # augmented version of gaussian
@@ -341,25 +334,6 @@ class TPGMM_RPLQR(TPGMMBi):
         lqr.x0_c = self.repr_c.demos_xdx[show_demo_idx][0]
 
         xi_l, xi_r = lqr.seq_xi
-
-        if self.plot:
-            plt.figure()
-            plt.title('Trajectory reproduction')
-            plt.plot(xi_l[:, 0], xi_l[:, 1], color='r', lw=2, label='generated left line')
-            plt.plot(xi_r[:, 0], xi_r[:, 1], color='b', lw=2, label='generated right line')
-            plt.axis('equal')
-            plt.legend()
-            plt.show()
-
-            plt.figure()
-            plt.plot(self.demos_left_x[show_demo_idx, :, 0], self.demos_left_x[show_demo_idx, :, 1], color='darkblue',
-                     label='demo left')
-            plt.plot(self.demos_right_x[show_demo_idx, :, 0], self.demos_right_x[show_demo_idx, :, 1], color='darkred',
-                     label='demo right')
-            plt.legend()
-            plt.axis('equal')
-            plt.show()
-
         return xi_l, xi_r
 
     def fit(self) -> Tuple[HMM, HMM, HMM]:
@@ -367,36 +341,24 @@ class TPGMM_RPLQR(TPGMMBi):
         model_c = self.repr_c.hmm_learning()
         return model_l, model_r, model_c
 
-    def reproduce(self, model_l, model_r, model_c, show_demo_idx: int) -> Tuple[
-        ndarray, ndarray, GMM, GMM]:
+    def reproduce(self, model_l, model_r, model_c, show_demo_idx: int) -> Tuple[ndarray, ndarray, GMM, GMM]:
         prod_l = self.repr_l.poe(model_l, show_demo_idx=show_demo_idx)
         prod_r = self.repr_r.poe(model_r, show_demo_idx=show_demo_idx)
         prod_c = self.repr_c.poe(model_c, show_demo_idx=show_demo_idx)
-
-        # if self.plot:
-        #     traj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
-        #     traj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
-        #     # # gen_c = generate(model_c, prod_c, self.demos_com_x, self.demos_com_xdx, self.demos_com_xdx_augm)
-        #     # plt.figure()
-        #     plt.plot(traj_l[:, 0], traj_l[:, 1], color='lightblue', label='generated left')
-        #     plt.plot(traj_r[:, 0], traj_r[:, 1], color='lightsalmon', label='generated right')
-        #     # # plt.plot(gen_c[:, 0], gen_c[:, 1], color='lightsalmon', label='generated right')
-        #     # draw_connect(gen_l, gen_r, '--')
-        #     plt.legend()
-        #     plt.axis('equal')
-        #     plt.show()
-
         # Coordinated trajectory
         ctraj_l, ctraj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
 
+        if self.plot:
+            data_lst = [ctraj_l[:, :self.repr_l.nb_dim], ctraj_r[:, :self.repr_r.nb_dim]]
+            rf.visualab.traj_plot(data_lst)
         return ctraj_l, ctraj_r, prod_l, prod_r
 
     def generate(self, model_l: HMM, model_r: HMM, model_c: HMM, ref_demo_idx: int, task_params: dict) -> \
             Tuple[ndarray, ndarray, GMM, GMM]:
         beauty_print('generate trajectories from learned representation with new task parameters', type='info')
 
-        _, _, _, _, task_params_A_b_l = self.repr_l.get_A_b_from_task_params(task_params['Left'])
-        _, _, _, _, task_params_A_b_r = self.repr_r.get_A_b_from_task_params(task_params['Right'])
+        _, _, _, _, task_params_A_b_l = self.repr_l.get_A_b_from_task_params(task_params['left'])
+        _, _, _, _, task_params_A_b_r = self.repr_r.get_A_b_from_task_params(task_params['right'])
 
         prod_l = self.repr_l.poe(model_l, ref_demo_idx, task_params_A_b_l)
         prod_r = self.repr_r.poe(model_r, ref_demo_idx, task_params_A_b_r)
@@ -410,7 +372,7 @@ class TPGMM_RPLQR(TPGMMBi):
         return ctraj_l, ctraj_r, prod_l, prod_r
 
 
-class TRPGMM_LQR(TPGMMBi):
+class TPGMM_RPRepr(TPGMMBi):
     """
     TPGMM for bimanual coordination
     """
@@ -491,7 +453,7 @@ class TRPGMM_LQR(TPGMMBi):
             rf.tpgmm.poe_plot(self.nb_dim, mod_list, prod, repr.demos_x, show_demo_idx)
         return prod
 
-    def poe(self, model_l: HMM, model_r: HMM, show_demo_idx: int) -> Tuple[GMM, GMM]:
+    def _bi_poe(self, model_l: HMM, model_r: HMM, show_demo_idx: int) -> Tuple[GMM, GMM]:
         """
         Product of Expert/Gaussian (PoE), which calculates the mixture distribution from multiple coordinates
         :param model_l: learned left arm model
@@ -514,7 +476,7 @@ class TRPGMM_LQR(TPGMMBi):
         """
         beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
 
-        prod_l, prod_r = self.poe(model_l, model_r, show_demo_idx)
+        prod_l, prod_r = self._bi_poe(model_l, model_r, show_demo_idx)
         ctraj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
         ctraj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
 
@@ -529,14 +491,14 @@ class TRPGMM_LQR(TPGMMBi):
                      type='info')
 
         self.repr_l.P = self.repr_r.P = 2
-        _, _, _, _, task_params_A_b_l = self.repr_l.get_A_b_from_task_params(task_params['Left'])
-        _, _, _, _, task_params_A_b_r = self.repr_r.get_A_b_from_task_params(task_params['Right'])
+        _, _, _, _, task_params_A_b_l = self.repr_l.get_A_b_from_task_params(task_params['left'])
+        _, _, _, _, task_params_A_b_r = self.repr_r.get_A_b_from_task_params(task_params['right'])
 
         # Generate without coordination originally
         prod_l = self.repr_l.poe(model_l, ref_demo_idx, task_params_A_b_l)
         prod_r = self.repr_r.poe(model_r, ref_demo_idx, task_params_A_b_r)
-        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, task_params['Left']['start_xdx'])
-        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, task_params['Right']['start_xdx'])
+        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, task_params['left']['start_xdx'])
+        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, task_params['right']['start_xdx'])
 
         if self.plot:
             data_lst = [traj_l[:, :self.nb_dim], traj_r[:, :self.nb_dim]]
@@ -545,24 +507,24 @@ class TRPGMM_LQR(TPGMMBi):
         # Add coordination to generate the trajectories iteratively
         self.repr_l.P = self.repr_r.P = 3
         for i in range(nb_iter):
-            task_params['Left']['traj'] = traj_l[:, :self.nb_dim]
-            ctraj_r, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader='Left')
-            task_params['Right']['traj'] = traj_r[:, :self.nb_dim]
-            ctraj_l, prod_l = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader='Right')
+            task_params['left']['traj'] = traj_l[:, :self.nb_dim]
+            ctraj_r, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader='left')
+            task_params['right']['traj'] = traj_r[:, :self.nb_dim]
+            ctraj_l, prod_l = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader='right')
             traj_l, traj_r = ctraj_l, ctraj_r
 
-            if self.plot:
-                data_lst = [traj_l[:, :self.nb_dim], traj_r[:, :self.nb_dim]]
-                rf.visualab.traj_plot(data_lst, title='Iterative Generation: {}-th Iteration'.format(i + 1))
+            # if self.plot:
+            #     data_lst = [traj_l[:, :self.nb_dim], traj_r[:, :self.nb_dim]]
+            #     rf.visualab.traj_plot(data_lst, title='Iterative Generation: {}-th Iteration'.format(i + 1))
 
         return ctraj_l, ctraj_r, prod_l, prod_r
 
     def conditional_generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, leader: str) -> \
-            Tuple[ndarray, GMM]:
-        follower = 'Left' if leader == 'Right' else 'Right'
+            Tuple[ndarray, ndarray, None, GMM]:
+        follower = 'left' if leader == 'right' else 'right'
         leader_traj = task_params[leader]['traj']
-        models = {'Left': model_l, 'Right': model_r}
-        reprs = {'Left': self.repr_l, 'Right': self.repr_r}
+        models = {'left': model_l, 'right': model_r}
+        reprs = {'left': self.repr_l, 'right': self.repr_r}
 
         beauty_print('generate the {} trajectory from learned representation conditioned on the {} trajectory'.format(
             follower, leader), type='info')
@@ -578,7 +540,7 @@ class TRPGMM_LQR(TPGMMBi):
         if self.plot:
             data_lst = [leader_traj[:, :self.nb_dim], follower_traj[:, :self.nb_dim]]
             rf.visualab.traj_plot(data_lst)
-        return follower_traj, follower_prod
+        return leader_traj, follower_traj, None, follower_prod
 
     def generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, leader: str = None):
         if leader is None:
@@ -587,23 +549,33 @@ class TRPGMM_LQR(TPGMMBi):
             return self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader)
 
 
-class TRPGMM_RPLQR(TRPGMM_LQR, TPGMM_RPLQR):
+class TPGMM_RPAll(TPGMM_RPRepr, TPGMM_RPCtl):
     def __init__(self, demos_left_x, demos_right_x, nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
                  plot: bool = False):
-        TRPGMM_LQR.__init__(self, demos_left_x, demos_right_x, nb_states, reg, horizon, plot)
+        TPGMM_RPRepr.__init__(self, demos_left_x, demos_right_x, nb_states, reg, horizon, plot)
 
         self.demos_com_x = self.get_rel_demos()
         self.repr_c = TPGMM(self.demos_com_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
 
     def fit(self):
-        return TPGMM_RPLQR.fit(self)
+        return TPGMM_RPCtl.fit(self)
 
     def reproduce(self, model_l: HMM, model_r: HMM, model_c: HMM, show_demo_idx: int) -> Tuple[
         ndarray, ndarray, GMM, GMM]:
-        prod_l, prod_r = self.poe(model_l, model_r, show_demo_idx)
+        prod_l, prod_r = self._bi_poe(model_l, model_r, show_demo_idx)
         prod_c = self.repr_c.poe(model_c, show_demo_idx=show_demo_idx)
 
         # Coordinated trajectory
         ctraj_l, ctraj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
 
         return ctraj_l, ctraj_r, prod_l, prod_r
+
+    def generate(self, model_l: HMM, model_r: HMM, model_c: HMM, ref_demo_idx: int, task_params: dict,
+                 leader: str = None):
+        # TODO
+        if leader is None:
+            _, _, prod_l, prod_r = self.iterative_generate(model_l, model_r, ref_demo_idx, task_params)
+            prod_c = self.repr_c.poe(model_c, show_demo_idx=ref_demo_idx)
+            return self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, ref_demo_idx)
+        else:
+            return self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader)
