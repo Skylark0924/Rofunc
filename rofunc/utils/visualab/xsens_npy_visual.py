@@ -7,32 +7,37 @@ def filter(interval, windowsize):
     re = np.convolve(interval, window, 'same')
     return re
 
-data = np.load('/home/ubuntu/Xsens_data/HKSI/squat#Chenzui/RightHand.npy')
-pos_x = filter(data[:, 0], 10)
-pos_y = filter(data[:, 1], 10)
-pos_z = filter(data[:, 2], 10)
-vel_x = [0] * len(data)
-vel_y = [0] * len(data)
-vel_z = [0] * len(data)
-for i in range(1, len(data)):
-    vel_x[i - 1] = (data[i, 0] - data[i - 1, 0]) * 60
-    vel_y[i - 1] = (data[i, 1] - data[i - 1, 1]) * 60
-    vel_z[i - 1] = (data[i, 2] - data[i - 1, 2]) * 60
-vel_x = filter(np.array(vel_x), 10)
-vel_y = filter(np.array(vel_y), 10)
-vel_z = filter(np.array(vel_z), 10)
-acc_x = [0] * len(data)
-acc_y = [0] * len(data)
-acc_z = [0] * len(data)
-for i in range(1, len(data)):
-    acc_x[i - 1] = (vel_x[i] - vel_x[i - 1]) * 60
-    acc_y[i - 1] = (vel_y[i] - vel_y[i - 1]) * 60
-    acc_z[i - 1] = (vel_z[i] - vel_z[i - 1]) * 60
-acc_x = filter(np.array(acc_x), 10)
-acc_y = filter(np.array(acc_y), 10)
-acc_z = filter(np.array(acc_z), 10)
-data_processed = np.array([pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z])[:, 800:2900]
-t = np.arange(0, 2100/60, 1/60)
+def process(data):
+    pos_x = filter(data[:, 0], 10)
+    pos_y = filter(data[:, 1], 10)
+    pos_z = filter(data[:, 2], 10)
+    vel_x = [0] * len(data)
+    vel_y = [0] * len(data)
+    vel_z = [0] * len(data)
+    for i in range(1, len(data)):
+        vel_x[i - 1] = (data[i, 0] - data[i - 1, 0]) * 60
+        vel_y[i - 1] = (data[i, 1] - data[i - 1, 1]) * 60
+        vel_z[i - 1] = (data[i, 2] - data[i - 1, 2]) * 60
+    vel_x = filter(np.array(vel_x), 10)
+    vel_y = filter(np.array(vel_y), 10)
+    vel_z = filter(np.array(vel_z), 10)
+    acc_x = [0] * len(data)
+    acc_y = [0] * len(data)
+    acc_z = [0] * len(data)
+    for i in range(1, len(data)):
+        acc_x[i - 1] = (vel_x[i] - vel_x[i - 1]) * 60
+        acc_y[i - 1] = (vel_y[i] - vel_y[i - 1]) * 60
+        acc_z[i - 1] = (vel_z[i] - vel_z[i - 1]) * 60
+    acc_x = filter(np.array(acc_x), 10)
+    acc_y = filter(np.array(acc_y), 10)
+    acc_z = filter(np.array(acc_z), 10)
+    data_processed = np.array([pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z])
+    return data_processed
+
+data = np.load('/home/ubuntu/Xsens_data/HKSI/20230322/ForceEMG-012/RightHand.npy')
+data_processed = process(data)[:, 100:900]
+# t = np.arange(0, len(pos_y)/60, 1/60)
+t = np.arange(0, 800/60, 1/60)
 
 plt.figure(figsize=(20, 10))
 plt.subplot(3, 3, 1)
@@ -107,10 +112,10 @@ plt.yticks(fontproperties='Times New Roman', size=12)
 plt.plot(t, data_processed[8, :], color="lightcoral", label='acc_z', linewidth=1.5)
 plt.legend(loc="upper right", prop={'size': 12})
 
-plt.suptitle("Squat", fontsize=30)
+plt.suptitle("BicepsCurl_90%_15kg", fontsize=30)
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=0.3)
 
-plt.savefig('/home/ubuntu/Xsens_data/HKSI/figures/squat.png', dpi=199)
+# plt.savefig('/home/ubuntu/Xsens_data/HKSI/20230322/fig/11.png', dpi=300)
 plt.show()
 
 # fig, ax0 = plt.subplots(nrows=1, ncols=1, figsize=(10, 6), tight_layout=True)
