@@ -11,7 +11,7 @@ def set_axis(ax, labels=None):
     ax.set_zlabel(labels[2])
 
 
-def save_img(fig, save_dir, fig_name=None, dpi=300, transparent=True, format=None):
+def save_img(fig, save_dir, fig_name=None, dpi=300, transparent=False, format=None):
     if format is None:
         format = ['eps', 'png']
     if fig_name is None:

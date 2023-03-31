@@ -13,7 +13,7 @@ matplotlib_axes_logger.setLevel('ERROR')
 def traj_plot2d(data_lst: List, legend: str = None, title: str = None, g_ax=None):
     if g_ax is None:
         fig = plt.figure()
-        ax = fig.add_subplot(111, fc='white')
+        ax = fig.add_subplot(111)  # , fc='white'
     else:
         ax = g_ax
     for i in range(len(data_lst)):
@@ -69,7 +69,10 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
         if ori:
             data_ori = data_lst[i][:, 3:7]
             for t in range(len(data_ori)):
-                R = matrix_from_quaternion(data_ori[t])
+                try:
+                    R = matrix_from_quaternion(data_ori[t])
+                except:
+                    pass
                 p = data_lst[i][t, :3]
                 if t % 20 == 0:
                     ax = plot_basis(ax=ax, R=R, p=p, s=1)
