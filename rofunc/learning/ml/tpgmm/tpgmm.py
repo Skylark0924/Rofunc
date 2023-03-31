@@ -469,8 +469,9 @@ class TPGMM_RPRepr(TPGMMBi):
                 task_params)
             repr.P = 3
 
-            demos_xdx_f = [
-                np.concatenate([demos_xdx_f[0], np.expand_dims(repr.demos_xdx_f[show_demo_idx][:, 2], axis=1)], axis=1)]
+            # demos_xdx_f = [
+            #     np.concatenate([demos_xdx_f[0], np.expand_dims(repr.demos_xdx_f[show_demo_idx][:, 2], axis=1)], axis=1)]
+            demos_xdx_f = repr.demos_xdx_f
             demos_A_xdx = [
                 np.concatenate([demos_A_xdx[0], np.expand_dims(repr.demos_A_xdx[show_demo_idx][:, 2], axis=1)], axis=1)]
             demos_b_xdx = [
@@ -552,25 +553,29 @@ class TPGMM_RPRepr(TPGMMBi):
             plt.show()
         return ctraj_l, ctraj_r, prod_l, prod_r
 
-    def iterative_generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, nb_iter=10) -> \
+    def iterative_generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, nb_iter=1) -> \
             Tuple[ndarray, ndarray, GMM, GMM]:
         beauty_print('generate trajectories from learned representation with new task parameters iteratively',
                      type='info')
 
         vanilla_repr = TPGMMBi(self.demos_left_x, self.demos_right_x, nb_states=self.nb_states, plot=self.plot,
-                               save=self.save)
+                               save=self.save, save_params=self.save_params)
         vanilla_model_l, vanilla_model_r = vanilla_repr.fit()
 
-        _, _, _, _, task_params_A_b_l = vanilla_repr.repr_l.get_A_b_from_task_params(task_params['left'])
-        _, _, _, _, task_params_A_b_r = vanilla_repr.repr_r.get_A_b_from_task_params(task_params['right'])
+        vanilla_traj_l, vanilla_traj_r, _, _ = vanilla_repr.generate(vanilla_model_l, vanilla_model_r,
+                                                                     ref_demo_idx=ref_demo_idx,
+                                                                     task_params=task_params)
 
-        # Generate without coordination originally
-        vanilla_prod_l = vanilla_repr.repr_l.poe(vanilla_model_l, ref_demo_idx, task_params_A_b_l)
-        vanilla_prod_r = vanilla_repr.repr_r.poe(vanilla_model_r, ref_demo_idx, task_params_A_b_r)
-        vanilla_traj_l = vanilla_repr.repr_l._reproduce(vanilla_model_l, vanilla_prod_l, ref_demo_idx,
-                                                        task_params['left']['start_xdx'])
-        vanilla_traj_r = vanilla_repr.repr_r._reproduce(vanilla_model_r, vanilla_prod_r, ref_demo_idx,
-                                                        task_params['right']['start_xdx'])
+        # _, _, _, _, task_params_A_b_l = vanilla_repr.repr_l.get_A_b_from_task_params(task_params['left'])
+        # _, _, _, _, task_params_A_b_r = vanilla_repr.repr_r.get_A_b_from_task_params(task_params['right'])
+        #
+        # # Generate without coordination originally
+        # vanilla_prod_l = vanilla_repr.repr_l.poe(vanilla_model_l, ref_demo_idx, task_params_A_b_l)
+        # vanilla_prod_r = vanilla_repr.repr_r.poe(vanilla_model_r, ref_demo_idx, task_params_A_b_r)
+        # vanilla_traj_l = vanilla_repr.repr_l._reproduce(vanilla_model_l, vanilla_prod_l, ref_demo_idx,
+        #                                                 task_params['left']['start_xdx'])
+        # vanilla_traj_r = vanilla_repr.repr_r._reproduce(vanilla_model_r, vanilla_prod_r, ref_demo_idx,
+        #                                                 task_params['right']['start_xdx'])
 
         data_lst = [vanilla_traj_l[:, :self.nb_dim], vanilla_traj_r[:, :self.nb_dim]]
         fig = rf.visualab.traj_plot(data_lst, title='Generate Trajectories without Coordination')
@@ -582,12 +587,13 @@ class TPGMM_RPRepr(TPGMMBi):
         # Add coordination to generate the trajectories iteratively
         traj_l, traj_r = vanilla_traj_l, vanilla_traj_r
         for i in range(nb_iter):
+
+            task_params['left']['traj'] = traj_l[:, :self.nb_dim]
+            _, ctraj_r, _, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
+                                                              leader='left')
             task_params['right']['traj'] = traj_r[:, :self.nb_dim]
             _, ctraj_l, _, prod_l = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
                                                               leader='right')
-            task_params['left']['traj'] = ctraj_l[:, :self.nb_dim]
-            _, ctraj_r, _, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
-                                                              leader='left')
 
             traj_l, traj_r = ctraj_l, ctraj_r
 
@@ -664,6 +670,7 @@ class TPGMM_RPAll(TPGMM_RPRepr, TPGMM_RPCtl):
         if leader is None:
             _, _, prod_l, prod_r = self.iterative_generate(model_l, model_r, ref_demo_idx, task_params)
             prod_c = self.repr_c.poe(model_c, show_demo_idx=ref_demo_idx)
-            return self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, ref_demo_idx)
+            traj_l, traj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, ref_demo_idx)
+            return traj_l, traj_r, None, None
         else:
             return self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader)
