@@ -37,7 +37,7 @@ def traj_plot2d(data_lst: List, legend: str = None, title: str = None, g_ax=None
     ax.set_ylabel('y')
     plt.tight_layout()
     if g_ax is None:
-        plt.show()
+        return fig
 
 
 def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None, ori: bool = False):
@@ -70,9 +70,10 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
             data_ori = data_lst[i][:, 3:7]
             for t in range(len(data_ori)):
                 R = matrix_from_quaternion(data_ori[t])
-                p = data_ori[i][t, :3]
-                ax = plot_basis(ax=ax, R=R, p=p, s=0.01)
-                ax = plot_basis(ax=ax, R=R, p=p, s=0.01)
+                p = data_lst[i][t, :3]
+                if t % 20 == 0:
+                    ax = plot_basis(ax=ax, R=R, p=p, s=1)
+                    ax = plot_basis(ax=ax, R=R, p=p, s=1)
     if title is not None:
         ax.set_title(title, fontsize=12, fontweight='bold')
 
@@ -94,7 +95,7 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
     set_axis(ax)
     plt.tight_layout()
     if g_ax is None:
-        plt.show()
+        return fig
 
 
 def traj_plot(data_lst: List, legend: str = None, title: str = None, mode: str = None, ori: bool = False, g_ax=None):
@@ -111,8 +112,9 @@ def traj_plot(data_lst: List, legend: str = None, title: str = None, mode: str =
     if mode is None:
         mode = '2d' if len(data_lst[0][0]) == 2 else '3d'
     if mode == '2d':
-        traj_plot2d(data_lst, legend, title, g_ax)
+        fig = traj_plot2d(data_lst, legend, title, g_ax)
     elif mode == '3d':
-        traj_plot3d(data_lst, legend, title, g_ax, ori)
+        fig = traj_plot3d(data_lst, legend, title, g_ax, ori)
     else:
         raise Exception('Wrong mode, only support 2d and 3d plot.')
+    return fig
