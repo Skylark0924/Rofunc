@@ -13,7 +13,8 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 class TPGMM:
     def __init__(self, demos_x: Union[List, np.ndarray], nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
-                 P: int = 2, plot: bool = False, task_params: dict = None):
+                 P: int = 2, plot: bool = False, save: bool = False, save_params: dict = None,
+                 task_params: dict = None):
         """
         Task-parameterized Gaussian Mixture Model (TP-GMM)
         :param demos_x: demo displacement
@@ -22,13 +23,24 @@ class TPGMM:
         :param horizon: horizon of the reproduced trajectory
         :param P: number of candidate frames in a task-parameterized mixture
         :param plot: whether to plot the result
+        :param save: whether to save the result
+        :param save_params: save parameters, {'save_dir': 'path/to/save', 'save_format': 'eps'}
         :param task_params: task parameters
         """
         self.demos_x = demos_x
         self.nb_states = nb_states
         self.reg = reg
-        self.horizon = horizon
+        self.horizon = len(demos_x[0])
         self.plot = plot
+        self.save = save
+        self.save_params = save_params
+        if self.save:
+            if 'save_dir' not in self.save_params or 'format' not in self.save_params:
+                raise ValueError('Please specify the save dir and format!')
+            beauty_print(
+                'Save dir: {}, format: {}'.format(self.save_params['save_dir'], self.save_params['format']),
+                type='info')
+
         self.nb_dim = len(self.demos_x[0][0])
         self.nb_deriv = 2  # TODO: for now it is just original state and its first derivative
         self.P = P
@@ -61,8 +73,10 @@ class TPGMM:
                     dx = (self.demos_x[i][j + 1] - self.demos_x[i][j - 1]) / 2
                 elif j == len(self.demos_x[i]) - 1:
                     dx = self.demos_x[i][j] - self.demos_x[i][j - 1]
+                    # dx = np.zeros_like(self.demos_x[i][j] - self.demos_x[i][j - 1])
                 else:
                     dx = self.demos_x[i][j + 1] - self.demos_x[i][j]
+                    # dx = np.zeros_like(self.demos_x[i][j] - self.demos_x[i][j - 1])
                 dx = dx / 0.01
                 demo_dx.append(dx)
             demos_dx.append(np.array(demo_dx))
@@ -91,13 +105,13 @@ class TPGMM:
         if 'start_xdx' in task_params and 'end_xdx' in task_params:
             # TODO: only for one demo now
             start_xdx, end_xdx = task_params['start_xdx'], task_params['end_xdx']
-            demos_b = np.tile(np.vstack([start_xdx[: self.nb_dim], end_xdx[: self.nb_dim]]),
-                              (self.horizon, 1, 1))
-            demos_A = np.tile([np.eye(self.nb_dim)] * self.P, (self.horizon, 1, 1, 1))
+            demos_b = [np.tile(np.vstack([start_xdx[: self.nb_dim], end_xdx[: self.nb_dim]]),
+                               (self.horizon, 1, 1))]  # should be self.P
+            demos_A = [np.tile([np.eye(self.nb_dim)] * 2, (self.horizon, 1, 1, 1))]  # 2 should be self.P
 
-            demos_b_xdx = np.concatenate([demos_b, np.zeros(demos_b.shape)], axis=-1)
-            demos_A_xdx = np.kron(np.eye(self.nb_deriv), demos_A)
-            task_params_A_b = {'A': demos_A_xdx[0], 'b': demos_b_xdx[0]}
+            demos_b_xdx = [np.concatenate([demos_b[0], np.zeros(demos_b[0].shape)], axis=-1)]
+            demos_A_xdx = [np.kron(np.eye(self.nb_deriv), demos_A[0])]
+            task_params_A_b = {'A': demos_A_xdx[0][0], 'b': demos_b_xdx[0][0]}
         elif 'demos_A_xdx' in task_params and 'demos_b_xdx' in task_params:
             demos_A, demos_b, demos_A_xdx, demos_b_xdx = task_params['demos_A'], task_params['demos_b'], task_params[
                 'demos_A_xdx'], task_params['demos_b_xdx']
@@ -129,13 +143,11 @@ class TPGMM:
         model.init_hmm_kbins(self.demos_xdx_augm)  # initializing model
         model.em(self.demos_xdx_augm, reg=self.reg)
 
+        fig = rf.tpgmm.hmm_plot(self.nb_dim, self.demos_xdx_f, model)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            if int(len(self.demos_xdx_f[0][0, 0]) / 2) == 2:
-                rf.tpgmm.hmm_plot(self.demos_xdx_f, model)
-            elif int(len(self.demos_xdx_f[0][0, 0]) / 2) > 2:
-                rf.tpgmm.hmm_plot_3d(self.demos_xdx_f, model, scale=0.1)
-            else:
-                raise Exception('Dimension is less than 2, cannot plot')
+            plt.show()
         return model
 
     def poe(self, model: HMM, show_demo_idx: int, task_params: dict = None) -> GMM:
@@ -165,8 +177,11 @@ class TPGMM:
         for p in range(1, self.P):
             prod *= mod_list[p]
 
+        fig = rf.tpgmm.poe_plot(self.nb_dim, mod_list, prod, self.demos_x, show_demo_idx)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            rf.tpgmm.poe_plot(self.nb_dim, mod_list, prod, self.demos_x, show_demo_idx)
+            plt.show()
         return prod
 
     def _reproduce(self, model: HMM, prod: GMM, show_demo_idx: int,
@@ -236,7 +251,8 @@ class TPGMMBi(TPGMM):
     """
 
     def __init__(self, demos_left_x: Union[List, np.ndarray], demos_right_x: Union[List, np.ndarray],
-                 nb_states: int = 4, reg: float = 1e-3, horizon: int = 150, plot: bool = False):
+                 nb_states: int = 4, reg: float = 1e-3, horizon: int = 150, plot: bool = False, save: bool = False,
+                 save_params: dict = None, **kwargs):
         assert len(demos_left_x) == len(
             demos_right_x), 'The number of demonstrations for left and right arm should be the same'
         assert len(demos_left_x[0]) == len(
@@ -245,9 +261,13 @@ class TPGMMBi(TPGMM):
         self.demos_right_x = demos_right_x
         self.nb_dim = len(demos_left_x[0][0])
         self.plot = plot
+        self.save = save
+        self.save_params = save_params
 
-        self.repr_l = TPGMM(demos_left_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
-        self.repr_r = TPGMM(demos_right_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
+        self.repr_l = TPGMM(demos_left_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot, save=save,
+                            save_params=save_params, **kwargs)
+        self.repr_r = TPGMM(demos_right_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot, save=save,
+                            save_params=save_params, **kwargs)
 
     def fit(self) -> Tuple[HMM, HMM]:
         """
@@ -270,12 +290,15 @@ class TPGMMBi(TPGMM):
         traj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
         traj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
 
+        data_lst = [traj_l[:, :self.repr_l.nb_dim], traj_r[:, :self.repr_r.nb_dim]]
+        fig = rf.visualab.traj_plot(data_lst)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            data_lst = [traj_l[:, :self.repr_l.nb_dim], traj_r[:, :self.repr_r.nb_dim]]
-            rf.visualab.traj_plot(data_lst)
+            plt.show()
         return traj_l, traj_r, prod_l, prod_r
 
-    def generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict) -> \
+    def generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, **kwargs) -> \
             Tuple[ndarray, ndarray, GMM, GMM]:
         """
         Generate a new trajectory from the learned model
@@ -290,9 +313,12 @@ class TPGMMBi(TPGMM):
         traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, task_params['left']['start_xdx'])
         traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, task_params['right']['start_xdx'])
 
+        data_lst = [traj_l[:, :self.repr_l.nb_dim], traj_r[:, :self.repr_r.nb_dim]]
+        fig = rf.visualab.traj_plot(data_lst)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            data_lst = [traj_l[:, :self.repr_l.nb_dim], traj_r[:, :self.repr_r.nb_dim]]
-            rf.visualab.traj_plot(data_lst)
+            plt.show()
         return traj_l, traj_r, prod_l, prod_r
 
 
@@ -302,11 +328,13 @@ class TPGMM_RPCtl(TPGMMBi):
     """
 
     def __init__(self, demos_left_x, demos_right_x, nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
-                 plot: bool = False):
-        super().__init__(demos_left_x, demos_right_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
+                 plot: bool = False, save: bool = False, save_params: dict = None, **kwargs):
+        super().__init__(demos_left_x, demos_right_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot,
+                         save=save, save_params=save_params, **kwargs)
 
         self.demos_com_x = self.get_rel_demos()
-        self.repr_c = TPGMM(self.demos_com_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
+        self.repr_c = TPGMM(self.demos_com_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot, save=save,
+                            save_params=save_params, **kwargs)
 
     def get_rel_demos(self):
         # calculate the relative movement of each demo
@@ -350,9 +378,12 @@ class TPGMM_RPCtl(TPGMMBi):
         # Coordinated trajectory
         ctraj_l, ctraj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx)
 
+        data_lst = [ctraj_l[:, :self.repr_l.nb_dim], ctraj_r[:, :self.repr_r.nb_dim]]
+        fig = rf.visualab.traj_plot(data_lst)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            data_lst = [ctraj_l[:, :self.repr_l.nb_dim], ctraj_r[:, :self.repr_r.nb_dim]]
-            rf.visualab.traj_plot(data_lst)
+            plt.show()
         return ctraj_l, ctraj_r, prod_l, prod_r
 
     def generate(self, model_l: HMM, model_r: HMM, model_c: HMM, ref_demo_idx: int, task_params: dict) -> \
@@ -368,9 +399,12 @@ class TPGMM_RPCtl(TPGMMBi):
 
         ctraj_l, ctraj_r = self._bi_reproduce(model_l, prod_l, model_r, prod_r, model_c, prod_c, ref_demo_idx)
 
+        data_lst = [ctraj_l[:, :self.repr_l.nb_dim], ctraj_r[:, :self.repr_r.nb_dim]]
+        fig = rf.visualab.traj_plot(data_lst)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            data_lst = [ctraj_l[:, :self.repr_l.nb_dim], ctraj_r[:, :self.repr_r.nb_dim]]
-            rf.visualab.traj_plot(data_lst)
+            plt.show()
         return ctraj_l, ctraj_r, prod_l, prod_r
 
 
@@ -380,18 +414,23 @@ class TPGMM_RPRepr(TPGMMBi):
     """
 
     def __init__(self, demos_left_x, demos_right_x, nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
-                 plot: bool = False):
+                 plot: bool = False, save: bool = False, save_params: dict = None, **kwargs):
         self.P = 3  # Observe frames: from start points, from end points, from the other arm
-        self.nb_dim = demos_left_x.shape[2]
+        self.nb_dim = demos_left_x[0].shape[1]
         self.nb_deriv = 2
+        self.nb_states = nb_states
 
         self.demos_left_x = demos_left_x
         self.demos_right_x = demos_right_x
         self.plot = plot
+        self.save = save
+        self.save_params = save_params
 
         self.task_params = self.get_rel_task_params()
-        self.repr_l = TPGMM(demos_left_x, nb_states, reg, horizon, self.P, plot, self.task_params['left'])
-        self.repr_r = TPGMM(demos_right_x, nb_states, reg, horizon, self.P, plot, self.task_params['right'])
+        self.repr_l = TPGMM(demos_left_x, nb_states, reg, horizon, P=self.P, plot=plot, save=save,
+                            save_params=save_params, task_params=self.task_params['left'])
+        self.repr_r = TPGMM(demos_right_x, nb_states, reg, horizon, P=self.P, plot=plot, save=save,
+                            save_params=save_params, task_params=self.task_params['right'])
 
     def get_rel_task_params(self) -> dict:
         """
@@ -421,19 +460,37 @@ class TPGMM_RPRepr(TPGMMBi):
                                  'demos_A_xdx': demos_A_xdx_r, 'demos_b_xdx': demos_b_xdx_r}}
         return task_params
 
-    def _get_dyna_A_b(self, model, repr, show_demo_idx):
-        ref_frame = 0  # TODO: 0 for start frame, 1 for end frame, 2 for the o frame
+    def _get_dyna_A_b(self, model, repr, show_demo_idx, task_params=None):
+        ref_frame = 0  # TODO: 0 for start frame, 1 for end frame, 2 for the relative frame
+
+        if task_params is not None:
+            repr.P = 2
+            demos_dx, demos_A, demos_b, demos_A_xdx, demos_b_xdx, demos_xdx, demos_xdx_f, demos_xdx_augm = repr.get_related_matrix(
+                task_params)
+            repr.P = 3
+
+            demos_xdx_f = [
+                np.concatenate([demos_xdx_f[0], np.expand_dims(repr.demos_xdx_f[show_demo_idx][:, 2], axis=1)], axis=1)]
+            demos_A_xdx = [
+                np.concatenate([demos_A_xdx[0], np.expand_dims(repr.demos_A_xdx[show_demo_idx][:, 2], axis=1)], axis=1)]
+            demos_b_xdx = [
+                np.concatenate([demos_b_xdx[0], np.expand_dims(repr.demos_b_xdx[show_demo_idx][:, 2], axis=1)], axis=1)]
+            show_demo_idx = 0
+        else:
+            demos_xdx_f = repr.demos_xdx_f
+            demos_A_xdx = repr.demos_A_xdx
+            demos_b_xdx = repr.demos_b_xdx
 
         mus = model._mu[:,
               self.nb_dim * self.nb_deriv * ref_frame:self.nb_dim * self.nb_deriv * ref_frame + self.nb_dim]
-        demo_traj_in_ref_frame = repr.demos_xdx_f[show_demo_idx][:, ref_frame, :self.nb_dim]
+        demo_traj_in_ref_frame = demos_xdx_f[show_demo_idx][:, ref_frame, :self.nb_dim]
         index_list = []
         for mu in mus:
             dist = list(scipy.spatial.distance.cdist([mu], demo_traj_in_ref_frame)[0])
             index = dist.index(min(dist))
             index_list.append(index)
 
-        A, b = repr.demos_A_xdx[show_demo_idx][index_list], repr.demos_b_xdx[show_demo_idx][index_list]
+        A, b = demos_A_xdx[show_demo_idx][index_list], demos_b_xdx[show_demo_idx][index_list]
         return A, b, index_list
 
     def _uni_poe(self, model, repr, show_demo_idx, task_params=None) -> GMM:
@@ -448,11 +505,19 @@ class TPGMM_RPRepr(TPGMMBi):
                     slice(p * self.nb_deriv * self.nb_dim, (p + 1) * self.nb_deriv * self.nb_dim)).lintrans_dyna(
                     A[:, p], b[:, p]))
         # product
-        prod = mod_list[0]
-        for p in range(1, self.P):
-            prod *= mod_list[p]
+        # prod = mod_list[0]
+        # for p in range(1, self.P):
+        #     prod *= mod_list[p]
+
+        # Weighted product
+        prod = mod_list[0] * mod_list[1] * mod_list[2] * mod_list[2] * mod_list[2] * mod_list[2] * mod_list[2] * \
+               mod_list[2] * mod_list[2]
+
+        fig = rf.tpgmm.poe_plot(self.nb_dim, mod_list, prod, repr.demos_x, show_demo_idx)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            rf.tpgmm.poe_plot(self.nb_dim, mod_list, prod, repr.demos_x, show_demo_idx)
+            plt.show()
         return prod
 
     def _bi_poe(self, model_l: HMM, model_r: HMM, show_demo_idx: int) -> Tuple[GMM, GMM]:
@@ -479,9 +544,12 @@ class TPGMM_RPRepr(TPGMMBi):
         ctraj_l = self.repr_l._reproduce(model_l, prod_l, show_demo_idx, self.repr_l.demos_xdx[show_demo_idx][0])
         ctraj_r = self.repr_r._reproduce(model_r, prod_r, show_demo_idx, self.repr_r.demos_xdx[show_demo_idx][0])
 
+        data_lst = [ctraj_l[:, :self.nb_dim], ctraj_r[:, :self.nb_dim]]
+        fig = rf.visualab.traj_plot(data_lst)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            data_lst = [ctraj_l[:, :self.nb_dim], ctraj_r[:, :self.nb_dim]]
-            rf.visualab.traj_plot(data_lst)
+            plt.show()
         return ctraj_l, ctraj_r, prod_l, prod_r
 
     def iterative_generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, nb_iter=10) -> \
@@ -489,34 +557,46 @@ class TPGMM_RPRepr(TPGMMBi):
         beauty_print('generate trajectories from learned representation with new task parameters iteratively',
                      type='info')
 
-        self.repr_l.P = self.repr_r.P = 2
-        _, _, _, _, task_params_A_b_l = self.repr_l.get_A_b_from_task_params(task_params['left'])
-        _, _, _, _, task_params_A_b_r = self.repr_r.get_A_b_from_task_params(task_params['right'])
+        vanilla_repr = TPGMMBi(self.demos_left_x, self.demos_right_x, nb_states=self.nb_states, plot=self.plot,
+                               save=self.save)
+        vanilla_model_l, vanilla_model_r = vanilla_repr.fit()
+
+        _, _, _, _, task_params_A_b_l = vanilla_repr.repr_l.get_A_b_from_task_params(task_params['left'])
+        _, _, _, _, task_params_A_b_r = vanilla_repr.repr_r.get_A_b_from_task_params(task_params['right'])
 
         # Generate without coordination originally
-        prod_l = self.repr_l.poe(model_l, ref_demo_idx, task_params_A_b_l)
-        prod_r = self.repr_r.poe(model_r, ref_demo_idx, task_params_A_b_r)
-        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, task_params['left']['start_xdx'])
-        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, task_params['right']['start_xdx'])
+        vanilla_prod_l = vanilla_repr.repr_l.poe(vanilla_model_l, ref_demo_idx, task_params_A_b_l)
+        vanilla_prod_r = vanilla_repr.repr_r.poe(vanilla_model_r, ref_demo_idx, task_params_A_b_r)
+        vanilla_traj_l = vanilla_repr.repr_l._reproduce(vanilla_model_l, vanilla_prod_l, ref_demo_idx,
+                                                        task_params['left']['start_xdx'])
+        vanilla_traj_r = vanilla_repr.repr_r._reproduce(vanilla_model_r, vanilla_prod_r, ref_demo_idx,
+                                                        task_params['right']['start_xdx'])
 
+        data_lst = [vanilla_traj_l[:, :self.nb_dim], vanilla_traj_r[:, :self.nb_dim]]
+        fig = rf.visualab.traj_plot(data_lst, title='Generate Trajectories without Coordination')
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            data_lst = [traj_l[:, :self.nb_dim], traj_r[:, :self.nb_dim]]
-            rf.visualab.traj_plot(data_lst, title='Generate Trajectories without Coordination')
+            plt.show()
 
         # Add coordination to generate the trajectories iteratively
-        self.repr_l.P = self.repr_r.P = 3
+        traj_l, traj_r = vanilla_traj_l, vanilla_traj_r
         for i in range(nb_iter):
-            task_params['left']['traj'] = traj_l[:, :self.nb_dim]
-            _, ctraj_r, _, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
-                                                              leader='left')
             task_params['right']['traj'] = traj_r[:, :self.nb_dim]
             _, ctraj_l, _, prod_l = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
                                                               leader='right')
+            task_params['left']['traj'] = ctraj_l[:, :self.nb_dim]
+            _, ctraj_r, _, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
+                                                              leader='left')
+
             traj_l, traj_r = ctraj_l, ctraj_r
 
+            data_lst = [traj_l[:, :self.nb_dim], traj_r[:, :self.nb_dim]]
+            fig = rf.visualab.traj_plot(data_lst, title='Iterative Generation: {}-th Iteration'.format(i + 1))
+            if self.save:
+                rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
             if self.plot:
-                data_lst = [traj_l[:, :self.nb_dim], traj_r[:, :self.nb_dim]]
-                rf.visualab.traj_plot(data_lst, title='Iterative Generation: {}-th Iteration'.format(i + 1))
+                plt.show()
 
         return ctraj_l, ctraj_r, prod_l, prod_r
 
@@ -530,7 +610,8 @@ class TPGMM_RPRepr(TPGMMBi):
         beauty_print('generate the {} trajectory from learned representation conditioned on the {} trajectory'.format(
             follower, leader), type='info')
 
-        A, b, index_list = self._get_dyna_A_b(models[follower], reprs[follower], ref_demo_idx)
+        A, b, index_list = self._get_dyna_A_b(models[follower], reprs[follower], ref_demo_idx,
+                                              task_params=task_params[follower])
         b[:, 2, :self.nb_dim] = leader_traj[index_list, :self.nb_dim]
 
         follower_prod = self._uni_poe(models[follower], reprs[follower], ref_demo_idx, task_params={'A': A, 'b': b})
@@ -538,9 +619,12 @@ class TPGMM_RPRepr(TPGMMBi):
         follower_traj = reprs[follower]._reproduce(models[follower], follower_prod, ref_demo_idx,
                                                    task_params[follower]['start_xdx'])
 
+        data_lst = [leader_traj[:, :self.nb_dim], follower_traj[:, :self.nb_dim]]
+        fig = rf.visualab.traj_plot(data_lst, ori=True)
+        if self.save:
+            rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
-            data_lst = [leader_traj[:, :self.nb_dim], follower_traj[:, :self.nb_dim]]
-            rf.visualab.traj_plot(data_lst)
+            plt.show()
         return leader_traj, follower_traj, None, follower_prod
 
     def generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, leader: str = None):
@@ -552,11 +636,13 @@ class TPGMM_RPRepr(TPGMMBi):
 
 class TPGMM_RPAll(TPGMM_RPRepr, TPGMM_RPCtl):
     def __init__(self, demos_left_x, demos_right_x, nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
-                 plot: bool = False):
-        TPGMM_RPRepr.__init__(self, demos_left_x, demos_right_x, nb_states, reg, horizon, plot)
+                 plot: bool = False, save: bool = False, save_params: dict = None, **kwargs):
+        TPGMM_RPRepr.__init__(self, demos_left_x, demos_right_x, nb_states, reg, horizon, plot=plot, save=save,
+                              save_params=save_params, **kwargs)
 
         self.demos_com_x = self.get_rel_demos()
-        self.repr_c = TPGMM(self.demos_com_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
+        self.repr_c = TPGMM(self.demos_com_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot, save=save,
+                            save_params=save_params, **kwargs)
 
     def fit(self):
         return TPGMM_RPCtl.fit(self)

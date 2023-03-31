@@ -6,7 +6,27 @@ import rofunc as rf
 color_list = ['steelblue', 'orangered', 'green', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
 
 
-def hmm_plot(demos_xdx_f, model):
+def hmm_plot(nb_dim, demos_xdx_f, model):
+    if nb_dim == 2:
+        fig = hmm_plot2d(demos_xdx_f, model)
+    elif nb_dim > 2:
+        fig = hmm_plot_3d(demos_xdx_f, model, scale=0.1)
+    else:
+        raise Exception('Dimension is less than 2, cannot plot')
+    return fig
+
+
+def poe_plot(nb_dim, mod_list, prod, demos_x, show_demo_idx):
+    if nb_dim == 2:
+        fig = poe_plot2d(mod_list, prod, demos_x, show_demo_idx)
+    elif nb_dim > 2:
+        fig = poe_plot_3d(mod_list, prod, demos_x, show_demo_idx)
+    else:
+        raise Exception('Dimension is less than 2, cannot plot')
+    return fig
+
+
+def hmm_plot2d(demos_xdx_f, model):
     P = len(demos_xdx_f[0][0])
     fig, ax = plt.subplots(ncols=P, nrows=1)
     fig.set_size_inches(4 * P, 6)
@@ -18,7 +38,7 @@ def hmm_plot(demos_xdx_f, model):
         rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax[p], dim=[4 * p, 4 * p + 1], color=color_list[p], alpha=0.1)
 
     plt.tight_layout()
-    plt.show()
+    return fig
 
 
 def hmm_plot_3d(demos_xdx_f, model, scale=1):
@@ -36,17 +56,7 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
                              dim=[nb_dim_deriv * p, nb_dim_deriv * p + 1, nb_dim_deriv * p + 2], color=color_list[p],
                              scale=scale, alpha=0.1)
         rf.visualab.set_axis(ax)
-
-    plt.show()
-
-
-def poe_plot(nb_dim, mod_list, prod, demos_x, show_demo_idx):
-    if nb_dim == 2:
-        rf.tpgmm.poe_plot2d(mod_list, prod, demos_x, show_demo_idx)
-    elif nb_dim > 2:
-        rf.tpgmm.poe_plot_3d(mod_list, prod, demos_x, show_demo_idx)
-    else:
-        raise Exception('Dimension is less than 2, cannot plot')
+    return fig
 
 
 def poe_plot2d(mod_list, prod, demos_x, demo_idx):
@@ -73,7 +83,7 @@ def poe_plot2d(mod_list, prod, demos_x, demo_idx):
                mpatches.Patch(color='gold', label='product')]
 
     plt.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.show()
+    return fig
 
 
 def poe_plot_3d(mod_list, prod, demos_x, demo_idx):
@@ -102,11 +112,11 @@ def poe_plot_3d(mod_list, prod, demos_x, demo_idx):
                mpatches.Patch(color='gold', label='product')]
 
     plt.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.show()
+    return fig
 
 
 def generate_plot(xi, prod, demos_x, demo_idx):
-    plt.figure()
+    fig = plt.figure()
 
     plt.title('Trajectory reproduction')
     rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold', alpha=0.5)
@@ -114,7 +124,7 @@ def generate_plot(xi, prod, demos_x, demo_idx):
     plt.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], 'k--', lw=2, label='demo line')
     plt.axis('equal')
     plt.legend()
-    plt.show()
+    return fig
 
 
 def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, plot_ori=True):
@@ -128,7 +138,6 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, pl
     ax.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2], 'k--', lw=2, label='demo line')
     rf.visualab.set_axis(ax)
     plt.legend()
-    plt.show()
 
     if plot_ori and xi.shape[1] == 7:
         t = np.arange(len(xi))
@@ -152,4 +161,4 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, pl
         plt.plot(t, xi[:, 6], color='r', lw=2, label='generated line')
         plt.plot(np.arange(len(demos_x[demo_idx][:, 6])), demos_x[demo_idx][:, 6], 'k--', lw=2, label='demo line')
         plt.title('z-t')
-        plt.show()
+    return fig
