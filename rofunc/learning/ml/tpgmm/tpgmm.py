@@ -338,11 +338,13 @@ class TPGMM_RPCtl(TPGMMBi):
 
     def get_rel_demos(self):
         # calculate the relative movement of each demo
-        rel_demos = np.zeros_like(self.demos_left_x)
-        for i in range(self.demos_left_x.shape[0]):
-            for j in range(self.demos_left_x.shape[1]):
+        rel_demos = []
+        for i in range(len(self.demos_left_x)):
+            rel_demo = np.zeros_like(self.demos_left_x[i])
+            for j in range(len(self.demos_left_x[i])):
                 # rel_demos[i, j] = np.linalg.norm(left_x[i, j] - right_x[i, j])
-                rel_demos[i, j] = self.demos_left_x[i, j] - self.demos_right_x[i, j]
+                rel_demo[j] = self.demos_left_x[i][j] - self.demos_right_x[i][j]
+            rel_demos.append(rel_demo)
         return rel_demos
 
     def _bi_reproduce(self, model_l, prod_l, model_r, prod_r, model_c, prod_c, show_demo_idx):
