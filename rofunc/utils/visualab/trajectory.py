@@ -66,7 +66,7 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
             ax.scatter(data_lst[i][0, 0], data_lst[i][0, 1], data_lst[i][0, 2], s=20, c=c)
             ax.scatter(data_lst[i][-1, 0], data_lst[i][-1, 1], data_lst[i][-1, 2], marker='x', s=20, c=c)
 
-        if ori:
+        if ori and len(data_lst[i][0]) >= 7:
             data_ori = data_lst[i][:, 3:7]
             for t in range(len(data_ori)):
                 try:

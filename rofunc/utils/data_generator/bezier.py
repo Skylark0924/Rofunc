@@ -25,11 +25,11 @@ def plot_bezier(bx, by, x, y, bz=None, z=None, ax=None):
     if bz is not None and z is not None:
         for i in range(len(bx)):
             ax.plot(bx[i], by[i], bz[i])
-            ax.plot(x[i], y[i], z[i], 'r.')
+            # ax.plot(x[i], y[i], z[i], 'r.')
     else:
         for i in range(len(bx)):
             plt.plot(bx[i], by[i])
-            plt.plot(x[i], y[i], 'r.')
+            # plt.plot(x[i], y[i], 'r.')
 
 
 def multi_bezier_demos(demo_points, ax=None):
