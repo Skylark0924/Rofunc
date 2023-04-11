@@ -1,8 +1,8 @@
 import os
 
 
-def set_axis(ax, labels=None):
-    ax.view_init(elev=45, azim=45, roll=0)
+def set_axis(ax, labels=None, elev=45, azim=45, roll=0):
+    ax.view_init(elev=elev, azim=azim, roll=roll)
     ax.set_aspect('equal', 'box')
     if labels is None:
         labels = ['x', 'y', 'z']
