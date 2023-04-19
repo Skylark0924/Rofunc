@@ -68,11 +68,34 @@ def transform_armbasetoarmend(arm_joint):
     T_ArmBaseToArmEnd = np.around(T[0] @ T[1] @ T[2] @ T[3] @ T[4] @ T[5] @ T[6], decimals=6)
     return T_ArmBaseToArmEnd      # Arm end represents the flange of Franka Emila
 
+
+def transform_mobilebasetoarmend(torso_joint, arm_joint_left, arm_joint_right):
+    T_MobileBaseToLeftArmBase, T_MobileBaseToRightArmBase = transform_mobilebasetoarmbase(torso_joint)
+    T_MobileBaseToLeftArmEnd = T_MobileBaseToLeftArmBase @ transform_armbasetoarmend(arm_joint_left)
+    T_MobileBaseToRightArmEnd = T_MobileBaseToRightArmBase @ transform_armbasetoarmend(arm_joint_right)
+    return T_MobileBaseToLeftArmEnd, T_MobileBaseToRightArmEnd
+
+
+def transform_worldbasetomobilebase(data):
+    translation = np.array([[data[0], data[1], 0]])
+    rotation = np.array([[math.cos(data[2]), -math.sin(data[2]), 0], [math.sin(data[2]), math.cos(data[2]), 0],
+         [0, 0, 1]])
+    T_WorldBaseToMobileBase = np.r_[np.c_[rotation, translation.T], np.array([[0, 0, 0, 1]])]
+    return T_WorldBaseToMobileBase
+
+
 if __name__ == '__main__':
-    T_LeftArmBaseToArmEnd = transform_armbasetoarmend(np.array([0, 0, 0, 0, 0, 0, 0]))
-    T_RightArmBaseToArmEnd = transform_armbasetoarmend(np.array([0, 0, 0, 0, 0, 0, 0]))
-    T_MobileBaseToLeftArmBase, T_MobileBaseToRightArmBase = transform_mobilebasetoarmbase(np.array([0, -0.7, 0.1]))
-    T_MobileBaseToLeftArmEnd = T_MobileBaseToLeftArmBase @ T_LeftArmBaseToArmEnd
-    T_MobileBaseToRightArmEnd = T_MobileBaseToRightArmBase @ T_RightArmBaseToArmEnd
-    print(T_MobileBaseToLeftArmBase, '\n', T_MobileBaseToRightArmBase, '\n', T_MobileBaseToLeftArmEnd, '\n', T_MobileBaseToRightArmEnd)
+    # T_LeftArmBaseToArmEnd = transform_armbasetoarmend(np.array([0, 0, 0, 0, 0, 0, 0]))
+    # T_RightArmBaseToArmEnd = transform_armbasetoarmend(np.array([0, 0, 0, 0, 0, 0, 0]))
+    # T_MobileBaseToLeftArmBase, T_MobileBaseToRightArmBase = transform_mobilebasetoarmbase(np.array([0, -0.7, 0.1]))
+    # print(T_MobileBaseToLeftArmBase, '\n', T_MobileBaseToRightArmBase)
+
+    torso_joint = np.array([0, -0.7, 0.1])
+    arm_joint_left = np.array([0, 0, 0, 0, 0, 0, 0])
+    arm_joint_right = np.array([0, 0, 0, 0, 0, 0, 0])
+    T_MobileBaseToLeftArmEnd, T_MobileBaseToRightArmEnd = transform_mobilebasetoarmend(torso_joint, arm_joint_left, arm_joint_right)
+    print(T_MobileBaseToLeftArmEnd, '\n', T_MobileBaseToRightArmEnd)
+
+    T_WorldBaseToMobileBase = transform_worldbasetomobilebase(np.array([1, 1, 0]))    # x, y, theta
+    print(T_WorldBaseToMobileBase)
 
