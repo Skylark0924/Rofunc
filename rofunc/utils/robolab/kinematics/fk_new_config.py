@@ -26,7 +26,9 @@ def transform_torsobasetotorsoend(theta):
     p[0] = L * (math.sin(theta[1]) + math.cos(theta[1] + theta[2])) * math.cos(theta[0])
     p[1] = L * (math.sin(theta[1]) + math.cos(theta[1] + theta[2])) * math.sin(theta[0])
     p[2] = d + L * (math.cos(theta[1]) - math.sin(theta[1] + theta[2]))
-    R = np.array([[math.cos(theta[0]), 0, math.sin(theta[0])], [0, 1, 0], [-math.sin(theta[0]), 0, math.cos(theta[0])]])
+    R = np.array(
+        [[math.cos(theta[0]), -math.sin(theta[0]), 0], [math.sin(theta[0]), math.cos(theta[0]), 0],
+         [0, 0, 1]])
     return p, R
 
 
@@ -91,6 +93,7 @@ if __name__ == '__main__':
     # print(T_MobileBaseToLeftArmBase, '\n', T_MobileBaseToRightArmBase)
 
     torso_joint = np.array([0, -0.7, 0.1])
+    test = transform_torsobasetotorsoend(torso_joint)
     arm_joint_left = np.array([0, 0, 0, 0, 0, 0, 0])
     arm_joint_right = np.array([0, 0, 0, 0, 0, 0, 0])
     T_MobileBaseToLeftArmEnd, T_MobileBaseToRightArmEnd = transform_mobilebasetoarmend(torso_joint, arm_joint_left, arm_joint_right)
