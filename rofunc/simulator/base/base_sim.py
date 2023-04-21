@@ -170,6 +170,7 @@ class RobotSim:
         dof_props['damping'].fill(100000.0)
 
         # Give a desired pose for first 2 robot joints to improve stability
+        # TODO: make this configurable
         dof_props["driveMode"][0:2] = gymapi.DOF_MODE_EFFORT
 
         dof_props["driveMode"][7:] = gymapi.DOF_MODE_EFFORT
@@ -315,6 +316,28 @@ class RobotSim:
         beauty_print("The number of bodies in the robot asset is {}".format(num_bodies), 2)
         return num_bodies
 
+    def get_dof_info(self):
+        # Gets number of Degree of Freedom for an actor
+        dof_count = self.gym.get_actor_dof_count(self.envs[0], self.robot_handles[0])
+        # maps degree of freedom names to actor-relative indices
+        dof_dict = self.gym.get_actor_dof_dict(self.envs[0], self.robot_handles[0])
+        # Gets forces for the actor’s degrees of freedom
+        # dof_forces = self.gym.get_actor_dof_forces(self.envs[0], self.robot_handles[0])
+        # Gets Frames for Degrees of Freedom of actor
+        # dof_frames = self.gym.get_actor_dof_frames(self.envs[0], self.robot_handles[0])
+        # Gets names of all degrees of freedom on actor
+        dof_names = self.gym.get_actor_dof_names(self.envs[0], self.robot_handles[0])
+        # Gets target position for the actor’s degrees of freedom.
+        # dof_position_targets = self.gym.get_actor_dof_position_targets(self.envs[0], self.robot_handles[0])
+        # Gets properties for all Dofs on an actor.
+        dof_properties = self.gym.get_actor_dof_properties(self.envs[0], self.robot_handles[0])
+        # Gets state for the actor’s degrees of freedom
+        # dof_states = self.gym.get_actor_dof_states(self.envs[0], self.robot_handles[0], gymapi.STATE_ALL)
+        # Gets target velocity for the actor’s degrees of freedom
+        # dof_velocity_targets = self.gym.get_actor_dof_velocity_targets(self.envs[0], self.robot_handles[0])
+
+        return {'dof_count': dof_count, 'dof_dict': dof_dict, 'dof_names': dof_names, 'dof_properties': dof_properties}
+
     def get_robot_state(self, mode):
         from isaacgym import gymtorch
 
@@ -362,12 +385,12 @@ class RobotSim:
 
     def run_traj_multi_joints(self, traj: List, attracted_joints: List = None, update_freq=0.001):
         """
-        Run the trajectory with multiple joints, the default is to run the trajectory with the left and right hand of the
-        CURI robot.
-        Args:
-            traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
-            attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
-            update_freq: the frequency of updating the robot pose
+        Run the trajectory with multiple joints, the default is to run the trajectory with the left and right hand of
+        bimanual robot.
+        :param traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
+        :param attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
+        :param update_freq: the frequency of updating the robot pose
+        :return:
         """
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
 
