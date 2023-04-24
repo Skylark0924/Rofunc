@@ -7,9 +7,9 @@ and any modifications thereto. Any use, reproduction, disclosure or
 distribution of this software and related documentation without an express
 license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-Franka Cube Pick
+curi Cube Pick
 ----------------
-Use Jacobian matrix and inverse kinematics control of Franka robot to pick up a box.
+Use Jacobian matrix and inverse kinematics control of curi robot to pick up a box.
 Damped Least Squares method from: https://www.math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/iksurvey.pdf
 """
 
@@ -22,6 +22,8 @@ from isaacgym.torch_utils import *
 import math
 import numpy as np
 import torch
+
+DOF = 25
 
 
 def orientation_error(desired, current):
@@ -55,9 +57,11 @@ class ScrewFSM:
         # control / position constants:
         self._above_offset = torch.tensor([0, 0, 0.08 + self._bolt_height], dtype=torch.float32, device=self.device)
         self._grip_offset = torch.tensor([0, 0, 0.12 + self._nut_height], dtype=torch.float32, device=self.device)
-        self._lift_offset = torch.tensor([0, 0, 0.15 + self._bolt_height], dtype=torch.float32, device=self.device)
-        self._above_bolt_offset = torch.tensor([0, 0, self._bolt_height], dtype=torch.float32, device=self.device) + self._grip_offset
-        self._on_bolt_offset = torch.tensor([0, 0, 0.8 * self._bolt_height], dtype=torch.float32, device=self.device) + self._grip_offset
+        self._lift_offset = torch.tensor([0, 0, 0.0 + self._bolt_height], dtype=torch.float32, device=self.device)
+        self._above_bolt_offset = torch.tensor([0, 0, self._bolt_height], dtype=torch.float32,
+                                               device=self.device) + self._grip_offset
+        self._on_bolt_offset = torch.tensor([0, 0, 0.8 * self._bolt_height], dtype=torch.float32,
+                                            device=self.device) + self._grip_offset
         self._hand_down_quat = torch.tensor([1, 0, 0, 0], dtype=torch.float32, device=self.device)
         grab_angle = torch.tensor([np.pi / 6.0], dtype=torch.float32, device=self.device)
         grab_axis = torch.tensor([0, 0, 1], dtype=torch.float32, device=self.device)
@@ -206,7 +210,7 @@ custom_parameters = [
     {"name": "--num_envs", "type": int, "default": 1, "help": "Number of environments to create"},
 ]
 args = gymutil.parse_arguments(
-    description="Franka Jacobian Inverse Kinematics (IK) Nut-Bolt Screwing",
+    description="curi Jacobian Inverse Kinematics (IK) Nut-Bolt Screwing",
     custom_parameters=custom_parameters,
 )
 
@@ -241,7 +245,7 @@ else:
 
 # Set controller parameters
 # IK params
-damping = 0.15
+damping = 0.05
 
 # create sim
 sim = gym.create_sim(args.compute_device_id, args.graphics_device_id, args.physics_engine, sim_params)
@@ -256,7 +260,7 @@ if viewer is None:
 asset_root = "../assets"
 
 # create table asset
-table_dims = gymapi.Vec3(0.6, 1.0, 0.4)
+table_dims = gymapi.Vec3(0.6, 2.5, 0.4)
 asset_options = gymapi.AssetOptions()
 asset_options.fix_base_link = True
 table_asset = gym.create_box(sim, table_dims.x, table_dims.y, table_dims.z, asset_options)
@@ -295,50 +299,54 @@ nut_asset = gym.load_asset(sim, asset_root, nut_file, nut_options)
 
 # create box asset
 
-#asset_options = gymapi.AssetOptions()
-#box_asset = gym.create_box(sim, box_size, box_size, box_size, asset_options)
+# asset_options = gymapi.AssetOptions()
+# box_asset = gym.create_box(sim, box_size, box_size, box_size, asset_options)
 
-# load franka asset
-franka_asset_file = "urdf/franka_description/robots/franka_panda.urdf"
+# load curi asset
+curi_asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
 asset_options = gymapi.AssetOptions()
 asset_options.armature = 0.01
 asset_options.fix_base_link = True
 asset_options.disable_gravity = True
 asset_options.flip_visual_attachments = True
-franka_asset = gym.load_asset(sim, asset_root, franka_asset_file, asset_options)
+curi_asset = gym.load_asset(sim, asset_root, curi_asset_file, asset_options)
 
-# configure franka dofs
-franka_dof_props = gym.get_asset_dof_properties(franka_asset)
-franka_lower_limits = franka_dof_props["lower"]
-franka_upper_limits = franka_dof_props["upper"]
-franka_ranges = franka_upper_limits - franka_lower_limits
-franka_mids = 0.3 * (franka_upper_limits + franka_lower_limits)
+# configure curi dofs
+curi_dof_props = gym.get_asset_dof_properties(curi_asset)
+curi_lower_limits = curi_dof_props["lower"]
+curi_upper_limits = curi_dof_props["upper"]
+curi_ranges = curi_upper_limits - curi_lower_limits
+curi_mids = 0.3 * (curi_upper_limits + curi_lower_limits)
 
 # use position drive for all dofs
-franka_dof_props["driveMode"][:7].fill(gymapi.DOF_MODE_POS)
-franka_dof_props["stiffness"][:7].fill(400.0)
-franka_dof_props["damping"][:7].fill(40.0)
+curi_dof_props["driveMode"][7:].fill(gymapi.DOF_MODE_POS)
+curi_dof_props["stiffness"][7:].fill(400.0)
+curi_dof_props["damping"][7:].fill(40.0)
 # grippers
-franka_dof_props["driveMode"][7:].fill(gymapi.DOF_MODE_POS)
-franka_dof_props["stiffness"][7:].fill(800.0)
-franka_dof_props["damping"][7:].fill(40.0)
+curi_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
+curi_dof_props["stiffness"][14:16].fill(800.0)
+curi_dof_props["damping"][14:16].fill(40.0)
+curi_dof_props["driveMode"][23:25].fill(gymapi.DOF_MODE_POS)
+curi_dof_props["stiffness"][23:25].fill(800.0)
+curi_dof_props["damping"][23:25].fill(40.0)
 
 # default dof states and position targets
-franka_num_dofs = gym.get_asset_dof_count(franka_asset)
-default_dof_pos = np.zeros(franka_num_dofs, dtype=np.float32)
-default_dof_pos[:7] = franka_mids[:7]
+curi_num_dofs = gym.get_asset_dof_count(curi_asset)
+default_dof_pos = np.zeros(curi_num_dofs, dtype=np.float32)
+default_dof_pos[7:] = curi_mids[7:]
 # grippers open
-default_dof_pos[7:] = franka_upper_limits[7:]
+default_dof_pos[14:16] = curi_upper_limits[14:16]
+default_dof_pos[23:25] = curi_upper_limits[23:25]
 
-default_dof_state = np.zeros(franka_num_dofs, gymapi.DofState.dtype)
+default_dof_state = np.zeros(curi_num_dofs, gymapi.DofState.dtype)
 default_dof_state["pos"] = default_dof_pos
 
 # send to torch
 default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
 
 # get link index of panda hand, which we will use as end effector
-franka_link_dict = gym.get_asset_rigid_body_dict(franka_asset)
-franka_hand_index = franka_link_dict["panda_hand"]
+curi_link_dict = gym.get_asset_rigid_body_dict(curi_asset)
+curi_hand_index = curi_link_dict["panda_left_hand"]
 
 # configure env grid
 num_envs = args.num_envs
@@ -348,11 +356,11 @@ env_lower = gymapi.Vec3(-spacing, -spacing, 0.0)
 env_upper = gymapi.Vec3(spacing, spacing, spacing)
 print("Creating %d environments" % num_envs)
 
-franka_pose = gymapi.Transform()
-franka_pose.p = gymapi.Vec3(0, 0, 0)
+curi_pose = gymapi.Transform()
+curi_pose.p = gymapi.Vec3(0, 0, 0)
 
 table_pose = gymapi.Transform()
-table_pose.p = gymapi.Vec3(0.5, 0.0, 0.5 * table_dims.z)
+table_pose.p = gymapi.Vec3(1, 0.0, 0.5 * table_dims.z)
 bolt_pose = gymapi.Transform()
 nut_pose = gymapi.Transform()
 
@@ -385,7 +393,7 @@ for i in range(num_envs):
     bolt_pose.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 0, 1), np.random.uniform(-math.pi, math.pi))
     bolt_handle = gym.create_actor(env, bolt_asset, bolt_pose, "bolt", i, 0)
     bolt_props = gym.get_actor_rigid_shape_properties(env, bolt_handle)
-    #bolt_props[0].filter = imesh
+    # bolt_props[0].filter = imesh
     bolt_props[0].friction = 0.0  # default = ?
     bolt_props[0].rolling_friction = 0.0  # default = 0.0
     bolt_props[0].torsion_friction = 0.0  # default = 0.0
@@ -404,7 +412,7 @@ for i in range(num_envs):
     nut_pose.p.z = table_dims.z + 0.02
     nut_handle = gym.create_actor(env, nut_asset, nut_pose, "nut", i, 0)
     nut_props = gym.get_actor_rigid_shape_properties(env, nut_handle)
-    #nut_props[0].filter = i
+    # nut_props[0].filter = i
     nut_props[0].friction = 0.2  # default = ?
     nut_props[0].rolling_friction = 0.0  # default = 0.0
     nut_props[0].torsion_friction = 0.0  # default = 0.0
@@ -417,24 +425,24 @@ for i in range(num_envs):
     nut_idx = gym.get_actor_rigid_body_index(env, nut_handle, 0, gymapi.DOMAIN_SIM)
     nut_idxs.append(nut_idx)
 
-    # add franka
-    franka_handle = gym.create_actor(env, franka_asset, franka_pose, "franka", i, 0)
+    # add curi
+    curi_handle = gym.create_actor(env, curi_asset, curi_pose, "curi", i, 2)
 
     # set dof properties
-    gym.set_actor_dof_properties(env, franka_handle, franka_dof_props)
+    gym.set_actor_dof_properties(env, curi_handle, curi_dof_props)
 
     # set initial dof states
-    gym.set_actor_dof_states(env, franka_handle, default_dof_state, gymapi.STATE_ALL)
+    gym.set_actor_dof_states(env, curi_handle, default_dof_state, gymapi.STATE_ALL)
 
     # set initial position targets
-    gym.set_actor_dof_position_targets(env, franka_handle, default_dof_pos)
+    gym.set_actor_dof_position_targets(env, curi_handle, default_dof_pos)
 
     # get global index of hand in rigid body state tensor
-    hand_idx = gym.find_actor_rigid_body_index(env, franka_handle, "panda_hand", gymapi.DOMAIN_SIM)
+    hand_idx = gym.find_actor_rigid_body_index(env, curi_handle, "panda_left_hand", gymapi.DOMAIN_SIM)
     hand_idxs.append(hand_idx)
 
     # create env's fsm - run them on CPU
-    fsms.append(ScrewFSM(sim_params.dt, 0.016, 0.1, 30.0 / 180.0 * np.pi, 60.0/180.0 * np.pi, fsm_device, i))
+    fsms.append(ScrewFSM(sim_params.dt, 0.016, 0.1, 30.0 / 180.0 * np.pi, 60.0 / 180.0 * np.pi, fsm_device, i))
 
 # point camera at middle env
 cam_pos = gymapi.Vec3(1, 0, 0.6)
@@ -447,12 +455,12 @@ gym.viewer_camera_look_at(viewer, middle_env, cam_pos, cam_target)
 gym.prepare_sim(sim)
 
 # get jacobian tensor
-# for fixed-base franka, tensor has shape (num envs, 10, 6, 9)
-_jacobian = gym.acquire_jacobian_tensor(sim, "franka")
+# for fixed-base curi, tensor has shape (num envs, 10, 6, 9)
+_jacobian = gym.acquire_jacobian_tensor(sim, "curi")
 jacobian = gymtorch.wrap_tensor(_jacobian)
 
-# jacobian entries corresponding to franka hand
-j_eef = jacobian[:, franka_hand_index - 1, :, :7]
+# jacobian entries corresponding to curi hand
+j_eef = jacobian[:, curi_hand_index - 1, :, 7:14]
 
 # get rigid body state tensor
 _rb_states = gym.acquire_rigid_body_state_tensor(sim)
@@ -461,7 +469,7 @@ rb_states = gymtorch.wrap_tensor(_rb_states)
 # get dof state tensor
 _dof_states = gym.acquire_dof_state_tensor(sim)
 dof_states = gymtorch.wrap_tensor(_dof_states)
-dof_pos = dof_states[:, 0].view(num_envs, 9, 1)
+dof_pos = dof_states[:, 0].view(num_envs, DOF, 1)
 
 # Set action tensors
 pos_action = torch.zeros_like(dof_pos).squeeze(-1)
@@ -487,17 +495,19 @@ while not gym.query_viewer_has_closed(viewer):
     bolt_poses = rb_states_fsm[bolt_idxs, :7]
     hand_poses = rb_states_fsm[hand_idxs, :7]
     dof_pos_fsm = dof_pos.to(fsm_device)
-    cur_grip_sep_fsm = dof_pos_fsm[:, 7] + dof_pos_fsm[:, 8]
+    cur_grip_sep_fsm = dof_pos_fsm[:, 14] + dof_pos_fsm[:, 15]
     for env_idx in range(num_envs):
-        fsms[env_idx].update(nut_poses[env_idx, :], bolt_poses[env_idx, :], hand_poses[env_idx, :], cur_grip_sep_fsm[env_idx])
+        fsms[env_idx].update(nut_poses[env_idx, :], bolt_poses[env_idx, :], hand_poses[env_idx, :],
+                             cur_grip_sep_fsm[env_idx])
         d_pose[env_idx, :] = fsms[env_idx].d_pose
         grip_sep[env_idx] = fsms[env_idx].gripper_separation
 
-    pos_action[:, :7] = dof_pos.squeeze(-1)[:, :7] + control_ik(d_pose.unsqueeze(-1).to(device), damping, j_eef, num_envs)
+    pos_action[:, 7:14] = dof_pos.squeeze(-1)[:, 7:14] + control_ik(d_pose.unsqueeze(-1).to(device), damping, j_eef,
+                                                                num_envs)
     # gripper actions depend on distance between hand and box
 
     grip_acts = torch.cat((0.5 * grip_sep, 0.5 * grip_sep), 1).to(device)
-    pos_action[:, 7:9] = grip_acts
+    pos_action[:, 14:16] = grip_acts
 
     # Deploy actions
     gym.set_dof_position_target_tensor(sim, gymtorch.unwrap_tensor(pos_action))
