@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot name="bolt_m4_tight_CM">
+  <link name="bolt_m4_tight_CM">
+    <visual>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="bolt_m4_tight.obj" scale="100 100 100"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="bolt_m4_tight.obj" scale="100 100 100"/>
+      </geometry>
+      <sdf resolution="512"/>
+    </collision>
+  </link>
+</robot>
