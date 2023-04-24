@@ -42,12 +42,12 @@ def orientation_error(desired, current):
 def cube_grasping_yaw(q, corners):
     """ returns horizontal rotation required to grasp cube """
     rc = quat_rotate(q, corners)
-    yaw = (torch.atan2(rc[:, 1], rc[:, 0]) - 0.25 * math.pi) % (0.5 * math.pi)
+    yaw = (torch.atan2(rc[:, 2], rc[:, 0]) - 0.25 * math.pi) % (0.5 * math.pi)
     theta = 0.5 * yaw
     w = theta.cos()
     x = torch.zeros_like(w)
-    y = torch.zeros_like(w)
-    z = theta.sin()
+    z = torch.zeros_like(w)
+    y = theta.sin()
     yaw_quats = torch.stack([x, y, z, w], dim=-1)
     return yaw_quats
 
@@ -93,7 +93,7 @@ gym = gymapi.acquire_gym()
 
 # Add custom arguments
 custom_parameters = [
-    {"name": "--controller", "type": str, "default": "osc",
+    {"name": "--controller", "type": str, "default": "ik",
      "help": "Controller to use for curi. Options are {ik, osc}"},
     {"name": "--num_envs", "type": int, "default": 1, "help": "Number of environments to create"},
 ]
@@ -111,8 +111,8 @@ device = args.sim_device if args.use_gpu_pipeline else 'cpu'
 
 # configure sim
 sim_params = gymapi.SimParams()
-sim_params.up_axis = gymapi.UP_AXIS_Z
-sim_params.gravity = gymapi.Vec3(0.0, 0.0, -9.8)
+sim_params.up_axis = gymapi.UP_AXIS_Y
+sim_params.gravity = gymapi.Vec3(0.0, -9.8, 0.0)
 sim_params.dt = 1.0 / 60.0
 sim_params.substeps = 2
 sim_params.use_gpu_pipeline = args.use_gpu_pipeline
@@ -152,7 +152,7 @@ if viewer is None:
 asset_root = "../assets"
 
 # create table asset
-table_dims = gymapi.Vec3(0.6, 2.5, 0.5)
+table_dims = gymapi.Vec3(0.6, 0.5, 2.5)
 asset_options = gymapi.AssetOptions()
 asset_options.fix_base_link = True
 table_asset = gym.create_box(sim, table_dims.x, table_dims.y, table_dims.z, asset_options)
@@ -217,15 +217,16 @@ curi_hand_index = curi_link_dict["panda_left_hand"]
 num_envs = args.num_envs
 num_per_row = int(math.sqrt(num_envs))
 spacing = 1.0
-env_lower = gymapi.Vec3(-spacing, -spacing, 0.0)
+env_lower = gymapi.Vec3(-spacing, 0.0, -spacing)
 env_upper = gymapi.Vec3(spacing, spacing, spacing)
 print("Creating %d environments" % num_envs)
 
 curi_pose = gymapi.Transform()
 curi_pose.p = gymapi.Vec3(0, 0, 0)
+curi_pose.r = gymapi.Quat(-0.707, 0, 0, 0.707)
 
 table_pose = gymapi.Transform()
-table_pose.p = gymapi.Vec3(1, 0.0, 0.5 * table_dims.z)
+table_pose.p = gymapi.Vec3(1, 0.5 * table_dims.y, 0.0)
 
 box_pose = gymapi.Transform()
 
@@ -237,7 +238,7 @@ init_rot_list = []
 
 # add ground plane
 plane_params = gymapi.PlaneParams()
-plane_params.normal = gymapi.Vec3(0, 0, 1)
+plane_params.normal = gymapi.Vec3(0, 1, 0)
 gym.add_ground(sim, plane_params)
 
 for i in range(num_envs):
@@ -250,9 +251,9 @@ for i in range(num_envs):
 
     # add box
     box_pose.p.x = table_pose.p.x + np.random.uniform(-0.2, 0.1)
-    box_pose.p.y = table_pose.p.y + np.random.uniform(-0.3, 0.3)
-    box_pose.p.z = table_dims.z + 0.5 * box_size
-    box_pose.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 0, 1), np.random.uniform(-math.pi, math.pi))
+    box_pose.p.z = table_pose.p.z + np.random.uniform(-0.3, -0.3)
+    box_pose.p.y = table_dims.y + 0.5 * box_size
+    box_pose.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.random.uniform(-math.pi, math.pi))
     box_handle = gym.create_actor(env, box_asset, box_pose, "box", i, 0)
     color = gymapi.Vec3(np.random.uniform(0, 1), np.random.uniform(0, 1), np.random.uniform(0, 1))
     gym.set_rigid_body_color(env, box_handle, 0, gymapi.MESH_VISUAL_AND_COLLISION, color)
@@ -298,7 +299,7 @@ init_pos = torch.Tensor(init_pos_list).view(num_envs, 3).to(device)
 init_rot = torch.Tensor(init_rot_list).view(num_envs, 4).to(device)
 
 # hand orientation for grasping
-down_q = torch.stack(num_envs * [torch.tensor([1.0, 0.0, 0.0, 0.0])]).to(device).view((num_envs, 4))
+down_q = torch.stack(num_envs * [torch.tensor([0.707, 0, 0, 0.707])]).to(device).view((num_envs, 4))
 
 # box corner coords, used to determine grasping yaw
 box_half_size = 0.5 * box_size
@@ -306,7 +307,7 @@ corner_coord = torch.Tensor([box_half_size, box_half_size, box_half_size])
 corners = torch.stack(num_envs * [corner_coord]).to(device)
 
 # downard axis
-down_dir = torch.Tensor([0, 0, -1]).to(device).view(1, 3)
+down_dir = torch.Tensor([0, -1, 0]).to(device).view(1, 3)
 
 # get jacobian tensor
 # for fixed-base curi, tensor has shape (num envs, 10, 6, 9)
@@ -385,7 +386,7 @@ while not gym.query_viewer_has_closed(viewer):
     # otherwise, seek a position above the box
     above_box = ((box_dot >= 0.99) & (yaw_dot >= 0.95) & (box_dist < grasp_offset * 3)).squeeze(-1)
     grasp_pos = box_pos.clone()
-    grasp_pos[:, 2] = torch.where(above_box, box_pos[:, 2] + grasp_offset, box_pos[:, 2] + grasp_offset * 2.5)
+    grasp_pos[:, 1] = torch.where(above_box, box_pos[:, 1] + grasp_offset, box_pos[:, 1] + grasp_offset * 2.5)
 
     # compute goal position and orientation
     goal_pos = torch.where(return_to_start, init_pos, grasp_pos)
@@ -408,7 +409,7 @@ while not gym.query_viewer_has_closed(viewer):
     # gripper actions depend on distance between hand and box
     close_gripper = (box_dist < grasp_offset + 0.02) | gripped
     # always open the gripper above a certain height, dropping the box and restarting from the beginning
-    hand_restart = hand_restart | (box_pos[:, 2] > 0.6)
+    hand_restart = hand_restart | (box_pos[:, 1] > 0.6)
     keep_going = torch.logical_not(hand_restart)
     close_gripper = close_gripper & keep_going.unsqueeze(-1)
     grip_acts = torch.where(close_gripper, torch.Tensor([[0., 0.]] * num_envs).to(device),
