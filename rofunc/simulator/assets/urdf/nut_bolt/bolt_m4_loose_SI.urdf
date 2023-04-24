@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot name="bolt_m4_loose_SI">
+  <link name="bolt_m4_loose_SI">
+    <visual>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="bolt_m4_loose.obj" scale="1 1 1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="bolt_m4_loose.obj" scale="1 1 1"/>
+      </geometry>
+      <sdf resolution="512"/>
+    </collision>
+  </link>
+</robot>
