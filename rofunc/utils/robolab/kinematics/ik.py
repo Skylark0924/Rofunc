@@ -10,7 +10,7 @@ DT = 1e-1
 damp = 1e-12
 
 
-def ik(model, POSE, ORI, JOINT_ID):
+def get_ik_from_model(model, POSE, ORI, JOINT_ID):
     data = model.createData()
 
     oMdes = pinocchio.SE3(ORI, np.array(POSE))
