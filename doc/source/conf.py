@@ -21,12 +21,12 @@ source_suffix = ['.rst', '.md']
 
 # -- Project information -----------------------------------------------------
 
-project = 'RoFunc'
+project = 'Rofunc'
 copyright = '2022, Junjia Liu'
 author = 'Junjia Liu'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.0.9'
+release = '0.0.1.2'
 
 # -- General configuration ---------------------------------------------------
 
@@ -50,7 +50,7 @@ extensions = [
 ]
 
 sphinx_gallery_conf = {
-     'examples_dirs': '../../rofunc/examples',   # path to your example scripts
+     'examples_dirs': '../../examples',   # path to your example scripts
      'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
     #  'ignore_pattern': r'__init__\.py',
      'filename_pattern': r'learning/CURICabinet\.py',

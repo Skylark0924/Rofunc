@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot name="nut_m4_tight_SI">
+  <link name="nut_m4_tight_SI">
+    <visual>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="nut_m4_tight.obj" scale="5 5 5"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="nut_m4_tight.obj" scale="5 5 5"/>
+      </geometry>
+      <sdf resolution="256"/>
+    </collision>
+  </link>
+</robot>

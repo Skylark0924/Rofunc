@@ -28,7 +28,7 @@ def state_plot(pos: np.ndarray, vel: np.ndarray, effort: np.ndarray, joint_index
 
 if __name__ == '__main__':
     state = np.load(
-        '/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/examples/simulator/state7.npy',
+        '/examples/simulator/state7.npy',
         allow_pickle=True)[10: 310]
     pos = state[:, :, 0]
     vel = state[:, :, 1]

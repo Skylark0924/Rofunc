@@ -10,7 +10,7 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 class RobotSim:
     def __init__(self, args, robot_name, asset_root=None, fix_base_link=False, flip_visual_attachments=True,
-                 init_pose_vec=(0, 0.5, 0.0), num_envs=1):
+                 init_pose_vec=(0, 0.5, 0.0), num_envs=1, device="cpu"):
         """
         Initialize the robot simulator
         :param args: arguments
@@ -24,6 +24,7 @@ class RobotSim:
         self.flip_visual_attachments = flip_visual_attachments
         self.init_pose_vec = init_pose_vec
         self.num_envs = num_envs
+        self.device = device
         if self.robot_name == "CURI":
             self.asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
             self.init_pose_vec = (0, 0.0, 0.0)
@@ -44,6 +45,11 @@ class RobotSim:
             self.init_pose_vec = (0, 1.0, 0.0)
         elif self.robot_name == "sawyer":
             self.asset_file = "urdf/sawyer/robot.xml"
+        elif self.robot_name == "gluon":
+            self.asset_file = "urdf/gluon/gluon.urdf"
+            self.flip_visual_attachments = False
+            self.fix_base_link = True
+            self.init_pose_vec = (0, 0.0, 0.0)
         else:
             raise ValueError(
                 "The robot {} is not supported. Please choose a robot in [CURI, walker, CURI-mini, baxter, sawyer]".format(
@@ -54,12 +60,18 @@ class RobotSim:
             pip_root_path = site.getsitepackages()[0]
             self.asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
 
-        # Initial gym, sim and env
+        # Initial gym, sim, viewer and env
         self._init_sim()
+        self._init_viewer()
         self._init_env()
 
-    def _init_sim(self, cam_pos=(3.0, 2.0, 0.0), cam_target=(0.0, 0.0, 0.0), up_axis="Y"):
+        self.robot_dof = self.gym.get_actor_dof_count(self.envs[0], self.robot_handles[0])
+
+    def _init_sim(self, up_axis="Y"):
         from isaacgym import gymapi
+
+        if hasattr(self.args, "up_axis"):
+            up_axis = self.args.up_axis.upper()
 
         # Initialize gym
         self.gym = gymapi.acquire_gym()
@@ -69,12 +81,14 @@ class RobotSim:
         self.sim_params.dt = 1.0 / 60.0
         self.sim_params.substeps = 2
         if up_axis == "Y":
-            self.sim_params.gravity.y = -9.80
+            self.sim_params.gravity = gymapi.Vec3(0.0, -9.8, 0.0)
             self.sim_params.up_axis = gymapi.UP_AXIS_Y
         elif up_axis == "Z":
-            self.sim_params.gravity.y = 0.0
-            self.sim_params.gravity.z = -9.80
+            self.sim_params.gravity = gymapi.Vec3(0.0, 0.0, -9.8)
             self.sim_params.up_axis = gymapi.UP_AXIS_Z
+        else:
+            raise ValueError("The up_axis should be in [Y, Z]")
+
         if self.args.physics_engine == gymapi.SIM_FLEX:
             self.sim_params.flex.solver_type = 5
             self.sim_params.flex.num_outer_iterations = 4
@@ -85,8 +99,14 @@ class RobotSim:
             self.sim_params.physx.solver_type = 1
             self.sim_params.physx.num_position_iterations = 4
             self.sim_params.physx.num_velocity_iterations = 1
+            self.sim_params.physx.rest_offset = 0.0
+            self.sim_params.physx.contact_offset = 0.001
+            self.sim_params.physx.friction_offset_threshold = 0.001
+            self.sim_params.physx.friction_correlation_distance = 0.0005
             self.sim_params.physx.num_threads = self.args.num_threads
             self.sim_params.physx.use_gpu = self.args.use_gpu
+        else:
+            raise ValueError("The physics engine should be in [SIM_FLEX, SIM_PHYSX]")
 
         self.sim_params.use_gpu_pipeline = self.args.use_gpu_pipeline
         if self.args.use_gpu_pipeline:
@@ -96,19 +116,26 @@ class RobotSim:
                                        self.args.physics_engine, self.sim_params)
 
         if self.sim is None:
-            print("*** Failed to create sim")
+            beauty_print("Failed to create sim", type="warning")
             quit()
+
+    def _init_viewer(self, cam_pos=(3.0, 2.0, 0.0), cam_target=(0.0, 0.0, 0.0)):
+        from isaacgym import gymapi
+
+        if hasattr(self.args, 'cam_pos') and hasattr(self.args, 'cam_target'):
+            cam_pos = self.args.cam_pos
+            cam_target = self.args.cam_target
 
         # Create viewer
         self.viewer = None
         camera_props = gymapi.CameraProperties()
-        camera_props.horizontal_fov = 75.0
-        camera_props.width = 1920
-        camera_props.height = 1080
+        camera_props.horizontal_fov = 75.0 if not hasattr(self.args, 'camera_horizontal_fov') else self.args.camera_horizontal_fov
+        camera_props.width = 1920 if not hasattr(self.args, 'camera_width') else self.args.camera_width
+        camera_props.height = 1080 if not hasattr(self.args, 'camera_height') else self.args.camera_height
         # camera_props.use_collision_geometry = True
         self.viewer = self.gym.create_viewer(self.sim, camera_props)
         if self.viewer is None:
-            print("*** Failed to create viewer")
+            beauty_print("Failed to create viewer", type="warning")
             quit()
 
         # Point camera at environments
@@ -132,16 +159,18 @@ class RobotSim:
         asset_options.flip_visual_attachments = self.flip_visual_attachments
         asset_options.armature = 0.01
 
+        # load robot asset
         beauty_print("Loading robot asset {} from {}".format(self.asset_file, self.asset_root), type="info")
-        robot_asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, asset_options)
+        self.robot_asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, asset_options)
 
         # Set up the env grid
         env_lower = gymapi.Vec3(-spacing, 0.0, -spacing)
         env_upper = gymapi.Vec3(spacing, spacing, spacing)
 
         envs = []
-        handles = []
+        robot_handles = []
 
+        # configure env grid
         print("Creating %d environments" % self.num_envs)
         num_per_row = int(math.sqrt(self.num_envs))
         pose = gymapi.Transform()
@@ -153,29 +182,12 @@ class RobotSim:
             envs.append(env)
 
             # add robot
-            handle = self.gym.create_actor(env, robot_asset, pose, "robot", i, 2)
-            self.gym.enable_actor_dof_force_sensors(env, handle)
-            handles.append(handle)
-
-        dof_props = self.gym.get_actor_dof_properties(envs[0], handles[0])
-
-        # override default stiffness and damping values
-        # TODO: make this configurable
-        dof_props['stiffness'].fill(100000.0)
-        dof_props['damping'].fill(100000.0)
-
-        # Give a desired pose for first 2 robot joints to improve stability
-        dof_props["driveMode"][0:2] = gymapi.DOF_MODE_EFFORT
-
-        dof_props["driveMode"][7:] = gymapi.DOF_MODE_EFFORT
-        dof_props['stiffness'][7:] = 1e10
-        dof_props['damping'][7:] = 1
-
-        for i in range(self.num_envs):
-            self.gym.set_actor_dof_properties(envs[i], handles[i], dof_props)
+            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, "robot", i, 2)
+            self.gym.enable_actor_dof_force_sensors(env, robot_handle)
+            robot_handles.append(robot_handle)
 
         self.envs = envs
-        self.robot_handles = handles
+        self.robot_handles = robot_handles
 
     def _init_attractor(self, attracted_joint):
         from isaacgym import gymapi
@@ -222,23 +234,56 @@ class RobotSim:
 
     def _setup_robot(self):
         from isaacgym import gymapi
+        # configure robot dofs
+        robot_dof_props = self.gym.get_asset_dof_properties(self.robot_asset)
+        robot_lower_limits = robot_dof_props["lower"]
+        robot_upper_limits = robot_dof_props["upper"]
+        robot_ranges = robot_upper_limits - robot_lower_limits
+        robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
 
-        # get joint limits and ranges for the robot
-        dof_props = self.gym.get_actor_dof_properties(self.envs[0], self.robot_handles[0])
-        lower_limits = dof_props['lower']
-        upper_limits = dof_props['upper']
-        mids = 0.5 * (upper_limits + lower_limits)
-        num_dofs = len(dof_props)
+        # override default stiffness and damping values
+        # TODO: make this configurable
+        # robot_dof_props['stiffness'].fill(100000.0)
+        # robot_dof_props['damping'].fill(100000.0)
+
+        # Give a desired pose for first 2 robot joints to improve stability
+        # TODO: make this configurable
+        # robot_dof_props["driveMode"][0:2] = gymapi.DOF_MODE_EFFORT
+        robot_dof_props["driveMode"][7:].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][7:].fill(300.0)
+        robot_dof_props["damping"][7:].fill(80.0)
+
+        # grippers
+        robot_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][14:16].fill(800.0)
+        robot_dof_props["damping"][14:16].fill(40.0)
+        robot_dof_props["driveMode"][23:25].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][23:25].fill(800.0)
+        robot_dof_props["damping"][23:25].fill(40.0)
+
+        # default dof states and position targets
+        robot_num_dofs = self.gym.get_asset_dof_count(self.robot_asset)
+        default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
+        default_dof_pos[7:] = robot_mids[7:]
+        # # grippers open
+        default_dof_pos[14:16] = robot_upper_limits[14:16]
+        default_dof_pos[23:25] = robot_upper_limits[23:25]
+
+        default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
+        default_dof_state["pos"] = default_dof_pos
+
+        # # send to torch
+        # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
 
         for i in range(len(self.envs)):
-            # Set updated stiffness and damping properties
-            self.gym.set_actor_dof_properties(self.envs[i], self.robot_handles[i], dof_props)
+            # set dof properties
+            self.gym.set_actor_dof_properties(self.envs[i], self.robot_handles[i], robot_dof_props)
 
-            # Set robot pose so that each joint is in the middle of its actuation range
-            dof_states = self.gym.get_actor_dof_states(self.envs[i], self.robot_handles[i], gymapi.STATE_NONE)
-            for j in range(num_dofs):
-                dof_states['pos'][j] = mids[j]
-            self.gym.set_actor_dof_states(self.envs[i], self.robot_handles[i], dof_states, gymapi.STATE_POS)
+            # set initial dof states
+            self.gym.set_actor_dof_states(self.envs[i], self.robot_handles[i], default_dof_state, gymapi.STATE_ALL)
+
+            # set initial position targets
+            self.gym.set_actor_dof_position_targets(self.envs[i], self.robot_handles[i], default_dof_pos)
 
     def _setup_attractors(self, traj, attracted_joints):
         assert isinstance(attracted_joints, list), "The attracted joints should be a list"
@@ -252,6 +297,41 @@ class RobotSim:
             axes_geoms.append(axes_geom)
             sphere_geoms.append(sphere_geom)
         return attracted_joints, attractor_handles, axes_geoms, sphere_geoms
+
+    def add_object(self, object_asset, object_poses, object_name, object_color=None, collision_group=0, filter_mask=-1,
+                   seg_id=0):
+        """
+
+        :param object_asset:
+        :param object_poses:
+        :param object_name:
+        :param object_color:
+        :param collision_group:
+        :param filter_mask:
+        :param seg_id:
+        :return:
+        """
+        from isaacgym import gymapi
+
+        object_idxs = []
+        object_handles = []
+        for i in range(self.num_envs):
+            if isinstance(object_poses, list):
+                object_pose = object_poses[i]
+            else:
+                object_pose = object_poses
+
+            object_handle = self.gym.create_actor(self.envs[i], object_asset, object_pose, object_name, collision_group,
+                                                  filter_mask, seg_id)
+            object_handles.append(object_handle)
+
+            if object_color is not None:
+                self.gym.set_rigid_body_color(self.envs[i], object_handle, 0, gymapi.MESH_VISUAL_AND_COLLISION,
+                                              object_color)
+
+            object_idx = self.gym.get_actor_rigid_body_index(self.envs[i], object_handle, 0, gymapi.DOMAIN_SIM)
+            object_idxs.append(object_idx)
+        return object_handles, object_idxs
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
@@ -310,6 +390,28 @@ class RobotSim:
         beauty_print("The number of bodies in the robot asset is {}".format(num_bodies), 2)
         return num_bodies
 
+    def get_dof_info(self):
+        # Gets number of Degree of Freedom for an actor
+        dof_count = self.gym.get_actor_dof_count(self.envs[0], self.robot_handles[0])
+        # maps degree of freedom names to actor-relative indices
+        dof_dict = self.gym.get_actor_dof_dict(self.envs[0], self.robot_handles[0])
+        # Gets forces for the actor’s degrees of freedom
+        # dof_forces = self.gym.get_actor_dof_forces(self.envs[0], self.robot_handles[0])
+        # Gets Frames for Degrees of Freedom of actor
+        # dof_frames = self.gym.get_actor_dof_frames(self.envs[0], self.robot_handles[0])
+        # Gets names of all degrees of freedom on actor
+        dof_names = self.gym.get_actor_dof_names(self.envs[0], self.robot_handles[0])
+        # Gets target position for the actor’s degrees of freedom.
+        # dof_position_targets = self.gym.get_actor_dof_position_targets(self.envs[0], self.robot_handles[0])
+        # Gets properties for all Dofs on an actor.
+        dof_properties = self.gym.get_actor_dof_properties(self.envs[0], self.robot_handles[0])
+        # Gets state for the actor’s degrees of freedom
+        # dof_states = self.gym.get_actor_dof_states(self.envs[0], self.robot_handles[0], gymapi.STATE_ALL)
+        # Gets target velocity for the actor’s degrees of freedom
+        # dof_velocity_targets = self.gym.get_actor_dof_velocity_targets(self.envs[0], self.robot_handles[0])
+
+        return {'dof_count': dof_count, 'dof_dict': dof_dict, 'dof_names': dof_names, 'dof_properties': dof_properties}
+
     def get_robot_state(self, mode):
         from isaacgym import gymtorch
 
@@ -352,17 +454,37 @@ class RobotSim:
         else:
             raise ValueError("The mode {} is not supported".format(mode))
 
+    def get_robot_jacobian(self):
+        from isaacgym import gymtorch
+
+        _jacobian = self.gym.acquire_jacobian_tensor(self.sim, "robot")
+        jacobian = gymtorch.wrap_tensor(_jacobian)
+        return jacobian
+
     def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index):
         raise NotImplementedError
 
+    def ik_controller(self, joint_index, dpose, damping=0.05):
+        jacobian = self.get_robot_jacobian()
+
+        # jacobian entries corresponding to curi hand
+        j_eef = jacobian[:, joint_index - 1, :, 7:14]
+
+        import torch
+
+        j_eef_T = torch.transpose(j_eef, 1, 2)
+        lmbda = torch.eye(6, device=self.device) * (damping ** 2)
+        u = (j_eef_T @ torch.inverse(j_eef @ j_eef_T + lmbda) @ dpose).view(self.num_envs, 7)
+        return u
+
     def run_traj_multi_joints(self, traj: List, attracted_joints: List = None, update_freq=0.001):
         """
-        Run the trajectory with multiple joints, the default is to run the trajectory with the left and right hand of the
-        CURI robot.
-        Args:
-            traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
-            attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
-            update_freq: the frequency of updating the robot pose
+        Run the trajectory with multiple joints, the default is to run the trajectory with the left and right hand of
+        bimanual robot.
+        :param traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
+        :param attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
+        :param update_freq: the frequency of updating the robot pose
+        :return:
         """
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
 

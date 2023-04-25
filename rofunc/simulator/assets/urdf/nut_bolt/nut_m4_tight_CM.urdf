@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot name="nut_m4_tight_CM">
+  <link name="nut_m4_tight_CM">
+    <visual>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="nut_m4_tight.obj" scale="100 100 100"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="nut_m4_tight.obj" scale="100 100 100"/>
+      </geometry>
+      <sdf resolution="256"/>
+    </collision>
+    <inertial>
+      <mass value="0.0008"/>
+      <origin xyz="0 0 0.56" rpy="0 0 0"/>
+      <inertia ixx="4.1e-5" ixy="0.0" ixz="0.0" iyy="4.1e-5" iyz="0.0" izz="6.86e-5"/>
+    </inertial>
+  </link>
+</robot>
