@@ -2,29 +2,36 @@
 
 ### Interactive mode 
 ```python
-import rofunc as rf
 from isaacgym import gymutil
+import rofunc as rf
 
 args = gymutil.parse_arguments()
-rf.curi.show(args)
+args.use_gpu_pipeline = False
+
+CURIsim = rf.sim.CURISim(args)
+CURIsim.show(visual_obs_flag=False)
 ```
 
-![](../img/curi_interactive.gif)
+![](../img/Videos/curi_interactive.gif)
 
 ### Run the bimanual trajectory in the Cartesian space
 
 ```python
+import os
 import numpy as np
-import rofunc as rf
-from importlib_resources import files
 from isaacgym import gymutil
+import rofunc as rf
 
 args = gymutil.parse_arguments()
-traj_l = np.load(files('rofunc.data').joinpath('taichi_1l.npy'))  # [traj_len, 7]
-traj_r = np.load(files('rofunc.data').joinpath('taichi_1r.npy'))  # [traj_len, 7]
+args.use_gpu_pipeline = False
 
-rf.curi.run_traj_bi(args, traj_l, traj_r, update_freq=0.001)
+traj_l = np.load(os.path.join(rf.file.get_rofunc_path(), 'data/taichi_1l.npy'))
+traj_r = np.load(os.path.join(rf.file.get_rofunc_path(), 'data/taichi_1r.npy'))
+rf.lqt.plot_3d_bi(traj_l, traj_r, ori=False)
+
+CURIsim = rf.sim.CURISim(args)
+CURIsim.run_traj(traj=[traj_l, traj_r], update_freq=0.001)
 ```
 
-![](../img/FormatFactoryPart1.gif)
+![](../img/Videos/CURITaichiFlat.gif)
 

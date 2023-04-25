@@ -3,9 +3,6 @@ import numpy as np
 import os
 from rofunc.config.utils import get_config
 
-cfg = get_config('./planning', 'lqt_cp_dmp')
-cfg.nbDeriv = 3
-
 
 # <editor-fold desc="3d example">
 # TODO: not work
@@ -16,12 +13,17 @@ cfg.nbDeriv = 3
 # MuVel = np.gradient(MuPos)[0] / cfg.dt
 # MuAcc = np.gradient(MuVel)[0] / cfg.dt
 # via_points = np.hstack((MuPos, MuVel, MuAcc)).T
+# state_noise = np.hstack(
+#     (-1, -.2, 1, 0, 0, 0, 0, np.zeros(cfg.nbVarX - cfg.nbVarPos))).reshape(
+#     (cfg.nbVarX, 1))  # Simulated noise on 3d state
 # </editor-fold>
 
 
 def test_2d_cp_dmp_lqt():
-    # <editor-fold desc="2d letter example data">
     from scipy.interpolate import interp1d
+
+    cfg = get_config('./planning', 'lqt_cp_dmp')
+    cfg.nbDeriv = 3
 
     x = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LQT_LQR/S.npy'))[0, :, :2].T
 
@@ -31,10 +33,13 @@ def test_2d_cp_dmp_lqt():
     MuAcc = np.gradient(MuVel)[1] / cfg.dt
     # Position, velocity and acceleration profiles as references
     via_points = np.vstack((MuPos, MuVel, MuAcc))
-    # </editor-fold>
+
+    state_noise = np.vstack(
+        (np.array([[3], [-0.5]]), np.zeros((cfg.nbVarX - cfg.nbVarU, 1))))  # Simulated noise on 2d state
 
     cfg.nbData = len(via_points[0])
-    rf.lqt.uni_cp_dmp(via_points, cfg, for_test=True)
+    controller = rf.planning_control.lqt.LQTCPDMP(via_points, cfg)
+    u_hat, x_hat = controller.solve(state_noise, for_test=True)
 
 
 if __name__ == '__main__':
