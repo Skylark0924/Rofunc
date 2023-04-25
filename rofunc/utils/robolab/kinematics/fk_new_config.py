@@ -86,19 +86,55 @@ def transform_worldbasetomobilebase(data):
     return T_WorldBaseToMobileBase
 
 
+def transform_optitrackbasetomobilebase(data):
+    translation = np.array([[0, -1.11462, -0.2195]])
+    R_1 =np.array([[math.cos(data[0]), 0, math.sin(data[0])], [0, 1, 0],
+                    [-math.sin(data[0]), 0, math.cos(data[0])]])
+    R_2 = np.array([[1, 0, 0], [0, math.cos(data[1]), -math.sin(data[1])],
+                    [0, math.sin(data[1]), math.cos(data[1])]])
+    rotation = R_1 @ R_2
+    # rotation = np.array([[0, -1, 0], [0, 0, 1], [-1, 0, 0]]).T
+    T_OptitrackBaseToMobileBase = np.r_[np.c_[rotation, translation.T], np.array([[0, 0, 0, 1]])]
+    return T_OptitrackBaseToMobileBase
+
+
+def transform_optitrackbasetoarmend(torso_joint, arm_joint_left, arm_joint_right):
+    T_OptitrackBaseToMobileBase = transform_optitrackbasetomobilebase(np.array([math.pi / 2, -math.pi / 2]))
+    T_MobileBaseToLeftArmEnd, T_MobileBaseToRightArmEnd = transform_mobilebasetoarmend(torso_joint, arm_joint_left,
+                                                                                       arm_joint_right)
+    T_OptitrackBaseToLeftArmEnd = T_OptitrackBaseToMobileBase @ T_MobileBaseToLeftArmEnd
+    T_OptitrackBaseToRightArmEnd = T_OptitrackBaseToMobileBase @ T_MobileBaseToRightArmEnd
+    return T_OptitrackBaseToLeftArmEnd, T_OptitrackBaseToRightArmEnd
+
+
+
 if __name__ == '__main__':
     # T_LeftArmBaseToArmEnd = transform_armbasetoarmend(np.array([0, 0, 0, 0, 0, 0, 0]))
     # T_RightArmBaseToArmEnd = transform_armbasetoarmend(np.array([0, 0, 0, 0, 0, 0, 0]))
     # T_MobileBaseToLeftArmBase, T_MobileBaseToRightArmBase = transform_mobilebasetoarmbase(np.array([0, -0.7, 0.1]))
     # print(T_MobileBaseToLeftArmBase, '\n', T_MobileBaseToRightArmBase)
 
+    T_OptitrackBaseToMobileBase = transform_optitrackbasetomobilebase(np.array([math.pi/2, -math.pi/2]))
+    pose = np.array([[1, 0, 0, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]])
+    pose_new = np.linalg.inv(T_OptitrackBaseToMobileBase) @ pose
+    print(pose_new)
+
+    # T_TorsoEndToLeftArmBase = transform_torsoendtoarmbase(
+    #     np.array([math.pi / 2, -math.pi / 4, -math.pi / 6, -math.pi / 18]), np.array([[-0.08537, 0.07009, 0.2535]]))
+    # T_TorsoEndToRightArmBase = transform_torsoendtoarmbase(
+    #     np.array([math.pi / 2, math.pi / 4, math.pi / 6, -math.pi / 18]), np.array([[-0.08537, -0.07009, 0.2535]]))
+    # print(T_TorsoEndToLeftArmBase, '\n', T_TorsoEndToRightArmBase)
+
     torso_joint = np.array([0, -0.7, 0.1])
-    test = transform_torsobasetotorsoend(torso_joint)
     arm_joint_left = np.array([0, 0, 0, 0, 0, 0, 0])
     arm_joint_right = np.array([0, 0, 0, 0, 0, 0, 0])
-    T_MobileBaseToLeftArmEnd, T_MobileBaseToRightArmEnd = transform_mobilebasetoarmend(torso_joint, arm_joint_left, arm_joint_right)
-    print(T_MobileBaseToLeftArmEnd, '\n', T_MobileBaseToRightArmEnd)
+    # T_MobileBaseToLeftArmEnd, T_MobileBaseToRightArmEnd = transform_mobilebasetoarmend(torso_joint, arm_joint_left, arm_joint_right)
+    # print(T_MobileBaseToLeftArmEnd, '\n', T_MobileBaseToRightArmEnd)
+    # test = T_OptitrackBaseToMobileBase @ T_MobileBaseToLeftArmEnd
+    T_l, T_r = transform_optitrackbasetoarmend(torso_joint, arm_joint_left, arm_joint_right)
+    print(T_l, '\n', T_r)
 
-    T_WorldBaseToMobileBase = transform_worldbasetomobilebase(np.array([1, 1, 0]))    # x, y, theta
-    print(T_WorldBaseToMobileBase)
+
+    # T_WorldBaseToMobileBase = transform_worldbasetomobilebase(np.array([1, 1, 0]))    # x, y, theta
+    # print(T_WorldBaseToMobileBase)
 
