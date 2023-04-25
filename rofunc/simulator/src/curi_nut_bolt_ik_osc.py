@@ -23,7 +23,11 @@ import math
 import numpy as np
 import torch
 
-DOF = 25
+DOF = 18
+# Gripper_index = [14, 15, 23, 24]
+Gripper_index = [7, 8, 16, 17]
+# Arm_joint_index = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+Arm_joint_index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
 
 def orientation_error(desired, current):
@@ -57,7 +61,7 @@ class ScrewFSM:
         # control / position constants:
         self._above_offset = torch.tensor([0, 0, 0.08 + self._bolt_height], dtype=torch.float32, device=self.device)
         self._grip_offset = torch.tensor([0, 0, 0.12 + self._nut_height], dtype=torch.float32, device=self.device)
-        self._lift_offset = torch.tensor([0, 0, 0.0 + self._bolt_height], dtype=torch.float32, device=self.device)
+        self._lift_offset = torch.tensor([0, 0, 0.25 + self._bolt_height], dtype=torch.float32, device=self.device)
         self._above_bolt_offset = torch.tensor([0, 0, self._bolt_height], dtype=torch.float32,
                                                device=self.device) + self._grip_offset
         self._on_bolt_offset = torch.tensor([0, 0, 0.8 * self._bolt_height], dtype=torch.float32,
@@ -170,7 +174,7 @@ class ScrewFSM:
             if self._screw_angle[0] > 0.99 * self._screw_limit_angle:
                 newState = "back_to_screw_grip"
         elif self._state == "back_to_screw_grip":
-            target_sep = 0.037
+            target_sep = 0.04
             self._gripper_separation = target_sep
             target_pos = bolt_pose[:3]
             target_pos[2] = nut_pose[2]
@@ -245,7 +249,7 @@ else:
 
 # Set controller parameters
 # IK params
-damping = 0.05
+damping = 0.1
 
 # create sim
 sim = gym.create_sim(args.compute_device_id, args.graphics_device_id, args.physics_engine, sim_params)
@@ -260,7 +264,7 @@ if viewer is None:
 asset_root = "../assets"
 
 # create table asset
-table_dims = gymapi.Vec3(0.6, 2.5, 0.4)
+table_dims = gymapi.Vec3(0.6, 2.5, 0.5)
 asset_options = gymapi.AssetOptions()
 asset_options.fix_base_link = True
 table_asset = gym.create_box(sim, table_dims.x, table_dims.y, table_dims.z, asset_options)
@@ -303,7 +307,7 @@ nut_asset = gym.load_asset(sim, asset_root, nut_file, nut_options)
 # box_asset = gym.create_box(sim, box_size, box_size, box_size, asset_options)
 
 # load curi asset
-curi_asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+curi_asset_file = "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
 asset_options = gymapi.AssetOptions()
 asset_options.armature = 0.01
 asset_options.fix_base_link = True
@@ -319,24 +323,20 @@ curi_ranges = curi_upper_limits - curi_lower_limits
 curi_mids = 0.3 * (curi_upper_limits + curi_lower_limits)
 
 # use position drive for all dofs
-curi_dof_props["driveMode"][7:].fill(gymapi.DOF_MODE_POS)
-curi_dof_props["stiffness"][7:].fill(400.0)
-curi_dof_props["damping"][7:].fill(40.0)
+curi_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
+curi_dof_props["stiffness"][:].fill(400.0)
+curi_dof_props["damping"][:].fill(40.0)
 # grippers
-curi_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
-curi_dof_props["stiffness"][14:16].fill(800.0)
-curi_dof_props["damping"][14:16].fill(40.0)
-curi_dof_props["driveMode"][23:25].fill(gymapi.DOF_MODE_POS)
-curi_dof_props["stiffness"][23:25].fill(800.0)
-curi_dof_props["damping"][23:25].fill(40.0)
+curi_dof_props["driveMode"][7:9].fill(gymapi.DOF_MODE_POS)
+curi_dof_props["stiffness"][7:9].fill(800.0)
+curi_dof_props["damping"][7:9].fill(40.0)
 
 # default dof states and position targets
 curi_num_dofs = gym.get_asset_dof_count(curi_asset)
 default_dof_pos = np.zeros(curi_num_dofs, dtype=np.float32)
-default_dof_pos[7:] = curi_mids[7:]
+default_dof_pos[:] = curi_mids[:]
 # grippers open
-default_dof_pos[14:16] = curi_upper_limits[14:16]
-default_dof_pos[23:25] = curi_upper_limits[23:25]
+default_dof_pos[7:9] = curi_upper_limits[7:9]
 
 default_dof_state = np.zeros(curi_num_dofs, gymapi.DofState.dtype)
 default_dof_state["pos"] = default_dof_pos
@@ -460,7 +460,7 @@ _jacobian = gym.acquire_jacobian_tensor(sim, "curi")
 jacobian = gymtorch.wrap_tensor(_jacobian)
 
 # jacobian entries corresponding to curi hand
-j_eef = jacobian[:, curi_hand_index - 1, :, 7:14]
+j_eef = jacobian[:, curi_hand_index - 1, :, :7]
 
 # get rigid body state tensor
 _rb_states = gym.acquire_rigid_body_state_tensor(sim)
@@ -495,19 +495,19 @@ while not gym.query_viewer_has_closed(viewer):
     bolt_poses = rb_states_fsm[bolt_idxs, :7]
     hand_poses = rb_states_fsm[hand_idxs, :7]
     dof_pos_fsm = dof_pos.to(fsm_device)
-    cur_grip_sep_fsm = dof_pos_fsm[:, 14] + dof_pos_fsm[:, 15]
+    cur_grip_sep_fsm = dof_pos_fsm[:, 7] + dof_pos_fsm[:, 8]
     for env_idx in range(num_envs):
         fsms[env_idx].update(nut_poses[env_idx, :], bolt_poses[env_idx, :], hand_poses[env_idx, :],
                              cur_grip_sep_fsm[env_idx])
         d_pose[env_idx, :] = fsms[env_idx].d_pose
         grip_sep[env_idx] = fsms[env_idx].gripper_separation
 
-    pos_action[:, 7:14] = dof_pos.squeeze(-1)[:, 7:14] + control_ik(d_pose.unsqueeze(-1).to(device), damping, j_eef,
+    pos_action[:, :7] = dof_pos.squeeze(-1)[:, :7] + control_ik(d_pose.unsqueeze(-1).to(device), damping, j_eef,
                                                                 num_envs)
     # gripper actions depend on distance between hand and box
 
     grip_acts = torch.cat((0.5 * grip_sep, 0.5 * grip_sep), 1).to(device)
-    pos_action[:, 14:16] = grip_acts
+    pos_action[:, 7:9] = grip_acts
 
     # Deploy actions
     gym.set_dof_position_target_tensor(sim, gymtorch.unwrap_tensor(pos_action))
