@@ -1,5 +1,13 @@
 # Xsens
 
+- [Xsens](#xsens)
+  - [Setup](#setup)
+  - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
+  - [Visualize the motion data](#visualize-the-motion-data)
+
+
+## Setup
+
 ## Convert mvnx file to npys
 
 `get_skeleton(mvnx_path, output_dir=None)`
