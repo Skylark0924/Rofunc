@@ -67,6 +67,7 @@ def load_mvnx(file_name):
     joints_element = subject_element.find('mvn:joints', ns)
     if joints_element is not None:
         mvnx_file.file_data['joints'] = parse_joints(joints_element, mvnx_file.file_data['segments'])
+        mvnx_file.create_index_to_joint_dict()  # for later convenience on retrieving joint names
 
     # Parse ergo joint information
     ergo_joints_element = subject_element.find('mvn:ergonomicJointAngles', ns)
