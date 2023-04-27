@@ -1,7 +1,9 @@
 import os
-import numpy as np
-from .src import pytrigno
 import time
+
+import numpy as np
+
+from rofunc.devices.emg.src import pytrigno
 
 
 def record(host, n, samples_per_read, t, root_path, exp_name):
@@ -20,7 +22,6 @@ def record(host, n, samples_per_read, t, root_path, exp_name):
     """
     dev = pytrigno.TrignoEMG(channel_range=(0, 0), samples_per_read=samples_per_read,
                              host=host)
-
     dev.set_channel_range((0, n - 1))
     dev.start()
     data_sensor = []
@@ -28,30 +29,15 @@ def record(host, n, samples_per_read, t, root_path, exp_name):
     for i in range(int(t)):
         # while True:
         data = dev.read() * 1e6
-        t = time.time()
-        data_w_time[0, :] = t
+        system_time = time.time()
+        data_w_time[0, :] = system_time
         data_w_time[1:, :] = data
         print(data_w_time)
         assert data_w_time.shape == (n + 1, samples_per_read)
-        data_sensor.append(data)
+        temp = data_w_time.copy()
+        data_sensor.append(temp)        # change to 'data' if system time is not needed
     print(n, '-channel achieved')
     dev.stop()
 
-    data_sensor = np.reshape(np.transpose(np.array(data_sensor), (0, 2, 1)), (-1, n))
+    data_sensor = np.reshape(np.transpose(np.array(data_sensor), (0, 2, 1)), (-1, n + 1))        # change to 'n' if system time is not needed
     np.save(os.path.join(root_path, exp_name), data_sensor)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument(
-        '-a', '--addr',
-        dest='host',
-        default='10.13.166.60',
-        help="IP address of the machine running TCU. Default is localhost.")
-    args = parser.parse_args()
-
-    # For instance, 4 channels, 2000 samples per read and 10 batches are chosen.
-    # import rofunc as rf
-    # rf.emg.record(args.host, 2, 2000, 10)
-    record(args.host, 2, 2000, 10)
