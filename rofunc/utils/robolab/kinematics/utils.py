@@ -1,4 +1,5 @@
 from urdfpy import URDF
+import rofunc as rf
 
 
 def check_urdf(urdf_path):
@@ -8,19 +9,20 @@ def check_urdf(urdf_path):
 
     link_name = []
     for link in robot.links:
-        str = link.name
-        link_name.append(str)
-    print(link_name)
+        link_name.append(link.name)
+    rf.logger.beauty_print('Robot link names (total {}): {}'.format(len(robot.links), link_name), type='info')
 
     joint_name = []
     for joint in robot.joints:
-        str = joint.name
-        joint_name.append(str)
+        joint_name.append(joint.name)
+    rf.logger.beauty_print('Robot joint names (total {}): {}'.format(len(robot.joints), joint_name), type='info')
 
     actuated_joint_name = []
     for joint in robot.actuated_joints:
-        str = joint.name
-        actuated_joint_name.append(str)
+        actuated_joint_name.append(joint.name)
+    rf.logger.beauty_print(
+        'Robot actuated joint names (total {}): {}'.format(len(robot.actuated_joints), actuated_joint_name),
+        type='info')
 
     # for joint in robot.joints:
     #     print('{} connects {} to {}'.format(
