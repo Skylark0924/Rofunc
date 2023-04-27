@@ -1,16 +1,8 @@
 from urdfpy import URDF
 
 
-def get_fk_from_model(file_path, joint_name, joint_value, export_link='panda_left_link7'):
-    """
-    Get the forward kinematics of the robot from the 3D model
-    :param file_path:
-    :param joint_name:
-    :param joint_value:
-    :param export_link:
-    :return:
-    """
-    robot = URDF.load(file_path)
+def fk(urdf_path, joint_name, joint_value, export_link):
+    robot = URDF.load(urdf_path)
     link_name = []
     for link in robot.links:
         str = link.name
