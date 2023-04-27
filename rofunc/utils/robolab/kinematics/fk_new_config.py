@@ -94,8 +94,8 @@ def transform_worldbasetomobilebase(data):
 
 
 def transform_optitrackbasetomobilebase():
-    translation = np.array([[0, 0.2195, -1.11462]])
-    rotation = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]])
+    translation = np.array([[0.2195, 0, -1.11462]])
+    rotation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
     T_OptitrackBaseToMobileBase = np.r_[np.c_[rotation, translation.T], np.array([[0, 0, 0, 1]])]
     return T_OptitrackBaseToMobileBase
 
