@@ -14,8 +14,3 @@ data = rf.optitrack.export('/home/ubuntu/Data/optitrack/Take 2022-12-21 05.41.07
 root_dir = '/home/ubuntu/Data/optitrack'
 exp_name = 'rigid_body'
 np.save(os.path.join(root_dir, exp_name), data)
-
-# print(data)
-
-data = rf.optitrack.export('/home/ubuntu/Data/optitrack/Take 2022-12-21 05.41.07 PM.csv')
-print(data)
