@@ -1,3 +1,9 @@
+"""
+CURI controllers
+================
+
+This example shows how to use basic controllers of the CURI robot.
+"""
 from isaacgym import gymapi
 from isaacgym import gymutil
 from isaacgym import gymtorch
