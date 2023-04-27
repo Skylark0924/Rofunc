@@ -47,6 +47,8 @@ jobs:
         python setup.py bdist_wheel sdist
         cd ./dist
         pip install *.whl
+        pip uninstall numpy
+        pip install numpy==1.21.6
 #    - name: cuda-toolkit
 #      uses: Jimver/cuda-toolkit@v0.2.8
 #      id: cuda-toolkit
