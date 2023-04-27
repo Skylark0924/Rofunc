@@ -359,13 +359,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/visual/torso_end_v2.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_end_v2_yup.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/torso_end_v2.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_end_v2_yup.STL"/>
       </geometry>
     </collision>
     <inertial>
@@ -766,7 +766,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/flange_iso_04.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/flange_iso_04_yupzfront.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/base">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -775,7 +775,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/flange_iso_04.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/flange_iso_04_yupzfront.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -793,7 +793,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/palm_pinch_l.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/palm_pinch_l_yupzfront1.STL" scale="1000 1000 1000"/>
       </geometry>
       <material name="qbhand/palm">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -802,7 +802,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/palm_pinch_l.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/palm_pinch_l_yupzfront1.STL" scale="1000 1000 1000"/>
       </geometry>
     </collision>
   </link>
@@ -825,7 +825,7 @@
     <origin rpy="-1.57 3.14 0.0" xyz="-0.044 -0.0465 0.002"/>
     <parent link="left_qbhand_palm_link"/>
     <child link="left_qbhand_thumb_knuckle_link"/>
-    <axis xyz="0 0 -1"/>
+    <axis xyz="0 0 1"/>
     <dynamics damping="0.0" friction="0.0"/>
     <limit effort="100" lower="0.0" upper="1.571" velocity="100"/>
     <mimic joint="left_qbhand_synergy_joint" multiplier="2.542"/>
@@ -839,7 +839,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_thumb_l.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_thumb_l_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -848,7 +848,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_thumb_l_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_thumb_l_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -886,7 +886,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -895,7 +895,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -933,7 +933,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -942,7 +942,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -964,7 +964,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -973,7 +973,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1011,7 +1011,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1020,7 +1020,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1058,7 +1058,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/middle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1067,7 +1067,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1105,7 +1105,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1114,7 +1114,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1136,7 +1136,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1145,7 +1145,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1183,7 +1183,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1192,7 +1192,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1230,7 +1230,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/middle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1239,7 +1239,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1277,7 +1277,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1286,7 +1286,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1308,7 +1308,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1317,7 +1317,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1355,7 +1355,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1364,7 +1364,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1402,7 +1402,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/middle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1411,7 +1411,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1449,7 +1449,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1458,7 +1458,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1480,7 +1480,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1489,7 +1489,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1527,7 +1527,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1536,7 +1536,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1574,7 +1574,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/middle">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1583,7 +1583,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1621,7 +1621,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1630,7 +1630,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1881,14 +1881,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/flange_iso_04.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/flange_iso_04_yupzfront.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/base"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/flange_iso_04.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/flange_iso_04_yupzfront.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1906,7 +1906,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/palm_pinch_r.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/palm_pinch_r_yupzfront2.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/palm"/>
     </visual>
@@ -1959,14 +1959,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_thumb_r.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_thumb_r_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_thumb_r_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_thumb_r_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2004,14 +2004,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2049,14 +2049,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2078,14 +2078,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2123,14 +2123,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2168,14 +2168,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/middle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2213,14 +2213,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2242,14 +2242,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2287,14 +2287,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2332,14 +2332,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/middle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2377,14 +2377,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2406,14 +2406,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2451,14 +2451,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_medium_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_medium_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2496,14 +2496,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/middle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2541,14 +2541,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2570,14 +2570,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/knuckle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_knuckle_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_knuckle_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2615,14 +2615,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/proximal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2660,14 +2660,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/middle"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_short_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_short_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2705,14 +2705,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
       <material name="qbhand/distal"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/ph_distal_collision.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="../meshes/qbhand/ph_distal_yupzfront1.STL" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2723,3 +2723,4 @@
   </joint>
   <link name="right_qbhand_end_effector_link"/>
 </robot>
+
