@@ -169,6 +169,15 @@ def export(mvnx_path, output_type='segment', output_dir=None):
             label = joint_name
             assert dim == np.array(joint_angle).shape[0]
             np.save(os.path.join(output_dir, "{}_{}.npy".format(idx, label)), joint_angle)
+
+        ergo_joint_count = mvnx_file.ergo_joint_count
+        for idx in range(ergo_joint_count):
+            ergo_joint_name = mvnx_file.ergo_joint_name_from_index(idx)
+            ergo_joint_angle = mvnx_file.get_ergo_joint_angle(idx)
+
+            label = ergo_joint_name
+            assert dim == np.array(ergo_joint_angle).shape[0]
+            np.save(os.path.join(output_dir, "ergo_{}_{}.npy".format(idx, label)), ergo_joint_angle)
     else:
         raise Exception('Wrong output type, only support segment or joint')
 
