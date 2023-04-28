@@ -47,7 +47,7 @@ jobs:
         python setup.py bdist_wheel sdist
         cd ./dist
         pip install *.whl
-        pip install numpy==1.21.6
+        pip install networkx==3.1
 #    - name: cuda-toolkit
 #      uses: Jimver/cuda-toolkit@v0.2.8
 #      id: cuda-toolkit
