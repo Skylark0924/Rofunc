@@ -73,6 +73,7 @@ def load_mvnx(file_name):
     ergo_joints_element = subject_element.find('mvn:ergonomicJointAngles', ns)
     if ergo_joints_element is not None:
         mvnx_file.file_data['ergo_joints'] = parse_ergo_joints(ergo_joints_element)
+        mvnx_file.create_index_to_ergo_joint_dict()
 
     # Parse foot contact
     foot_contact_definitions_element = subject_element.find('mvn:footContactDefinition', ns)
