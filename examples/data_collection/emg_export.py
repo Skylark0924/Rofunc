@@ -14,9 +14,9 @@ import math
 
 import rofunc as rf
 
-
 a = 20
 b = 0.05
+
 
 def save_multi_image(filename):
     pp = PdfPages(filename)
@@ -26,15 +26,18 @@ def save_multi_image(filename):
         fig.savefig(pp, format='pdf')
     pp.close()
 
+
 def impedance_profile(data):
     impedance_1 = np.zeros(len(data))
     impedance_2 = np.zeros(len(data))
     for i in range(len(data)):
-        impedance_1[i] = a * (1 - math.exp(- b * (data[i, 0] + data[i, 1] + data[i, 2]))) / (1 + math.exp(- b * (data[i, 0] + data[i, 1] + data[i, 2])))
+        impedance_1[i] = a * (1 - math.exp(- b * (data[i, 0] + data[i, 1] + data[i, 2]))) / (
+                    1 + math.exp(- b * (data[i, 0] + data[i, 1] + data[i, 2])))
     for i in range(len(data)):
-        impedance_2[i] = 1.5*a * (1 - math.exp(- b * (data[i, 3] + data[i, 3]))) / (
-                    1 + math.exp(- b * (data[i, 3] + data[i, 3])))
+        impedance_2[i] = 1.5 * a * (1 - math.exp(- b * (data[i, 3] + data[i, 3]))) / (
+                1 + math.exp(- b * (data[i, 3] + data[i, 3])))
     return impedance_1, impedance_2
+
 
 emg = np.load('/home/ubuntu/Data/emg_record/20230306/20230306_093814.npy')
 emg = emg[:, 1:]
@@ -42,7 +45,8 @@ emg = emg[:, 1:]
 SAMPING_RATE = 2000
 k = 4
 n = 6
-data_filter, data_clean, data_mvc, data_activity, data_abs, data_mvcscale = rf.emg.process_all_channels(emg, n, SAMPING_RATE, k)
+data_filter, data_clean, data_mvc, data_activity, data_abs, data_mvcscale = rf.emg.process_all_channels(emg, n,
+                                                                                                        SAMPING_RATE, k)
 impedance_1, impedance_2 = impedance_profile(data_mvcscale)
 # impedance_1 = np.where(impedance_1 > 0.15, 1, 0)
 # impedance_2 = np.where(impedance_2 > 0.15, 1, 0)
