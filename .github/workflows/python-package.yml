@@ -44,4 +44,4 @@ jobs:
 #        nvcc -V
     - name: Test with pytest
       run: |
-        pytest test/test_*.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+        pytest tests/test_*.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
