@@ -21,6 +21,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ matrix.os }}-pip-${{ hashFiles('**/**/requirements.txt') }}
+        restore-keys: |
+          ${{ matrix.os }}-pip-
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
