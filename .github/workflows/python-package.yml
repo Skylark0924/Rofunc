@@ -12,12 +12,10 @@ on:
 jobs:
   build:
     name: Test on Python ${{ matrix.python-version }} and ${{ matrix.os }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-#        python-version: ["3.6", "3.7", "3.8"]
-#        python-version: ["3.7", "3.8"]
         python-version: ["3.8"]
         os: [ubuntu-18.04]
 
@@ -27,27 +25,14 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install ZED Python API
-      run: |
-        cd /usr/local/zed/
-        python get_python_api.py
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest pytest-cov
+        git clone https://github.com/Skylark0924/Rofunc.git
+        cd Rofunc
         pip install -r requirements.txt
-        python -m pip install cython numpy opencv-python pyopengl
-        pip install torch==1.10.2+cu113 torchvision==0.11.3+cu113 torchaudio==0.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
-    - name: Install rofunc
-      run: |
-        cd /home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science
-        pip uninstall -y rofunc
-        rm -rf ./build
-        rm -rf ./dist
-        python setup.py bdist_wheel sdist
-        cd ./dist
-        pip install *.whl
-        pip install networkx==3.1
+        pip install .
 #    - name: cuda-toolkit
 #      uses: Jimver/cuda-toolkit@v0.2.8
 #      id: cuda-toolkit
@@ -57,12 +42,6 @@ jobs:
 #        echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
 #        echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
 #        nvcc -V
-#    - name: Lint with flake8
-#      run: |
-#        # stop the build if there are Python syntax errors or undefined names
-#        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=
-#        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-#        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest tests/test_*.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+        pytest test/test_*.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html

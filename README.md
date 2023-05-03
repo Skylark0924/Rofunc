@@ -51,11 +51,7 @@ cd Rofunc
 # Create a conda environment
 # Python 3.8 is strongly recommended
 conda create -n rofunc python=3.8
-conda activate rofunc
-
-# Install the requirements and rofunc
-pip install -r requirements.txt
-pip install .
+sh ./scripts/install.sh
 ```
 
 > **Note**
