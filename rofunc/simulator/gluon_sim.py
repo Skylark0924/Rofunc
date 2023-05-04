@@ -7,7 +7,6 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 class GluonSim(RobotSim):
     def __init__(self, args, **kwargs):
         super().__init__(args, robot_name="gluon", **kwargs)
-        self._setup_robot()
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
