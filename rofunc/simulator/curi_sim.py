@@ -7,7 +7,65 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 class CURISim(RobotSim):
     def __init__(self, args, **kwargs):
         super().__init__(args, robot_name="CURI", **kwargs)
-        self._setup_robot()
+
+    def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
+        from isaacgym import gymapi
+
+        gym = self.gym if gym is None else gym
+        envs = self.envs if envs is None else envs
+        robot_asset = self.robot_asset if robot_asset is None else robot_asset
+        robot_handles = self.robot_handles if robot_handles is None else robot_handles
+
+        # configure robot dofs
+        robot_dof_props = gym.get_asset_dof_properties(robot_asset)
+        robot_lower_limits = robot_dof_props["lower"]
+        robot_upper_limits = robot_dof_props["upper"]
+        robot_ranges = robot_upper_limits - robot_lower_limits
+        robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
+
+        # override default stiffness and damping values
+        # TODO: make this configurable
+        # robot_dof_props['stiffness'].fill(100000.0)
+        # robot_dof_props['damping'].fill(100000.0)
+
+        # Give a desired pose for first 2 robot joints to improve stability
+        # TODO: make this configurable
+        # robot_dof_props["driveMode"][0:2] = gymapi.DOF_MODE_EFFORT
+        robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][:].fill(300.0)
+        robot_dof_props["damping"][:].fill(80.0)
+
+        # grippers
+        robot_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][14:16].fill(800.0)
+        robot_dof_props["damping"][14:16].fill(40.0)
+        robot_dof_props["driveMode"][23:25].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][23:25].fill(800.0)
+        robot_dof_props["damping"][23:25].fill(40.0)
+
+        # default dof states and position targets
+        robot_num_dofs = gym.get_asset_dof_count(robot_asset)
+        default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
+        default_dof_pos[7:] = robot_mids[7:]
+        # # grippers open
+        default_dof_pos[14:16] = robot_upper_limits[14:16]
+        default_dof_pos[23:25] = robot_upper_limits[23:25]
+
+        default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
+        default_dof_state["pos"] = default_dof_pos
+
+        # # send to torch
+        # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
+
+        for i in range(len(envs)):
+            # set dof properties
+            gym.set_actor_dof_properties(envs[i], robot_handles[i], robot_dof_props)
+
+            # set initial dof states
+            gym.set_actor_dof_states(envs[i], robot_handles[i], default_dof_state, gymapi.STATE_ALL)
+
+            # set initial position targets
+            gym.set_actor_dof_position_targets(envs[i], robot_handles[i], default_dof_pos)
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
