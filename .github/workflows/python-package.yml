@@ -30,7 +30,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install flake8 pytest pytest-cov
+          pip install pip==21.0
           pip install -r requirements.txt
+          pip install .
           
           sudo apt install -qqy lsb-release gnupg2 curl
           echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" | sudo tee /etc/apt/sources.list.d/robotpkg.list
