@@ -55,21 +55,17 @@ class MultiRobotSim:
             envs.append(env)
 
             # add robots
-            num_robots_in_one_env = 0
             for robot_name, robot_sim in self.robot_sims.items():
                 s = robot_sim
                 pose = gymapi.Transform()
                 pose.p = gymapi.Vec3(s.init_pose_vec[0], s.init_pose_vec[1], s.init_pose_vec[2])
                 pose.r = gymapi.Quat(s.init_pose_vec[3], s.init_pose_vec[4], s.init_pose_vec[5], s.init_pose_vec[6])
-                robot_handle = self.gym.create_actor(env, self.multi_robot_assets[robot_name], pose, robot_name, i,
-                                                     2 + num_robots_in_one_env)
+                robot_handle = self.gym.create_actor(env, self.multi_robot_assets[robot_name], pose, robot_name, i, -1)
                 self.gym.enable_actor_dof_force_sensors(env, robot_handle)
                 multi_robot_handles[robot_name].append(robot_handle)
-                num_robots_in_one_env += 1
 
         self.envs = envs
         self.multi_robot_handles = multi_robot_handles
-        self.num_robots_in_one_env = num_robots_in_one_env
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """

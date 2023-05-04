@@ -198,7 +198,7 @@ class RobotSim:
             envs.append(env)
 
             # add robot
-            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, "robot", i, 2)
+            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, "robot", i, -1)
             self.gym.enable_actor_dof_force_sensors(env, robot_handle)
             robot_handles.append(robot_handle)
 
