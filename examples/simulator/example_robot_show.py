@@ -14,6 +14,7 @@ args.use_gpu_pipeline = False
 
 # CURI
 # CURIsim = rf.sim.CURISim(args)
+# CURIsim.init()
 # CURIsim.show(visual_obs_flag=True)
 
 # walker
@@ -36,6 +37,14 @@ args.use_gpu_pipeline = False
 # sawyersim = rf.sim.SawyerSim(args)
 # sawyersim.show()
 
-Gluonsim = rf.sim.GluonSim(args)
-Gluonsim.show(visual_obs_flag=False)
+# gluon
+# Gluonsim = rf.sim.GluonSim(args, init_pose_vec=[1, 0, 0])
+# Gluonsim.show(visual_obs_flag=False)
 
+# Multi Robots
+CURIsim = rf.sim.CURISim(args)
+CURIsim2 = rf.sim.CURISim(args, init_pose_vec=[2, 0, 0, 0., 0.707107, 0.707107, 0.])
+
+MRsim = rf.sim.MultiRobotSim(args, robot_sims={"CURI": CURIsim, "CURI2": CURIsim2})
+MRsim.init()
+MRsim.show()
