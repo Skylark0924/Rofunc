@@ -148,6 +148,9 @@ class CURISim(RobotSim):
         assert intf_mode in ["actor_dof_efforts", "body_forces", "body_force_at_pos"], \
             "The interference mode should be one of ['actor_dof_efforts', 'body_forces', 'body_force_at_pos']"
 
+        if attracted_joints is None:
+            attracted_joints = ["panda_left_hand", "panda_right_hand"]
+
         beauty_print('Execute multi-joint trajectory with interference with the CURI simulator')
 
         device = self.args.sim_device if self.args.use_gpu_pipeline else 'cpu'
@@ -162,7 +165,7 @@ class CURISim(RobotSim):
             intf_torques = intf_torques.to(device)
 
         # Create the attractor
-        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self.setup_attractors(traj, attracted_joints)
+        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attracted_joints)
 
         # Time to wait in seconds before moving robot
         next_curi_update_time = 1
