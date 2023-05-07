@@ -125,10 +125,10 @@ class RobotSim:
             self.asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
             self.init_pose_vec = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         elif self.robot_name == "walker":
-            self.asset_file = "urdf/walker/urdf/walker.urdf"
+            self.asset_file = "urdf/walker/urdf/walker_cartesio.urdf"
             self.fix_base_link = True
             self.flip_visual_attachments = False
-            self.init_pose_vec = (0., 2., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+            self.init_pose_vec = (0., 1.3, 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         elif self.robot_name == "CURI-mini":
             self.asset_file = "urdf/curi_mini/urdf/diablo_simulation.urdf"
             self.flip_visual_attachments = False
@@ -198,7 +198,7 @@ class RobotSim:
             envs.append(env)
 
             # add robot
-            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, "robot", i, -1)
+            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, "robot", i, 2)
             self.gym.enable_actor_dof_force_sensors(env, robot_handle)
             robot_handles.append(robot_handle)
 
@@ -248,7 +248,7 @@ class RobotSim:
             attractor_handles.append(attractor_handle)
         return attractor_handles, axes_geom, sphere_geom
 
-    def setup_robot_dof_prop(self):
+    def setup_robot_dof_prop(self, **kwargs):
         raise NotImplementedError
 
     def _setup_attractors(self, traj, attracted_joints):

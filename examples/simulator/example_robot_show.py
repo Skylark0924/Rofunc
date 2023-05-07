@@ -19,6 +19,7 @@ args.use_gpu_pipeline = False
 
 # walker
 # walkersim = rf.sim.WalkerSim(args)
+# walkersim.init()
 # walkersim.show()
 
 # CURI-mini
@@ -43,8 +44,8 @@ args.use_gpu_pipeline = False
 
 # Multi Robots
 CURIsim = rf.sim.CURISim(args)
-CURIsim2 = rf.sim.CURISim(args, init_pose_vec=[2, 0, 0, 0., 0.707107, 0.707107, 0.])
+walkersim = rf.sim.WalkerSim(args, init_pose_vec=[2, 1.3, 0, 0., 0.707107, 0.707107, 0.])
 
-MRsim = rf.sim.MultiRobotSim(args, robot_sims={"CURI": CURIsim, "CURI2": CURIsim2})
+MRsim = rf.sim.MultiRobotSim(args, robot_sims={"CURI": CURIsim, "walker": walkersim})
 MRsim.init()
 MRsim.show()
