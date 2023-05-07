@@ -28,13 +28,14 @@ class CURISim(RobotSim):
         # robot_dof_props['stiffness'].fill(100000.0)
         # robot_dof_props['damping'].fill(100000.0)
 
-        # Give a desired pose for first 2 robot joints to improve stability
-        # TODO: make this configurable
-        # robot_dof_props["driveMode"][0:2] = gymapi.DOF_MODE_EFFORT
-        robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][:].fill(300.0)
-        robot_dof_props["damping"][:].fill(80.0)
-
+        # Wheels
+        robot_dof_props["driveMode"][:4].fill(gymapi.DOF_MODE_VEL)
+        robot_dof_props["stiffness"][:4].fill(300.0)
+        robot_dof_props["damping"][:4].fill(80.0)
+        # Torso and arms
+        robot_dof_props["driveMode"][4:].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][4:].fill(300.0)
+        robot_dof_props["damping"][4:].fill(80.0)
         # grippers
         robot_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
         robot_dof_props["stiffness"][14:16].fill(800.0)
@@ -46,7 +47,7 @@ class CURISim(RobotSim):
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)
         default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
-        default_dof_pos[7:] = robot_mids[7:]
+        default_dof_pos = robot_mids
         # # grippers open
         default_dof_pos[14:16] = robot_upper_limits[14:16]
         default_dof_pos[23:25] = robot_upper_limits[23:25]
