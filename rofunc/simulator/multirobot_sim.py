@@ -60,7 +60,7 @@ class MultiRobotSim:
                 pose = gymapi.Transform()
                 pose.p = gymapi.Vec3(s.init_pose_vec[0], s.init_pose_vec[1], s.init_pose_vec[2])
                 pose.r = gymapi.Quat(s.init_pose_vec[3], s.init_pose_vec[4], s.init_pose_vec[5], s.init_pose_vec[6])
-                robot_handle = self.gym.create_actor(env, self.multi_robot_assets[robot_name], pose, robot_name, i, -1)
+                robot_handle = self.gym.create_actor(env, self.multi_robot_assets[robot_name], pose, robot_name, i, 2)
                 self.gym.enable_actor_dof_force_sensors(env, robot_handle)
                 multi_robot_handles[robot_name].append(robot_handle)
 
