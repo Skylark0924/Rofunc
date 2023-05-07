@@ -62,6 +62,7 @@ def load_mvnx(file_name):
     sensors_element = subject_element.find('mvn:sensors', ns)
     if sensors_element is not None:
         mvnx_file.file_data['sensors'] = parse_sensor(sensors_element, mvnx_file.file_data['segments']['names'])
+        mvnx_file.create_index_to_sensor_dict()  # for later convenience on retrieving sensor names
 
     # Parse joint information
     joints_element = subject_element.find('mvn:joints', ns)
