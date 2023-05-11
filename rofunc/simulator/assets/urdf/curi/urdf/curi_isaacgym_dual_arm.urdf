@@ -328,13 +328,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/visual/torso_end.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_end_v2_yup.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/torso_end.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_end_v2_yup.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -351,7 +351,7 @@
   <joint name="head_joint_torso_end" type="fixed">
     <parent link="torso_end"/>
     <child link="head_base"/>
-    <origin rpy="0 0 0" xyz="0.01466 0 0.2775"/>
+    <origin rpy="0 0 0" xyz="0.02 0 0.3929"/>
   </joint>
   <link name="head_base">
     <visual>
@@ -434,7 +434,7 @@
   <joint name="panda_left_joint_torso_end" type="fixed">
     <parent link="torso_end"/>
     <child link="panda_left_link0"/>
-    <origin rpy="-1.5004311592913677 0.8772798703277918 -0.2038499389018784" xyz="0.02842 0.11216 0.19004"/>
+    <origin rpy="-1.3685238493647454 0.913218224774749 -0.6168337646727412" xyz="-0.08537 0.07009 0.2535"/>
   </joint>
   <link name="panda_left_link0">
     <visual>
@@ -655,7 +655,7 @@
   <joint name="panda_right_joint_torso_end" type="fixed">
     <parent link="torso_end"/>
     <child link="panda_right_link0"/>
-    <origin rpy="1.5004311592913677 0.8772798703277918 0.2038499389018784" xyz="0.02842 -0.11216 0.19004"/>
+    <origin rpy="1.3685238493647454 0.913218224774749 0.6168337646727412" xyz="-0.08537 -0.07009 0.2535"/>
   </joint>
   <link name="panda_right_link0">
     <visual>

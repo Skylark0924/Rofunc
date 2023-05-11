@@ -6,9 +6,9 @@ This example runs a Tai Chi demo bimanual trajectory by using CURI.
 """
 import os
 import numpy as np
-import rofunc as rf
 from isaacgym import gymutil
 import torch
+import rofunc as rf
 
 args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
@@ -33,12 +33,11 @@ torques[:, 9, 1] = torque_intf
 # torques[:, 36, 2] = torque_intf
 # efforts[:, 9, 0] = 100000
 efforts[4] = -100000
-rf.curi.run_traj_multi_joints_with_interference(args, traj=[traj_l, traj_r], intf_mode="body_forces",
-                                                intf_forces=forces, intf_torques=torques,
-                                                intf_index=[50],
-                                                num_envs=num_envs, update_freq=0.001, save_name='state7')
 
-# rf.curi.run_traj_multi_joints_with_interference(args, traj=[traj_l, traj_r], intf_index=[i for i in range(50, 100)],
-#                                                 intf_mode="actor_dof_efforts",
-#                                                 intf_efforts=efforts,
-#                                                 num_envs=num_envs, update_freq=0.001, save_name='state5')
+CURIsim = rf.sim.CURISim(args, num_envs=num_envs, fix_base_link=True)
+CURIsim.init()
+CURIsim.run_traj_multi_joints_with_interference(traj=[traj_l, traj_r],
+                                                attracted_joints=["panda_left_hand", "panda_right_hand"],
+                                                intf_mode="body_forces",
+                                                intf_forces=forces, intf_torques=torques,
+                                                intf_index=[50], update_freq=0.001, save_name='state7')
