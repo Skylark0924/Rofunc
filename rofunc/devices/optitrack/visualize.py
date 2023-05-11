@@ -14,7 +14,7 @@ class PauseAnimation(object):
     def __init__(self, fig, *args, **kwargs):
         self.anim = animation.FuncAnimation(fig, *args, **kwargs)
         self.paused = False
-        fig.canvas.mpl_connect('button_press_event', self._toggle_pause)
+        fig.canvas.mpl_connect('key_press_event', self._toggle_pause)
 
     def _toggle_pause(self, *args, **kwargs):
         if self.paused:
@@ -25,7 +25,7 @@ class PauseAnimation(object):
 
 
 def plot_objects(csv_path: str, objs: dict, meta: dict,
-                 show_markers=True, save_gif=False, scale=''):
+                 show_markers:bool =True, save_gif: bool=False, scale: str=''):
     """Plots the objects in the objs dict.
     The default bounding box for the plot is:
     xlim = (-1200, 1200)
@@ -46,8 +46,6 @@ def plot_objects(csv_path: str, objs: dict, meta: dict,
         save_gif (bool, optional): Whether to save the gif. Defaults to False.
         scale (str, optional): Normalization method. Defaults to ''.
     """
-    print('[plot_objects] Loading data...')
-    print('[plot_objects] data path: ', osp.join(csv_path, f"{meta['Take Name']}.csv"))
     data = pd.read_csv(osp.join(csv_path, f"{meta['Take Name']}.csv"), skiprows=6)
     xlim = (-1200, 1200)
     ylim = (-0.5, 2000)
@@ -109,12 +107,14 @@ def plot_objects(csv_path: str, objs: dict, meta: dict,
             pts = (pts - t) * s
             if not np.isnan(pts[i]).any():
                 ax.scatter(*pts[i], marker="o", color=COLORS[n % len(COLORS)], label=obj)
+                ax.text(*pts[i], obj[-5:])
                 if show_markers:
                     for marker in objs_loc[obj]['markers']:
                         pts = objs_loc[obj]['markers'][marker]['data']
                         pts = (pts - t) * s
-                        if not np.isnan(pt[i]).any():
-                            ax.scatter(*pts[i], marker=f"${marker}$", color=COLORS[n % len(COLORS)])
+                        if not np.isnan(pts[i]).any():
+                                ax.scatter(*pts[i], marker=f"${marker}$", color=COLORS[n % len(COLORS)])
+
         ax.legend()
 
     ax.set_xlim(*xlim)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
