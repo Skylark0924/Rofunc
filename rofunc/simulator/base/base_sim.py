@@ -103,7 +103,8 @@ class PlaygroundSim:
 
 
 class RobotSim:
-    def __init__(self, args, robot_name, asset_root=None, fix_base_link=False, flip_visual_attachments=True,
+    def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=False,
+                 flip_visual_attachments=True,
                  init_pose_vec=None, num_envs=1, device="cpu"):
         """
         Initialize the robot simulator
@@ -146,6 +147,11 @@ class RobotSim:
             self.flip_visual_attachments = False
             self.fix_base_link = True
             self.init_pose_vec = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+        elif self.robot_name == "human":
+            self.asset_file = asset_file
+            self.flip_visual_attachments = False
+            self.fix_base_link = False
+            self.init_pose_vec = (0., 2., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         else:
             raise ValueError(
                 "The robot {} is not supported. Please choose a robot in [CURI, walker, CURI-mini, baxter, sawyer]".format(
@@ -155,6 +161,8 @@ class RobotSim:
             import site
             pip_root_path = site.getsitepackages()[0]
             self.asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
+        else:
+            self.asset_root = asset_root
 
         self.asset_options = gymapi.AssetOptions()
         self.asset_options.fix_base_link = self.fix_base_link
