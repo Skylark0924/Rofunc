@@ -1,5 +1,4 @@
-<robot
-    name="walker">
+<robot name="walker">
   <link name="world"/>
   <joint name="reference" type="floating">
     <parent link="world"/>

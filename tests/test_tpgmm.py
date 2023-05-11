@@ -68,8 +68,8 @@ def test_7d_bi_tpgmm():
     end_xdx_l = representation.repr_l.demos_xdx[ref_demo_idx][0]
     start_xdx_r = representation.repr_r.demos_xdx[ref_demo_idx][0]
     end_xdx_r = representation.repr_r.demos_xdx[ref_demo_idx][0]
-    task_params = {'Left': {'start_xdx': start_xdx_l, 'end_xdx': end_xdx_l},
-                   'Right': {'start_xdx': start_xdx_r, 'end_xdx': end_xdx_r}}
+    task_params = {'left': {'start_xdx': start_xdx_l, 'end_xdx': end_xdx_l},
+                   'right': {'start_xdx': start_xdx_r, 'end_xdx': end_xdx_r}}
     traj_l, traj_r, _, _ = representation.generate(model_l, model_r, ref_demo_idx, task_params)
 
 
