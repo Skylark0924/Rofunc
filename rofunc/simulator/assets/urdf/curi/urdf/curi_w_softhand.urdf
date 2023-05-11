@@ -442,6 +442,30 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     <mimic joint="torso_actuated_joint3" multiplier="1"/>
   </joint>
+  <link name="shell">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/visual/Shell_v2_Share_zup.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/collision/Shell_v2_Share_zup.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-5.05e-03 -0.09e-03 0.27614"/>
+      <mass value="1.63531"/>
+      <inertia ixx="0.010693997" ixy="5.645e-06" ixz="-9.4779e-04" iyy="0.026717753" iyz="-8.196e-06" izz="0.036543169"/>
+    </inertial>
+  </link>
+  <joint name="shell_torso_end" type="fixed">
+    <parent link="torso_end"/>
+    <child link="shell"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
   <joint name="head_joint_torso_end" type="fixed">
     <parent link="torso_end"/>
     <child link="head_base"/>
