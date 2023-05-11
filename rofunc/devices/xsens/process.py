@@ -2,6 +2,7 @@ import ast
 import json
 import os
 from tqdm import tqdm
+import pathlib
 
 import numpy as np
 import pandas as pd
@@ -104,61 +105,81 @@ def get_skeleton_from_json_batch(json_dir):
         get_skeleton_from_json(json_path)
 
 
-def export(mvnx_path, output_dir=None):
+def export(mvnx_path, output_type='segment', output_dir=None):
     """
-    Example:
-        import rofunc as rf
 
-        mvnx_file = '/home/ubuntu/Data/06_24/Xsens/dough_01.mvnx'
-        rf.xsens.export(mvnx_file)
+    :param mvnx_path:
+    :param output_type: type of output data, support segment or joint
+    :param output_dir:
+    :return:
     """
-    if mvnx_path.split('.')[-1] == 'mvnx':
+    if mvnx_path.endswith('.mvnx'):
         mvnx_file = load_mvnx(mvnx_path)
     else:
         raise Exception('Wrong file type, only support .mvnx')
 
     if output_dir is None:
         output_dir = mvnx_path.split('.mvnx')[0]
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-        else:
-            raise Exception('There are already some files in {}, please delete this directory.'.format(output_dir))
+        output_dir = os.path.join(output_dir, output_type)
+        pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
         beauty_print('Save .npys in {}'.format(output_dir), level=2)
     else:
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-            print('{} not exist, created.'.format(output_dir))
+        pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
+        beauty_print('{} not exist, created.'.format(output_dir), level=2)
 
-    segment_count = mvnx_file.segment_count
-    dim = mvnx_file.frame_count
+    if output_type == 'segment':
+        segment_count = mvnx_file.segment_count
+        dim = mvnx_file.frame_count
 
-    for idx in range(segment_count):
-        segment_name = mvnx_file.segment_name_from_index(idx)
-        segment_pos = mvnx_file.get_segment_pos(idx)
-        segment_ori = mvnx_file.get_segment_ori(idx)
+        for idx in range(segment_count):
+            segment_name = mvnx_file.segment_name_from_index(idx)
+            segment_pos = mvnx_file.get_segment_pos(idx)
+            segment_ori = mvnx_file.get_segment_ori(idx)
 
-        label = segment_name
-        pose = np.hstack((np.array(segment_pos), np.array(segment_ori)))
-        assert dim == pose.shape[0]
-        np.save(os.path.join(output_dir, "{}.npy".format(label)), pose)
+            label = segment_name
+            pose = np.hstack((np.array(segment_pos), np.array(segment_ori)))
+            assert dim == pose.shape[0]
+            np.save(os.path.join(output_dir, "{}_{}.npy".format(idx, label)), pose)
 
-    for finger_segment_name in mvnx_file.file_data['finger_segments']['names']['left']:
-        segment_pos = mvnx_file.get_finger_segment_pos('left', finger_segment_name)
-        segment_ori = mvnx_file.get_finger_segment_ori('left', finger_segment_name)
+        for finger_segment_name in mvnx_file.file_data['finger_segments']['names']['left']:
+            segment_pos = mvnx_file.get_finger_segment_pos('left', finger_segment_name)
+            segment_ori = mvnx_file.get_finger_segment_ori('left', finger_segment_name)
 
-        label = finger_segment_name
-        pose = np.hstack((np.array(segment_pos), np.array(segment_ori)))
-        assert dim == pose.shape[0]
-        np.save(os.path.join(output_dir, "left_finger_{}.npy".format(label)), pose)
+            label = finger_segment_name
+            pose = np.hstack((np.array(segment_pos), np.array(segment_ori)))
+            assert dim == pose.shape[0]
+            np.save(os.path.join(output_dir, "left_finger_{}.npy".format(label)), pose)
 
-    for finger_segment_name in mvnx_file.file_data['finger_segments']['names']['right']:
-        segment_pos = mvnx_file.get_finger_segment_pos('right', finger_segment_name)
-        segment_ori = mvnx_file.get_finger_segment_ori('right', finger_segment_name)
+        for finger_segment_name in mvnx_file.file_data['finger_segments']['names']['right']:
+            segment_pos = mvnx_file.get_finger_segment_pos('right', finger_segment_name)
+            segment_ori = mvnx_file.get_finger_segment_ori('right', finger_segment_name)
 
-        label = finger_segment_name
-        pose = np.hstack((np.array(segment_pos), np.array(segment_ori)))
-        assert dim == pose.shape[0]
-        np.save(os.path.join(output_dir, "right_finger_{}.npy".format(label)), pose)
+            label = finger_segment_name
+            pose = np.hstack((np.array(segment_pos), np.array(segment_ori)))
+            assert dim == pose.shape[0]
+            np.save(os.path.join(output_dir, "right_finger_{}.npy".format(label)), pose)
+    elif output_type == 'joint':
+        joint_count = mvnx_file.joint_count
+        dim = mvnx_file.frame_count
+
+        for idx in range(joint_count):
+            joint_name = mvnx_file.joint_name_from_index(idx)
+            joint_angle = mvnx_file.get_joint_angle(idx)
+
+            label = joint_name
+            assert dim == np.array(joint_angle).shape[0]
+            np.save(os.path.join(output_dir, "{}_{}.npy".format(idx, label)), joint_angle)
+
+        ergo_joint_count = mvnx_file.ergo_joint_count
+        for idx in range(ergo_joint_count):
+            ergo_joint_name = mvnx_file.ergo_joint_name_from_index(idx)
+            ergo_joint_angle = mvnx_file.get_ergo_joint_angle(idx)
+
+            label = ergo_joint_name
+            assert dim == np.array(ergo_joint_angle).shape[0]
+            np.save(os.path.join(output_dir, "ergo_{}_{}.npy".format(idx, label)), ergo_joint_angle)
+    else:
+        raise Exception('Wrong output type, only support segment or joint')
 
 
 def export_time(mvnx_path, output_dir=None):
@@ -191,7 +212,6 @@ def export_time(mvnx_path, output_dir=None):
     np.save(os.path.join(output_dir, "time.npy"), np.array(time))
 
 
-
 def export_batch(mvnx_dir):
     """
     Example:
@@ -205,3 +225,15 @@ def export_batch(mvnx_dir):
         if mvnx.split('.')[-1] == 'mvnx':
             mvnx_path = os.path.join(mvnx_dir, mvnx)
             export(mvnx_path)
+
+
+def get_transformation_matrices(joints_dir):
+    """
+
+    :param joints_dir: the directory path of joints data
+    :return:
+    """
+    ...
+
+
+

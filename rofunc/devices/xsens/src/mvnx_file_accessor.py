@@ -50,7 +50,8 @@ class MvnxFileAccessor:
 
     @property
     def ergo_joint_count(self):
-        ergo_joint_count = len(self.file_data['ergo_joints']) if self.file_data['ergo_joints'] is not None else None
+        ergo_joint_count = len(self.file_data['ergo_joints']['names']) if self.file_data[
+                                                                              'ergo_joints'] is not None else None
         return ergo_joint_count  # 'ergoJointCount' non-existing in mvnx
 
     @property
@@ -79,6 +80,9 @@ class MvnxFileAccessor:
         self._first_frame = 0
         self._last_frame = 0
         self._index_to_segment = {}
+        self._index_to_joint = {}
+        self._index_to_sensor = {}
+        self._index_to_ergo_joint = {}
 
     def create_index_to_segment_dict(self):
         segment_index = 0
@@ -86,6 +90,27 @@ class MvnxFileAccessor:
             if 'label' in segment:
                 self._index_to_segment[segment_index] = segment['label']
             segment_index += 1
+
+    def create_index_to_joint_dict(self):
+        joint_index = 0
+        for joint in self.file_data['joints']['elements']:
+            if 'label' in joint:
+                self._index_to_joint[joint_index] = joint['label']
+            joint_index += 1
+
+    def create_index_to_sensor_dict(self):
+        sensor_index = 0
+        for sensor in self.file_data['sensors']['elements']:
+            if 'label' in sensor:
+                self._index_to_sensor[sensor_index] = sensor['label']
+            sensor_index += 1
+
+    def create_index_to_ergo_joint_dict(self):
+        ergo_joint_index = 0
+        for ergo_joint in self.file_data['ergo_joints']['elements']:
+            if 'label' in ergo_joint:
+                self._index_to_ergo_joint[ergo_joint_index] = ergo_joint['label']
+            ergo_joint_index += 1
 
     def set_frame_window(self, first_frame, last_frame):
         self._first_frame = first_frame
@@ -144,6 +169,15 @@ class MvnxFileAccessor:
     def segment_name_from_index(self, segment_index):
         return self._index_to_segment[segment_index]
 
+    def joint_name_from_index(self, joint_index):
+        return self._index_to_joint[joint_index]
+
+    def sensor_name_from_index(self, sensor_index):
+        return self._index_to_sensor[sensor_index]
+
+    def ergo_joint_name_from_index(self, ergo_joint_index):
+        return self._index_to_ergo_joint[ergo_joint_index]
+
     def point_name_from_indices(self, segment_index, point_index):
         segment_name = self.segment_name_from_index(segment_index)
         segment = self.file_data['segments']['elements'][segment_name]
@@ -153,7 +187,7 @@ class MvnxFileAccessor:
 
     def identity_pose_is_valid(self):
         return ('identity' in self.file_data) and \
-               (self.identity_pose()['segments_counts'] > 0)
+            (self.identity_pose()['segments_counts'] > 0)
 
     def identity_pose_segment_pos(self, segment):
         return self.identity_pose()['segments'][segment]['pos_g']
@@ -163,7 +197,7 @@ class MvnxFileAccessor:
 
     def t_pose_is_valid(self):
         return ('tpose' in self.file_data) and \
-               (self.t_pose()['segments_counts'] > 0)
+            (self.t_pose()['segments_counts'] > 0)
 
     def t_pose_segment_pos(self, segment):
         return self.t_pose()['segments'][segment]['pos_g']

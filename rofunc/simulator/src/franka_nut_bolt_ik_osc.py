@@ -203,7 +203,7 @@ gym = gymapi.acquire_gym()
 
 # Add custom arguments
 custom_parameters = [
-    {"name": "--num_envs", "type": int, "default": 4, "help": "Number of environments to create"},
+    {"name": "--num_envs", "type": int, "default": 1, "help": "Number of environments to create"},
 ]
 args = gymutil.parse_arguments(
     description="Franka Jacobian Inverse Kinematics (IK) Nut-Bolt Screwing",

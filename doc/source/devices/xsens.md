@@ -1,5 +1,13 @@
 # Xsens
 
+- [Xsens](#xsens)
+  - [Setup](#setup)
+  - [Convert mvnx file to npys](#convert-mvnx-file-to-npys)
+  - [Visualize the motion data](#visualize-the-motion-data)
+
+
+## Setup
+
 ## Convert mvnx file to npys
 
 `get_skeleton(mvnx_path, output_dir=None)`
@@ -36,7 +44,7 @@ skeleton_data_path = '[your_path]/xsens_data/test'
 rf.xsens.plot_skeleton(skeleton_data_path)
 ```
 
-![](../img/dough_01.gif)
+![](../img/Videos/dough_01.gif)
 
 > We also provide a batch form for saving gifs of several skeleton data in parallel.
 

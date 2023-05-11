@@ -34,6 +34,7 @@ from tqdm import tqdm
 import numpy as np
 import rofunc as rf
 
+
 def get_objects(input_path: str):
     """Returns a dictionary of objects from the Optitrack data.
     The Optitack csv must have the original name format (e.g. "Take 2020-06-03 15-00-00.csv").
