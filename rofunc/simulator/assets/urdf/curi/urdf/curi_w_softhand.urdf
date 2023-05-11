@@ -211,12 +211,6 @@
         <mesh filename="../meshes/clover/visual/control_box.dae"/>
       </geometry>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="../meshes/clover/collision/control_box.stl"/>
-      </geometry>
-    </collision>
     <inertial>
       <!-- Estimated guesses from CAD -->
       <origin rpy="0 0 0" xyz="-0.221652 1.4173e-02 0.165597"/>
@@ -365,13 +359,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/visual/torso_end.dae"/>
+        <mesh filename="../meshes/clover/visual/torso_end_v2.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/torso_end.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_end_v2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -448,10 +442,34 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     <mimic joint="torso_actuated_joint3" multiplier="1"/>
   </joint>
+  <link name="shell">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/visual/Shell_v2_Share_zup.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/collision/Shell_v2_Share_zup.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-5.05e-03 -0.09e-03 0.27614"/>
+      <mass value="1.63531"/>
+      <inertia ixx="0.010693997" ixy="5.645e-06" ixz="-9.4779e-04" iyy="0.026717753" iyz="-8.196e-06" izz="0.036543169"/>
+    </inertial>
+  </link>
+  <joint name="shell_torso_end" type="fixed">
+    <parent link="torso_end"/>
+    <child link="shell"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
   <joint name="head_joint_torso_end" type="fixed">
     <parent link="torso_end"/>
     <child link="head_base"/>
-    <origin rpy="0 0 0" xyz="0.01466 0 0.2775"/>
+    <origin rpy="0 0 0" xyz="0.02 0 0.3929"/>
   </joint>
   <link name="head_base">
     <visual>
@@ -534,7 +552,7 @@
   <joint name="panda_left_joint_torso_end" type="fixed">
     <parent link="torso_end"/>
     <child link="panda_left_link0"/>
-    <origin rpy="-1.5004311592913677 0.8772798703277918 -0.2038499389018784" xyz="0.02842 0.11216 0.19004"/>
+    <origin rpy="-1.3685238493647454 0.913218224774749 -0.6168337646727412" xyz="-0.08537 0.07009 0.2535"/>
   </joint>
   <link name="panda_left_link0">
     <visual>
@@ -1649,7 +1667,7 @@
   <joint name="panda_right_joint_torso_end" type="fixed">
     <parent link="torso_end"/>
     <child link="panda_right_link0"/>
-    <origin rpy="1.5004311592913677 0.8772798703277918 0.2038499389018784" xyz="0.02842 -0.11216 0.19004"/>
+    <origin rpy="1.3685238493647454 0.913218224774749 0.6168337646727412" xyz="-0.08537 -0.07009 0.2535"/>
   </joint>
   <link name="panda_right_link0">
     <visual>
@@ -2729,4 +2747,3 @@
   </joint>
   <link name="right_qbhand_end_effector_link"/>
 </robot>
-

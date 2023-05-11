@@ -17,7 +17,7 @@ def test_bi_spatial_data():
     demos_left_x = multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
     demos_right_x = multi_bezier_demos(right_demo_points)
 
-    representation = rf.tpgmm.TPGMMBiLQRBiCoord(demos_left_x, demos_right_x, plot=False)
+    representation = rf.tpgmm.TPGMM_RPCtl(demos_left_x, demos_right_x, plot=False)
     model_l, model_r, model_c = representation.fit()
 
     representation.reproduce(model_l, model_r, model_c, show_demo_idx=2)
@@ -42,7 +42,7 @@ def test_bi_temporal_data():
                                draw_arc([1, -2], 4, theta_right[2, 0], theta_right[2, 1], 'grey'),
                                draw_arc([1, -2], 1, theta_right[3, 0], theta_right[3, 1], 'blue')))
 
-    representation = rf.tpgmm.TPGMMBiLQRBiCoord(demos_left_x, demos_right_x, plot=False)
+    representation = rf.tpgmm.TPGMM_RPCtl(demos_left_x, demos_right_x, plot=False)
     model_l, model_r, model_c = representation.fit()
 
     representation.reproduce(model_l, model_r, model_c, show_demo_idx=2)
