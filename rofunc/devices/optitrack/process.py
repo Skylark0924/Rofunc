@@ -26,6 +26,7 @@ table_pos_x = data[label_idx, :]
 """
 import os
 import csv
+import glob
 
 import pickle as pkl
 import pandas as pd
@@ -41,58 +42,60 @@ def get_objects(input_path: str):
 
     Args:
         input_path (str): path to the Optitrack data.\
-                          If the path is to a folder, it will return a list of objects for each file in the folder.
+                          If the path is to a folder, all the file with names like "Take[...].csv" are read.
     Returns:
         tuple: (objects, meta)
     """
-    #TODO: Must work for **file** or folder input path
     objs_list = list()
     meta_list = list()
-    demo_csvs = os.listdir(input_path)
+    if input_path.endswith('.csv'):
+        glob_path = input_path
+    else:
+        glob_path = os.path.join(input_path, 'Take*.csv')
+    demo_csvs = glob.glob(glob_path)
     demo_csvs = sorted(demo_csvs)
     for demo_csv in demo_csvs:
-        if 'Take' in demo_csv:
-            objs={}
-            meta={}
-            demo_path = os.path.join(input_path, demo_csv)
-            with open(demo_path) as f:
-                data = csv.reader(f)
-                row = next(data)
-                meta = dict(zip(row[::2], row[1::2]))
-                next(data)
-                t = next(data)
-                n = next(data)
-                id = next(data)
-                tr = next(data)
-                ax = next(data)
+        objs={}
+        meta={}
+        demo_path = os.path.join(input_path, demo_csv)
+        with open(demo_path) as f:
+            data = csv.reader(f)
+            row = next(data)
+            meta = dict(zip(row[::2], row[1::2]))
+            next(data)
+            t = next(data)
+            n = next(data)
+            id = next(data)
+            tr = next(data)
+            ax = next(data)
 
-                for i, o in enumerate(n):
-                    o = o.lower()
-                    if o and o != 'name':
-                        if o[-7:-1] == 'marker':
-                            obj = o[:-8]
-                            m = o[-1]
-                            if obj not in objs:
-                                objs[obj] = {'markers': {}}
-                            if str(m) not in objs[obj]['markers']:
-                                objs[obj]['markers'][str(m)] = {'pose': {tr[i]: {ax[i]: i}}}
-                            else:
-                                if tr[i] not in objs[obj]['markers'][str(m)]['pose']:
-                                    objs[obj]['markers'][str(m)]['pose'][tr[i]] = {}
-                                objs[obj]['markers'][str(m)]['pose'][tr[i]][ax[i]] = i
-                        elif not o in objs:
-                            objs[o] = {
-                                'type': t[i],
-                                'pose': {tr[i]: {ax[i]: i}},
-                                'markers': {},
-                                'id': {id[i]}
-                            }
+            for i, o in enumerate(n):
+                o = o.lower()
+                if o and o != 'name':
+                    if o[-7:-1] == 'marker':
+                        obj = o[:-8]
+                        m = o[-1]
+                        if obj not in objs:
+                            objs[obj] = {'markers': {}}
+                        if str(m) not in objs[obj]['markers']:
+                            objs[obj]['markers'][str(m)] = {'pose': {tr[i]: {ax[i]: i}}}
                         else:
-                            if tr[i] not in objs[o]['pose']:
-                                objs[o]['pose'][tr[i]] = {}
-                            objs[o]['pose'][tr[i]][ax[i]] = i
-            objs_list.append(objs)
-            meta_list.append(meta)
+                            if tr[i] not in objs[obj]['markers'][str(m)]['pose']:
+                                objs[obj]['markers'][str(m)]['pose'][tr[i]] = {}
+                            objs[obj]['markers'][str(m)]['pose'][tr[i]][ax[i]] = i
+                    elif not o in objs:
+                        objs[o] = {
+                            'type': t[i],
+                            'pose': {tr[i]: {ax[i]: i}},
+                            'markers': {},
+                            'id': {id[i]}
+                        }
+                    else:
+                        if tr[i] not in objs[o]['pose']:
+                            objs[o]['pose'][tr[i]] = {}
+                        objs[o]['pose'][tr[i]][ax[i]] = i
+        objs_list.append(objs)
+        meta_list.append(meta)
 
     return objs_list, meta_list
 
@@ -200,7 +203,6 @@ def data_clean_batch(input_dir: str):
 
 
 def get_time_series(input_dir: str, meta: dict):
-    print(meta['Take Name'])
     data = pd.read_csv(os.path.join(input_dir, f"{meta['Take Name']}.csv"), skiprows=6)
 
     return data

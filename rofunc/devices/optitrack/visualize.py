@@ -14,7 +14,7 @@ class PauseAnimation(object):
     def __init__(self, fig, *args, **kwargs):
         self.anim = animation.FuncAnimation(fig, *args, **kwargs)
         self.paused = False
-        fig.canvas.mpl_connect('button_press_event', self._toggle_pause)
+        fig.canvas.mpl_connect('key_press_event', self._toggle_pause)
 
     def _toggle_pause(self, *args, **kwargs):
         if self.paused:
@@ -107,11 +107,12 @@ def plot_objects(csv_path: str, objs: dict, meta: dict,
             pts = (pts - t) * s
             if not np.isnan(pts[i]).any():
                 ax.scatter(*pts[i], marker="o", color=COLORS[n % len(COLORS)], label=obj)
+                ax.text(*pts[i], obj[-5:])
                 if show_markers:
                     for marker in objs_loc[obj]['markers']:
                         pts = objs_loc[obj]['markers'][marker]['data']
                         pts = (pts - t) * s
-                        if not np.isnan(pt[i]).any():
+                        if not np.isnan(pts[i]).any():
                                 ax.scatter(*pts[i], marker=f"${marker}$", color=COLORS[n % len(COLORS)])
         ax.legend()
 
