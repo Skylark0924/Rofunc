@@ -6,3 +6,6 @@ from .franka_sim import FrankaSim
 from .sawyer_sim import SawyerSim
 from .walker_sim import WalkerSim
 from .gluon_sim import GluonSim
+from .multirobot_sim import MultiRobotSim
+from .human_sim import HumanSim
+from .utils.xsens2urdf import xsens2urdf

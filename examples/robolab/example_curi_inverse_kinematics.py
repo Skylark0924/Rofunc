@@ -1,8 +1,8 @@
 """
-CURI inverse dynamics
+CURI inverse kinematics
 ========================
 
-Inverse dynamics of the CURI robot.
+Inverse kinematics of the CURI robot.
 """
 import os
 
