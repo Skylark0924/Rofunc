@@ -12,6 +12,11 @@ import rofunc as rf
 args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
 
+mvnx_path = '/home/ubuntu/Data/xsens_mvnx/force.mvnx'
+save_dir = '/home/ubuntu/Data/xsens_mvnx'
+rf.sim.xsens2urdf(mvnx_path, save_dir, human_mass=70.0, human_height=1.8)
+
 # CURI
-CURIsim = rf.sim.CURISim(args)
-CURIsim.show(visual_obs_flag=True)
+human_sim = rf.sim.HumanSim(args, asset_root=save_dir, asset_file='Athlete 1.urdf')
+human_sim.init()
+human_sim.show()
