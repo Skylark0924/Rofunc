@@ -18,7 +18,7 @@ objs, meta = get_objects(input_path)
 for obj in del_objects:
     del objs[obj]
 
-data, labels = data_clean(input_path, legacy=False, objs)[0]
+data, labels = data_clean(input_path, legacy=False, objs=objs)[0]
 
 label_idx = labels.index('table.pose.x')
 table_pos_x = data[label_idx, :]
@@ -26,6 +26,7 @@ table_pos_x = data[label_idx, :]
 """
 import os
 import csv
+import glob
 
 import pickle as pkl
 import pandas as pd
@@ -34,7 +35,7 @@ import numpy as np
 import rofunc as rf
 
 
-def get_objects(input_path):
+def get_objects(input_path: str):
     """Returns a dictionary of objects from the Optitrack data.
     The Optitack csv must have the original name format (e.g. "Take 2020-06-03 15-00-00.csv").
     The reutrned list does not necessarly have the same order as your file explorer, but the meta ond objects list do.\
@@ -42,72 +43,79 @@ def get_objects(input_path):
 
     Args:
         input_path (str): path to the Optitrack data.\
-                          If the path is to a folder, it will return a list of objects for each file in the folder.
+                          If the path is to a folder, all the file with names like "Take[...].csv" are read.
     Returns:
         tuple: (objects, meta)
     """
     objs_list = list()
     meta_list = list()
-    demo_csvs = os.listdir(input_path)
+    if input_path.endswith('.csv'):
+        glob_path = input_path
+    else:
+        glob_path = os.path.join(input_path, 'Take*.csv')
+    demo_csvs = glob.glob(glob_path)
     demo_csvs = sorted(demo_csvs)
     for demo_csv in demo_csvs:
-        if 'Take' in demo_csv:
-            objs = {}
-            meta = {}
-            demo_path = os.path.join(input_path, demo_csv)
-            with open(demo_path) as f:
-                data = csv.reader(f)
-                row = next(data)
-                meta = dict(zip(row[::2], row[1::2]))
-                next(data)
-                t = next(data)
-                n = next(data)
-                id = next(data)
-                tr = next(data)
-                ax = next(data)
+        objs={}
+        meta={}
+        demo_path = os.path.join(input_path, demo_csv)
+        with open(demo_path) as f:
+            data = csv.reader(f)
+            row = next(data)
+            meta = dict(zip(row[::2], row[1::2]))
+            next(data)
+            t = next(data)
+            n = next(data)
+            id = next(data)
+            tr = next(data)
+            ax = next(data)
 
-                for i, o in enumerate(n):
-                    o = o.lower()
-                    if o and o != 'name':
-                        if o[-7:-1] == 'marker':
-                            obj = o[:-8]
-                            m = o[-1]
-                            if obj not in objs:
-                                objs[obj] = {'markers': {}}
-                            if str(m) not in objs[obj]['markers']:
-                                objs[obj]['markers'][str(m)] = {'pose': {tr[i]: {ax[i]: i}}}
-                            else:
-                                if tr[i] not in objs[obj]['markers'][str(m)]['pose']:
-                                    objs[obj]['markers'][str(m)]['pose'][tr[i]] = {}
-                                objs[obj]['markers'][str(m)]['pose'][tr[i]][ax[i]] = i
-                        elif not o in objs:
-                            objs[o] = {
-                                'type': t[i],
-                                'pose': {tr[i]: {ax[i]: i}},
-                                'markers': {},
-                                'id': {id[i]}
-                            }
+            for i, o in enumerate(n):
+                o = o.lower()
+                if o and o != 'name':
+                    if o[-7:-1] == 'marker':
+                        obj = o[:-8]
+                        m = o[-1]
+                        if obj not in objs:
+                            objs[obj] = {'markers': {}}
+                        if str(m) not in objs[obj]['markers']:
+                            objs[obj]['markers'][str(m)] = {'pose': {tr[i]: {ax[i]: i}}}
                         else:
-                            if tr[i] not in objs[o]['pose']:
-                                objs[o]['pose'][tr[i]] = {}
-                            objs[o]['pose'][tr[i]][ax[i]] = i
-            objs_list.append(objs)
-            meta_list.append(meta)
+                            if tr[i] not in objs[obj]['markers'][str(m)]['pose']:
+                                objs[obj]['markers'][str(m)]['pose'][tr[i]] = {}
+                            objs[obj]['markers'][str(m)]['pose'][tr[i]][ax[i]] = i
+                    elif not o in objs:
+                        objs[o] = {
+                            'type': t[i],
+                            'pose': {tr[i]: {ax[i]: i}},
+                            'markers': {},
+                            'id': {id[i]}
+                        }
+                    else:
+                        if tr[i] not in objs[o]['pose']:
+                            objs[o]['pose'][tr[i]] = {}
+                        objs[o]['pose'][tr[i]][ax[i]] = i
+        objs_list.append(objs)
+        meta_list.append(meta)
 
     return objs_list, meta_list
 
 
-def data_clean(input_path, legacy=True, objs=None, save=False):
+def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=False):
     """
     Cleans the Optitrack data.
     Args:
         input_path (str): path to the Optitrack data.
         legacy (:obj:`bool`, optional): if True, it will use the legacy version of the function.\
-                                       Defaults to True.
-        objs (:obj:`list`, optional): dictionary of objects to keep. If set to None, save all data.\
+                                        Defaults to True.
+        objs (:obj:`dict`, optional): dictionary of objects to keep. If set to None, export all data.\
+                                        Defaults to None.
+        save (:obj:`bool`, optional): if True, it will save the cleaned data to disk.\
+                                        Defaults to False.
     Returns:
         list: list of cleaned data for all csv in folder. Type of elements in list depend on args.
     """
+    #TODO: Must work for **file** or folder input path
     out_path = os.path.join(input_path, 'process')
     if not os.path.exists(out_path):
         os.mkdir(out_path)
@@ -128,26 +136,26 @@ def data_clean(input_path, legacy=True, objs=None, save=False):
                     labels = ['frame', 'time']
                     out_data = []
                     data_raw = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
-                    out_data.append(data_raw[:, 0])
-                    out_data.append(data_raw[:, 1])
+                    out_data.append(data_raw.iloc[:, 0])
+                    out_data.append(data_raw.iloc[:, 1])
                     for obj in objs:
-                        labels.extend([f"{obj}.pose.x", f"{obj}.pose.y", f"{obj}.pose.z",
-                                       f"{obj}.pose.qx", f"{obj}.pose.qy", f"{obj}.pose.qz", f"{obj}.pose.qw"])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['X']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['Y']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['Z']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['X']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['Y']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['Z']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['W']])
+                        labels.extend([f"{obj}.pose.x", f"{obj}.pose.y", f"{obj}.pose.z"]),
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['X']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Y']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Z']])
+                        if objs[obj]['type'] == 'Rigid Body':
+                            labels.extend([f"{obj}.pose.qx", f"{obj}.pose.qy", f"{obj}.pose.qz", f"{obj}.pose.qw"])
+                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['X']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Y']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Z']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['W']])
                         for marker in objs[obj]['markers']:
-                            labels.extend(
-                                [f"{obj}.marker.{marker}.x", f"{obj}.marker.{marker}.y", f"{obj}.marker.{marker}.z"])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['X']])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['Y']])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['Z']])
+                            labels.extend([f"{obj}.marker.{marker}.x", f"{obj}.marker.{marker}.y", f"{obj}.marker.{marker}.z"])
+                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['X']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Y']])
+                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Z']])
                     out_data = np.array(out_data).T
-                    out_list.append(out_data, labels)
+                    out_list.append((out_data, labels))
                     if save:
                         with open(os.path.join(out_path, demo_csv.replace('.csv', '_labels.pkl')), 'wb') as f:
                             pkl.dump(labels, f)
@@ -157,16 +165,16 @@ def data_clean(input_path, legacy=True, objs=None, save=False):
     return out_list
 
 
-def def_data_clean_legacy(input_path, demo_csv, out_path):
+def def_data_clean_legacy(input_path: str, demo_csv: str, out_path: str):
     """
     Cleans the Optitrack data. legacy version
     Args:
-        input_path: path to the Optitrack data.
-        demo_csv: name of the csv file
-        out_path: path to save the cleaned data for Manus
+        input_path (str): path to the Optitrack data.
+        demo_csv (str): name of the csv file
+        out_path (str): path to save the cleaned data for Manus
 
     Returns:
-        csv_data: cleaned data as a pandas dataframe
+        csv_data (:pandas:`DataFrame`): cleaned data as a pandas dataframe
     """
     if 'Manus' in demo_csv:
         demo_path = os.path.join(input_path, demo_csv)
@@ -187,7 +195,7 @@ def def_data_clean_legacy(input_path, demo_csv, out_path):
     return csv_data
 
 
-def data_clean_batch(input_dir):
+def data_clean_batch(input_dir: str):
     demos = os.listdir(input_dir)
     demos = sorted(demos)
     for demo in tqdm(demos):
@@ -195,13 +203,13 @@ def data_clean_batch(input_dir):
         data_clean(input_path)
 
 
-def get_time_series(input_dir, meta):
+def get_time_series(input_dir: str, meta: dict):
     data = pd.read_csv(os.path.join(input_dir, f"{meta['Take Name']}.csv"), skiprows=6)
 
     return data
 
 
-def export(input_dir):
+def export(input_dir: str):
     """
     Export rigid body motion data.
     Args:
