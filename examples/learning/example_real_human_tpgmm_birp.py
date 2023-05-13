@@ -1,3 +1,10 @@
+"""
+TP-GMM learning from real human demonstration data
+=================================================
+
+This example shows how to learn a TP-GMM from real human demonstration data.
+"""
+
 from isaacgym import gymutil
 
 import os
