@@ -352,7 +352,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/torso_end_v2_yup.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_end_v2_yup.STL"/>
       </geometry>
     </collision>
     <inertial>
@@ -361,6 +361,30 @@
       <inertia ixx="0.146638956" ixy="-2.2432e-05" ixz="-0.012989506" iyy="0.097685785" iyz="-2.19304e-04" izz="0.100449047"/>
     </inertial>
   </link>
+  <link name="shell">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/visual/Shell_v2_Share_yup.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/collision/Shell_v2_Share_yup.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.120384 0.569e-03 6.703e-03"/>
+      <mass value="1.63531"/>
+      <inertia ixx="0.010693997" ixy="5.645e-06" ixz="-9.4779e-04" iyy="0.026717753" iyz="-8.196e-06" izz="0.036543169"/>
+    </inertial>
+  </link>
+  <joint name="shell_torso_end" type="fixed">
+    <parent link="torso_end"/>
+    <child link="shell"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
   <joint name="torso_joint8" type="fixed">
     <origin rpy="0 0 0" xyz="0.25 0 0"/>
     <parent link="torso_link_c1"/>
