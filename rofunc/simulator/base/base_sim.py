@@ -123,7 +123,7 @@ class RobotSim:
         self.num_envs = num_envs
         self.device = device
         if self.robot_name == "CURI":
-            self.asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+            self.asset_file = "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
             self.init_pose_vec = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         elif self.robot_name == "walker":
             self.asset_file = "urdf/walker/urdf/walker_cartesio.urdf"

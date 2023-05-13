@@ -37,7 +37,7 @@ import rofunc as rf
 def get_objects(input_path):
     """Returns a dictionary of objects from the Optitrack data.
     The Optitack csv must have the original name format (e.g. "Take 2020-06-03 15-00-00.csv").
-    The reutrned list does not necessarly have the same order as your file explorer, but the meta ond objects list do.\
+    The returned list does not necessarily have the same order as your file explorer, but the meta ond objects list do.\
     Check the meta to make sure you work on the correct file.
 
     Args:
@@ -114,10 +114,11 @@ def data_clean(input_path, legacy=True, objs=None, save=False):
     demo_csvs = os.listdir(input_path)
     demo_csvs = sorted(demo_csvs)
     out_list = list()
-    for demo_csv in demo_csvs:
+    for i in range(len(demo_csvs)):
+        demo_csv = demo_csvs[i]
         if 'Take' in demo_csv:
             if legacy:
-                out_list.append(def_data_clean_legacy(input_path, demo_csv, out_path))
+                out_list.append(data_clean_legacy(input_path, demo_csv, out_path))
             else:
                 if objs is None:
                     out_data = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
@@ -127,27 +128,27 @@ def data_clean(input_path, legacy=True, objs=None, save=False):
                 else:
                     labels = ['frame', 'time']
                     out_data = []
-                    data_raw = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
+                    data_raw = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6).values
                     out_data.append(data_raw[:, 0])
                     out_data.append(data_raw[:, 1])
-                    for obj in objs:
+                    for obj in objs[i]:
                         labels.extend([f"{obj}.pose.x", f"{obj}.pose.y", f"{obj}.pose.z",
                                        f"{obj}.pose.qx", f"{obj}.pose.qy", f"{obj}.pose.qz", f"{obj}.pose.qw"])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['X']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['Y']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Position"]['Z']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['X']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['Y']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['Z']])
-                        out_data.append(data_raw[:, objs[obj]['pose']["Rotation"]['W']])
-                        for marker in objs[obj]['markers']:
+                        out_data.append(data_raw[:, objs[i][obj]['pose']["Position"]['X']])
+                        out_data.append(data_raw[:, objs[i][obj]['pose']["Position"]['Y']])
+                        out_data.append(data_raw[:, objs[i][obj]['pose']["Position"]['Z']])
+                        out_data.append(data_raw[:, objs[i][obj]['pose']["Rotation"]['X']])
+                        out_data.append(data_raw[:, objs[i][obj]['pose']["Rotation"]['Y']])
+                        out_data.append(data_raw[:, objs[i][obj]['pose']["Rotation"]['Z']])
+                        out_data.append(data_raw[:, objs[i][obj]['pose']["Rotation"]['W']])
+                        for marker in objs[i][obj]['markers']:
                             labels.extend(
                                 [f"{obj}.marker.{marker}.x", f"{obj}.marker.{marker}.y", f"{obj}.marker.{marker}.z"])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['X']])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['Y']])
-                            out_data.append(data_raw[:, objs[obj]['markers'][marker]['pose']["Position"]['Z']])
+                            out_data.append(data_raw[:, objs[i][obj]['markers'][marker]['pose']["Position"]['X']])
+                            out_data.append(data_raw[:, objs[i][obj]['markers'][marker]['pose']["Position"]['Y']])
+                            out_data.append(data_raw[:, objs[i][obj]['markers'][marker]['pose']["Position"]['Z']])
                     out_data = np.array(out_data).T
-                    out_list.append(out_data, labels)
+                    out_list.append(out_data)
                     if save:
                         with open(os.path.join(out_path, demo_csv.replace('.csv', '_labels.pkl')), 'wb') as f:
                             pkl.dump(labels, f)
@@ -157,7 +158,7 @@ def data_clean(input_path, legacy=True, objs=None, save=False):
     return out_list
 
 
-def def_data_clean_legacy(input_path, demo_csv, out_path):
+def data_clean_legacy(input_path, demo_csv, out_path):
     """
     Cleans the Optitrack data. legacy version
     Args:

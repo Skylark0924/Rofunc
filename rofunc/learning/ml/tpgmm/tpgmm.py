@@ -13,15 +13,13 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 class TPGMM:
     def __init__(self, demos_x: Union[List, np.ndarray], nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
-                 P: int = 2, plot: bool = False, save: bool = False, save_params: dict = None,
-                 task_params: dict = None):
+                 plot: bool = False, save: bool = False, save_params: dict = None, task_params: dict = None):
         """
         Task-parameterized Gaussian Mixture Model (TP-GMM)
         :param demos_x: demo displacement
         :param nb_states: number of states in the HMM
         :param reg: regularization coefficient
         :param horizon: horizon of the reproduced trajectory
-        :param P: number of candidate frames in a task-parameterized mixture
         :param plot: whether to plot the result
         :param save: whether to save the result
         :param save_params: save parameters, {'save_dir': 'path/to/save', 'save_format': 'eps'}
@@ -43,7 +41,11 @@ class TPGMM:
 
         self.nb_dim = len(self.demos_x[0][0])
         self.nb_deriv = 2  # TODO: for now it is just original state and its first derivative
-        self.P = P
+        self.task_params = task_params
+        if task_params is not None:
+            self.P = len(task_params['frame_origin'])  # number of candidate frames in a task-parameterized mixture
+        else:
+            self.P = 2
 
         """
         Some related matrices are generated from the demo data with displacement
@@ -62,7 +64,7 @@ class TPGMM:
         demos_xdx_augm: reshape demos_xdx_f, [M, T, nb_dim * nb_deriv * P]
         """
         self.demos_dx, self.demos_A, self.demos_b, self.demos_A_xdx, self.demos_b_xdx, self.demos_xdx, \
-            self.demos_xdx_f, self.demos_xdx_augm = self.get_related_matrix(task_params)
+            self.demos_xdx_f, self.demos_xdx_augm = self.get_related_matrix()
 
     def get_dx(self):
         demos_dx = []
@@ -96,21 +98,23 @@ class TPGMM:
         demos_b_xdx = [np.concatenate([d, np.zeros(d.shape)], axis=-1) for d in demos_b]
         return demos_A, demos_b, demos_A_xdx, demos_b_xdx
 
-    def get_A_b_from_task_params(self, task_params: dict):
+    def get_A_b_from_task_params(self, task_params):
         """
         Define custom task parameters
         :param task_params: task parameters
         :return: demos_A, demos_b, demos_A_xdx, demos_b_xdx
         """
-        if 'start_xdx' in task_params and 'end_xdx' in task_params:
-            # TODO: only for one demo now
-            start_xdx, end_xdx = task_params['start_xdx'], task_params['end_xdx']
-            demos_b = [np.tile(np.vstack([start_xdx[: self.nb_dim], end_xdx[: self.nb_dim]]),
-                               (self.horizon, 1, 1))]  # should be self.P
-            demos_A = [np.tile([np.eye(self.nb_dim)] * 2, (self.horizon, 1, 1, 1))]  # 2 should be self.P
+        if 'frame_origin' in task_params:
+            frame_origin = self.task_params['frame_origin']
 
-            demos_b_xdx = [np.concatenate([demos_b[0], np.zeros(demos_b[0].shape)], axis=-1)]
-            demos_A_xdx = [np.kron(np.eye(self.nb_deriv), demos_A[0])]
+            demos_b = []
+            demos_A = []
+            for i in range(len(self.demos_x)):
+                demos_b.append(np.tile(np.vstack([frame[i][: self.nb_dim] for frame in frame_origin]),
+                                       (len(self.demos_x[i]), 1, 1)))
+                demos_A.append(np.tile([np.eye(self.nb_dim)] * self.P, (len(self.demos_x[i]), 1, 1, 1)))
+            demos_A_xdx = [np.kron(np.eye(self.nb_deriv), demos_A[i]) for i in range(len(demos_A))]
+            demos_b_xdx = [np.concatenate([d, np.zeros(d.shape)], axis=-1) for d in demos_b]
             task_params_A_b = {'A': demos_A_xdx[0][0], 'b': demos_b_xdx[0][0]}
         elif 'demos_A_xdx' in task_params and 'demos_b_xdx' in task_params:
             demos_A, demos_b, demos_A_xdx, demos_b_xdx = task_params['demos_A'], task_params['demos_b'], task_params[
@@ -121,12 +125,12 @@ class TPGMM:
 
         return demos_A, demos_b, demos_A_xdx, demos_b_xdx, task_params_A_b
 
-    def get_related_matrix(self, task_params: dict = None):
+    def get_related_matrix(self):
         demos_dx = self.get_dx()
-        if task_params is None:
+        if self.task_params is None:
             demos_A, demos_b, demos_A_xdx, demos_b_xdx = self.get_A_b()
         else:
-            demos_A, demos_b, demos_A_xdx, demos_b_xdx, _ = self.get_A_b_from_task_params(task_params)
+            demos_A, demos_b, demos_A_xdx, demos_b_xdx, _ = self.get_A_b_from_task_params(self.task_params)
 
         demos_xdx = [np.hstack([_x, _dx]) for _x, _dx in
                      zip(self.demos_x, demos_dx)]  # Position and velocity (num_of_points, 14)
@@ -143,7 +147,7 @@ class TPGMM:
         model.init_hmm_kbins(self.demos_xdx_augm)  # initializing model
         model.em(self.demos_xdx_augm, reg=self.reg)
 
-        fig = rf.tpgmm.hmm_plot(self.nb_dim, self.demos_xdx_f, model)
+        fig = rf.tpgmm.hmm_plot(self.nb_dim, self.demos_xdx_f, model, self.task_params)
         if self.save:
             rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
@@ -177,7 +181,7 @@ class TPGMM:
         for p in range(1, self.P):
             prod *= mod_list[p]
 
-        fig = rf.tpgmm.poe_plot(self.nb_dim, mod_list, prod, self.demos_x, show_demo_idx)
+        fig = rf.tpgmm.poe_plot(self.nb_dim, mod_list, prod, self.demos_x, show_demo_idx, self.task_params)
         if self.save:
             rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
@@ -252,7 +256,7 @@ class TPGMMBi(TPGMM):
 
     def __init__(self, demos_left_x: Union[List, np.ndarray], demos_right_x: Union[List, np.ndarray],
                  nb_states: int = 4, reg: float = 1e-3, horizon: int = 150, plot: bool = False, save: bool = False,
-                 save_params: dict = None, **kwargs):
+                 save_params: dict = None, task_params: dict = None, **kwargs):
         assert len(demos_left_x) == len(
             demos_right_x), 'The number of demonstrations for left and right arm should be the same'
         assert len(demos_left_x[0]) == len(
@@ -265,9 +269,9 @@ class TPGMMBi(TPGMM):
         self.save_params = save_params
 
         self.repr_l = TPGMM(demos_left_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot, save=save,
-                            save_params=save_params, **kwargs)
+                            save_params=save_params, task_params=task_params['left'], **kwargs)
         self.repr_r = TPGMM(demos_right_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot, save=save,
-                            save_params=save_params, **kwargs)
+                            save_params=save_params, task_params=task_params['right'], **kwargs)
 
     def fit(self) -> Tuple[HMM, HMM]:
         """
@@ -334,7 +338,7 @@ class TPGMM_RPCtl(TPGMMBi):
 
         self.demos_com_x = self.get_rel_demos()
         self.repr_c = TPGMM(self.demos_com_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot, save=save,
-                            save_params=save_params, **kwargs)
+                            save_params=save_params)
 
     def get_rel_demos(self):
         # calculate the relative movement of each demo
