@@ -167,7 +167,7 @@ def data_clean(input_path: str, legacy: bool = True, objs: dict = None, save: bo
     return out_list
 
 
-def def_data_clean_legacy(input_path: str, demo_csv: str, out_path: str):
+def data_clean_legacy(input_path: str, demo_csv: str, out_path: str):
     """
     Cleans the Optitrack data. legacy version
     Args:
@@ -213,10 +213,8 @@ def get_time_series(input_dir: str, meta: dict):
 def export(input_dir: str):
     """
     Export rigid body motion data.
-    Args:
-        input_dir: csv file path
-
-    Returns: [number of frames, number of rigid bodies, pose dimension = 7]
+    :param input_dir: csv file path
+    :return: [number of frames, number of rigid bodies, pose dimension = 7]
     """
     csv_data = pd.read_csv(input_dir, skiprows=7, header=None)
 
