@@ -8,8 +8,7 @@ import rofunc as rf
 
 input_path = '/home/lee/BoB_data/2022-12-03/BoB data/bench_press/'
 out_path = os.path.join(input_path, 'process')
-if not os.path.exists(out_path):
-    os.mkdir(out_path)
+rf.utils.create_dir(out_path)
 demo_path = os.path.join(input_path, "all_muscle_forces.csv")
 out_file_path = os.path.join(out_path, "all_muscle_forces_processed.csv")
 rf.utils.delete_lines(demo_path, out_file_path, 1)

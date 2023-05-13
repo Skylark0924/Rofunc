@@ -12,6 +12,7 @@ import numpy as np
 input_path = os.path.join(rf.utils.get_rofunc_path(), 'data/RAW_DEMO/optitrack/Take 2023-03-29 06.23.40 PM.csv')
 data = rf.optitrack.export(input_path)
 
-root_dir = '/home/ubuntu/Data/optitrack'
-# exp_name = 'rigid_body'
-# np.save(os.path.join(root_dir, exp_name), data)
+root_dir = '/home/ubuntu/Data/optitrack_export/'
+rf.utils.create_dir(root_dir)
+exp_name = 'rigid_body.npy'
+np.save(os.path.join(root_dir, exp_name), data)

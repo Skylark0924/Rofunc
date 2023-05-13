@@ -4,6 +4,7 @@ import struct
 import os
 import threading
 from typing import List
+import rofunc as rf
 
 from rofunc.utils.logger.beauty_logger import beauty_print
 
@@ -342,7 +343,7 @@ def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str = No
         raise Exception('There are already some files in {}, please rename the exp_name.'.format(
             '{}/{}'.format(root_dir, exp_name)))
     else:
-        os.mkdir('{}/{}'.format(root_dir, exp_name))
+        rf.utils.create_dir('{}/{}'.format(root_dir, exp_name))
         beauty_print('Recording folder: {}/{}'.format(root_dir, exp_name), type='info')
         interface = XsensInterface(ip, port, ref_frame=ref_frame)
         listener = Listener(on_press=on_press)
