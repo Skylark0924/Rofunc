@@ -6,21 +6,21 @@ import rofunc as rf
 color_list = ['steelblue', 'orangered', 'green', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
 
 
-def hmm_plot(nb_dim, demos_xdx_f, model):
+def hmm_plot(nb_dim, demos_xdx_f, model, task_params=None):
     if nb_dim == 2:
         fig = hmm_plot2d(demos_xdx_f, model)
     elif nb_dim > 2:
-        fig = hmm_plot_3d(demos_xdx_f, model, scale=0.1)
+        fig = hmm_plot_3d(demos_xdx_f, model, scale=0.1, task_params=task_params)
     else:
         raise Exception('Dimension is less than 2, cannot plot')
     return fig
 
 
-def poe_plot(nb_dim, mod_list, prod, demos_x, show_demo_idx):
+def poe_plot(nb_dim, mod_list, prod, demos_x, show_demo_idx, task_params=None):
     if nb_dim == 2:
         fig = poe_plot2d(mod_list, prod, demos_x, show_demo_idx)
     elif nb_dim > 2:
-        fig = poe_plot_3d(mod_list, prod, demos_x, show_demo_idx)
+        fig = poe_plot_3d(mod_list, prod, demos_x, show_demo_idx, task_params)
     else:
         raise Exception('Dimension is less than 2, cannot plot')
     return fig
@@ -32,7 +32,7 @@ def hmm_plot2d(demos_xdx_f, model):
     fig.set_size_inches(4 * P, 6)
 
     for p in range(P):
-        ax[p].set_title('pos - coord. %d' % (p + 1))
+        ax[p].set_title('Frame %d' % (p + 1))
         for d in demos_xdx_f:
             ax[p].plot(d[:, p, 0], d[:, p, 1])
         rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax[p], dim=[4 * p, 4 * p + 1], color=color_list[p], alpha=0.1)
@@ -41,7 +41,7 @@ def hmm_plot2d(demos_xdx_f, model):
     return fig
 
 
-def hmm_plot_3d(demos_xdx_f, model, scale=1):
+def hmm_plot_3d(demos_xdx_f, model, scale=1, task_params=None):
     P = len(demos_xdx_f[0][0])
     nb_dim_deriv = len(demos_xdx_f[0][0][0])
     fig = plt.figure(figsize=(4, 4))
@@ -49,7 +49,10 @@ def hmm_plot_3d(demos_xdx_f, model, scale=1):
 
     for p in range(P):
         ax = fig.add_subplot(1, P, p + 1, projection='3d', fc='white')
-        ax.set_title('pos - coord. %d' % (p + 1))
+        if task_params is not None:
+            ax.set_title('{}'.format(task_params['frame_names'][p]))
+        else:
+            ax.set_title('Frame {}'.format(p + 1))
         for d in demos_xdx_f:
             ax.plot(d[:, p, 0], d[:, p, 1], d[:, p, 2])
         rf.visualab.gmm_plot(model.mu, model.sigma, ax=ax,
@@ -67,39 +70,41 @@ def poe_plot2d(mod_list, prod, demos_x, demo_idx):
         i.set_aspect('equal')
 
     for p in range(P):
-        ax[p].set_title('model %d' % (p + 1))
+        ax[p].set_title('Model (frame %d)' % (p + 1))
         rf.visualab.gmm_plot(mod_list[p].mu, mod_list[p].sigma, swap=True, ax=ax[p], dim=[0, 1], color=color_list[p],
                              alpha=0.3)
 
-    ax[P].set_title('tranformed models and product')
+    ax[P].set_title('Product of Experts (PoE)')
     for p in range(P):
         rf.visualab.gmm_plot(mod_list[p].mu, mod_list[p].sigma, swap=True, ax=ax[P], dim=[0, 1], color=color_list[p],
                              alpha=0.3)
     rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, ax=ax[P], dim=[0, 1], color='gold', alpha=0.3)
     ax[P].plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], color="b")
 
-    patches = [mpatches.Patch(color='steelblue', label='transformed model 1'),
-               mpatches.Patch(color='orangered', label='transformed model 2'),
-               mpatches.Patch(color='gold', label='product')]
+    patches = [mpatches.Patch(color=color_list[p], label='Model (frame %d)' % (p + 1)) for p in range(P)]
+    patches.append(mpatches.Patch(color='gold', label='Product'))
 
     plt.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     return fig
 
 
-def poe_plot_3d(mod_list, prod, demos_x, demo_idx):
+def poe_plot_3d(mod_list, prod, demos_x, demo_idx, task_params=None):
     P = len(mod_list)
     fig = plt.figure(figsize=(4, 4))
     fig.set_size_inches((4 * (P + 1), 6))
 
     for p in range(P):
         ax = fig.add_subplot(1, P + 1, p + 1, projection='3d', fc='white')
-        ax.set_title('model %d' % (p + 1))
+        if task_params is not None:
+            ax.set_title('{}'.format(task_params['frame_names'][p]))
+        else:
+            ax.set_title('Model (frame %d)' % (p + 1))
         rf.visualab.gmm_plot(mod_list[p].mu, mod_list[p].sigma, swap=True, ax=ax, dim=[0, 1, 2], color=color_list[p],
                              alpha=0.05)
         rf.visualab.set_axis(ax)
 
     ax = fig.add_subplot(1, 4, 4, projection='3d', fc='white')
-    ax.set_title('transformed models and product')
+    ax.set_title('Product of Experts (PoE)')
     for p in range(P):
         rf.visualab.gmm_plot(mod_list[p].mu, mod_list[p].sigma, swap=True, ax=ax, dim=[0, 1, 2], color=color_list[p],
                              alpha=0.05)
@@ -107,9 +112,8 @@ def poe_plot_3d(mod_list, prod, demos_x, demo_idx):
     ax.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2], color="b")
     rf.visualab.set_axis(ax)
 
-    patches = [mpatches.Patch(color='steelblue', label='transformed model 1'),
-               mpatches.Patch(color='orangered', label='transformed model 2'),
-               mpatches.Patch(color='gold', label='product')]
+    patches = [mpatches.Patch(color=color_list[p], label='Model (frame %d)' % (p + 1)) for p in range(P)]
+    patches.append(mpatches.Patch(color='gold', label='Product'))
 
     plt.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     return fig

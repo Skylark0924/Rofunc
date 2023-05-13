@@ -106,12 +106,12 @@ class CURISim(RobotSim):
             pose = attractor_properties.target
             # pose.p: (x, y, z), pose.r: (w, x, y, z)
             pose.p.x = traj[index, 0]
-            pose.p.y = traj[index, 2]
-            pose.p.z = traj[index, 1]
+            pose.p.y = traj[index, 1]
+            pose.p.z = traj[index, 2]
             pose.r.w = traj[index, 6]
             pose.r.x = traj[index, 3]
-            pose.r.y = traj[index, 5]
-            pose.r.z = traj[index, 4]
+            pose.r.y = traj[index, 4]
+            pose.r.z = traj[index, 5]
             self.gym.set_attractor_target(self.envs[i], attractor_handles[i], pose)
 
             # Draw axes and sphere at attractor location

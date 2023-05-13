@@ -14,6 +14,8 @@ def set_axis(ax, labels=None, elev=45, azim=45, roll=0):
 def save_img(fig, save_dir, fig_name=None, dpi=300, transparent=False, format=None):
     if format is None:
         format = ['eps', 'png']
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
     if fig_name is None:
         nb_files = len(os.listdir(save_dir))
         fig_name = 'fig_{}'.format(nb_files)
