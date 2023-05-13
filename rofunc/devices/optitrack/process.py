@@ -56,8 +56,8 @@ def get_objects(input_path: str):
     demo_csvs = glob.glob(glob_path)
     demo_csvs = sorted(demo_csvs)
     for demo_csv in demo_csvs:
-        objs={}
-        meta={}
+        objs = {}
+        meta = {}
         demo_path = os.path.join(input_path, demo_csv)
         with open(demo_path) as f:
             data = csv.reader(f)
@@ -101,7 +101,7 @@ def get_objects(input_path: str):
     return objs_list, meta_list
 
 
-def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=False):
+def data_clean(input_path: str, legacy: bool = True, objs: dict = None, save: bool = False):
     """
     Cleans the Optitrack data.
     Args:
@@ -115,7 +115,7 @@ def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=F
     Returns:
         list: list of cleaned data for all csv in folder. Type of elements in list depend on args.
     """
-    #TODO: Must work for **file** or folder input path
+    # TODO: Must work for **file** or folder input path
     out_path = os.path.join(input_path, 'process')
     if not os.path.exists(out_path):
         os.mkdir(out_path)
@@ -151,7 +151,8 @@ def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=F
                             out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Z']])
                             out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['W']])
                         for marker in objs[obj]['markers']:
-                            labels.extend([f"{obj}.marker.{marker}.x", f"{obj}.marker.{marker}.y", f"{obj}.marker.{marker}.z"])
+                            labels.extend(
+                                [f"{obj}.marker.{marker}.x", f"{obj}.marker.{marker}.y", f"{obj}.marker.{marker}.z"])
                             out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['X']])
                             out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Y']])
                             out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Z']])
@@ -164,7 +165,6 @@ def data_clean(input_path: str, legacy: bool=True, objs: dict=None, save: bool=F
 
     print('{} finished'.format(input_path.split('/')[-1]))
     return out_list
-
 
 
 def def_data_clean_legacy(input_path: str, demo_csv: str, out_path: str):
@@ -207,7 +207,6 @@ def data_clean_batch(input_dir: str):
 
 def get_time_series(input_dir: str, meta: dict):
     data = pd.read_csv(os.path.join(input_dir, f"{meta['Take Name']}.csv"), skiprows=6)
-
     return data
 
 
