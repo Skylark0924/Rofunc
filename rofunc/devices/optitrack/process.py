@@ -117,8 +117,7 @@ def data_clean(input_path: str, legacy: bool = True, objs: dict = None, save: bo
     """
     # TODO: Must work for **file** or folder input path
     out_path = os.path.join(input_path, 'process')
-    if not os.path.exists(out_path):
-        os.mkdir(out_path)
+    rf.utils.create_dir(out_path)
     demo_csvs = os.listdir(input_path)
     demo_csvs = sorted(demo_csvs)
     out_list = list()

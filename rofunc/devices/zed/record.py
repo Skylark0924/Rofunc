@@ -3,6 +3,7 @@ import os
 import signal
 import threading
 import time
+import rofunc as rf
 
 zed_list = []
 
@@ -10,7 +11,8 @@ zed_list = []
 def get_intrinsic_parameters(cam):
     """Get the intrinsic parameters of the camera.
     :param cam: the camera object
-    :return: F, C, K, P, T : the focal length, the principal point, the radial distortion coefficients, the tangential distortion coefficients, the translation vector
+    :return: F, C, K, P, T : the focal length, the principal point, the radial distortion coefficients, the tangential
+    distortion coefficients, the translation vector
     """
     calibration_params = cam.get_camera_information().camera_configuration.calibration_parameters
     # Focal length of the left eye in pixels
@@ -72,8 +74,8 @@ def record(root_dir, exp_name):
         raise Exception('There are already some files in {}, please rename the exp_name.'.format(
             '{}/{}'.format(root_dir, exp_name)))
     else:
-        os.mkdir('{}/{}'.format(root_dir, exp_name))
-        print('Recording folder: {}/{}'.format(root_dir, exp_name))
+        rf.utils.create_dir('{}/{}'.format(root_dir, exp_name))
+        rf.utils.beauty_print('Recording folder: {}/{}'.format(root_dir, exp_name), type='info')
 
     left_list = []
     depth_list = []

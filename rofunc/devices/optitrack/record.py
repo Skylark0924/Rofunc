@@ -4,6 +4,7 @@ import os
 import threading
 import numpy as np
 from typing import Tuple, List
+import rofunc as rf
 
 
 def data_process(data: str):
@@ -64,7 +65,7 @@ def record(root_dir: str, exp_name: str, ip: str, port: int) -> None:
         raise Exception('There are already some files in {}, please rename the exp_name.'.format(
             '{}/{}'.format(root_dir, exp_name)))
     else:
-        os.mkdir('{}/{}'.format(root_dir, exp_name))
+        rf.utils.create_dir('{}/{}'.format(root_dir, exp_name))
         print('Recording folder: {}/{}'.format(root_dir, exp_name))
         opti_thread = threading.Thread(target=opti_run, args=(root_dir, exp_name, ip, port))
         opti_thread.start()

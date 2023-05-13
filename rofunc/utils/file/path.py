@@ -27,8 +27,7 @@ def check_ckpt_exist(ckpt_name):
 
 
 def shutil_exp_files(files, src_dir, dst_dir):
-    if not os.path.exists(dst_dir):
-        os.makedirs(dst_dir)
+    rf.utils.create_dir(dst_dir)
 
     for file in files:
         src = os.path.join(src_dir, file)

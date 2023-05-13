@@ -32,6 +32,7 @@ from datetime import datetime
 from typing import List, Tuple
 import matplotlib.pyplot as plt
 from pyquaternion import Quaternion
+import rofunc as rf
 from rf.utils.data_sampler.utils import rreplace, pcd_concat
 
 
@@ -51,7 +52,7 @@ class DataHolder(object):
         return self._sampled_data
 
     def _pre_load(self):
-        os.makedirs(f".data_tmp/{self.__class__.__name__}/", exist_ok=True)
+        rf.utils.create_dir(f".data_tmp/{self.__class__.__name__}/")
         self.tmp_folder = f".data_tmp/{self.__class__.__name__}/"
 
     def to_pcd(self, frame_number):
