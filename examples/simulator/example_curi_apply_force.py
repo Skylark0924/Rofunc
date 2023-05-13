@@ -16,6 +16,8 @@ import torch
 from rofunc.simulator.base.base_sim import init_sim, init_env
 from rofunc.utils.file import get_rofunc_path
 
+# TODO: Reformat
+
 # parse arguments
 args = gymutil.parse_arguments(
     description="Example of applying forces to bodies at given positions")

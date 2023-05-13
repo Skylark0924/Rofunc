@@ -9,7 +9,7 @@ import rofunc as rf
 
 # Export a single mvnx file
 mvnx_file = '../xsens_data/test.mvnx'
-rf.xsens.export(mvnx_file)
+rf.xsens.export(mvnx_file, output_type='joint')
 
 # Export a batch of mvnx files in a directory
 mvnx_dir = '../xsens_data'

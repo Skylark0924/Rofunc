@@ -7,7 +7,66 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 class CURISim(RobotSim):
     def __init__(self, args, **kwargs):
         super().__init__(args, robot_name="CURI", **kwargs)
-        self._setup_robot()
+
+    def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
+        from isaacgym import gymapi
+
+        gym = self.gym if gym is None else gym
+        envs = self.envs if envs is None else envs
+        robot_asset = self.robot_asset if robot_asset is None else robot_asset
+        robot_handles = self.robot_handles if robot_handles is None else robot_handles
+
+        # configure robot dofs
+        robot_dof_props = gym.get_asset_dof_properties(robot_asset)
+        robot_lower_limits = robot_dof_props["lower"]
+        robot_upper_limits = robot_dof_props["upper"]
+        robot_ranges = robot_upper_limits - robot_lower_limits
+        robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
+
+        # override default stiffness and damping values
+        # TODO: make this configurable
+        # robot_dof_props['stiffness'].fill(100000.0)
+        # robot_dof_props['damping'].fill(100000.0)
+
+        # Wheels
+        robot_dof_props["driveMode"][:4].fill(gymapi.DOF_MODE_VEL)
+        robot_dof_props["stiffness"][:4].fill(300.0)
+        robot_dof_props["damping"][:4].fill(80.0)
+        # Torso and arms
+        robot_dof_props["driveMode"][4:].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][4:].fill(300.0)
+        robot_dof_props["damping"][4:].fill(80.0)
+        # grippers
+        robot_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][14:16].fill(800.0)
+        robot_dof_props["damping"][14:16].fill(40.0)
+        robot_dof_props["driveMode"][23:25].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][23:25].fill(800.0)
+        robot_dof_props["damping"][23:25].fill(40.0)
+
+        # default dof states and position targets
+        robot_num_dofs = gym.get_asset_dof_count(robot_asset)
+        default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
+        default_dof_pos = robot_mids
+        # # grippers open
+        default_dof_pos[14:16] = robot_upper_limits[14:16]
+        default_dof_pos[23:25] = robot_upper_limits[23:25]
+
+        default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
+        default_dof_state["pos"] = default_dof_pos
+
+        # # send to torch
+        # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
+
+        for i in range(len(envs)):
+            # set dof properties
+            gym.set_actor_dof_properties(envs[i], robot_handles[i], robot_dof_props)
+
+            # set initial dof states
+            gym.set_actor_dof_states(envs[i], robot_handles[i], default_dof_state, gymapi.STATE_ALL)
+
+            # set initial position targets
+            gym.set_actor_dof_position_targets(envs[i], robot_handles[i], default_dof_pos)
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
@@ -47,12 +106,12 @@ class CURISim(RobotSim):
             pose = attractor_properties.target
             # pose.p: (x, y, z), pose.r: (w, x, y, z)
             pose.p.x = traj[index, 0]
-            pose.p.y = traj[index, 2]
-            pose.p.z = traj[index, 1]
+            pose.p.y = traj[index, 1]
+            pose.p.z = traj[index, 2]
             pose.r.w = traj[index, 6]
             pose.r.x = traj[index, 3]
-            pose.r.y = traj[index, 5]
-            pose.r.z = traj[index, 4]
+            pose.r.y = traj[index, 4]
+            pose.r.z = traj[index, 5]
             self.gym.set_attractor_target(self.envs[i], attractor_handles[i], pose)
 
             # Draw axes and sphere at attractor location
@@ -90,6 +149,9 @@ class CURISim(RobotSim):
         assert intf_mode in ["actor_dof_efforts", "body_forces", "body_force_at_pos"], \
             "The interference mode should be one of ['actor_dof_efforts', 'body_forces', 'body_force_at_pos']"
 
+        if attracted_joints is None:
+            attracted_joints = ["panda_left_hand", "panda_right_hand"]
+
         beauty_print('Execute multi-joint trajectory with interference with the CURI simulator')
 
         device = self.args.sim_device if self.args.use_gpu_pipeline else 'cpu'
@@ -104,7 +166,7 @@ class CURISim(RobotSim):
             intf_torques = intf_torques.to(device)
 
         # Create the attractor
-        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self.setup_attractors(traj, attracted_joints)
+        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attracted_joints)
 
         # Time to wait in seconds before moving robot
         next_curi_update_time = 1
