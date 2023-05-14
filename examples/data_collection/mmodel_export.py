@@ -149,7 +149,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, nargs='?',
-                        default=osp.join(rf.utils.get_rofunc_path(), 'data/MULTIMODAL'),
+                        default='../data/MULTIMODAL',
                         help='Path to data folder')
     parser.add_argument('--frame_number', type=int, nargs='?',
                         default=0,

@@ -8,7 +8,7 @@ import os
 import rofunc as rf
 
 
-input_path = os.path.join(rf.utils.get_rofunc_path(), 'data/RAW_DEMO/optitrack/Take 2023-03-29 06.23.40 PM.csv')
+input_path = '../data/RAW_DEMO/optitrack/Take 2023-03-29 06.23.40 PM.csv'
 parent_dir = os.path.dirname(input_path)
 objs_list, meta_list = rf.optitrack.get_objects(input_path)
 

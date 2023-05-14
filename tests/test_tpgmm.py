@@ -43,7 +43,7 @@ def test_2d_bi_tpgmm():
 
 
 def test_7d_uni_tpgmm():
-    raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
+    raw_demo = np.load('../data/LFD_ML/LeftHand.npy')
     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
     start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
@@ -64,8 +64,8 @@ def test_7d_uni_tpgmm():
 
 
 def test_7d_bi_tpgmm():
-    left_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
-    right_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/RightHand.npy'))
+    left_raw_demo = np.load('../data/LFD_ML/LeftHand.npy')
+    right_raw_demo = np.load('../data/LFD_ML/RightHand.npy')
     demos_left_x = [left_raw_demo[500:635, :], left_raw_demo[635:770, :], left_raw_demo[770:905, :]]
     demos_right_x = [right_raw_demo[500:635, :], right_raw_demo[635:770, :], right_raw_demo[770:905, :]]
 
