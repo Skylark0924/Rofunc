@@ -204,11 +204,6 @@ def data_clean_batch(input_dir: str):
         data_clean(input_path)
 
 
-def get_time_series(input_dir: str, meta: dict):
-    data = pd.read_csv(os.path.join(input_dir, f"{meta['Take Name']}.csv"), skiprows=6)
-    return data
-
-
 def export(input_dir: str):
     """
     Export rigid body motion data.

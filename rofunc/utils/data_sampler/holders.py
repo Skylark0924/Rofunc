@@ -33,7 +33,7 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 from pyquaternion import Quaternion
 import rofunc as rf
-from rf.utils.data_sampler.utils import rreplace, pcd_concat
+from .utils import rreplace, pcd_concat
 
 
 class DataHolder(object):
@@ -338,7 +338,7 @@ class OptitrackDataHolder(DataHolder):
                 prev_fnb = fnb
 
 
-class MultiModalDataHandler(object):
+class MultimodalDataHandler(object):
     """Class to handle multimodal data collection.
 
     Attributes:
