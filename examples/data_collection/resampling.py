@@ -5,19 +5,23 @@ Data re-sampling
 This example shows how to synchronise and use multimodal data.
 """
 
+import time
+import argparse
+import numpy as np
 import rofunc as rf
+import open3d as o3d
+import os.path as osp
+
+from rofunc.utils.data_sampler.utils import pcd_concat
+from rofunc.utils.data_sampler import XsensDataHolder, OptitrackDataHolder, MultimodalDataHandler
 
 # Bounds of the demonstrations in the data.
 # (start_frame, end_frame)
 # The frames number are from original optitrack data, can be got from plot_objects
 EXPS = [
     [500, 900],
-    [6300, 7200],
-    [20000, 22000],
-    [27000, 28000],
-    [32000, 33000],
-    [38500, 39700],
-    [41400, 41900]]
+    [6300, 7200]
+    ]
 
 def clean_exp(exp_raw: np.array, labels: list, data_labels: list):
     new_name = ['t7', 't1', 't4', 'rh', 'rl', 'lh', 'll']
@@ -80,7 +84,7 @@ def main(args):
     tstep = 1/100
 
     # tstep in ms
-    mmh = MultiModalDataHandler(tstep=tstep * 1000, data_holders=data_holders)
+    mmh = MultimodalDataHandler(tstep=tstep * 1000, data_holders=data_holders)
     sp_start = time.time()
     ts = mmh.sample()
     print(f"Sampling took {time.time() - sp_start:.2f}s")
@@ -138,13 +142,14 @@ def main(args):
             xs_data.append(_data)
         xs_data = np.concatenate(xs_data, axis=1)
         data = np.concatenate([data, xs_data], axis=1)
+        print(data.shape)
         # Play with your data
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, nargs='?',
-                        default="/Users/donatien/data/CLOVER_captures/2023_04_14_dressing",
+                        default=osp.join(rf.utils.get_rofunc_path(), 'data/MULTIMODAL'),
                         help='Path to data folder')
     parser.add_argument('--frame_number', type=int, nargs='?',
                         default=0,
