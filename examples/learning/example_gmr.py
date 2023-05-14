@@ -8,7 +8,7 @@ import os
 import numpy as np
 import rofunc as rf
 
-datapath = '../data/LFD_ML/pbd/'
+datapath = '../../data/LFD_ML/pbd/'
 data = np.load(datapath + 'test_001.npy', allow_pickle=True, encoding="latin1")[()]
 
 demos_x = data['x']  # Position data
