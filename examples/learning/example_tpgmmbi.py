@@ -4,12 +4,11 @@ TP-GMM for bimanual setting
 
 This example shows how to use the TP-GMM in bimanual setting (without coordination).
 """
-import os
 import numpy as np
 import rofunc as rf
 
-left_raw_demo = np.load('../data/LFD_ML/LeftHand.npy')
-right_raw_demo = np.load('../data/LFD_ML/RightHand.npy')
+left_raw_demo = np.load('../../data/LFD_ML/LeftHand.npy')
+right_raw_demo = np.load('../../data/LFD_ML/RightHand.npy')
 demos_left_x = [left_raw_demo[500:635, :], left_raw_demo[635:770, :], left_raw_demo[770:905, :]]
 demos_right_x = [right_raw_demo[500:635, :], right_raw_demo[635:770, :], right_raw_demo[770:905, :]]
 

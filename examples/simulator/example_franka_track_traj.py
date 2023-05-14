@@ -12,7 +12,7 @@ import rofunc as rf
 args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
 
-traj = np.load('../data/taichi_1l.npy')
+traj = np.load('../../data/taichi_1l.npy')
 rf.lqt.plot_3d_uni(traj, ori=False)
 
 frankasim = rf.sim.FrankaSim(args)

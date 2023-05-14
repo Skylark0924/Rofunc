@@ -13,8 +13,8 @@ import rofunc as rf
 args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
 
-traj_l = np.load('../data/taichi_1l.npy')
-traj_r = np.load('../data/taichi_1r.npy')
+traj_l = np.load('../../data/taichi_1l.npy')
+traj_r = np.load('../../data/taichi_1r.npy')
 rf.lqt.plot_3d_bi(traj_l, traj_r, ori=False)
 
 num_envs = 1
