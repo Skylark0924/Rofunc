@@ -57,7 +57,6 @@ def get_objects(input_path: str):
     demo_csvs = sorted(demo_csvs)
     for demo_csv in demo_csvs:
         objs = {}
-        meta = {}
         demo_path = os.path.join(input_path, demo_csv)
         with open(demo_path) as f:
             data = csv.reader(f)
