@@ -54,7 +54,7 @@ def main(args):
 
     # Optitrack
     print("Loading Optitrack data...")
-    objs, meta = rf.optitrack.get_objects(args.data_path)
+    objs, meta = rf.optitrack.get_objects(f"{args.data_path}/optitrack_data")
     if len(objs) > 1:
         print('More than one optitrack file found. Using the first one.')
     objs = objs[0]
@@ -72,15 +72,14 @@ def main(args):
     # print(f'Optitrack objects: {objs}')
     # rf.optitrack.plot_objects(args.data_path, objs, meta)
 
-    ot_full, ot_labels = rf.optitrack.data_clean(args.data_path, legacy=False, objs=objs)[0]
+    ot_full, ot_labels = rf.optitrack.data_clean(f"{args.data_path}/optitrack_data", legacy=False, objs=objs)[0]
 
     ot_dh = OptitrackDataHolder(meta, ot_labels, ot_full)
     data_holders.append(ot_dh)
 
     # Xsens
     print("Loading Xsens data...")
-    nb = 1
-    xsens_dh = XsensDataHolder(f"{args.data_path}/010-{nb:03}#Dona")
+    xsens_dh = XsensDataHolder(f"{args.data_path}/xsens_data")
     data_holders.append(xsens_dh)
 
     tstep = 1 / 100
@@ -149,7 +148,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, nargs='?',
-                        default='../data/MULTIMODAL',
+                        default='../../data/MULTIMODAL',
                         help='Path to data folder')
     parser.add_argument('--frame_number', type=int, nargs='?',
                         default=0,
