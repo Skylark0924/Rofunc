@@ -8,7 +8,7 @@ import os
 import numpy as np
 import rofunc as rf
 
-raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
+raw_demo = np.load('../data/LFD_ML/LeftHand.npy')
 demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
 # --- TP-GMR ---
