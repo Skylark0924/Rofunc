@@ -25,13 +25,16 @@ def plot_skeleton(skeleton_data_path: str, save_gif=False):
     data_dict = {}
     for label in labels:
         if label.split('.')[-1] == 'npy':
-            exec('{} = np.load(os.path.join(skeleton_data_path, "{}"))'.format(label.split('.')[0], label))
-            data_dict['{}'.format(label.split('.')[0])] = np.load(os.path.join(skeleton_data_path, "{}".format(label)))
+            np_data = np.load(os.path.join(skeleton_data_path, "{}".format(label)))
+            if len(np_data.shape) == 1:
+                continue
+            data_dict['{}'.format(label.split('.')[0])] =np_data
 
-    dim = len(data_dict['left_finger_LeftFirstPP'])
+    dim = len(data_dict['Head'])
 
     fig = plt.figure()
-    ax = Axes3D(fig, fc='white')
+    # ax = Axes3D(fig, fc='white')
+    ax = plt.axes(projection='3d')
     ax.set_xlim(-0.5, 1)  # Because the canvas is cleared, the range of the coordinate axis needs to be reset
     ax.set_ylim(-0.5, 1)
     ax.set_zlim(-.5, 2)
@@ -42,9 +45,7 @@ def plot_skeleton(skeleton_data_path: str, save_gif=False):
         ax.set_ylim(-0.5, 1)
         ax.set_zlim(-.5, 2)
         ax.text2D(0.05, 0.95, "Frame: {}".format(index), transform=ax.transAxes)
-        for label in labels:
-            # exec('{} = np.load(os.path.join(skeleton_data_path, "{}"))'.format(label.split('.')[0], label))
-            # exec('x, y, z =  {}[index, :3]'.format(label.split('.')[0]))
+        for label in data_dict:
             if label.split('.')[-1] == 'npy':
                 if 'finger' not in label:
                     x, y, z = data_dict['{}'.format(label.split('.')[0])][index, :3]
@@ -73,6 +74,8 @@ def plot_skeleton_batch(skeleton_dir, save_gif=True):
     """
     skeletons = os.listdir(skeleton_dir)
     for skeleton in tqdm(skeletons):
+        # if "chenzui" not in skeleton:
+        #     continue
         skeleton_path = os.path.join(skeleton_dir, skeleton)
         if os.path.isdir(skeleton_path):
             plot_skeleton(skeleton_path, save_gif)
