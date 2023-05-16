@@ -33,22 +33,23 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 from pyquaternion import Quaternion
 import rofunc as rf
-from rf.utils.data_sampler.utils import rreplace, pcd_concat
+from .utils import rreplace, pcd_concat
 
 
 class DataHolder(object):
     """Class to hold data for each frame"""
+
     def __init__(self):
         self.time_serie = None
         self._sampled_data = None
-        self.transform = [np.eye(3), np.zeros((1,3)), 1]
+        self.transform = [np.eye(3), np.zeros((1, 3)), 1]
         # R, t, s: pt' = s(R@pt + t)
         self.tstart = None
         self.tstop = None
 
     @property
     def sampled_data(self):
-        #This has the effect on not letting the object reader modify the data. Good idea ??
+        # This has the effect on not letting the object reader modify the data. Good idea ??
         return self._sampled_data
 
     def _pre_load(self):
@@ -67,9 +68,11 @@ class DataHolder(object):
         elif data.shape[-1] == 7:
             pos = self.lin_trans(data[:, :3], inv=inv)
             if inv:
-                rot = [Quaternion(matrix=(self.transform[0].T @ Quaternion(q).rotation_matrix.T).T).elements for q in data[:, 3:]]
+                rot = [Quaternion(matrix=(self.transform[0].T @ Quaternion(q).rotation_matrix.T).T).elements for q in
+                       data[:, 3:]]
             else:
-                rot = [Quaternion(matrix=(self.transform[0] @ Quaternion(q).rotation_matrix.T).T).elements for q in data[:, 3:]]
+                rot = [Quaternion(matrix=(self.transform[0] @ Quaternion(q).rotation_matrix.T).T).elements for q in
+                       data[:, 3:]]
             rot = np.stack(rot, axis=0)
             return np.hstack((pos, rot))
 
@@ -80,7 +83,7 @@ class DataHolder(object):
         j = 0
         for i, tick in enumerate(ticks):
             if i > 0:
-                self._sampled_data[i] = self._sampled_data[i-1]
+                self._sampled_data[i] = self._sampled_data[i - 1]
             while j < len(self.time_serie) and self.time_serie[j] <= tick:
                 self._sampled_data[i] = self[j]
                 j += 1
@@ -143,12 +146,12 @@ class RGBDDataHolder(DataHolder):
         depth_raw = o3d.io.read_image(rreplace(self._sampled_data[frame_number], 'left', 'depth', 1))
         intrinsic.intrinsic_matrix = self.intrinsic
         rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
-                        color_raw, depth_raw, depth_scale=1, depth_trunc=self.depth_trunc,
-                        convert_rgb_to_intensity=False)
+            color_raw, depth_raw, depth_scale=1, depth_trunc=self.depth_trunc,
+            convert_rgb_to_intensity=False)
 
         pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
-                        rgbd_image,
-                        intrinsic)
+            rgbd_image,
+            intrinsic)
         voxel_down_pcd = pcd.voxel_down_sample(voxel_size=1)
         cl, ind = voxel_down_pcd.remove_statistical_outlier(nb_neighbors=20,
                                                             std_ratio=2.0)
@@ -180,8 +183,8 @@ class XsensDataHolder(DataHolder):
         super().__init__()
         self.root_path = root_path
         if transform is None:
-            transform = [np.array([[0, 1, 0],[0, 0, 1],[1, 0, 0]], dtype=np.float64),
-                         np.zeros((1,3), dtype=np.float64), 1000]
+            transform = [np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]], dtype=np.float64),
+                         np.zeros((1, 3), dtype=np.float64), 1000]
         self.transform = transform
         self.labels = {}
         self.files = []
@@ -189,7 +192,7 @@ class XsensDataHolder(DataHolder):
 
     @property
     def sampled_data(self):
-        #This has the effect on not letting the object reader modify the data. Good idea ??
+        # This has the effect on not letting the object reader modify the data. Good idea ??
         return np.array(self._sampled_data)
 
     def _pre_load(self):
@@ -224,9 +227,9 @@ class XsensDataHolder(DataHolder):
         return data_ptr[item].copy()
 
     def sampled_match(self, label, pos_array, fnb=0, bnds=None):
-        if pos_array.shape[0] != 1 and\
-            pos_array.shape[0] != len(self._sampled_data) and\
-            bnds is None:
+        if pos_array.shape[0] != 1 and \
+                pos_array.shape[0] != len(self._sampled_data) and \
+                bnds is None:
             print("Not matching : pos_array must be constant or span the whole demonstration")
             return
         if label not in self.labels:
@@ -234,21 +237,22 @@ class XsensDataHolder(DataHolder):
         label_idx = self.labels[label][0]
         if pos_array.shape[-1] == 3:
             if pos_array.shape[0] == 1:
-                diff = pos_array[0] - self.lin_trans(self.sampled_data[fnb, label_idx:label_idx+3][None, :])
+                diff = pos_array[0] - self.lin_trans(self.sampled_data[fnb, label_idx:label_idx + 3][None, :])
             else:
                 print("Current behavior of sampled match: median matching")
                 diff = np.median(pos_array[bnds[0]:bnds[1]] - \
                                  self.lin_trans(
-                                     self.sampled_data[bnds[0]:bnds[1], label_idx:label_idx+3]),
+                                     self.sampled_data[bnds[0]:bnds[1], label_idx:label_idx + 3]),
                                  axis=0)[None, :]
             self.transform[1] = diff / self.transform[2] + self.transform[1]
         # Experimental
         elif pos_array.shape[-1] == 7:
             pos_array[fnb, 3:] = Quaternion(matrix=np.eye(3)).elements
             if pos_array.shape[0] >= 0:
-                qrot = Quaternion(pos_array[fnb, 3:7]) * Quaternion(self.sampled_data[fnb, label_idx+3:label_idx+7]).inverse
+                qrot = Quaternion(pos_array[fnb, 3:7]) * Quaternion(
+                    self.sampled_data[fnb, label_idx + 3:label_idx + 7]).inverse
                 mrot = qrot.rotation_matrix
-                trans = pos_array[fnb, :3] / self.transform[2] - mrot @ self.sampled_data[fnb, label_idx:label_idx+3]
+                trans = pos_array[fnb, :3] / self.transform[2] - mrot @ self.sampled_data[fnb, label_idx:label_idx + 3]
                 self.transform[0] = mrot
                 self.transform[1] = trans[None, :]
 
@@ -257,12 +261,12 @@ class XsensDataHolder(DataHolder):
             raise ValueError("Data must be sampled before converting to pcd.")
         pcds = []
         for label in self.labels:
-            (imin,imax) = self.labels[label]
+            (imin, imax) = self.labels[label]
             if imax - imin < 3:
                 continue
-            sphere = o3d.geometry.TriangleMesh.create_sphere(radius=10, resolution=5)\
-                                              .translate(self.lin_trans(self._sampled_data[frame_number][imin:imin+3][None, :]).T)
-            #Xsens data is in mm for some reason
+            sphere = o3d.geometry.TriangleMesh.create_sphere(radius=10, resolution=5) \
+                .translate(self.lin_trans(self._sampled_data[frame_number][imin:imin + 3][None, :]).T)
+            # Xsens data is in mm for some reason
             sphere.compute_vertex_normals()
             sample = sphere.sample_points_uniformly(number_of_points=1000)
             pcds.append(sample)
@@ -273,7 +277,7 @@ class XsensDataHolder(DataHolder):
 
 
 class OptitrackDataHolder(DataHolder):
-    #TODO: Merge with XsensDataHolder ?
+    # TODO: Merge with XsensDataHolder ?
     def __init__(self, meta=None, labels=None, data=None):
         super().__init__()
         if data is None:
@@ -287,7 +291,7 @@ class OptitrackDataHolder(DataHolder):
 
     @property
     def sampled_data(self):
-        #This has the effect on not letting the object reader modify the data. Good idea ??
+        # This has the effect on not letting the object reader modify the data. Good idea ??
         return np.array(self._sampled_data)
 
     def _pre_load(self, data, labels):
@@ -300,7 +304,7 @@ class OptitrackDataHolder(DataHolder):
         # data = data[:, 2:]
         # self.labels = labels[2:]
         self.labels = labels
-        #TODO: change stupid separator. Too common
+        # TODO: change stupid separator. Too common
         self.objs = list(set([l.split('.')[0] for l in self.labels]))
         self.tmp_file = osp.join(self.tmp_folder, f'{len(os.listdir(self.tmp_folder))}.npy')
         np.save(self.tmp_file, data)
@@ -317,8 +321,8 @@ class OptitrackDataHolder(DataHolder):
             if f"{o}.pose.x" not in self.labels:
                 continue
             imin = self.labels.index(f"{o}.pose.x")
-            sphere = o3d.geometry.TriangleMesh.create_sphere(radius=10, resolution=5)\
-                                              .translate(self.lin_trans(self._sampled_data[frame_number][imin:imin+3][None, :]).T)
+            sphere = o3d.geometry.TriangleMesh.create_sphere(radius=10, resolution=5) \
+                .translate(self.lin_trans(self._sampled_data[frame_number][imin:imin + 3][None, :]).T)
             sphere.compute_vertex_normals()
             sample = sphere.sample_points_uniformly(number_of_points=1000)
             pcds.append(sample)
@@ -338,7 +342,7 @@ class OptitrackDataHolder(DataHolder):
                 prev_fnb = fnb
 
 
-class MultiModalDataHandler(object):
+class MultimodalDataHandler(object):
     """Class to handle multimodal data collection.
 
     Attributes:
@@ -346,7 +350,8 @@ class MultiModalDataHandler(object):
         tstart (int): Start time of the shared data time serie.
         tstop (int): Stop time of the shared data time serie.
     """
-    #TODO: put in DataHolders family ?
+
+    # TODO: put in DataHolders family ?
     def __init__(self, tstep: int = None, tstart: int = None, tstop: int = None,
                  data_holders: List[DataHolder] = None, interpolate: str = 'repeat'):
         self.tstep = tstep
@@ -377,7 +382,8 @@ class MultiModalDataHandler(object):
         Adding a data serie will update the time boundaries of the handler. You can set custom boundaries when loading the data.
         """
         if len(time_series) != len(data_series):
-            raise ValueError("Time series and data series must have the same length. Make sure each data serie is passed with corresponding time serie.")
+            raise ValueError(
+                "Time series and data series must have the same length. Make sure each data serie is passed with corresponding time serie.")
         self.data_holders.append(data_holders)
         self.update_bounds()
 
@@ -451,7 +457,7 @@ class MultiModalDataHandler(object):
             List[open3d.geometry.PointCloud]: List of point clouds.
         """
         if show_holder is None:
-            show_holder = [True]*len(self.data_holders)
+            show_holder = [True] * len(self.data_holders)
         pcd = []
         for i, holder in enumerate(self.data_holders):
             if show_holder[i]:
