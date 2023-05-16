@@ -228,8 +228,3 @@ def get_transformation_matrices(joints_dir):
     :return:
     """
     ...
-
-
-if __name__=="__main__":
-    mvnx_path = '/Users/donatien/data/CLOVER_captures/2023_04_14_dressing'
-    export_batch(mvnx_path)
