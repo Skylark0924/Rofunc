@@ -24,7 +24,7 @@ class PauseAnimation(object):
         self.paused = not self.paused
 
 
-def visualize_objects(csv_path: str, objs: dict, meta: dict, show_markers: bool = True, save_gif: bool = False,
+def visualize_objects(parent_dir: str, objs: dict, meta: dict, show_markers: bool = True, save_gif: bool = False,
                       scale: str = '', up_axis: str = 'Y'):
     """
     Plots the objects in the objs dict.
@@ -37,7 +37,7 @@ def visualize_objects(csv_path: str, objs: dict, meta: dict, show_markers: bool 
     '' -  No scaling, use default bounding box
     'max_scale' - scales the data tp a (-1, 1). Respects original offset to center of scene and aspect ratio.
     'center_scale' - scales the plot to a centered (-1, 1) box. Respects the original aspect ratio.
-    :param csv_path: Path to the csv file.
+    :param parent_dir: Directory where the data is stored.
     :param objs: Dictionary of objects to plot.
     :param meta: Dictionary of metadata.
     :param show_markers:
@@ -46,7 +46,7 @@ def visualize_objects(csv_path: str, objs: dict, meta: dict, show_markers: bool 
     :param up_axis: Axis to be considered as up. Defaults to 'Y'.
     :return:
     """
-    data = pd.read_csv(osp.join(csv_path, f"{meta['Take Name']}.csv"), skiprows=6)
+    data = pd.read_csv(osp.join(parent_dir, f"{meta['Take Name']}.csv"), skiprows=6)
     xlim = (-1200, 1200)
     ylim = (-0.5, 2000)
     zlim = (-1200, 1200)

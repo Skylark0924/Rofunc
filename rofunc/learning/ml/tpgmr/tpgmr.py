@@ -11,17 +11,18 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 class TPGMR(TPGMM):
-    def __init__(self, demos_x, nb_states: int = 4, reg: float = 1e-3, horizon=150, plot=False):
+    def __init__(self, demos_x, task_params, nb_states: int = 4, reg: float = 1e-3, plot=False):
         """
         Task-parameterized Gaussian Mixture Regression (TP-GMR)
         :param demos_x: demo displacement
+        :param task_params: task parameters
         :param nb_states: number of states in the HMM
         :param reg: regularization term
-        :param horizon: horizon of the reproduced trajectory
         :param plot: whether to plot the result
         """
-        super().__init__(demos_x, nb_states=nb_states, reg=reg, horizon=horizon, plot=plot)
-        self.gmr = rf.learning.gmr.GMR(self.demos_x, self.demos_dx, self.demos_xdx, nb_states=nb_states, reg=reg, plot=False)
+        super().__init__(demos_x, task_params, nb_states=nb_states, reg=reg, plot=plot)
+        self.gmr = rf.learning.gmr.GMR(self.demos_x, self.demos_dx, self.demos_xdx, nb_states=nb_states, reg=reg,
+                                       plot=False)
 
     def gmm_learning(self):
         # Learn the time-dependent GMR from demonstration
@@ -78,21 +79,21 @@ class TPGMR(TPGMM):
     def generate(self, model: pbd.HMM, ref_demo_idx: int, task_params: dict) -> np.ndarray:
         beauty_print('generate new demo from learned representation', type='info')
 
-        task_params_A_b = self.get_task_params_A_b(task_params)
+        self.get_A_b()
 
-        prod = self.poe(model, ref_demo_idx, task_params_A_b)
-        traj = self._reproduce(model, prod, ref_demo_idx, task_params['start_xdx'])
+        prod = self.poe(model, ref_demo_idx)
+        traj = self._reproduce(model, prod, ref_demo_idx, self.task_params['frame_origins'][0][0])
         return traj, prod
 
 
 class TPGMRBi(TPGMR):
-    def __init__(self, demos_left_x, demos_right_x, horizon=150, plot=False):
+    def __init__(self, demos_left_x, demos_right_x, task_params, plot=False):
         self.demos_left_x = demos_left_x
         self.demos_right_x = demos_right_x
         self.plot = plot
 
-        self.repr_l = TPGMR(demos_left_x)
-        self.repr_r = TPGMR(demos_right_x)
+        self.repr_l = TPGMR(demos_left_x, task_params['left'], plot=plot)
+        self.repr_r = TPGMR(demos_right_x, task_params['right'], plot=plot)
 
     def fit(self):
         beauty_print('Learning the trajectory representation from demonstration via TP-GMR')
@@ -101,8 +102,10 @@ class TPGMRBi(TPGMR):
         model_r = self.repr_r.gmm_learning()
         return model_l, model_r
 
-    def reproduce(self, model_l, model_r, show_demo_idx):
+    def reproduce(self, models, show_demo_idx):
         beauty_print('reproduce {}-th demo from learned representation'.format(show_demo_idx), type='info')
+
+        model_l, model_r = models
 
         prod_l = self.repr_l.poe(model_l, show_demo_idx)
         prod_r = self.repr_r.poe(model_r, show_demo_idx)
@@ -112,23 +115,28 @@ class TPGMRBi(TPGMR):
         if self.plot:
             nb_dim = int(traj_l.shape[1] / 2)
             data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
-            rf.visualab.traj_plot(data_lst)
+            rf.visualab.traj_plot(data_lst, title='Reproduced bimanual trajectories')
         return traj_l, traj_r, prod_l, prod_r
 
-    def generate(self, model_l: pbd.HMM, model_r: pbd.HMM, ref_demo_idx: int, task_params: dict) -> \
+    def generate(self, models, ref_demo_idx: int, task_params: dict) -> \
             Tuple[ndarray, ndarray]:
         beauty_print('generate new demo from learned representation', type='info')
 
-        task_params_A_b_l = self.repr_l.get_task_params_A_b(task_params['Left'])
-        task_params_A_b_r = self.repr_r.get_task_params_A_b(task_params['Right'])
+        model_l, model_r = models
 
-        prod_l = self.repr_l.poe(model_l, ref_demo_idx, task_params_A_b_l)
-        prod_r = self.repr_r.poe(model_r, ref_demo_idx, task_params_A_b_r)
-        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, task_params['Left']['start_xdx'])
-        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, task_params['Right']['start_xdx'])
+        self.repr_l.task_params = self.task_params['left']
+        self.repr_r.task_params = self.task_params['right']
+
+        self.repr_l.get_A_b()
+        self.repr_r.get_A_b()
+
+        prod_l = self.repr_l.poe(model_l, ref_demo_idx)
+        prod_r = self.repr_r.poe(model_r, ref_demo_idx)
+        traj_l = self.repr_l._reproduce(model_l, prod_l, ref_demo_idx, self.repr_l.task_params['frame_origins'][0][0])
+        traj_r = self.repr_r._reproduce(model_r, prod_r, ref_demo_idx, self.repr_l.task_params['frame_origins'][0][0])
 
         if self.plot:
             nb_dim = int(traj_l.shape[1] / 2)
             data_lst = [traj_l[:, :nb_dim], traj_r[:, :nb_dim]]
-            rf.visualab.traj_plot(data_lst)
+            rf.visualab.traj_plot(data_lst, title='Generated bimanual trajectories')
         return traj_l, traj_r, prod_l, prod_r

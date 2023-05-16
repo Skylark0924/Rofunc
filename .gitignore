@@ -164,3 +164,5 @@ examples/learning/result
 others/
 /rofunc/simulator/assets/urdf/objects/
 /rofunc/planning_control/src/
+
+data/MULTIMODAL/xsens_data/.DS_Store
