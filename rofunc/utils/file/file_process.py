@@ -11,6 +11,6 @@ def delete_lines(in_path, out_path, head, tail=0):
 
 
 def create_dir(path):
+    if not pathlib.Path(path).exists():
+        rf.utils.beauty_print('{} not exist, created.'.format(path), type='info')
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-    rf.utils.beauty_print('{} not exist, created.'.format(path), type='info')
-

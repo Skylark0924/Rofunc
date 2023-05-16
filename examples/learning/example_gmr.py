@@ -4,10 +4,11 @@ GMR
 
 This example shows how to use the GMR to learn a human demonstration motion.
 """
+import os
 import numpy as np
 import rofunc as rf
 
-datapath = '/home/ubuntu/Github/Knowledge-Universe/Robotics/Rofunc_relative_files/pbd/pbdlib/data/gui/'
+datapath = '../../data/LFD_ML/pbd/'
 data = np.load(datapath + 'test_001.npy', allow_pickle=True, encoding="latin1")[()]
 
 demos_x = data['x']  # Position data
