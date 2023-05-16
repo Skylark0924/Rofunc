@@ -22,8 +22,8 @@ class HumanSim(RobotSim):
         robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
 
         robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][:].fill(10000.0)
-        robot_dof_props["damping"][:].fill(10000.0)
+        robot_dof_props["stiffness"][:].fill(1000000.0)
+        robot_dof_props["damping"][:].fill(1000000.0)
 
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)
@@ -67,17 +67,28 @@ class HumanSim(RobotSim):
             default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
             default_dof_state["pos"] = default_dof_pos
 
+            # dof_names = ['jL5S1_rotx', 'jL5S1_roty', 'jL4L3_rotx', 'jL4L3_roty', 'jL1T12_rotx', 'jL1T12_roty',
+            #              'jT9T8_rotz', 'jT9T8_rotx', 'jT9T8_roty', 'jLeftC7Shoulder_rotx', 'jLeftShoulder_rotz',
+            #              'jLeftShoulder_rotx', 'jLeftShoulder_roty', 'jLeftElbow_rotz', 'jLeftElbow_roty',
+            #              'jLeftWrist_rotz', 'jLeftWrist_rotx', 'jRightC7Shoulder_rotx', 'jRightShoulder_rotz',
+            #              'jRightShoulder_rotx', 'jRightShoulder_roty', 'jRightElbow_rotz', 'jRightElbow_roty',
+            #              'jRightWrist_rotz', 'jRightWrist_rotx', 'jT1C7_rotz', 'jT1C7_rotx', 'jT1C7_roty',
+            #              'jC1Head_rotx', 'jC1Head_roty', 'jLeftHip_rotz', 'jLeftHip_rotx', 'jLeftHip_roty',
+            #              'jLeftKnee_rotz', 'jLeftKnee_roty', 'jLeftAnkle_rotz', 'jLeftAnkle_rotx', 'jLeftAnkle_roty',
+            #              'jLeftBallFoot_roty', 'jRightHip_rotz', 'jRightHip_rotx', 'jRightHip_roty', 'jRightKnee_rotz',
+            #              'jRightKnee_roty', 'jRightAnkle_rotz', 'jRightAnkle_rotx', 'jRightAnkle_roty',
+            #              'jRightBallFoot_roty']
             for i in range(self.num_envs):
                 dof_info = self.get_dof_info()
                 dof_pos = []
                 for dof_name in dof_info['dof_names']:
-                    dof_handle = self.gym.find_actor_dof_handle(self.envs[i], self.robot_handles[i], dof_name)
+                    # dof_handle = self.gym.find_actor_dof_handle(self.envs[i], self.robot_handles[i], dof_name)
                     if dof_name[-1] == 'x':
                         index = 0
                     elif dof_name[-1] == 'y':
-                        index = 2
-                    elif dof_name[-1] == 'z':
                         index = 1
+                    elif dof_name[-1] == 'z':
+                        index = 2
                     else:
                         raise ValueError('Invalid dof name')
 
@@ -87,8 +98,19 @@ class HumanSim(RobotSim):
                         joint_name = 'jLeftT4Shoulder'
                     if joint_name == 'jRightC7Shoulder':
                         joint_name = 'jRightT4Shoulder'
+                    joint_value = xsens_data.file_data['frames']['joint_data'][frame][joint_name]
+
+                    # if 'Shoulder' in joint_name:
+                    #     # if dof_name[-1] == 'x':
+                    #     #     index = 0
+                    #     # elif dof_name[-1] == 'y':
+                    #     #     index = 2
+                    #     # elif dof_name[-1] == 'z':
+                    #     #     index = 1
+                    #
+                    #     joint_value = xsens_data.file_data['frames']['joint_data_xzy'][frame][joint_name]
+
                     # if joint_name in ['jLeftWrist']:
-                    joint_value = xsens_data.file_data['frames']['joint_data_xzy'][frame][joint_name]
                     joint_value = np.pi * joint_value / 180.
                     # self.gym.set_dof_target_position(self.envs[i], dof_handle, joint_value[index])
                     dof_pos.append(joint_value[index])

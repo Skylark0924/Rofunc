@@ -1,6 +1,6 @@
 """
-Data re-sampling
-================
+Multimodal data fusion
+==========================
 
 This example shows how to synchronise and use multimodal data.
 """
@@ -21,7 +21,8 @@ from rofunc.utils.data_sampler import XsensDataHolder, OptitrackDataHolder, Mult
 EXPS = [
     [500, 900],
     [6300, 7200]
-    ]
+]
+
 
 def clean_exp(exp_raw: np.array, labels: list, data_labels: list):
     new_name = ['t7', 't1', 't4', 'rh', 'rl', 'lh', 'll']
@@ -34,7 +35,7 @@ def clean_exp(exp_raw: np.array, labels: list, data_labels: list):
     for i, l in enumerate(data_labels):
         new_labels.extend([f'{new_name[i]}.pose.{c}' for c in ['x', 'y', 'z']])
         ptr = labels.index(f'unlabeled {l}.pose.x')
-        new_data.append(exp_raw[:, ptr:ptr+3])
+        new_data.append(exp_raw[:, ptr:ptr + 3])
     new_data = np.concatenate(new_data, axis=1)
 
     return [new_data, new_labels]
@@ -46,13 +47,14 @@ def get_one_frame(frame_number, data_handler):
 
     return out_pcds
 
+
 def main(args):
     anim_pcd = []
     data_holders = []
 
     # Optitrack
     print("Loading Optitrack data...")
-    objs, meta = rf.optitrack.get_objects(args.data_path)
+    objs, meta = rf.optitrack.get_objects(f"{args.data_path}/optitrack_data")
     if len(objs) > 1:
         print('More than one optitrack file found. Using the first one.')
     objs = objs[0]
@@ -70,18 +72,17 @@ def main(args):
     # print(f'Optitrack objects: {objs}')
     # rf.optitrack.plot_objects(args.data_path, objs, meta)
 
-    ot_full, ot_labels = rf.optitrack.data_clean(args.data_path, legacy=False, objs=objs)[0]
+    ot_full, ot_labels = rf.optitrack.data_clean(f"{args.data_path}/optitrack_data", legacy=False, objs=objs)[0]
 
     ot_dh = OptitrackDataHolder(meta, ot_labels, ot_full)
     data_holders.append(ot_dh)
 
     # Xsens
     print("Loading Xsens data...")
-    nb = 1
-    xsens_dh = XsensDataHolder(f"{args.data_path}/010-{nb:03}#Dona")
+    xsens_dh = XsensDataHolder(f"{args.data_path}/xsens_data")
     data_holders.append(xsens_dh)
 
-    tstep = 1/100
+    tstep = 1 / 100
 
     # tstep in ms
     mmh = MultimodalDataHandler(tstep=tstep * 1000, data_holders=data_holders)
@@ -90,12 +91,11 @@ def main(args):
     print(f"Sampling took {time.time() - sp_start:.2f}s")
     # Sampling can be long for long demonstrations
 
-
     # Data from XSens is subject to sensor drift.
     # sampled_match updates the linear transformation of the XSens data holder so that it
     # matches the Optitrack data
     ot_idx = mmh.data_holders[0].labels.index('left.pose.x')
-    ot_obj = mmh.sampled_data[0][:, ot_idx:ot_idx+7]
+    ot_obj = mmh.sampled_data[0][:, ot_idx:ot_idx + 7]
     ot_obj = mmh.data_holders[0].lin_trans(ot_obj)
     mmh.data_holders[1].sampled_match('LeftHand', ot_obj[args.frame_number, :3][None, :])
     pcd = get_one_frame(args.frame_number, mmh)
@@ -104,7 +104,6 @@ def main(args):
     # Matching over just one frame is not enough to have the data match correctly for the
     # whole length of demonstrations usually.
     # See below
-
 
     exp_data = []
     exp_params = []
@@ -135,10 +134,10 @@ def main(args):
                 # Xsens data needs to be linear transformed to match it
                 _data = mmh.data_holders[1].lin_trans(
                     mmh.sampled_data[1][sampled_bounds[-1][0]:sampled_bounds[-1][1],
-                                        imin:imax])
+                    imin:imax])
             else:
                 _data = mmh.sampled_data[1][sampled_bounds[-1][0]:sampled_bounds[-1][1],
-                                            imin:imax]
+                        imin:imax]
             xs_data.append(_data)
         xs_data = np.concatenate(xs_data, axis=1)
         data = np.concatenate([data, xs_data], axis=1)
@@ -149,7 +148,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, nargs='?',
-                        default=osp.join(rf.utils.get_rofunc_path(), 'data/MULTIMODAL'),
+                        default='../../data/MULTIMODAL',
                         help='Path to data folder')
     parser.add_argument('--frame_number', type=int, nargs='?',
                         default=0,

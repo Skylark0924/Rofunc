@@ -150,7 +150,7 @@ class RobotSim:
         elif self.robot_name == "human":
             self.asset_file = asset_file
             self.flip_visual_attachments = False
-            self.fix_base_link = False
+            self.fix_base_link = True
             self.init_pose_vec = (0., 2., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         else:
             raise ValueError(
