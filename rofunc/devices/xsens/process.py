@@ -200,9 +200,10 @@ def export_time(mvnx_path, output_dir=None):
     dim = mvnx_file.frame_count
 
     time = [int(i) for i in mvnx_file.file_data['frames']['time']]
+    time = [int(i) for i in mvnx_file.file_data['frames']['ms']]
 
     np.save(os.path.join(output_dir, "time.npy"), np.array(time))
-
+    np.save(os.path.join(output_dir, "ms.npy"), np.array(time))
 
 def export_batch(mvnx_dir):
     """
@@ -217,6 +218,7 @@ def export_batch(mvnx_dir):
         if mvnx.split('.')[-1] == 'mvnx':
             mvnx_path = os.path.join(mvnx_dir, mvnx)
             export(mvnx_path)
+            export_time(mvnx_path)
 
 
 def get_transformation_matrices(joints_dir):
@@ -226,3 +228,8 @@ def get_transformation_matrices(joints_dir):
     :return:
     """
     ...
+
+
+if __name__=="__main__":
+    mvnx_path = '/Users/donatien/data/CLOVER_captures/2023_04_14_dressing'
+    export_batch(mvnx_path)
