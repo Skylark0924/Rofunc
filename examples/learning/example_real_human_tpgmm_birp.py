@@ -103,13 +103,13 @@ def learn(demos_left_x, demos_right_x, demo_idx=0):
     via2_xdx_r = [demos_right_x[i][100] for i in range(len(demos_right_x))]
     end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
 
-    task_params = {'left': {'frame_origin': [start_xdx_l, via1_xdx_l, via2_xdx_l, end_xdx_l],
+    task_params = {'left': {'frame_origins': [start_xdx_l, via1_xdx_l, via2_xdx_l, end_xdx_l],
                             'frame_names': ['start', 'via1', 'via2', 'end']},
-                   'right': {'frame_origin': [start_xdx_r, via1_xdx_r, via2_xdx_r, end_xdx_r],
+                   'right': {'frame_origins': [start_xdx_r, via1_xdx_r, via2_xdx_r, end_xdx_r],
                              'frame_names': ['start', 'via1', 'via2', 'end']}}
 
     # Create representation model
-    representation = rf.tpgmm.TPGMM_RPCtl(demos_left_x, demos_right_x, nb_states=4, plot=True, save=False,
+    representation = rf.tpgmm.TPGMM_RPCtrl(demos_left_x, demos_right_x, nb_states=4, plot=True, save=False,
                                           save_params=save_params, task_params=task_params)
 
     # Define observe frames for new situation
@@ -123,12 +123,12 @@ def learn(demos_left_x, demos_right_x, demo_idx=0):
     via2_xdx_r = np.hstack((np.array([1, 0.8, -0.5]), representation.repr_r.demos_xdx[demo_idx][150][3: 7]))
     end_xdx_r = np.hstack((np.array([1, 0.8, 0.5]), representation.repr_r.demos_xdx[demo_idx][-1][3: 7]))
 
-    task_params = {'left': {'frame_origin': [start_xdx_l, via1_xdx_l, via2_xdx_l, end_xdx_l],
+    task_params = {'left': {'frame_origins': [start_xdx_l, via1_xdx_l, via2_xdx_l, end_xdx_l],
                             'frame_names': ['start', 'via1', 'via2', 'end']},
-                   'right': {'frame_origin': [start_xdx_r, via1_xdx_r, via2_xdx_r, end_xdx_r],
+                   'right': {'frame_origins': [start_xdx_r, via1_xdx_r, via2_xdx_r, end_xdx_r],
                              'frame_names': ['start', 'via1', 'via2', 'end']}}
     # 'traj': representation.repr_r.demos_x[demo_idx]}}
-    if isinstance(representation, rf.tpgmm.TPGMM_RPCtl) or isinstance(representation, rf.tpgmm.TPGMM_RPAll):
+    if isinstance(representation, rf.tpgmm.TPGMM_RPCtrl) or isinstance(representation, rf.tpgmm.TPGMM_RPAll):
         model_l, model_r, model_c = representation.fit()
         representation.reproduce(model_l, model_r, model_c, show_demo_idx=demo_idx)
         traj_l, traj_r, _, _ = representation.generate(model_l, model_r, model_c, ref_demo_idx=demo_idx,
