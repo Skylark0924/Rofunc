@@ -5,3 +5,4 @@ from . import gmm
 from . import gmr
 from . import tpgmm
 from . import tpgmr
+from . import tphsmm
