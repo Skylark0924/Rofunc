@@ -57,8 +57,7 @@ def get_objects(input_path: str):
     demo_csvs = sorted(demo_csvs)
     for demo_csv in demo_csvs:
         objs = {}
-        meta = {}
-        demo_path = os.path.join(input_path, demo_csv)
+        demo_path = demo_csv
         with open(demo_path) as f:
             data = csv.reader(f)
             row = next(data)
@@ -117,7 +116,8 @@ def data_clean(input_path: str, legacy: bool = True, objs: dict = None, save: bo
     """
     # TODO: Must work for **file** or folder input path
     out_path = os.path.join(input_path, 'process')
-    rf.utils.create_dir(out_path)
+    if save:
+        rf.utils.create_dir(out_path)
     demo_csvs = os.listdir(input_path)
     demo_csvs = sorted(demo_csvs)
     out_list = list()

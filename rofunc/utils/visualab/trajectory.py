@@ -2,6 +2,7 @@ import random
 from typing import List
 
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.axes._axes import _log as matplotlib_axes_logger
 from matplotlib.pyplot import cm
 from pytransform3d.rotations import matrix_from_quaternion, plot_basis
@@ -95,7 +96,8 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
     # for xb, yb, zb in zip(Xb, Yb, Zb):
     #     ax.plot([xb], [yb], [zb], 'w')
 
-    set_axis(ax)
+    tmp_data = np.vstack((data_lst[i] for i in range(len(data_lst))))
+    set_axis(ax, data=[tmp_data[:, 0], tmp_data[:, 1], tmp_data[:, 2]])
     plt.tight_layout()
     if g_ax is None:
         return fig
