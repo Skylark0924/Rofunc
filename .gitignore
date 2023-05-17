@@ -166,3 +166,6 @@ others/
 /rofunc/planning_control/src/
 
 data/MULTIMODAL/xsens_data/.DS_Store
+/data/RAW_DEMO/xsens/010-005/
+/data/RAW_DEMO/xsens/010-003/
+/data/RAW_DEMO/xsens/010-004/
