@@ -100,7 +100,7 @@ class HumanSim(RobotSim):
                         joint_name = 'jRightT4Shoulder'
                     joint_value = xsens_data.file_data['frames']['joint_data'][frame][joint_name]
 
-                    # if 'Shoulder' in joint_name:
+                    # if 'LeftShoulder' in joint_name or 'RightShoulder' in joint_name:
                     #     # if dof_name[-1] == 'x':
                     #     #     index = 0
                     #     # elif dof_name[-1] == 'y':
