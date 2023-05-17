@@ -51,7 +51,11 @@ cd Rofunc
 # Create a conda environment
 # Python 3.8 is strongly recommended
 conda create -n rofunc python=3.8
+
+# For Linux user
 sh ./scripts/install.sh
+# For MacOS user (Isaac Gym based simulator is not supported on MacOS)
+sh ./scripts/mac_install.sh
 ```
 
 > **Note**
