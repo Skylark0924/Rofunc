@@ -107,10 +107,10 @@ def get_skeleton_from_json_batch(json_dir):
 
 def export(mvnx_path, output_type='segment', output_dir=None):
     """
-
+    Export data from .mvnx file to skeleton data
     :param mvnx_path:
     :param output_type: type of output data, support segment or joint
-    :param output_dir:
+    :param output_dir: specific output directory
     :return:
     """
     if mvnx_path.endswith('.mvnx'):
@@ -180,14 +180,7 @@ def export(mvnx_path, output_type='segment', output_dir=None):
 
 
 def export_time(mvnx_path, output_dir=None):
-    """
-    Example:
-        import rofunc as rf
-
-        mvnx_file = '/home/ubuntu/Data/06_24/Xsens/dough_01.mvnx'
-        rf.xsens.export(mvnx_file)
-    """
-    if mvnx_path.split('.')[-1] == 'mvnx':
+    if mvnx_path.endswith('mvnx'):
         mvnx_file = load_mvnx(mvnx_path)
     else:
         raise Exception('Wrong file type, only support .mvnx')
@@ -196,35 +189,14 @@ def export_time(mvnx_path, output_dir=None):
         output_dir = mvnx_path.split('.mvnx')[0]
     rf.utils.create_dir(output_dir)
 
-    segment_count = mvnx_file.segment_count
-    dim = mvnx_file.frame_count
-
-    time = [int(i) for i in mvnx_file.file_data['frames']['time']]
     time = [int(i) for i in mvnx_file.file_data['frames']['ms']]
-
-    np.save(os.path.join(output_dir, "time.npy"), np.array(time))
     np.save(os.path.join(output_dir, "ms.npy"), np.array(time))
 
-def export_batch(mvnx_dir):
-    """
-    Example:
-        import rofunc as rf
 
-        mvnx_dir = '../xsens_data'
-        rf.xsens.export_batch(mvnx_dir)
-    """
+def export_batch(mvnx_dir, output_type='segment'):
     mvnxs = os.listdir(mvnx_dir)
     for mvnx in tqdm(mvnxs):
         if mvnx.split('.')[-1] == 'mvnx':
             mvnx_path = os.path.join(mvnx_dir, mvnx)
-            export(mvnx_path)
+            export(mvnx_path, output_type)
             export_time(mvnx_path)
-
-
-def get_transformation_matrices(joints_dir):
-    """
-
-    :param joints_dir: the directory path of joints data
-    :return:
-    """
-    ...
