@@ -753,7 +753,7 @@ def xsens2urdf(mvnx_path, save_dir=None, human_mass=70, human_height=183):
     # Open template urdf
     rofunc_path = get_rofunc_path()
     human_urdf_dir = os.path.join(rofunc_path, 'simulator/assets/urdf/human')
-    urdf_template_path = os.path.join(human_urdf_dir, 'human_xsenstemplate_48dof.urdf')
+    urdf_template_path = os.path.join(human_urdf_dir, 'human_xsenstemplate_48dof_zxy.urdf')
     with open(urdf_template_path, 'r') as f:
         urdf_template = f.read()
 
