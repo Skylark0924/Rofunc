@@ -42,7 +42,7 @@ Thus, have fun in the robotics world!
 > Several requirements need to be installed before using the package. Please refer to
 > the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
 
-### Install from Source (nightly version)
+### Install from Source (nightly version, recommended)
 
 ```python
 git clone https://github.com/Skylark0924/Rofunc.git
@@ -54,7 +54,7 @@ conda create -n rofunc python=3.8
 
 # For Linux user
 sh ./scripts/install.sh
-# For MacOS user (Isaac Gym based simulator is not supported on MacOS)
+# For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
 sh ./scripts/mac_install.sh
 ```
 
