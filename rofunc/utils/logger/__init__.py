@@ -2,6 +2,7 @@
 
 import os
 import logging
+from .beauty_logger import beauty_print
 
 # __all__ = ["__version__", "logger"]
 
