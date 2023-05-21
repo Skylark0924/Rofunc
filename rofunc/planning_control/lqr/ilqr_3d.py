@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from rofunc.config.utils import get_config
 from omegaconf import DictConfig
-from rofunc.utils.robolab.kinematics.fk import fk
+from rofunc.utils.robolab.kinematics.fk import get_fk_from_model
 from rofunc.planning_control.lqr.gluon_config import robot_config
 
 kin = robot_config()
