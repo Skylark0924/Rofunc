@@ -161,7 +161,7 @@ examples/learning/skrl_example2.py
 rofunc/learning/rl/utils/result
 examples/learning/result
 
-others/
+rofunc/others/
 /rofunc/simulator/assets/urdf/objects/
 /rofunc/planning_control/src/
 
