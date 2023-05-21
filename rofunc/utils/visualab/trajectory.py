@@ -2,6 +2,7 @@ import random
 from typing import List
 
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.axes._axes import _log as matplotlib_axes_logger
 from matplotlib.pyplot import cm
 from pytransform3d.rotations import matrix_from_quaternion, plot_basis
@@ -13,7 +14,7 @@ matplotlib_axes_logger.setLevel('ERROR')
 def traj_plot2d(data_lst: List, legend: str = None, title: str = None, g_ax=None):
     if g_ax is None:
         fig = plt.figure()
-        ax = fig.add_subplot(111, fc='white')
+        ax = fig.add_subplot(111)  # , fc='white'
     else:
         ax = g_ax
     for i in range(len(data_lst)):
@@ -37,7 +38,7 @@ def traj_plot2d(data_lst: List, legend: str = None, title: str = None, g_ax=None
     ax.set_ylabel('y')
     plt.tight_layout()
     if g_ax is None:
-        plt.show()
+        return fig
 
 
 def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None, ori: bool = False):
@@ -66,13 +67,17 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
             ax.scatter(data_lst[i][0, 0], data_lst[i][0, 1], data_lst[i][0, 2], s=20, c=c)
             ax.scatter(data_lst[i][-1, 0], data_lst[i][-1, 1], data_lst[i][-1, 2], marker='x', s=20, c=c)
 
-        if ori:
+        if ori and len(data_lst[i][0]) >= 7:
             data_ori = data_lst[i][:, 3:7]
             for t in range(len(data_ori)):
-                R = matrix_from_quaternion(data_ori[t])
-                p = data_ori[i][t, :3]
-                ax = plot_basis(ax=ax, R=R, p=p, s=0.01)
-                ax = plot_basis(ax=ax, R=R, p=p, s=0.01)
+                try:
+                    R = matrix_from_quaternion(data_ori[t])
+                except:
+                    pass
+                p = data_lst[i][t, :3]
+                if t % 20 == 0:
+                    ax = plot_basis(ax=ax, R=R, p=p, s=1)
+                    ax = plot_basis(ax=ax, R=R, p=p, s=1)
     if title is not None:
         ax.set_title(title, fontsize=12, fontweight='bold')
 
@@ -91,31 +96,30 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
     # for xb, yb, zb in zip(Xb, Yb, Zb):
     #     ax.plot([xb], [yb], [zb], 'w')
 
-    set_axis(ax)
+    tmp_data = np.vstack((data_lst[i] for i in range(len(data_lst))))
+    set_axis(ax, data=[tmp_data[:, 0], tmp_data[:, 1], tmp_data[:, 2]])
     plt.tight_layout()
     if g_ax is None:
-        plt.show()
+        return fig
 
 
 def traj_plot(data_lst: List, legend: str = None, title: str = None, mode: str = None, ori: bool = False, g_ax=None):
     """
-
-    Args:
-        data_lst: list with 2d array or 3d array
-        legend:
-        title:
-        mode:
-        ori:
-        g_ax:
-
-    Returns:
-
+    Plot 2d or 3d trajectories
+    :param data_lst: list with 2d array or 3d array
+    :param legend: legend of the figure
+    :param title: title of the figure
+    :param mode: '2d' or '3d'
+    :param ori: plot orientation or not
+    :param g_ax: global axis
+    :return:
     """
     if mode is None:
         mode = '2d' if len(data_lst[0][0]) == 2 else '3d'
     if mode == '2d':
-        traj_plot2d(data_lst, legend, title, g_ax)
+        fig = traj_plot2d(data_lst, legend, title, g_ax)
     elif mode == '3d':
-        traj_plot3d(data_lst, legend, title, g_ax, ori)
+        fig = traj_plot3d(data_lst, legend, title, g_ax, ori)
     else:
         raise Exception('Wrong mode, only support 2d and 3d plot.')
+    return fig

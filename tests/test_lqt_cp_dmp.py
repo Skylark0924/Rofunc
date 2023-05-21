@@ -25,7 +25,7 @@ def test_2d_cp_dmp_lqt():
     cfg = get_config('./planning', 'lqt_cp_dmp')
     cfg.nbDeriv = 3
 
-    x = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LQT_LQR/S.npy'))[0, :, :2].T
+    x = np.load('../data/LQT_LQR/S.npy')[0, :, :2].T
 
     f_pos = interp1d(np.linspace(0, np.size(x, 1) - 1, np.size(x, 1), dtype=int), x, kind='cubic')
     MuPos = f_pos(np.linspace(0, np.size(x, 1) - 1, cfg.nbData))  # Position

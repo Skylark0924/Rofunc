@@ -4,7 +4,9 @@ import struct
 import os
 import threading
 from typing import List
-from pynput.keyboard import Key, Listener
+import rofunc as rf
+
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 event = threading.Event()
 
@@ -270,10 +272,8 @@ class XsensInterface(object):
     def _get_header(data):
         """
         Get the header data from the received MVN Awinda datagram.
-        Args:
-            data: Tuple From self._sock.recvfrom(self._buffer_size)
-        Returns:
-            Header
+        :param data: Tuple From self._sock.recvfrom(self._buffer_size)
+        :return: header
         """
         if len(data) < 24:
             print(
@@ -318,33 +318,37 @@ class XsensInterface(object):
 
 
 def on_press(key):
-    # 当按下esc，结束监听
+    from pynput.keyboard import Key
+
+    # When pressing the Esc key, stop recording
     if key == Key.esc:
         event.set()
-        print(f"你按下了esc，监听结束")
+        beauty_print("Esc button is pressed, stop recording", type="info")
         return False
 
 
 def record(root_dir: str, exp_name: str, ip: str, port: int, ref_frame: str = None) -> None:
     """
-    Args:
-        root_dir: root directory
-        exp_name: npy file location
-        ip: ip address of server computer
-        port: port number of optitrack server
-        ref_frame: reference frame
-    Returns: None
+    record xsens motion data
+    :param root_dir: root directory
+    :param exp_name: npy file location
+    :param ip: ip address of server computer
+    :param port: port number of optitrack server
+    :param ref_frame: reference frame
+    :return:
     """
+    from pynput.keyboard import Listener
+
     if os.path.exists('{}/{}'.format(root_dir, exp_name)):
         raise Exception('There are already some files in {}, please rename the exp_name.'.format(
             '{}/{}'.format(root_dir, exp_name)))
     else:
-        os.mkdir('{}/{}'.format(root_dir, exp_name))
-        print('Recording folder: {}/{}'.format(root_dir, exp_name))
+        rf.utils.create_dir('{}/{}'.format(root_dir, exp_name))
+        beauty_print('Recording folder: {}/{}'.format(root_dir, exp_name), type='info')
         interface = XsensInterface(ip, port, ref_frame=ref_frame)
         listener = Listener(on_press=on_press)
         listener.start()
         xsens_thread = threading.Thread(target=interface.save_file_thread, args=(root_dir, exp_name))
         xsens_thread.start()
         xsens_thread.join()
-        print('Xsens record finished')
+        beauty_print('Xsens record finished', type='info')
