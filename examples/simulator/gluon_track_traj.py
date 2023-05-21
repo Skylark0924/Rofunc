@@ -14,8 +14,8 @@ args.use_gpu_pipeline = False
 
 traj = np.load(os.path.join(rf.file.get_rofunc_path(), 'data/taichi_1l.npy'))
 # print(traj)
-traj = traj*0.2
-rf.lqt.plot_3d_uni(traj, ori=False)l;
+traj = traj*0.25
+rf.lqt.plot_3d_uni(traj, ori=False);
 
 gluonsim = rf.sim.GluonSim(args)
 gluonsim.run_traj(traj)
