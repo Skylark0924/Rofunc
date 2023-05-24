@@ -1,13 +1,8 @@
-from termcolor import colored
-import numpy as np
-
 from pbdlib.functions import *
 from pbdlib.model import *
 from rofunc.learning.ml.gmm.gmm import *
 
-import math
-from numpy.linalg import inv, pinv, norm, det
-import sys
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 class HMM(GMM):
@@ -20,7 +15,7 @@ class HMM(GMM):
     @property
     def init_priors(self):
         if self._init_priors is None:
-            print(colored("HMM init priors not defined, initializing to uniform", 'red', 'on_white'))
+            beauty_print("HMM init priors not defined, initializing to uniform", type="warning")
             self._init_priors = np.ones(self.nb_states) / self.nb_states
 
         return self._init_priors
@@ -32,7 +27,7 @@ class HMM(GMM):
     @property
     def trans(self):
         if self._trans is None:
-            print(colored("HMM transition matrix not defined, initializing to uniform", 'red', 'on_white'))
+            beauty_print("HMM transition matrix not defined, initializing to uniform", type="warning")
             self._trans = np.ones((self.nb_states, self.nb_states)) / self.nb_states
         return self._trans
 
