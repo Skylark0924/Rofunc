@@ -1,19 +1,10 @@
 """
-Copyright (c) 2020, NVIDIA CORPORATION. All rights reserved.
+CURI screw nut
+=================
 
-NVIDIA CORPORATION and its licensors retain all intellectual property
-and proprietary rights in and to this software, related documentation
-and any modifications thereto. Any use, reproduction, disclosure or
-distribution of this software and related documentation without an express
-license agreement from NVIDIA CORPORATION is strictly prohibited.
-
-curi Cube Pick
-----------------
-Use Jacobian matrix and inverse kinematics control of curi robot to pick up a box.
-Damped Least Squares method from: https://www.math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/iksurvey.pdf
+This example shows how to use the gym interface to control the CURI robot to screw a nut onto a bolt.
 """
-
-from inspect import Attribute
+import os.path
 from isaacgym import gymapi
 from isaacgym import gymutil
 from isaacgym import gymtorch
@@ -22,6 +13,7 @@ from isaacgym.torch_utils import *
 import math
 import numpy as np
 import torch
+import rofunc as rf
 
 DOF = 18
 # Gripper_index = [14, 15, 23, 24]
@@ -261,7 +253,8 @@ viewer = gym.create_viewer(sim, gymapi.CameraProperties())
 if viewer is None:
     raise Exception("Failed to create viewer")
 
-asset_root = "../assets"
+rofunc_path = rf.file.get_rofunc_path()
+asset_root = os.path.join(rofunc_path, "simulator/assets")
 
 # create table asset
 table_dims = gymapi.Vec3(0.6, 2.5, 0.5)
