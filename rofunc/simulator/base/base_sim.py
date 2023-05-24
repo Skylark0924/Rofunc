@@ -7,67 +7,17 @@ from typing import List
 
 from rofunc.utils.logger.beauty_logger import beauty_print
 
+'''TODO: Make this page configurable'''
 
-class RobotSim:
-    def __init__(self, args, robot_name, asset_root=None, fix_base_link=False, flip_visual_attachments=True,
-                 init_pose_vec=(0, 0.5, 0.0), num_envs=1, device="cpu"):
-        """
-        Initialize the robot simulator
-        :param args: arguments
-        :param robot_name: name of the robot
-        :param asset_root: path to the assets, 
-                           e.g., /home/ubuntu/anaconda3/lib/python3.7/site-packages/rofunc/simulator/assets
-        """
+
+class PlaygroundSim:
+    def __init__(self, args):
         self.args = args
-        self.robot_name = robot_name
-        self.fix_base_link = fix_base_link
-        self.flip_visual_attachments = flip_visual_attachments
-        self.init_pose_vec = init_pose_vec
-        self.num_envs = num_envs
-        self.device = device
-        if self.robot_name == "CURI":
-            self.asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
-            self.init_pose_vec = (0, 0.0, 0.0)
-        elif self.robot_name == "walker":
-            self.asset_file = "urdf/walker/urdf/walker.urdf"
-            self.fix_base_link = True
-            self.flip_visual_attachments = False
-            self.init_pose_vec = (0, 2.0, 0.0)
-        elif self.robot_name == "CURI-mini":
-            self.asset_file = "urdf/curi_mini/urdf/diablo_simulation.urdf"
-            self.flip_visual_attachments = False
-        elif self.robot_name == "franka":
-            self.asset_file = "urdf/franka_description/robots/franka_panda.urdf"
-            self.fix_base_link = True
-            self.init_pose_vec = (0, 0.0, 0.0)
-        elif self.robot_name == "baxter":
-            self.asset_file = "urdf/baxter/robot.xml"
-            self.init_pose_vec = (0, 1.0, 0.0)
-        elif self.robot_name == "sawyer":
-            self.asset_file = "urdf/sawyer/robot.xml"
-        elif self.robot_name == "gluon":
-            self.asset_file = "urdf/gluon/gluon.urdf"
-            self.flip_visual_attachments = False
-            self.fix_base_link = True
-            self.init_pose_vec = (0, 0.0, 0.0)
-        else:
-            raise ValueError(
-                "The robot {} is not supported. Please choose a robot in [CURI, walker, CURI-mini, baxter, sawyer]".format(
-                    self.robot_name))
+        self.init_sim()
+        self.init_viewer()
+        self.init_plane()
 
-        if asset_root is None:
-            import site
-            pip_root_path = site.getsitepackages()[0]
-            self.asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
-
-        # Initial gym, sim, viewer and env
-        self._init_sim()
-        self._init_viewer()
-        self._init_env()
-
-        self.robot_dof = self.gym.get_actor_dof_count(self.envs[0], self.robot_handles[0])
-
-    def _init_sim(self, up_axis="Y"):
+    def init_sim(self, up_axis="Y"):
         from isaacgym import gymapi
 
         if hasattr(self.args, "up_axis"):
@@ -119,7 +69,7 @@ class RobotSim:
             beauty_print("Failed to create sim", type="warning")
             quit()
 
-    def _init_viewer(self, cam_pos=(3.0, 2.0, 0.0), cam_target=(0.0, 0.0, 0.0)):
+    def init_viewer(self, cam_pos=(3.0, 2.0, 0.0), cam_target=(0.0, 0.0, 0.0)):
         from isaacgym import gymapi
 
         if hasattr(self.args, 'cam_pos') and hasattr(self.args, 'cam_target'):
@@ -129,7 +79,8 @@ class RobotSim:
         # Create viewer
         self.viewer = None
         camera_props = gymapi.CameraProperties()
-        camera_props.horizontal_fov = 75.0 if not hasattr(self.args, 'camera_horizontal_fov') else self.args.camera_horizontal_fov
+        camera_props.horizontal_fov = 75.0 if not hasattr(self.args,
+                                                          'camera_horizontal_fov') else self.args.camera_horizontal_fov
         camera_props.width = 1920 if not hasattr(self.args, 'camera_width') else self.args.camera_width
         camera_props.height = 1080 if not hasattr(self.args, 'camera_height') else self.args.camera_height
         # camera_props.use_collision_geometry = True
@@ -142,26 +93,98 @@ class RobotSim:
         self.gym.viewer_camera_look_at(self.viewer, None, gymapi.Vec3(cam_pos[0], cam_pos[1], cam_pos[2]),
                                        gymapi.Vec3(cam_target[0], cam_target[1], cam_target[2]))
 
-    def _init_env(self, num_env=None, spacing=3.0, plane_vec=None):
+    def init_plane(self, plane_vec=None):
         from isaacgym import gymapi
-
-        if num_env is not None:
-            self.num_envs = num_env
-
         # Add ground plane
         plane_params = gymapi.PlaneParams()
         if plane_vec is not None:
             plane_params.normal = plane_vec  # z-up! gymapi.Vec3(0, 0, 1)
         self.gym.add_ground(self.sim, plane_params)
 
-        asset_options = gymapi.AssetOptions()
-        asset_options.fix_base_link = self.fix_base_link
-        asset_options.flip_visual_attachments = self.flip_visual_attachments
-        asset_options.armature = 0.01
 
-        # load robot asset
+class RobotSim:
+    def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=False,
+                 flip_visual_attachments=True,
+                 init_pose_vec=None, num_envs=1, device="cpu"):
+        """
+        Initialize the robot simulator
+        :param args: arguments
+        :param robot_name: name of the robot
+        :param asset_root: path to the assets, 
+                           e.g., /home/ubuntu/anaconda3/lib/python3.7/site-packages/rofunc/simulator/assets
+        """
+        from isaacgym import gymapi
+
+        self.args = args
+        self.robot_name = robot_name
+        self.fix_base_link = fix_base_link
+        self.flip_visual_attachments = flip_visual_attachments
+        self.init_pose_vec = init_pose_vec
+        self.num_envs = num_envs
+        self.device = device
+        if self.robot_name == "CURI":
+            self.asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+            self.init_pose_vec = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+        elif self.robot_name == "walker":
+            self.asset_file = "urdf/walker/urdf/walker_cartesio.urdf"
+            self.fix_base_link = True
+            self.flip_visual_attachments = False
+            self.init_pose_vec = (0., 1.3, 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+        elif self.robot_name == "CURI-mini":
+            self.asset_file = "urdf/curi_mini/urdf/diablo_simulation.urdf"
+            self.flip_visual_attachments = False
+        elif self.robot_name == "franka":
+            self.asset_file = "urdf/franka_description/robots/franka_panda.urdf"
+            self.fix_base_link = True
+            self.init_pose_vec = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+        elif self.robot_name == "baxter":
+            self.asset_file = "urdf/baxter/robot.xml"
+            self.init_pose_vec = (0., 1., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+        elif self.robot_name == "sawyer":
+            self.asset_file = "urdf/sawyer/robot.xml"
+        elif self.robot_name == "gluon":
+            self.asset_file = "urdf/gluon/gluon.urdf"
+            self.flip_visual_attachments = False
+            self.fix_base_link = True
+            self.init_pose_vec = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+        elif self.robot_name == "human":
+            self.asset_file = asset_file
+            self.flip_visual_attachments = False
+            self.fix_base_link = False
+            self.init_pose_vec = (0., 2., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+        else:
+            raise ValueError(
+                "The robot {} is not supported. Please choose a robot in [CURI, walker, CURI-mini, baxter, sawyer]".format(
+                    self.robot_name))
+
+        if asset_root is None:
+            import site
+            pip_root_path = site.getsitepackages()[0]
+            self.asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
+        else:
+            self.asset_root = asset_root
+
+        self.asset_options = gymapi.AssetOptions()
+        self.asset_options.fix_base_link = self.fix_base_link
+        self.asset_options.flip_visual_attachments = self.flip_visual_attachments
+        self.asset_options.armature = 0.01
+
+    def init(self):
+        # Initial gym, sim, viewer and env
+        self.PlaygroundSim = PlaygroundSim(self.args)
+        self.gym = self.PlaygroundSim.gym
+        self.sim = self.PlaygroundSim.sim
+        self.viewer = self.PlaygroundSim.viewer
+        self.init_env()
+
+        self.setup_robot_dof_prop()
+        self.robot_dof = self.gym.get_actor_dof_count(self.envs[0], self.robot_handles[0])
+
+    def init_env(self, spacing=3.0):
+        from isaacgym import gymapi
+
         beauty_print("Loading robot asset {} from {}".format(self.asset_file, self.asset_root), type="info")
-        self.robot_asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, asset_options)
+        self.robot_asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, self.asset_options)
 
         # Set up the env grid
         env_lower = gymapi.Vec3(-spacing, 0.0, -spacing)
@@ -174,8 +197,9 @@ class RobotSim:
         print("Creating %d environments" % self.num_envs)
         num_per_row = int(math.sqrt(self.num_envs))
         pose = gymapi.Transform()
-        pose.p = gymapi.Vec3(self.init_pose_vec[0], self.init_pose_vec[1], self.init_pose_vec[2])
-        pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
+        init_pose = self.init_pose_vec
+        pose.p = gymapi.Vec3(init_pose[0], init_pose[1], init_pose[2])
+        pose.r = gymapi.Quat(init_pose[3], init_pose[4], init_pose[5], init_pose[6])
         for i in range(self.num_envs):
             # create env
             env = self.gym.create_env(self.sim, env_lower, env_upper, num_per_row)
@@ -232,58 +256,8 @@ class RobotSim:
             attractor_handles.append(attractor_handle)
         return attractor_handles, axes_geom, sphere_geom
 
-    def _setup_robot(self):
-        from isaacgym import gymapi
-        # configure robot dofs
-        robot_dof_props = self.gym.get_asset_dof_properties(self.robot_asset)
-        robot_lower_limits = robot_dof_props["lower"]
-        robot_upper_limits = robot_dof_props["upper"]
-        robot_ranges = robot_upper_limits - robot_lower_limits
-        robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
-
-        # override default stiffness and damping values
-        # TODO: make this configurable
-        # robot_dof_props['stiffness'].fill(100000.0)
-        # robot_dof_props['damping'].fill(100000.0)
-
-        # Give a desired pose for first 2 robot joints to improve stability
-        # TODO: make this configurable
-        # robot_dof_props["driveMode"][0:2] = gymapi.DOF_MODE_EFFORT
-        robot_dof_props["driveMode"][7:].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][7:].fill(300.0)
-        robot_dof_props["damping"][7:].fill(80.0)
-
-        # grippers
-        robot_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][14:16].fill(800.0)
-        robot_dof_props["damping"][14:16].fill(40.0)
-        robot_dof_props["driveMode"][23:25].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][23:25].fill(800.0)
-        robot_dof_props["damping"][23:25].fill(40.0)
-
-        # default dof states and position targets
-        robot_num_dofs = self.gym.get_asset_dof_count(self.robot_asset)
-        default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
-        default_dof_pos[7:] = robot_mids[7:]
-        # # grippers open
-        default_dof_pos[14:16] = robot_upper_limits[14:16]
-        default_dof_pos[23:25] = robot_upper_limits[23:25]
-
-        default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
-        default_dof_state["pos"] = default_dof_pos
-
-        # # send to torch
-        # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
-
-        for i in range(len(self.envs)):
-            # set dof properties
-            self.gym.set_actor_dof_properties(self.envs[i], self.robot_handles[i], robot_dof_props)
-
-            # set initial dof states
-            self.gym.set_actor_dof_states(self.envs[i], self.robot_handles[i], default_dof_state, gymapi.STATE_ALL)
-
-            # set initial position targets
-            self.gym.set_actor_dof_position_targets(self.envs[i], self.robot_handles[i], default_dof_pos)
+    def setup_robot_dof_prop(self, **kwargs):
+        raise NotImplementedError
 
     def _setup_attractors(self, traj, attracted_joints):
         assert isinstance(attracted_joints, list), "The attracted joints should be a list"
