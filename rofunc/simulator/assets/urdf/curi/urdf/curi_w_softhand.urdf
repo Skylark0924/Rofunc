@@ -776,9 +776,28 @@
     <origin rpy="0 0 -0.7853981633974483" xyz="0 0 0.107"/>
   </joint>
   <link name="left_hand_root_link"/>
-  <joint name="left_qbhand_base_fixed_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+  <joint name="left_qbhand_flange_joint" type="fixed">
+    <origin rpy="0 0 0.7854" xyz="0 0 0"/>
     <parent link="left_hand_root_link"/>
+    <child link="flange90_l"/>
+  </joint>
+  <link name="flange90_l">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/visual/flange90_zup.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/visual/flange90_zup.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_qbhand_base_fixed_joint" type="fixed">
+    <origin rpy="1.5708 0 1.5708" xyz="0.046 0 0.038"/>
+    <parent link="flange90_l"/>
     <child link="left_qbhand_base_link"/>
   </joint>
   <link name="left_qbhand_base_link">
@@ -1891,9 +1910,28 @@
     <origin rpy="0 0 -0.7853981633974483" xyz="0 0 0.107"/>
   </joint>
   <link name="right_hand_root_link"/>
-  <joint name="right_qbhand_base_fixed_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+  <joint name="right_qbhand_flange_joint" type="fixed">
+    <origin rpy="0 0 -2.3562" xyz="0 0 0"/>
     <parent link="right_hand_root_link"/>
+    <child link="flange90_r"/>
+  </joint>
+  <link name="flange90_r">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/visual/flange90_zup.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/visual/flange90_zup.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_qbhand_base_fixed_joint" type="fixed">
+    <origin rpy="1.5708 0 1.5708" xyz="0.046 0 0.038"/>
+    <parent link="flange90_r"/>
     <child link="right_qbhand_base_link"/>
   </joint>
   <link name="right_qbhand_base_link">
