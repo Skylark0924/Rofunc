@@ -1,8 +1,8 @@
 """
-Humanoid
+Humanoid RL (SKRL)
 ===========================
 
-Temp
+Humanoid RL using SKRL
 """
 
 import argparse
@@ -23,7 +23,6 @@ from skrl.agents.torch.td3 import TD3
 from skrl.agents.torch.amp import AMP
 from skrl.envs.torch import wrap_env
 from skrl.memories.torch import RandomMemory
-# Import the skrl components to build the RL system
 from skrl.trainers.torch import SequentialTrainer
 from skrl.utils import set_seed
 
