@@ -1,5 +1,6 @@
 import numpy as np
 from rofunc.utils.robolab.kinematics import get_fk_from_model, get_jacobian_from_model
+from rofunc.utils.file.path import get_rofunc_path
 
 class robot_config:
 
@@ -10,8 +11,7 @@ class robot_config:
         """
         Forward kinematics for end-effector (in robot coordinate system)
         """
-        robot, f, cfg = get_fk_from_model("/home/hengyi/GitHub/Rofunc/rofunc/simulator/assets/urdf/gluon/gluon.urdf", ["axis_joint_1", "axis_joint_2", "axis_joint_3", "axis_joint_4", "axis_joint_5", "axis_joint_6"], x, export_link='6_Link')
-
+        robot, f, cfg = get_fk_from_model(get_rofunc_path() + "/simulator/assets/urdf/gluon/gluon.urdf", ["axis_joint_1", "axis_joint_2", "axis_joint_3", "axis_joint_4", "axis_joint_5", "axis_joint_6"], x, export_link='6_Link')
         return f
 
     def jacob(self, x):
@@ -20,7 +20,7 @@ class robot_config:
                 $J(x_t)= \dfrac{\partial{f(x_t)}}{\partial{x_t}}$
                 """
 
-        J = get_jacobian_from_model("/home/hengyi/GitHub/Rofunc/rofunc/simulator/assets/urdf/gluon/gluon.urdf", end_link_name='6_Link', joint_values=x)
+        J = get_jacobian_from_model(get_rofunc_path() + "/simulator/assets/urdf/gluon/gluon.urdf", end_link_name='6_Link', joint_values=x)
 
         return J
 
@@ -29,7 +29,7 @@ class robot_config:
 
         f_all = []
         for i in range(len(link_names)):
-            robot, f, cfg = get_fk_from_model("/home/hengyi/GitHub/Rofunc/rofunc/simulator/assets/urdf/gluon/gluon.urdf", ["axis_joint_1", "axis_joint_2", "axis_joint_3", "axis_joint_4", "axis_joint_5", "axis_joint_6"], x, link_names[i])
+            robot, f, cfg = get_fk_from_model(get_rofunc_path() + "/simulator/assets/urdf/gluon/gluon.urdf", ["axis_joint_1", "axis_joint_2", "axis_joint_3", "axis_joint_4", "axis_joint_5", "axis_joint_6"], x, link_names[i])
 
             f_all.append(f)
 
@@ -92,9 +92,6 @@ if __name__ == '__main__':
     import numpy as np
     kin = robot_config()
 
-    # urdf_path = "/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/gluon/gluon.urdf"
-    # joint_name = ["axis_joint_1", "axis_joint_2", "axis_joint_3", "axis_joint_4", "axis_joint_5", "axis_joint_6"]
-    # link_name = ["1_Link", "2_Link", "3_Link", "4_Link", "5_Link", "6_Link"]
     joint_value = np.array([-3.97674561, 50.89657676, 120.01220703, 87.05993652, -7.04406738, 86.52160645])
     F = kin.fkinall(joint_value)
     F = np.asarray(F)
