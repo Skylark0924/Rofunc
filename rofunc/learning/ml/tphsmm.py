@@ -1,12 +1,8 @@
-import sys
+import copy
 from typing import Union, List, Tuple
 
-import copy
 import numpy as np
 import pbdlib as pbd
-from numpy import ndarray
-from pbdlib import HSMM
-import matplotlib.pyplot as plt
 
 import rofunc as rf
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -14,10 +10,11 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 class TPHSMM:
     def __init__(self, demos: Union[List, np.ndarray], nb_states: int = 4, reg: float = 1e-3, horizon: int = 150,
-                 plot: bool = False, task_params: Union[List, Union[List, Union[Tuple, np.ndarray]]] = None, dt: float = 0.01):
+                 plot: bool = False, task_params: Union[List, Union[List, Union[Tuple, np.ndarray]]] = None,
+                 dt: float = 0.01):
         """
         Task-parameterized Hidden Semi-Markov Model (TP-GMM)
-        :param demos_x: demo displacement
+        :param demos: demo displacement
         :param nb_states: number of states in the HMM
         :param reg: regularization coefficient
         :param horizon: horizon of the reproduced trajectory
@@ -66,7 +63,7 @@ class TPHSMM:
             print([(_x.shape, _A.shape, _b.shape) for _x, (_A, _b) in zip(demos_xdx, task_params)])
             demos_tp_f = [np.einsum('taij,taj->tai', _A[None, :], _x[:, None] - _b)
                           for _x, (_A, _b) in zip(demos_xdx, task_params)]
-        demos_tp = [d.reshape(-1, self.nb_dim*self.n_tp) for d in demos_tp_f]
+        demos_tp = [d.reshape(-1, self.nb_dim * self.n_tp) for d in demos_tp_f]
         return demos_tp_f, demos_tp
 
     def hsmm_learning(self):
@@ -79,12 +76,7 @@ class TPHSMM:
         self.hsmm.em(self.demos_tp, reg=self.reg)
 
         if self.plot:
-            if self.demos_x[0].shape[1] == 2:
-                rf.tpgmm.hmm_plot(self.demos_tp_f, self.hsmm)
-            elif self.demos_x[0].shape[1] > 2:
-                rf.tpgmm.hmm_plot_3d(self.demos_tp_f, self.hsmm, scale=0.1)
-            else:
-                raise Exception('Dimension is less than 2, cannot plot')
+            rf.ml.hmm_plot(self.nb_dim, self.demos_tp_f, self.hsmm)
 
     def poe(self, show_demo_idx: int, task_params: tuple = None) -> pbd.GMM:
         """
@@ -116,16 +108,11 @@ class TPHSMM:
                 prod = prod * mod
 
         if self.plot:
-            if len(self.demos_x[0][0]) == 2:
-                rf.tpgmm.poe_plot([marginal_models[0], marginal_models[1]], prod, self.demos_x, show_demo_idx)
-            elif len(self.demos_x[0][0]) > 2:
-                rf.tpgmm.poe_plot_3d([marginal_models[0], marginal_models[1]], prod, self.demos_x, show_demo_idx)
-            else:
-                raise Exception('Dimension is less than 2, cannot plot')
+            rf.ml.poe_plot(self.nb_dim, [marginal_models[0], marginal_models[1]], prod, self.demos_x, show_demo_idx)
         return prod
 
     def _reproduce(self, prod: pbd.GMM, show_demo_idx: int, start_xdx: np.ndarray,
-                   dt: float=None) -> np.ndarray:
+                   dt: float = None) -> np.ndarray:
         """
         Reproduce the specific demo_idx from the learned model
         :param model: learned model
@@ -141,7 +128,7 @@ class TPHSMM:
         sq = np.repeat(np.array(sq), int(self.dt / dt))
 
         # solving LQR with Product of Gaussian, see notebook on LQR
-        lqr = rf.lqr.PoGLQR(nb_dim=self.nb_dim//2, dt=dt,
+        lqr = rf.lqr.PoGLQR(nb_dim=self.nb_dim // 2, dt=dt,
                             horizon=int(self.demos_xdx[show_demo_idx].shape[0] * self.dt / dt))
         lqr.mvn_xi = prod.concatenate_gaussian(sq)  # augmented version of gaussian
         lqr.mvn_u = -4
@@ -149,17 +136,12 @@ class TPHSMM:
 
         xi = lqr.seq_xi
         if self.plot:
-            if len(self.demos_x[0][0]) == 2:
-                rf.tpgmm.generate_plot(xi, prod, self.demos_xdx, show_demo_idx)
-            elif len(self.demos_x[0][0]) > 2:
-                rf.tpgmm.generate_plot_3d(xi, prod, self.demos_xdx, show_demo_idx)
-            else:
-                raise Exception('Dimension is less than 2, cannot plot')
+            rf.ml.gen_plot(self.nb_dim, xi, prod, self.demos_x, show_demo_idx)
         return xi
 
     def _generate(self, prod: pbd.GMM, ref_demo_idx: int,
                   start_x: np.ndarray, task_params: tuple,
-                  horizon:int, dt:float = None) -> np.ndarray:
+                  horizon: int, dt: float = None) -> np.ndarray:
         """
         Reproduce the specific demo_idx from the learned model
         :param model: learned model
@@ -182,19 +164,14 @@ class TPHSMM:
         # sq = np.repeat(np.array(sq), int(self.dt / dt))
 
         # solving LQR with Product of Gaussian, see notebook on LQR
-        lqr = rf.lqr.PoGLQR(nb_dim=self.nb_dim//2, dt=dt, horizon=horizon)
+        lqr = rf.lqr.PoGLQR(nb_dim=self.nb_dim // 2, dt=dt, horizon=horizon)
         lqr.mvn_xi = prod.concatenate_gaussian(sq)  # augmented version of gaussian
         lqr.mvn_u = -4
         lqr.x0 = start_xdx[0]
 
         xi = lqr.seq_xi
         if self.plot:
-            if len(self.demos_x[0][0]) == 2:
-                rf.tpgmm.generate_plot(xi, prod, self.demos_xdx, ref_demo_idx)
-            elif len(self.demos_x[0][0]) > 2:
-                rf.tpgmm.generate_plot_3d(xi, prod, self.demos_xdx, ref_demo_idx)
-            else:
-                raise Exception('Dimension is less than 2, cannot plot')
+            rf.ml.gen_plot(self.nb_dim, xi, prod, self.demos_x, ref_demo_idx)
         return xi
 
     def fit(self) -> pbd.HSMM:
@@ -206,7 +183,7 @@ class TPHSMM:
         model = self.hsmm_learning()
         return model
 
-    def reproduce(self, show_demo_idx: int, dt: float=None) -> Tuple[np.ndarray, pbd.GMM]:
+    def reproduce(self, show_demo_idx: int, dt: float = None) -> Tuple[np.ndarray, pbd.GMM]:
         """
         Reproduce the specific demo_idx from the learned model
         """
@@ -219,7 +196,7 @@ class TPHSMM:
         return traj, prod
 
     def generate(self, ref_demo_idx: int, task_params: tuple,
-                 start_state: np.array, horizon: int=100, dt: float=None) -> Tuple[np.ndarray, pbd.GMM]:
+                 start_state: np.array, horizon: int = 100, dt: float = None) -> Tuple[np.ndarray, pbd.GMM]:
         """
         Generate a new trajectory from the learned model
         """

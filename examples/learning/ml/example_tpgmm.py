@@ -5,9 +5,10 @@ TP-GMM
 This example shows how to use the TP-GMM to learn a human demonstration motion.
 """
 import numpy as np
+
 import rofunc as rf
 
-raw_demo = np.load('../../data/LFD_ML/LeftHand.npy')
+raw_demo = np.load('../../../data/LFD_ML/LeftHand.npy')
 demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
 # --- TP-GMM ---
@@ -16,7 +17,7 @@ start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
 end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
 task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
 # Fit the model
-Repr = rf.learning.tpgmm.TPGMM(demos_x, task_params, plot=True)
+Repr = rf.ml.TPGMM(demos_x, task_params, plot=True)
 model = Repr.fit()
 
 # Reproductions for the same situations
