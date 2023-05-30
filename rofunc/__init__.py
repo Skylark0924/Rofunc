@@ -16,5 +16,5 @@ from .utils import visualab, robolab, data_generator, primitive, logger, file
 from . import config
 
 from .learning.ml import tpgmm, gmr, tpgmr
-from .learning.dl import bc, strans
+from .learning.dl import behavior_cloning, structured_transformer
 from .learning.rl import PPOAgent

@@ -4,6 +4,7 @@ import numpy as np
 
 class HumanSim(RobotSim):
     def __init__(self, args, **kwargs):
+        args.up_axis = 'Y'
         super().__init__(args, robot_name="human", **kwargs)
 
     def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
@@ -84,11 +85,11 @@ class HumanSim(RobotSim):
                 for dof_name in dof_info['dof_names']:
                     # dof_handle = self.gym.find_actor_dof_handle(self.envs[i], self.robot_handles[i], dof_name)
                     if dof_name[-1] == 'x':
-                        index = 0
-                    elif dof_name[-1] == 'y':
                         index = 1
-                    elif dof_name[-1] == 'z':
+                    elif dof_name[-1] == 'y':
                         index = 2
+                    elif dof_name[-1] == 'z':
+                        index = 0
                     else:
                         raise ValueError('Invalid dof name')
 
