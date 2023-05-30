@@ -55,8 +55,5 @@ def test_7d_uni_ilqr_3D():
     u5 = command[:, 4]
     u6 = command[:, 5]
 
-    df = pd.DataFrame(list(zip(x1, x2, x3, x4, x5, x6, u1, u2, u3, u4, u5, u6)), columns=['J_dot_1', 'J_dot_2', 'J_dot_3', 'J_dot_4', 'J_dot_5', 'J_dot_6', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6'])
-    df.to_excel('/home/ubuntu/Github/clover-innfos-python/trajectories/test_traj/test_ilqr3d_02s.xlsx', columns=['J_dot_1', 'J_dot_2', 'J_dot_3', 'J_dot_4', 'J_dot_5', 'J_dot_6', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6'])
-
 if __name__ == '__main__':
     test_7d_uni_ilqr_3D()
