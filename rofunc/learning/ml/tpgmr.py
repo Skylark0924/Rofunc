@@ -6,7 +6,7 @@ from numpy import ndarray
 from scipy.linalg import block_diag
 
 import rofunc as rf
-from rofunc.learning.ml.tpgmm.tpgmm import TPGMM
+from rofunc.learning.ml.tpgmm import TPGMM
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
@@ -56,9 +56,9 @@ class TPGMR(TPGMM):
         xi = lqr.seq_xi
         if self.plot:
             if len(self.demos_x[0][0]) == 2:
-                rf.tpgmm.generate_plot(xi, prod, self.demos_x, show_demo_idx)
+                rf.ml.generate_plot(xi, prod, self.demos_x, show_demo_idx)
             elif len(self.demos_x[0][0]) > 2:
-                rf.tpgmm.generate_plot_3d(xi, prod, self.demos_x, show_demo_idx, scale=0.1)
+                rf.ml.generate_plot_3d(xi, prod, self.demos_x, show_demo_idx, scale=0.1)
             else:
                 raise Exception('Dimension is less than 2, cannot plot')
         return xi

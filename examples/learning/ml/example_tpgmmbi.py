@@ -7,8 +7,8 @@ This example shows how to use the TP-GMM in bimanual setting (without coordinati
 import numpy as np
 import rofunc as rf
 
-left_raw_demo = np.load('../../data/LFD_ML/LeftHand.npy')
-right_raw_demo = np.load('../../data/LFD_ML/RightHand.npy')
+left_raw_demo = np.load('../../../data/LFD_ML/LeftHand.npy')
+right_raw_demo = np.load('../../../data/LFD_ML/RightHand.npy')
 demos_left_x = [left_raw_demo[500:635, :], left_raw_demo[635:770, :], left_raw_demo[770:905, :]]
 demos_right_x = [right_raw_demo[500:635, :], right_raw_demo[635:770, :], right_raw_demo[770:905, :]]
 
@@ -21,7 +21,7 @@ end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
 task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
 # Fit the model
-Repr = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=True)
+Repr = rf.ml.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=True)
 model_l, model_r = Repr.fit()
 
 # Reproductions for the same situations

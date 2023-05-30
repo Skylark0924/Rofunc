@@ -12,7 +12,7 @@ def test_2d_uni_tpgmm():
     start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
     end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
     task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
-    Repr = rf.learning.tpgmm.TPGMM(demos_x, task_params, plot=False)
+    Repr = rf.ml.TPGMM(demos_x, task_params, plot=False)
     model = Repr.fit()
 
     # Reproductions for the same situations
@@ -36,7 +36,7 @@ def test_2d_bi_tpgmm():
     end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
     task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                    'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
-    Repr = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
+    Repr = rf.ml.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
     model_l, model_r = Repr.fit()
 
     traj_l, traj_r, _, _ = Repr.reproduce([model_l, model_r], show_demo_idx=2)
@@ -49,7 +49,7 @@ def test_7d_uni_tpgmm():
     start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
     end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
     task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
-    Repr = rf.learning.tpgmm.TPGMM(demos_x, task_params, plot=False)
+    Repr = rf.ml.TPGMM(demos_x, task_params, plot=False)
     model = Repr.fit()
 
     # Reproductions for the same situations
@@ -78,7 +78,7 @@ def test_7d_bi_tpgmm():
     task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                    'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
     # Fit the model
-    Repr = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
+    Repr = rf.ml.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
     model_l, model_r = Repr.fit()
 
     # Reproductions for the same situations

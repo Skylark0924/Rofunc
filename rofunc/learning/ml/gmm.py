@@ -1,10 +1,8 @@
-import numpy as np
 from pbdlib.model import *
-from pbdlib.functions import multi_variate_normal
+from pbdlib.mvn import MVN
 from scipy.linalg import block_diag
 from scipy.special import logsumexp
 from termcolor import colored
-from pbdlib.mvn import MVN
 
 
 class GMM(Model):
@@ -255,7 +253,7 @@ class GMM(Model):
             return B
 
     def init_params_scikit(self, data, cov_type='full'):
-        from sklearn.mixture import BayesianGaussianMixture, GaussianMixture
+        from sklearn.mixture import GaussianMixture
         gmm_init = GaussianMixture(self.nb_states, cov_type, n_init=5, init_params='random')
         gmm_init.fit(data)
 
