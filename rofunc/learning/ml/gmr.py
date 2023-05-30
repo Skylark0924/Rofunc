@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pbdlib as pbd
 
+from rofunc.learning.ml.gmm import GMM
+from rofunc.utils.visualab.distribution import gmm_plot
+
 
 class GMR:
     def __init__(self, demos_x, demos_dx=None, demos_xdx=None, nb_states=4, reg=1e-3, horizon=100, plot=False):
@@ -32,7 +35,7 @@ class GMR:
         return t
 
     def gmm_learning(self):
-        model = pbd.GMM(nb_states=self.nb_states)
+        model = GMM(nb_states=self.nb_states)
         model.init_hmm_kbins(self.demos)  # initializing model
 
         data = np.vstack([d for d in self.demos])
@@ -48,7 +51,7 @@ class GMR:
                 for p in self.demos:
                     ax[i].plot(p[:, 0], p[:, i + 1])
 
-                pbd.plot_gmm(model.mu, model.sigma, ax=ax[i], dim=[0, i + 1])
+                gmm_plot(model.mu, model.sigma, ax=ax[i], dim=[0, i + 1])
             plt.show()
         return model
 
@@ -56,7 +59,7 @@ class GMR:
         mu, sigma = model.condition(cond_input, dim_in=dim_in, dim_out=dim_out)
 
         if self.plot:
-            pbd.plot_gmm(mu, sigma, dim=[0, 1], color='orangered', alpha=0.3)
+            gmm_plot(mu, sigma, dim=[0, 1], color='orangered', alpha=0.3)
             for d in self.demos_x:
                 plt.plot(d[:, 0], d[:, 1])
             plt.show()

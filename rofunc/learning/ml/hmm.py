@@ -1,7 +1,6 @@
-from pbdlib.functions import *
 from pbdlib.model import *
-from rofunc.learning.ml.gmm.gmm import *
 
+from rofunc.learning.ml.gmm import GMM
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
