@@ -1,4 +1,4 @@
-![](./img/logo8.png)
+![](doc/img/logo8.png)
 
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation
 
@@ -19,7 +19,7 @@ evaluation. This package aims to advance the field by building a full-process to
 simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on
 robots.
 
-![](./img/pipeline.png)
+![](doc/img/pipeline.png)
 
 ## Installation
 
