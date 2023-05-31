@@ -1,2 +1,1 @@
-from .cql.cql import CQL
-from .crr.crr import CRR
+from rofunc.learning.rl.agents.offline.crr_agent import CRR
