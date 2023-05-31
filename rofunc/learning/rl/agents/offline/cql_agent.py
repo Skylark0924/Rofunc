@@ -1,5 +1,3 @@
-
-
-class CQL():
+class CQLAgent():
     def __int__(self):
         pass
