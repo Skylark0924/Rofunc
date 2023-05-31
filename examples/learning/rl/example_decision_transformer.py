@@ -14,9 +14,10 @@ import numpy as np
 import torch
 import wandb
 
-from rofunc.learning.rl.agents.offline.dtrans_agent import DecisionTransformerAgent
+from rofunc.learning.rl.agents.offline.dtrans_agent import DTransAgent
 from rofunc.learning.rl.agents.offline.dtrans_agent import evaluate_episode, evaluate_episode_rtg
 from rofunc.learning.rl.trainers.dtrans_trainer import SequenceTrainer
+from rofunc.learning.utils.download_datasets import download_d4rl_dataset
 
 
 def discount_cumsum(x, gamma):
@@ -211,7 +212,7 @@ def experiment(
         return fn
 
     if model_type == 'dt':
-        model = DecisionTransformerAgent(
+        model = DTransAgent(
             state_dim=state_dim,
             act_dim=act_dim,
             max_length=K,
@@ -309,5 +310,8 @@ if __name__ == '__main__':
     parser.add_argument('--log_to_wandb', '-w', type=bool, default=False)
 
     args = parser.parse_args()
+
+    # Download D4Rl dataset
+    download_d4rl_dataset()
 
     experiment('gym-experiment', variant=vars(args))
