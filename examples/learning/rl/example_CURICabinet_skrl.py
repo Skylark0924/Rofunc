@@ -10,7 +10,7 @@ import isaacgym
 
 from skrl.trainers.torch import SequentialTrainer
 
-from rofunc.data.models import model_zoo
+from rofunc.learning.models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
 from rofunc.learning.rl.utils.skrl_utils import setup
 
