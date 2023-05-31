@@ -11,7 +11,7 @@ import isaacgym
 from elegantrl.train.run import train_and_evaluate
 
 from rofunc.utils.logger.beauty_logger import beauty_print
-from rofunc.data.models import model_zoo
+from rofunc.learning.models import model_zoo
 from rofunc.learning.rl.utils.elegantrl_utils import setup
 
 
