@@ -22,3 +22,4 @@ matplotlib==3.7.1
 numpy==1.21.6
 open3d
 kinpy
+transformers
