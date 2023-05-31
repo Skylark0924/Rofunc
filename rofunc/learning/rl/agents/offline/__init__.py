@@ -1,1 +1,3 @@
-from rofunc.learning.rl.agents.offline.crr_agent import CRR
+from .cql_agent import CQLAgent
+from .crr_agent import CRRAgent
+from .dtrans_agent import DTransAgent

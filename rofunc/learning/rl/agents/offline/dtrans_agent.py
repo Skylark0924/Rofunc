@@ -20,7 +20,7 @@ class TrajectoryModel(nn.Module):
         return torch.zeros_like(actions[-1])
 
 
-class DecisionTransformerAgent(TrajectoryModel):
+class DTransAgent(TrajectoryModel):
     """
     This model uses GPT to model (Return_1, state_1, action_1, Return_2, state_2, ...)
     """
