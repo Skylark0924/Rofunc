@@ -142,6 +142,25 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 }
 ```
 
+## Related Papers
+
+1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](./rofunc/learning/dl/structured_transformer/strans.py))
+```
+@article{liu2022robot,
+  title={Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects},
+  author={Liu, Junjia and Chen, Yiting and Dong, Zhipeng and Wang, Shixiong and Calinon, Sylvain and Li, Miao and Chen, Fei},
+  journal={IEEE Robotics and Automation Letters},
+  volume={7},
+  number={2},
+  pages={5159--5166},
+  year={2022},
+  publisher={IEEE}
+}
+```
+2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer (IROS 2023)
+3. Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration (IEEE CDC 2023 | [Code](./rofunc/learning/ml/tpgmm.py))
+
+
 ## The Team
 
 Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robots Laboratory)](https://feichenlab.com/), CUHK.
