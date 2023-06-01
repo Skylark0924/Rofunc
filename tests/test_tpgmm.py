@@ -1,6 +1,6 @@
-import rofunc as rf
 import numpy as np
-import os
+
+import rofunc as rf
 
 
 def test_2d_uni_tpgmm():
