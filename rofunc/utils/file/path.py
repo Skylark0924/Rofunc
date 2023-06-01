@@ -20,7 +20,7 @@ def get_elegantrl_path():
 
 def check_ckpt_exist(ckpt_name):
     rofunc_path = get_rofunc_path()
-    if os.path.exists(os.path.join(rofunc_path, "learning/models/{}".format(ckpt_name))):
+    if os.path.exists(os.path.join(rofunc_path, "learning/pre_trained_models/{}".format(ckpt_name))):
         return True
     else:
         return False
