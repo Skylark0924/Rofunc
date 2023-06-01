@@ -20,7 +20,7 @@ def test_2d_uni_tpgmr():
 
 def test_7d_uni_tpgmr():
     # Uni_3d
-    raw_demo = np.load('../data/LFD_ML/LeftHand.npy')
+    raw_demo = np.load('../examples/data/LFD_ML/LeftHand.npy')
     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
     # TP-GMR
