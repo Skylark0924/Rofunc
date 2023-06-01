@@ -69,7 +69,7 @@ def get_traj():
     demos_right_x = [data[: 200] for data in demos_right_x]
 
     pos_rot_quat = rf.robolab.quaternion_about_axis(-np.pi / 2, [0, 1, 0])
-    pos_rot_matrix = rf.robolab.quaternion_matrix(pos_rot_quat)
+    pos_rot_matrix = rf.robolab.homo_matrix_from_quaternion(pos_rot_quat)
     pos_rot_matrix = pos_rot_matrix[:3, :3]
     ori_rot_quat = rf.robolab.quaternion_about_axis(np.pi, [1, 0, 0])
     traj_rot(demos_left_x, pos_rot_matrix)
