@@ -1,10 +1,8 @@
-import rofunc as rf
 import numpy as np
-from rofunc.config.utils import get_config
 from scipy.spatial.transform import Rotation as R
-from rofunc.planning_control.lqr.ilqr_3d import iLQR_3D
-import pandas as pd
 
+from rofunc.config.utils import get_config
+from rofunc.planning_control.lqr.ilqr_3d import iLQR_3D
 
 
 def test_7d_uni_ilqr_3D():
@@ -37,12 +35,11 @@ def test_7d_uni_ilqr_3D():
     x6 = x[:, 5]
 
     command = []
-    for i in range(int(len(u)/6)):
-
-        com = np.array(u[i*6:i*6+6])
+    for i in range(int(len(u) / 6)):
+        com = np.array(u[i * 6:i * 6 + 6])
         command.append(com)
 
-        i = i+1
+        i = i + 1
 
     command = np.asarray(command)
 
@@ -54,6 +51,7 @@ def test_7d_uni_ilqr_3D():
     u4 = command[:, 3]
     u5 = command[:, 4]
     u6 = command[:, 5]
+
 
 if __name__ == '__main__':
     test_7d_uni_ilqr_3D()

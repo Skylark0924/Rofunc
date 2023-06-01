@@ -1,6 +1,5 @@
-import os
-
 import numpy as np
+
 import rofunc as rf
 
 
@@ -25,7 +24,7 @@ def test_7d_uni_lqt_hierarchical():
 
 
 def test_7d_uni_lqt_bi():
-    all_points = np.loadtxt('../data/LQT_LQR/coffee_stirring_1.txt', delimiter=', ')
+    all_points = np.loadtxt('../examples/data/LQT_LQR/coffee_stirring_1.txt', delimiter=', ')
     all_points_l = all_points[0:len(all_points):2]
     all_points_r = all_points[1:len(all_points):2]
 
