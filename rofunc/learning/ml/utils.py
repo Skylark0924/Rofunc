@@ -397,16 +397,16 @@ def plot_model_time(model, demos, figsize=(10, 2), dim_idx=[1], demo_idx=0):
 	plt.show()
 
 
-def quaternion_matrix(quaternion):
+def homo_matrix_from_quaternion(quaternion):
 	"""Return homogeneous rotation matrix from quaternion.
 
-	>>> M = quaternion_matrix([0.99810947, 0.06146124, 0, 0])
+	>>> M = homo_matrix_from_quaternion([0.99810947, 0.06146124, 0, 0])
 	>>> np.allclose(M, rotation_matrix(0.123, [1, 0, 0]))
 	True
-	>>> M = quaternion_matrix([1, 0, 0, 0])
+	>>> M = homo_matrix_from_quaternion([1, 0, 0, 0])
 	>>> np.allclose(M, np.identity(4))
 	True
-	>>> M = quaternion_matrix([0, 1, 0, 0])
+	>>> M = homo_matrix_from_quaternion([0, 1, 0, 0])
 	>>> np.allclose(M, np.diag([1, -1, -1, 1]))
 	True
 
