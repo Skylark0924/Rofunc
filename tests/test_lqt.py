@@ -5,7 +5,7 @@ import rofunc as rf
 
 
 def test_7d_uni_lqt():
-    via_points = np.load('../data/LQT_LQR/rolling_pin_1.npy')
+    via_points = np.load('../examples/data/LQT_LQR/rolling_pin_1.npy')
     filter_indices = [0, 1, 5, 10, 22, 36]
     via_points = via_points[filter_indices]
 
@@ -15,7 +15,7 @@ def test_7d_uni_lqt():
 
 
 def test_7d_uni_lqt_hierarchical():
-    via_points = np.load('../data/taichi_1l.npy')
+    via_points = np.load('../examples/data/LQT_LQR/taichi_1l.npy')
     filter_indices = [i for i in range(0, len(via_points) - 10, 5)]
     via_points = via_points[filter_indices]
 

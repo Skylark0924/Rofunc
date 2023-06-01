@@ -13,6 +13,7 @@ from rofunc.planning_control.lqr.gluon_config import robot_config
 
 kin = robot_config()
 
+
 class iLQR_3D:
     def __init__(self, cgf):
         self.cfg = cgf
@@ -44,11 +45,9 @@ class iLQR_3D:
 
         e_list = []
         for i in range(len(f0)):
-
             er = kin.error(f[i], f0[i])
 
             e_list.append(er)
-
 
         return e_list
 
@@ -150,7 +149,7 @@ class iLQR_3D:
             du = np.linalg.inv(Su.T @ J.T @ Q @ J @ Su + R) @ (
                     -Su.T @ J.T @ Q @ f.flatten() - u * self.cfg.rfactor)  # Gauss-Newton update
             # Estimate step size with backtracking line search method
-            alpha = 1 # 2
+            alpha = 1  # 2
             cost0 = f.flatten() @ Q @ f.flatten() + np.linalg.norm(u) ** 2 * self.cfg.rfactor  # Cost
             while True:
                 utmp = u + du * alpha

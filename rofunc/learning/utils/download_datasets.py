@@ -10,7 +10,7 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def download_d4rl_dataset():
-    save_dir = os.path.join(os.getcwd(), '../../../data/D4RL')
+    save_dir = os.path.join(os.getcwd(), '../../../examples/data/D4RL')
 
     for env_name in ['halfcheetah', 'hopper', 'walker2d']:
         for dataset_type in ['medium', 'medium-replay', 'expert']:

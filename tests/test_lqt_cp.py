@@ -5,7 +5,7 @@ import rofunc as rf
 
 
 def test_7d_uni_cp_lqt():
-    via_points = np.load('../data/taichi_1l.npy')
+    via_points = np.load('../examples/data/LQT_LQR/taichi_1l.npy')
     filter_indices = [i for i in range(0, len(via_points) - 10, 5)]
     filter_indices.append(len(via_points) - 1)
     via_points = via_points[filter_indices]
