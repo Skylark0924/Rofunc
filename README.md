@@ -21,6 +21,20 @@ robots.
 
 ![](doc/img/pipeline.png)
 
+- [Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation](#rofunc-the-full-process-python-package-for-robot-learning-from-demonstration-and-robot-manipulation)
+  - [Installation](#installation)
+    - [Install from PyPI (stable version)](#install-from-pypi-stable-version)
+    - [Install from Source (nightly version, recommended)](#install-from-source-nightly-version-recommended)
+  - [Documentation](#documentation)
+  - [Star History](#star-history)
+  - [Cite](#cite)
+  - [Related Papers](#related-papers)
+  - [The Team](#the-team)
+  - [Acknowledge](#acknowledge)
+    - [Learning from Demonstration](#learning-from-demonstration)
+    - [Planning and Control](#planning-and-control)
+
+
 ## Installation
 
 ### Install from PyPI (stable version)
@@ -101,7 +115,7 @@ The available functions and plans can be found as follows.
 |                                  `emg.visual`                                   | ✅ |   `PPO(SKRL)`   | ✅  |                               `iLQRDyna`                                | 🔃  |                  |    |                                                                           |    |
 |                                 `mmodal.record`                                 | ⛔ |   `SAC(SKRL)`   | ✅  |                                `iLQRObs`                                | 🔃  |                  |    |                                                                           |    |
 |                                 `mmodal.export`                                 | ✅ |   `TD3(SKRL)`   | ✅  |                                  `MPC`                                  | ⛔   |                  |    |                                                                           |    |
-|                                                                                 |   |   `PPO(SB3)`    | ⛔  |                                  `CIO`                                  | ⛔   |                  |    |                                                                           |    |
+|                                                                                 |   |   `PPO(SB3)`    | ⛔  |                                  `RMP`                                  | ⛔   |                  |    |                                                                           |    |
 |                                                                                 |   |   `SAC(SB3)`    | ⛔  |                                                                         |     |                  |    |                                                                           |    |
 |                                                                                 |   |   `TD3(SB3)`    | ⛔  |                                                                         |     |                  |    |                                                                           |    |
 |                                                                                 |   |  `PPO(RLlib)`   | ✅  |                                                                         |     |                  |    |                                                                           |    |
@@ -147,14 +161,14 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](./rofunc/learning/dl/structured_transformer/strans.py))
 ```
 @article{liu2022robot,
-  title={Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects},
-  author={Liu, Junjia and Chen, Yiting and Dong, Zhipeng and Wang, Shixiong and Calinon, Sylvain and Li, Miao and Chen, Fei},
-  journal={IEEE Robotics and Automation Letters},
-  volume={7},
-  number={2},
-  pages={5159--5166},
-  year={2022},
-  publisher={IEEE}
+         title={Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects},
+         author={Liu, Junjia and Chen, Yiting and Dong, Zhipeng and Wang, Shixiong and Calinon, Sylvain and Li, Miao and Chen, Fei},
+         journal={IEEE Robotics and Automation Letters},
+         volume={7},
+         number={2},
+         pages={5159--5166},
+         year={2022},
+         publisher={IEEE}
 }
 ```
 2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer (IROS 2023)
@@ -179,4 +193,3 @@ We would like to acknowledge the following projects:
 ### Planning and Control
 
 1. [Robotics codes from scratch (RCFS)](https://gitlab.idiap.ch/rli/robotics-codes-from-scratch)
-2. [pddlstream](https://github.com/caelan/pddlstream)
