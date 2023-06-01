@@ -141,7 +141,7 @@ The available functions and plans can be found as follows.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Skylark0924/Rofunc&type=Date)](https://star-history.com/#Skylark0924/Rofunc&Date)
 
-## Cite
+## Citation
 
 If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
 

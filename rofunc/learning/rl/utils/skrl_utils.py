@@ -28,7 +28,7 @@ from skrl.memories.torch import RandomMemory
 from skrl.utils import set_seed
 
 
-# Define the shared model (stochastic and deterministic models) for the agent using mixins.
+# Define the shared model (stochastic and deterministic pre_trained_models) for the agent using mixins.
 class Shared(GaussianMixin, DeterministicMixin, Model):
     def __init__(self, observation_space, action_space, device, clip_actions=False,
                  clip_log_std=True, min_log_std=-20, max_log_std=2, reduction="sum"):
@@ -61,7 +61,7 @@ class Shared(GaussianMixin, DeterministicMixin, Model):
             return self.value_layer(self.net(states))
 
 
-# Define the models (stochastic and deterministic models) for the agents using mixins.
+# Define the pre_trained_models (stochastic and deterministic pre_trained_models) for the agents using mixins.
 # - StochasticActor: takes as input the environment's observation/state and returns an action
 # - DeterministicActor: takes as input the environment's observation/state and returns an action
 # - Critic: takes the state and action as input and provides a value to guide the policy
@@ -136,7 +136,7 @@ class Critic(DeterministicMixin, Model):
 
 def set_models_ppo(env, device):
     """
-    PPO requires 2 models, visit its documentation for more details
+    PPO requires 2 pre_trained_models, visit its documentation for more details
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ppo.html#spaces-and-models
     """
     models_ppo = {}
@@ -147,7 +147,7 @@ def set_models_ppo(env, device):
 
 def set_models_td3(env, device):
     """
-    TD3 requires 6 models, visit its documentation for more details
+    TD3 requires 6 pre_trained_models, visit its documentation for more details
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.td3.html#spaces-and-models
     """
     models_td3 = {}
@@ -164,7 +164,7 @@ def set_models_td3(env, device):
 
 def set_models_ddpg(env, device):
     """
-    DDPG requires 4 models, visit its documentation for more details
+    DDPG requires 4 pre_trained_models, visit its documentation for more details
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#spaces-and-models
     """
     models_ddpg = {}
@@ -173,7 +173,7 @@ def set_models_ddpg(env, device):
                                                       clip_actions=True)
     models_ddpg["critic"] = Critic(env.observation_space, env.action_space, device)
     models_ddpg["target_critic"] = Critic(env.observation_space, env.action_space, device)
-    # Initialize the models' parameters (weights and biases) using a Gaussian distribution
+    # Initialize the pre_trained_models' parameters (weights and biases) using a Gaussian distribution
     for model in models_ddpg.values():
         model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
     return models_ddpg
@@ -181,7 +181,7 @@ def set_models_ddpg(env, device):
 
 def set_models_sac(env, device):
     """
-    SAC requires 5 models, visit its documentation for more details
+    SAC requires 5 pre_trained_models, visit its documentation for more details
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.sac.html#spaces-and-models
     """
     models_sac = {}

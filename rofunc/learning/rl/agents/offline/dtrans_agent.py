@@ -1,5 +1,6 @@
+import numpy as np
+import torch
 import torch.nn as nn
-
 import transformers
 
 
@@ -15,7 +16,7 @@ class TrajectoryModel(nn.Module):
         # "masked" tokens or unspecified inputs can be passed in as None
         return None, None, None
 
-    def get_action(self, states, actions, rewards, **kwargs):
+    def act(self, states, actions, rewards, **kwargs):
         # these will come as tensors on the correct device
         return torch.zeros_like(actions[-1])
 
@@ -111,7 +112,7 @@ class DTransAgent(TrajectoryModel):
 
         return state_preds, action_preds, return_preds
 
-    def get_action(self, states, actions, rewards, returns_to_go, timesteps, **kwargs):
+    def act(self, states, actions, rewards, returns_to_go, timesteps, **kwargs):
         # we don't care about the past rewards in this model
 
         states = states.reshape(1, -1, self.state_dim)
@@ -154,10 +155,6 @@ class DTransAgent(TrajectoryModel):
         return action_preds[0, -1]
 
 
-import numpy as np
-import torch
-
-
 def evaluate_episode(
         env,
         state_dim,
@@ -193,7 +190,7 @@ def evaluate_episode(
         actions = torch.cat([actions, torch.zeros((1, act_dim), device=device)], dim=0)
         rewards = torch.cat([rewards, torch.zeros(1, device=device)])
 
-        action = model.get_action(
+        action = model.act(
             (states.to(dtype=torch.float32) - state_mean) / state_std,
             actions.to(dtype=torch.float32),
             rewards.to(dtype=torch.float32),
@@ -259,7 +256,7 @@ def evaluate_episode_rtg(
         actions = torch.cat([actions, torch.zeros((1, act_dim), device=device)], dim=0)
         rewards = torch.cat([rewards, torch.zeros(1, device=device)])
 
-        action = model.get_action(
+        action = model.act(
             (states.to(dtype=torch.float32) - state_mean) / state_std,
             actions.to(dtype=torch.float32),
             rewards.to(dtype=torch.float32),
