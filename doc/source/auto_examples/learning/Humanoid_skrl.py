@@ -25,7 +25,7 @@ from skrl.utils import set_seed
 set_seed(42)
 
 
-# Define the shared model (stochastic and deterministic models) for the agent using mixins.
+# Define the shared model (stochastic and deterministic pre_trained_models) for the agent using mixins.
 class Shared(GaussianMixin, DeterministicMixin, Model):
     def __init__(self, observation_space, action_space, device, clip_actions=False,
                  clip_log_std=True, min_log_std=-20, max_log_std=2, reduction="sum"):
@@ -67,8 +67,8 @@ device = env.device
 # Instantiate a RandomMemory as rollout buffer (any memory can be used for this)
 memory = RandomMemory(memory_size=32, num_envs=env.num_envs, device=device)
 
-# Instantiate the agent's models (function approximators).
-# PPO requires 2 models, visit its documentation for more details
+# Instantiate the agent's pre_trained_models (function approximators).
+# PPO requires 2 pre_trained_models, visit its documentation for more details
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ppo.html#spaces-and-models
 models_ppo = {}
 models_ppo["policy"] = Shared(env.observation_space, env.action_space, device)

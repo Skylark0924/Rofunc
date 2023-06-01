@@ -46,7 +46,7 @@ class PPOAgent(Agent):
         :param cfg: Configuration dictionary
         :type cfg: dict
 
-        :raises KeyError: If the models dictionary is missing a required key
+        :raises KeyError: If the pre_trained_models dictionary is missing a required key
         """
         PPO_DEFAULT_CONFIG = rf.config.omegaconf_to_dict(OmegaConf.load(
             os.path.join(rf.file.get_rofunc_path(), 'config/learning/rl/agent/ppo_default_config_skrl.yaml')))
@@ -59,11 +59,11 @@ class PPOAgent(Agent):
                          device=device,
                          cfg=_cfg)
 
-        # models
+        # pre_trained_models
         self.policy = self.models.get("policy", None)
         self.value = self.models.get("value", None)
 
-        # checkpoint models
+        # checkpoint pre_trained_models
         self.checkpoint_modules["policy"] = self.policy
         self.checkpoint_modules["value"] = self.value
 

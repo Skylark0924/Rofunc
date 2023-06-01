@@ -521,7 +521,7 @@ class TPGMM_RPRepr(TPGMMBi):
     def _bi_poe(self, models: List, show_demo_idx: int) -> Tuple[GMM, GMM]:
         """
         Product of Expert/Gaussian (PoE), which calculates the mixture distribution from multiple coordinates
-        :param models: list of models
+        :param models: list of pre_trained_models
         :param show_demo_idx: index of the specific demo to be reproduced
         :return: The product of experts
         """

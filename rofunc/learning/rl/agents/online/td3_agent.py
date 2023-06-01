@@ -45,7 +45,7 @@ class TD3Agent(Agent):
         :param cfg: Configuration dictionary
         :type cfg: dict
 
-        :raises KeyError: If the models dictionary is missing a required key
+        :raises KeyError: If the pre_trained_models dictionary is missing a required key
         """
         TD3_DEFAULT_CONFIG = rf.config.omegaconf_to_dict(OmegaConf.load(
             os.path.join(rf.file.get_rofunc_path(), 'config/learning/rl/agent/td3_default_config_skrl.yaml')))
@@ -58,7 +58,7 @@ class TD3Agent(Agent):
                          device=device,
                          cfg=_cfg)
 
-        # models
+        # pre_trained_models
         self.policy = self.models.get("policy", None)
         self.target_policy = self.models.get("target_policy", None)
         self.critic_1 = self.models.get("critic_1", None)
@@ -66,7 +66,7 @@ class TD3Agent(Agent):
         self.target_critic_1 = self.models.get("target_critic_1", None)
         self.target_critic_2 = self.models.get("target_critic_2", None)
 
-        # checkpoint models
+        # checkpoint pre_trained_models
         self.checkpoint_modules["policy"] = self.policy
         self.checkpoint_modules["target_policy"] = self.target_policy
         self.checkpoint_modules["critic_1"] = self.critic_1

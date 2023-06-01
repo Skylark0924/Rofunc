@@ -240,7 +240,7 @@ class HMM(GMM):
         """
 
         :param data:
-        :param left_to_right:  	if True, init with left to right. All observations models
+        :param left_to_right:  	if True, init with left to right. All observations pre_trained_models
             will be the same, and transition matrix will be set to l_t_r
         :type left_to_right: 	bool
         :param self_trans:		if left_to_right, self transition value to fill
