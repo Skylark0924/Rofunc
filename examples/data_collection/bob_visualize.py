@@ -1,3 +1,10 @@
+"""
+BoB Visualize
+================
+
+This example shows how to use the muscle force files to visualize the muscle force.
+"""
+
 import os
 
 import matplotlib.pyplot as plt
@@ -14,7 +21,8 @@ out_file_path = os.path.join(out_path, "all_muscle_forces_processed.csv")
 rf.utils.delete_lines(demo_path, out_file_path, 1)
 data = pd.read_csv(out_file_path, index_col=0)
 
-# Pectoralis major clavicular; Pectoralis major sternocostal; Deltoideus clavicular; Deltoideus scapular; Biceps femoris; Biceps femoris caput breve;
+# Pectoralis major clavicular; Pectoralis major sternocostal; Deltoideus clavicular; Deltoideus scapular;
+# Biceps femoris; Biceps femoris caput breve;
 muscle_name = 'Biceps femoris caput breve right'
 muscle_force_data = data.loc[:, muscle_name]
 n = 8
@@ -26,4 +34,3 @@ plt.xlabel("t")
 plt.ylabel("muscle force")
 plt.savefig(os.path.join(out_path, muscle_name))
 plt.show()
-

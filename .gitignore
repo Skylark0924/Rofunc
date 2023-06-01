@@ -165,10 +165,10 @@ rofunc/others/
 /rofunc/simulator/assets/urdf/objects/
 /rofunc/planning_control/src/
 
-data/MULTIMODAL/xsens_data/.DS_Store
-/data/RAW_DEMO/xsens/010-005/
-/data/RAW_DEMO/xsens/010-003/
-/data/RAW_DEMO/xsens/010-004/
+examples/data/MULTIMODAL/xsens_data/.DS_Store
+/examples/data/RAW_DEMO/xsens/010-005/
+/examples/data/RAW_DEMO/xsens/010-003/
+/examples/data/RAW_DEMO/xsens/010-004/
 
 rofunc/.DS_Store
 
