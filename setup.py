@@ -17,7 +17,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=['matplotlib', 'pandas', 'tqdm', 'pillow', 'nestle', 'omegaconf', 'hydra-core', 'opencv-python',
-                      'neurokit2', 'skrl', 'gdown', 'pytz', 'urdfpy', 'pin', 'shutup',
+                      'neurokit2', 'skrl', 'gdown', 'pytz', 'urdfpy', 'shutup',
                       'elegantrl', 'ray[rllib]==2.2.0', "numpy==1.21.6",
                       "matplotlib==3.7.1", "open3d"],
     # 'pbdlib @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl',
