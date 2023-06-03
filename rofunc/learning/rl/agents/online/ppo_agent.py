@@ -1,73 +1,48 @@
-"""
-Modified from SKRL
-"""
+from typing import Union, Tuple, Dict, Optional
 
-import copy
-import itertools
-import os.path
-from typing import Union, Tuple, Dict, Any
-
-import rofunc as rf
 import gym
+import gymnasium
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from omegaconf import OmegaConf
-from skrl.agents.torch import Agent
-from skrl.memories.torch import Memory
-from skrl.models.torch import Model
-from skrl.resources.schedulers.torch import KLAdaptiveRL
+from torch import Tensor
+
+from rofunc.learning.rl.agents.base_agent import BaseAgent
+from rofunc.learning.rl.models.actor_models import ActorPPO, ActorDiscretePPO
+from rofunc.learning.rl.models.base_model import BaseModel
+from rofunc.learning.rl.models.critic_models import CriticPPO
+from rofunc.learning.rl.utils.memory import Memory
 
 
-class PPOAgent(Agent):
+class PPOAgent(BaseAgent):
     def __init__(self,
-                 models: Dict[str, Model],
-                 memory: Union[Memory, Tuple[Memory], None] = None,
-                 observation_space: Union[int, Tuple[int], gym.Space, None] = None,
-                 action_space: Union[int, Tuple[int], gym.Space, None] = None,
-                 device: Union[str, torch.device] = "cuda:0",
-                 cfg: dict = {}) -> None:
-        """Proximal Policy Optimization (PPO)
-
-        https://arxiv.org/abs/1707.06347
-
-        :param models: Models used by the agent
-        :type models: dictionary of skrl.models.torch.Model
-        :param memory: Memory to storage the transitions.
-                       If it is a tuple, the first element will be used for training and 
-                       for the rest only the environment transitions will be added
-        :type memory: skrl.memory.torch.Memory, list of skrl.memory.torch.Memory or None
-        :param observation_space: Observation/state space or shape (default: None)
-        :type observation_space: int, tuple or list of integers, gym.Space or None, optional
-        :param action_space: Action space or shape (default: None)
-        :type action_space: int, tuple or list of integers, gym.Space or None, optional
-        :param device: Computing device (default: "cuda:0")
-        :type device: str or torch.device, optional
-        :param cfg: Configuration dictionary
-        :type cfg: dict
-
-        :raises KeyError: If the pre_trained_models dictionary is missing a required key
+                 cfg: Optional[dict],
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 memory: Optional[Union[Memory, Tuple[Memory]]] = None,
+                 device: Optional[Union[str, torch.device]] = None):
         """
-        PPO_DEFAULT_CONFIG = rf.config.omegaconf_to_dict(OmegaConf.load(
-            os.path.join(rf.file.get_rofunc_path(), 'config/learning/rl/agent/ppo_default_config_skrl.yaml')))
-        _cfg = copy.deepcopy(PPO_DEFAULT_CONFIG)
-        _cfg.update(cfg)
-        super().__init__(models=models,
-                         memory=memory,
-                         observation_space=observation_space,
-                         action_space=action_space,
-                         device=device,
-                         cfg=_cfg)
+        PPO algorithm. “Proximal Policy Optimization Algorithms”. John Schulman. et al. https://arxiv.org/abs/1707.06347
+        :param cfg: Custom configuration
+        :param observation_space: Observation/state space or shape
+        :param action_space: Action space or shape
+        :param memory: Memory for storing transitions
+        :param device: Device on which the torch tensor is allocated
+        """
+        super().__init__(cfg, observation_space, action_space, memory, device)
 
-        # pre_trained_models
-        self.policy = self.models.get("policy", None)
-        self.value = self.models.get("value", None)
+        # TODO
+        self.policy = ActorPPO(cfg, observation_space, action_space, device)
+        self.value = CriticPPO(cfg, observation_space, device)
 
-        # checkpoint pre_trained_models
+        # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
         self.checkpoint_modules["value"] = self.value
 
-        # configuration
+        # set up hyper-parameters
+        self.ratio_clip = getattr(cfg, "ratio_clip", 0.25)  # `ratio.clamp(1 - clip, 1 + clip)`
+        self.lambda_gae_adv = getattr(cfg, "lambda_gae_adv", 0.95)  # could be 0.50~0.99 # GAE for sparse reward
+        self.lambda_entropy = getattr(cfg, "lambda_entropy", 0.01)  # could be 0.00~0.20
+        self.lambda_entropy = torch.tensor(self.lambda_entropy, dtype=torch.float32, device=self.device)
+
         self._learning_epochs = self.cfg["learning_epochs"]
         self._mini_batches = self.cfg["mini_batches"]
         self._rollouts = self.cfg["rollouts"]
@@ -110,7 +85,7 @@ class PPOAgent(Agent):
 
             self.checkpoint_modules["optimizer"] = self.optimizer
 
-        # set up preprocessors
+        # set up preprocessors  TODO: add preprocessors for state and reward
         if self._state_preprocessor:
             self._state_preprocessor = self._state_preprocessor(**self.cfg["state_preprocessor_kwargs"])
             self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
@@ -123,285 +98,197 @@ class PPOAgent(Agent):
         else:
             self._value_preprocessor = self._empty_preprocessor
 
-    def init(self) -> None:
-        """Initialize the agent
+    def act(self, states: torch.Tensor):
         """
-        super().init()
-        self.set_mode("eval")
-
-        # create tensors in memory
-        if self.memory is not None:
-            self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
-            self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
-            self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
-            self.memory.create_tensor(name="dones", size=1, dtype=torch.bool)
-            self.memory.create_tensor(name="log_prob", size=1, dtype=torch.float32)
-            self.memory.create_tensor(name="values", size=1, dtype=torch.float32)
-            self.memory.create_tensor(name="returns", size=1, dtype=torch.float32)
-            self.memory.create_tensor(name="advantages", size=1, dtype=torch.float32)
-
-        self.tensors_names = ["states", "actions", "rewards", "dones", "log_prob", "values", "returns", "advantages"]
-
-        # create temporary variables needed for storage and computation
-        self._current_log_prob = None
-        self._current_next_states = None
-
-    def act(self, states: torch.Tensor, timestep: int, timesteps: int) -> torch.Tensor:
-        """Process the environment's states to make a decision (actions) using the main policy
-
-        :param states: Environment's states
-        :type states: torch.Tensor
-        :param timestep: Current timestep
-        :type timestep: int
-        :param timesteps: Number of timesteps
-        :type timesteps: int
-
-        :return: Actions
-        :rtype: torch.Tensor
+        Choose action based on the current state
+        :param states:
+        :return:
         """
-        states = self._state_preprocessor(states)
-
         # sample random actions
-        # TODO, check for stochasticity
-        if timestep < self._random_timesteps:
-            return self.policy.random_act(states, taken_actions=None, role="policy")
+        # TODO: fix for stochasticity, rnn and log_prob
+        if self.timestep < self._random_timesteps:
+            return self.policy.random_act({"states": self._state_preprocessor(states)}, role="policy")
 
         # sample stochastic actions
-        actions, log_prob, actions_mean = self.policy.act(states, taken_actions=None, role="policy")
+        actions, log_prob, outputs = self.policy.act({"states": self._state_preprocessor(states)}, role="policy")
         self._current_log_prob = log_prob
 
-        return actions, log_prob, actions_mean
+        return actions, log_prob, outputs
 
-    def record_transition(self,
-                          states: torch.Tensor,
-                          actions: torch.Tensor,
-                          rewards: torch.Tensor,
-                          next_states: torch.Tensor,
-                          dones: torch.Tensor,
-                          infos: Any,
-                          timestep: int,
-                          timesteps: int) -> None:
-        """Record an environment transition in memory
 
-        :param states: Observations/states of the environment used to make the decision
-        :type states: torch.Tensor
-        :param actions: Actions taken by the agent
-        :type actions: torch.Tensor
-        :param rewards: Instant rewards achieved by the current actions
-        :type rewards: torch.Tensor
-        :param next_states: Next observations/states of the environment
-        :type next_states: torch.Tensor
-        :param dones: Signals to indicate that episodes have ended
-        :type dones: torch.Tensor
-        :param infos: Additional information about the environment
-        :type infos: Any type supported by the environment
-        :param timestep: Current timestep
-        :type timestep: int
-        :param timesteps: Number of timesteps
-        :type timesteps: int
-        """
-        super().record_transition(states, actions, rewards, next_states, dones, infos, timestep, timesteps)
-
-        # reward shaping
-        if self._rewards_shaper is not None:
-            rewards = self._rewards_shaper(rewards, timestep, timesteps)
-
-        self._current_next_states = next_states
-
-        if self.memory is not None:
-            with torch.no_grad():
-                values, _, _ = self.value.act(states=self._state_preprocessor(states), taken_actions=None, role="value")
-            values = self._value_preprocessor(values, inverse=True)
-
-            self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
-                                    dones=dones,
-                                    log_prob=self._current_log_prob, values=values)
-            for memory in self.secondary_memories:
-                memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
-                                   dones=dones,
-                                   log_prob=self._current_log_prob, values=values)
-
-    def pre_interaction(self, timestep: int, timesteps: int) -> None:
-        """Callback called before the interaction with the environment
-
-        :param timestep: Current timestep
-        :type timestep: int
-        :param timesteps: Number of timesteps
-        :type timesteps: int
-        """
-        pass
-
-    def post_interaction(self, timestep: int, timesteps: int) -> None:
-        """Callback called after the interaction with the environment
-
-        :param timestep: Current timestep
-        :type timestep: int
-        :param timesteps: Number of timesteps
-        :type timesteps: int
-        """
-        self._rollout += 1
-        if not self._rollout % self._rollouts and timestep >= self._learning_starts:
-            self.set_mode("train")
-            self._update(timestep, timesteps)
-            self.set_mode("eval")
-
-        # write tracking data and checkpoints
-        super().post_interaction(timestep, timesteps)
-
-    def _update(self, timestep: int, timesteps: int) -> None:
-        """Algorithm's main update step
-
-        :param timestep: Current timestep
-        :type timestep: int
-        :param timesteps: Number of timesteps
-        :type timesteps: int
-        """
-
-        def compute_gae(rewards: torch.Tensor,
-                        dones: torch.Tensor,
-                        values: torch.Tensor,
-                        next_values: torch.Tensor,
-                        discount_factor: float = 0.99,
-                        lambda_coefficient: float = 0.95) -> torch.Tensor:
-            """Compute the Generalized Advantage Estimator (GAE)
-
-            :param rewards: Rewards obtained by the agent
-            :type rewards: torch.Tensor
-            :param dones: Signals to indicate that episodes have ended
-            :type dones: torch.Tensor
-            :param values: Values obtained by the agent
-            :type values: torch.Tensor
-            :param next_values: Next values obtained by the agent
-            :type next_values: torch.Tensor
-            :param discount_factor: Discount factor
-            :type discount_factor: float
-            :param lambda_coefficient: Lambda coefficient
-            :type lambda_coefficient: float
-
-            :return: Generalized Advantage Estimator
-            :rtype: torch.Tensor
-            """
-            advantage = 0
-            advantages = torch.zeros_like(rewards)
-            not_dones = dones.logical_not()
-            memory_size = rewards.shape[0]
-
-            # advantages computation
-            for i in reversed(range(memory_size)):
-                next_values = values[i + 1] if i < memory_size - 1 else last_values
-                advantage = rewards[i] - values[i] + discount_factor * not_dones[i] * (
-                        next_values + lambda_coefficient * advantage)
-                advantages[i] = advantage
-            # returns computation
-            returns = advantages + values
-            # normalize advantages
-            advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-
-            return returns, advantages
-
-        # compute returns and advantages
+    def update_net(self, buffer) -> Tuple[float, ...]:
         with torch.no_grad():
-            last_values, _, _ = self.value.act(self._state_preprocessor(self._current_next_states.float()),
-                                               taken_actions=None, role="value")
-        last_values = self._value_preprocessor(last_values, inverse=True)
+            states, actions, logprobs, rewards, undones = buffer
+            buffer_size = states.shape[0]
+            buffer_num = states.shape[1]
 
-        values = self.memory.get_tensor_by_name("values")
-        returns, advantages = compute_gae(rewards=self.memory.get_tensor_by_name("rewards"),
-                                          dones=self.memory.get_tensor_by_name("dones"),
-                                          values=values,
-                                          next_values=last_values,
-                                          discount_factor=self._discount_factor,
-                                          lambda_coefficient=self._lambda)
+            '''get advantages and reward_sums'''
+            bs = 2 ** 10  # set a smaller 'batch_size' to avoiding out of GPU memory.
+            values = torch.empty_like(rewards)  # values.shape == (buffer_size, buffer_num)
+            for i in range(0, buffer_size, bs):
+                for j in range(buffer_num):
+                    values[i:i + bs, j] = self.cri(states[i:i + bs, j])
 
-        self.memory.set_tensor_by_name("values", self._value_preprocessor(values, train=True))
-        self.memory.set_tensor_by_name("returns", self._value_preprocessor(returns, train=True))
-        self.memory.set_tensor_by_name("advantages", advantages)
+            advantages = self.get_advantages(rewards, undones, values)  # shape == (buffer_size, buffer_num)
+            reward_sums = advantages + values  # shape == (buffer_size, buffer_num)
+            del rewards, undones, values
 
-        # sample mini-batches from memory
-        sampled_batches = self.memory.sample_all(names=self.tensors_names, mini_batches=self._mini_batches)
+            advantages = (advantages - advantages.mean()) / (advantages.std(dim=0) + 1e-4)
 
-        cumulative_policy_loss = 0
-        cumulative_entropy_loss = 0
-        cumulative_value_loss = 0
+            self.update_avg_std_for_normalization(
+                states=states.reshape((-1, self.state_dim)),
+                returns=reward_sums.reshape((-1,))
+            )
+        # assert logprobs.shape == advantages.shape == reward_sums.shape == (buffer_size, buffer_num)
 
-        # learning epochs
-        for epoch in range(self._learning_epochs):
-            kl_divergences = []
+        '''update network'''
+        obj_critics = 0.0
+        obj_actors = 0.0
+        sample_len = buffer_size - 1
 
-            # mini-batches loop
-            for sampled_states, sampled_actions, _, _, sampled_log_prob, sampled_values, sampled_returns, sampled_advantages \
-                    in sampled_batches:
+        update_times = int(buffer_size * self.repeat_times / self.batch_size)
+        assert update_times >= 1
+        for _ in range(update_times):
+            ids = torch.randint(sample_len * buffer_num, size=(self.batch_size,), requires_grad=False)
+            ids0 = torch.fmod(ids, sample_len)  # ids % sample_len
+            ids1 = torch.div(ids, sample_len, rounding_mode='floor')  # ids // sample_len
 
-                sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
+            state = states[ids0, ids1]
+            action = actions[ids0, ids1]
+            logprob = logprobs[ids0, ids1]
+            advantage = advantages[ids0, ids1]
+            reward_sum = reward_sums[ids0, ids1]
 
-                _, next_log_prob, _ = self.policy.act(states=sampled_states, taken_actions=sampled_actions,
-                                                      role="policy")
+            value = self.cri(state)  # critic network predicts the reward_sum (Q value) of state
+            obj_critic = self.criterion(value, reward_sum)
+            self.optimizer_update(self.cri_optimizer, obj_critic)
 
-                # compute aproximate KL divergence
-                with torch.no_grad():
-                    ratio = next_log_prob - sampled_log_prob
-                    kl_divergence = ((torch.exp(ratio) - 1) - ratio).mean()
-                    kl_divergences.append(kl_divergence)
+            new_logprob, obj_entropy = self.act.get_logprob_entropy(state, action)
+            ratio = (new_logprob - logprob.detach()).exp()
+            surrogate1 = advantage * ratio
+            surrogate2 = advantage * ratio.clamp(1 - self.ratio_clip, 1 + self.ratio_clip)
+            obj_surrogate = torch.min(surrogate1, surrogate2).mean()
 
-                # early stopping with KL divergence
-                if self._kl_threshold and kl_divergence > self._kl_threshold:
-                    break
+            obj_actor = obj_surrogate + obj_entropy.mean() * self.lambda_entropy
+            self.optimizer_update(self.act_optimizer, -obj_actor)
 
-                # compute entropy loss
-                if self._entropy_loss_scale:
-                    entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy(role="policy").mean()
-                else:
-                    entropy_loss = 0
+            obj_critics += obj_critic.item()
+            obj_actors += obj_actor.item()
+        a_std_log = self.act.action_std_log.mean() if hasattr(self.act, 'action_std_log') else torch.zeros(1)
+        return obj_critics / update_times, obj_actors / update_times, a_std_log.item()
 
-                # compute policy loss
-                ratio = torch.exp(next_log_prob - sampled_log_prob)
-                surrogate = sampled_advantages * ratio
-                surrogate_clipped = sampled_advantages * torch.clip(ratio, 1.0 - self._ratio_clip,
-                                                                    1.0 + self._ratio_clip)
+    def get_advantages_origin(self, rewards: Tensor, undones: Tensor, values: Tensor) -> Tensor:
+        advantages = torch.empty_like(values)  # advantage value
 
-                policy_loss = -torch.min(surrogate, surrogate_clipped).mean()
+        masks = undones * self.gamma
+        horizon_len = rewards.shape[0]
 
-                # compute value loss
-                predicted_values, _, _ = self.value.act(states=sampled_states, taken_actions=None, role="value")
+        next_value = self.cri(self.last_state).detach()
 
-                if self._clip_predicted_values:
-                    predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,
-                                                                   min=-self._value_clip,
-                                                                   max=self._value_clip)
-                value_loss = self._value_loss_scale * F.mse_loss(sampled_returns, predicted_values)
+        advantage = torch.zeros_like(next_value)  # last advantage value by GAE (Generalized Advantage Estimate)
+        for t in range(horizon_len - 1, -1, -1):
+            next_value = rewards[t] + masks[t] * next_value
+            advantages[t] = advantage = next_value - values[t] + masks[t] * self.lambda_gae_adv * advantage
+            next_value = values[t]
+        return advantages
 
-                # optimization step
-                self.optimizer.zero_grad()
-                (policy_loss + entropy_loss + value_loss).backward()
-                if self._grad_norm_clip > 0:
-                    if self.policy is self.value:
-                        nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
-                    else:
-                        nn.utils.clip_grad_norm_(itertools.chain(self.policy.parameters(), self.value.parameters()),
-                                                 self._grad_norm_clip)
-                self.optimizer.step()
+    def get_advantages_vtrace(self, rewards: Tensor, undones: Tensor, values: Tensor) -> Tensor:
+        advantages = torch.empty_like(values)  # advantage value
 
-                # update cumulative losses
-                cumulative_policy_loss += policy_loss.item()
-                cumulative_value_loss += value_loss.item()
-                if self._entropy_loss_scale:
-                    cumulative_entropy_loss += entropy_loss.item()
+        masks = undones * self.gamma
+        horizon_len = rewards.shape[0]
 
-            # update learning rate
-            if self._learning_rate_scheduler:
-                if isinstance(self.scheduler, KLAdaptiveRL):
-                    self.scheduler.step(torch.tensor(kl_divergences).mean())
-                else:
-                    self.scheduler.step()
+        advantage = torch.zeros_like(values[0])  # last advantage value by GAE (Generalized Advantage Estimate)
+        for t in range(horizon_len - 1, -1, -1):
+            advantages[t] = rewards[t] - values[t] + masks[t] * advantage
+            advantage = values[t] + self.lambda_gae_adv * advantages[t]
+        return advantages
 
-        # record data
-        self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._mini_batches))
-        self.track_data("Loss / Value loss", cumulative_value_loss / (self._learning_epochs * self._mini_batches))
-        if self._entropy_loss_scale:
-            self.track_data("Loss / Entropy loss",
-                            cumulative_entropy_loss / (self._learning_epochs * self._mini_batches))
 
-        self.track_data("Policy / Standard deviation", self.policy.distribution(role="policy").stddev.mean().item())
+class AgentDiscretePPO(AgentPPO):
+    def __init__(self, net_dims: [int], state_dim: int, action_dim: int, gpu_id: int = 0, args: Config = Config()):
+        self.act_class = getattr(self, "act_class", ActorDiscretePPO)
+        super().__init__(net_dims=net_dims, state_dim=state_dim, action_dim=action_dim, gpu_id=gpu_id, args=args)
 
-        if self._learning_rate_scheduler:
-            self.track_data("Learning / Learning rate", self.scheduler.get_last_lr()[0])
+    def explore_one_env(self, env, horizon_len: int, if_random: bool = False) -> Tuple[Tensor, ...]:
+        """
+        Collect trajectories through the actor-environment interaction for a **single** environment instance.
+
+        env: RL training environment. env.reset() env.step(). It should be a vector env.
+        horizon_len: collect horizon_len step while exploring to update networks
+        return: `(states, actions, rewards, undones)` for off-policy
+            env_num == 1
+            states.shape == (horizon_len, env_num, state_dim)
+            actions.shape == (horizon_len, env_num, action_dim)
+            logprobs.shape == (horizon_len, env_num, action_dim)
+            rewards.shape == (horizon_len, env_num)
+            undones.shape == (horizon_len, env_num)
+        """
+        states = torch.zeros((horizon_len, self.num_envs, self.state_dim), dtype=torch.float32).to(self.device)
+        actions = torch.zeros((horizon_len, self.num_envs, 1), dtype=torch.int32).to(self.device)  # only different
+        logprobs = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
+        rewards = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
+        dones = torch.zeros((horizon_len, self.num_envs), dtype=torch.bool).to(self.device)
+
+        state = self.last_state  # shape == (1, state_dim) for a single env.
+
+        get_action = self.act.get_action
+        convert = self.act.convert_action_for_env
+        for t in range(horizon_len):
+            action, logprob = get_action(state)
+            states[t] = state
+
+            int_action = convert(action).item()
+            ary_state, reward, done, _ = env.step(int_action)  # next_state
+            state = torch.as_tensor(env.reset() if done else ary_state,
+                                    dtype=torch.float32, device=self.device).unsqueeze(0)
+            actions[t] = action
+            logprobs[t] = logprob
+            rewards[t] = reward
+            dones[t] = done
+
+        self.last_state = state
+
+        rewards *= self.reward_scale
+        undones = 1.0 - dones.type(torch.float32)
+        return states, actions, logprobs, rewards, undones
+
+    def explore_vec_env(self, env, horizon_len: int, if_random: bool = False) -> Tuple[Tensor, ...]:
+        """
+        Collect trajectories through the actor-environment interaction for a **vectorized** environment instance.
+
+        env: RL training environment. env.reset() env.step(). It should be a vector env.
+        horizon_len: collect horizon_len step while exploring to update networks
+        return: `(states, actions, rewards, undones)` for off-policy
+            states.shape == (horizon_len, env_num, state_dim)
+            actions.shape == (horizon_len, env_num, action_dim)
+            logprobs.shape == (horizon_len, env_num, action_dim)
+            rewards.shape == (horizon_len, env_num)
+            undones.shape == (horizon_len, env_num)
+        """
+        states = torch.zeros((horizon_len, self.num_envs, self.state_dim), dtype=torch.float32).to(self.device)
+        actions = torch.zeros((horizon_len, self.num_envs, 1), dtype=torch.float32).to(self.device)
+        logprobs = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
+        rewards = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
+        dones = torch.zeros((horizon_len, self.num_envs), dtype=torch.bool).to(self.device)
+
+        state = self.last_state  # shape == (env_num, state_dim) for a vectorized env.
+
+        get_action = self.act.get_action
+        convert = self.act.convert_action_for_env
+        for t in range(horizon_len):
+            action, logprob = get_action(state)
+            states[t] = state
+
+            state, reward, done, _ = env.step(convert(action))  # next_state
+            actions[t] = action
+            logprobs[t] = logprob
+            rewards[t] = reward
+            dones[t] = done
+
+        self.last_state = state
+
+        actions = actions.unsqueeze(2)
+        rewards *= self.reward_scale
+        undones = 1.0 - dones.type(torch.float32)
+        return states, actions, logprobs, rewards, undones
