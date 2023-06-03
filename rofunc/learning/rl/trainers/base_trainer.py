@@ -1,80 +1,92 @@
 import numpy as np
 import torch
-
+import copy
+import datetime
+import os
 import time
+from torch.utils.tensorboard import SummaryWriter
+from typing import Union, Tuple, Dict, Optional
 
 import tqdm
+from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
-class Trainer:
+class BaseTrainer:
 
-    def __init__(self, model, optimizer, batch_size, get_batch, loss_fn, scheduler=None, eval_fns=None):
-        self.model = model
-        self.optimizer = optimizer
-        self.batch_size = batch_size
-        self.get_batch = get_batch
-        self.loss_fn = loss_fn
-        self.scheduler = scheduler
-        self.eval_fns = [] if eval_fns is None else eval_fns
-        self.diagnostics = dict()
+    def __init__(self,
+                 cfg,
+                 env,
+                 device: Optional[Union[str, torch.device]] = None):
+        self.cfg = cfg
+        self._env = env
+        self._test_env = env
+        self._env.seed(self.cfg.seed)
+        self._test_env.seed(2 ** 31 - 1 - self.cfg.seed)
+        self.device = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
 
-        self.start_time = time.time()
+        '''Experiment log directory'''
+        directory = self.cfg.get("experiment", {}).get("directory", "")
+        experiment_name = self.cfg.get("experiment", {}).get("experiment_name", "")
+        if not directory:
+            directory = os.path.join(os.getcwd(), "runs")
+        if not experiment_name:
+            experiment_name = "{}_{}".format(datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f"),
+                                             self.__class__.__name__)
+        self.experiment_dir = os.path.join(directory, experiment_name)
 
-    def train_iteration(self, num_steps, iter_num=0, print_logs=False):
+        '''Wandb and Tensorboard'''
+        # setup Weights & Biases
+        if self.cfg.get("experiment", {}).get("wandb", False):
+            # save experiment config
+            trainer_cfg = None  # TODO: check
+            trainer_cfg = trainer_cfg if trainer_cfg is not None else {}
+            try:
+                models_cfg = {k: v.net._modules for (k, v) in self.models.items()}
+            except AttributeError:
+                models_cfg = {k: v._modules for (k, v) in self.models.items()}
+            config = {**self.cfg, **trainer_cfg, **models_cfg}
+            # set default values
+            wandb_kwargs = copy.deepcopy(self.cfg.get("experiment", {}).get("wandb_kwargs", {}))
+            wandb_kwargs.setdefault("name", os.path.split(self.experiment_dir)[-1])
+            wandb_kwargs.setdefault("sync_tensorboard", True)
+            wandb_kwargs.setdefault("config", {})
+            wandb_kwargs["config"].update(config)
+            # init Weights & Biases
+            import wandb
+            wandb.init(**wandb_kwargs)
 
-        train_losses = []
-        logs = dict()
+        # main entry to log data for consumption and visualization by TensorBoard
+        self.write_interval = self.cfg.get("experiment", {}).get("write_interval", 100)
+        if self.write_interval > 0:
+            self.writer = SummaryWriter(log_dir=self.experiment_dir)
 
-        train_start = time.time()
+        if self.checkpoint_interval > 0:
+            os.makedirs(os.path.join(self.experiment_dir, "checkpoints"), exist_ok=True)
 
-        self.model.train()
-        for _ in tqdm.trange(num_steps):
-            train_loss = self.train_step()
-            train_losses.append(train_loss)
-            if self.scheduler is not None:
-                self.scheduler.step()
+        '''Rofunc logger'''
+        # if self.cfg.get("experiment", {}).get("rofunc_logger", False):
+        self.rofunc_logger = BeautyLogger(self.experiment_dir, 'rofunc.log', verbose=True)
 
-        logs['time/training'] = time.time() - train_start
+        '''Misc variables'''
+        self.step = 0
+        self._episodes = 0
+        self.start_time = None
+        self.num_episodes = self.cfg.num_episodes
 
-        eval_start = time.time()
+    def train(self):
+        for _ in tqdm.trange(self.num_episodes):
+            self._episodes += 1
+            self.train_episode()
 
-        self.model.eval()
-        for eval_fn in self.eval_fns:
-            outputs = eval_fn(self.model)
-            for k, v in outputs.items():
-                logs[f'evaluation/{k}'] = v
+        self.writer.close()
+        self.rofunc_logger.info('Training complete.')
 
-        logs['time/total'] = time.time() - self.start_time
-        logs['time/evaluation'] = time.time() - eval_start
-        logs['training/train_loss_mean'] = np.mean(train_losses)
-        logs['training/train_loss_std'] = np.std(train_losses)
+    def train_episode(self):
+        pass
 
-        for k in self.diagnostics:
-            logs[k] = self.diagnostics[k]
+    def eval(self):
+        pass
 
-        if print_logs:
-            print('=' * 80)
-            print(f'Iteration {iter_num}')
-            for k, v in logs.items():
-                print(f'{k}: {v}')
-
-        return logs
-
-    def train_step(self):
-        states, actions, rewards, dones, attention_mask, returns = self.get_batch(self.batch_size)
-        state_target, action_target, reward_target = torch.clone(states), torch.clone(actions), torch.clone(rewards)
-
-        state_preds, action_preds, reward_preds = self.model.forward(
-            states, actions, rewards, masks=None, attention_mask=attention_mask, target_return=returns,
-        )
-
-        # note: currently indexing & masking is not fully correct
-        loss = self.loss_fn(
-            state_preds, action_preds, reward_preds,
-            state_target[:,1:], action_target, reward_target[:,1:],
-        )
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-
-        return loss.item()
+    def inference(self):
+        pass
