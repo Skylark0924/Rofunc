@@ -20,14 +20,14 @@ class BaseTrainer:
         self.cfg = cfg
         self._env = env
         self._test_env = env
-        self._env.seed(self.cfg.seed)
-        self._test_env.seed(2 ** 31 - 1 - self.cfg.seed)
+        # self._env.seed(self.cfg.Trainer.seed)
+        # self._test_env.seed(2 ** 31 - 1 - self.cfg.Trainer.seed)
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
 
         '''Experiment log directory'''
-        directory = self.cfg.get("experiment", {}).get("directory", "")
-        experiment_name = self.cfg.get("experiment", {}).get("experiment_name", "")
+        directory = self.cfg.get("Trainer", {}).get("log_directory", "")
+        experiment_name = self.cfg.get("Trainer", {}).get("experiment_name", "")
         if not directory:
             directory = os.path.join(os.getcwd(), "runs")
         if not experiment_name:
@@ -61,6 +61,7 @@ class BaseTrainer:
         if self.write_interval > 0:
             self.writer = SummaryWriter(log_dir=self.experiment_dir)
 
+        self.checkpoint_interval = self.cfg.get("experiment", {}).get("checkpoint_interval", 100)
         if self.checkpoint_interval > 0:
             os.makedirs(os.path.join(self.experiment_dir, "checkpoints"), exist_ok=True)
 
@@ -72,7 +73,7 @@ class BaseTrainer:
         self.step = 0
         self._episodes = 0
         self.start_time = None
-        self.num_episodes = self.cfg.num_episodes
+        self.num_episodes = self.cfg.Trainer.num_episodes
 
     def train(self):
         for _ in tqdm.trange(self.num_episodes):
