@@ -205,90 +205,90 @@ class PPOAgent(BaseAgent):
         return advantages
 
 
-class AgentDiscretePPO(AgentPPO):
-    def __init__(self, net_dims: [int], state_dim: int, action_dim: int, gpu_id: int = 0, args: Config = Config()):
-        self.act_class = getattr(self, "act_class", ActorDiscretePPO)
-        super().__init__(net_dims=net_dims, state_dim=state_dim, action_dim=action_dim, gpu_id=gpu_id, args=args)
-
-    def explore_one_env(self, env, horizon_len: int, if_random: bool = False) -> Tuple[Tensor, ...]:
-        """
-        Collect trajectories through the actor-environment interaction for a **single** environment instance.
-
-        env: RL training environment. env.reset() env.step(). It should be a vector env.
-        horizon_len: collect horizon_len step while exploring to update networks
-        return: `(states, actions, rewards, undones)` for off-policy
-            env_num == 1
-            states.shape == (horizon_len, env_num, state_dim)
-            actions.shape == (horizon_len, env_num, action_dim)
-            logprobs.shape == (horizon_len, env_num, action_dim)
-            rewards.shape == (horizon_len, env_num)
-            undones.shape == (horizon_len, env_num)
-        """
-        states = torch.zeros((horizon_len, self.num_envs, self.state_dim), dtype=torch.float32).to(self.device)
-        actions = torch.zeros((horizon_len, self.num_envs, 1), dtype=torch.int32).to(self.device)  # only different
-        logprobs = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
-        rewards = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
-        dones = torch.zeros((horizon_len, self.num_envs), dtype=torch.bool).to(self.device)
-
-        state = self.last_state  # shape == (1, state_dim) for a single env.
-
-        get_action = self.act.get_action
-        convert = self.act.convert_action_for_env
-        for t in range(horizon_len):
-            action, logprob = get_action(state)
-            states[t] = state
-
-            int_action = convert(action).item()
-            ary_state, reward, done, _ = env.step(int_action)  # next_state
-            state = torch.as_tensor(env.reset() if done else ary_state,
-                                    dtype=torch.float32, device=self.device).unsqueeze(0)
-            actions[t] = action
-            logprobs[t] = logprob
-            rewards[t] = reward
-            dones[t] = done
-
-        self.last_state = state
-
-        rewards *= self.reward_scale
-        undones = 1.0 - dones.type(torch.float32)
-        return states, actions, logprobs, rewards, undones
-
-    def explore_vec_env(self, env, horizon_len: int, if_random: bool = False) -> Tuple[Tensor, ...]:
-        """
-        Collect trajectories through the actor-environment interaction for a **vectorized** environment instance.
-
-        env: RL training environment. env.reset() env.step(). It should be a vector env.
-        horizon_len: collect horizon_len step while exploring to update networks
-        return: `(states, actions, rewards, undones)` for off-policy
-            states.shape == (horizon_len, env_num, state_dim)
-            actions.shape == (horizon_len, env_num, action_dim)
-            logprobs.shape == (horizon_len, env_num, action_dim)
-            rewards.shape == (horizon_len, env_num)
-            undones.shape == (horizon_len, env_num)
-        """
-        states = torch.zeros((horizon_len, self.num_envs, self.state_dim), dtype=torch.float32).to(self.device)
-        actions = torch.zeros((horizon_len, self.num_envs, 1), dtype=torch.float32).to(self.device)
-        logprobs = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
-        rewards = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
-        dones = torch.zeros((horizon_len, self.num_envs), dtype=torch.bool).to(self.device)
-
-        state = self.last_state  # shape == (env_num, state_dim) for a vectorized env.
-
-        get_action = self.act.get_action
-        convert = self.act.convert_action_for_env
-        for t in range(horizon_len):
-            action, logprob = get_action(state)
-            states[t] = state
-
-            state, reward, done, _ = env.step(convert(action))  # next_state
-            actions[t] = action
-            logprobs[t] = logprob
-            rewards[t] = reward
-            dones[t] = done
-
-        self.last_state = state
-
-        actions = actions.unsqueeze(2)
-        rewards *= self.reward_scale
-        undones = 1.0 - dones.type(torch.float32)
-        return states, actions, logprobs, rewards, undones
+# class AgentDiscretePPO(PPOAgent):
+#     def __init__(self, net_dims: [int], state_dim: int, action_dim: int, gpu_id: int = 0, args: Config = Config()):
+#         self.act_class = getattr(self, "act_class", ActorDiscretePPO)
+#         super().__init__(net_dims=net_dims, state_dim=state_dim, action_dim=action_dim, gpu_id=gpu_id, args=args)
+#
+#     def explore_one_env(self, env, horizon_len: int, if_random: bool = False) -> Tuple[Tensor, ...]:
+#         """
+#         Collect trajectories through the actor-environment interaction for a **single** environment instance.
+#
+#         env: RL training environment. env.reset() env.step(). It should be a vector env.
+#         horizon_len: collect horizon_len step while exploring to update networks
+#         return: `(states, actions, rewards, undones)` for off-policy
+#             env_num == 1
+#             states.shape == (horizon_len, env_num, state_dim)
+#             actions.shape == (horizon_len, env_num, action_dim)
+#             logprobs.shape == (horizon_len, env_num, action_dim)
+#             rewards.shape == (horizon_len, env_num)
+#             undones.shape == (horizon_len, env_num)
+#         """
+#         states = torch.zeros((horizon_len, self.num_envs, self.state_dim), dtype=torch.float32).to(self.device)
+#         actions = torch.zeros((horizon_len, self.num_envs, 1), dtype=torch.int32).to(self.device)  # only different
+#         logprobs = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
+#         rewards = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
+#         dones = torch.zeros((horizon_len, self.num_envs), dtype=torch.bool).to(self.device)
+#
+#         state = self.last_state  # shape == (1, state_dim) for a single env.
+#
+#         get_action = self.act.get_action
+#         convert = self.act.convert_action_for_env
+#         for t in range(horizon_len):
+#             action, logprob = get_action(state)
+#             states[t] = state
+#
+#             int_action = convert(action).item()
+#             ary_state, reward, done, _ = env.step(int_action)  # next_state
+#             state = torch.as_tensor(env.reset() if done else ary_state,
+#                                     dtype=torch.float32, device=self.device).unsqueeze(0)
+#             actions[t] = action
+#             logprobs[t] = logprob
+#             rewards[t] = reward
+#             dones[t] = done
+#
+#         self.last_state = state
+#
+#         rewards *= self.reward_scale
+#         undones = 1.0 - dones.type(torch.float32)
+#         return states, actions, logprobs, rewards, undones
+#
+#     def explore_vec_env(self, env, horizon_len: int, if_random: bool = False) -> Tuple[Tensor, ...]:
+#         """
+#         Collect trajectories through the actor-environment interaction for a **vectorized** environment instance.
+#
+#         env: RL training environment. env.reset() env.step(). It should be a vector env.
+#         horizon_len: collect horizon_len step while exploring to update networks
+#         return: `(states, actions, rewards, undones)` for off-policy
+#             states.shape == (horizon_len, env_num, state_dim)
+#             actions.shape == (horizon_len, env_num, action_dim)
+#             logprobs.shape == (horizon_len, env_num, action_dim)
+#             rewards.shape == (horizon_len, env_num)
+#             undones.shape == (horizon_len, env_num)
+#         """
+#         states = torch.zeros((horizon_len, self.num_envs, self.state_dim), dtype=torch.float32).to(self.device)
+#         actions = torch.zeros((horizon_len, self.num_envs, 1), dtype=torch.float32).to(self.device)
+#         logprobs = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
+#         rewards = torch.zeros((horizon_len, self.num_envs), dtype=torch.float32).to(self.device)
+#         dones = torch.zeros((horizon_len, self.num_envs), dtype=torch.bool).to(self.device)
+#
+#         state = self.last_state  # shape == (env_num, state_dim) for a vectorized env.
+#
+#         get_action = self.act.get_action
+#         convert = self.act.convert_action_for_env
+#         for t in range(horizon_len):
+#             action, logprob = get_action(state)
+#             states[t] = state
+#
+#             state, reward, done, _ = env.step(convert(action))  # next_state
+#             actions[t] = action
+#             logprobs[t] = logprob
+#             rewards[t] = reward
+#             dones[t] = done
+#
+#         self.last_state = state
+#
+#         actions = actions.unsqueeze(2)
+#         rewards *= self.reward_scale
+#         undones = 1.0 - dones.type(torch.float32)
+#         return states, actions, logprobs, rewards, undones

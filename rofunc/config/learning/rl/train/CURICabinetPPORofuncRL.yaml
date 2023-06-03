@@ -9,6 +9,7 @@ Trainer:
   wandb: False
   wandb_kwargs:
   write_interval: 100
+  checkpoint_interval: 100
   rofunc_logger: False
   rofunc_logger_kwargs: {verbose: True}
 
