@@ -1,15 +1,9 @@
 from __future__ import absolute_import
 
-from rofunc.learning.rl.agents.online import PPOAgent
-# from rofunc.learning.rl.agents.offline import CQL
-# from rofunc.learning.rl.agents.offline import CRR
-from rofunc.learning.rl.agents.offline import DTransAgent
+from rofunc.learning.rl.tasks import task_map
 
-algo_map = {
-    # "DQN": DQN,
-    "PPO": PPOAgent,
-    # "SAC": SAC,
-    # "CQL": CQL,
-    # "CRR": CRR
-    "DT": DTransAgent
-}
+from rofunc.learning.rl.agents.base_agent import BaseAgent
+
+from rofunc.learning.rl.trainers.base_trainer import BaseTrainer
+
+

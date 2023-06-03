@@ -6,6 +6,12 @@
     - QNetwork
     - ActorNetwork
     - CriticNetwork
+    - State Encoders
+      - MLP
+      - CNN
+      - ResNet
+      - GCN
+      - ViT
 2. **Rofunc RL** `Agents`:
     - PPOAgent: Proximal Policy Optimization
     - TD3Agent: Twin Delayed Deep Deterministic Policy Gradient

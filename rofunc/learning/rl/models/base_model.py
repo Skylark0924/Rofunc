@@ -38,7 +38,7 @@ def init_weights_xavier(m, gain=1.0):
             nn.init.constant_(m.bias, 0)
 
 
-class ModelBase(nn.Module):
+class BaseModel(nn.Module):
     def __init__(self, state_dim: int, action_dim: int):
         """
         Base class for all models
@@ -67,7 +67,7 @@ Q Network
 """
 
 
-class QBase(ModelBase):
+class BaseQNet(BaseModel):
     def __init__(self, state_dim: int, action_dim: int):
         super().__init__(state_dim, action_dim)
         self.explore_rate = 0.125
@@ -86,7 +86,7 @@ Actor Network
 """
 
 
-class ActorBase(nn.Module):
+class BaseActor(BaseModel):
     def __init__(self, state_dim: int, action_dim: int):
         super().__init__()
         self.state_dim = state_dim
@@ -107,7 +107,7 @@ Critic Network
 """
 
 
-class CriticBase(nn.Module):
+class BaseCritic(BaseModel):
     def __init__(self, state_dim: int, action_dim: int):
         super().__init__()
         self.state_dim = state_dim
