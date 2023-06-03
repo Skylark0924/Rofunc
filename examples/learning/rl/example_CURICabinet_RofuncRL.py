@@ -20,13 +20,13 @@ def train(custom_args):
     cfg = get_config('./learning/rl', 'config', args=args)
     cfg_dict = omegaconf_to_dict(cfg.task)
     # Instantiate the Isaac Gym environment
-    env = task_map[cfg.task](cfg=cfg_dict,
-                             rl_device=cfg.rl_device,
-                             sim_device=cfg.sim_device,
-                             graphics_device_id=cfg.graphics_device_id,
-                             headless=cfg.headless,
-                             virtual_screen_capture=cfg.capture_video,  # TODO: check
-                             force_render=cfg.force_render)
+    env = task_map[custom_args.task](cfg=cfg_dict,
+                                     rl_device=cfg.rl_device,
+                                     sim_device=cfg.sim_device,
+                                     graphics_device_id=cfg.graphics_device_id,
+                                     headless=cfg.headless,
+                                     virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                     force_render=cfg.force_render)
 
     # Instantiate the RL trainer
     trainer = PPOTrainer(cfg=cfg.train,
