@@ -34,7 +34,7 @@ class CriticPPO(BaseCritic):
         state = self.state_norm(state)
         value = self.net(state)
         value = self.value_re_norm(value)
-        return value.squeeze(1)  # q value
+        return value.squeeze(1).reshape((-1, 1))  # q value
 
 
 class CriticTwin(BaseCritic):  # shared parameter

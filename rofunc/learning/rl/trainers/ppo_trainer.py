@@ -9,7 +9,7 @@ from rofunc.learning.rl.utils.memory import RandomMemory
 class PPOTrainer(BaseTrainer):
     def __init__(self, cfg, env, device):
         super().__init__(cfg, env, device)
-        self.memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
+        self.memory = RandomMemory(memory_size=16, num_envs=self.env.num_envs, device=device)
         self.agent = PPOAgent(cfg, env.observation_space, env.action_space, self.memory,
                               device, self.experiment_dir, self.rofunc_logger)
 
@@ -34,11 +34,3 @@ class PPOTrainer(BaseTrainer):
             import wandb
             wandb.init(**wandb_kwargs)
 
-    def train(self):
-        pass
-
-    def eval(self):
-        pass
-
-    def inference(self):
-        pass
