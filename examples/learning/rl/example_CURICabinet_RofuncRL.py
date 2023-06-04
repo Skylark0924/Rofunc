@@ -1,11 +1,20 @@
+"""
+CURICabinet (Rofunc RL)
+=======================
+
+This example shows how to train a reinforcement learning agent to solve the CURICabinet task using Rofunc RL.
+"""
+
 import argparse
 import sys
+import isaacgym
 
 from hydra._internal.utils import get_args_parser
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
 from rofunc.learning.rl.tasks import task_map
 from rofunc.learning.rl.trainers.ppo_trainer import PPOTrainer
+from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
 
 
 def train(custom_args):
@@ -27,6 +36,8 @@ def train(custom_args):
                                      headless=cfg.headless,
                                      virtual_screen_capture=cfg.capture_video,  # TODO: check
                                      force_render=cfg.force_render)
+
+    env = wrap_env(env)
 
     # Instantiate the RL trainer
     trainer = PPOTrainer(cfg=cfg.train,

@@ -1,7 +1,8 @@
 import torch
 from torch import Tensor
+from omegaconf import DictConfig
 
-from .base_model import BaseCritic, build_mlp, init_with_orthogonal
+from .base_model import BaseCritic, build_mlp, init_with_orthogonal, activation_func
 
 
 class Critic(BaseCritic):
@@ -20,10 +21,14 @@ class Critic(BaseCritic):
 
 class CriticPPO(BaseCritic):
     """Value Network for PPO"""
-    def __init__(self, dims: [int], state_dim: int, action_dim: int):
+    def __init__(self, cfg: DictConfig, observation_space: int, action_space: int):
+        state_dim = observation_space.shape[0]
+        action_dim = action_space.shape[0]
         super().__init__(state_dim=state_dim, action_dim=action_dim)
-        self.net = build_mlp(dims=[state_dim, *dims, 1])
-        init_with_orthogonal(self.net[-1], std=0.5)
+        self.mlp_hidden_dims = cfg.mlp_hidden_dims
+        self.mlp_activation = activation_func(cfg.mlp_activation)
+
+        self.net = build_mlp(dims=[state_dim, *self.mlp_hidden_dims, 1], hidden_activation=self.mlp_activation)
 
     def forward(self, state: Tensor) -> Tensor:
         state = self.state_norm(state)

@@ -20,6 +20,17 @@ def build_mlp(dims: [int], hidden_activation: nn = nn.ReLU, output_activation: n
     return nn.Sequential(*layers).apply(init_weights_xavier)
 
 
+def activation_func(activation: str) -> nn:
+    if activation == 'relu':
+        return nn.ReLU()
+    elif activation == 'tanh':
+        return nn.Tanh()
+    elif activation == 'sigmoid':
+        return nn.Sigmoid()
+    else:
+        raise NotImplementedError
+
+
 # TODO: weights initialization
 def init_layers(layers, std=1.0, bias_const=1e-6):
     for layer in layers:
@@ -88,7 +99,7 @@ Actor Network
 
 class BaseActor(BaseModel):
     def __init__(self, state_dim: int, action_dim: int):
-        super().__init__()
+        super().__init__(state_dim, action_dim)
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.net = None  # build_mlp(dims=[state_dim, *dims, action_dim])
@@ -109,7 +120,7 @@ Critic Network
 
 class BaseCritic(BaseModel):
     def __init__(self, state_dim: int, action_dim: int):
-        super().__init__()
+        super().__init__(state_dim, action_dim)
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.net = None  # build_mlp(dims=[state_dim + action_dim, *dims, 1])
