@@ -2,17 +2,19 @@ import copy
 import datetime
 import os
 from typing import Union, Optional
-import collections
-from omegaconf import DictConfig
+
+import gym
+import gymnasium
 import numpy as np
 import torch
 import tqdm
-import gym, gymnasium
+from omegaconf import DictConfig, OmegaConf
+from tensorboard import program
 from torch.utils.tensorboard import SummaryWriter
 
 import rofunc as rf
-from rofunc.utils.logger.beauty_logger import BeautyLogger
 from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
+from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
 class BaseTrainer:
@@ -22,6 +24,7 @@ class BaseTrainer:
                  env: Union[gym.Env, gymnasium.Env],
                  device: Optional[Union[str, torch.device]] = None):
         self.cfg = cfg
+        self.agent = None
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
 
@@ -31,17 +34,24 @@ class BaseTrainer:
         if not directory:
             directory = os.path.join(os.getcwd(), "runs")
         if not experiment_name:
-            experiment_name = "{}_{}".format(datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f"),
-                                             self.__class__.__name__)
+            experiment_name = "RofuncRL_{}_{}".format(self.__class__.__name__,
+                                                      datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f"))
         self.experiment_dir = os.path.join(directory, experiment_name)
-
-        # main entry to log data for consumption and visualization by TensorBoard
-        self.write_interval = self.cfg.get("Trainer", {}).get("write_interval", 100)
-        self.writer = SummaryWriter(log_dir=self.experiment_dir)
+        rf.utils.create_dir(self.experiment_dir)
 
         '''Rofunc logger'''
         # if self.cfg.get("experiment", {}).get("rofunc_logger", False):
         self.rofunc_logger = BeautyLogger(self.experiment_dir, 'rofunc.log', verbose=True)
+        self.rofunc_logger.info(f"Configurations:\n{OmegaConf.to_yaml(self.cfg)}")
+
+        '''TensorBoard'''
+        # main entry to log data for consumption and visualization by TensorBoard
+        self.write_interval = self.cfg.get("Trainer", {}).get("write_interval", 100)
+        self.writer = SummaryWriter(log_dir=self.experiment_dir)
+        tb = program.TensorBoard()
+        tb.configure(argv=[None, '--logdir', self.experiment_dir])
+        url = tb.launch()
+        self.rofunc_logger.info(f"Tensorflow listening on {url}")
 
         '''Misc variables'''
         self.maximum_steps = self.cfg.Trainer.maximum_steps
@@ -154,7 +164,8 @@ class BaseTrainer:
                 self.agent.checkpoint_best_modules["timestep"] = self._step
                 self.agent.checkpoint_best_modules["reward"] = reward
                 self.agent.checkpoint_best_modules["saved"] = False
-                self.agent.checkpoint_best_modules["modules"] = {k: copy.deepcopy(self.agent._get_internal_value(v)) for k, v
+                self.agent.checkpoint_best_modules["modules"] = {k: copy.deepcopy(self.agent._get_internal_value(v)) for
+                                                                 k, v
                                                                  in self.agent.checkpoint_modules.items()}
 
             # Update tensorboard

@@ -1,14 +1,14 @@
-from typing import Union, Tuple, Dict, Optional
-
+import collections
 import os
-import rofunc as rf
+from typing import Union, Tuple, Optional
+
 import gym
 import gymnasium
 import numpy as np
 import torch
-import collections
 from omegaconf import DictConfig
 
+import rofunc as rf
 from rofunc.learning.rl.utils.memory import Memory
 
 

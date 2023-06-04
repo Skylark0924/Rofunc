@@ -17,18 +17,18 @@ class BeautyLogger:
         with open(os.path.join(self.log_path, self.log_name), "a") as f:
             f.write("[Rofunc:{}] {}\n".format(type.upper(), content))
 
-    def warning(self, content):
-        if self.verbose:
+    def warning(self, content, local_verbose=True):
+        if self.verbose and local_verbose:
             beauty_print(content, type="warning")
         self._write_log(content, type="warning")
 
-    def module(self, content):
-        if self.verbose:
+    def module(self, content, local_verbose=True):
+        if self.verbose and local_verbose:
             beauty_print(content, type="module")
         self._write_log(content, type="module")
 
-    def info(self, content):
-        if self.verbose:
+    def info(self, content, local_verbose=True):
+        if self.verbose and local_verbose:
             beauty_print(content, type="info")
         self._write_log(content, type="info")
 
