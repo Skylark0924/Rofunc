@@ -1,3 +1,6 @@
+import os
+
+
 class BeautyLogger:
     def __init__(self, log_path: str, log_name: str, verbose: bool = True):
         """
@@ -11,7 +14,7 @@ class BeautyLogger:
         self.verbose = verbose
 
     def _write_log(self, content, type):
-        with open(self.log_path + self.log_name, "a") as f:
+        with open(os.path.join(self.log_path, self.log_name), "a") as f:
             f.write("[Rofunc:{}] {}\n".format(type.upper(), content))
 
     def warning(self, content):

@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import rofunc as rf
 from rofunc.utils.logger.beauty_logger import BeautyLogger
+from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
 
 
 class BaseTrainer:
@@ -21,10 +22,6 @@ class BaseTrainer:
                  env: Union[gym.Env, gymnasium.Env],
                  device: Optional[Union[str, torch.device]] = None):
         self.cfg = cfg
-        self.env = env
-        self.eval_env = env
-        # self._env.seed(self.cfg.Trainer.seed)
-        # self._test_env.seed(2 ** 31 - 1 - self.cfg.Trainer.seed)
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
 
@@ -56,6 +53,8 @@ class BaseTrainer:
         self._update_times = 0
         self.start_time = None
 
+        self.env = wrap_env(env, logger=self.rofunc_logger)
+
     def train(self):
         """
         Main training loop.
@@ -79,19 +78,20 @@ class BaseTrainer:
                 if self._step < self.random_steps:
                     actions = self.env.action_space.sample()  # sample random actions
                 else:
-                    actions = self.agent.act(states)
+                    actions, _ = self.agent.act(states)
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.env.step(actions)
 
                 # Store transition
-                self.agent.store_transition(states, actions, rewards, next_states, terminated, truncated, infos)
+                self.agent.store_transition(states=states, actions=actions, rewards=rewards, next_states=next_states,
+                                            terminated=terminated, truncated=truncated, infos=infos)
 
                 # Reset the environment
                 if terminated.any() or truncated.any():
                     states, infos = self.env.reset()
                 else:
-                    states = next_states.copy()
+                    states = next_states.clone()
 
                 self._step += 1
             self.post_interaction()
@@ -135,14 +135,14 @@ class BaseTrainer:
         pass
 
     def pre_interaction(self):
-        raise NotImplementedError
+        pass
 
     def post_interaction(self):
         self._rollout += 1
 
         # Update agent
         if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
-            self.agent.update()
+            self.agent.update_net()
             self._update_times += 1
             self.rofunc_logger.info(f'Update {self._update_times} times.')
 

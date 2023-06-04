@@ -107,7 +107,7 @@ class BaseAgent:
             self.tracking_data["Episode / Total timesteps (min)"].append(np.min(track_timesteps))
             self.tracking_data["Episode / Total timesteps (mean)"].append(np.mean(track_timesteps))
 
-    def update(self):
+    def update_net(self):
         """
         Update the agent model parameters.
         """

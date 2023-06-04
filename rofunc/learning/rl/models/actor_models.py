@@ -57,9 +57,9 @@ class ActorPPO(BaseActor):
         dist = self.ActionDist(action_avg, action_std)
 
         if deterministic:
-            action = dist.sample()
+            action = dist.mode
         else:
-            action = dist.mode()
+            action = dist.sample()
         log_prob = dist.log_prob(action).sum(1)
         return action, log_prob
 
