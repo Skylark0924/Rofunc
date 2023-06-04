@@ -209,9 +209,9 @@ class PPOAgent(BaseAgent):
                     kl_divergence = ((torch.exp(ratio) - 1) - ratio).mean()
                     kl_divergences.append(kl_divergence)
 
-                # early stopping with KL divergence
-                if self._kl_threshold and kl_divergence > self._kl_threshold:
-                    break
+                # # early stopping with KL divergence
+                # if self._kl_threshold and kl_divergence > self._kl_threshold:
+                #     break
 
                 # compute entropy loss
                 if self._entropy_loss_scale:

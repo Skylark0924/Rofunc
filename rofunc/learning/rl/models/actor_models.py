@@ -67,7 +67,10 @@ class ActorPPO(BaseActor):
         action_avg = self.net(state)
         action_std = self.action_std_log.exp()
 
-        dist = self.ActionDist(action_avg, action_std)
+        try:
+            dist = self.ActionDist(action_avg, action_std)
+        except:
+            raise ValueError
         log_prob = dist.log_prob(action).sum(1)
         entropy = dist.entropy().sum(1)
         return log_prob, entropy
