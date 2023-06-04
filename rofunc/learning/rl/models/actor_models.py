@@ -1,9 +1,8 @@
 import math
-
 import torch
 import torch.nn as nn
-from torch import Tensor
 from omegaconf import DictConfig
+from torch import Tensor
 
 from .base_model import BaseActor, build_mlp, init_with_orthogonal, activation_func
 
