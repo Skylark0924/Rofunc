@@ -1,6 +1,6 @@
 import torch
-from torch import Tensor
 from omegaconf import DictConfig
+from torch import Tensor
 
 from .base_model import BaseCritic, build_mlp, init_with_orthogonal, activation_func
 
