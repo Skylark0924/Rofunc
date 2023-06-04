@@ -24,8 +24,8 @@ Agent:
   discount: 0.99                      # The discount factor, gamma.
   td_lambda: 0.95                     # TD(lambda) coefficient (lam) for computing returns and advantages.
 
-  learning_epochs: 10                 # The number of epochs to train for per update.
-  batch_size: 256                     # The number of samples per update.
+  learning_epochs: 8                  # The number of epochs to train for per update.
+  batch_size: 8                       # The number of samples per update.
 
   lr: 0.001                      # Learning rate.
   lr_scheduler:                  # Learning rate scheduler type.
