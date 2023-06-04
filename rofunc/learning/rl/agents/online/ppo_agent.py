@@ -35,8 +35,8 @@ class PPOAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         # Define models for PPO
-        self.policy = ActorPPO(cfg.Model.actor, observation_space, action_space)
-        self.value = CriticPPO(cfg.Model.critic, observation_space, action_space)
+        self.policy = ActorPPO(cfg.Model.actor, observation_space, action_space).to(self.device)
+        self.value = CriticPPO(cfg.Model.critic, observation_space, action_space).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
 
         # create tensors in memory
@@ -114,7 +114,7 @@ class PPOAgent(BaseAgent):
         """
         # sample stochastic actions
         actions, log_prob = self.policy.act(states)
-        self._current_log_prob = log_prob
+        self._current_log_prob = log_prob.reshape((-1, 1))
 
         return actions, log_prob
 
@@ -140,23 +140,15 @@ class PPOAgent(BaseAgent):
                         next_values: torch.Tensor,
                         discount_factor: float = 0.99,
                         lambda_coefficient: float = 0.95):
-            """Compute the Generalized Advantage Estimator (GAE)
-
+            """
+            Compute the Generalized Advantage Estimator (GAE)
             :param rewards: Rewards obtained by the agent
-            :type rewards: torch.Tensor
             :param dones: Signals to indicate that episodes have ended
-            :type dones: torch.Tensor
             :param values: Values obtained by the agent
-            :type values: torch.Tensor
             :param next_values: Next values obtained by the agent
-            :type next_values: torch.Tensor
             :param discount_factor: Discount factor
-            :type discount_factor: float
             :param lambda_coefficient: Lambda coefficient
-            :type lambda_coefficient: float
-
             :return: Generalized Advantage Estimator
-            :rtype: torch.Tensor
             """
             advantage = 0
             advantages = torch.zeros_like(rewards)
@@ -179,7 +171,7 @@ class PPOAgent(BaseAgent):
         # compute returns and advantages
         with torch.no_grad():
             self.value.train(False)
-            last_values, _, _ = self.value.act(self._current_next_states.float())
+            last_values = self.value(self._current_next_states.float())
             self.value.train(True)
 
         values = self.memory.get_tensor_by_name("values")
@@ -234,7 +226,7 @@ class PPOAgent(BaseAgent):
                 policy_loss = -torch.min(surrogate, surrogate_clipped).mean()
 
                 # compute value loss
-                predicted_values, _, _ = self.value.act(sampled_states)
+                predicted_values = self.value(sampled_states)
 
                 if self._clip_predicted_values:
                     predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,

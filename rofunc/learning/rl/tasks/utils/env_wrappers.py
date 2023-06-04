@@ -8,8 +8,6 @@ from packaging import version
 
 import torch
 
-from skrl import logger
-
 __all__ = ["wrap_env"]
 
 
@@ -42,7 +40,7 @@ class Wrapper(object):
         if hasattr(self._env, key):
             return getattr(self._env, key)
         raise AttributeError("Wrapped environment ({}) does not have attribute '{}'" \
-            .format(self._env.__class__.__name__, key))
+                             .format(self._env.__class__.__name__, key))
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -384,7 +382,7 @@ class GymWrapper(Wrapper):
             return torch.tensor(observation, device=self.device, dtype=torch.float32).view(self.num_envs, -1)
         elif isinstance(space, gym.spaces.Dict):
             tmp = torch.cat([self._observation_to_tensor(observation[k], space[k]) \
-                for k in sorted(space.keys())], dim=-1).view(self.num_envs, -1)
+                             for k in sorted(space.keys())], dim=-1).view(self.num_envs, -1)
             return tmp
         else:
             raise ValueError("Observation space type {} not supported. Please report this issue".format(type(space)))
@@ -553,7 +551,7 @@ class GymnasiumWrapper(Wrapper):
             return torch.tensor(observation, device=self.device, dtype=torch.float32).view(self.num_envs, -1)
         elif isinstance(space, gymnasium.spaces.Dict):
             tmp = torch.cat([self._observation_to_tensor(observation[k], space[k]) \
-                for k in sorted(space.keys())], dim=-1).view(self.num_envs, -1)
+                             for k in sorted(space.keys())], dim=-1).view(self.num_envs, -1)
             return tmp
         else:
             raise ValueError("Observation space type {} not supported. Please report this issue".format(type(space)))
@@ -719,7 +717,7 @@ class DeepMindWrapper(Wrapper):
             return torch.tensor(observation, device=self.device, dtype=torch.float32).reshape(self.num_envs, -1)
         elif isinstance(spec, collections.OrderedDict):
             return torch.cat([self._observation_to_tensor(observation[k], spec[k]) \
-                for k in sorted(spec.keys())], dim=-1).reshape(self.num_envs, -1)
+                              for k in sorted(spec.keys())], dim=-1).reshape(self.num_envs, -1)
         else:
             raise ValueError("Observation spec type {} not supported. Please report this issue".format(type(spec)))
 
@@ -762,10 +760,10 @@ class DeepMindWrapper(Wrapper):
 
         # convert response to torch
         return self._observation_to_tensor(observation), \
-               torch.tensor(reward, device=self.device, dtype=torch.float32).view(self.num_envs, -1), \
-               torch.tensor(terminated, device=self.device, dtype=torch.bool).view(self.num_envs, -1), \
-               torch.tensor(truncated, device=self.device, dtype=torch.bool).view(self.num_envs, -1), \
-               info
+            torch.tensor(reward, device=self.device, dtype=torch.float32).view(self.num_envs, -1), \
+            torch.tensor(terminated, device=self.device, dtype=torch.bool).view(self.num_envs, -1), \
+            torch.tensor(truncated, device=self.device, dtype=torch.bool).view(self.num_envs, -1), \
+            info
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -871,7 +869,7 @@ class RobosuiteWrapper(Wrapper):
             return torch.tensor(observation, device=self.device, dtype=torch.float32).reshape(self.num_envs, -1)
         elif isinstance(spec, collections.OrderedDict):
             return torch.cat([self._observation_to_tensor(observation[k], spec[k]) \
-                for k in sorted(spec.keys())], dim=-1).reshape(self.num_envs, -1)
+                              for k in sorted(spec.keys())], dim=-1).reshape(self.num_envs, -1)
         else:
             raise ValueError("Observation spec type {} not supported. Please report this issue".format(type(spec)))
 
@@ -908,10 +906,10 @@ class RobosuiteWrapper(Wrapper):
 
         # convert response to torch
         return self._observation_to_tensor(observation), \
-               torch.tensor(reward, device=self.device, dtype=torch.float32).view(self.num_envs, -1), \
-               torch.tensor(terminated, device=self.device, dtype=torch.bool).view(self.num_envs, -1), \
-               torch.tensor(truncated, device=self.device, dtype=torch.bool).view(self.num_envs, -1), \
-               info
+            torch.tensor(reward, device=self.device, dtype=torch.float32).view(self.num_envs, -1), \
+            torch.tensor(terminated, device=self.device, dtype=torch.bool).view(self.num_envs, -1), \
+            torch.tensor(truncated, device=self.device, dtype=torch.bool).view(self.num_envs, -1), \
+            info
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -933,7 +931,7 @@ class RobosuiteWrapper(Wrapper):
         self._env.close()
 
 
-def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True) -> Wrapper:
+def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None) -> Wrapper:
     """Wrap an environment to use a common interface
 
     Example::
@@ -944,7 +942,6 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True) -> Wrapper:
         >>> env = wrap_env(env)
 
     :param env: The environment to be wrapped
-    :type env: gym.Env, gymnasium.Env, dm_env.Environment or VecTask
     :param wrapper: The type of wrapper to use (default: "auto").
                     If ``"auto"``, the wrapper will be automatically selected based on the environment class.
                     The supported wrappers are described in the following table:
@@ -974,22 +971,19 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True) -> Wrapper:
                     +--------------------+-------------------------+
                     |Isaac Sim (orbit)   |``"isaac-orbit"``        |
                     +--------------------+-------------------------+
-    :type wrapper: str, optional
     :param verbose: Whether to print the wrapper type (default: True)
-    :type verbose: bool, optional
-
+    :param logger: The logger to use (default: None)
     :raises ValueError: Unknow wrapper type
-
     :return: Wrapped environment
     :rtype: Wrapper
     """
     if verbose:
         logger.info("Environment class: {}".format(", ".join([str(base).replace("<class '", "").replace("'>", "") \
-            for base in env.__class__.__bases__])))
+                                                              for base in env.__class__.__bases__])))
     if wrapper == "auto":
         base_classes = [str(base) for base in env.__class__.__bases__]
         if "<class 'omni.isaac.gym.vec_env.vec_env_base.VecEnvBase'>" in base_classes or \
-            "<class 'omni.isaac.gym.vec_env.vec_env_mt.VecEnvMT'>" in base_classes:
+                "<class 'omni.isaac.gym.vec_env.vec_env_mt.VecEnvMT'>" in base_classes:
             if verbose:
                 logger.info("Environment wrapper: Omniverse Isaac Gym")
             return OmniverseIsaacGymWrapper(env)
