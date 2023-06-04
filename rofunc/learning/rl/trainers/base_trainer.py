@@ -1,32 +1,35 @@
-import numpy as np
-import torch
 import copy
 import datetime
 import os
-import time
-from torch.utils.tensorboard import SummaryWriter
-from typing import Union, Tuple, Dict, Optional
-
+from typing import Union, Optional
+import collections
+from omegaconf import DictConfig
+import numpy as np
+import torch
 import tqdm
+import gym, gymnasium
+from torch.utils.tensorboard import SummaryWriter
+
+import rofunc as rf
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
 class BaseTrainer:
 
     def __init__(self,
-                 cfg,
-                 env,
+                 cfg: DictConfig,
+                 env: Union[gym.Env, gymnasium.Env],
                  device: Optional[Union[str, torch.device]] = None):
         self.cfg = cfg
-        self._env = env
-        self._test_env = env
+        self.env = env
+        self.eval_env = env
         # self._env.seed(self.cfg.Trainer.seed)
         # self._test_env.seed(2 ** 31 - 1 - self.cfg.Trainer.seed)
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
 
         '''Experiment log directory'''
-        directory = self.cfg.get("Trainer", {}).get("log_directory", "")
+        directory = self.cfg.get("Trainer", {}).get("experiment_directory", "")
         experiment_name = self.cfg.get("Trainer", {}).get("experiment_name", "")
         if not directory:
             directory = os.path.join(os.getcwd(), "runs")
@@ -35,59 +38,141 @@ class BaseTrainer:
                                              self.__class__.__name__)
         self.experiment_dir = os.path.join(directory, experiment_name)
 
-        '''Wandb and Tensorboard'''
-        # setup Weights & Biases
-        if self.cfg.get("experiment", {}).get("wandb", False):
-            # save experiment config
-            trainer_cfg = None  # TODO: check
-            trainer_cfg = trainer_cfg if trainer_cfg is not None else {}
-            try:
-                models_cfg = {k: v.net._modules for (k, v) in self.models.items()}
-            except AttributeError:
-                models_cfg = {k: v._modules for (k, v) in self.models.items()}
-            config = {**self.cfg, **trainer_cfg, **models_cfg}
-            # set default values
-            wandb_kwargs = copy.deepcopy(self.cfg.get("experiment", {}).get("wandb_kwargs", {}))
-            wandb_kwargs.setdefault("name", os.path.split(self.experiment_dir)[-1])
-            wandb_kwargs.setdefault("sync_tensorboard", True)
-            wandb_kwargs.setdefault("config", {})
-            wandb_kwargs["config"].update(config)
-            # init Weights & Biases
-            import wandb
-            wandb.init(**wandb_kwargs)
-
         # main entry to log data for consumption and visualization by TensorBoard
-        self.write_interval = self.cfg.get("experiment", {}).get("write_interval", 100)
-        if self.write_interval > 0:
-            self.writer = SummaryWriter(log_dir=self.experiment_dir)
-
-        self.checkpoint_interval = self.cfg.get("experiment", {}).get("checkpoint_interval", 100)
-        if self.checkpoint_interval > 0:
-            os.makedirs(os.path.join(self.experiment_dir, "checkpoints"), exist_ok=True)
+        self.write_interval = self.cfg.get("Trainer", {}).get("write_interval", 100)
+        self.writer = SummaryWriter(log_dir=self.experiment_dir)
 
         '''Rofunc logger'''
         # if self.cfg.get("experiment", {}).get("rofunc_logger", False):
         self.rofunc_logger = BeautyLogger(self.experiment_dir, 'rofunc.log', verbose=True)
 
         '''Misc variables'''
-        self.step = 0
-        self._episodes = 0
+        self.maximum_steps = self.cfg.Trainer.maximum_steps
+        self.start_learning_steps = self.cfg.Trainer.start_learning_steps
+        self.random_steps = self.cfg.Trainer.random_steps
+        self.rollouts = self.cfg.Trainer.rollouts
+        self._step = 0
+        self._rollout = 0
+        self._update_times = 0
         self.start_time = None
-        self.num_episodes = self.cfg.Trainer.num_episodes
 
     def train(self):
-        for _ in tqdm.trange(self.num_episodes):
-            self._episodes += 1
-            self.train_episode()
+        """
+        Main training loop.
+        - Reset the environment
+        - For each step:
+            - Pre-interaction
+            - Obtain action from agent
+            - Interact with environment
+            - Store transition
+            - Reset the environment
+            - Post-interaction
+        - Close the environment
+        """
 
+        # reset env
+        states, infos = self.env.reset()
+        for _ in tqdm.trange(self.maximum_steps):
+            self.pre_interaction()
+            with torch.no_grad():
+                # Obtain action from agent
+                if self._step < self.random_steps:
+                    actions = self.env.action_space.sample()  # sample random actions
+                else:
+                    actions = self.agent.act(states)
+
+                # Interact with environment
+                next_states, rewards, terminated, truncated, infos = self.env.step(actions)
+
+                # Store transition
+                self.agent.store_transition(states, actions, rewards, next_states, terminated, truncated, infos)
+
+                # Reset the environment
+                if terminated.any() or truncated.any():
+                    states, infos = self.env.reset()
+                else:
+                    states = next_states.copy()
+
+                self._step += 1
+            self.post_interaction()
+        # close the environment
+        self.env.close()
+        # close the logger
         self.writer.close()
         self.rofunc_logger.info('Training complete.')
 
-    def train_episode(self):
-        pass
-
     def eval(self):
-        pass
+        # reset env
+        states, infos = self.env.reset()
+
+        for _ in tqdm.trange(self.num_episodes):
+            self._episodes += 1
+
+            with torch.no_grad():
+                # Obtain action from agent
+                actions = self.agent.act(states)
+
+                # Interact with environment
+                next_states, rewards, dones, infos = self.env.step(actions)
+
+                # Store transition
+                self.agent.store_transition(states, actions, rewards, next_states, dones)
+
+                # Reset the environment
+                if dones.any():
+                    states, infos = self.env.reset()
+                else:
+                    states = next_states.copy()
+
+        # close the environment
+        self.env.close()
+
+        # close the logger
+        self.writer.close()
+        self.rofunc_logger.info('Training complete.')
 
     def inference(self):
         pass
+
+    def pre_interaction(self):
+        raise NotImplementedError
+
+    def post_interaction(self):
+        self._rollout += 1
+
+        # Update agent
+        if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
+            self.agent.update()
+            self._update_times += 1
+            self.rofunc_logger.info(f'Update {self._update_times} times.')
+
+        # Update best models and tensorboard
+        if not self._step % self.write_interval and self.write_interval > 0 and self._step > 1:
+            # update best models
+            reward = np.mean(self.agent.tracking_data.get("Reward / Total reward (mean)", -2 ** 31))
+            if reward > self.agent.checkpoint_best_modules["reward"]:
+                self.agent.checkpoint_best_modules["timestep"] = self._step
+                self.agent.checkpoint_best_modules["reward"] = reward
+                self.agent.checkpoint_best_modules["saved"] = False
+                self.agent.checkpoint_best_modules["modules"] = {k: copy.deepcopy(self.agent._get_internal_value(v)) for k, v
+                                                                 in self.agent.checkpoint_modules.items()}
+
+            # Update tensorboard
+            self.write_tensorboard()
+
+        # Save checkpoints
+        if not self._step % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
+            self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step}.pth"))
+
+    def write_tensorboard(self):
+        for k, v in self.agent.tracking_data.items():
+            if k.endswith("(min)"):
+                self.writer.add_scalar(k, np.min(v), self._step)
+            elif k.endswith("(max)"):
+                self.writer.add_scalar(k, np.max(v), self._step)
+            else:
+                self.writer.add_scalar(k, np.mean(v), self._step)
+        # reset data containers for next iteration
+        self.agent.track_rewards.clear()
+        self.agent.track_timesteps.clear()
+        self.agent.tracking_data.clear()

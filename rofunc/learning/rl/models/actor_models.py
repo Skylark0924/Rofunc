@@ -3,8 +3,9 @@ import math
 import torch
 import torch.nn as nn
 from torch import Tensor
+from omegaconf import DictConfig
 
-from .base_model import BaseActor, build_mlp, init_with_orthogonal
+from .base_model import BaseActor, build_mlp, init_with_orthogonal, activation_func
 
 
 class Actor(BaseActor):
@@ -33,10 +34,14 @@ class Actor(BaseActor):
 
 
 class ActorPPO(BaseActor):
-    def __init__(self, dims: [int], state_dim: int, action_dim: int):
+    def __init__(self, cfg: DictConfig, observation_space: int, action_space: int):
+        state_dim = observation_space.shape[0]
+        action_dim = action_space.shape[0]
         super().__init__(state_dim=state_dim, action_dim=action_dim)
-        self.net = build_mlp(dims=[state_dim, *dims, action_dim])
-        init_with_orthogonal(self.net[-1], std=0.1)
+        self.mlp_hidden_dims = cfg.mlp_hidden_dims
+        self.mlp_activation = activation_func(cfg.mlp_activation)
+
+        self.net = build_mlp(dims=[state_dim, *self.mlp_hidden_dims, action_dim], hidden_activation=self.mlp_activation)
 
         self.action_std_log = nn.Parameter(torch.zeros((1, action_dim)), requires_grad=True)  # trainable parameter
 
@@ -44,25 +49,29 @@ class ActorPPO(BaseActor):
         state = self.state_norm(state)
         return self.net(state).tanh()  # action.tanh()
 
-    def get_action(self, state: Tensor) -> (Tensor, Tensor):  # for exploration
+    def act(self, state: Tensor, deterministic=False) -> (Tensor, Tensor):  # for exploration
         state = self.state_norm(state)
         action_avg = self.net(state)
         action_std = self.action_std_log.exp()
 
         dist = self.ActionDist(action_avg, action_std)
-        action = dist.sample()
-        logprob = dist.log_prob(action).sum(1)
-        return action, logprob
 
-    def get_logprob_entropy(self, state: Tensor, action: Tensor) -> (Tensor, Tensor):
+        if deterministic:
+            action = dist.sample()
+        else:
+            action = dist.mode()
+        log_prob = dist.log_prob(action).sum(1)
+        return action, log_prob
+
+    def get_log_prob_entropy(self, state: Tensor, action: Tensor) -> (Tensor, Tensor):
         state = self.state_norm(state)
         action_avg = self.net(state)
         action_std = self.action_std_log.exp()
 
         dist = self.ActionDist(action_avg, action_std)
-        logprob = dist.log_prob(action).sum(1)
+        log_prob = dist.log_prob(action).sum(1)
         entropy = dist.entropy().sum(1)
-        return logprob, entropy
+        return log_prob, entropy
 
     @staticmethod
     def convert_action_for_env(action: Tensor) -> Tensor:
