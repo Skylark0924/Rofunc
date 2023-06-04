@@ -31,6 +31,8 @@ class PPOAgent(BaseAgent):
         :param action_space: Action space or shape
         :param memory: Memory for storing transitions
         :param device: Device on which the torch tensor is allocated
+        :param experiment_dir: Directory where experiment outputs are saved
+        :param rofunc_logger: Rofunc logger
         """
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
@@ -268,30 +270,3 @@ class PPOAgent(BaseAgent):
 
         if self._lr_scheduler:
             self.track_data("Learning / Learning rate", self.scheduler.get_last_lr()[0])
-
-    # def get_advantages_origin(self, rewards: Tensor, undones: Tensor, values: Tensor) -> Tensor:
-    #     advantages = torch.empty_like(values)  # advantage value
-    #
-    #     masks = undones * self.gamma
-    #     horizon_len = rewards.shape[0]
-    #
-    #     next_value = self.cri(self.last_state).detach()
-    #
-    #     advantage = torch.zeros_like(next_value)  # last advantage value by GAE (Generalized Advantage Estimate)
-    #     for t in range(horizon_len - 1, -1, -1):
-    #         next_value = rewards[t] + masks[t] * next_value
-    #         advantages[t] = advantage = next_value - values[t] + masks[t] * self.lambda_gae_adv * advantage
-    #         next_value = values[t]
-    #     return advantages
-    #
-    # def get_advantages_vtrace(self, rewards: Tensor, undones: Tensor, values: Tensor) -> Tensor:
-    #     advantages = torch.empty_like(values)  # advantage value
-    #
-    #     masks = undones * self.gamma
-    #     horizon_len = rewards.shape[0]
-    #
-    #     advantage = torch.zeros_like(values[0])  # last advantage value by GAE (Generalized Advantage Estimate)
-    #     for t in range(horizon_len - 1, -1, -1):
-    #         advantages[t] = rewards[t] - values[t] + masks[t] * advantage
-    #         advantage = values[t] + self.lambda_gae_adv * advantages[t]
-    #     return advantages

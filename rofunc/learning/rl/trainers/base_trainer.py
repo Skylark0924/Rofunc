@@ -154,7 +154,7 @@ class BaseTrainer:
         if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
             self.agent.update_net()
             self._update_times += 1
-            self.rofunc_logger.info(f'Update {self._update_times} times.')
+            self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
 
         # Update best models and tensorboard
         if not self._step % self.write_interval and self.write_interval > 0 and self._step > 1:
