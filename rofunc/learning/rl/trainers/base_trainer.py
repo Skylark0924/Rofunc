@@ -41,8 +41,8 @@ class BaseTrainer:
         rf.utils.create_dir(self.experiment_dir)
 
         '''Rofunc logger'''
-        # if self.cfg.get("experiment", {}).get("rofunc_logger", False):
-        self.rofunc_logger = BeautyLogger(self.experiment_dir, 'rofunc.log', verbose=True)
+        self.rofunc_logger = BeautyLogger(self.experiment_dir, 'rofunc.log',
+                                          verbose=self.cfg.Trainer.rofunc_logger_kwargs.verbose)
         self.rofunc_logger.info(f"Configurations:\n{OmegaConf.to_yaml(self.cfg)}")
 
         '''TensorBoard'''
@@ -63,8 +63,12 @@ class BaseTrainer:
         self._rollout = 0
         self._update_times = 0
         self.start_time = None
+        self.inference_steps = self.cfg.Trainer.inference_steps
 
+        '''Environment'''
         self.env = wrap_env(env, logger=self.rofunc_logger)
+
+        '''Normalization'''
         self.state_norm = Normalization(shape=self.env.observation_space.shape[0], device=device)
 
     def train(self):
@@ -146,7 +150,26 @@ class BaseTrainer:
         self.rofunc_logger.info('Training complete.')
 
     def inference(self):
-        pass
+        # reset env
+        states, infos = self.env.reset()
+        for _ in tqdm.trange(self.inference_steps):
+            with torch.no_grad():
+                states = self.state_norm(states)
+                # Obtain action from agent
+                actions, _ = self.agent.act(states)
+
+                # Interact with environment
+                next_states, rewards, terminated, truncated, infos = self.env.step(actions)
+                next_states = self.state_norm(next_states)
+
+                # Reset the environment
+                if terminated.any() or truncated.any():
+                    states, infos = self.env.reset()
+                else:
+                    states = next_states.clone()
+        # close the environment
+        self.env.close()
+        self.rofunc_logger.info('Inference complete.')
 
     def pre_interaction(self):
         pass
