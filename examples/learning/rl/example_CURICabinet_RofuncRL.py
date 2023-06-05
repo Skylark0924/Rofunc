@@ -14,6 +14,7 @@ from hydra._internal.utils import get_args_parser
 from rofunc.config.utils import omegaconf_to_dict, get_config
 from rofunc.learning.rl.tasks import task_map
 from rofunc.learning.rl.trainers.ppo_trainer import PPOTrainer
+from rofunc.learning.pre_trained_models.download import model_zoo
 
 
 def train(custom_args):
@@ -58,13 +59,13 @@ def inference(custom_args, ckpt_path=None):
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     # Instantiate the Isaac Gym environment
-    infer_env = task_map[cfg.task](cfg=cfg_dict,
-                                   rl_device=cfg.rl_device,
-                                   sim_device=cfg.sim_device,
-                                   graphics_device_id=cfg.graphics_device_id,
-                                   headless=cfg.headless,
-                                   virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                   force_render=cfg.force_render)
+    infer_env = task_map[custom_args.task](cfg=cfg_dict,
+                                           rl_device=cfg.rl_device,
+                                           sim_device=cfg.sim_device,
+                                           graphics_device_id=cfg.graphics_device_id,
+                                           headless=cfg.headless,
+                                           virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                           force_render=cfg.force_render)
 
     # Instantiate the RL trainer
     trainer = PPOTrainer(cfg=cfg.train,
@@ -72,7 +73,7 @@ def inference(custom_args, ckpt_path=None):
                          device=cfg.rl_device)
     # load checkpoint
     if ckpt_path is None:
-        ckpt_path = model_zoo(name="CURICabinetPPO_right_arm.pt")
+        ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO.pt")
     trainer.agent.load(ckpt_path)
 
     # Start inference
@@ -95,7 +96,5 @@ if __name__ == '__main__':
     if not custom_args.inference:
         train(custom_args)
     else:
-        folder = 'CURICabinetSAC_22-11-27_18-38-53-296354'
-        ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/examples/learning/runs/{}/checkpoints/best_agent.pt".format(
-            folder)
+        ckpt_path = None
         inference(custom_args, ckpt_path=ckpt_path)
