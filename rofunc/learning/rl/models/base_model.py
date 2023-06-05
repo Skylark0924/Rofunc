@@ -17,7 +17,7 @@ def build_mlp(dims: [int], hidden_activation: nn = nn.ReLU, output_activation: n
         layers.append(hidden_activation)
     if output_activation is not None:
         layers.append(output_activation)
-    return nn.Sequential(*layers).apply(init_weights_xavier)
+    return nn.Sequential(*layers)
 
 
 def activation_func(activation: str) -> nn:
@@ -31,14 +31,23 @@ def activation_func(activation: str) -> nn:
         raise NotImplementedError
 
 
-# TODO: weights initialization
-def init_layers(layers, std=1.0, bias_const=1e-6):
+def init_layers(layers, gain=1.0, bias_const=1e-6):
+    if not isinstance(layers, list):
+        layers = [layers]
     for layer in layers:
-        init_with_orthogonal(layer, std, bias_const)
+        if isinstance(layer, nn.Linear):
+            init_with_orthogonal(layer, gain, bias_const)
 
 
-def init_with_orthogonal(layer, std=1.0, bias_const=1e-6):
-    torch.nn.init.orthogonal_(layer.weight, std)
+def init_with_orthogonal(layer, gain=1.0, bias_const=1e-6):
+    """
+    Parameter orthogonal initialization
+    :param layer:
+    :param gain:
+    :param bias_const:
+    :return:
+    """
+    torch.nn.init.orthogonal_(layer.weight, gain=gain)
     torch.nn.init.constant_(layer.bias, bias_const)
 
 
