@@ -14,6 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import rofunc as rf
 from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
+from rofunc.learning.rl.processors.normalizers import Normalization
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
@@ -64,6 +65,7 @@ class BaseTrainer:
         self.start_time = None
 
         self.env = wrap_env(env, logger=self.rofunc_logger)
+        self.state_norm = Normalization(shape=self.env.observation_space.shape[0], device=device)
 
     def train(self):
         """
@@ -84,6 +86,7 @@ class BaseTrainer:
         for _ in tqdm.trange(self.maximum_steps):
             self.pre_interaction()
             with torch.no_grad():
+                states = self.state_norm(states)
                 # Obtain action from agent
                 if self._step < self.random_steps:
                     actions = self.env.action_space.sample()  # sample random actions
@@ -92,6 +95,7 @@ class BaseTrainer:
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.env.step(actions)
+                next_states = self.state_norm(next_states)
 
                 # Store transition
                 self.agent.store_transition(states=states, actions=actions, rewards=rewards, next_states=next_states,
@@ -148,10 +152,8 @@ class BaseTrainer:
         pass
 
     def post_interaction(self):
-        self._rollout += 1
-
         # Update agent
-        if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
+        if not self._step % self.cfg.Trainer.rollouts and self._step >= self.start_learning_steps:
             self.agent.update_net()
             self._update_times += 1
             self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)

@@ -269,9 +269,12 @@ class Memory:
 
         # multi environment (number of environments equals num_envs)
         if dim == 2 and shape[0] == self.num_envs:
-            for name, tensor in tensors.items():
-                if name in self.tensors:
-                    self.tensors[name][self.memory_index].copy_(tensor)
+            try:
+                for name, tensor in tensors.items():
+                    if name in self.tensors:
+                        self.tensors[name][self.memory_index].copy_(tensor)
+            except:
+                raise ValueError("The tensors have incompatible shapes")
             self.memory_index += 1
         # multi environment (number of environments less than num_envs)
         elif dim == 2 and shape[0] < self.num_envs:
@@ -385,6 +388,7 @@ class Memory:
         # default order
         if mini_batches > 1:
             indexes = np.arange(self.memory_size * self.num_envs)
+            # indexes = np.arange(2048)
             batches = BatchSampler(indexes, batch_size=len(indexes) // mini_batches, drop_last=True)
             return [[self.tensors_view[name][batch] for name in names] for batch in batches]
         return [[self.tensors_view[name] for name in names]]
