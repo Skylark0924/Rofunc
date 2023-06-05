@@ -3,8 +3,10 @@ import torch
 import torch.nn as nn
 from omegaconf import DictConfig
 from torch import Tensor
+import torch.nn.functional as F
+from torch.distributions import Beta, Normal
 
-from .base_model import BaseActor, build_mlp, init_with_orthogonal, activation_func
+from .base_model import BaseActor, build_mlp, init_layers, activation_func
 
 
 class Actor(BaseActor):
@@ -32,52 +34,99 @@ class Actor(BaseActor):
         return (action + noise).clamp(-1.0, 1.0)
 
 
-class ActorPPO(BaseActor):
+class ActorPPO_Beta(nn.Module):
     def __init__(self, cfg: DictConfig, observation_space: int, action_space: int):
+        super().__init__()
         state_dim = observation_space.shape[0]
         action_dim = action_space.shape[0]
-        super().__init__(state_dim=state_dim, action_dim=action_dim)
         self.mlp_hidden_dims = cfg.mlp_hidden_dims
         self.mlp_activation = activation_func(cfg.mlp_activation)
 
-        self.net = build_mlp(dims=[state_dim, *self.mlp_hidden_dims, action_dim], hidden_activation=self.mlp_activation)
+        # Build mlp network except the output layer
+        self.net = build_mlp(dims=[state_dim, *self.mlp_hidden_dims], hidden_activation=self.mlp_activation)
+        self.alpha_layer = nn.Linear(self.mlp_hidden_dims[-1], action_dim)
+        self.beta_layer = nn.Linear(self.mlp_hidden_dims[-1], action_dim)
+        init_layers(self.net, gain=1)
+        init_layers([self.alpha_layer, self.beta_layer], gain=0.01)
 
-        self.action_std_log = nn.Parameter(torch.zeros((1, action_dim)), requires_grad=True)  # trainable parameter
+    def forward(self, state: Tensor):
+        state = self.net(state)
+        # alpha and beta need to be larger than 1,so we use 'softplus' as the activation function and then plus 1
+        alpha = F.softplus(self.alpha_layer(state)) + 1.0
+        beta = F.softplus(self.beta_layer(state)) + 1.0
+        return alpha, beta
 
-    def forward(self, state: Tensor) -> Tensor:
-        state = self.state_norm(state)
-        return self.net(state).tanh()  # action.tanh()
+    # def act(self, state: Tensor, deterministic=False) -> (Tensor, Tensor):  # for exploration
+    #     state = self.state_norm(state)
+    #     action_avg = self.net(state)
+    #     action_std = self.action_std_log.exp()
+    #
+    #     dist = self.ActionDist(action_avg, action_std)
+    #
+    #     if deterministic:
+    #         action = dist.mode
+    #     else:
+    #         action = dist.sample()
+    #     log_prob = dist.log_prob(action).sum(1)
+    #     return action, log_prob
+    #
+    # def get_log_prob_entropy(self, state: Tensor, action: Tensor) -> (Tensor, Tensor):
+    #     state = self.state_norm(state)
+    #     action_avg = self.net(state)
+    #     action_std = self.action_std_log.exp()
+    #
+    #     try:
+    #         dist = self.ActionDist(action_avg, action_std)
+    #     except:
+    #         raise ValueError
+    #     log_prob = dist.log_prob(action).sum(1)
+    #     entropy = dist.entropy().sum(1)
+    #     return log_prob, entropy
 
-    def act(self, state: Tensor, deterministic=False) -> (Tensor, Tensor):  # for exploration
-        state = self.state_norm(state)
-        action_avg = self.net(state)
-        action_std = self.action_std_log.exp()
+    def get_dist(self, state):
+        alpha, beta = self.forward(state)
+        dist = Beta(alpha, beta)
+        return dist
 
-        dist = self.ActionDist(action_avg, action_std)
+    def mean(self, state):
+        alpha, beta = self.forward(state)
+        mean = alpha / (alpha + beta)  # The mean of the beta distribution
+        return mean
 
-        if deterministic:
-            action = dist.mode
-        else:
-            action = dist.sample()
-        log_prob = dist.log_prob(action).sum(1)
-        return action, log_prob
 
-    def get_log_prob_entropy(self, state: Tensor, action: Tensor) -> (Tensor, Tensor):
-        state = self.state_norm(state)
-        action_avg = self.net(state)
-        action_std = self.action_std_log.exp()
+class ActorPPO_Gaussian(nn.Module):
+    def __init__(self, cfg: DictConfig, observation_space: int, action_space: int):
+        super().__init__()
+        state_dim = observation_space.shape[0]
+        action_dim = action_space.shape[0]
+        self.mlp_hidden_dims = cfg.mlp_hidden_dims
+        self.mlp_activation = activation_func(cfg.mlp_activation)
 
+        # Build mlp network except the output layer
+        self.net = build_mlp(dims=[state_dim, *self.mlp_hidden_dims], hidden_activation=self.mlp_activation)
+        self.mean_layer = nn.Linear(self.mlp_hidden_dims[-1], action_dim)
+        self.log_std = nn.Parameter(torch.zeros(1, action_dim))  # We use 'nn.Parameter' to train log_std automatically
+        init_layers(self.net, gain=1)
+        init_layers(self.mean_layer, gain=0.01)
+
+    def forward(self, state):
+        if torch.isnan(state).any():
+            raise ValueError
+        state = self.net(state)
+        if torch.isnan(state).any():
+            raise ValueError
+        mean = torch.tanh(self.mean_layer(state))  # [-1,1]
+        return mean
+
+    def get_dist(self, state):
+        mean = self.forward(state)
+        log_std = self.log_std.expand_as(mean)  # To make 'log_std' have the same dimension as 'mean'
+        std = torch.exp(log_std)  # The reason we train the 'log_std' is to ensure std=exp(log_std)>0
         try:
-            dist = self.ActionDist(action_avg, action_std)
+            dist = Normal(mean, std)  # Get the Gaussian distribution
         except:
             raise ValueError
-        log_prob = dist.log_prob(action).sum(1)
-        entropy = dist.entropy().sum(1)
-        return log_prob, entropy
-
-    @staticmethod
-    def convert_action_for_env(action: Tensor) -> Tensor:
-        return action.tanh()
+        return dist
 
 
 class ActorDiscretePPO(BaseActor):

@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
-from rofunc.learning.rl.models.actor_models import ActorPPO
+from rofunc.learning.rl.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
 from rofunc.learning.rl.models.critic_models import CriticPPO
 from rofunc.learning.rl.utils.memory import Memory
 
@@ -37,7 +37,10 @@ class PPOAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         # Define models for PPO
-        self.policy = ActorPPO(cfg.Model.actor, observation_space, action_space).to(self.device)
+        if self.cfg.Model.actor.type == "Beta":
+            self.policy = ActorPPO_Beta(cfg.Model.actor, observation_space, action_space).to(self.device)
+        else:
+            self.policy = ActorPPO_Gaussian(cfg.Model.actor, observation_space, action_space).to(self.device)
         self.value = CriticPPO(cfg.Model.critic, observation_space, action_space).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
 
@@ -47,7 +50,7 @@ class PPOAgent(BaseAgent):
             self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
             self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
             self.memory.create_tensor(name="terminated", size=1, dtype=torch.bool)
-            self.memory.create_tensor(name="log_prob", size=1, dtype=torch.float32)
+            self.memory.create_tensor(name="log_prob", size=self.action_space, dtype=torch.float32)
             self.memory.create_tensor(name="values", size=1, dtype=torch.float32)
             self.memory.create_tensor(name="returns", size=1, dtype=torch.float32)
             self.memory.create_tensor(name="advantages", size=1, dtype=torch.float32)
@@ -64,10 +67,12 @@ class PPOAgent(BaseAgent):
         self._discount = self.cfg.Agent.discount
         self._td_lambda = self.cfg.Agent.td_lambda
         self._learning_epochs = self.cfg.Agent.learning_epochs
-        self._batch_size = self.cfg.Agent.batch_size
-        self._lr = self.cfg.Agent.lr
+        self._mini_batch_size = self.cfg.Agent.mini_batch_size
+        self._lr_a = self.cfg.Agent.lr_a
+        self._lr_c = self.cfg.Agent.lr_c
         self._lr_scheduler = self.cfg.Agent.lr_scheduler
         self._lr_scheduler_kwargs = self.cfg.Agent.lr_scheduler_kwargs
+        self._adam_eps = self.cfg.Agent.adam_eps
         self._use_gae = self.cfg.Agent.use_gae
         self._entropy_loss_scale = self.cfg.Agent.entropy_loss_scale
         self._value_loss_scale = self.cfg.Agent.value_loss_scale
@@ -79,16 +84,15 @@ class PPOAgent(BaseAgent):
         self._kl_threshold = self.cfg.Agent.kl_threshold
 
         # set up optimizer and learning rate scheduler
-        if self.policy is not None and self.value is not None:
-            if self.policy is self.value:
-                self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self._lr)
-            else:
-                self.optimizer = torch.optim.Adam(itertools.chain(self.policy.parameters(), self.value.parameters()),
-                                                  lr=self._lr)
-            if self._lr_scheduler is not None:
-                self.scheduler = self._lr_scheduler(self.optimizer, **self._lr_scheduler_kwargs)
+        self.optimizer_policy = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a, eps=self._adam_eps)
+        self.optimizer_value = torch.optim.Adam(self.value.parameters(), lr=self._lr_c, eps=self._adam_eps)
 
-            self.checkpoint_modules["optimizer"] = self.optimizer
+        if self._lr_scheduler is not None:
+            self.scheduler = self._lr_scheduler(self.optimizer_policy, **self._lr_scheduler_kwargs)
+            self.scheduler = self._lr_scheduler(self.optimizer_value, **self._lr_scheduler_kwargs)
+
+        self.checkpoint_modules["optimizer_policy"] = self.optimizer_policy
+        self.checkpoint_modules["optimizer_value"] = self.optimizer_value
 
         # create temporary variables needed for storage and computation
         self._current_log_prob = None
@@ -107,17 +111,27 @@ class PPOAgent(BaseAgent):
         # else:
         #     self._value_preprocessor = self._empty_preprocessor
 
-    def act(self, states: torch.Tensor, timestep: int = None):
-        """
-        Choose action based on the current state
-        :param states: current state
-        :param timestep: current timestep
-        :return:
-        """
-        # sample stochastic actions
-        actions, log_prob = self.policy.act(states)
-        self._current_log_prob = log_prob.reshape((-1, 1))
-
+    def act(self, states: torch.Tensor, deterministic: bool = False):
+        if not deterministic:
+            # sample stochastic actions
+            if self.cfg.Model.actor.type == "Beta":
+                dist = self.policy.get_dist(states)
+                actions = dist.rsample()  # Sample the action according to the probability distribution
+                log_prob = dist.log_prob(actions)  # The log probability density of the action
+            else:
+                dist = self.policy.get_dist(states)
+                actions = dist.rsample()  # Sample the action according to the probability distribution
+                actions = torch.clamp(actions, -1, 1)  # [-max,max]
+                log_prob = dist.log_prob(actions)  # The log probability density of the action
+            self._current_log_prob = log_prob
+        else:
+            # choose deterministic actions for evaluation
+            if self.cfg.Model.actor.type == "Beta":
+                actions = self.policy.mean(states).detach()
+                log_prob = None
+            else:
+                actions = self.policy(states).detach()
+                log_prob = None
         return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
@@ -159,34 +173,36 @@ class PPOAgent(BaseAgent):
 
             # advantages computation
             for i in reversed(range(memory_size)):
-                next_values = values[i + 1] if i < memory_size - 1 else last_values
-                advantage = rewards[i] - values[i] + discount_factor * not_dones[i] * (
-                        next_values + lambda_coefficient * advantage)
+                next_values = values[i + 1] if i < memory_size - 1 else next_values
+                advantage = rewards[i] + discount_factor * not_dones[i] * (
+                        next_values - values[i] + lambda_coefficient * advantage)
                 advantages[i] = advantage
             # returns computation
-            returns = advantages + values
+            values_target = advantages + values
             # normalize advantages
             advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
-            return returns, advantages
+            return values_target, advantages
 
         # compute returns and advantages
         with torch.no_grad():
             self.value.train(False)
-            last_values = self.value(self._current_next_states.float())
+            next_values = self.value(self._current_next_states.float())
             self.value.train(True)
 
         values = self.memory.get_tensor_by_name("values")
-        returns, advantages = compute_gae(rewards=self.memory.get_tensor_by_name("rewards"),
-                                          dones=self.memory.get_tensor_by_name("terminated"),
-                                          values=values,
-                                          next_values=last_values,
-                                          discount_factor=self._discount,
-                                          lambda_coefficient=self._td_lambda)
+        values_target, advantages = compute_gae(rewards=self.memory.get_tensor_by_name("rewards"),
+                                                dones=self.memory.get_tensor_by_name("terminated"),
+                                                values=values,
+                                                next_values=next_values,
+                                                discount_factor=self._discount,
+                                                lambda_coefficient=self._td_lambda)
+        self.memory.set_tensor_by_name("returns", values_target)
         self.memory.set_tensor_by_name("advantages", advantages)
 
+        # ---------------------------------
         # sample mini-batches from memory
-        sampled_batches = self.memory.sample_all(names=self._tensors_names, mini_batches=self._batch_size)
+        sampled_batches = self.memory.sample_all(names=self._tensors_names, mini_batches=self._mini_batch_size)
 
         cumulative_policy_loss = 0
         cumulative_entropy_loss = 0
@@ -200,52 +216,55 @@ class PPOAgent(BaseAgent):
             for i, (sampled_states, sampled_actions, sampled_dones, sampled_log_prob, sampled_values, sampled_returns,
                     sampled_advantages) in enumerate(sampled_batches):
                 # sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
+                dist_now = self.policy.get_dist(sampled_states)
+                dist_entropy = dist_now.entropy().sum(1, keepdim=True)  # shape(mini_batch_size X 1)
+                log_prob_now = dist_now.log_prob(sampled_actions)
 
-                next_log_prob, entropy = self.policy.get_log_prob_entropy(sampled_states, sampled_actions)
+                # next_log_prob, entropy = self.policy.get_log_prob_entropy(sampled_states, sampled_actions)
 
-                # compute approximate KL divergence
-                with torch.no_grad():
-                    ratio = next_log_prob - sampled_log_prob
-                    kl_divergence = ((torch.exp(ratio) - 1) - ratio).mean()
-                    kl_divergences.append(kl_divergence)
+                # # compute approximate KL divergence
+                # with torch.no_grad():
+                #     ratio = log_prob_now - sampled_log_prob
+                #     kl_divergence = ((torch.exp(ratio) - 1) - ratio).mean()
+                #     kl_divergences.append(kl_divergence)
 
                 # # early stopping with KL divergence
                 # if self._kl_threshold and kl_divergence > self._kl_threshold:
                 #     break
 
                 # compute entropy loss
-                if self._entropy_loss_scale:
-                    entropy_loss = -self._entropy_loss_scale * entropy.mean()
-                else:
-                    entropy_loss = 0
+                entropy_loss = -self._entropy_loss_scale * dist_entropy.mean()
 
                 # compute policy loss
-                ratio = torch.exp(next_log_prob - sampled_log_prob)
+                ratio = torch.exp(log_prob_now.sum(1, keepdim=True) - sampled_log_prob.sum(1, keepdim=True))
                 surrogate = sampled_advantages * ratio
-                surrogate_clipped = sampled_advantages * torch.clip(ratio, 1.0 - self._ratio_clip,
-                                                                    1.0 + self._ratio_clip)
+                surrogate_clipped = sampled_advantages * torch.clamp(ratio, 1.0 - self._ratio_clip,
+                                                                     1.0 + self._ratio_clip)
 
-                policy_loss = -torch.min(surrogate, surrogate_clipped).mean()
+                policy_loss = -torch.min(surrogate, surrogate_clipped).mean() - entropy_loss
+
+                # Update policy network
+                self.optimizer_policy.zero_grad()
+                policy_loss.backward()
+                if self._grad_norm_clip > 0:
+                    nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
+                self.optimizer_policy.step()
 
                 # compute value loss
                 predicted_values = self.value(sampled_states)
 
-                if self._clip_predicted_values:
-                    predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,
-                                                                   min=-self._value_clip,
-                                                                   max=self._value_clip)
+                # if self._clip_predicted_values:
+                # predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,
+                #                                                min=-self._value_clip,
+                #                                                max=self._value_clip)
                 value_loss = self._value_loss_scale * F.mse_loss(sampled_returns, predicted_values)
 
-                # optimization step
-                self.optimizer.zero_grad()
-                (policy_loss + entropy_loss + value_loss).backward()
+                # Update value network
+                self.optimizer_value.zero_grad()
+                value_loss.backward()
                 if self._grad_norm_clip > 0:
-                    if self.policy is self.value:
-                        nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
-                    else:
-                        nn.utils.clip_grad_norm_(itertools.chain(self.policy.parameters(), self.value.parameters()),
-                                                 self._grad_norm_clip)
-                self.optimizer.step()
+                    nn.utils.clip_grad_norm_(self.value.parameters(), self._grad_norm_clip)
+                self.optimizer_value.step()
 
                 # update cumulative losses
                 cumulative_policy_loss += policy_loss.item()
@@ -261,10 +280,11 @@ class PPOAgent(BaseAgent):
             #         self.scheduler.step()
 
         # record data
-        self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._batch_size))
-        self.track_data("Loss / Value loss", cumulative_value_loss / (self._learning_epochs * self._batch_size))
+        self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._mini_batch_size))
+        self.track_data("Loss / Value loss", cumulative_value_loss / (self._learning_epochs * self._mini_batch_size))
         if self._entropy_loss_scale:
-            self.track_data("Loss / Entropy loss", cumulative_entropy_loss / (self._learning_epochs * self._batch_size))
+            self.track_data("Loss / Entropy loss",
+                            cumulative_entropy_loss / (self._learning_epochs * self._mini_batch_size))
 
         # self.track_data("Policy / Standard deviation", self.policy.distribution(role="policy").stddev.mean().item())
 
