@@ -54,13 +54,7 @@ class BaseAgent:
         self.cumulative_timesteps = None
         self.tracking_data = collections.defaultdict(list)
 
-    def act(self, states: torch.Tensor, timestep: int = None):
-        """
-        Make a decision based on the current state.
-        :param states: current environment states
-        :param timestep: current timestep
-        :return: action
-        """
+    def act(self, states: torch.Tensor):
         raise NotImplementedError
 
     def track_data(self, tag: str, value: float) -> None:

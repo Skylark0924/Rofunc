@@ -24,19 +24,21 @@ Agent:
   discount: 0.99                      # The discount factor, gamma.
   td_lambda: 0.95                     # TD(lambda) coefficient (lam) for computing returns and advantages.
 
-  learning_epochs: 8                  # The number of epochs to train for per update.
-  batch_size: 8                       # The number of samples per update.
+  learning_epochs: 8                 # The number of epochs to train for per update.
+  mini_batch_size: 8                 # The number of samples per update.
 
-  lr: 0.001                      # Learning rate.
-  lr_scheduler:                  # Learning rate scheduler type.
-  lr_scheduler_kwargs: {}        # Learning rate scheduler kwargs.
+  lr_a: 5e-4                       # Learning rate for actor.
+  lr_c: 5e-4                       # Learning rate for critic.
+  lr_scheduler:                    # Learning rate scheduler type.
+  lr_scheduler_kwargs: {}          # Learning rate scheduler kwargs.
+  adam_eps: 1e-5                   # Adam epsilon.
 
   # If true, use the Generalized Advantage Estimator (GAE)
   # with a value function, see https://arxiv.org/pdf/1506.02438.pdf.
   use_gae: True
 
-  entropy_loss_scale: 0.0      # entropy loss scaling factor
-  value_loss_scale: 1.0        # value loss scaling factor
+  entropy_loss_scale: 0.0          # entropy loss scaling factor
+  value_loss_scale: 1.0            # value loss scaling factor
 
   grad_norm_clip: 0.5              # clipping coefficient for the norm of the gradients
   ratio_clip: 0.2                  # clipping coefficient for computing the clipped surrogate objective
@@ -49,6 +51,7 @@ Agent:
 # ========= Model parameters ==========
 Model:
   actor:
+    type: "Gaussian"  # ["Beta", "Gaussian"]
     mlp_hidden_dims: [ 256, 256 ]
     mlp_activation: tanh
     use_lstm: false
