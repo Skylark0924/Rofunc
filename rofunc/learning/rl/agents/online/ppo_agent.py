@@ -164,7 +164,8 @@ class PPOAgent(BaseAgent):
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
-        super().store_transition(states, actions, next_states, rewards, terminated, truncated, infos)
+        super().store_transition(states=states, actions=actions, next_states=next_states, rewards=rewards,
+                                 terminated=terminated, truncated=truncated, infos=infos)
 
         if self.memory is not None:
             self._current_next_states = next_states
@@ -208,8 +209,8 @@ class PPOAgent(BaseAgent):
             # advantages computation
             for i in reversed(range(memory_size)):
                 next_values = values[i + 1] if i < memory_size - 1 else next_values
-                advantage = rewards[i] + discount_factor * not_dones[i] * (
-                        next_values - values[i] + lambda_coefficient * advantage)
+                advantage = rewards[i] - values[i] + discount_factor * not_dones[i] * (
+                        next_values + lambda_coefficient * advantage)
                 advantages[i] = advantage
             # returns computation
             values_target = advantages + values

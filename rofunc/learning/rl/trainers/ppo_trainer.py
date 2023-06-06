@@ -33,4 +33,3 @@ class PPOTrainer(BaseTrainer):
             # init Weights & Biases
             import wandb
             wandb.init(**wandb_kwargs)
-

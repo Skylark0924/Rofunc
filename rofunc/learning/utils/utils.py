@@ -7,8 +7,6 @@ import torch
 import random
 import numpy as np
 
-# from rofunc.utils.logger import logger
-
 
 def set_seed(seed: Optional[int] = None, deterministic: bool = False) -> int:
     """
