@@ -26,6 +26,7 @@ import rofunc as rf
 from rofunc.config.utils import get_config, omegaconf_to_dict
 from rofunc.utils.file.internet import reserve_sock_addr
 from rofunc.utils.file.path import shutil_exp_files
+from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
 # Define the shared model (stochastic and deterministic models) for the agent using mixins.
@@ -402,5 +403,10 @@ def setup(custom_args, eval_mode=False):
         tb.configure(argv)
     url = tb.launch()
     rf.logger.beauty_print(f"Tensorflow listening on {url}", type='info')
+    rf.utils.create_dir(agent.experiment_dir)
+
+    rofunc_logger = BeautyLogger(agent.experiment_dir, 'rofunc.log')
+    rofunc_logger.info("Configurations: \n{}".format(agent.cfg))
+
 
     return env, agent
