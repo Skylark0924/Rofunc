@@ -120,6 +120,7 @@ class BaseTrainer:
         self.rofunc_logger.info('Training complete.')
 
     def eval(self):
+        # TODO: implement evaluation
         # reset env
         states, infos = self.env.reset()
 
