@@ -15,6 +15,7 @@ from rofunc.config.utils import omegaconf_to_dict, get_config
 from rofunc.learning.rl.tasks import task_map
 from rofunc.learning.rl.trainers.ppo_trainer import PPOTrainer
 from rofunc.learning.pre_trained_models.download import model_zoo
+from rofunc.learning.utils.utils import set_seed
 
 
 def train(custom_args):
@@ -28,6 +29,9 @@ def train(custom_args):
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
     cfg_dict = omegaconf_to_dict(cfg.task)
+
+    set_seed(cfg.train.Trainer.seed)
+
     # Instantiate the Isaac Gym environment
     env = task_map[custom_args.task](cfg=cfg_dict,
                                      rl_device=cfg.rl_device,

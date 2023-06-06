@@ -17,7 +17,6 @@ from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
 from rofunc.learning.rl.processors.normalizers import Normalization
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 from rofunc.utils.file.internet import reserve_sock_addr
-from rofunc.learning.utils.utils import set_seed
 
 
 class BaseTrainer:
@@ -30,7 +29,6 @@ class BaseTrainer:
         self.agent = None
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
-        set_seed(self.cfg.Trainer.seed)
 
         '''Experiment log directory'''
         directory = self.cfg.Trainer.experiment_directory
