@@ -62,16 +62,19 @@ def load_mvnx(file_name):
     sensors_element = subject_element.find('mvn:sensors', ns)
     if sensors_element is not None:
         mvnx_file.file_data['sensors'] = parse_sensor(sensors_element, mvnx_file.file_data['segments']['names'])
+        mvnx_file.create_index_to_sensor_dict()  # for later convenience on retrieving sensor names
 
     # Parse joint information
     joints_element = subject_element.find('mvn:joints', ns)
     if joints_element is not None:
         mvnx_file.file_data['joints'] = parse_joints(joints_element, mvnx_file.file_data['segments'])
+        mvnx_file.create_index_to_joint_dict()  # for later convenience on retrieving joint names
 
     # Parse ergo joint information
     ergo_joints_element = subject_element.find('mvn:ergonomicJointAngles', ns)
     if ergo_joints_element is not None:
         mvnx_file.file_data['ergo_joints'] = parse_ergo_joints(ergo_joints_element)
+        mvnx_file.create_index_to_ergo_joint_dict()
 
     # Parse foot contact
     foot_contact_definitions_element = subject_element.find('mvn:footContactDefinition', ns)
@@ -257,6 +260,7 @@ def parse_frames(frames_element, mvnx_file):
     :return: a dictionary with frames data
     """
     frames = {'time': [],
+              'ms': [],
               'segment_data': [],
               'sensor_data': [],
               'joint_data': [],
@@ -280,6 +284,7 @@ def parse_frames(frames_element, mvnx_file):
     for frame_element in frame_elements:
         if frame_element.get('type') == 'normal':
             frames['time'].append(frame_element.get('time'))
+            frames['ms'].append(frame_element.get('ms'))
             frames['joint_data'].append(
                 get_joint_data_from_frame(frame_element, 'jointAngle', mvnx_file.file_data['joints']['names']))
             frames['joint_data_xzy'].append(

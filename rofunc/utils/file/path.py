@@ -20,15 +20,14 @@ def get_elegantrl_path():
 
 def check_ckpt_exist(ckpt_name):
     rofunc_path = get_rofunc_path()
-    if os.path.exists(os.path.join(rofunc_path, "data/models/{}".format(ckpt_name))):
+    if os.path.exists(os.path.join(rofunc_path, "learning/pre_trained_models/{}".format(ckpt_name))):
         return True
     else:
         return False
 
 
 def shutil_exp_files(files, src_dir, dst_dir):
-    if not os.path.exists(dst_dir):
-        os.makedirs(dst_dir)
+    rf.utils.create_dir(dst_dir)
 
     for file in files:
         src = os.path.join(src_dir, file)

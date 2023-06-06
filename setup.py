@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="rofunc",
-    version="0.0.1.2",
+    version="0.0.1.5",
     description='The Full Process Python Package for Robot Learning from Demonstration',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -16,10 +16,10 @@ setup(
     url='https://github.com/Skylark0924/Rofunc',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['matplotlib', 'pandas', 'tqdm', 'pillow', 'pytransform3d', 'pynput',
-                      'nestle', 'omegaconf', 'hydra-core', 'opencv-python', 'neurokit2', 'skrl', 'gdown', 'dm_tree',
-                      'openpyxl', 'pytz', 'urdfpy', 'pin', 'shutup', 'elegantrl', 'ray[rllib]==2.2.0', "numpy==1.21.6",
-                      "matplotlib==3.7.0"],
+    install_requires=['matplotlib', 'pandas', 'tqdm', 'pillow', 'nestle', 'omegaconf', 'hydra-core', 'opencv-python',
+                      'neurokit2', 'skrl', 'gdown', 'pytz', 'urdfpy', 'shutup',
+                      'elegantrl', 'ray[rllib]==2.2.0', "numpy==1.21.6",
+                      "matplotlib==3.7.1", "open3d"],
     # 'pbdlib @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl',
     # 'isaacgym @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4-py3-none-any.whl',
     # 'pyzed @ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/pyzed-3.7-cp37-cp37m-linux_x86_64.whl'],

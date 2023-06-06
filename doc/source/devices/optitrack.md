@@ -1,5 +1,17 @@
 # Optitrack
 
+- [Optitrack](#optitrack)
+  - [Setup](#setup)
+  - [Get useful data](#get-useful-data)
+  - [Visualize the motion data](#visualize-the-motion-data)
+
+
+## Setup
+
+![](../img/optitrack_setup.png)
+
+
+
 ## Get useful data
 
 You need first prepare your raw data in the following structure.

@@ -1,3 +1,38 @@
+import os
+
+
+class BeautyLogger:
+    def __init__(self, log_path: str, log_name: str, verbose: bool = True):
+        """
+        Lightweight logger for Rofunc package.
+        :param log_path: the path for saving the log file
+        :param log_name: the name of the log file
+        :param verbose: whether to print the log to the console
+        """
+        self.log_path = log_path
+        self.log_name = log_name
+        self.verbose = verbose
+
+    def _write_log(self, content, type):
+        with open(os.path.join(self.log_path, self.log_name), "a") as f:
+            f.write("[Rofunc:{}] {}\n".format(type.upper(), content))
+
+    def warning(self, content, local_verbose=True):
+        if self.verbose and local_verbose:
+            beauty_print(content, type="warning")
+        self._write_log(content, type="warning")
+
+    def module(self, content, local_verbose=True):
+        if self.verbose and local_verbose:
+            beauty_print(content, type="module")
+        self._write_log(content, type="module")
+
+    def info(self, content, local_verbose=True):
+        if self.verbose and local_verbose:
+            beauty_print(content, type="info")
+        self._write_log(content, type="info")
+
+
 def beauty_print(content, level=None, type=None):
     if level is None and type is None:
         level = 1
