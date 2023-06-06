@@ -54,7 +54,7 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="False")
+    parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--test", action="store_true", help="turn to test mode while adding this argument")
     custom_args = parser.parse_args()
 

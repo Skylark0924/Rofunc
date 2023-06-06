@@ -388,7 +388,6 @@ class Memory:
         # default order
         if mini_batches > 1:
             indexes = np.arange(self.memory_size * self.num_envs)
-            # indexes = np.arange(2048)
             batches = BatchSampler(indexes, batch_size=len(indexes) // mini_batches, drop_last=True)
             return [[self.tensors_view[name][batch] for name in names] for batch in batches]
         return [[self.tensors_view[name] for name in names]]
