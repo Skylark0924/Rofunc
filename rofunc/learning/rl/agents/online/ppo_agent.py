@@ -179,7 +179,7 @@ class PPOAgent(BaseAgent):
                 advantages[i] = advantage
             # returns computation
             values_target = advantages + values
-            # normalize advantages
+            # advantage normalization
             advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
             return values_target, advantages
