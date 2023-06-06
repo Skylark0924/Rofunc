@@ -17,6 +17,7 @@ from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
 from rofunc.learning.rl.processors.normalizers import Normalization
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 from rofunc.utils.file.internet import reserve_sock_addr
+from rofunc.learning.utils.utils import set_seed
 
 
 class BaseTrainer:
@@ -29,6 +30,7 @@ class BaseTrainer:
         self.agent = None
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
+        set_seed(self.cfg.Trainer.seed)
 
         '''Experiment log directory'''
         directory = self.cfg.Trainer.experiment_directory
@@ -98,29 +100,29 @@ class BaseTrainer:
         for _ in tqdm.trange(self.maximum_steps):
             self.pre_interaction()
             with torch.no_grad():
-                # states = self.agent._state_preprocessor(states)
                 # Obtain action from agent
                 if self._step < self.random_steps:
                     actions = self.env.action_space.sample()  # sample random actions
                 else:
                     actions, _ = self.agent.act(states)
 
-                # Interact with environment
-                next_states, rewards, terminated, truncated, infos = self.env.step(actions)
-                # next_states = self.agent._state_preprocessor(next_states)
+            # Interact with environment
+            next_states, rewards, terminated, truncated, infos = self.env.step(actions)
 
+            with torch.no_grad():
                 # Store transition
                 self.agent.store_transition(states=states, actions=actions, next_states=next_states, rewards=rewards,
                                             terminated=terminated, truncated=truncated, infos=infos)
+            self._step += 1
+            self.post_interaction()
 
+            with torch.no_grad():
                 # Reset the environment
                 if terminated.any() or truncated.any():
                     states, infos = self.env.reset()
                 else:
                     states = next_states.clone()
 
-                self._step += 1
-            self.post_interaction()
         # close the environment
         self.env.close()
         # close the logger
@@ -188,7 +190,13 @@ class BaseTrainer:
 
         # Update agent
         if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
+            for model in self.agent.models.values():
+                if model is not None:
+                    model.set_mode("train")
             self.agent.update_net()
+            for model in self.agent.models.values():
+                if model is not None:
+                    model.set_mode("eval")
             self._update_times += 1
             self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
 

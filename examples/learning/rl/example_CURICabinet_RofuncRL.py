@@ -81,7 +81,7 @@ def inference(custom_args, ckpt_path=None):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="CURICabinet")
