@@ -40,7 +40,7 @@ class BaseAgent:
 
         '''Checkpoint'''
         self.checkpoint_modules = {}
-        self.checkpoint_interval = self.cfg.get("Trainer", {}).get("checkpoint_interval", 1000)
+        self.checkpoint_interval = self.cfg.Trainer.checkpoint_interval
         if self.checkpoint_interval > 0:
             self.checkpoint_dir = os.path.join(self.experiment_dir, "checkpoints")
             rf.file.create_dir(self.checkpoint_dir)
@@ -60,9 +60,8 @@ class BaseAgent:
     def track_data(self, tag: str, value: float) -> None:
         self.tracking_data[tag].append(value)
 
-    def store_transition(self, states: torch.Tensor, actions: torch.Tensor, rewards: torch.Tensor,
-                         next_states: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor,
-                         infos: torch.Tensor):
+    def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
+                         rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
         """
         Record the transition.
         """

@@ -29,8 +29,8 @@ Agent:
 
   lr_a: 5e-4                       # Learning rate for actor.
   lr_c: 5e-4                       # Learning rate for critic.
-  lr_scheduler:                    # Learning rate scheduler type.
-  lr_scheduler_kwargs: {}          # Learning rate scheduler kwargs.
+#  lr_scheduler:                    # Learning rate scheduler type.
+#  lr_scheduler_kwargs:             # Learning rate scheduler kwargs.
   adam_eps: 1e-5                   # Adam epsilon.
 
   # If true, use the Generalized Advantage Estimator (GAE)
@@ -38,14 +38,20 @@ Agent:
   use_gae: True
 
   entropy_loss_scale: 0.0          # entropy loss scaling factor
-  value_loss_scale: 1.0            # value loss scaling factor
+  value_loss_scale: 2.0            # value loss scaling factor
 
-  grad_norm_clip: 0.5              # clipping coefficient for the norm of the gradients
+  grad_norm_clip: 1.0              # clipping coefficient for the norm of the gradients
   ratio_clip: 0.2                  # clipping coefficient for computing the clipped surrogate objective
   value_clip: 0.2                  # clipping coefficient for computing the value loss (if clip_predicted_values is True)
-  clip_predicted_values: False     # clip predicted values during value loss computation
+  clip_predicted_values: True      # clip predicted values during value loss computation
 
-  kl_threshold: 0.2       # Initial coefficient for KL divergence.
+  kl_threshold: 0              # Initial coefficient for KL divergence.
+
+#  state_preprocessor:            # State preprocessor type.
+#  state_preprocessor_kwargs:     # State preprocessor kwargs.
+#  value_preprocessor:            # Value preprocessor type.
+#  value_preprocessor_kwargs:     # Value preprocessor kwargs.
+#  rewards_shaper:                # Rewards shaper type.
 
 
 # ========= Model parameters ==========
