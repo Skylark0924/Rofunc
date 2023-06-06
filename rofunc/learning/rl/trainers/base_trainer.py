@@ -16,6 +16,7 @@ import rofunc as rf
 from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
 from rofunc.learning.rl.processors.normalizers import Normalization
 from rofunc.utils.logger.beauty_logger import BeautyLogger
+from rofunc.utils.file.internet import reserve_sock_addr
 
 
 class BaseTrainer:
@@ -30,8 +31,8 @@ class BaseTrainer:
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
 
         '''Experiment log directory'''
-        directory = self.cfg.get("Trainer", {}).get("experiment_directory", "")
-        experiment_name = self.cfg.get("Trainer", {}).get("experiment_name", "")
+        directory = self.cfg.Trainer.experiment_directory
+        experiment_name = self.cfg.Trainer.experiment_name
         if not directory:
             directory = os.path.join(os.getcwd(), "runs")
         if not experiment_name:
@@ -47,10 +48,17 @@ class BaseTrainer:
 
         '''TensorBoard'''
         # main entry to log data for consumption and visualization by TensorBoard
-        self.write_interval = self.cfg.get("Trainer", {}).get("write_interval", 100)
+        self.write_interval = self.cfg.Trainer.write_interval
         self.writer = SummaryWriter(log_dir=self.experiment_dir)
         tb = program.TensorBoard()
-        tb.configure(argv=[None, '--logdir', self.experiment_dir])
+        # Find a free port
+        with reserve_sock_addr() as (h, p):
+            argv = ['tensorboard', f"--logdir={self.experiment_dir}", f"--port={p}"]
+            tb_extra_args = os.getenv('TB_EXTRA_ARGS', "")
+            if tb_extra_args:
+                argv += tb_extra_args.split(' ')
+            tb.configure(argv)
+        # Launch TensorBoard
         url = tb.launch()
         self.rofunc_logger.info(f"Tensorflow listening on {url}")
 
@@ -90,7 +98,7 @@ class BaseTrainer:
         for _ in tqdm.trange(self.maximum_steps):
             self.pre_interaction()
             with torch.no_grad():
-                states = self.state_norm(states)
+                # states = self.agent._state_preprocessor(states)
                 # Obtain action from agent
                 if self._step < self.random_steps:
                     actions = self.env.action_space.sample()  # sample random actions
@@ -99,10 +107,10 @@ class BaseTrainer:
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.env.step(actions)
-                next_states = self.state_norm(next_states)
+                # next_states = self.agent._state_preprocessor(next_states)
 
                 # Store transition
-                self.agent.store_transition(states=states, actions=actions, rewards=rewards, next_states=next_states,
+                self.agent.store_transition(states=states, actions=actions, next_states=next_states, rewards=rewards,
                                             terminated=terminated, truncated=truncated, infos=infos)
 
                 # Reset the environment
@@ -155,13 +163,13 @@ class BaseTrainer:
         states, infos = self.env.reset()
         for _ in tqdm.trange(self.inference_steps):
             with torch.no_grad():
-                states = self.state_norm(states)
+                # states = self.state_norm(states)
                 # Obtain action from agent
                 actions, _ = self.agent.act(states)
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.env.step(actions)
-                next_states = self.state_norm(next_states)
+                # next_states = self.state_norm(next_states)
 
                 # Reset the environment
                 if terminated.any() or truncated.any():
@@ -176,8 +184,10 @@ class BaseTrainer:
         pass
 
     def post_interaction(self):
+        self._rollout += 1
+
         # Update agent
-        if not self._step % self.cfg.Trainer.rollouts and self._step >= self.start_learning_steps:
+        if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
             self.agent.update_net()
             self._update_times += 1
             self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)

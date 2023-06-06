@@ -22,11 +22,9 @@ from skrl.resources.schedulers.torch import KLAdaptiveRL
 from skrl.utils import set_seed
 from tensorboard import program
 
-# from rofunc.lfd.rl.online import PPOAgent
-# from rofunc.lfd.rl.online import SACAgent
-# from rofunc.lfd.rl.online import TD3Agent
 import rofunc as rf
 from rofunc.config.utils import get_config, omegaconf_to_dict
+from rofunc.utils.file.internet import reserve_sock_addr
 from rofunc.utils.file.path import shutil_exp_files
 
 
@@ -394,8 +392,14 @@ def setup(custom_args, eval_mode=False):
         raise ValueError("Agent not supported")
 
     tb = program.TensorBoard()
-    tracking_address = agent.experiment_dir
-    tb.configure(argv=[None, '--logdir', tracking_address])
+    # Find a free port
+    with reserve_sock_addr() as (h, p):
+        argv = ['tensorboard', f"--logdir={agent.experiment_dir}",
+                f"--port={p}"]
+        tb_extra_args = os.getenv('TB_EXTRA_ARGS', "")
+        if tb_extra_args:
+            argv += tb_extra_args.split(' ')
+        tb.configure(argv)
     url = tb.launch()
     rf.logger.beauty_print(f"Tensorflow listening on {url}", type='info')
 
