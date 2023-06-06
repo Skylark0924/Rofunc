@@ -1980,7 +1980,7 @@ class FurnitureTask(metaclass=EnvMeta):
         """
         Loads the object XMLs
         """
-        # load models for objects
+        # load pre_trained_models for objects
         path = xml_path_completion(furniture_xmls[self._furniture_id])
         logger.debug("load furniture %s" % path)
         resize_factor = None

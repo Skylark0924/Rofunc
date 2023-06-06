@@ -161,6 +161,17 @@ examples/learning/skrl_example2.py
 rofunc/learning/rl/utils/result
 examples/learning/result
 
-others/
+rofunc/others/
 /rofunc/simulator/assets/urdf/objects/
 /rofunc/planning_control/src/
+
+examples/data/MULTIMODAL/xsens_data/.DS_Store
+/examples/data/RAW_DEMO/xsens/010-005/
+/examples/data/RAW_DEMO/xsens/010-003/
+/examples/data/RAW_DEMO/xsens/010-004/
+
+rofunc/.DS_Store
+
+.DS_Store
+others/
+

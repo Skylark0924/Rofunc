@@ -1,11 +1,10 @@
-import os
-
 import numpy as np
+
 import rofunc as rf
 
 
 def test_7d_uni_lqt():
-    via_points = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LQT_LQR/rolling_pin_1.npy'))
+    via_points = np.load('../examples/data/LQT_LQR/rolling_pin_1.npy')
     filter_indices = [0, 1, 5, 10, 22, 36]
     via_points = via_points[filter_indices]
 
@@ -15,7 +14,7 @@ def test_7d_uni_lqt():
 
 
 def test_7d_uni_lqt_hierarchical():
-    via_points = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/taichi_1l.npy'))
+    via_points = np.load('../examples/data/LQT_LQR/taichi_1l.npy')
     filter_indices = [i for i in range(0, len(via_points) - 10, 5)]
     via_points = via_points[filter_indices]
 
@@ -25,8 +24,7 @@ def test_7d_uni_lqt_hierarchical():
 
 
 def test_7d_uni_lqt_bi():
-    all_points = np.loadtxt(os.path.join(rf.utils.get_rofunc_path(), 'data/LQT_LQR/coffee_stirring_1.txt'),
-                            delimiter=', ')
+    all_points = np.loadtxt('../examples/data/LQT_LQR/coffee_stirring_1.txt', delimiter=', ')
     all_points_l = all_points[0:len(all_points):2]
     all_points_r = all_points[1:len(all_points):2]
 

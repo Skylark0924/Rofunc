@@ -1,5 +1,4 @@
-<robot
-    name="walker">
+<robot name="walker">
   <link name="world"/>
   <joint name="reference" type="floating">
     <parent link="world"/>
@@ -30,7 +29,8 @@
       </geometry>
       <material
           name="">
-        <color rgba="1 1 1 1"/>
+        <color
+            rgba="1 1 1 1"/>
       </material>
     </visual>
     <collision>
@@ -42,15 +42,12 @@
       </geometry>
     </collision>
   </link>
-  <joint
-      name="torso_joint"
-      type="fixed">
+  <joint name="torso_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="torso"/>
   </joint>
-  <link
-      name="right_limb_l1">
+  <link name="right_limb_l1">
     <inertial>
       <origin
           xyz="-0.00722075380474052 0.000182063550966449 -0.0361420965458128"
@@ -73,8 +70,7 @@
         <mesh filename="../meshes/right_limb_l1.STL"/>
       </geometry>
       <material name="">
-        <color
-            rgba="0.752941176470588 0.752941176470588 0.752941176470588 1"/>
+        <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1"/>
       </material>
     </visual>
     <collision>
@@ -82,14 +78,11 @@
           xyz="0 0 0"
           rpy="0 0 0"/>
       <geometry>
-        <mesh
-            filename="../meshes/right_limb_l1.STL"/>
+        <mesh filename="../meshes/right_limb_l1.STL"/>
       </geometry>
     </collision>
   </link>
-  <joint
-      name="right_limb_j1"
-      type="revolute">
+  <joint name="right_limb_j1" type="revolute">
     <origin
         xyz="0 -0.24142 0.018386"
         rpy="-1.9576E-06 1.3107 -1.5708"/>
@@ -105,8 +98,7 @@
         effort="30"
         velocity="2.0944"/>
   </joint>
-  <link
-      name="right_limb_l2">
+  <link name="right_limb_l2">
     <inertial>
       <origin
           xyz="-0.00196280070849963 0.0273168501674689 -0.000134287637530872"
@@ -126,8 +118,7 @@
           xyz="0 0 0"
           rpy="0 0 0"/>
       <geometry>
-        <mesh
-            filename="../meshes/right_limb_l2.STL"/>
+        <mesh filename="../meshes/right_limb_l2.STL"/>
       </geometry>
       <material
           name="">
@@ -140,13 +131,11 @@
           xyz="0 0 0"
           rpy="0 0 0"/>
       <geometry>
-        <mesh
-            filename="../meshes/right_limb_l2.STL"/>
+        <mesh filename="../meshes/right_limb_l2.STL"/>
       </geometry>
     </collision>
   </link>
-  <joint
-      name="right_limb_j2"
+  <joint name="right_limb_j2"
       type="revolute">
     <origin
         xyz="0 0 0"
@@ -163,8 +152,7 @@
         effort="25"
         velocity="3.1416"/>
   </joint>
-  <link
-      name="right_limb_l3">
+  <link name="right_limb_l3">
     <inertial>
       <origin
           xyz="0.00629656239509119 -0.000210202146791738 -0.0621806056819393"
@@ -184,8 +172,7 @@
           xyz="0 0 0"
           rpy="0 0 0"/>
       <geometry>
-        <mesh
-            filename="../meshes/right_limb_l3.STL"/>
+        <mesh filename="../meshes/right_limb_l3.STL"/>
       </geometry>
       <material
           name="">
@@ -278,6 +265,18 @@
         upper="0"
         effort="15"
         velocity="3.1416"/>
+  </joint>
+  <link name="right_elbow"/>
+  <joint name="right_elbow_joint" type="fixed">
+    <origin
+        xyz="0 0 0"
+        rpy="0 -1.5708 -3.1416"/>
+    <parent
+        link="right_limb_l4"/>
+    <child
+        link="right_elbow"/>
+    <axis
+        xyz="0 0 1"/>
   </joint>
   <link
       name="right_limb_l5">
@@ -1047,7 +1046,7 @@
     <limit
         lower="0"
         upper="1.5708"
-        effort=""
+        effort="0"
         velocity="0"/>
   </joint>
   <link
