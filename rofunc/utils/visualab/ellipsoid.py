@@ -34,9 +34,9 @@ def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
             center = ellipsoids[index, :3]
 
             if mode == 'quaternion':
-                R = rf.robolab.coord.quaternion_matrix(ellipsoids[index, 3:7])
+                R = rf.robolab.coord.homo_matrix_from_quaternion(ellipsoids[index, 3:7])
             elif mode == 'euler':
-                R = rf.robolab.coord.euler_matrix(ellipsoids[index, 3], ellipsoids[index, 4], ellipsoids[index, 5],
+                R = rf.robolab.coord.homo_matrix_from_euler(ellipsoids[index, 3], ellipsoids[index, 4], ellipsoids[index, 5],
                                                   'sxyz')
 
             # find the rotation matrix and radii of the axes
@@ -99,7 +99,7 @@ def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
 #     y = sigma_multiplier * r[1] * sin(phi) * sin(theta) + c[1]
 #     z = sigma_multiplier * r[2] * cos(phi) + c[2]
 #     # if ori is not None:
-#     #     ori_matrix = rf.coord.quaternion_matrix(ori)
+#     #     ori_matrix = rf.coord.homo_matrix_from_quaternion(ori)
 #     #     xyz = np.matmul(ori_matrix, np.vstack((x, y, z)))
 #     #     x, y, z = xyz[0], xyz[1], xyz[2]
 #     ax.plot_surface(x, y, z, color=color, alpha=alpha, linewidth=1)

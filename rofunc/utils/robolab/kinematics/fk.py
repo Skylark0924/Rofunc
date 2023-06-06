@@ -1,7 +1,15 @@
 from urdfpy import URDF
 
 
-def fk(urdf_path, joint_name, joint_value, export_link):
+def get_fk_from_model(urdf_path, joint_name, joint_value, export_link):
+    """
+
+    :param urdf_path:
+    :param joint_name:
+    :param joint_value:
+    :param export_link:
+    :return:
+    """
     robot = URDF.load(urdf_path)
     link_name = []
     for link in robot.links:

@@ -1,11 +1,21 @@
 # Zed
 
+- [Zed](#zed)
+  - [Setup](#setup)
+    - [System Requirements](#system-requirements)
+    - [Run](#run)
+    - [Show Helps](#show-helps)
+  - [Record](#record)
+  - [Playback](#playback)
+  - [Export](#export)
+
+
 In our Rofunc project, we will provide some demos and examples to show what Zed cameras can do with robots.
 
 The website of Zed camera: 
 > https://www.stereolabs.com/
 
-## Install
+## Setup
 
 ### System Requirements
 The script can be run on:

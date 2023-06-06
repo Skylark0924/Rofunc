@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import numpy as np
-import pinocchio
 from numpy.linalg import norm, solve
 
 eps = 1e-4
@@ -12,6 +11,8 @@ damp = 1e-12
 
 
 def ik_dual(model, POSE_L, POSE_R, JOINT_ID_L, JOINT_ID_R):
+    import pinocchio
+
     data = model.createData()
 
     oMdes_l = pinocchio.SE3(np.eye(3), np.array(POSE_L))

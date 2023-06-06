@@ -4,28 +4,30 @@ import sys
 
 import torch
 import torch.nn as nn
-from rofunc.utils.file.path import shutil_exp_files
-# from rofunc.lfd.rl.online import PPOAgent
-# from rofunc.lfd.rl.online import SACAgent
-# from rofunc.lfd.rl.online import TD3Agent
-from rofunc.config.utils import get_config, omegaconf_to_dict
 from hydra._internal.utils import get_args_parser
-
-from skrl.agents.torch.ppo import PPO_DEFAULT_CONFIG
-from skrl.agents.torch.td3 import TD3_DEFAULT_CONFIG
 from skrl.agents.torch.ddpg import DDPG_DEFAULT_CONFIG
+from skrl.agents.torch.ppo import PPO as PPOAgent
+from skrl.agents.torch.ppo import PPO_DEFAULT_CONFIG
+from skrl.agents.torch.sac import SAC as SACAgent
 from skrl.agents.torch.sac import SAC_DEFAULT_CONFIG
+from skrl.agents.torch.td3 import TD3 as TD3Agent
+from skrl.agents.torch.td3 import TD3_DEFAULT_CONFIG
+from skrl.envs.torch import wrap_env
+from skrl.memories.torch import RandomMemory
 from skrl.models.torch import Model, GaussianMixin, DeterministicMixin
 from skrl.resources.noises.torch import GaussianNoise, OrnsteinUhlenbeckNoise
 # Import the skrl components to build the RL system
 from skrl.resources.preprocessors.torch import RunningStandardScaler
 from skrl.resources.schedulers.torch import KLAdaptiveRL
-from skrl.agents.torch.ppo import PPO as PPOAgent
-from skrl.agents.torch.sac import SAC as SACAgent
-from skrl.agents.torch.td3 import TD3 as TD3Agent
-from skrl.envs.torch import wrap_env
-from skrl.memories.torch import RandomMemory
 from skrl.utils import set_seed
+from tensorboard import program
+
+# from rofunc.lfd.rl.online import PPOAgent
+# from rofunc.lfd.rl.online import SACAgent
+# from rofunc.lfd.rl.online import TD3Agent
+import rofunc as rf
+from rofunc.config.utils import get_config, omegaconf_to_dict
+from rofunc.utils.file.path import shutil_exp_files
 
 
 # Define the shared model (stochastic and deterministic models) for the agent using mixins.
@@ -36,32 +38,32 @@ class Shared(GaussianMixin, DeterministicMixin, Model):
         GaussianMixin.__init__(self, clip_actions, clip_log_std, min_log_std, max_log_std, reduction)
         DeterministicMixin.__init__(self, clip_actions)
 
-        self.net = nn.Sequential(nn.Linear(self.num_observations, 256),
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 512),
+                                 nn.ELU(),
+                                 nn.Linear(512, 256),
                                  nn.ELU(),
                                  nn.Linear(256, 128),
-                                 nn.ELU(),
-                                 nn.Linear(128, 64),
                                  nn.ELU())
 
-        self.mean_layer = nn.Linear(64, self.num_actions)
+        self.mean_layer = nn.Linear(128, self.num_actions)
         self.log_std_parameter = nn.Parameter(torch.zeros(self.num_actions))
 
-        self.value_layer = nn.Linear(64, 1)
+        self.value_layer = nn.Linear(128, 1)
 
-    def act(self, states, taken_actions, role):
+    def act(self, inputs, role):
         if role == "policy":
-            return GaussianMixin.act(self, states, taken_actions, role)
+            return GaussianMixin.act(self, inputs, role)
         elif role == "value":
-            return DeterministicMixin.act(self, states, taken_actions, role)
+            return DeterministicMixin.act(self, inputs, role)
 
-    def compute(self, states, taken_actions, role):
+    def compute(self, inputs, role):
         if role == "policy":
-            return self.mean_layer(self.net(states)), self.log_std_parameter
+            return self.mean_layer(self.net(inputs["states"])), self.log_std_parameter, {}
         elif role == "value":
-            return self.value_layer(self.net(states))
+            return self.value_layer(self.net(inputs["states"])), {}
 
 
-# Define the models (stochastic and deterministic models) for the agents using mixins.
+# Define the pre_trained_models (stochastic and deterministic pre_trained_models) for the agents using mixins.
 # - StochasticActor: takes as input the environment's observation/state and returns an action
 # - DeterministicActor: takes as input the environment's observation/state and returns an action
 # - Critic: takes the state and action as input and provides a value to guide the policy
@@ -136,7 +138,7 @@ class Critic(DeterministicMixin, Model):
 
 def set_models_ppo(env, device):
     """
-    PPO requires 2 models, visit its documentation for more details
+    PPO requires 2 pre_trained_models, visit its documentation for more details
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ppo.html#spaces-and-models
     """
     models_ppo = {}
@@ -147,7 +149,7 @@ def set_models_ppo(env, device):
 
 def set_models_td3(env, device):
     """
-    TD3 requires 6 models, visit its documentation for more details
+    TD3 requires 6 pre_trained_models, visit its documentation for more details
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.td3.html#spaces-and-models
     """
     models_td3 = {}
@@ -164,7 +166,7 @@ def set_models_td3(env, device):
 
 def set_models_ddpg(env, device):
     """
-    DDPG requires 4 models, visit its documentation for more details
+    DDPG requires 4 pre_trained_models, visit its documentation for more details
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#spaces-and-models
     """
     models_ddpg = {}
@@ -173,7 +175,7 @@ def set_models_ddpg(env, device):
                                                       clip_actions=True)
     models_ddpg["critic"] = Critic(env.observation_space, env.action_space, device)
     models_ddpg["target_critic"] = Critic(env.observation_space, env.action_space, device)
-    # Initialize the models' parameters (weights and biases) using a Gaussian distribution
+    # Initialize the pre_trained_models' parameters (weights and biases) using a Gaussian distribution
     for model in models_ddpg.values():
         model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
     return models_ddpg
@@ -181,7 +183,7 @@ def set_models_ddpg(env, device):
 
 def set_models_sac(env, device):
     """
-    SAC requires 5 models, visit its documentation for more details
+    SAC requires 5 pre_trained_models, visit its documentation for more details
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.sac.html#spaces-and-models
     """
     models_sac = {}
@@ -390,5 +392,11 @@ def setup(custom_args, eval_mode=False):
                          device=device)
     else:
         raise ValueError("Agent not supported")
+
+    tb = program.TensorBoard()
+    tracking_address = agent.experiment_dir
+    tb.configure(argv=[None, '--logdir', tracking_address])
+    url = tb.launch()
+    rf.logger.beauty_print(f"Tensorflow listening on {url}", type='info')
 
     return env, agent
