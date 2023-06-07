@@ -12,7 +12,7 @@ from skrl.resources.schedulers.torch import KLAdaptiveRL
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
 from rofunc.learning.rl.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
-# from rofunc.learning.rl.models.critic_models import CriticPPO
+from rofunc.learning.rl.models.critic_models import CriticPPO
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
 from rofunc.learning.rl.utils.memory import Memory
 
@@ -44,8 +44,8 @@ class PPOAgent(BaseAgent):
             self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space).to(self.device)
         else:
             self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
-        # self.value = CriticPPO(cfg.Model, observation_space, action_space).to(self.device)
-        self.value = self.policy
+        self.value = CriticPPO(cfg.Model, observation_space, action_space).to(self.device)
+        # self.value = self.policy
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
@@ -134,7 +134,7 @@ class PPOAgent(BaseAgent):
         if not deterministic:
             # sample stochastic actions
             if self.cfg.Model.actor.type == "Beta":
-                dist = self.policy.get_dist(states)
+                dist = self.policy.get_dist(self._state_preprocessor(states))
                 actions = dist.rsample()  # Sample the action according to the probability distribution
                 log_prob = dist.log_prob(actions)  # The log probability density of the action
             else:
@@ -143,10 +143,10 @@ class PPOAgent(BaseAgent):
         else:
             # choose deterministic actions for evaluation
             if self.cfg.Model.actor.type == "Beta":
-                actions = self.policy.mean(states).detach()
+                actions = self.policy.mean(self._state_preprocessor(states)).detach()
                 log_prob = None
             else:
-                actions = self.policy(states).detach()
+                actions = self.policy(self._state_preprocessor(states)).detach()
                 log_prob = None
         return actions, log_prob
 
@@ -163,7 +163,7 @@ class PPOAgent(BaseAgent):
                 rewards = self._rewards_shaper(rewards)
 
             # compute values
-            values = self.policy.get_value(self._state_preprocessor(states))
+            values = self.value(self._state_preprocessor(states))
             values = self._value_preprocessor(values, inverse=True)
 
             # storage transition in memory
@@ -180,9 +180,9 @@ class PPOAgent(BaseAgent):
         values = self.memory.get_tensor_by_name("values")
 
         with torch.no_grad():
-            self.policy.train(False)
-            next_values = self.policy.get_value(self._state_preprocessor(self._current_next_states.float()))
-            self.policy.train(True)
+            self.value.train(False)
+            next_values = self.value(self._state_preprocessor(self._current_next_states.float()))
+            self.value.train(True)
         next_values = self._value_preprocessor(next_values, inverse=True)
 
         advantage = 0
@@ -244,7 +244,7 @@ class PPOAgent(BaseAgent):
                 policy_loss = -torch.min(surrogate, surrogate_clipped).mean()
 
                 # compute value loss
-                predicted_values = self.policy.get_value(sampled_states)
+                predicted_values = self.value(sampled_states)
 
                 if self._clip_predicted_values:
                     predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,

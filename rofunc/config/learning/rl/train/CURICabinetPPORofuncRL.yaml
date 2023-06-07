@@ -37,7 +37,7 @@ Agent:
   # with a value function, see https://arxiv.org/pdf/1506.02438.pdf.
   use_gae: True
 
-  entropy_loss_scale: 0.0          # entropy loss scaling factor
+  entropy_loss_scale: 0.01         # entropy loss scaling factor
   value_loss_scale: 2.0            # value loss scaling factor
 
   grad_norm_clip: 1.0              # clipping coefficient for the norm of the gradients
@@ -56,7 +56,7 @@ Agent:
 
 # ========= Model parameters ==========
 Model:
-  use_init: False
+  use_init: True
   use_action_clip: False             # If true, clip actions to the action space range.
   action_clip: 1.0                 # clipping coefficient for the norm of the actions
   use_log_std_clip: True             # If true, clip log standard deviations to the range [-20, 2].
