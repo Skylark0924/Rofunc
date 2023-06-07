@@ -274,7 +274,8 @@ class Memory:
                     if name in self.tensors:
                         self.tensors[name][self.memory_index].copy_(tensor)
             except:
-                raise ValueError("The tensors have incompatible shapes")
+                raise ValueError("The tensors have incompatible shapes. \n name: {} \n Expect shape: {} "
+                                 "\n Got shape: {}".format(name, self.tensors[name][self.memory_index].shape, tensor.shape))
             self.memory_index += 1
         # multi environment (number of environments less than num_envs)
         elif dim == 2 and shape[0] < self.num_envs:

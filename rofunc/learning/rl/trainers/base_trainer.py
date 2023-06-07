@@ -188,13 +188,7 @@ class BaseTrainer:
 
         # Update agent
         if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
-            for model in self.agent.models.values():
-                if model is not None:
-                    model.set_mode("train")
             self.agent.update_net()
-            for model in self.agent.models.values():
-                if model is not None:
-                    model.set_mode("eval")
             self._update_times += 1
             self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
 
@@ -207,8 +201,7 @@ class BaseTrainer:
                 self.agent.checkpoint_best_modules["reward"] = reward
                 self.agent.checkpoint_best_modules["saved"] = False
                 self.agent.checkpoint_best_modules["modules"] = {k: copy.deepcopy(self.agent._get_internal_value(v)) for
-                                                                 k, v
-                                                                 in self.agent.checkpoint_modules.items()}
+                                                                 k, v in self.agent.checkpoint_modules.items()}
 
             # Update tensorboard
             self.write_tensorboard()
