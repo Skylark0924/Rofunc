@@ -11,6 +11,8 @@ Machine learning methods
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
+   :glob:
 
    dmp
    tpgmm
