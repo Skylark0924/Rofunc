@@ -27,6 +27,8 @@ def activation_func(activation: str) -> nn:
         return nn.Tanh()
     elif activation == 'sigmoid':
         return nn.Sigmoid()
+    elif activation == 'elu':
+        return nn.ELU()
     else:
         raise NotImplementedError
 

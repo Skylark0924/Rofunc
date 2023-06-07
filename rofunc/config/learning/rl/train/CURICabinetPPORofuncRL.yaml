@@ -58,8 +58,8 @@ Agent:
 Model:
   actor:
     type: "Gaussian"  # ["Beta", "Gaussian"]
-    mlp_hidden_dims: [ 256, 256 ]
-    mlp_activation: tanh
+    mlp_hidden_dims: [ 512, 256, 128]
+    mlp_activation: elu
     use_lstm: false
     lstm_cell_size: 256
     lstm_use_prev_action: false
@@ -67,8 +67,8 @@ Model:
     max_seq_len: 20
 
   critic:
-    mlp_hidden_dims: [ 256, 256 ]
-    mlp_activation: tanh
+    mlp_hidden_dims: [ 512, 256, 128 ]
+    mlp_activation: elu
     use_lstm: false
     lstm_cell_size: 256
     lstm_use_prev_action: false

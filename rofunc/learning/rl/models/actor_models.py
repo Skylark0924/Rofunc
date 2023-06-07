@@ -122,10 +122,7 @@ class ActorPPO_Gaussian(nn.Module):
         mean = self.forward(state)
         log_std = self.log_std.expand_as(mean)  # To make 'log_std' have the same dimension as 'mean'
         std = torch.exp(log_std)  # The reason we train the 'log_std' is to ensure std=exp(log_std)>0
-        try:
-            dist = Normal(mean, std)  # Get the Gaussian distribution
-        except:
-            raise ValueError
+        dist = Normal(mean, std)  # Get the Gaussian distribution
         return dist
 
 

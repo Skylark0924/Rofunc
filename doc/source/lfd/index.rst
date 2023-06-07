@@ -2,9 +2,9 @@ Learning from Demonstration
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   dmp
-   tpgmm
-   tpgmr
+   ml/index
+   RofuncRL/index
+
 
