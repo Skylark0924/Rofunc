@@ -58,6 +58,7 @@ def inference(custom_args, ckpt_path=None):
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
     sys.argv.append("headless={}".format(custom_args.headless))
+    sys.argv.append("num_envs={}".format(16))
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
     cfg_dict = omegaconf_to_dict(cfg.task)
@@ -77,8 +78,8 @@ def inference(custom_args, ckpt_path=None):
                          device=cfg.rl_device)
     # load checkpoint
     if ckpt_path is None:
-        ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO.pt")
-    trainer.agent.load(ckpt_path)
+        ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO_left_arm.pt")
+    trainer.agent.load_ckpt(ckpt_path)
 
     # Start inference
     trainer.inference()
@@ -93,8 +94,8 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
+    parser.add_argument("--headless", type=str, default="False")
+    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
     custom_args = parser.parse_args()
 
     if not custom_args.inference:
