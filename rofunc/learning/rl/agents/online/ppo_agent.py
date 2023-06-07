@@ -12,7 +12,7 @@ from skrl.resources.schedulers.torch import KLAdaptiveRL
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
 from rofunc.learning.rl.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
-from rofunc.learning.rl.models.critic_models import CriticPPO
+# from rofunc.learning.rl.models.critic_models import CriticPPO
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
 from rofunc.learning.rl.utils.memory import Memory
 
@@ -41,16 +41,18 @@ class PPOAgent(BaseAgent):
 
         '''Define models for PPO'''
         if self.cfg.Model.actor.type == "Beta":
-            self.policy = ActorPPO_Beta(cfg.Model.actor, observation_space, action_space).to(self.device)
+            self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space).to(self.device)
         else:
-            self.policy = ActorPPO_Gaussian(cfg.Model.actor, observation_space, action_space).to(self.device)
-        self.value = CriticPPO(cfg.Model.critic, observation_space, action_space).to(self.device)
-        # self.policy = Shared(observation_space, action_space, device).to(device)
-        # self.value = self.policy.to(device)
+            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
+        # self.value = CriticPPO(cfg.Model, observation_space, action_space).to(self.device)
+        self.value = self.policy
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
         self.checkpoint_modules["value"] = self.value
+
+        self.rofunc_logger.module(f"Policy model: {self.policy}")
+        self.rofunc_logger.module(f"Value model: {self.value}")
 
         '''Create tensors in memory'''
         self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
@@ -129,11 +131,6 @@ class PPOAgent(BaseAgent):
             self._value_preprocessor = empty_preprocessor
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
-        # states = self._state_preprocessor(states)
-
-        # actions, log_prob, outputs = self.policy.act({"states": self._state_preprocessor(states)}, role="policy")
-        # self._current_log_prob = log_prob
-
         if not deterministic:
             # sample stochastic actions
             if self.cfg.Model.actor.type == "Beta":
@@ -141,11 +138,7 @@ class PPOAgent(BaseAgent):
                 actions = dist.rsample()  # Sample the action according to the probability distribution
                 log_prob = dist.log_prob(actions)  # The log probability density of the action
             else:
-                dist = self.policy.get_dist(states)
-                actions = dist.rsample()  # Sample the action according to the probability distribution
-                actions = torch.clip(actions, -1, 1)  # [-max,max]
-                log_prob = dist.log_prob(actions)  # The log probability density of the action
-                log_prob = torch.sum(log_prob, dim=-1, keepdim=True)
+                actions, log_prob = self.policy(self._state_preprocessor(states))
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
@@ -170,8 +163,7 @@ class PPOAgent(BaseAgent):
                 rewards = self._rewards_shaper(rewards)
 
             # compute values
-            values = self.value(self._state_preprocessor(states))
-            # values, _, outputs = self.value.act({"states": self._state_preprocessor(states)}, role="value")
+            values = self.policy.get_value(self._state_preprocessor(states))
             values = self._value_preprocessor(values, inverse=True)
 
             # storage transition in memory
@@ -188,11 +180,9 @@ class PPOAgent(BaseAgent):
         values = self.memory.get_tensor_by_name("values")
 
         with torch.no_grad():
-            self.value.train(False)
-            next_values = self.value(self._state_preprocessor(self._current_next_states.float()))
-            # next_values, _, _ = self.value.act(
-            #     {"states": self._state_preprocessor(self._current_next_states.float())}, role="value")
-            self.value.train(True)
+            self.policy.train(False)
+            next_values = self.policy.get_value(self._state_preprocessor(self._current_next_states.float()))
+            self.policy.train(True)
         next_values = self._value_preprocessor(next_values, inverse=True)
 
         advantage = 0
@@ -230,13 +220,7 @@ class PPOAgent(BaseAgent):
             for i, (sampled_states, sampled_actions, sampled_dones, sampled_log_prob, sampled_values, sampled_returns,
                     sampled_advantages) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
-                dist_now = self.policy.get_dist(sampled_states)
-                dist_entropy = dist_now.entropy().sum(1, keepdim=True)  # shape [mini_batch_size x 1]
-                log_prob_now = dist_now.log_prob(sampled_actions)  # shape [mini_batch_size x action_dim]
-                log_prob_now = torch.sum(log_prob_now, dim=-1, keepdim=True)  # shape [mini_batch_size x 1]
-                # _, log_prob_now, _ = self.policy.act({"states": sampled_states, "taken_actions": sampled_actions},
-                #                                      role="policy")
-                # dist_entropy = self.policy.get_entropy(role="policy")
+                _, log_prob_now = self.policy(sampled_states, sampled_actions)
 
                 # compute approximate KL divergence
                 with torch.no_grad():
@@ -249,10 +233,7 @@ class PPOAgent(BaseAgent):
                     break
 
                 # compute entropy loss
-                if self._entropy_loss_scale:
-                    entropy_loss = -self._entropy_loss_scale * dist_entropy.mean()
-                else:
-                    entropy_loss = 0
+                entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
 
                 # compute policy loss
                 ratio = torch.exp(log_prob_now - sampled_log_prob)
@@ -260,12 +241,10 @@ class PPOAgent(BaseAgent):
                 surrogate_clipped = sampled_advantages * torch.clip(ratio, 1.0 - self._ratio_clip,
                                                                     1.0 + self._ratio_clip)
 
-                # policy_loss = -torch.min(surrogate, surrogate_clipped).mean() - entropy_loss
                 policy_loss = -torch.min(surrogate, surrogate_clipped).mean()
 
                 # compute value loss
-                predicted_values = self.value(sampled_states)
-                # predicted_values, _, _ = self.value.act({"states": sampled_states}, role="value")
+                predicted_values = self.policy.get_value(sampled_states)
 
                 if self._clip_predicted_values:
                     predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,

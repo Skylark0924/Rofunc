@@ -1,7 +1,21 @@
 import torch
 import torch.nn as nn
 
-from .base_model import BaseQNet, build_mlp, init_with_orthogonal
+from .utils import build_mlp, init_with_orthogonal
+
+
+class BaseQNet(nn.Module):
+    def __init__(self, state_dim: int, action_dim: int):
+        super().__init__(state_dim, action_dim)
+        self.explore_rate = 0.125
+        self.state_dim = state_dim
+        self.action_dim = action_dim
+        self.net = None  # build_mlp(dims=[state_dim + action_dim, *dims, 1])
+
+        self.state_avg = nn.Parameter(torch.zeros((state_dim,)), requires_grad=False)
+        self.state_std = nn.Parameter(torch.ones((state_dim,)), requires_grad=False)
+        self.value_avg = nn.Parameter(torch.zeros((1,)), requires_grad=False)
+        self.value_std = nn.Parameter(torch.ones((1,)), requires_grad=False)
 
 
 class QNet(BaseQNet):
