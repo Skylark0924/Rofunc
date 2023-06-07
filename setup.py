@@ -8,7 +8,7 @@ long_description = (this_directory / "README.md").read_text()
 setup(
     name="rofunc",
     version="0.0.1.5",
-    description='The Full Process Python Package for Robot Learning from Demonstration',
+    description='Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author="Junjia Liu",
