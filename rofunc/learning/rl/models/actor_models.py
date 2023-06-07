@@ -98,10 +98,10 @@ class ActorPPO_Gaussian(BaseActor):
     def get_entropy(self):
         return self.dist.entropy()
 
-    def get_value(self, state):
-        state = self.net(state)
-        value = self.value_layer(state)
-        return value
+    # def get_value(self, state):
+    #     state = self.net(state)
+    #     value = self.value_layer(state)
+    #     return value
 
 
 class ActorDiscretePPO(BaseActor):

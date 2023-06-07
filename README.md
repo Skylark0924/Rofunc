@@ -1,4 +1,4 @@
-![](doc/img/logo10.png)
+![](doc/img/logo4.png)
 
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation
 
