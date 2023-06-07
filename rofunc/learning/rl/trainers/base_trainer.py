@@ -92,7 +92,6 @@ class BaseTrainer:
             - Post-interaction
         - Close the environment
         """
-
         # reset env
         states, infos = self.env.reset()
         for _ in tqdm.trange(self.maximum_steps):
