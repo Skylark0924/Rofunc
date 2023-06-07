@@ -43,6 +43,18 @@ $$
 
 ## Tricks
 
+We compare the performance of the PPO algorithm with different tricks and an open source baseline 
+([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments
+are conducted on the `CURICabinet` environment. The results are shown below:
+
+![](../../../img/RofuncPPO_perf.png)
+- `Orange`: PPO implementation from SKRL
+- `Dark Blue`: Rofunc PPO sharing the backbone in the policy network and value network
+- `Red`: Rofunc PPO with independent policy network and value network
+- `Light Blue`: Rofunc PPO with independent policy network and value network, using network initialization
+- `Pink`: Rofunc PPO with independent policy network and value network, using network initialization and entropy
+
+
 ### Normalization
 
 1. State Normalization
