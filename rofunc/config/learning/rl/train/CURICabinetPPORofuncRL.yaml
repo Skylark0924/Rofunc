@@ -27,11 +27,11 @@ Agent:
   learning_epochs: 8                 # The number of epochs to train for per update.
   mini_batch_size: 8                 # The number of samples per update.
 
-  lr_a: 5e-4                       # Learning rate for actor.
-  lr_c: 5e-4                       # Learning rate for critic.
+  lr_a: 5e-4                        # Learning rate for actor.
+  lr_c: 5e-4                        # Learning rate for critic.
 #  lr_scheduler:                    # Learning rate scheduler type.
 #  lr_scheduler_kwargs:             # Learning rate scheduler kwargs.
-  adam_eps: 1e-5                   # Adam epsilon.
+  adam_eps: 1e-5                    # Adam epsilon.
 
   # If true, use the Generalized Advantage Estimator (GAE)
   # with a value function, see https://arxiv.org/pdf/1506.02438.pdf.
@@ -56,9 +56,16 @@ Agent:
 
 # ========= Model parameters ==========
 Model:
+  use_init: False
+  use_action_clip: False             # If true, clip actions to the action space range.
+  action_clip: 1.0                 # clipping coefficient for the norm of the actions
+  use_log_std_clip: True             # If true, clip log standard deviations to the range [-20, 2].
+  log_std_clip_max: 2.0                # clipping coefficient for the log standard deviations
+  log_std_clip_min: -20                # clipping coefficient for the log standard deviations
+
   actor:
     type: "Gaussian"  # ["Beta", "Gaussian"]
-    mlp_hidden_dims: [ 512, 256, 128]
+    mlp_hidden_dims: [ 512, 256, 128 ]
     mlp_activation: elu
     use_lstm: false
     lstm_cell_size: 256

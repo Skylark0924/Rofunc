@@ -13,10 +13,10 @@ from tensorboard import program
 from torch.utils.tensorboard import SummaryWriter
 
 import rofunc as rf
-from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
 from rofunc.learning.rl.processors.normalizers import Normalization
-from rofunc.utils.logger.beauty_logger import BeautyLogger
+from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
 from rofunc.utils.file.internet import reserve_sock_addr
+from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
 class BaseTrainer:
@@ -188,7 +188,11 @@ class BaseTrainer:
 
         # Update agent
         if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
+            for model in self.agent.models.values():
+                model.train(True)
             self.agent.update_net()
+            for model in self.agent.models.values():
+                model.train(False)
             self._update_times += 1
             self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
 
