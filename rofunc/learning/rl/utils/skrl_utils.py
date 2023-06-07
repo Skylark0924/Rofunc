@@ -408,5 +408,4 @@ def setup(custom_args, eval_mode=False):
     rofunc_logger = BeautyLogger(agent.experiment_dir, 'rofunc.log')
     rofunc_logger.info("Configurations: \n{}".format(agent.cfg))
 
-
     return env, agent
