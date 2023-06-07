@@ -119,6 +119,7 @@ class BaseAgent:
         for name, module in self.checkpoint_modules.items():
             modules[name] = self._get_internal_value(module)
         torch.save(modules, path)
+        self.rofunc_logger.info("Saved the checkpoint to {}".format(path))
 
     def load_ckpt(self, path: str):
         """
@@ -140,3 +141,4 @@ class BaseAgent:
                 else:
                     self.rofunc_logger.warning(
                         "Cannot load the {} module. The agent doesn't have such an instance".format(name))
+        self.rofunc_logger.info("Loaded the checkpoint from {}".format(path))
