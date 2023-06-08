@@ -13,7 +13,7 @@ from hydra._internal.utils import get_args_parser
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
 from rofunc.learning.rl.tasks import task_map
-from rofunc.learning.rl.trainers.ppo_trainer import PPOTrainer
+from rofunc.learning.rl.trainers import trainer_map
 from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
 
@@ -42,9 +42,9 @@ def train(custom_args):
                                      force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = PPOTrainer(cfg=cfg.train,
-                         env=env,
-                         device=cfg.rl_device)
+    trainer = trainer_map[custom_args.agent](cfg=cfg.train,
+                                             env=env,
+                                             device=cfg.rl_device)
 
     # Start training
     trainer.train()
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="CURICabinet")
-    parser.add_argument("--agent", type=str, default="ppo")
+    parser.add_argument("--agent", type=str, default="sac")
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)

@@ -2,7 +2,7 @@ Reinforcement learning methods (RofuncRL)
 =================================
 
 
-:doc: `overview`
+:doc:`overview`
     Overview of the `RofuncRL` subpackage
 :doc:`PPO`
     PPO implementation for rofunc
