@@ -1,30 +1,31 @@
-"""
-Modified from SKRL
-"""
+from typing import Union, Tuple, Optional
 
-import copy
-import itertools
-import os.path
-from typing import Union, Tuple, Dict, Any
+import gym
+import gymnasium
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from omegaconf import DictConfig
+from skrl.resources.preprocessors.torch import RunningStandardScaler
+from skrl.resources.schedulers.torch import KLAdaptiveRL
 
 import rofunc as rf
-import numpy as np
-import gym
-import torch
-import torch.nn.functional as F
-from omegaconf import OmegaConf
-from skrl.agents.torch import Agent
-from skrl.memories.torch import Memory
-from skrl.models.torch import Model
+from rofunc.learning.rl.agents.base_agent import BaseAgent
+from rofunc.learning.rl.models.actor_models import ActorSAC
+from rofunc.learning.rl.models.critic_models import CriticSAC
+from rofunc.learning.rl.processors.normalizers import empty_preprocessor
+from rofunc.learning.rl.utils.memory import Memory
 
-class SACAgent(Agent):
+
+class SACAgent(BaseAgent):
     def __init__(self,
-                 models: Dict[str, Model],
-                 memory: Union[Memory, Tuple[Memory], None] = None,
-                 observation_space: Union[int, Tuple[int], gym.Space, None] = None,
-                 action_space: Union[int, Tuple[int], gym.Space, None] = None,
-                 device: Union[str, torch.device] = "cuda:0",
-                 cfg: dict = {}) -> None:
+                 cfg: DictConfig,
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 memory: Optional[Union[Memory, Tuple[Memory]]] = None,
+                 device: Optional[Union[str, torch.device]] = None,
+                 experiment_dir: Optional[str] = None,
+                 rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
         """Soft Actor-Critic (SAC)
 
         https://arxiv.org/abs/1801.01290

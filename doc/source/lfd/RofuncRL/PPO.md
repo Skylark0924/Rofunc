@@ -45,7 +45,7 @@ $$
 
 We compare the performance of the PPO algorithm with different tricks and an open source baseline 
 ([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments
-are conducted on the `CURICabinet` environment. The results are shown below:
+were conducted on the `CURICabinet` environment. The results are shown below:
 
 ![](../../../img/RofuncPPO_perf.png)
 - `Orange`: PPO implementation from SKRL
