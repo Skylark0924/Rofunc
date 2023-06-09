@@ -2,6 +2,9 @@
 
 - [RofuncRL PPO (Proximal Policy Optimization)](#rofuncrl-ppo-proximal-policy-optimization)
   - [Algorithm](#algorithm)
+  - [Performance comparison](#performance-comparison)
+    - [CURICabinet](#curicabinet)
+    - [FrankaCabinet](#frankacabinet)
   - [Tricks](#tricks)
     - [Normalization](#normalization)
     - [Reward Scaling](#reward-scaling)
@@ -41,19 +44,26 @@ $$
 $$
 
 
-## Tricks
+## Performance comparison
 
 We compare the performance of the PPO algorithm with different tricks and an open source baseline 
 ([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments
-were conducted on the `CURICabinet` environment. The results are shown below:
+were conducted on the `CURICabinet` and `FrankaCabinet` environment. The results are shown below:
 
-![](../../../img/RofuncPPO_perf.png)
+### CURICabinet
+![CURICabinet](../../../img/RofuncPPO_CURICabinet_perf.png)
 - `Orange`: PPO implementation from SKRL
 - `Dark Blue`: Rofunc PPO sharing the backbone in the policy network and value network
 - `Red`: Rofunc PPO with independent policy network and value network
 - `Light Blue`: Rofunc PPO with independent policy network and value network, using network initialization
 - `Pink`: Rofunc PPO with independent policy network and value network, using network initialization and entropy
 
+### FrankaCabinet
+![FrankaCabinet](../../../img/RofuncPPO_FrankaCabinet_perf.png)
+- `Pink`: PPO implementation from SKRL
+- `Light Blue`: Rofunc PPO
+
+## Tricks
 
 ### Normalization
 
