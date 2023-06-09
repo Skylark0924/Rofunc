@@ -21,7 +21,7 @@ def train(custom_args):
     env, agent = setup(custom_args)
 
     # Configure and instantiate the RL trainer
-    cfg_trainer = {"timesteps": 24000, "headless": True}
+    cfg_trainer = {"timesteps": 100000, "headless": True}
     trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent)
 
     # start training
@@ -47,14 +47,14 @@ def eval(custom_args, ckpt_path=None):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 1
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="FrankaCabinet")
-    parser.add_argument("--agent", type=str, default="td3")
+    parser.add_argument("--agent", type=str, default="PPO")
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="False")
+    parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--test", action="store_true", help="turn to test mode while adding this argument")
     custom_args = parser.parse_args()
 
