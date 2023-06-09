@@ -26,6 +26,7 @@ def train(custom_args):
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
     sys.argv.append("headless={}".format(custom_args.headless))
+    sys.argv.append("num_envs={}".format(4096))
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
     cfg_dict = omegaconf_to_dict(cfg.task)
