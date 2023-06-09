@@ -313,7 +313,7 @@ def setup(custom_args, eval_mode=False):
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
     sys.argv.append("headless={}".format(custom_args.headless))
     if custom_args.agent.lower() == "sac":
-        sys.argv.append("num_envs={}".format(16))
+        sys.argv.append("num_envs={}".format(64))
 
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
@@ -345,7 +345,7 @@ def setup(custom_args, eval_mode=False):
                          action_space=env.action_space,
                          device=device)
     elif custom_args.agent.lower() == "sac":
-        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
+        memory = RandomMemory(memory_size=1000000, num_envs=env.num_envs, device=device, replacement=True)
         models_sac = set_models_sac(env, device)
         cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
         agent = SACAgent(models=models_sac,
