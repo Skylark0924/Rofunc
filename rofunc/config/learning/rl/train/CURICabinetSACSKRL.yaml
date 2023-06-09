@@ -1,0 +1,8 @@
+gradient_steps: 1
+batch_size: 256
+random_timesteps: 100
+learning_starts: 100
+actor_learning_rate: 5e-4
+critic_learning_rate: 5e-4
+learn_entropy: true
+entropy_learning_rate: 5e-4

@@ -321,7 +321,7 @@ class Memory:
                 self.save(directory=self.export_directory, format=self.export_format)
 
     def sample(self,
-               names: Tuple[str],
+               names: Optional[Tuple[str], List[str]],
                batch_size: int,
                mini_batches: int = 1,
                sequence_length: int = 1) -> List[List[torch.Tensor]]:
