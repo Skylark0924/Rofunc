@@ -20,7 +20,7 @@ class BaseCritic(nn.Module):
         self.mlp_hidden_dims = cfg.critic.mlp_hidden_dims
         self.mlp_activation = activation_func(cfg.critic.mlp_activation)
 
-        self.net = None  # build_mlp(dims=[state_dim + action_dim, *dims, 1])
+        self.backbone_net = None  # build_mlp(dims=[state_dim + action_dim, *dims, 1])
 
         self.state_avg = nn.Parameter(torch.zeros((self.state_dim,)), requires_grad=False)
         self.state_std = nn.Parameter(torch.ones((self.state_dim,)), requires_grad=False)
@@ -34,18 +34,18 @@ class BaseCritic(nn.Module):
         return value * self.value_std + self.value_avg  # todo value_norm
 
 
-class CriticPPO(BaseCritic):
+class Critic(BaseCritic):
     def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
         super().__init__(cfg, observation_space, action_space)
-        self.net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims], hidden_activation=self.mlp_activation)
+        self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims], hidden_activation=self.mlp_activation)
         self.value_net = nn.Linear(self.mlp_hidden_dims[-1], 1)
         if self.cfg.use_init:
-            init_layers(self.net, gain=1.0)
+            init_layers(self.backbone_net, gain=1.0)
             init_layers(self.value_net, gain=1.0)
 
     def forward(self, state: Tensor) -> Tensor:
-        value = self.net(state)
+        value = self.backbone_net(state)
         value = self.value_net(value)
         return value
 

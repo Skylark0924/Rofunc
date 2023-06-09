@@ -164,7 +164,7 @@ class BaseTrainer:
             with torch.no_grad():
                 # states = self.state_norm(states)
                 # Obtain action from agent
-                actions, _ = self.agent.act(states)
+                actions, _ = self.agent.act(states, deterministic=True)  # TODO: check
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.env.step(actions)

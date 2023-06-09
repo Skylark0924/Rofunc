@@ -72,23 +72,15 @@ class StochasticActor(GaussianMixin, Model):
         Model.__init__(self, observation_space, action_space, device)
         GaussianMixin.__init__(self, clip_actions, clip_log_std, min_log_std, max_log_std)
 
-        # self.net = nn.Sequential(nn.Linear(self.num_observations, 32),
-        #                          nn.ELU(),
-        #                          nn.Linear(32, 32),
-        #                          nn.ELU(),
-        #                          nn.Linear(32, self.num_actions))
-        self.net = nn.Sequential(nn.Linear(self.num_observations, 256),
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 32),
                                  nn.ELU(),
-                                 nn.Linear(256, 128),
+                                 nn.Linear(32, 32),
                                  nn.ELU(),
-                                 nn.Linear(128, 64),
-                                 nn.ELU())
-        self.mean_layer = nn.Linear(64, self.num_actions)
-
+                                 nn.Linear(32, self.num_actions))
         self.log_std_parameter = nn.Parameter(torch.zeros(self.num_actions))
 
-    def compute(self, states, taken_actions, role):
-        return torch.tanh(self.mean_layer(self.net(states))), self.log_std_parameter
+    def compute(self, inputs, role):
+        return torch.tanh(self.net(inputs["states"])), self.log_std_parameter, {}
 
 
 class DeterministicActor(DeterministicMixin, Model):
@@ -96,21 +88,14 @@ class DeterministicActor(DeterministicMixin, Model):
         Model.__init__(self, observation_space, action_space, device)
         DeterministicMixin.__init__(self, clip_actions)
 
-        # self.net = nn.Sequential(nn.Linear(self.num_observations, 32),
-        #                          nn.ELU(),
-        #                          nn.Linear(32, 32),
-        #                          nn.ELU(),
-        #                          nn.Linear(32, self.num_actions))
-        self.net = nn.Sequential(nn.Linear(self.num_observations, 256),
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 32),
                                  nn.ELU(),
-                                 nn.Linear(256, 128),
+                                 nn.Linear(32, 32),
                                  nn.ELU(),
-                                 nn.Linear(128, 64),
-                                 nn.ELU())
-        self.mean_layer = nn.Linear(64, self.num_actions)
+                                 nn.Linear(32, self.num_actions))
 
-    def compute(self, states, taken_actions, role):
-        return self.mean_layer(self.net(states))
+    def compute(self, inputs, role):
+        return torch.tanh(self.net(inputs["states"])), {}
 
 
 class Critic(DeterministicMixin, Model):
@@ -118,21 +103,14 @@ class Critic(DeterministicMixin, Model):
         Model.__init__(self, observation_space, action_space, device)
         DeterministicMixin.__init__(self, clip_actions)
 
-        # self.net = nn.Sequential(nn.Linear(self.num_observations + self.num_actions, 32),
-        #                          nn.ELU(),
-        #                          nn.Linear(32, 32),
-        #                          nn.ELU(),
-        #                          nn.Linear(32, 1))
-        self.net = nn.Sequential(nn.Linear(self.num_observations + self.num_actions, 256),
+        self.net = nn.Sequential(nn.Linear(self.num_observations + self.num_actions, 32),
                                  nn.ELU(),
-                                 nn.Linear(256, 128),
+                                 nn.Linear(32, 32),
                                  nn.ELU(),
-                                 nn.Linear(128, 64),
-                                 nn.ELU())
-        self.value_layer = nn.Linear(64, 1)
+                                 nn.Linear(32, 1))
 
-    def compute(self, states, taken_actions, role):
-        return self.value_layer(self.net(torch.cat([states, taken_actions], dim=1)))
+    def compute(self, inputs, role):
+        return self.net(torch.cat([inputs["states"], inputs["taken_actions"]], dim=1)), {}
 
 
 def set_models_ppo(env, device):
@@ -297,8 +275,8 @@ def set_cfg_sac(cfg, env, device, eval_mode=False):
     cfg_sac = SAC_DEFAULT_CONFIG.copy()
     cfg_sac["gradient_steps"] = 1
     cfg_sac["batch_size"] = 256
-    cfg_sac["random_timesteps"] = 5000
-    cfg_sac["learning_starts"] = 5000
+    cfg_sac["random_timesteps"] = 1000
+    cfg_sac["learning_starts"] = 1000
     cfg_sac["actor_learning_rate"] = 1e-3
     cfg_sac["critic_learning_rate"] = 1e-3
     cfg_sac["learning_rate_scheduler"] = KLAdaptiveRL
@@ -308,7 +286,7 @@ def set_cfg_sac(cfg, env, device, eval_mode=False):
     #
     cfg_sac["learn_entropy"] = True
     # cfg_sac["entropy_learning_rate"] = 5e-3
-    # cfg_sac["rewards_shaper"] = lambda rewards, timestep, timesteps: rewards * 0.01
+    cfg_sac["rewards_shaper"] = lambda rewards, timestep, timesteps: rewards * 0.01
     # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
     cfg_sac["experiment"]["write_interval"] = 100
     cfg_sac["experiment"]["checkpoint_interval"] = 1000
@@ -320,12 +298,6 @@ def set_cfg_sac(cfg, env, device, eval_mode=False):
         cfg_sac["experiment"]["experiment_name"] = "{}{}_{}".format(cfg.task.name, "SAC",
                                                                     datetime.datetime.now().strftime(
                                                                         "%y-%m-%d_%H-%M-%S-%f"))
-        files = ["base_skrl.py",
-                 "CURICabinet_skrl.py",
-                 "tasks/curi_cabinet.py"]
-        local_dir = os.getcwd()
-        exp_dir = os.path.join(local_dir, 'runs/{}'.format(cfg_sac["experiment"]["experiment_name"]))
-        shutil_exp_files(files, local_dir, exp_dir)
     return cfg_sac
 
 
@@ -340,6 +312,9 @@ def setup(custom_args, eval_mode=False):
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
     sys.argv.append("headless={}".format(custom_args.headless))
+    if custom_args.agent.lower() == "sac":
+        sys.argv.append("num_envs={}".format(16))
+
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
     cfg_dict = omegaconf_to_dict(cfg.task)
