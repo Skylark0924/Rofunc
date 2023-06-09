@@ -73,9 +73,9 @@ def inference(custom_args, ckpt_path=None):
                                            force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = PPOTrainer(cfg=cfg.train,
-                         env=infer_env,
-                         device=cfg.rl_device)
+    trainer = trainer_map[custom_args.agent](cfg=cfg.train,
+                                             env=infer_env,
+                                             device=cfg.rl_device)
     # load checkpoint
     if ckpt_path is None:
         ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO_left_arm.pt")
