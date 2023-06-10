@@ -43,6 +43,9 @@ The installation is very easy,
 
 ```
 pip install rofunc
+
+# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
+pip install rofunc[baselines]
 ```
 
 and as you'll find later, it's easy to use as well!
