@@ -2,7 +2,7 @@
 FrankaCabinet (Stable Baseline 3)
 ===========================
 
-Open a cabinet with a single Franka arm, trained by Stable Baseline 3
+Open drawers with a Franka robot, trained by Stable Baseline 3
 """
 
 from autolab_core import YamlConfig

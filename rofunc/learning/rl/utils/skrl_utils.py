@@ -1,22 +1,19 @@
 import datetime
 import os
 import sys
+from omegaconf import OmegaConf
 
 import torch
 import torch.nn as nn
 from hydra._internal.utils import get_args_parser
-from skrl.agents.torch.ddpg import DDPG_DEFAULT_CONFIG
 from skrl.agents.torch.ppo import PPO as PPOAgent
-from skrl.agents.torch.ppo import PPO_DEFAULT_CONFIG
 from skrl.agents.torch.sac import SAC as SACAgent
-from skrl.agents.torch.sac import SAC_DEFAULT_CONFIG
 from skrl.agents.torch.td3 import TD3 as TD3Agent
-from skrl.agents.torch.td3 import TD3_DEFAULT_CONFIG
+from skrl.agents.torch.ddpg import DDPG as DDPGAgent
 from skrl.envs.torch import wrap_env
 from skrl.memories.torch import RandomMemory
 from skrl.models.torch import Model, GaussianMixin, DeterministicMixin
 from skrl.resources.noises.torch import GaussianNoise, OrnsteinUhlenbeckNoise
-# Import the skrl components to build the RL system
 from skrl.resources.preprocessors.torch import RunningStandardScaler
 from skrl.resources.schedulers.torch import KLAdaptiveRL
 from skrl.utils import set_seed
@@ -25,7 +22,6 @@ from tensorboard import program
 import rofunc as rf
 from rofunc.config.utils import get_config, omegaconf_to_dict
 from rofunc.utils.file.internet import reserve_sock_addr
-from rofunc.utils.file.path import shutil_exp_files
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
@@ -113,34 +109,6 @@ class Critic(DeterministicMixin, Model):
         return self.net(torch.cat([inputs["states"], inputs["taken_actions"]], dim=1)), {}
 
 
-def set_models_ppo(env, device):
-    """
-    PPO requires 2 pre_trained_models, visit its documentation for more details
-    https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ppo.html#spaces-and-models
-    """
-    models_ppo = {}
-    models_ppo["policy"] = Shared(env.observation_space, env.action_space, device)
-    models_ppo["value"] = models_ppo["policy"]  # same instance: shared model
-    return models_ppo
-
-
-def set_models_td3(env, device):
-    """
-    TD3 requires 6 pre_trained_models, visit its documentation for more details
-    https://skrl.readthedocs.io/en/latest/modules/skrl.agents.td3.html#spaces-and-models
-    """
-    models_td3 = {}
-    models_td3["policy"] = DeterministicActor(env.observation_space, env.action_space, device, clip_actions=True)
-    models_td3["target_policy"] = DeterministicActor(env.observation_space, env.action_space, device, clip_actions=True)
-    models_td3["critic_1"] = Critic(env.observation_space, env.action_space, device)
-    models_td3["critic_2"] = Critic(env.observation_space, env.action_space, device)
-    models_td3["target_critic_1"] = Critic(env.observation_space, env.action_space, device)
-    models_td3["target_critic_2"] = Critic(env.observation_space, env.action_space, device)
-    for model in models_td3.values():
-        model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
-    return models_td3
-
-
 def set_models_ddpg(env, device):
     """
     DDPG requires 4 pre_trained_models, visit its documentation for more details
@@ -158,61 +126,28 @@ def set_models_ddpg(env, device):
     return models_ddpg
 
 
-def set_models_sac(env, device):
-    """
-    SAC requires 5 pre_trained_models, visit its documentation for more details
-    https://skrl.readthedocs.io/en/latest/modules/skrl.agents.sac.html#spaces-and-models
-    """
-    models_sac = {}
-    models_sac["policy"] = StochasticActor(env.observation_space, env.action_space, device, clip_actions=True)
-    models_sac["critic_1"] = Critic(env.observation_space, env.action_space, device)
-    models_sac["critic_2"] = Critic(env.observation_space, env.action_space, device)
-    models_sac["target_critic_1"] = Critic(env.observation_space, env.action_space, device)
-    models_sac["target_critic_2"] = Critic(env.observation_space, env.action_space, device)
-    for model in models_sac.values():
-        model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
-    return models_sac
-
-
 def set_cfg_ppo(cfg, env, device, eval_mode=False):
     """
     # Configure and instantiate the agent.
     # Only modify some default configuration, visit its documentation to see all the options
     # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ppo.html#configuration-and-hyperparameters
     """
-    cfg_ppo = PPO_DEFAULT_CONFIG.copy()
-    cfg_ppo["rollouts"] = 16  # memory_size
-    cfg_ppo["learning_epochs"] = 8
-    cfg_ppo["mini_batches"] = 8  # 16 * 4096 / 8192
-    cfg_ppo["discount_factor"] = 0.99
-    cfg_ppo["lambda"] = 0.95
-    cfg_ppo["learning_rate"] = 5e-4
+    cfg_ppo = omegaconf_to_dict(cfg.train)
     cfg_ppo["learning_rate_scheduler"] = KLAdaptiveRL
     cfg_ppo["learning_rate_scheduler_kwargs"] = {"kl_threshold": 0.008}
-    cfg_ppo["random_timesteps"] = 0
-    cfg_ppo["learning_starts"] = 0
-    cfg_ppo["grad_norm_clip"] = 1.0
-    cfg_ppo["ratio_clip"] = 0.2
-    cfg_ppo["value_clip"] = 0.2
-    cfg_ppo["clip_predicted_values"] = True
-    cfg_ppo["entropy_loss_scale"] = 0.0
-    cfg_ppo["value_loss_scale"] = 2.0
-    cfg_ppo["kl_threshold"] = 0
     cfg_ppo["rewards_shaper"] = lambda rewards, timestep, timesteps: rewards * 0.01
     cfg_ppo["state_preprocessor"] = RunningStandardScaler
     cfg_ppo["state_preprocessor_kwargs"] = {"size": env.observation_space, "device": device}
     cfg_ppo["value_preprocessor"] = RunningStandardScaler
     cfg_ppo["value_preprocessor_kwargs"] = {"size": 1, "device": device}
     # logging to TensorBoard and write checkpoints each 120 and 1200 timesteps respectively
-    cfg_ppo["experiment"]["write_interval"] = 100
-    cfg_ppo["experiment"]["checkpoint_interval"] = 1000
     cfg_ppo["experiment"]["directory"] = os.path.join(os.getcwd(), "runs")
     if eval_mode:
-        cfg_ppo["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "PPO",
+        cfg_ppo["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "SKRLPPO",
                                                                          datetime.datetime.now().strftime(
                                                                              "%y-%m-%d_%H-%M-%S-%f"))
     else:
-        cfg_ppo["experiment"]["experiment_name"] = "{}{}_{}".format(cfg.task.name, "PPO",
+        cfg_ppo["experiment"]["experiment_name"] = "{}{}_{}".format(cfg.task.name, "SKRLPPO",
                                                                     datetime.datetime.now().strftime(
                                                                         "%y-%m-%d_%H-%M-%S-%f"))
     return cfg_ppo
@@ -336,7 +271,8 @@ def setup(custom_args, eval_mode=False):
 
     if custom_args.agent.lower() == "ppo":
         memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
-        models_ppo = set_models_ppo(env, device)
+        models_ppo = {"policy": Shared(env.observation_space, env.action_space, device)}
+        models_ppo["value"] = models_ppo["policy"]  # same instance: shared model
         cfg_ppo = set_cfg_ppo(cfg, env, device, eval_mode)
         agent = PPOAgent(models=models_ppo,
                          memory=memory,
@@ -346,8 +282,15 @@ def setup(custom_args, eval_mode=False):
                          device=device)
     elif custom_args.agent.lower() == "sac":
         memory = RandomMemory(memory_size=1000000, num_envs=env.num_envs, device=device, replacement=True)
-        models_sac = set_models_sac(env, device)
-        cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
+        models_sac = {}
+        models_sac["policy"] = StochasticActor(env.observation_space, env.action_space, device, clip_actions=True)
+        models_sac["critic_1"] = Critic(env.observation_space, env.action_space, device)
+        models_sac["critic_2"] = Critic(env.observation_space, env.action_space, device)
+        models_sac["target_critic_1"] = Critic(env.observation_space, env.action_space, device)
+        models_sac["target_critic_2"] = Critic(env.observation_space, env.action_space, device)
+        for model in models_sac.values():
+            model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
+        cfg_sac = set_cfg_sac(cfg.train, env, device, eval_mode)
         agent = SACAgent(models=models_sac,
                          memory=memory,
                          cfg=cfg_sac,
@@ -356,14 +299,40 @@ def setup(custom_args, eval_mode=False):
                          device=device)
     elif custom_args.agent.lower() == "td3":
         memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
-        models_td3 = set_models_td3(env, device)
-        cfg_td3 = set_cfg_td3(cfg, env, device, eval_mode)
+        models_td3 = {}
+        models_td3["policy"] = DeterministicActor(env.observation_space, env.action_space, device, clip_actions=True)
+        models_td3["target_policy"] = DeterministicActor(env.observation_space, env.action_space, device,
+                                                         clip_actions=True)
+        models_td3["critic_1"] = Critic(env.observation_space, env.action_space, device)
+        models_td3["critic_2"] = Critic(env.observation_space, env.action_space, device)
+        models_td3["target_critic_1"] = Critic(env.observation_space, env.action_space, device)
+        models_td3["target_critic_2"] = Critic(env.observation_space, env.action_space, device)
+        for model in models_td3.values():
+            model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
+        cfg_td3 = set_cfg_td3(cfg.train, env, device, eval_mode)
         agent = TD3Agent(models=models_td3,
                          memory=memory,
                          cfg=cfg_td3,
                          observation_space=env.observation_space,
                          action_space=env.action_space,
                          device=device)
+    elif custom_args.agent.lower() == "ddpg":
+        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
+        models_ddpg = {}
+        models_ddpg["policy"] = DeterministicActor(env.observation_space, env.action_space, device, clip_actions=True)
+        models_ddpg["target_policy"] = DeterministicActor(env.observation_space, env.action_space, device,
+                                                          clip_actions=True)
+        models_ddpg["critic"] = Critic(env.observation_space, env.action_space, device)
+        models_ddpg["target_critic"] = Critic(env.observation_space, env.action_space, device)
+        for model in models_ddpg.values():
+            model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
+        cfg_ddpg = set_cfg_ddpg(cfg.train, env, device, eval_mode)
+        agent = DDPGAgent(models=models_ddpg,
+                          memory=memory,
+                          cfg=cfg_ddpg,
+                          observation_space=env.observation_space,
+                          action_space=env.action_space,
+                          device=device)
     else:
         raise ValueError("Agent not supported")
 

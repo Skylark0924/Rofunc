@@ -1,8 +1,8 @@
 """
-CURICabinet (Rofunc RL)
+CURICabinet (RofuncRL)
 =======================
 
-This example shows how to train a reinforcement learning agent to solve the CURICabinet task using Rofunc RL.
+Open drawers with a humanoid CURI robot, trained by RofuncRL
 """
 
 import argparse
