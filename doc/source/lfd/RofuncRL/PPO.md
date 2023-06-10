@@ -5,6 +5,8 @@
   - [Performance comparison](#performance-comparison)
     - [CURICabinet](#curicabinet)
     - [FrankaCabinet](#frankacabinet)
+    - [Humanoid](#humanoid)
+    - [Ant](#ant)
   - [Tricks](#tricks)
     - [Normalization](#normalization)
     - [Reward Scaling](#reward-scaling)

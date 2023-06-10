@@ -31,7 +31,7 @@ Then
 
    pip install rofunc
 
-   # Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
+   # [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
    pip install rofunc[baselines]
 
 .. note::
