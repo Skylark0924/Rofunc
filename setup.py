@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 # Environment-specific dependencies.
 extras = {
-    "baselines": ["skrl>=0.10.2", "ray[rllib]==2.2.0", "stable-baselines3==1.8.0"],
+    "baselines": ["skrl>=0.10.2", "ray[rllib]==2.2.0", "stable-baselines3==1.8.0", "gym==0.21.0"],
 }
 
 setup(
@@ -40,7 +40,7 @@ setup(
                       'open3d==0.17.0',
                       'transformers==4.30.1',
                       'kinpy==0.2.1',
-                      'gym==0.21.0'],
+                      'transformations==2022.9.26'],
     python_requires=">3.7,<3.9",
     keywords=['robotics', 'learning from demonstration', 'reinforcement learning', 'robot manipulation'],
     license='MIT',
