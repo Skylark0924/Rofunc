@@ -2,7 +2,7 @@
 CURICabinet (RLlib Tuner)
 ===========================
 
-Open drawers with a humanoid CURI robot, trained by RLlib
+Open drawers with a humanoid CURI robot, trained by RLlib Tuner
 """
 
 import isaacgym

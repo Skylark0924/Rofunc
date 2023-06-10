@@ -48,7 +48,7 @@ $$
 
 We compare the performance of the PPO algorithm with different tricks and an open source baseline 
 ([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments
-were conducted on the `CURICabinet` and `FrankaCabinet` environment. The results are shown below:
+were conducted on the `CURICabinet`, `FrankaCabinet` and `Humanoid` environment. The results are shown below:
 
 ### CURICabinet
 ![CURICabinet](../../../img/RofuncPPO_CURICabinet_perf.png)
@@ -61,7 +61,17 @@ were conducted on the `CURICabinet` and `FrankaCabinet` environment. The results
 ### FrankaCabinet
 ![FrankaCabinet](../../../img/RofuncPPO_FrankaCabinet_perf.png)
 - `Pink`: PPO implementation from SKRL
-- `Light Blue`: Rofunc PPO
+- `Blue`: Rofunc PPO
+
+### Humanoid
+![FrankaCabinet](../../../img/RofuncPPO_Humanoid_perf.png)
+- `Orange`: PPO implementation from SKRL
+- `Blue`: Rofunc PPO
+
+### Ant
+![FrankaCabinet](../../../img/RofuncPPO_Ant_perf.png)
+- `Red`: PPO implementation from SKRL
+- `Blue`: Rofunc PPO
 
 ## Tricks
 
