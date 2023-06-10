@@ -26,7 +26,7 @@ copyright = '2022, Junjia Liu'
 author = 'Junjia Liu'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1.5'
+release = '0.0.1.9'
 
 # -- General configuration ---------------------------------------------------
 

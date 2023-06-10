@@ -1,23 +1,29 @@
 Overview and Installation
-=====
+==============================
 
-Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and provides valuable and 
-convenient python functions for robotics, including _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods. We also plan to provide an Isaac Gym-based robot simulator for evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
-
+Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for
+**(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including *demonstration collection, data
+pre-processing, LfD algorithms, planning, and control methods*. We also provide an Isaac Gym-based robot simulator for
+evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that
+simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on
+robots.
 .. image:: ../img/pipeline.png
 
 
 Installation
 ------------------
 
-Install from PyPI
-^^^^^^^^^^^^^^^^^^^^
+Install from PyPI (stable version)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Requirements need to be installed manually**
 
-1. pbdlib
-2. Isaac Gym
-3. ZED SDK
+.. code-block:: python
+
+   # Install pbdlib
+   pip install https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl
+   # Install Isaac Gym
+   pip install https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4-py3-none-any.whl
 
 Then
 
@@ -25,19 +31,37 @@ Then
 
    pip install rofunc
 
-Install from Source
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   # Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
+   pip install rofunc[baselines]
+
+.. note::
+
+   If you want to use functions related to ZED camera, you need to install `ZED SDK <https://www.stereolabs.com/developers/release/#downloads>`_ manually. (We have tried to package it as a :guilabel:`.whl` file to add it to :guilabel:`requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+
+
+Install from Source (nightly version, recommended)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
    git clone https://github.com/Skylark0924/Rofunc.git
    cd Rofunc
-   pip install -r requirements.txt
-   pip install -e .
+
+   # Create a conda environment
+   # Python 3.8 is strongly recommended
+   conda create -n rofunc python=3.8
+
+   # For Linux user
+   sh ./scripts/install.sh
+   # [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
+   sh ./scripts/install_w_baselines.sh
+   # [Option] For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
+   sh ./scripts/mac_install.sh
 
 .. note::
 
-   Besides, you need to install `ZED SDK <https://www.stereolabs.com/developers/release/#downloads>`_ manually. (We have tried to package it as a :guilabel:`.whl` file to add it to :guilabel:`requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+   If you want to use functions related to ZED camera, you need to install `ZED SDK <https://www.stereolabs.com/developers/release/#downloads>`_ manually. (We have tried to package it as a :guilabel:`.whl` file to add it to :guilabel:`requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support direct installation.)
+
 
 
 Available functions
