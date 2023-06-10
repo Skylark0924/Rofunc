@@ -4,9 +4,11 @@ from .curi_cabinet_bimanual import CURICabinetBimanualTask
 from .curi_coffee_stirring import CURICoffeeStirringTask
 from .humanoid import HumanoidTask
 from .cartpole import CartpoleTask
+from .ant import AntTask
 # from .humanoid_amp import HumanoidAMPTask
 
 task_map = {
+    "Ant": AntTask,
     "Cartpole": CartpoleTask,
     "FrankaCabinet": FrankaCabinetTask,
     "CURICabinet": CURICabinetTask,

@@ -2,7 +2,7 @@
 FrankaCabinet (SKRL)
 ===========================
 
-Open a cabinet with a single Franka arm, trained by SKRL
+Open drawers with a Franka robot, trained by SKRL
 """
 
 import argparse

@@ -1,8 +1,8 @@
 """
-FrankaCabinet (RofuncRL)
-=======================
+Ant (RofuncRL)
+===========================
 
-Open drawers with a Franka robot, trained by RofuncRL
+Ant RL using RofuncRL
 """
 
 import argparse
@@ -12,9 +12,9 @@ import isaacgym
 from hydra._internal.utils import get_args_parser
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
+from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.rl.tasks import task_map
 from rofunc.learning.rl.trainers import trainer_map
-from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
 
 
@@ -79,7 +79,7 @@ def inference(custom_args, ckpt_path=None):
                                              device=cfg.rl_device)
     # load checkpoint
     if ckpt_path is None:
-        ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO_left_arm.pt")
+        ckpt_path = model_zoo(name="AntRofuncRLPPO_left_arm.pt")
     trainer.agent.load_ckpt(ckpt_path)
 
     # Start inference
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="FrankaCabinet")
+    parser.add_argument("--task", type=str, default="Ant")
     parser.add_argument("--agent", type=str, default="ppo")
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
