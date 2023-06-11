@@ -202,3 +202,28 @@ We would like to acknowledge the following projects:
 ### Planning and Control
 
 1. [Robotics codes from scratch (RCFS)](https://gitlab.idiap.ch/rli/robotics-codes-from-scratch)
+
+
+```{toctree}
+:maxdepth: 3
+:caption: Get Started
+:hidden:
+:glob:
+
+overview
+quickstart
+auto_examples/index
+```
+
+```{toctree}
+:maxdepth: 3
+:caption: Core Modules
+:hidden:
+:glob:
+
+devices/index
+lfd/index
+planning/index
+tools/index
+simulator/index
+```
