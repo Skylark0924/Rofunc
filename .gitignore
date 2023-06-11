@@ -176,3 +176,5 @@ rofunc/.DS_Store
 others/
 
 doc/source/auto_examples
+
+.vscode/
