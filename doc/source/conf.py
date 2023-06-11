@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../../rofunc'))
 from recommonmark.transform import AutoStructify
 from recommonmark.parser import CommonMarkParser
 
-source_suffix = ['.rst', '.md']
+# source_suffix = ['.rst', '.md']
 
 # -- Project information -----------------------------------------------------
 
@@ -34,19 +34,21 @@ release = '0.0.1.9.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
-    'sphinx.ext.autosectionlabel',
-    'sphinx_gallery.gen_gallery',
-    'recommonmark',
-    'sphinx_markdown_tables',
+    "myst_parser",
+    "autodoc2",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx_design",
+    "sphinx_copybutton",
+    "sphinxext.rediraffe",
+    # disabled due to https://github.com/mgaitan/sphinxcontrib-mermaid/issues/109
+    # "sphinxcontrib.mermaid",
+    "sphinxext.opengraph",
+    "sphinx_pyscript",
+    "sphinx_tippy",
+    "sphinx_togglebutton",
 ]
 
 sphinx_gallery_conf = {
@@ -73,6 +75,60 @@ master_doc = 'index'
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+
+# -- Autodoc settings ---------------------------------------------------
+
+autodoc2_packages = [
+    {
+        "path": "../rofunc",
+        "exclude_files": ["_docs.py"],
+    }
+]
+autodoc2_hidden_objects = ["dunder", "private", "inherited"]
+autodoc2_replace_annotations = [
+    ("re.Pattern", "typing.Pattern"),
+    ("markdown_it.MarkdownIt", "markdown_it.main.MarkdownIt"),
+]
+autodoc2_replace_bases = [
+    ("sphinx.directives.SphinxDirective", "sphinx.util.docutils.SphinxDirective"),
+]
+autodoc2_docstring_parser_regexes = [
+    ("myst_parser", "myst"),
+    (r"myst_parser\.setup", "myst"),
+]
+nitpicky = True
+nitpick_ignore_regex = [
+    (r"py:.*", r"docutils\..*"),
+    (r"py:.*", r"pygments\..*"),
+]
+nitpick_ignore = [
+    ("py:obj", "myst_parser._docs._ConfigBase"),
+    ("py:exc", "MarkupError"),
+    ("py:class", "sphinx.util.typing.Inventory"),
+    ("py:class", "sphinx.writers.html.HTMLTranslator"),
+    ("py:obj", "sphinx.transforms.post_transforms.ReferencesResolver"),
+]
+
+# -- MyST settings ---------------------------------------------------
+
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "deflist",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "colon_fence",
+    "smartquotes",
+    "replacements",
+    # "linkify",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+    "attrs_inline",
+    "attrs_block",
+]
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -88,22 +144,48 @@ html_static_path = ['_static']
 html_logo = "_static/logo3.png"
 html_favicon = "_static/logo2.ico"
 
-source_parsers = {
-    '.md': CommonMarkParser,
-}
+# source_parsers = {
+#     '.md': CommonMarkParser,
+# }
 
 mathjax_path = 'https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
 
-# app setup hook
-def setup(app):
-    app.add_config_value('recommonmark_config', {
-        # 'url_resolver': lambda url: github_doc_root + url,
-        'auto_toc_tree_section': 'Contents',
-        'enable_math': False,
-        'enable_inline_math': False,
-        'enable_eval_rst': True,
-        'enable_auto_doc_ref': True,
-    }, True)
-    app.add_transform(AutoStructify)
-    app.add_css_file('my_theme.css')
+# # app setup hook
+# def setup(app):
+#     app.add_config_value('recommonmark_config', {
+#         # 'url_resolver': lambda url: github_doc_root + url,
+#         'auto_toc_tree_section': 'Contents',
+#         'enable_math': False,
+#         'enable_inline_math': False,
+#         'enable_eval_rst': True,
+#         'enable_auto_doc_ref': True,
+#     }, True)
+#     app.add_transform(AutoStructify)
+#     app.add_css_file('my_theme.css')
+def setup(app: Sphinx):
+    """Add functions to the Sphinx setup."""
+    from myst_parser._docs import (
+        DirectiveDoc,
+        DocutilsCliHelpDirective,
+        MystAdmonitionDirective,
+        MystConfigDirective,
+        MystExampleDirective,
+        MystLexer,
+        MystToHTMLDirective,
+        MystWarningsDirective,
+        NumberSections,
+        StripUnsupportedLatex,
+    )
+
+    app.add_directive("myst-config", MystConfigDirective)
+    app.add_directive("docutils-cli-help", DocutilsCliHelpDirective)
+    app.add_directive("doc-directive", DirectiveDoc)
+    app.add_directive("myst-warnings", MystWarningsDirective)
+    app.add_directive("myst-example", MystExampleDirective)
+    app.add_directive("myst-admonitions", MystAdmonitionDirective)
+    app.add_directive("myst-to-html", MystToHTMLDirective)
+    app.add_post_transform(StripUnsupportedLatex)
+    app.add_post_transform(NumberSections)
+    # app.connect("html-page-context", add_version_to_css)
+    app.add_lexer("myst", MystLexer)

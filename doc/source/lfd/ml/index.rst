@@ -1,4 +1,4 @@
-Machine learning methods
+Machine learning class
 =================================
 
 :doc:`dmp`
