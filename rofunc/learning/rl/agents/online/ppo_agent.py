@@ -6,8 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
-from skrl.resources.preprocessors.torch import RunningStandardScaler
-from skrl.resources.schedulers.torch import KLAdaptiveRL
+from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
+from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
 
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
@@ -27,7 +27,8 @@ class PPOAgent(BaseAgent):
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
         """
-        PPO algorithm. “Proximal Policy Optimization Algorithms”. John Schulman. et al. https://arxiv.org/abs/1707.06347
+        Proximal Policy Optimization (PPO) agent
+        “Proximal Policy Optimization Algorithms”. John Schulman. et al. https://arxiv.org/abs/1707.06347
         Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/PPO.html
         :param cfg: Custom configuration
         :param observation_space: Observation/state space or shape
