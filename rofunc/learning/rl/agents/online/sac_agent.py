@@ -1,20 +1,21 @@
-from typing import Union, Tuple, Optional
 import itertools
+from typing import Union, Tuple, Optional
 
 import gym
 import gymnasium
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
-from skrl.resources.preprocessors.torch import RunningStandardScaler
-from skrl.resources.schedulers.torch import KLAdaptiveRL
 
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
 from rofunc.learning.rl.models.actor_models import ActorSAC
 from rofunc.learning.rl.models.critic_models import Critic
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
+from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
+from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.rl.utils.memory import Memory
 
 
@@ -28,7 +29,8 @@ class SACAgent(BaseAgent):
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
         """
-        Soft Actor-Critic (SAC) https://arxiv.org/abs/1801.01290
+        Soft Actor-Critic (SAC) agent
+        "Soft Actor-Critic Algorithms and Applications" (https://arxiv.org/abs/1812.05905)
         Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/SAC.html
         :param cfg: Custom configuration
         :param observation_space: Observation/state space or shape
@@ -40,12 +42,12 @@ class SACAgent(BaseAgent):
         """
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
-        '''Define models for PPO'''
+        '''Define models for SAC'''
         self.actor = ActorSAC(cfg.Model, observation_space, action_space).to(self.device)
-        self.critic_1 = Critic(cfg.Model, observation_space, action_space).to(self.device)
-        self.critic_2 = Critic(cfg.Model, observation_space, action_space).to(self.device)
-        self.target_critic_1 = Critic(cfg.Model, observation_space, action_space).to(self.device)
-        self.target_critic_2 = Critic(cfg.Model, observation_space, action_space).to(self.device)
+        self.critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
+        self.critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
+        self.target_critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
+        self.target_critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
 
         self.models = {"actor": self.actor, "critic_1": self.critic_1, "critic_2": self.critic_2,
                        "target_critic_1": self.target_critic_1, "target_critic_2": self.target_critic_2}
@@ -80,7 +82,6 @@ class SACAgent(BaseAgent):
         '''Get hyper-parameters from config'''
         self._horizon = self.cfg.Agent.horizon
         self._discount = self.cfg.Agent.discount
-        self._td_lambda = self.cfg.Agent.td_lambda
         self._gradient_steps = self.cfg.Agent.gradient_steps
         self._polyak = self.cfg.Agent.polyak
         self._batch_size = self.cfg.Agent.batch_size
@@ -89,21 +90,16 @@ class SACAgent(BaseAgent):
         self._lr_scheduler = self.cfg.get("Agent", {}).get("lr_scheduler", KLAdaptiveRL)
         self._lr_scheduler_kwargs = self.cfg.get("Agent", {}).get("lr_scheduler_kwargs", {'kl_threshold': 0.008})
         self._adam_eps = self.cfg.Agent.adam_eps
-        # self._use_gae = self.cfg.Agent.use_gae
-        self._entropy_loss_scale = self.cfg.Agent.entropy_loss_scale
-        self._value_loss_scale = self.cfg.Agent.value_loss_scale
         self._grad_norm_clip = self.cfg.Agent.grad_norm_clip
-        self._ratio_clip = self.cfg.Agent.ratio_clip
-        self._value_clip = self.cfg.Agent.value_clip
-        self._clip_predicted_values = self.cfg.Agent.clip_predicted_values
         self._kl_threshold = self.cfg.Agent.kl_threshold
         self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
+        self._learn_entropy = self.cfg.Agent.learn_entropy
+        self._entropy_learning_rate = self.cfg.Agent.entropy_learning_rate
+        self._entropy_coefficient = self.cfg.Agent.initial_entropy_value
+        self._target_entropy = self.cfg.Agent.target_entropy
         self._state_preprocessor = RunningStandardScaler
         self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
                                                                         {"size": observation_space, "device": device})
-        # self._value_preprocessor = RunningStandardScaler
-        # self._value_preprocessor_kwargs = self.cfg.get("Agent", {}).get("value_preprocessor_kwargs",
-        #                                                                 {"size": 1, "device": device})
 
         '''Misc variables'''
         self._current_log_prob = None
@@ -125,25 +121,38 @@ class SACAgent(BaseAgent):
         self.checkpoint_modules["actor_optimizer"] = self.actor_optimizer
         self.checkpoint_modules["critic_optimizer"] = self.critic_optimizer
 
+        # entropy
+        if self._learn_entropy:
+            if self._target_entropy is None:
+                if issubclass(type(self.action_space), gym.spaces.Box) or issubclass(type(self.action_space),
+                                                                                     gymnasium.spaces.Box):
+                    self._target_entropy = -np.prod(self.action_space.shape).astype(np.float32)
+                elif issubclass(type(self.action_space), gym.spaces.Discrete) or issubclass(type(self.action_space),
+                                                                                            gymnasium.spaces.Discrete):
+                    self._target_entropy = -self.action_space.n
+                else:
+                    self._target_entropy = 0
+
+            self.log_entropy_coefficient = torch.log(
+                torch.ones(1, device=self.device) * self._entropy_coefficient).requires_grad_(True)
+            self.entropy_optimizer = torch.optim.Adam([self.log_entropy_coefficient], lr=self._entropy_learning_rate)
+
+            self.checkpoint_modules["entropy_optimizer"] = self.entropy_optimizer
+
         # set up preprocessors
         if self._state_preprocessor:
             self._state_preprocessor = self._state_preprocessor(**self._state_preprocessor_kwargs)
             self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
         else:
             self._state_preprocessor = empty_preprocessor
-        if self._value_preprocessor:
-            self._value_preprocessor = self._value_preprocessor(**self._value_preprocessor_kwargs)
-            self.checkpoint_modules["value_preprocessor"] = self._value_preprocessor
-        else:
-            self._value_preprocessor = empty_preprocessor
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:
             # sample stochastic actions
             actions, _ = self.actor(self._state_preprocessor(states))
         else:
-            # choose deterministic actions for evaluation
-            actions = self.actor(self._state_preprocessor(states)).detach()
+            # choose deterministic actions for evaluation TODO: check if this is correct
+            actions, _ = self.actor(self._state_preprocessor(states)).detach()
         return actions, None
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
@@ -176,16 +185,17 @@ class SACAgent(BaseAgent):
 
             # compute target values
             with torch.no_grad():
-                next_actions, next_log_prob, _ = self.actor(sampled_next_states)
+                next_actions, next_log_prob = self.actor(sampled_next_states)
 
-                target_q1_values, _, _ = self.target_critic_1(sampled_next_states, next_actions)
-                target_q2_values, _, _ = self.target_critic_2(sampled_next_states, next_actions)
-                target_q_values = torch.min(target_q1_values, target_q2_values) - self._entropy_coefficient * next_log_prob
+                target_q1_values = self.target_critic_1(sampled_next_states, next_actions)
+                target_q2_values = self.target_critic_2(sampled_next_states, next_actions)
+                target_q_values = torch.min(target_q1_values,
+                                            target_q2_values) - self._entropy_coefficient * next_log_prob
                 target_values = sampled_rewards + self._discount * sampled_dones.logical_not() * target_q_values
 
             # compute critic loss
-            critic_1_values, _, _ = self.critic_1(sampled_states, sampled_actions)
-            critic_2_values, _, _ = self.critic_2(sampled_states, sampled_actions)
+            critic_1_values = self.critic_1(sampled_states, sampled_actions)
+            critic_2_values = self.critic_2(sampled_states, sampled_actions)
 
             critic_loss = (F.mse_loss(critic_1_values, target_values) + F.mse_loss(critic_2_values, target_values)) / 2
 
@@ -193,13 +203,14 @@ class SACAgent(BaseAgent):
             self.critic_optimizer.zero_grad()
             critic_loss.backward()
             if self._grad_norm_clip > 0:
-                nn.utils.clip_grad_norm_(itertools.chain(self.critic_1.parameters(), self.critic_2.parameters()), self._grad_norm_clip)
+                nn.utils.clip_grad_norm_(itertools.chain(self.critic_1.parameters(), self.critic_2.parameters()),
+                                         self._grad_norm_clip)
             self.critic_optimizer.step()
 
             # compute actor (actor) loss
-            actions, log_prob, _ = self.actor.act(sampled_states)
-            critic_1_values, _, _ = self.critic_1.act(sampled_states, actions)
-            critic_2_values, _, _ = self.critic_2.act(sampled_states, actions)
+            actions, log_prob = self.actor(sampled_states)
+            critic_1_values = self.critic_1(sampled_states, actions)
+            critic_2_values = self.critic_2(sampled_states, actions)
 
             policy_loss = (self._entropy_coefficient * log_prob - torch.min(critic_1_values, critic_2_values)).mean()
 
@@ -228,7 +239,7 @@ class SACAgent(BaseAgent):
             self.target_critic_2.update_parameters(self.critic_2, polyak=self._polyak)
 
             # update learning rate
-            if self._learning_rate_scheduler:
+            if self._lr_scheduler:
                 self.actor_scheduler.step()
                 self.critic_scheduler.step()
 
@@ -248,7 +259,7 @@ class SACAgent(BaseAgent):
             self.track_data("Target / Target (min)", torch.min(target_values).item())
             self.track_data("Target / Target (mean)", torch.mean(target_values).item())
 
-            if self._entropy_loss_scale:
+            if self._learn_entropy:
                 self.track_data("Loss / Entropy loss", entropy_loss.item())
                 self.track_data("Coefficient / Entropy coefficient", self._entropy_coefficient.item())
 

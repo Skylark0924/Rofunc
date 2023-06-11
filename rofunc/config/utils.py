@@ -9,6 +9,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 from omegaconf import DictConfig
 
+import rofunc as rf
 from rofunc.config import *
 from rofunc.utils.file.path import get_rofunc_path
 
@@ -26,7 +27,13 @@ def get_config(config_path=None, config_name=None, args=None, debug=False) -> Di
             absl_config_path = os.path.join(rofunc_path, "config/{}".format(config_path))
             search_path = create_automatic_config_search_path(config_name, None, absl_config_path)
             hydra_object = Hydra.create_main_hydra2(task_name='load_isaacgymenv', config_search_path=search_path)
-            cfg = hydra_object.compose_config(config_name, args.overrides, run_mode=RunMode.RUN)
+            try:
+                cfg = hydra_object.compose_config(config_name, args.overrides, run_mode=RunMode.RUN)
+            except Exception as e:
+                rf.logger.beauty_print('Use BaseTask config', type='warning')
+                args.overrides[1] = 'train={}'.format('BaseTask' +
+                    args.overrides[1].split('=')[1].split(args.overrides[0].split('=')[1])[1])
+                cfg = hydra_object.compose_config(config_name, args.overrides, run_mode=RunMode.RUN)
     else:
         with initialize(config_path="./", version_base=None):
             cfg = compose(config_name="lqt")
