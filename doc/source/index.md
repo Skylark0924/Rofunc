@@ -1,4 +1,4 @@
-![](doc/img/logo7.png)
+![](../img/logo7.png)
 
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation
 
@@ -19,85 +19,14 @@ evaluation. This package aims to advance the field by building a full-process to
 simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on
 robots.
 
-![](doc/img/pipeline.png)
-
-- [Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation](#rofunc-the-full-process-python-package-for-robot-learning-from-demonstration-and-robot-manipulation)
-  - [Installation](#installation)
-    - [Install from PyPI (stable version)](#install-from-pypi-stable-version)
-    - [Install from Source (nightly version, recommended)](#install-from-source-nightly-version-recommended)
-  - [Documentation](#documentation)
-  - [Star History](#star-history)
-  - [Citation](#citation)
-  - [Related Papers](#related-papers)
-  - [The Team](#the-team)
-  - [Acknowledge](#acknowledge)
-    - [Learning from Demonstration](#learning-from-demonstration)
-    - [Planning and Control](#planning-and-control)
-
+![](../img/pipeline.png)
 
 ## Installation
 
-### Install from PyPI (stable version)
+Please refer to [Installation](https://rofunc.readthedocs.io/en/latest/installation.html) for installation.
 
-The installation is very easy,
 
-```shell
-pip install rofunc
-
-# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
-pip install rofunc[baselines]
-```
-
-and as you'll find later, it's easy to use as well!
-
-```python
-import rofunc as rf
-```
-
-Thus, have fun in the robotics world!
-> **Note**
-> Several requirements need to be installed before using the package. Please refer to
-> the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
-
-### Install from Source (nightly version, recommended)
-
-```shell
-git clone https://github.com/Skylark0924/Rofunc.git
-cd Rofunc
-
-# Create a conda environment
-# Python 3.8 is strongly recommended
-conda create -n rofunc python=3.8
-
-# For Linux user
-sh ./scripts/install.sh
-# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
-sh ./scripts/install_w_baselines.sh
-# [Option] For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
-sh ./scripts/mac_install.sh
-```
-
-> **Note**
-> If you want to use functions related to ZED camera, you need to
-> install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to package it as
-> a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support
-> direct installation.)
-
-## Documentation
-
-[![Documentation](https://img.shields.io/badge/Documentation-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/)
-[![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)
-
-> **Note**
-> Currently, we provide a simple document; please refer to [here](./rofunc/).
-> A comprehensive one with both English and Chinese versions is built via
-> the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
-> We provide a simple but interesting example: learning to play
-> Taichi by learning from human demonstration.
-
-To give you a quick overview of the pipeline of `rofunc`, we provide an interesting example of learning to play Taichi
-from human demonstration. You can find it in the [Quick start](https://rofunc.readthedocs.io/en/latest/quickstart.html)
-section of the documentation.
+## Available functions and future plans
 
 The available functions and plans can be found as follows.
 
@@ -142,14 +71,6 @@ The available functions and plans can be found as follows.
 |                                                                                 |   |                                 `EDAC(RofuncRL)`                                 | ⛔  |                                                                         |     |                  |    |                                                                           |    |
 
 
-
-  
-
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Skylark0924/Rofunc&type=Date)](https://star-history.com/#Skylark0924/Rofunc&Date)
-
 ## Citation
 
 If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
@@ -188,21 +109,6 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 Rofunc is developed and maintained by the [CLOVER Lab (Collaborative and Versatile Robots Laboratory)](https://feichenlab.com/), CUHK.
 
-## Acknowledge
-
-We would like to acknowledge the following projects:
-
-### Learning from Demonstration
-
-1. [pbdlib](https://gitlab.idiap.ch/rli/pbdlib-python)
-2. [Ray RLlib](https://docs.ray.io/en/latest/rllib/index.html)
-3. [ElegantRL](https://github.com/AI4Finance-Foundation/ElegantRL)
-4. [SKRL](https://github.com/Toni-SM/skrl)
-
-### Planning and Control
-
-1. [Robotics codes from scratch (RCFS)](https://gitlab.idiap.ch/rli/robotics-codes-from-scratch)
-
 
 ```{toctree}
 :maxdepth: 3
@@ -210,7 +116,7 @@ We would like to acknowledge the following projects:
 :hidden:
 :glob:
 
-overview
+installation
 quickstart
 auto_examples/index
 ```
@@ -226,4 +132,13 @@ lfd/index
 planning/index
 tools/index
 simulator/index
+```
+
+```{toctree}
+:maxdepth: 3
+:caption: API Reference
+:hidden:
+:glob:
+
+apidocs/index
 ```
