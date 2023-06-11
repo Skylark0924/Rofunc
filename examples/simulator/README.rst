@@ -1,4 +1,4 @@
-Examples of simulator usage
+Simulator 
 -----------------------------
 
 The following examples show how to use the simulator.

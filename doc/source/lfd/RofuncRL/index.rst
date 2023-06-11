@@ -5,7 +5,11 @@ Reinforcement learning class (RofuncRL)
 :doc:`overview`
     Overview of the `RofuncRL` subpackage
 :doc:`PPO`
-    PPO implementation for rofunc
+    PPO implementation and explanation of tricks in `RofuncRL`
+:doc:`SAC`
+    SAC implementation and explanation of tricks in `RofuncRL`
+:doc:`TD3`
+    TD3 implementation and explanation of tricks in `RofuncRL`
 
 
 .. toctree::
@@ -15,5 +19,8 @@ Reinforcement learning class (RofuncRL)
 
    overview
    PPO
+   SAC
+   TD3
+
 
 
