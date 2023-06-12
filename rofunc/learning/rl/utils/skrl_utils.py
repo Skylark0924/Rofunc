@@ -143,13 +143,13 @@ def set_cfg_ppo(cfg, env, device, eval_mode=False):
     # logging to TensorBoard and write checkpoints each 120 and 1200 timesteps respectively
     cfg_ppo["experiment"]["directory"] = os.path.join(os.getcwd(), "runs")
     if eval_mode:
-        cfg_ppo["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "SKRLPPO",
-                                                                         datetime.datetime.now().strftime(
-                                                                             "%y-%m-%d_%H-%M-%S-%f"))
+        cfg_ppo["experiment"]["experiment_name"] = "Eval_{}_{}_{}".format("SKRL_PPO", cfg.task.name,
+                                                                          datetime.datetime.now().strftime(
+                                                                              "%y-%m-%d_%H-%M-%S-%f"))
     else:
-        cfg_ppo["experiment"]["experiment_name"] = "{}{}_{}".format(cfg.task.name, "SKRLPPO",
-                                                                    datetime.datetime.now().strftime(
-                                                                        "%y-%m-%d_%H-%M-%S-%f"))
+        cfg_ppo["experiment"]["experiment_name"] = "{}_{}_{}".format("SKRL_PPO", cfg.task.name,
+                                                                     datetime.datetime.now().strftime(
+                                                                         "%y-%m-%d_%H-%M-%S-%f"))
     return cfg_ppo
 
 
@@ -157,25 +157,18 @@ def set_cfg_td3(cfg, env, device, eval_mode=False):
     """
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.td3.html#configuration-and-hyperparameters
     """
-    cfg_td3 = TD3_DEFAULT_CONFIG.copy()
+    cfg_td3 = omegaconf_to_dict(cfg.train)
     cfg_td3["exploration"]["noise"] = GaussianNoise(0, 0.2, device=device)
     cfg_td3["smooth_regularization_noise"] = GaussianNoise(0, 0.1, device=device)
-    cfg_td3["smooth_regularization_clip"] = 0.1
-    cfg_td3["gradient_steps"] = 1
-    cfg_td3["batch_size"] = 512
-    cfg_td3["random_timesteps"] = 0
-    cfg_td3["learning_starts"] = 0
     # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
-    cfg_td3["experiment"]["write_interval"] = 100
-    cfg_td3["experiment"]["checkpoint_interval"] = 1000
     if eval_mode:
-        cfg_td3["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "TD3",
-                                                                         datetime.datetime.now().strftime(
-                                                                             "%y-%m-%d_%H-%M-%S-%f"))
+        cfg_td3["experiment"]["experiment_name"] = "Eval_{}_{}_{}".format("SKRL_TD3", cfg.task.name,
+                                                                          datetime.datetime.now().strftime(
+                                                                              "%y-%m-%d_%H-%M-%S-%f"))
     else:
-        cfg_td3["experiment"]["experiment_name"] = "{}{}_{}".format(cfg.task.name, "TD3",
-                                                                    datetime.datetime.now().strftime(
-                                                                        "%y-%m-%d_%H-%M-%S-%f"))
+        cfg_td3["experiment"]["experiment_name"] = "{}_{}_{}".format("SKRL_TD3", cfg.task.name,
+                                                                     datetime.datetime.now().strftime(
+                                                                         "%y-%m-%d_%H-%M-%S-%f"))
     return cfg_td3
 
 
@@ -207,32 +200,23 @@ def set_cfg_sac(cfg, env, device, eval_mode=False):
     """
     https://skrl.readthedocs.io/en/latest/modules/skrl.agents.sac.html#configuration-and-hyperparameters
     """
-    cfg_sac = SAC_DEFAULT_CONFIG.copy()
-    cfg_sac["gradient_steps"] = 1
-    cfg_sac["batch_size"] = 256
-    cfg_sac["random_timesteps"] = 1000
-    cfg_sac["learning_starts"] = 1000
-    cfg_sac["actor_learning_rate"] = 1e-3
-    cfg_sac["critic_learning_rate"] = 1e-3
+    cfg_sac = omegaconf_to_dict(cfg.train)
     cfg_sac["learning_rate_scheduler"] = KLAdaptiveRL
     cfg_sac["learning_rate_scheduler_kwargs"] = {"kl_threshold": 0.008}
     cfg_sac["state_preprocessor"] = RunningStandardScaler
     cfg_sac["state_preprocessor_kwargs"] = {"size": env.observation_space, "device": device}
     #
     cfg_sac["learn_entropy"] = True
-    # cfg_sac["entropy_learning_rate"] = 5e-3
     cfg_sac["rewards_shaper"] = lambda rewards, timestep, timesteps: rewards * 0.01
     # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
-    cfg_sac["experiment"]["write_interval"] = 100
-    cfg_sac["experiment"]["checkpoint_interval"] = 1000
     if eval_mode:
-        cfg_sac["experiment"]["experiment_name"] = "Eval_{}{}_{}".format(cfg.task.name, "SAC",
-                                                                         datetime.datetime.now().strftime(
-                                                                             "%y-%m-%d_%H-%M-%S-%f"))
+        cfg_sac["experiment"]["experiment_name"] = "Eval_{}_{}_{}".format("SKRL_SAC", cfg.task.name,
+                                                                          datetime.datetime.now().strftime(
+                                                                              "%y-%m-%d_%H-%M-%S-%f"))
     else:
-        cfg_sac["experiment"]["experiment_name"] = "{}{}_{}".format(cfg.task.name, "SAC",
-                                                                    datetime.datetime.now().strftime(
-                                                                        "%y-%m-%d_%H-%M-%S-%f"))
+        cfg_sac["experiment"]["experiment_name"] = "{}_{}_{}".format("SKRL_SAC", cfg.task.name,
+                                                                     datetime.datetime.now().strftime(
+                                                                         "%y-%m-%d_%H-%M-%S-%f"))
     return cfg_sac
 
 
@@ -247,7 +231,7 @@ def setup(custom_args, eval_mode=False):
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
     sys.argv.append("headless={}".format(custom_args.headless))
-    if custom_args.agent.lower() == "sac":
+    if custom_args.agent.upper() in ["SAC", "TD3"]:
         sys.argv.append("num_envs={}".format(64))
 
     args = get_args_parser().parse_args()
@@ -281,7 +265,7 @@ def setup(custom_args, eval_mode=False):
                          action_space=env.action_space,
                          device=device)
     elif custom_args.agent.lower() == "sac":
-        memory = RandomMemory(memory_size=1000000, num_envs=env.num_envs, device=device, replacement=True)
+        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
         models_sac = {}
         models_sac["policy"] = StochasticActor(env.observation_space, env.action_space, device, clip_actions=True)
         models_sac["critic_1"] = Critic(env.observation_space, env.action_space, device)
@@ -290,7 +274,7 @@ def setup(custom_args, eval_mode=False):
         models_sac["target_critic_2"] = Critic(env.observation_space, env.action_space, device)
         for model in models_sac.values():
             model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
-        cfg_sac = set_cfg_sac(cfg.train, env, device, eval_mode)
+        cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
         agent = SACAgent(models=models_sac,
                          memory=memory,
                          cfg=cfg_sac,
@@ -309,7 +293,7 @@ def setup(custom_args, eval_mode=False):
         models_td3["target_critic_2"] = Critic(env.observation_space, env.action_space, device)
         for model in models_td3.values():
             model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
-        cfg_td3 = set_cfg_td3(cfg.train, env, device, eval_mode)
+        cfg_td3 = set_cfg_td3(cfg, env, device, eval_mode)
         agent = TD3Agent(models=models_td3,
                          memory=memory,
                          cfg=cfg_td3,
@@ -336,6 +320,7 @@ def setup(custom_args, eval_mode=False):
     else:
         raise ValueError("Agent not supported")
 
+    '''Tensorboard and rofunc logger'''
     tb = program.TensorBoard()
     # Find a free port
     with reserve_sock_addr() as (h, p):
