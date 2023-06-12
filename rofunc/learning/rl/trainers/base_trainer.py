@@ -75,9 +75,19 @@ class BaseTrainer:
 
         '''Environment'''
         self.env = wrap_env(env, logger=self.rofunc_logger)
+        self.rofunc_logger.info(f"Environment:\n  action_space: {self.env.action_space.shape}\n  observation_space: "
+                                f"{self.env.observation_space.shape}\n  num_envs: {self.env.num_envs}")
 
         '''Normalization'''
         self.state_norm = Normalization(shape=self.env.observation_space.shape[0], device=device)
+
+    def get_action(self, states):
+        if self._step < self.random_steps:
+            actions = torch.tensor([self.env.action_space.sample() for _ in range(self.env.num_envs)]).to(
+                self.device)  # sample random actions
+        else:
+            actions, _ = self.agent.act(states)
+        return actions
 
     def train(self):
         """
@@ -96,12 +106,9 @@ class BaseTrainer:
         states, infos = self.env.reset()
         for _ in tqdm.trange(self.maximum_steps):
             self.pre_interaction()
+            # Obtain action from agent
             with torch.no_grad():
-                # Obtain action from agent
-                if self._step < self.random_steps:
-                    actions = self.env.action_space.sample()  # sample random actions
-                else:
-                    actions, _ = self.agent.act(states)
+                actions = self.get_action(states)
 
             # Interact with environment
             next_states, rewards, terminated, truncated, infos = self.env.step(actions)
