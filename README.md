@@ -44,7 +44,7 @@ The installation is very easy,
 ```shell
 pip install rofunc
 
-# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
+# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3) and Envs (gymnasium[all], mujoco_py)
 pip install rofunc[baselines]
 ```
 
@@ -87,13 +87,6 @@ sh ./scripts/mac_install.sh
 
 [![Documentation](https://img.shields.io/badge/Documentation-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/)
 [![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)
-
-> **Note**
-> Currently, we provide a simple document; please refer to [here](./rofunc/).
-> A comprehensive one with both English and Chinese versions is built via
-> the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
-> We provide a simple but interesting example: learning to play
-> Taichi by learning from human demonstration.
 
 To give you a quick overview of the pipeline of `rofunc`, we provide an interesting example of learning to play Taichi
 from human demonstration. You can find it in the [Quick start](https://rofunc.readthedocs.io/en/latest/quickstart.html)

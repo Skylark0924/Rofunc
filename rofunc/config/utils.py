@@ -30,9 +30,13 @@ def get_config(config_path=None, config_name=None, args=None, debug=False) -> Di
             try:
                 cfg = hydra_object.compose_config(config_name, args.overrides, run_mode=RunMode.RUN)
             except Exception as e:
-                rf.logger.beauty_print('Use BaseTask config', type='warning')
-                args.overrides[1] = 'train={}'.format('BaseTask' +
-                    args.overrides[1].split('=')[1].split(args.overrides[0].split('=')[1])[1])
+                train = 'BaseTask' + args.overrides[1].split('=')[1].split(args.overrides[0].split('=')[1])[1]
+                args.overrides[1] = 'train={}'.format(train)
+                rf.logger.beauty_print('Use train config: {}.yaml'.format(train), type='warning')
+                if args.overrides[0].split('=')[1].split('_')[0] == 'Gym':
+                    task = 'GymBaseTask'
+                    args.overrides[0] = 'task={}'.format(task)
+                    rf.logger.beauty_print('Use task config: {}.yaml'.format(task), type='warning')
                 cfg = hydra_object.compose_config(config_name, args.overrides, run_mode=RunMode.RUN)
     else:
         with initialize(config_path="./", version_base=None):
