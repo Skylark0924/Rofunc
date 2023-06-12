@@ -20,7 +20,7 @@ Then
 
    pip install rofunc
 
-   # [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
+   # [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3) and Envs (gymnasium[all], mujoco_py)
    pip install rofunc[baselines]
 
 .. note::
