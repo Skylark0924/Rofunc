@@ -31,6 +31,34 @@ class BaseActor(nn.Module):
     def state_norm(self, state: Tensor) -> Tensor:
         return (state - self.state_avg) / self.state_std
 
+    def freeze_parameters(self, freeze: bool = True) -> None:
+        """
+        Freeze or unfreeze internal parameters
+        :param freeze: freeze (True) or unfreeze (False)
+        """
+        for parameters in self.parameters():
+            parameters.requires_grad = not freeze
+
+    def update_parameters(self, model: torch.nn.Module, polyak: float = 1) -> None:
+        """
+        Update internal parameters by hard or soft (polyak averaging) update
+        - Hard update: :math:`\\theta = \\theta_{net}`
+        - Soft (polyak averaging) update: :math:`\\theta = (1 - \\rho) \\theta + \\rho \\theta_{net}`
+        :param model: Model used to update the internal parameters
+        :param polyak: Polyak hyperparameter between 0 and 1 (default: ``1``).
+                       A hard update is performed when its value is 1
+        """
+        with torch.no_grad():
+            # hard update
+            if polyak == 1:
+                for parameters, model_parameters in zip(self.parameters(), model.parameters()):
+                    parameters.data.copy_(model_parameters.data)
+            # soft update (use in-place operations to avoid creating new parameters)
+            else:
+                for parameters, model_parameters in zip(self.parameters(), model.parameters()):
+                    parameters.data.mul_(1 - polyak)
+                    parameters.data.add_(polyak * model_parameters.data)
+
 
 class ActorPPO_Beta(BaseActor):
     def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],

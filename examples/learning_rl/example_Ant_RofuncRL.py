@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Ant")
-    parser.add_argument("--agent", type=str, default="sac")  # Available agents: ppo, sac
+    parser.add_argument("--agent", type=str, default="td3")  # Available agents: ppo, sac, td3
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
