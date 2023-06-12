@@ -3,7 +3,6 @@ from typing import Union, Tuple, Optional
 
 import gym
 import gymnasium
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -223,14 +222,14 @@ class TD3Agent(BaseAgent):
                 self.target_critic_1.update_parameters(self.critic_1, polyak=self._polyak)
                 self.target_critic_2.update_parameters(self.critic_2, polyak=self._polyak)
 
+                self.track_data("Loss / Actor loss", policy_loss.item())
+
             # update learning rate
             if self._lr_scheduler:
                 self.actor_scheduler.step()
                 self.critic_scheduler.step()
 
             # record data
-            if self._critic_update_times % self._policy_update_delay == 0:
-                self.track_data("Loss / Actor loss", policy_loss.item())
             self.track_data("Loss / Critic loss", critic_loss.item())
 
             self.track_data("Q-network / Q1 (max)", torch.max(critic_1_values).item())

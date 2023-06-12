@@ -12,7 +12,7 @@ __all__ = ["wrap_env"]
 
 
 class Wrapper(object):
-    def __init__(self, env: Any) -> None:
+    def __init__(self, env: Any, device=None) -> None:
         """Base wrapper class for RL environments
 
         :param env: The environment to wrap
@@ -25,6 +25,8 @@ class Wrapper(object):
             self.device = torch.device(self._env.device)
         else:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        if device is not None:
+            self.device = torch.device(device)
 
     def __getattr__(self, key: str) -> Any:
         """Get an attribute from the wrapped environment

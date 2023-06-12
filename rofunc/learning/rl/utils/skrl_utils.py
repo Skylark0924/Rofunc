@@ -338,3 +338,92 @@ def setup(custom_args, eval_mode=False):
     rofunc_logger.info("Configurations: \n{}".format(agent.cfg))
 
     return env, agent
+
+
+def setup_agent(cfg, custom_args, env, eval_mode=False):
+    device = env.device
+
+    if custom_args.agent.lower() == "ppo":
+        memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
+        models_ppo = {"policy": Shared(env.observation_space, env.action_space, device)}
+        models_ppo["value"] = models_ppo["policy"]  # same instance: shared model
+        cfg_ppo = set_cfg_ppo(cfg, env, device, eval_mode)
+        agent = PPOAgent(models=models_ppo,
+                         memory=memory,
+                         cfg=cfg_ppo,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device)
+    elif custom_args.agent.lower() == "sac":
+        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
+        models_sac = {}
+        models_sac["policy"] = StochasticActor(env.observation_space, env.action_space, device, clip_actions=True)
+        models_sac["critic_1"] = Critic(env.observation_space, env.action_space, device)
+        models_sac["critic_2"] = Critic(env.observation_space, env.action_space, device)
+        models_sac["target_critic_1"] = Critic(env.observation_space, env.action_space, device)
+        models_sac["target_critic_2"] = Critic(env.observation_space, env.action_space, device)
+        for model in models_sac.values():
+            model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
+        cfg_sac = set_cfg_sac(cfg, env, device, eval_mode)
+        agent = SACAgent(models=models_sac,
+                         memory=memory,
+                         cfg=cfg_sac,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device)
+    elif custom_args.agent.lower() == "td3":
+        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
+        models_td3 = {}
+        models_td3["policy"] = DeterministicActor(env.observation_space, env.action_space, device, clip_actions=True)
+        models_td3["target_policy"] = DeterministicActor(env.observation_space, env.action_space, device,
+                                                         clip_actions=True)
+        models_td3["critic_1"] = Critic(env.observation_space, env.action_space, device)
+        models_td3["critic_2"] = Critic(env.observation_space, env.action_space, device)
+        models_td3["target_critic_1"] = Critic(env.observation_space, env.action_space, device)
+        models_td3["target_critic_2"] = Critic(env.observation_space, env.action_space, device)
+        for model in models_td3.values():
+            model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
+        cfg_td3 = set_cfg_td3(cfg, env, device, eval_mode)
+        agent = TD3Agent(models=models_td3,
+                         memory=memory,
+                         cfg=cfg_td3,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device)
+    elif custom_args.agent.lower() == "ddpg":
+        memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
+        models_ddpg = {}
+        models_ddpg["policy"] = DeterministicActor(env.observation_space, env.action_space, device, clip_actions=True)
+        models_ddpg["target_policy"] = DeterministicActor(env.observation_space, env.action_space, device,
+                                                          clip_actions=True)
+        models_ddpg["critic"] = Critic(env.observation_space, env.action_space, device)
+        models_ddpg["target_critic"] = Critic(env.observation_space, env.action_space, device)
+        for model in models_ddpg.values():
+            model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
+        cfg_ddpg = set_cfg_ddpg(cfg.train, env, device, eval_mode)
+        agent = DDPGAgent(models=models_ddpg,
+                          memory=memory,
+                          cfg=cfg_ddpg,
+                          observation_space=env.observation_space,
+                          action_space=env.action_space,
+                          device=device)
+    else:
+        raise ValueError("Agent not supported")
+
+    '''Tensorboard and rofunc logger'''
+    tb = program.TensorBoard()
+    # Find a free port
+    with reserve_sock_addr() as (h, p):
+        argv = ['tensorboard', f"--logdir={agent.experiment_dir}",
+                f"--port={p}"]
+        tb_extra_args = os.getenv('TB_EXTRA_ARGS', "")
+        if tb_extra_args:
+            argv += tb_extra_args.split(' ')
+        tb.configure(argv)
+    url = tb.launch()
+    rf.logger.beauty_print(f"Tensorflow listening on {url}", type='info')
+    rf.utils.create_dir(agent.experiment_dir)
+
+    rofunc_logger = BeautyLogger(agent.experiment_dir, 'rofunc.log')
+    rofunc_logger.info("Configurations: \n{}".format(agent.cfg))
+    return agent
