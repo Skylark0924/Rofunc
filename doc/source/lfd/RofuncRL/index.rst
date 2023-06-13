@@ -39,8 +39,8 @@ Offline reinforcement learning
 
    overview
    PPO
-   SAC
    TD3
+   SAC
 
 
 

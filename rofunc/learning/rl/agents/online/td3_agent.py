@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
-from rofunc.learning.rl.models.actor_models import ActorSAC
+from rofunc.learning.rl.models.actor_models import ActorTD3
 from rofunc.learning.rl.models.critic_models import Critic
 from rofunc.learning.rl.processors.noises import GaussianNoise
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
@@ -43,15 +43,16 @@ class TD3Agent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for TD3'''
-        self.actor = ActorSAC(cfg.Model, observation_space, action_space).to(self.device)
-        self.target_actor = ActorSAC(cfg.Model, observation_space, action_space).to(self.device)
+        self.actor = ActorTD3(cfg.Model, observation_space, action_space).to(self.device)
+        self.target_actor = ActorTD3(cfg.Model, observation_space, action_space).to(self.device)
         self.critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
         self.critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
         self.target_critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
         self.target_critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
 
-        self.models = {"actor": self.actor, "critic_1": self.critic_1, "critic_2": self.critic_2,
-                       "target_critic_1": self.target_critic_1, "target_critic_2": self.target_critic_2}
+        self.models = {"actor": self.actor, "target_actor": self.target_actor, "critic_1": self.critic_1,
+                       "critic_2": self.critic_2, "target_critic_1": self.target_critic_1,
+                       "target_critic_2": self.target_critic_2}
 
         # checkpoint models
         self.checkpoint_modules["actor"] = self.actor
@@ -168,7 +169,6 @@ class TD3Agent(BaseAgent):
 
         # learning epochs
         for gradient_step in range(self._gradient_steps):
-
             sampled_states = self._state_preprocessor(sampled_states, train=not gradient_step)
             sampled_next_states = self._state_preprocessor(sampled_next_states)
 

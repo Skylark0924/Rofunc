@@ -202,44 +202,15 @@ class ActorSAC(BaseActor):
         log_prob = self.dist.log_prob(action).sum(dim=-1, keepdim=True)
         return action, log_prob
 
-    def get_action(self, state):
-        state = self.state_norm(state)
-        s_enc = self.backbone_net_s(state)  # encoded state
-        a_avg, a_std_log = self.backbone_net_a(s_enc).chunk(2, dim=1)
-        a_std = a_std_log.clamp(-16, 2).exp()
 
-        dist = torch.distributions.normal.Normal(a_avg, a_std)
-        return dist.rsample().tanh()  # action (re-parameterize)
+class ActorTD3(ActorSAC):
+    def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
+        super().__init__(cfg, observation_space, action_space)
 
-    def get_action_logprob(self, state):
-        state = self.state_norm(state)
-        s_enc = self.backbone_net_s(state)  # encoded state
-        a_avg, a_std_log = self.backbone_net_a(s_enc).chunk(2, dim=1)
-        a_std = a_std_log.clamp(-16, 2).exp()
-
-        dist = torch.distributions.normal.Normal(a_avg, a_std)
-        action = dist.rsample()
-
-        action_tanh = action.tanh()
-        logprob = dist.log_prob(a_avg)
-        logprob -= (-action_tanh.pow(2) + 1.000001).log()  # fix logprob using the derivative of action.tanh()
-        return action_tanh, logprob.sum(1)
+    def forward(self, state):
+        state = self.backbone_net(state)
+        mean_action = torch.tanh(self.mean_layer(state))
+        return mean_action, None
 
 
-class ActorFixSAC(ActorSAC):
-    def __init__(self, dims: [int], state_dim: int, action_dim: int):
-        super().__init__(dims=dims, state_dim=state_dim, action_dim=action_dim)
-        self.soft_plus = torch.nn.Softplus()
-
-    def get_action_logprob(self, state):
-        state = self.state_norm(state)
-        s_enc = self.backbone_net_s(state)  # encoded state
-        a_avg, a_std_log = self.backbone_net_a(s_enc).chunk(2, dim=1)
-        a_std = a_std_log.clamp(-16, 2).exp()
-
-        dist = torch.distributions.normal.Normal(a_avg, a_std)
-        action = dist.rsample()
-
-        logprob = dist.log_prob(a_avg)
-        logprob -= 2 * (math.log(2) - action - self.soft_plus(action * -2))  # fix logprob using SoftPlus
-        return action.tanh(), logprob.sum(1)

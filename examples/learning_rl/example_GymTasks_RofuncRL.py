@@ -52,7 +52,7 @@ def eval(custom_args, ckpt_path=None):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 0
     gym_task_name = 'Pendulum-v1'
     # Classic: ['Acrobot-v1', 'CartPole-v1', 'MountainCarContinuous-v0', 'MountainCar-v0', 'Pendulum-v1']
     # Box2D: ['BipedalWalker-v3', 'CarRacing-v1', 'LunarLander-v2']  `pip install gymnasium[box2d]`
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Gym_{}".format(gym_task_name))  # Start with 'Gym_'
-    parser.add_argument("--agent", type=str, default="sac")  # Available agents: ppo, sac, td3
+    parser.add_argument("--agent", type=str, default="td3")  # Available agents: ppo, sac, td3
     parser.add_argument("--render_mode", type=str, default=None)  # Available render_mode: None, "human", "rgb_array"
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))

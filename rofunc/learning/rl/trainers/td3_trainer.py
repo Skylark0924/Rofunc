@@ -12,7 +12,7 @@ from rofunc.learning.rl.utils.memory import RandomMemory
 class TD3Trainer(BaseTrainer):
     def __init__(self, cfg, env, device):
         super().__init__(cfg, env, device)
-        self.memory = RandomMemory(memory_size=16, num_envs=self.env.num_envs, device=device)
+        self.memory = RandomMemory(memory_size=10000, num_envs=self.env.num_envs, device=device, replacement=True)
         self.agent = TD3Agent(cfg, env.observation_space, env.action_space, self.memory,
                               device, self.experiment_dir, self.rofunc_logger)
 
@@ -48,13 +48,10 @@ class TD3Trainer(BaseTrainer):
             wandb.init(**wandb_kwargs)
 
     def get_action(self, states):
-        if self._step < self.random_steps:
-            actions = torch.tensor([self.env.action_space.sample() for _ in range(self.env.num_envs)]).to(
-                self.device)  # sample random actions
-        else:
-            actions, _ = self.agent.act(states)
+        actions = super().get_action(states)
+
         # add exploration noise
-        if self._step < self.random_steps:
+        if self._step < self.random_steps and False:
             # sample noises
             noises = self._exploration_noise.sample(actions.shape)
 
@@ -86,3 +83,12 @@ class TD3Trainer(BaseTrainer):
                 self.agent.track_data("Exploration / Exploration noise (mean)", 0)
 
         return actions
+
+    def post_interaction(self):
+        # Update agent
+        if self._step >= self.start_learning_steps:
+            self.agent.update_net()
+            self._update_times += 1
+            self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
+
+        super().post_interaction()
