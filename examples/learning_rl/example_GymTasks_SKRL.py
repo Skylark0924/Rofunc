@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Gym_{}".format(gym_task_name))  # Start with 'Gym_'
-    parser.add_argument("--agent", type=str, default="sac")  # Available agents: ppo, sac, td3
+    parser.add_argument("--agent", type=str, default="td3")  # Available agents: ppo, sac, td3
     parser.add_argument("--render_mode", type=str, default=None)  # Available render_mode: None, "human", "rgb_array"
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--test", action="store_true", help="turn to test mode while adding this argument")

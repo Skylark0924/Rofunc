@@ -8,6 +8,8 @@ Learning from Demonstration
 :doc:`RofuncRL/index`
     Rofunc reinforcement learning methods for robot learning
 
+![](../../../img/RofuncRL.png)
+
 
 .. toctree::
    :maxdepth: 3
