@@ -13,6 +13,7 @@ import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
 from rofunc.learning.rl.models.actor_models import ActorSAC
 from rofunc.learning.rl.models.critic_models import Critic
+# from rofunc.learning.rl.utils.skrl_utils import StochasticActor, Critic
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
 from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
@@ -48,9 +49,16 @@ class SACAgent(BaseAgent):
         self.critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
         self.target_critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
         self.target_critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
+        # self.actor = StochasticActor(observation_space, action_space, device, clip_actions=True).to(self.device)
+        # self.critic_1 = Critic(observation_space, action_space, device).to(self.device)
+        # self.critic_2 = Critic(observation_space, action_space, device).to(self.device)
+        # self.target_critic_1 = Critic(observation_space, action_space, device).to(self.device)
+        # self.target_critic_2 = Critic(observation_space, action_space, device).to(self.device)
 
         self.models = {"actor": self.actor, "critic_1": self.critic_1, "critic_2": self.critic_2,
                        "target_critic_1": self.target_critic_1, "target_critic_2": self.target_critic_2}
+        # for model in self.models.values():
+        #     model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
 
         # checkpoint models
         self.checkpoint_modules["actor"] = self.actor
@@ -124,9 +132,11 @@ class SACAgent(BaseAgent):
         # entropy
         if self._learn_entropy:
             if self._target_entropy is None:
+                # continuous action space
                 if issubclass(type(self.action_space), gym.spaces.Box) or issubclass(type(self.action_space),
                                                                                      gymnasium.spaces.Box):
                     self._target_entropy = -np.prod(self.action_space.shape).astype(np.float32)
+                # discrete action space
                 elif issubclass(type(self.action_space), gym.spaces.Discrete) or issubclass(type(self.action_space),
                                                                                             gymnasium.spaces.Discrete):
                     self._target_entropy = -self.action_space.n
@@ -179,7 +189,6 @@ class SACAgent(BaseAgent):
 
         # learning epochs
         for gradient_step in range(self._gradient_steps):
-
             sampled_states = self._state_preprocessor(sampled_states, train=not gradient_step)
             sampled_next_states = self._state_preprocessor(sampled_next_states)
 
@@ -212,11 +221,11 @@ class SACAgent(BaseAgent):
             critic_1_values = self.critic_1(sampled_states, actions)
             critic_2_values = self.critic_2(sampled_states, actions)
 
-            policy_loss = (self._entropy_coefficient * log_prob - torch.min(critic_1_values, critic_2_values)).mean()
+            actor_loss = (self._entropy_coefficient * log_prob - torch.min(critic_1_values, critic_2_values)).mean()
 
             # optimization step (actor)
             self.actor_optimizer.zero_grad()
-            policy_loss.backward()
+            actor_loss.backward()
             if self._grad_norm_clip > 0:
                 nn.utils.clip_grad_norm_(self.actor.parameters(), self._grad_norm_clip)
             self.actor_optimizer.step()
@@ -244,7 +253,7 @@ class SACAgent(BaseAgent):
                 self.critic_scheduler.step()
 
             # record data
-            self.track_data("Loss / Actor loss", policy_loss.item())
+            self.track_data("Loss / Actor loss", actor_loss.item())
             self.track_data("Loss / Critic loss", critic_loss.item())
 
             self.track_data("Q-network / Q1 (max)", torch.max(critic_1_values).item())

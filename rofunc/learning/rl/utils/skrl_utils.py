@@ -78,6 +78,10 @@ class StochasticActor(GaussianMixin, Model):
     def compute(self, inputs, role):
         return torch.tanh(self.net(inputs["states"])), self.log_std_parameter, {}
 
+    def suit(self, states):
+        inputs = {"states": states}
+        return self.act(inputs, "policy")[:2]
+
 
 class DeterministicActor(DeterministicMixin, Model):
     def __init__(self, observation_space, action_space, device, clip_actions=False):
@@ -107,6 +111,10 @@ class Critic(DeterministicMixin, Model):
 
     def compute(self, inputs, role):
         return self.net(torch.cat([inputs["states"], inputs["taken_actions"]], dim=1)), {}
+
+    def suit(self, states, actions):
+        inputs = {"states": states, "taken_actions": actions}
+        return self.act(inputs, "value")[0]
 
 
 def set_models_ddpg(env, device):
