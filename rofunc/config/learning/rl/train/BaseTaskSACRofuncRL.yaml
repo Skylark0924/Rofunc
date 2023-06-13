@@ -10,8 +10,8 @@ Trainer:
   rofunc_logger_kwargs:               # Rofunc BeautyLogger kwargs.
     verbose: True                     # If true, print to stdout.
   maximum_steps: 100000               # The maximum number of steps to run for.
-  random_steps: 1000                     # The number of random exploration steps to take.
-  start_learning_steps: 1000             # The number of steps to take before starting network updating.
+  random_steps: 0                     # The number of random exploration steps to take.
+  start_learning_steps: 0             # The number of steps to take before starting network updating.
   seed: 42                            # The random seed.
   rollouts: 16                        # The number of rollouts before updating.
   inference_steps: 1000               # The number of steps to run for inference.
@@ -24,7 +24,7 @@ Agent:
   polyak: 0.005                       # soft update hyperparameter (tau)
 
   gradient_steps: 1                  # The number of gradient steps to take per update.
-  batch_size: 512                    # The number of samples per update.
+  batch_size: 64                     # The number of samples per update.
 
   lr_a: 1e-3                        # Learning rate for actor.
   lr_c: 1e-3                        # Learning rate for critic.
@@ -38,8 +38,7 @@ Agent:
   target_entropy:                  # target entropy
 
   grad_norm_clip: 0.0              # clipping coefficient for the norm of the gradients
-
-  kl_threshold: 0              # Initial coefficient for KL divergence.
+  kl_threshold: 0                  # Initial coefficient for KL divergence.
 
 #  state_preprocessor:            # State preprocessor type.
 #  state_preprocessor_kwargs:     # State preprocessor kwargs.
@@ -59,7 +58,7 @@ Model:
 
   actor:
     mlp_hidden_dims: [ 512, 256, 128 ]
-    mlp_activation: elu
+    mlp_activation: tanh
     use_lstm: false
     lstm_cell_size: 256
     lstm_use_prev_action: false
@@ -68,7 +67,7 @@ Model:
 
   critic:
     mlp_hidden_dims: [ 512, 256, 128 ]
-    mlp_activation: elu
+    mlp_activation: tanh
     use_lstm: false
     lstm_cell_size: 256
     lstm_use_prev_action: false

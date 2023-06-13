@@ -33,3 +33,18 @@ class PPOTrainer(BaseTrainer):
             # init Weights & Biases
             import wandb
             wandb.init(**wandb_kwargs)
+
+    def post_interaction(self):
+        self._rollout += 1
+
+        # Update agent
+        if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
+            # for model in self.agent.models.values():
+            #     model.train(True)
+            self.agent.update_net()
+            # for model in self.agent.models.values():
+            #     model.train(False)
+            self._update_times += 1
+            self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
+
+        super().post_interaction()

@@ -54,7 +54,7 @@ class TD3Trainer(BaseTrainer):
         else:
             actions, _ = self.agent.act(states)
         # add exploration noise
-        if False:
+        if self._step < self.random_steps:
             # sample noises
             noises = self._exploration_noise.sample(actions.shape)
 
