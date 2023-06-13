@@ -10,7 +10,6 @@ import sys
 import gymnasium as gym
 import isaacgym
 
-
 from hydra._internal.utils import get_args_parser
 
 from rofunc.config.utils import get_config
@@ -33,9 +32,10 @@ def train(custom_args):
     gym_task_name = custom_args.task.split('_')[1]
     cfg.task.name = gym_task_name
 
-    set_seed(42)
+    set_seed(cfg.train.Trainer.seed)
 
     env = gym.make(gym_task_name, render_mode=custom_args.render_mode)
+
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=env,
@@ -52,7 +52,7 @@ def eval(custom_args, ckpt_path=None):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 1
     gym_task_name = 'Pendulum-v1'
     # Classic: ['Acrobot-v1', 'CartPole-v1', 'MountainCarContinuous-v0', 'MountainCar-v0', 'Pendulum-v1']
     # Box2D: ['BipedalWalker-v3', 'CarRacing-v1', 'LunarLander-v2']  `pip install gymnasium[box2d]`
