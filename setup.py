@@ -13,7 +13,7 @@ extras = {
 
 setup(
     name="rofunc",
-    version="0.0.1.9.1",
+    version="0.0.2.1",
     description='Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation',
     long_description=long_description,
     long_description_content_type='text/markdown',
