@@ -8,7 +8,8 @@ Learning from Demonstration
 :doc:`RofuncRL/index`
     Rofunc reinforcement learning methods for robot learning
 
-![](../../../img/RofuncRL.png)
+    .. figure:: ../../img/RofuncRL.png
+       :alt:
 
 
 .. toctree::
