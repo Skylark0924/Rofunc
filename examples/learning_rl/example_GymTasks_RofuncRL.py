@@ -30,7 +30,6 @@ def train(custom_args):
     sys.argv.append("headless={}".format(custom_args.headless))
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
-
     gym_task_name = custom_args.task.split('_')[1]
     cfg.task.name = gym_task_name
 
@@ -53,9 +52,9 @@ def eval(custom_args, ckpt_path=None):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 0
     gym_task_name = 'Pendulum-v1'
-    # ['Acrobot-v1', 'CartPole-v1', 'MountainCarContinuous-v0', 'MountainCar-v0', 'Pendulum-v1']
+    # Classic: ['Acrobot-v1', 'CartPole-v1', 'MountainCarContinuous-v0', 'MountainCar-v0', 'Pendulum-v1']
     # Box2D: ['BipedalWalker-v3', 'CarRacing-v1', 'LunarLander-v2']  `pip install gymnasium[box2d]`
     # MuJoCo: ['Ant-v2', 'HalfCheetah-v2', 'Hopper-v2', 'Humanoid-v2', 'InvertedDoublePendulum-v2',
     #          'InvertedPendulum-v2', 'Reacher-v2', 'Swimmer-v2', 'Walker2d-v2']  `pip install -U mujoco-py`

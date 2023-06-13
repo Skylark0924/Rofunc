@@ -9,7 +9,7 @@ from rofunc.learning.rl.utils.memory import RandomMemory
 class SACTrainer(BaseTrainer):
     def __init__(self, cfg, env, device):
         super().__init__(cfg, env, device)
-        self.memory = RandomMemory(memory_size=16, num_envs=self.env.num_envs, device=device)
+        self.memory = RandomMemory(memory_size=10000, num_envs=self.env.num_envs, device=device, replacement=True)
         self.agent = SACAgent(cfg, env.observation_space, env.action_space, self.memory,
                               device, self.experiment_dir, self.rofunc_logger)
 
@@ -33,3 +33,12 @@ class SACTrainer(BaseTrainer):
             # init Weights & Biases
             import wandb
             wandb.init(**wandb_kwargs)
+
+    def post_interaction(self):
+        # Update agent
+        if self._step >= self.start_learning_steps:
+            self.agent.update_net()
+            self._update_times += 1
+            self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
+
+        super().post_interaction()

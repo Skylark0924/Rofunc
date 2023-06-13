@@ -85,8 +85,8 @@ class BaseTrainer:
 
     def get_action(self, states):
         if self._step < self.random_steps:
-            actions = torch.tensor([self.env.action_space.sample() for _ in range(self.env.num_envs)]).to(
-                self.device)  # sample random actions
+            # sample random actions
+            actions = torch.tensor([self.env.action_space.sample() for _ in range(self.env.num_envs)]).to(self.device)
         else:
             actions, _ = self.agent.act(states)
         return actions
@@ -192,18 +192,6 @@ class BaseTrainer:
         pass
 
     def post_interaction(self):
-        self._rollout += 1
-
-        # Update agent
-        if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
-            for model in self.agent.models.values():
-                model.train(True)
-            self.agent.update_net()
-            for model in self.agent.models.values():
-                model.train(False)
-            self._update_times += 1
-            self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
-
         # Update best models and tensorboard
         if not self._step % self.write_interval and self.write_interval > 0 and self._step > 1:
             # update best models
