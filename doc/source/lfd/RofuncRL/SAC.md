@@ -5,7 +5,7 @@
 
 ## Performance comparison
 
-We compare the performance of the PPO algorithm with different tricks and an open source baseline 
+We compare the performance of the SAC algorithm with different tricks and an open source baseline 
 ([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments were conducted on the `Pendulum` environment. 
 The results are shown below:
 

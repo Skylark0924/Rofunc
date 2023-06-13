@@ -13,7 +13,6 @@ import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
 from rofunc.learning.rl.models.actor_models import ActorSAC
 from rofunc.learning.rl.models.critic_models import Critic
-# from rofunc.learning.rl.utils.skrl_utils import StochasticActor, Critic
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
 from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
@@ -49,16 +48,9 @@ class SACAgent(BaseAgent):
         self.critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
         self.target_critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
         self.target_critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
-        # self.actor = StochasticActor(observation_space, action_space, device, clip_actions=True).to(self.device)
-        # self.critic_1 = Critic(observation_space, action_space, device).to(self.device)
-        # self.critic_2 = Critic(observation_space, action_space, device).to(self.device)
-        # self.target_critic_1 = Critic(observation_space, action_space, device).to(self.device)
-        # self.target_critic_2 = Critic(observation_space, action_space, device).to(self.device)
 
         self.models = {"actor": self.actor, "critic_1": self.critic_1, "critic_2": self.critic_2,
                        "target_critic_1": self.target_critic_1, "target_critic_2": self.target_critic_2}
-        # for model in self.models.values():
-        #     model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
 
         # checkpoint models
         self.checkpoint_modules["actor"] = self.actor
@@ -69,15 +61,6 @@ class SACAgent(BaseAgent):
 
         self.rofunc_logger.module(f"Actor model: {self.actor}")
         self.rofunc_logger.module(f"Critic model x4: {self.critic_1}")
-
-        if self.target_critic_1 is not None and self.target_critic_2 is not None:
-            # freeze target networks with respect to optimizers (update via .update_parameters())
-            self.target_critic_1.freeze_parameters(True)
-            self.target_critic_2.freeze_parameters(True)
-
-            # update target networks (hard update)
-            self.target_critic_1.update_parameters(self.critic_1, polyak=1)
-            self.target_critic_2.update_parameters(self.critic_2, polyak=1)
 
         '''Create tensors in memory'''
         self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
@@ -155,6 +138,13 @@ class SACAgent(BaseAgent):
             self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
         else:
             self._state_preprocessor = empty_preprocessor
+
+        # freeze target networks with respect to optimizers (update via .update_parameters())
+        self.target_critic_1.freeze_parameters(True)
+        self.target_critic_2.freeze_parameters(True)
+        # update target networks (hard update)
+        self.target_critic_1.update_parameters(self.critic_1, polyak=1)
+        self.target_critic_2.update_parameters(self.critic_2, polyak=1)
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:
