@@ -9,6 +9,7 @@ from hydra._internal.utils import get_args_parser
 from skrl.agents.torch.ppo import PPO as PPOAgent
 from skrl.agents.torch.sac import SAC as SACAgent
 from skrl.agents.torch.td3 import TD3 as TD3Agent
+from skrl.agents.torch.a2c import A2C as A2CAgent
 from skrl.agents.torch.ddpg import DDPG as DDPGAgent
 from skrl.envs.torch import wrap_env
 from skrl.memories.torch import RandomMemory
@@ -117,6 +118,50 @@ class Critic(DeterministicMixin, Model):
         return self.act(inputs, "value")[0]
 
 
+class Policy(GaussianMixin, Model):
+    def __init__(self, observation_space, action_space, device, clip_actions=False,
+                 clip_log_std=True, min_log_std=-20, max_log_std=2, reduction="sum"):
+        Model.__init__(self, observation_space, action_space, device)
+        GaussianMixin.__init__(self, clip_actions, clip_log_std, min_log_std, max_log_std, reduction)
+
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 64),
+                                 nn.ReLU(),
+                                 nn.Linear(64, 64),
+                                 nn.ReLU(),
+                                 nn.Linear(64, self.num_actions))
+        self.log_std_parameter = nn.Parameter(torch.zeros(self.num_actions))
+
+    def compute(self, inputs, role):
+        # Pendulum-v1 action_space is -2 to 2
+        return 2 * torch.tanh(self.net(inputs["states"])), self.log_std_parameter, {}
+
+    def suit(self, states, actions=None):
+        if actions is None:
+            inputs = {"states": states}
+        else:
+            inputs = {"states": states, "taken_actions": actions}
+        return self.act(inputs, "policy")[:2]
+
+
+class Value(DeterministicMixin, Model):
+    def __init__(self, observation_space, action_space, device, clip_actions=False):
+        Model.__init__(self, observation_space, action_space, device)
+        DeterministicMixin.__init__(self, clip_actions)
+
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 64),
+                                 nn.ReLU(),
+                                 nn.Linear(64, 64),
+                                 nn.ReLU(),
+                                 nn.Linear(64, 1))
+
+    def compute(self, inputs, role):
+        return self.net(inputs["states"]), {}
+
+    def suit(self, states):
+        inputs = {"states": states}
+        return self.act(inputs, "value")[0]
+
+
 def set_models_ddpg(env, device):
     """
     DDPG requires 4 pre_trained_models, visit its documentation for more details
@@ -178,6 +223,26 @@ def set_cfg_td3(cfg, env, device, eval_mode=False):
                                                                      datetime.datetime.now().strftime(
                                                                          "%y-%m-%d_%H-%M-%S-%f"))
     return cfg_td3
+
+
+def set_cfg_a2c(cfg, env, device, eval_mode=False):
+    cfg_a2c = omegaconf_to_dict(cfg.train)
+    cfg_a2c["learning_rate_scheduler"] = KLAdaptiveRL
+    cfg_a2c["learning_rate_scheduler_kwargs"] = {"kl_threshold": 0.008, "min_lr": 5e-4}
+    cfg_a2c["state_preprocessor"] = RunningStandardScaler
+    cfg_a2c["state_preprocessor_kwargs"] = {"size": env.observation_space, "device": device}
+    cfg_a2c["value_preprocessor"] = RunningStandardScaler
+    cfg_a2c["value_preprocessor_kwargs"] = {"size": 1, "device": device}
+    # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
+    if eval_mode:
+        cfg_a2c["experiment"]["experiment_name"] = "Eval_{}_{}_{}".format("SKRL_A2C", cfg.task.name,
+                                                                          datetime.datetime.now().strftime(
+                                                                              "%y-%m-%d_%H-%M-%S-%f"))
+    else:
+        cfg_a2c["experiment"]["experiment_name"] = "{}_{}_{}".format("SKRL_A2C", cfg.task.name,
+                                                                     datetime.datetime.now().strftime(
+                                                                         "%y-%m-%d_%H-%M-%S-%f"))
+    return cfg_a2c
 
 
 def set_cfg_ddpg(cfg, env, device, eval_mode=False):
@@ -308,6 +373,18 @@ def setup(custom_args, eval_mode=False):
                          observation_space=env.observation_space,
                          action_space=env.action_space,
                          device=device)
+    elif custom_args.agent.lower() == "a2c":
+        memory = RandomMemory(memory_size=1024, num_envs=env.num_envs, device=device)
+        models_a2c = {}
+        models_a2c["policy"] = Policy(env.observation_space, env.action_space, device, clip_actions=True)
+        models_a2c["value"] = Value(env.observation_space, env.action_space, device)
+        cfg_a2c = set_cfg_a2c(cfg, env, device, eval_mode)
+        agent = A2CAgent(models=models_a2c,
+                         memory=memory,
+                         cfg=cfg_a2c,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device)
     elif custom_args.agent.lower() == "ddpg":
         memory = RandomMemory(memory_size=10000, num_envs=env.num_envs, device=device, replacement=True)
         models_ddpg = {}
@@ -395,6 +472,18 @@ def setup_agent(cfg, custom_args, env, eval_mode=False):
         agent = TD3Agent(models=models_td3,
                          memory=memory,
                          cfg=cfg_td3,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device)
+    elif custom_args.agent.lower() == "a2c":
+        memory = RandomMemory(memory_size=1024, num_envs=env.num_envs, device=device)
+        models_a2c = {}
+        models_a2c["policy"] = Policy(env.observation_space, env.action_space, device, clip_actions=True)
+        models_a2c["value"] = Value(env.observation_space, env.action_space, device)
+        cfg_a2c = set_cfg_a2c(cfg, env, device, eval_mode)
+        agent = A2CAgent(models=models_a2c,
+                         memory=memory,
+                         cfg=cfg_a2c,
                          observation_space=env.observation_space,
                          action_space=env.action_space,
                          device=device)

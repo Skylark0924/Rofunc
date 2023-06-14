@@ -109,7 +109,7 @@ class ActorPPO_Gaussian(BaseActor):
 
     def forward(self, state, action=None):
         state = self.backbone_net(state)
-        mean_action = self.mean_layer(state)  # [-1,1]
+        mean_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-action_scale, action_scale]
 
         log_std = self.log_std
         if self.cfg.use_log_std_clip:
@@ -134,41 +134,6 @@ class ActorPPO_Gaussian(BaseActor):
     #     return value
 
 
-class ActorDiscretePPO(BaseActor):
-    def __init__(self, dims: [int], state_dim: int, action_dim: int):
-        super().__init__(state_dim=state_dim, action_dim=action_dim)
-        self.backbone_net = build_mlp(dims=[state_dim, *dims, action_dim])
-        init_with_orthogonal(self.backbone_net[-1], std=0.1)
-
-        self.ActionDist = torch.distributions.Categorical
-        self.soft_max = nn.Softmax(dim=-1)
-
-    def forward(self, state: Tensor) -> Tensor:
-        state = self.state_norm(state)
-        a_prob = self.backbone_net(state)  # action_prob without softmax
-        return a_prob.argmax(dim=1)  # get the indices of discrete action
-
-    def get_action(self, state: Tensor) -> (Tensor, Tensor):
-        state = self.state_norm(state)
-        a_prob = self.soft_max(self.backbone_net(state))
-        a_dist = self.ActionDist(a_prob)
-        action = a_dist.sample()
-        logprob = a_dist.log_prob(action)
-        return action, logprob
-
-    def get_logprob_entropy(self, state: Tensor, action: Tensor) -> (Tensor, Tensor):
-        state = self.state_norm(state)
-        a_prob = self.soft_max(self.backbone_net(state))  # action.shape == (batch_size, 1), action.dtype = torch.int
-        dist = self.ActionDist(a_prob)
-        logprob = dist.log_prob(action.squeeze(1))
-        entropy = dist.entropy()
-        return logprob, entropy
-
-    @staticmethod
-    def convert_action_for_env(action: Tensor) -> Tensor:
-        return action.long()
-
-
 class ActorSAC(BaseActor):
     def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
@@ -186,7 +151,7 @@ class ActorSAC(BaseActor):
 
     def forward(self, state, action=None):
         state = self.backbone_net(state)
-        mean_action = torch.tanh(self.mean_layer(state))  # [-1,1]
+        mean_action = self.cfg.actor.action_scale * torch.tanh(self.mean_layer(state))  # [-1,1]
 
         log_std = self.log_std
         if self.cfg.use_log_std_clip:
@@ -212,5 +177,3 @@ class ActorTD3(ActorSAC):
         state = self.backbone_net(state)
         mean_action = torch.tanh(self.mean_layer(state))
         return mean_action, None
-
-
