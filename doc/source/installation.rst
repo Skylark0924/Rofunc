@@ -6,8 +6,7 @@ Installation
 
     .. tab:: stable version
 
-         **Requirements need to be installed manually**
-
+te 
          .. code-block:: shell
 
             # Install pbdlib
