@@ -6,14 +6,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
-from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
-from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
 
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
 from rofunc.learning.rl.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
 from rofunc.learning.rl.models.critic_models import Critic
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
+from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
+from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.rl.utils.memory import Memory
 
 
@@ -46,7 +46,6 @@ class PPOAgent(BaseAgent):
         else:
             self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
         self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
-        # self.value = self.policy
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy

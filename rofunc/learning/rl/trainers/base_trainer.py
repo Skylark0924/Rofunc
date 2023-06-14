@@ -36,9 +36,10 @@ class BaseTrainer:
         if not directory:
             directory = os.path.join(os.getcwd(), "runs")
         if not experiment_name:
-            env_name = env.cfg['name'] if hasattr(env, 'cfg') else env.spec.id
-            experiment_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name,
-                                                         datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f"))
+            experiment_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f")
+        env_name = env.cfg['name'] if hasattr(env, 'cfg') else env.spec.id
+        experiment_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, experiment_name)
+
         self.experiment_dir = os.path.join(directory, experiment_name)
         rf.utils.create_dir(self.experiment_dir)
 
