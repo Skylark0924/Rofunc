@@ -9,8 +9,9 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
-from rofunc.learning.rl.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
-from rofunc.learning.rl.models.critic_models import Critic
+# from rofunc.learning.rl.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
+# from rofunc.learning.rl.models.critic_models import Critic
+from rofunc.learning.rl.utils.skrl_utils import Policy, Value
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
 from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
@@ -27,8 +28,8 @@ class A2CAgent(BaseAgent):
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
         """
-        A
-        “Proximal Policy Optimization Algorithms”. John Schulman. et al. https://arxiv.org/abs/1707.06347
+        Advantage Actor Critic (A2C) agent
+
         Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/PPO.html
         :param cfg: Custom configuration
         :param observation_space: Observation/state space or shape
@@ -41,11 +42,10 @@ class A2CAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for A2C'''
-        if self.cfg.Model.actor.type == "Beta":
-            self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space).to(self.device)
-        else:
-            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
+        # self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
+        # self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
+        self.policy = Policy(observation_space, action_space, device, clip_actions=True).to(self.device)
+        self.value = Value(observation_space, action_space, device).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
@@ -79,7 +79,6 @@ class A2CAgent(BaseAgent):
         self._adam_eps = self.cfg.Agent.adam_eps
         self._use_gae = self.cfg.Agent.use_gae
         self._entropy_loss_scale = self.cfg.Agent.entropy_loss_scale
-        self._value_loss_scale = self.cfg.Agent.value_loss_scale
         self._grad_norm_clip = self.cfg.Agent.grad_norm_clip
         self._ratio_clip = self.cfg.Agent.ratio_clip
         self._value_clip = self.cfg.Agent.value_clip
@@ -133,21 +132,12 @@ class A2CAgent(BaseAgent):
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:
             # sample stochastic actions
-            if self.cfg.Model.actor.type == "Beta":
-                dist = self.policy.get_dist(self._state_preprocessor(states))
-                actions = dist.rsample()  # Sample the action according to the probability distribution
-                log_prob = dist.log_prob(actions)  # The log probability density of the action
-            else:
-                actions, log_prob = self.policy(self._state_preprocessor(states))
+            actions, log_prob = self.policy.suit(self._state_preprocessor(states))
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
-            if self.cfg.Model.actor.type == "Beta":
-                actions = self.policy.mean(self._state_preprocessor(states)).detach()
-                log_prob = None
-            else:
-                actions = self.policy(self._state_preprocessor(states)).detach()
-                log_prob = None
+            actions = self.policy.suit(self._state_preprocessor(states)).detach()
+            log_prob = None
         return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
@@ -155,21 +145,20 @@ class A2CAgent(BaseAgent):
         super().store_transition(states=states, actions=actions, next_states=next_states, rewards=rewards,
                                  terminated=terminated, truncated=truncated, infos=infos)
 
-        if self.memory is not None:
-            self._current_next_states = next_states
+        self._current_next_states = next_states
 
-            # reward shaping
-            if self._rewards_shaper is not None:
-                rewards = self._rewards_shaper(rewards)
+        # reward shaping
+        if self._rewards_shaper is not None:
+            rewards = self._rewards_shaper(rewards)
 
-            # compute values
-            values = self.value(self._state_preprocessor(states))
-            values = self._value_preprocessor(values, inverse=True)
+        # compute values
+        values = self.value.suit(self._state_preprocessor(states))
+        values = self._value_preprocessor(values, inverse=True)
 
-            # storage transition in memory
-            self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
-                                    terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
-                                    values=values)
+        # storage transition in memory
+        self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
+                                terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
+                                values=values)
 
     def update_net(self):
         """
@@ -181,7 +170,7 @@ class A2CAgent(BaseAgent):
 
         with torch.no_grad():
             self.value.train(False)
-            next_values = self.value(self._state_preprocessor(self._current_next_states.float()))
+            next_values = self.value.suit(self._state_preprocessor(self._current_next_states.float()))
             self.value.train(True)
         next_values = self._value_preprocessor(next_values, inverse=True)
 
@@ -220,7 +209,7 @@ class A2CAgent(BaseAgent):
             for i, (sampled_states, sampled_actions, sampled_dones, sampled_log_prob, sampled_values, sampled_returns,
                     sampled_advantages) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
-                _, log_prob_now = self.policy(sampled_states, sampled_actions)
+                _, log_prob_now = self.policy.suit(sampled_states, sampled_actions)
 
                 # compute approximate KL divergence
                 with torch.no_grad():
@@ -228,29 +217,20 @@ class A2CAgent(BaseAgent):
                     kl_divergence = ((torch.exp(ratio) - 1) - ratio).mean()
                     kl_divergences.append(kl_divergence)
 
-                # early stopping with KL divergence
-                if self._kl_threshold and kl_divergence > self._kl_threshold:
-                    break
-
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
 
                 # compute policy loss
-                ratio = torch.exp(log_prob_now - sampled_log_prob)
-                surrogate = sampled_advantages * ratio
-                surrogate_clipped = sampled_advantages * torch.clip(ratio, 1.0 - self._ratio_clip,
-                                                                    1.0 + self._ratio_clip)
-
-                policy_loss = -torch.min(surrogate, surrogate_clipped).mean()
+                policy_loss = -(sampled_advantages * log_prob_now).mean()
 
                 # compute value loss
-                predicted_values = self.value(sampled_states)
+                predicted_values = self.value.suit(sampled_states)
 
                 if self._clip_predicted_values:
                     predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,
                                                                    min=-self._value_clip,
                                                                    max=self._value_clip)
-                value_loss = self._value_loss_scale * F.mse_loss(sampled_returns, predicted_values)
+                value_loss = F.mse_loss(sampled_returns, predicted_values)
 
                 if self.policy is self.value:
                     # optimization step

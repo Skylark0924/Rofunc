@@ -155,21 +155,20 @@ class PPOAgent(BaseAgent):
         super().store_transition(states=states, actions=actions, next_states=next_states, rewards=rewards,
                                  terminated=terminated, truncated=truncated, infos=infos)
 
-        if self.memory is not None:
-            self._current_next_states = next_states
+        self._current_next_states = next_states
 
-            # reward shaping
-            if self._rewards_shaper is not None:
-                rewards = self._rewards_shaper(rewards)
+        # reward shaping
+        if self._rewards_shaper is not None:
+            rewards = self._rewards_shaper(rewards)
 
-            # compute values
-            values = self.value(self._state_preprocessor(states))
-            values = self._value_preprocessor(values, inverse=True)
+        # compute values
+        values = self.value(self._state_preprocessor(states))
+        values = self._value_preprocessor(values, inverse=True)
 
-            # storage transition in memory
-            self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
-                                    terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
-                                    values=values)
+        # storage transition in memory
+        self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
+                                terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
+                                values=values)
 
     def update_net(self):
         """
