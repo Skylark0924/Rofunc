@@ -115,8 +115,7 @@ class PlaygroundSim:
 
 class RobotSim:
     def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=False,
-                 flip_visual_attachments=True,
-                 init_pose_vec=None, num_envs=1, device="cpu"):
+                 flip_visual_attachments=True, init_pose_vec=None, num_envs=1, device="cpu"):
         """
         Initialize the robot simulator
         :param args: arguments
@@ -168,12 +167,13 @@ class RobotSim:
                 "The robot {} is not supported. Please choose a robot in [CURI, walker, CURI-mini, baxter, sawyer]".format(
                     self.robot_name))
 
-        if hasattr(self.args, "up_axis"): # TODO: suit for z-up setting
+        if hasattr(self.args, "up_axis"):  # TODO: suit for z-up setting
             up_axis = self.args.up_axis.upper()
             if up_axis == "Z":
                 pos_z, pos_y = pos_y, pos_z
-        self.init_pose_vec = (0., pos_y, pos_z, -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+        self.init_pose_vec = (0., pos_y, pos_z, -0.707107, 0., 0., 0.707107) if self.init_pose_vec is None else self.init_pose_vec
 
+        # Find the asset root folder
         if asset_root is None:
             import site
             pip_root_path = site.getsitepackages()[0]
