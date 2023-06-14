@@ -23,7 +23,7 @@ pip3rf install pip==21.3.1
 
 # Install the requirements and rofunc
 pip3rf install -r requirements.txt
-pip3rf install -e . --use-deprecated=legacy-resolver
+pip3rf install . --use-deprecated=legacy-resolver
 
 
 
