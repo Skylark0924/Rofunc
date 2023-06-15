@@ -13,7 +13,7 @@ We compare the performance of the A2C algorithm with different tricks and an ope
 ([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments were conducted on the `Pendulum-v1` environment.
 The results are shown below:
 
-### CURICabinet
+### Pendulum
 ![Pendulum](../../../img/RofuncA2C_Pendulum_perf.png)
 - `Dark Blue`: SKRL A2C
 - `Green`: Rofunc A2C with SKRL policy and value network
