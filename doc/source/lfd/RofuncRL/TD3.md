@@ -2,6 +2,10 @@
 
 ## Algorithm 
 
+```{literalinclude} ../../../../rofunc/learning/rl/agents/online/td3_agent.py
+:pyobject: TD3Agent.update_net
+```
+
 ## Performance comparison
 
 We compare the performance of the TD3 algorithm with different tricks and an open source baseline 

@@ -1,3 +1,4 @@
+seed: 42
 rollouts: 1024
 learning_epochs: 10
 mini_batches: 32

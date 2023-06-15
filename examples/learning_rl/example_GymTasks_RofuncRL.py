@@ -35,6 +35,8 @@ def train(custom_args):
     set_seed(cfg.train.Trainer.seed)
 
     env = gym.make(gym_task_name, render_mode=custom_args.render_mode)
+    if custom_args.agent == 'a2c':
+        env = gym.vector.make(gym_task_name, render_mode=custom_args.render_mode, num_envs=10, asynchronous=False)
 
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
@@ -52,7 +54,7 @@ def eval(custom_args, ckpt_path=None):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 1
     gym_task_name = 'Pendulum-v1'
     # Classic: ['Acrobot-v1', 'CartPole-v1', 'MountainCarContinuous-v0', 'MountainCar-v0', 'Pendulum-v1']
     # Box2D: ['BipedalWalker-v3', 'CarRacing-v1', 'LunarLander-v2']  `pip install gymnasium[box2d]`

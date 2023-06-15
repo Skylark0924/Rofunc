@@ -173,7 +173,6 @@ class PPOAgent(BaseAgent):
     def update_net(self):
         """
         Update the network
-        :return:
         """
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")

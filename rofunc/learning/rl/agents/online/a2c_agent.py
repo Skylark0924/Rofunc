@@ -9,9 +9,9 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
-# from rofunc.learning.rl.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
-# from rofunc.learning.rl.models.critic_models import Critic
-from rofunc.learning.rl.utils.skrl_utils import Policy, Value
+from rofunc.learning.rl.models.actor_models import ActorPPO_Gaussian
+from rofunc.learning.rl.models.critic_models import Critic
+# from rofunc.learning.rl.utils.skrl_utils import Policy, Value
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
 from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
@@ -42,10 +42,10 @@ class A2CAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for A2C'''
-        # self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
-        # self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
-        self.policy = Policy(observation_space, action_space, device, clip_actions=True).to(self.device)
-        self.value = Value(observation_space, action_space, device).to(self.device)
+        self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
+        self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
+        # self.policy = Policy(observation_space, action_space, device, clip_actions=True).to(self.device)
+        # self.value = Value(observation_space, action_space, device).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
@@ -132,11 +132,11 @@ class A2CAgent(BaseAgent):
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:
             # sample stochastic actions
-            actions, log_prob = self.policy.suit(self._state_preprocessor(states))
+            actions, log_prob = self.policy(self._state_preprocessor(states))
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
-            actions = self.policy.suit(self._state_preprocessor(states)).detach()
+            actions = self.policy(self._state_preprocessor(states)).detach()
             log_prob = None
         return actions, log_prob
 
@@ -152,7 +152,7 @@ class A2CAgent(BaseAgent):
             rewards = self._rewards_shaper(rewards)
 
         # compute values
-        values = self.value.suit(self._state_preprocessor(states))
+        values = self.value(self._state_preprocessor(states))
         values = self._value_preprocessor(values, inverse=True)
 
         # storage transition in memory
@@ -163,14 +163,13 @@ class A2CAgent(BaseAgent):
     def update_net(self):
         """
         Update the network
-        :return:
         """
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
 
         with torch.no_grad():
             self.value.train(False)
-            next_values = self.value.suit(self._state_preprocessor(self._current_next_states.float()))
+            next_values = self.value(self._state_preprocessor(self._current_next_states.float()))
             self.value.train(True)
         next_values = self._value_preprocessor(next_values, inverse=True)
 
@@ -209,7 +208,7 @@ class A2CAgent(BaseAgent):
             for i, (sampled_states, sampled_actions, sampled_dones, sampled_log_prob, sampled_values, sampled_returns,
                     sampled_advantages) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
-                _, log_prob_now = self.policy.suit(sampled_states, sampled_actions)
+                _, log_prob_now = self.policy(sampled_states, sampled_actions)
 
                 # compute approximate KL divergence
                 with torch.no_grad():
@@ -224,7 +223,7 @@ class A2CAgent(BaseAgent):
                 policy_loss = -(sampled_advantages * log_prob_now).mean()
 
                 # compute value loss
-                predicted_values = self.value.suit(sampled_states)
+                predicted_values = self.value(sampled_states)
 
                 if self._clip_predicted_values:
                     predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,
