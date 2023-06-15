@@ -30,6 +30,10 @@ $$
     \delta_t^V=r_t+\gamma V\left(s_{t+1}\right)-V\left(s_{t}\right)
 $$
 
+```{literalinclude} ../../../../rofunc/learning/rl/agents/online/ppo_agent.py
+:pyobject: PPOAgent.update_net
+```
+
 
 ## Performance comparison
 

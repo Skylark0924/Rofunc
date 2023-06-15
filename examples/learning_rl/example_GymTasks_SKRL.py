@@ -7,13 +7,14 @@ Gym Tasks RL using SKRL
 
 import argparse
 import sys
-import gymnasium as gym
+import isaacgym
 
+import gymnasium as gym
 from hydra._internal.utils import get_args_parser
 from skrl.trainers.torch import SequentialTrainer
-from skrl.envs.torch import wrap_env
 
 from rofunc.config.utils import get_config
+from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
 from rofunc.learning.rl.utils.skrl_utils import setup_agent
 from rofunc.learning.utils.utils import set_seed
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -30,12 +31,12 @@ def train(custom_args):
     gym_task_name = custom_args.task.split('_')[1]
     cfg.task.name = gym_task_name
 
-    set_seed(42)
+    set_seed(cfg.seed)
 
     env = gym.make(gym_task_name, render_mode=custom_args.render_mode)
-    # if custom_args.agent == 'A2C':
-    #     env = gym.make(gym_task_name, render_mode=custom_args.render_mode, num_envs=10, asynchronous=False)
-    env = wrap_env(env)
+    if custom_args.agent == 'a2c':
+        env = gym.vector.make(gym_task_name, render_mode=custom_args.render_mode, num_envs=10, asynchronous=False)
+    env = wrap_env(env, seed=cfg.seed, verbose=False)
     agent = setup_agent(cfg, custom_args, env)
 
     # Configure and instantiate the RL trainer

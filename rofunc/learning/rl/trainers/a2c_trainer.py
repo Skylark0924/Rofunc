@@ -10,7 +10,7 @@ class A2CTrainer(BaseTrainer):
     def __init__(self, cfg, env, device):
         super().__init__(cfg, env, device)
         self.memory = RandomMemory(memory_size=cfg.Trainer.rollouts, num_envs=self.env.num_envs, device=device)
-        self.agent = A2CAgent(cfg, env.observation_space, env.action_space, self.memory,
+        self.agent = A2CAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
                               device, self.experiment_dir, self.rofunc_logger)
 
         '''Wandb and Tensorboard'''
