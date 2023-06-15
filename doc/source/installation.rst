@@ -4,9 +4,9 @@ Installation
 
 .. tabs::
 
-    .. tab:: stable version
+    .. tab:: Stable version (PyPI)
 
-         **Requirements need to be installed manually**
+         **Some requirements need to be installed manually**
 
          .. code-block:: shell
 
@@ -24,24 +24,24 @@ Installation
             # [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3) and Envs (gymnasium[all], mujoco_py)
             pip install rofunc[baselines]
 
-    .. tab:: nightly version (recommended)
+    .. tab:: Nightly version (recommended)
 
 
          .. code-block:: shell
 
-         git clone https://github.com/Skylark0924/Rofunc.git
-         cd Rofunc
+            git clone https://github.com/Skylark0924/Rofunc.git
+            cd Rofunc
 
-         # Create a conda environment
-         # Python 3.8 is strongly recommended
-         conda create -n rofunc python=3.8
+            # Create a conda environment
+            # Python 3.8 is strongly recommended
+            conda create -n rofunc python=3.8
 
-         # For Linux user
-         sh ./scripts/install.sh
-         # [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
-         sh ./scripts/install_w_baselines.sh
-         # [Option] For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
-         sh ./scripts/mac_install.sh
+            # For Linux user
+            sh ./scripts/install.sh
+            # [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
+            sh ./scripts/install_w_baselines.sh
+            # [Option] For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
+            sh ./scripts/mac_install.sh
 
 
 .. note::
