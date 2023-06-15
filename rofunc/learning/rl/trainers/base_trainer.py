@@ -77,7 +77,7 @@ class BaseTrainer:
 
         '''Environment'''
         env.device = self.device
-        self.env = wrap_env(env, logger=self.rofunc_logger)
+        self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.Trainer.seed)
         self.rofunc_logger.info(f"Environment:\n  action_space: {self.env.action_space.shape}\n  observation_space: "
                                 f"{self.env.observation_space.shape}\n  num_envs: {self.env.num_envs}")
 
