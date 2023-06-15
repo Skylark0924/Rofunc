@@ -28,7 +28,7 @@ class PPOAgent(BaseAgent):
                  rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
         """
         Proximal Policy Optimization (PPO) agent
-        “Proximal Policy Optimization Algorithms”. John Schulman. et al. https://arxiv.org/abs/1707.06347
+        “Proximal Policy Optimization Algorithms”. John Schulman. et al. 2017. https://arxiv.org/abs/1707.06347
         Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/PPO.html
         :param cfg: Custom configuration
         :param observation_space: Observation/state space or shape

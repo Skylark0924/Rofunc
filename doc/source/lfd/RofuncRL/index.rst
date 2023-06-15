@@ -42,9 +42,14 @@ Offline reinforcement learning
    :glob:
 
    overview
+   A2C
    PPO
    TD3
    SAC
-
-
-
+   AMP
+   ODTrans
+   CQL
+   BCQ
+   DTrans
+   TD3-BC
+   EDAC

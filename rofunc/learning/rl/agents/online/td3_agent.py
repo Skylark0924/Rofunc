@@ -30,7 +30,7 @@ class TD3Agent(BaseAgent):
                  rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
         """
         Twin Delayed Deep Deterministic Policy Gradient (TD3) agent
-        “Addressing Function Approximation Error in Actor-Critic Methods”. Scott Fujimoto. et al. https://arxiv.org/abs/1802.09477
+        “Addressing Function Approximation Error in Actor-Critic Methods”. Fujimoto. et al. 2018. https://arxiv.org/abs/1802.09477
         Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/TD3.html
         :param cfg: Custom configuration
         :param observation_space: Observation/state space or shape
