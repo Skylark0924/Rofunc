@@ -7,12 +7,16 @@ Online reinforcement learning
 
 :doc:`overview`
     Overview of the `RofuncRL` subpackage
+:doc:`A2C`
+    A2C implementation and explanation of tricks in `RofuncRL`
 :doc:`PPO`
     PPO implementation and explanation of tricks in `RofuncRL`
 :doc:`TD3`
     TD3 implementation and explanation of tricks in `RofuncRL`
 :doc:`SAC`
     SAC implementation and explanation of tricks in `RofuncRL`
+:doc:`AMP`
+    AMP implementation and explanation of tricks in `RofuncRL`
 :doc:`ODTrans`
     ODTrans implementation and explanation of tricks in `RofuncRL`
 

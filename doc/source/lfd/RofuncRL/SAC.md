@@ -13,6 +13,7 @@ We compare the performance of the SAC algorithm with different tricks and an ope
 ([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments were conducted on the `Pendulum` environment. 
 The results are shown below:
 
+### Pendulum
 ![Pendulum](../../../img/RofuncSAC_Pendulum_perf.png)
 - `Pink`: SKRL SAC
 - `Blue`: Rofunc SAC with ReLU activation function and batch size of 64
