@@ -55,6 +55,7 @@ extensions = [
     "sphinx_pyscript",
     "sphinx_tippy",
     "sphinx_togglebutton",
+    'sphinx_tabs.tabs'
 ]
 
 sphinx_gallery_conf = {
