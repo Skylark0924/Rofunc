@@ -483,7 +483,7 @@ class GymWrapper(Wrapper):
 
 
 class GymnasiumWrapper(Wrapper):
-    def __init__(self, env: Any) -> None:
+    def __init__(self, env: Any, seed: int) -> None:
         """Gymnasium environment wrapper
 
         :param env: The environment to wrap
@@ -492,6 +492,7 @@ class GymnasiumWrapper(Wrapper):
         super().__init__(env)
 
         self._vectorized = False
+        self.seed = seed
         try:
             if isinstance(env, gymnasium.vector.SyncVectorEnv) or isinstance(env, gymnasium.vector.AsyncVectorEnv):
                 self._vectorized = True
@@ -622,7 +623,10 @@ class GymnasiumWrapper(Wrapper):
             self._reset_once = False
 
         # reset the env/envs
-        observation, info = self._env.reset()
+        if self.seed is None:
+            observation, info = self._env.reset()
+        else:
+            observation, info = self._env.reset(seed=self.seed)
         return self._observation_to_tensor(observation), info
 
     def render(self, *args, **kwargs) -> None:
@@ -933,16 +937,9 @@ class RobosuiteWrapper(Wrapper):
         self._env.close()
 
 
-def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None) -> Wrapper:
-    """Wrap an environment to use a common interface
-
-    Example::
-
-        >>> from skrl.envs.torch import wrap_env
-        >>>
-        >>> # assuming that there is an environment called "env"
-        >>> env = wrap_env(env)
-
+def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None, seed=None) -> Wrapper:
+    """
+    Wrap an environment to use a common interface
     :param env: The environment to be wrapped
     :param wrapper: The type of wrapper to use (default: "auto").
                     If ``"auto"``, the wrapper will be automatically selected based on the environment class.
@@ -974,10 +971,8 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None)
                     |Isaac Sim (orbit)   |``"isaac-orbit"``        |
                     +--------------------+-------------------------+
     :param verbose: Whether to print the wrapper type (default: True)
-    :param logger: The logger to use (default: None)
-    :raises ValueError: Unknow wrapper type
-    :return: Wrapped environment
-    :rtype: Wrapper
+    :param logger: rofunc logger (default: None)
+    :param seed: random seed for env (default: None)
     """
     if verbose:
         logger.info("Environment class: {}".format(", ".join([str(base).replace("<class '", "").replace("'>", "") \
@@ -1002,7 +997,7 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None)
         elif isinstance(env, gymnasium.core.Env) or isinstance(env, gymnasium.core.Wrapper):
             if verbose:
                 logger.info("Environment wrapper: Gymnasium")
-            return GymnasiumWrapper(env)
+            return GymnasiumWrapper(env, seed)
         elif "<class 'dm_env._environment.Environment'>" in base_classes:
             if verbose:
                 logger.info("Environment wrapper: DeepMind")
