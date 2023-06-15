@@ -12,6 +12,7 @@ sphinx-autodoc2
 sphinx_pyscript
 sphinx_tippy
 sphinx_togglebutton
+sphinx-tabs
 pillow
 neurokit2
 gdown
