@@ -1,4 +1,4 @@
-# RofuncRL AMP (Advantage Actor-Critic)
+# RofuncRL AMP (Adversarial Motion Priors)
 
 
 ## Algorithm 

@@ -30,7 +30,7 @@ class SACAgent(BaseAgent):
                  rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
         """
         Soft Actor-Critic (SAC) agent
-        "Soft Actor-Critic Algorithms and Applications" (https://arxiv.org/abs/1812.05905)
+        "Soft Actor-Critic Algorithms and Applications". Haarnoja et al. 2018. https://arxiv.org/abs/1812.05905
         Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/SAC.html
         :param cfg: Custom configuration
         :param observation_space: Observation/state space or shape
