@@ -37,7 +37,12 @@ class BaseTrainer:
             directory = os.path.join(os.getcwd(), "runs")
         if not experiment_name:
             experiment_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f")
-        env_name = env.cfg['name'] if hasattr(env, 'cfg') else env.spec.id
+        if hasattr(env, 'cfg'):
+            env_name = env.cfg['name']
+        elif hasattr(env, 'envs'):
+            env_name = env.envs[0].spec.id
+        else:  # vectorized env
+            env_name = env.spec.id
         experiment_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, experiment_name)
 
         self.experiment_dir = os.path.join(directory, experiment_name)

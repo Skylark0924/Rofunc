@@ -3,6 +3,10 @@
 
 ## Algorithm 
 
+```{literalinclude} ../../../../rofunc/learning/rl/agents/online/sac_agent.py
+:pyobject: SACAgent.update_net
+```
+
 ## Performance comparison
 
 We compare the performance of the SAC algorithm with different tricks and an open source baseline 
