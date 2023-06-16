@@ -162,6 +162,21 @@ class Value(DeterministicMixin, Model):
         return self.act(inputs, "value")[0]
 
 
+class Discriminator(DeterministicMixin, Model):
+    def __init__(self, observation_space, action_space, device, clip_actions=False):
+        Model.__init__(self, observation_space, action_space, device)
+        DeterministicMixin.__init__(self, clip_actions)
+
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 1024),
+                                 nn.ReLU(),
+                                 nn.Linear(1024, 512),
+                                 nn.ReLU(),
+                                 nn.Linear(512, 1))
+
+    def compute(self, inputs, role):
+        return self.net(inputs["states"]), {}
+
+
 def set_models_ddpg(env, device):
     """
     DDPG requires 4 pre_trained_models, visit its documentation for more details
@@ -267,6 +282,26 @@ def set_cfg_ddpg(cfg, env, device, eval_mode=False):
                                                                      datetime.datetime.now().strftime(
                                                                          "%y-%m-%d_%H-%M-%S-%f"))
     return cfg_ddpg
+
+
+def set_cfg_amp(cfg, env, device, eval_mode=False):
+    cfg_amp = omegaconf_to_dict(cfg.train)
+    cfg_amp["learning_rate_scheduler"] = KLAdaptiveRL
+    cfg_amp["learning_rate_scheduler_kwargs"] = {"kl_threshold": 0.008, "min_lr": 5e-4}
+    cfg_amp["state_preprocessor"] = RunningStandardScaler
+    cfg_amp["state_preprocessor_kwargs"] = {"size": env.observation_space, "device": device}
+    cfg_amp["value_preprocessor"] = RunningStandardScaler
+    cfg_amp["value_preprocessor_kwargs"] = {"size": 1, "device": device}
+    # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
+    if eval_mode:
+        cfg_amp["experiment"]["experiment_name"] = "Eval_{}_{}_{}".format("SKRL_AMP", cfg.task.name,
+                                                                          datetime.datetime.now().strftime(
+                                                                              "%y-%m-%d_%H-%M-%S-%f"))
+    else:
+        cfg_amp["experiment"]["experiment_name"] = "{}_{}_{}".format("SKRL_AMP", cfg.task.name,
+                                                                     datetime.datetime.now().strftime(
+                                                                         "%y-%m-%d_%H-%M-%S-%f"))
+    return cfg_amp
 
 
 def set_cfg_sac(cfg, env, device, eval_mode=False):
@@ -504,6 +539,27 @@ def setup_agent(cfg, custom_args, env, eval_mode=False):
                           observation_space=env.observation_space,
                           action_space=env.action_space,
                           device=device)
+
+    elif custom_args.agent.lower() == "amp":
+        memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
+        models_amp = {}
+        models_amp["policy"] = Policy(env.observation_space, env.action_space, device)
+        models_amp["value"] = Value(env.observation_space, env.action_space, device)
+        models_amp["discriminator"] = Discriminator(env.amp_observation_space, env.action_space, device)
+        cfg_amp = set_cfg_amp(cfg, env, device, eval_mode)
+        agent = AMPAgent(models=models_amp,
+                         memory=memory,
+                         cfg=cfg_amp,
+                         observation_space=env.observation_space,
+                         action_space=env.action_space,
+                         device=device,
+                         amp_observation_space=env.amp_observation_space,
+                         motion_dataset=RandomMemory(memory_size=200000, device=device),
+                         reply_buffer=RandomMemory(memory_size=1000000, device=device),
+                         collect_reference_motions=lambda num_samples: env.fetch_amp_obs_demo(num_samples),
+                         collect_observation=lambda: env.reset_done()[0]["obs"])
+
+
     else:
         raise ValueError("Agent not supported")
 

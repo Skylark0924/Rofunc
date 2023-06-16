@@ -1,6 +1,3 @@
-import copy
-import os
-
 from rofunc.learning.rl.agents.online.a2c_agent import A2CAgent
 from rofunc.learning.rl.trainers.base_trainer import BaseTrainer
 from rofunc.learning.rl.utils.memory import RandomMemory

@@ -9,8 +9,9 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.learning.rl.agents.base_agent import BaseAgent
-from rofunc.learning.rl.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
-from rofunc.learning.rl.models.critic_models import Critic
+# from rofunc.learning.rl.models.actor_models import ActorPPO_Gaussian
+# from rofunc.learning.rl.models.critic_models import Critic
+from rofunc.learning.rl.utils.skrl_utils import Policy, Value, Discriminator
 from rofunc.learning.rl.processors.normalizers import empty_preprocessor
 from rofunc.learning.rl.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.rl.processors.standard_scaler import RunningStandardScaler
@@ -41,12 +42,12 @@ class AMPAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for AMP'''
-        if self.cfg.Model.actor.type == "Beta":
-            self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space).to(self.device)
-        else:
-            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
-        self.models = {"policy": self.policy, "value": self.value}
+        # self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
+        # self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
+        self.discriminator = Discriminator(cfg.amp_observation_space, action_space, device)
+        self.policy = Policy(observation_space, action_space, device, clip_actions=True).to(self.device)
+        self.value = Value(observation_space, action_space, device).to(self.device)
+        self.models = {"policy": self.policy, "value": self.value, "discriminator": self.discriminator}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
         self.checkpoint_modules["value"] = self.value
