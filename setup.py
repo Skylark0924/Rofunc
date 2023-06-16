@@ -7,8 +7,8 @@ long_description = (this_directory / "README.md").read_text()
 
 # Environment-specific dependencies.
 extras = {
-    "baselines": ["skrl==0.10.2", "ray[rllib]==2.2.0", "stable-baselines3==1.8.0", "mujoco_py==2.1.2.14",
-                  "gym[all]==0.26.2", "gymnasium[all]==0.28.1"],
+    "baselines": ["skrl==0.10.2", "ray[rllib]==2.2.0", "stable-baselines3==1.8.0", "rl-games==1.6.0",
+                  "mujoco_py==2.1.2.14", "gym[all]==0.26.2", "gymnasium[all]==0.28.1"],
 }
 
 setup(

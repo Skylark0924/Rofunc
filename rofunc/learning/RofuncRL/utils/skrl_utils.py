@@ -24,6 +24,9 @@ from rofunc.config.utils import get_config, omegaconf_to_dict
 from rofunc.utils.file.internet import reserve_sock_addr
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
+# set the seed for reproducibility
+set_seed(42)
+
 
 # Define the shared model (stochastic and deterministic models) for the agent using mixins.
 class Shared(GaussianMixin, DeterministicMixin, Model):
@@ -161,6 +164,51 @@ class Value(DeterministicMixin, Model):
         return self.act(inputs, "value")[0]
 
 
+class PolicyAMP(GaussianMixin, Model):
+    def __init__(self, observation_space, action_space, device, clip_actions=False,
+                 clip_log_std=True, min_log_std=-20, max_log_std=2):
+        Model.__init__(self, observation_space, action_space, device)
+        GaussianMixin.__init__(self, clip_actions, clip_log_std, min_log_std, max_log_std)
+
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 1024),
+                                 nn.ReLU(),
+                                 nn.Linear(1024, 512),
+                                 nn.ReLU(),
+                                 nn.Linear(512, self.num_actions))
+
+        # set a fixed log standard deviation for the policy
+        self.log_std_parameter = nn.Parameter(torch.full((self.num_actions,), fill_value=-2.9), requires_grad=False)
+
+    def compute(self, inputs, role):
+        return torch.tanh(self.net(inputs["states"])), self.log_std_parameter, {}
+
+    def suit(self, states, actions=None):
+        if actions is None:
+            inputs = {"states": states}
+        else:
+            inputs = {"states": states, "taken_actions": actions}
+        return self.act(inputs, "policy")[:2]
+
+
+class ValueAMP(DeterministicMixin, Model):
+    def __init__(self, observation_space, action_space, device, clip_actions=False):
+        Model.__init__(self, observation_space, action_space, device)
+        DeterministicMixin.__init__(self, clip_actions)
+
+        self.net = nn.Sequential(nn.Linear(self.num_observations, 1024),
+                                 nn.ReLU(),
+                                 nn.Linear(1024, 512),
+                                 nn.ReLU(),
+                                 nn.Linear(512, 1))
+
+    def compute(self, inputs, role):
+        return self.net(inputs["states"]), {}
+
+    def suit(self, states):
+        inputs = {"states": states}
+        return self.act(inputs, "value")[0]
+
+
 class Discriminator(DeterministicMixin, Model):
     def __init__(self, observation_space, action_space, device, clip_actions=False):
         Model.__init__(self, observation_space, action_space, device)
@@ -174,6 +222,10 @@ class Discriminator(DeterministicMixin, Model):
 
     def compute(self, inputs, role):
         return self.net(inputs["states"]), {}
+
+    def suit(self, states):
+        inputs = {"states": states}
+        return self.act(inputs, "value")[0]
 
 
 # def set_models_ddpg(env, device):
@@ -330,9 +382,6 @@ def set_cfg_sac(cfg, env, device, eval_mode=False):
 
 
 def setup(custom_args, eval_mode=False):
-    # set the seed for reproducibility
-    set_seed(42)
-
     # get config
     sys.argv.append("task={}".format(custom_args.task))
     sys.argv.append("train={}{}SKRL".format(custom_args.task, custom_args.agent.upper()))
@@ -445,8 +494,8 @@ def setup_agent(cfg, custom_args, env, eval_mode=False):
     elif custom_args.agent.lower() == "amp":
         memory = RandomMemory(memory_size=16, num_envs=env.num_envs, device=device)
         models_amp = {}
-        models_amp["policy"] = Policy(env.observation_space, env.action_space, device)
-        models_amp["value"] = Value(env.observation_space, env.action_space, device)
+        models_amp["policy"] = PolicyAMP(env.observation_space, env.action_space, device)
+        models_amp["value"] = ValueAMP(env.observation_space, env.action_space, device)
         models_amp["discriminator"] = Discriminator(env.amp_observation_space, env.action_space, device)
         cfg_amp = set_cfg_amp(cfg, env, device, eval_mode)
         agent = AMPAgent(models=models_amp,
