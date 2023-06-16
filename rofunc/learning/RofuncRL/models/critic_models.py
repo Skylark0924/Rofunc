@@ -8,12 +8,14 @@ from omegaconf import DictConfig
 from torch import Tensor
 
 from .utils import build_mlp, init_layers, activation_func
+from rofunc.config.utils import omegaconf_to_dict
 
 
 class BaseCritic(nn.Module):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 cfg_name: str = 'critic'):
         super().__init__()
         self.cfg = cfg
         if isinstance(observation_space, List):
@@ -23,8 +25,9 @@ class BaseCritic(nn.Module):
         else:
             self.state_dim = observation_space.shape[0]
         self.action_dim = action_space.shape[0]
-        self.mlp_hidden_dims = cfg.critic.mlp_hidden_dims
-        self.mlp_activation = activation_func(cfg.critic.mlp_activation)
+        cfg_dict = omegaconf_to_dict(cfg)
+        self.mlp_hidden_dims = cfg_dict[cfg_name]['mlp_hidden_dims']
+        self.mlp_activation = activation_func(cfg_dict[cfg_name]['mlp_activation'])
 
         self.backbone_net = None  # build_mlp(dims=[state_dim + action_dim, *dims, 1])
 
@@ -71,8 +74,9 @@ class BaseCritic(nn.Module):
 class Critic(BaseCritic):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
-        super().__init__(cfg, observation_space, action_space)
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 cfg_name: str = 'critic'):
+        super().__init__(cfg, observation_space, action_space, cfg_name)
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
                                       hidden_activation=self.mlp_activation)
         self.value_net = nn.Linear(self.mlp_hidden_dims[-1], 1)
@@ -86,29 +90,3 @@ class Critic(BaseCritic):
         value = self.backbone_net(state)
         value = self.value_net(value)
         return value
-
-
-class CriticTwin(BaseCritic):  # shared parameter
-    def __init__(self, dims: [int], state_dim: int, action_dim: int):
-        super().__init__(state_dim=state_dim, action_dim=action_dim)
-        self.net = build_mlp(dims=[state_dim + action_dim, *dims, 2])
-
-        init_with_orthogonal(self.net[-1], std=0.5)
-
-    def forward(self, state, action):
-        state = self.state_norm(state)
-        values = self.net(torch.cat((state, action), dim=1))
-        values = self.value_re_norm(values)
-        return values.mean(dim=1)  # mean Q value
-
-    def get_q_min(self, state, action):
-        state = self.state_norm(state)
-        values = self.net(torch.cat((state, action), dim=1))
-        values = self.value_re_norm(values)
-        return torch.min(values, dim=1)[0]  # min Q value
-
-    def get_q1_q2(self, state, action):
-        state = self.state_norm(state)
-        values = self.net(torch.cat((state, action), dim=1))
-        values = self.value_re_norm(values)
-        return values[:, 0], values[:, 1]  # two Q values
