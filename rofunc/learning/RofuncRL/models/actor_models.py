@@ -107,23 +107,26 @@ class ActorPPO_Gaussian(BaseActor):
             init_layers(self.backbone_net, gain=1)
             init_layers(self.mean_layer, gain=0.01)
 
-    def forward(self, state, action=None):
+    def forward(self, state, action=None, deterministic=False):
         state = self.backbone_net(state)
-        mean_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-action_scale, action_scale]
+        output_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-action_scale, action_scale]
 
-        log_std = self.log_std
-        if self.cfg.use_log_std_clip:
-            log_std = torch.clamp(log_std, self.cfg.log_std_clip_min, self.cfg.log_std_clip_max)
+        log_prob = None
+        if not deterministic:
+            log_std = self.log_std
+            if self.cfg.use_log_std_clip:
+                log_std = torch.clamp(log_std, self.cfg.log_std_clip_min, self.cfg.log_std_clip_max)
 
-        self.dist = Normal(mean_action, log_std.exp())  # Get the Gaussian distribution
+            self.dist = Normal(output_action, log_std.exp())  # Get the Gaussian distribution
 
-        # sample using the re-parameterization trick
-        if action is None:
-            action = self.dist.rsample()
-        if self.cfg.use_action_clip:
-            action = torch.clamp(action, -self.cfg.action_clip, self.cfg.action_clip)  # [-max,max]
-        log_prob = self.dist.log_prob(action).sum(dim=-1, keepdim=True)
-        return action, log_prob
+            # sample using the re-parameterization trick
+            if action is None:
+                action = self.dist.rsample()
+            if self.cfg.use_action_clip:
+                action = torch.clamp(action, -self.cfg.action_clip, self.cfg.action_clip)  # [-max,max]
+            log_prob = self.dist.log_prob(action).sum(dim=-1, keepdim=True)
+            output_action = action
+        return output_action, log_prob
 
     def get_entropy(self):
         return self.dist.entropy()
@@ -184,4 +187,3 @@ class ActorAMP(ActorPPO_Gaussian):
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
         super().__init__(cfg, observation_space, action_space)
         self.log_std = nn.Parameter(torch.full((self.action_dim,), fill_value=-2.9), requires_grad=False)
-
