@@ -177,3 +177,11 @@ class ActorTD3(ActorSAC):
         state = self.backbone_net(state)
         mean_action = torch.tanh(self.mean_layer(state))
         return mean_action, None
+
+
+class ActorAMP(ActorPPO_Gaussian):
+    def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
+        super().__init__(cfg, observation_space, action_space)
+        self.log_std = nn.Parameter(torch.full((self.action_dim,), fill_value=-2.9), requires_grad=False)
+
