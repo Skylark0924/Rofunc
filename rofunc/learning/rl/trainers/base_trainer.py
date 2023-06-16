@@ -76,8 +76,10 @@ class BaseTrainer:
         env.device = self.device
         self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.Trainer.seed)
         self.eval_env = wrap_env(env, logger=self.rofunc_logger, seed=random.randint(0, 10000))
-        self.rofunc_logger.info(f"Environment:\n  action_space: {self.env.action_space.shape}\n  observation_space: "
-                                f"{self.env.observation_space.shape}\n  num_envs: {self.env.num_envs}")
+        self.rofunc_logger.info(f"Environment:\n  "
+                                f"  action_space: {self.env.action_space.shape}\n  "
+                                f"  observation_space: {self.env.observation_space.shape}\n  "
+                                f"  num_envs: {self.env.num_envs}")
 
         '''Normalization'''
         self.state_norm = Normalization(shape=self.env.observation_space.shape[0], device=device)
@@ -105,7 +107,6 @@ class BaseTrainer:
 
     def get_action(self, states):
         if self._step < self.random_steps:
-            # sample random actions
             actions = torch.tensor([self.env.action_space.sample() for _ in range(self.env.num_envs)]).to(self.device)
         else:
             actions, _ = self.agent.act(states)
