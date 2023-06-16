@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2022, NVIDIA Corporation
+# Copyright (c) 2018-2023, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,18 +28,19 @@
 
 import os
 
-from isaacgym import gymtorch
 from isaacgym import gymapi
+from isaacgym import gymtorch
+
+from rofunc.utils.file.path import get_rofunc_path
 from .base.vec_task import VecTask
 from .utils.torch_jit_utils import *
-from rofunc.utils.file.path import get_rofunc_path
 
 
 class HumanoidTask(VecTask):
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
-        
+
         self.randomization_params = self.cfg["task"]["randomization_params"]
         self.randomize = self.cfg["task"]["randomize"]
         self.dof_vel_scale = self.cfg["env"]["dofVelocityScale"]
@@ -64,7 +65,9 @@ class HumanoidTask(VecTask):
         self.cfg["env"]["numObservations"] = 108
         self.cfg["env"]["numActions"] = 21
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         if self.viewer != None:
             cam_pos = gymapi.Vec3(50.0, 25.0, 2.4)
@@ -96,7 +99,8 @@ class HumanoidTask(VecTask):
         self.initial_dof_pos = torch.zeros_like(self.dof_pos, device=self.device, dtype=torch.float)
         zero_tensor = torch.tensor([0.0], device=self.device)
         self.initial_dof_pos = torch.where(self.dof_limits_lower > zero_tensor, self.dof_limits_lower,
-                                           torch.where(self.dof_limits_upper < zero_tensor, self.dof_limits_upper, self.initial_dof_pos))
+                                           torch.where(self.dof_limits_upper < zero_tensor, self.dof_limits_upper,
+                                                       self.initial_dof_pos))
         self.initial_dof_vel = torch.zeros_like(self.dof_vel, device=self.device, dtype=torch.float)
 
         # initialize some data used later on
@@ -110,11 +114,11 @@ class HumanoidTask(VecTask):
         self.targets = to_torch([1000, 0, 0], device=self.device).repeat((self.num_envs, 1))
         self.target_dirs = to_torch([1, 0, 0], device=self.device).repeat((self.num_envs, 1))
         self.dt = self.cfg["sim"]["dt"]
-        self.potentials = to_torch([-1000./self.dt], device=self.device).repeat(self.num_envs)
+        self.potentials = to_torch([-1000. / self.dt], device=self.device).repeat(self.num_envs)
         self.prev_potentials = self.potentials.clone()
 
     def create_sim(self):
-        self.up_axis_idx = 2 # index of up axis: Y=1, Z=2
+        self.up_axis_idx = 2  # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
 
         self._create_ground_plane()
@@ -171,7 +175,8 @@ class HumanoidTask(VecTask):
         start_pose.p = gymapi.Vec3(*get_axis_params(1.34, self.up_axis_idx))
         start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
-        self.start_rotation = torch.tensor([start_pose.r.x, start_pose.r.y, start_pose.r.z, start_pose.r.w], device=self.device)
+        self.start_rotation = torch.tensor([start_pose.r.x, start_pose.r.y, start_pose.r.z, start_pose.r.w],
+                                           device=self.device)
 
         self.humanoid_handles = []
         self.envs = []
@@ -235,12 +240,13 @@ class HumanoidTask(VecTask):
         self.gym.refresh_force_sensor_tensor(self.sim)
 
         self.gym.refresh_dof_force_tensor(self.sim)
-        self.obs_buf[:], self.potentials[:], self.prev_potentials[:], self.up_vec[:], self.heading_vec[:] = compute_humanoid_observations(
-            self.obs_buf, self.root_states, self.targets, self.potentials,
-            self.inv_start_rot, self.dof_pos, self.dof_vel, self.dof_force_tensor,
-            self.dof_limits_lower, self.dof_limits_upper, self.dof_vel_scale,
-            self.vec_sensor_tensor, self.actions, self.dt, self.contact_force_scale, self.angular_velocity_scale,
-            self.basis_vec0, self.basis_vec1)
+        self.obs_buf[:], self.potentials[:], self.prev_potentials[:], self.up_vec[:], self.heading_vec[:] = \
+            compute_humanoid_observations(
+                self.obs_buf, self.root_states, self.targets, self.potentials,
+                self.inv_start_rot, self.dof_pos, self.dof_vel, self.dof_force_tensor,
+                self.dof_limits_lower, self.dof_limits_upper, self.dof_vel_scale,
+                self.vec_sensor_tensor, self.actions, self.dt, self.contact_force_scale, self.angular_velocity_scale,
+                self.basis_vec0, self.basis_vec1)
 
     def reset_idx(self, env_ids):
         # Randomization can happen only at reset time, since it can reset actor positions on GPU
@@ -250,7 +256,8 @@ class HumanoidTask(VecTask):
         positions = torch_rand_float(-0.2, 0.2, (len(env_ids), self.num_dof), device=self.device)
         velocities = torch_rand_float(-0.1, 0.1, (len(env_ids), self.num_dof), device=self.device)
 
-        self.dof_pos[env_ids] = tensor_clamp(self.initial_dof_pos[env_ids] + positions, self.dof_limits_lower, self.dof_limits_upper)
+        self.dof_pos[env_ids] = tensor_clamp(self.initial_dof_pos[env_ids] + positions, self.dof_limits_lower,
+                                             self.dof_limits_upper)
         self.dof_vel[env_ids] = velocities
 
         env_ids_int32 = env_ids.to(dtype=torch.int32)
@@ -297,15 +304,18 @@ class HumanoidTask(VecTask):
                 origin = self.gym.get_env_origin(self.envs[i])
                 pose = self.root_states[:, 0:3][i].cpu().numpy()
                 glob_pos = gymapi.Vec3(origin.x + pose[0], origin.y + pose[1], origin.z + pose[2])
-                points.append([glob_pos.x, glob_pos.y, glob_pos.z, glob_pos.x + 4 * self.heading_vec[i, 0].cpu().numpy(),
-                               glob_pos.y + 4 * self.heading_vec[i, 1].cpu().numpy(),
-                               glob_pos.z + 4 * self.heading_vec[i, 2].cpu().numpy()])
+                points.append(
+                    [glob_pos.x, glob_pos.y, glob_pos.z, glob_pos.x + 4 * self.heading_vec[i, 0].cpu().numpy(),
+                     glob_pos.y + 4 * self.heading_vec[i, 1].cpu().numpy(),
+                     glob_pos.z + 4 * self.heading_vec[i, 2].cpu().numpy()])
                 colors.append([0.97, 0.1, 0.06])
-                points.append([glob_pos.x, glob_pos.y, glob_pos.z, glob_pos.x + 4 * self.up_vec[i, 0].cpu().numpy(), glob_pos.y + 4 * self.up_vec[i, 1].cpu().numpy(),
+                points.append([glob_pos.x, glob_pos.y, glob_pos.z, glob_pos.x + 4 * self.up_vec[i, 0].cpu().numpy(),
+                               glob_pos.y + 4 * self.up_vec[i, 1].cpu().numpy(),
                                glob_pos.z + 4 * self.up_vec[i, 2].cpu().numpy()])
                 colors.append([0.05, 0.99, 0.04])
 
             self.gym.add_lines(self.viewer, None, self.num_envs * 2, points, colors)
+
 
 #####################################################################
 ###=========================jit functions=========================###
@@ -314,22 +324,22 @@ class HumanoidTask(VecTask):
 
 @torch.jit.script
 def compute_humanoid_reward(
-    obs_buf,
-    reset_buf,
-    progress_buf,
-    actions,
-    up_weight,
-    heading_weight,
-    potentials,
-    prev_potentials,
-    actions_cost_scale,
-    energy_cost_scale,
-    joints_at_limit_cost_scale,
-    max_motor_effort,
-    motor_efforts,
-    termination_height,
-    death_cost,
-    max_episode_length
+        obs_buf,
+        reset_buf,
+        progress_buf,
+        actions,
+        up_weight,
+        heading_weight,
+        potentials,
+        prev_potentials,
+        actions_cost_scale,
+        energy_cost_scale,
+        joints_at_limit_cost_scale,
+        max_motor_effort,
+        motor_efforts,
+        termination_height,
+        death_cost,
+        max_episode_length
 ):
     # type: (Tensor, Tensor, Tensor, Tensor, float, float, Tensor, Tensor, float, float, float, float, Tensor, float, float, float) -> Tuple[Tensor, Tensor]
 
@@ -346,7 +356,8 @@ def compute_humanoid_reward(
     # energy cost reward
     motor_effort_ratio = motor_efforts / max_motor_effort
     scaled_cost = joints_at_limit_cost_scale * (torch.abs(obs_buf[:, 12:33]) - 0.98) / 0.02
-    dof_at_limit_cost = torch.sum((torch.abs(obs_buf[:, 12:33]) > 0.98) * scaled_cost * motor_effort_ratio.unsqueeze(0), dim=-1)
+    dof_at_limit_cost = torch.sum((torch.abs(obs_buf[:, 12:33]) > 0.98) * scaled_cost * motor_effort_ratio.unsqueeze(0),
+                                  dim=-1)
 
     electricity_cost = torch.sum(torch.abs(actions * obs_buf[:, 33:54]) * motor_effort_ratio.unsqueeze(0), dim=-1)
 
@@ -355,10 +366,11 @@ def compute_humanoid_reward(
     progress_reward = potentials - prev_potentials
 
     total_reward = progress_reward + alive_reward + up_reward + heading_reward - \
-        actions_cost_scale * actions_cost - energy_cost_scale * electricity_cost - dof_at_limit_cost
+                   actions_cost_scale * actions_cost - energy_cost_scale * electricity_cost - dof_at_limit_cost
 
     # adjust reward for fallen agents
-    total_reward = torch.where(obs_buf[:, 0] < termination_height, torch.ones_like(total_reward) * death_cost, total_reward)
+    total_reward = torch.where(obs_buf[:, 0] < termination_height, torch.ones_like(total_reward) * death_cost,
+                               total_reward)
 
     # reset agents
     reset = torch.where(obs_buf[:, 0] < termination_height, torch.ones_like(reset_buf), reset_buf)
