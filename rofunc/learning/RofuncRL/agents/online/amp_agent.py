@@ -16,7 +16,6 @@ from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardS
 from rofunc.learning.RofuncRL.utils.memory import Memory
 from rofunc.learning.RofuncRL.models.actor_models import ActorAMP
 from rofunc.learning.RofuncRL.models.critic_models import Critic
-from rofunc.learning.RofuncRL.utils.skrl_utils import PolicyAMP, ValueAMP, Discriminator
 
 
 class AMPAgent(BaseAgent):
@@ -58,10 +57,7 @@ class AMPAgent(BaseAgent):
         '''Define models for AMP'''
         self.policy = ActorAMP(cfg.Model, observation_space, action_space).to(self.device)
         self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
-        self.discriminator = Critic(cfg.Model, amp_observation_space, action_space).to(self.device)
-        # self.discriminator = Discriminator(amp_observation_space, action_space, device).to(self.device)
-        # self.policy = PolicyAMP(observation_space, action_space, device, clip_actions=True).to(self.device)
-        # self.value = ValueAMP(observation_space, action_space, device).to(self.device)
+        self.discriminator = Critic(cfg.Model, amp_observation_space, action_space, cfg_name='discriminator').to(self.device)
         self.models = {"policy": self.policy, "value": self.value, "discriminator": self.discriminator}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy

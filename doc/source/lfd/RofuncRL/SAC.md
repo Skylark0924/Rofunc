@@ -3,7 +3,7 @@
 
 ## Algorithm 
 
-```{literalinclude} ../../../../rofunc/learning/rl/agents/online/sac_agent.py
+```{literalinclude} ../../../../rofunc/learning/RofuncRL/agents/online/sac_agent.py
 :pyobject: SACAgent.update_net
 ```
 

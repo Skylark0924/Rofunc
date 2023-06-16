@@ -25,8 +25,8 @@ Agent:
   td_lambda: 0.95                     # TD(lambda) coefficient (lam) for computing returns and advantages.
 
   learning_epochs: 6                 # The number of epochs to train for per update.
-  mini_batch_size: 2                 # The number of samples per update.
-  amp_batch_size: 512                  # The number of samples per update.
+  mini_batch_size: 8                 # The number of samples per update.
+  amp_batch_size: 1024                  # The number of samples per update.
 
   lr_a: 5e-5                       # Learning rate for actor.
   lr_c: 5e-5                        # Learning rate for critic.

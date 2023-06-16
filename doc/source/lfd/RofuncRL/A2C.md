@@ -3,7 +3,7 @@
 
 ## Algorithm 
 
-```{literalinclude} ../../../../rofunc/learning/rl/agents/online/a2c_agent.py
+```{literalinclude} ../../../../rofunc/learning/RofuncRL/agents/online/a2c_agent.py
 :pyobject: A2CAgent.update_net
 ```
 
