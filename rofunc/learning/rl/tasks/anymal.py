@@ -26,17 +26,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
 import os
-import torch
+from typing import Tuple, Dict
 
-from isaacgym import gymtorch
 from isaacgym import gymapi
+from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
-from isaacgymenvs.tasks.base.vec_task import VecTask
-
-from typing import Tuple, Dict
+from .base.vec_task import VecTask
 
 
 class Anymal(VecTask):
@@ -44,7 +41,7 @@ class Anymal(VecTask):
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
 
         self.cfg = cfg
-        
+
         # normalization
         self.lin_vel_scale = self.cfg["env"]["learn"]["linearVelocityScale"]
         self.ang_vel_scale = self.cfg["env"]["learn"]["angularVelocityScale"]
@@ -87,7 +84,9 @@ class Anymal(VecTask):
         self.cfg["env"]["numObservations"] = 48
         self.cfg["env"]["numActions"] = 12
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         # other
         self.dt = self.sim_params.dt
@@ -122,14 +121,16 @@ class Anymal(VecTask):
         self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)
         self.dof_pos = self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 0]
         self.dof_vel = self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 1]
-        self.contact_forces = gymtorch.wrap_tensor(net_contact_forces).view(self.num_envs, -1, 3)  # shape: num_envs, num_bodies, xyz axis
+        self.contact_forces = gymtorch.wrap_tensor(net_contact_forces).view(self.num_envs, -1,
+                                                                            3)  # shape: num_envs, num_bodies, xyz axis
         self.torques = gymtorch.wrap_tensor(torques).view(self.num_envs, self.num_dof)
 
         self.commands = torch.zeros(self.num_envs, 3, dtype=torch.float, device=self.device, requires_grad=False)
         self.commands_y = self.commands.view(self.num_envs, 3)[..., 1]
         self.commands_x = self.commands.view(self.num_envs, 3)[..., 0]
         self.commands_yaw = self.commands.view(self.num_envs, 3)[..., 2]
-        self.default_dof_pos = torch.zeros_like(self.dof_pos, dtype=torch.float, device=self.device, requires_grad=False)
+        self.default_dof_pos = torch.zeros_like(self.dof_pos, dtype=torch.float, device=self.device,
+                                                requires_grad=False)
 
         for i in range(self.cfg["env"]["numActions"]):
             name = self.dof_names[i]
@@ -140,13 +141,15 @@ class Anymal(VecTask):
         self.extras = {}
         self.initial_root_states = self.root_states.clone()
         self.initial_root_states[:] = to_torch(self.base_init_state, device=self.device, requires_grad=False)
-        self.gravity_vec = to_torch(get_axis_params(-1., self.up_axis_idx), device=self.device).repeat((self.num_envs, 1))
-        self.actions = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
+        self.gravity_vec = to_torch(get_axis_params(-1., self.up_axis_idx), device=self.device).repeat(
+            (self.num_envs, 1))
+        self.actions = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device,
+                                   requires_grad=False)
 
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
 
     def create_sim(self):
-        self.up_axis_idx = 2 # index of up axis: Y=1, Z=2
+        self.up_axis_idx = 2  # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
         self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
@@ -154,7 +157,6 @@ class Anymal(VecTask):
         # If randomizing, apply once immediately on startup before the fist sim step
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
-
 
     def _create_ground_plane(self):
         plane_params = gymapi.PlaneParams()
@@ -166,9 +168,9 @@ class Anymal(VecTask):
     def _create_envs(self, num_envs, spacing, num_per_row):
         asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../assets')
         asset_file = "urdf/anymal_c/urdf/anymal.urdf"
-        #asset_path = os.path.join(asset_root, asset_file)
-        #asset_root = os.path.dirname(asset_path)
-        #asset_file = os.path.basename(asset_path)
+        # asset_path = os.path.join(asset_root, asset_file)
+        # asset_root = os.path.dirname(asset_path)
+        # asset_file = os.path.basename(asset_path)
 
         asset_options = gymapi.AssetOptions()
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
@@ -202,8 +204,8 @@ class Anymal(VecTask):
         dof_props = self.gym.get_asset_dof_properties(anymal_asset)
         for i in range(self.num_dof):
             dof_props['driveMode'][i] = gymapi.DOF_MODE_POS
-            dof_props['stiffness'][i] = self.cfg["env"]["control"]["stiffness"] #self.Kp
-            dof_props['damping'][i] = self.cfg["env"]["control"]["damping"] #self.Kd
+            dof_props['stiffness'][i] = self.cfg["env"]["control"]["stiffness"]  # self.Kp
+            dof_props['damping'][i] = self.cfg["env"]["control"]["damping"]  # self.Kd
 
         env_lower = gymapi.Vec3(-spacing, -spacing, 0.0)
         env_upper = gymapi.Vec3(spacing, spacing, spacing)
@@ -220,9 +222,11 @@ class Anymal(VecTask):
             self.anymal_handles.append(anymal_handle)
 
         for i in range(len(feet_names)):
-            self.feet_indices[i] = self.gym.find_actor_rigid_body_handle(self.envs[0], self.anymal_handles[0], feet_names[i])
+            self.feet_indices[i] = self.gym.find_actor_rigid_body_handle(self.envs[0], self.anymal_handles[0],
+                                                                         feet_names[i])
         for i in range(len(knee_names)):
-            self.knee_indices[i] = self.gym.find_actor_rigid_body_handle(self.envs[0], self.anymal_handles[0], knee_names[i])
+            self.knee_indices[i] = self.gym.find_actor_rigid_body_handle(self.envs[0], self.anymal_handles[0],
+                                                                         knee_names[i])
 
         self.base_index = self.gym.find_actor_rigid_body_handle(self.envs[0], self.anymal_handles[0], "base")
 
@@ -264,18 +268,18 @@ class Anymal(VecTask):
         self.gym.refresh_dof_force_tensor(self.sim)
 
         self.obs_buf[:] = compute_anymal_observations(  # tensors
-                                                        self.root_states,
-                                                        self.commands,
-                                                        self.dof_pos,
-                                                        self.default_dof_pos,
-                                                        self.dof_vel,
-                                                        self.gravity_vec,
-                                                        self.actions,
-                                                        # scales
-                                                        self.lin_vel_scale,
-                                                        self.ang_vel_scale,
-                                                        self.dof_pos_scale,
-                                                        self.dof_vel_scale
+            self.root_states,
+            self.commands,
+            self.dof_pos,
+            self.default_dof_pos,
+            self.dof_vel,
+            self.gravity_vec,
+            self.actions,
+            # scales
+            self.lin_vel_scale,
+            self.ang_vel_scale,
+            self.dof_pos_scale,
+            self.dof_vel_scale
         )
 
     def reset_idx(self, env_ids):
@@ -299,12 +303,16 @@ class Anymal(VecTask):
                                               gymtorch.unwrap_tensor(self.dof_state),
                                               gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
 
-        self.commands_x[env_ids] = torch_rand_float(self.command_x_range[0], self.command_x_range[1], (len(env_ids), 1), device=self.device).squeeze()
-        self.commands_y[env_ids] = torch_rand_float(self.command_y_range[0], self.command_y_range[1], (len(env_ids), 1), device=self.device).squeeze()
-        self.commands_yaw[env_ids] = torch_rand_float(self.command_yaw_range[0], self.command_yaw_range[1], (len(env_ids), 1), device=self.device).squeeze()
+        self.commands_x[env_ids] = torch_rand_float(self.command_x_range[0], self.command_x_range[1], (len(env_ids), 1),
+                                                    device=self.device).squeeze()
+        self.commands_y[env_ids] = torch_rand_float(self.command_y_range[0], self.command_y_range[1], (len(env_ids), 1),
+                                                    device=self.device).squeeze()
+        self.commands_yaw[env_ids] = torch_rand_float(self.command_yaw_range[0], self.command_yaw_range[1],
+                                                      (len(env_ids), 1), device=self.device).squeeze()
 
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 1
+
 
 #####################################################################
 ###=========================jit functions=========================###
@@ -313,18 +321,18 @@ class Anymal(VecTask):
 
 @torch.jit.script
 def compute_anymal_reward(
-    # tensors
-    root_states,
-    commands,
-    torques,
-    contact_forces,
-    knee_indices,
-    episode_lengths,
-    # Dict
-    rew_scales,
-    # other
-    base_index,
-    max_episode_length
+        # tensors
+        root_states,
+        commands,
+        torques,
+        contact_forces,
+        knee_indices,
+        episode_lengths,
+        # Dict
+        rew_scales,
+        # other
+        base_index,
+        max_episode_length
 ):
     # (reward, reset, feet_in air, feet_air_time, episode sums)
     # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Dict[str, float], int, int) -> Tuple[Tensor, Tensor]
@@ -337,8 +345,8 @@ def compute_anymal_reward(
     # velocity tracking reward
     lin_vel_error = torch.sum(torch.square(commands[:, :2] - base_lin_vel[:, :2]), dim=1)
     ang_vel_error = torch.square(commands[:, 2] - base_ang_vel[:, 2])
-    rew_lin_vel_xy = torch.exp(-lin_vel_error/0.25) * rew_scales["lin_vel_xy"]
-    rew_ang_vel_z = torch.exp(-ang_vel_error/0.25) * rew_scales["ang_vel_z"]
+    rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * rew_scales["lin_vel_xy"]
+    rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * rew_scales["ang_vel_z"]
 
     # torque penalty
     rew_torque = torch.sum(torch.square(torques), dim=1) * rew_scales["torque"]
@@ -367,7 +375,6 @@ def compute_anymal_observations(root_states,
                                 dof_pos_scale,
                                 dof_vel_scale
                                 ):
-
     # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, float, float, float) -> Tensor
     base_quat = root_states[:, 3:7]
     base_lin_vel = quat_rotate_inverse(base_quat, root_states[:, 7:10]) * lin_vel_scale
@@ -375,14 +382,15 @@ def compute_anymal_observations(root_states,
     projected_gravity = quat_rotate(base_quat, gravity_vec)
     dof_pos_scaled = (dof_pos - default_dof_pos) * dof_pos_scale
 
-    commands_scaled = commands*torch.tensor([lin_vel_scale, lin_vel_scale, ang_vel_scale], requires_grad=False, device=commands.device)
+    commands_scaled = commands * torch.tensor([lin_vel_scale, lin_vel_scale, ang_vel_scale], requires_grad=False,
+                                              device=commands.device)
 
     obs = torch.cat((base_lin_vel,
                      base_ang_vel,
                      projected_gravity,
                      commands_scaled,
                      dof_pos_scaled,
-                     dof_vel*dof_vel_scale,
+                     dof_vel * dof_vel_scale,
                      actions
                      ), dim=-1)
 
