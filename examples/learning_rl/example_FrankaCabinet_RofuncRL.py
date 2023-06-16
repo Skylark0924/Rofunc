@@ -12,8 +12,8 @@ import isaacgym
 from hydra._internal.utils import get_args_parser
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
-from rofunc.learning.rl.tasks import task_map
-from rofunc.learning.rl.trainers import trainer_map
+from rofunc.learning.RofuncRL.tasks import task_map
+from rofunc.learning.RofuncRL.trainers import trainer_map
 from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
 

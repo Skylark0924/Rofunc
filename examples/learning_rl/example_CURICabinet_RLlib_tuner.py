@@ -10,7 +10,7 @@ from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.algorithms.sac import SACConfig
 from ray import air
 from ray import tune
-from rofunc.learning.rl.utils.rllib_utils import RLlibIsaacGymVecEnvWrapper
+from rofunc.learning.RofuncRL.utils.rllib_utils import RLlibIsaacGymVecEnvWrapper
 from hydra._internal.utils import get_args_parser
 import sys, argparse
 from rofunc.config.utils import get_config, omegaconf_to_dict
