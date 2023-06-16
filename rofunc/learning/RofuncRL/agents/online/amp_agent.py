@@ -180,7 +180,7 @@ class AMPAgent(BaseAgent):
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
-            actions = self.policy(self._state_preprocessor(states)).detach()
+            actions, _ = self.policy(self._state_preprocessor(states), deterministic=True)
             log_prob = None
         return actions, log_prob
 
