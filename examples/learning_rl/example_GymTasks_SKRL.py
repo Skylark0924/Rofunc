@@ -14,8 +14,8 @@ from hydra._internal.utils import get_args_parser
 from skrl.trainers.torch import SequentialTrainer
 
 from rofunc.config.utils import get_config
-from rofunc.learning.rl.tasks.utils.env_wrappers import wrap_env
-from rofunc.learning.rl.utils.skrl_utils import setup_agent
+from rofunc.learning.RofuncRL.tasks.utils.env_wrappers import wrap_env
+from rofunc.learning.RofuncRL.utils.skrl_utils import setup_agent
 from rofunc.learning.utils.utils import set_seed
 from rofunc.utils.logger.beauty_logger import beauty_print
 

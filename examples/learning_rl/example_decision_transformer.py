@@ -14,9 +14,9 @@ import numpy as np
 import torch
 import wandb
 
-from rofunc.learning.rl.agents.offline.dtrans_agent import DTransAgent
-from rofunc.learning.rl.agents.offline.dtrans_agent import evaluate_episode, evaluate_episode_rtg
-from rofunc.learning.rl.trainers.dtrans_trainer import SequenceTrainer
+from rofunc.learning.RofuncRL.agents.offline.dtrans_agent import DTransAgent
+from rofunc.learning.RofuncRL.agents.offline.dtrans_agent import evaluate_episode, evaluate_episode_rtg
+from rofunc.learning.RofuncRL.trainers.dtrans_trainer import SequenceTrainer
 from rofunc.learning.utils.download_datasets import download_d4rl_dataset
 
 

@@ -23,6 +23,6 @@ rewards_shaper: null
 experiment:
   directory: ''
   experiment_name: ''
-  write_interval: 250
+  write_interval: 100
   checkpoint_interval: 1000
   store_separately: false

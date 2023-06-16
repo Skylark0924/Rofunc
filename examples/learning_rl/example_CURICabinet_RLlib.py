@@ -22,8 +22,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 from rofunc.config.utils import get_config, omegaconf_to_dict
 from rofunc.learning.pre_trained_models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
-from rofunc.learning.rl.utils.rllib_utils import RLlibIsaacGymVecEnvWrapper
-from rofunc.learning.rl.tasks import task_map
+from rofunc.learning.RofuncRL.utils.rllib_utils import RLlibIsaacGymVecEnvWrapper
+from rofunc.learning.RofuncRL.tasks import task_map
 
 from hydra._internal.utils import get_args_parser
 from tqdm.auto import tqdm

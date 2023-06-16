@@ -1,4 +1,4 @@
-![](doc/img/logo7.png)
+![](doc/img/logo8.png)
 
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation
 
@@ -161,7 +161,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 ## Related Papers
 
-1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](./rofunc/learning/dl/structured_transformer/strans.py))
+1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](rofunc/learning/RofuncIL/structured_transformer/strans.py))
 ```
 @article{liu2022robot,
          title={Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects},

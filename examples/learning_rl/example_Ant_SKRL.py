@@ -11,7 +11,7 @@ import isaacgym
 from skrl.trainers.torch import SequentialTrainer
 
 from rofunc.learning.pre_trained_models import model_zoo
-from rofunc.learning.rl.utils.skrl_utils import setup
+from rofunc.learning.RofuncRL.utils.skrl_utils import setup
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
