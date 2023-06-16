@@ -2,7 +2,7 @@
 
 ## Algorithm 
 
-```{literalinclude} ../../../../rofunc/learning/rl/agents/online/td3_agent.py
+```{literalinclude} ../../../../rofunc/learning/RofuncRL/agents/online/td3_agent.py
 :pyobject: TD3Agent.update_net
 ```
 
