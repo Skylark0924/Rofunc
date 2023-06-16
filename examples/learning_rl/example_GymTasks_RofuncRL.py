@@ -13,7 +13,7 @@ import isaacgym
 from hydra._internal.utils import get_args_parser
 
 from rofunc.config.utils import get_config
-from rofunc.learning.rl.trainers import trainer_map
+from rofunc.learning.RofuncRL.trainers import trainer_map
 from rofunc.learning.utils.utils import set_seed
 from rofunc.utils.logger.beauty_logger import beauty_print
 

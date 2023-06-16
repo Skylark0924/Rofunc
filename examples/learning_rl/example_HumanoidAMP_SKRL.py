@@ -1,8 +1,8 @@
 """
-Ant (SKRL)
+HumanoidAMP (SKRL)
 ===========================
 
-Ant RL using SKRL
+Humanoid walking, trained by SKRL
 """
 
 import argparse
@@ -35,7 +35,7 @@ def eval(custom_args, ckpt_path=None):
 
     # load checkpoint (agent)
     if ckpt_path is None:
-        ckpt_path = model_zoo(name="AntPPO.pt")
+        ckpt_path = model_zoo(name="CURICabinetPPO_right_arm.pt")
     agent.load(ckpt_path)
 
     # Configure and instantiate the RL trainer
@@ -49,8 +49,8 @@ def eval(custom_args, ckpt_path=None):
 if __name__ == '__main__':
     gpu_id = 1
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="Ant")
-    parser.add_argument("--agent", type=str, default="td3")  # Available agents: ppo, sac, td3
+    parser.add_argument("--task", type=str, default="HumanoidAMP")
+    parser.add_argument("--agent", type=str, default="AMP")
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
