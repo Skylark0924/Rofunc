@@ -26,16 +26,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
 import os
-import torch
 
-from isaacgym import gymtorch
 from isaacgym import gymapi
-from isaacgym.torch_utils import *
+from isaacgym import gymtorch
 
-from isaacgymenvs.utils.torch_jit_utils import *
-from isaacgymenvs.tasks.base.vec_task import VecTask
+from .base.vec_task import VecTask
+from .utils.torch_jit_utils import *
 
 
 @torch.jit.script
@@ -49,7 +46,6 @@ def axisangle2quat(vec, eps=1e-6):
     Returns:
         tensor: (..., 4) tensor where final dim is (x,y,z,w) vec4 float quaternion
     """
-    # type: (Tensor, float) -> Tensor
     # store input shape and reshape
     input_shape = vec.shape[:-1]
     vec = vec.reshape(-1, 3)
@@ -98,7 +94,7 @@ class FrankaCubeStack(VecTask):
 
         # Controller type
         self.control_type = self.cfg["env"]["controlType"]
-        assert self.control_type in {"osc", "joint_tor"},\
+        assert self.control_type in {"osc", "joint_tor"}, \
             "Invalid control type specified. Must be one of: {osc, joint_tor}"
 
         # dimensions
@@ -108,24 +104,24 @@ class FrankaCubeStack(VecTask):
         self.cfg["env"]["numActions"] = 7 if self.control_type == "osc" else 8
 
         # Values to be filled in at runtime
-        self.states = {}                        # will be dict filled with relevant states to use for reward calculation
-        self.handles = {}                       # will be dict mapping names to relevant sim handles
-        self.num_dofs = None                    # Total number of DOFs per env
-        self.actions = None                     # Current actions to be deployed
-        self._init_cubeA_state = None           # Initial state of cubeA for the current env
-        self._init_cubeB_state = None           # Initial state of cubeB for the current env
-        self._cubeA_state = None                # Current state of cubeA for the current env
-        self._cubeB_state = None                # Current state of cubeB for the current env
-        self._cubeA_id = None                   # Actor ID corresponding to cubeA for a given env
-        self._cubeB_id = None                   # Actor ID corresponding to cubeB for a given env
+        self.states = {}  # will be dict filled with relevant states to use for reward calculation
+        self.handles = {}  # will be dict mapping names to relevant sim handles
+        self.num_dofs = None  # Total number of DOFs per env
+        self.actions = None  # Current actions to be deployed
+        self._init_cubeA_state = None  # Initial state of cubeA for the current env
+        self._init_cubeB_state = None  # Initial state of cubeB for the current env
+        self._cubeA_state = None  # Current state of cubeA for the current env
+        self._cubeB_state = None  # Current state of cubeB for the current env
+        self._cubeA_id = None  # Actor ID corresponding to cubeA for a given env
+        self._cubeB_id = None  # Actor ID corresponding to cubeB for a given env
 
         # Tensor placeholders
-        self._root_state = None             # State of root body        (n_envs, 13)
+        self._root_state = None  # State of root body        (n_envs, 13)
         self._dof_state = None  # State of all joints       (n_envs, n_dof)
         self._q = None  # Joint positions           (n_envs, n_dof)
-        self._qd = None                     # Joint velocities          (n_envs, n_dof)
+        self._qd = None  # Joint velocities          (n_envs, n_dof)
         self._rigid_body_state = None  # State of all rigid bodies             (n_envs, n_bodies, 13)
-        self._contact_forces = None     # Contact forces in sim
+        self._contact_forces = None  # Contact forces in sim
         self._eef_state = None  # end effector state (at grasping point)
         self._eef_lf_state = None  # end effector state (at left fingertip)
         self._eef_rf_state = None  # end effector state (at left fingertip)
@@ -133,17 +129,19 @@ class FrankaCubeStack(VecTask):
         self._mm = None  # Mass matrix
         self._arm_control = None  # Tensor buffer for controlling arm
         self._gripper_control = None  # Tensor buffer for controlling gripper
-        self._pos_control = None            # Position actions
-        self._effort_control = None         # Torque actions
-        self._franka_effort_limits = None        # Actuator effort limits for franka
-        self._global_indices = None         # Unique indices corresponding to all envs in flattened array
+        self._pos_control = None  # Position actions
+        self._effort_control = None  # Torque actions
+        self._franka_effort_limits = None  # Actuator effort limits for franka
+        self._global_indices = None  # Unique indices corresponding to all envs in flattened array
 
         self.debug_viz = self.cfg["env"]["enableDebugVis"]
 
         self.up_axis = "z"
         self.up_axis_idx = 2
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         # Franka defaults
         self.franka_default_dof_pos = to_torch(
@@ -155,11 +153,11 @@ class FrankaCubeStack(VecTask):
         self.kd = 2 * torch.sqrt(self.kp)
         self.kp_null = to_torch([10.] * 7, device=self.device)
         self.kd_null = 2 * torch.sqrt(self.kp_null)
-        #self.cmd_limit = None                   # filled in later
+        # self.cmd_limit = None                   # filled in later
 
         # Set control limits
         self.cmd_limit = to_torch([0.1, 0.1, 0.1, 0.5, 0.5, 0.5], device=self.device).unsqueeze(0) if \
-        self.control_type == "osc" else self._franka_effort_limits[:7].unsqueeze(0)
+            self.control_type == "osc" else self._franka_effort_limits[:7].unsqueeze(0)
 
         # Reset all environments
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
@@ -190,7 +188,8 @@ class FrankaCubeStack(VecTask):
         franka_asset_file = "urdf/franka_description/robots/franka_panda_gripper.urdf"
 
         if "asset" in self.cfg["env"]:
-            asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.cfg["env"]["asset"].get("assetRoot", asset_root))
+            asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                      self.cfg["env"]["asset"].get("assetRoot", asset_root))
             franka_asset_file = self.cfg["env"]["asset"].get("assetFileNameFranka", franka_asset_file)
 
         # load franka asset
@@ -294,8 +293,8 @@ class FrankaCubeStack(VecTask):
         # compute aggregate size
         num_franka_bodies = self.gym.get_asset_rigid_body_count(franka_asset)
         num_franka_shapes = self.gym.get_asset_rigid_shape_count(franka_asset)
-        max_agg_bodies = num_franka_bodies + 4     # 1 for table, table stand, cubeA, cubeB
-        max_agg_shapes = num_franka_shapes + 4     # 1 for table, table stand, cubeA, cubeB
+        max_agg_bodies = num_franka_bodies + 4  # 1 for table, table stand, cubeA, cubeB
+        max_agg_shapes = num_franka_shapes + 4  # 1 for table, table stand, cubeA, cubeB
 
         self.frankas = []
         self.envs = []
@@ -315,7 +314,7 @@ class FrankaCubeStack(VecTask):
             if self.franka_position_noise > 0:
                 rand_xy = self.franka_position_noise * (-1. + np.random.rand(2) * 2.0)
                 franka_start_pose.p = gymapi.Vec3(-0.45 + rand_xy[0], 0.0 + rand_xy[1],
-                                                 1.0 + table_thickness / 2 + table_stand_height)
+                                                  1.0 + table_thickness / 2 + table_stand_height)
             if self.franka_rotation_noise > 0:
                 rand_rot = torch.zeros(1, 3)
                 rand_rot[:, -1] = self.franka_rotation_noise * (-1. + np.random.rand() * 2.0)
@@ -412,7 +411,7 @@ class FrankaCubeStack(VecTask):
 
         # Initialize indices
         self._global_indices = torch.arange(self.num_envs * 5, dtype=torch.int32,
-                                           device=self.device).view(self.num_envs, -1)
+                                            device=self.device).view(self.num_envs, -1)
 
     def _update_states(self):
         self.states.update({
@@ -587,8 +586,8 @@ class FrankaCubeStack(VecTask):
         else:
             # We just directly sample
             sampled_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
-                                              2.0 * self.start_position_noise * (
-                                                      torch.rand(num_resets, 2, device=self.device) - 0.5)
+                                        2.0 * self.start_position_noise * (
+                                                torch.rand(num_resets, 2, device=self.device) - 0.5)
 
         # Sample rotation value
         if self.start_rotation_noise > 0:
@@ -686,9 +685,13 @@ class FrankaCubeStack(VecTask):
                     pz = (pos[i] + quat_apply(rot[i], to_torch([0, 0, 1], device=self.device) * 0.2)).cpu().numpy()
 
                     p0 = pos[i].cpu().numpy()
-                    self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]], [0.85, 0.1, 0.1])
-                    self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]], [0.1, 0.85, 0.1])
-                    self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]], [0.1, 0.1, 0.85])
+                    self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], px[0], px[1], px[2]],
+                                       [0.85, 0.1, 0.1])
+                    self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], py[0], py[1], py[2]],
+                                       [0.1, 0.85, 0.1])
+                    self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]],
+                                       [0.1, 0.1, 0.85])
+
 
 #####################################################################
 ###=========================jit functions=========================###
@@ -697,7 +700,7 @@ class FrankaCubeStack(VecTask):
 
 @torch.jit.script
 def compute_franka_reward(
-    reset_buf, progress_buf, actions, states, reward_settings, max_episode_length
+        reset_buf, progress_buf, actions, states, reward_settings, max_episode_length
 ):
     # type: (Tensor, Tensor, Tensor, Dict[str, Tensor], Dict[str, float], float) -> Tuple[Tensor, Tensor]
 
@@ -743,6 +746,7 @@ def compute_franka_reward(
     )
 
     # Compute resets
-    reset_buf = torch.where((progress_buf >= max_episode_length - 1) | (stack_reward > 0), torch.ones_like(reset_buf), reset_buf)
+    reset_buf = torch.where((progress_buf >= max_episode_length - 1) | (stack_reward > 0), torch.ones_like(reset_buf),
+                            reset_buf)
 
     return rewards, reset_buf
