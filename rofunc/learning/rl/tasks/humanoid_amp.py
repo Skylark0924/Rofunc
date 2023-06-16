@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022, NVIDIA Corporation
+# Copyright (c) 2021-2023, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,20 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE..
 
-from enum import Enum
 import os
+from enum import Enum
+
 from gym import spaces
 from isaacgym import gymtorch
-from isaacgymenvs.tasks.amp.humanoid_amp_base import HumanoidAMPBase, dof_to_obs
-from isaacgymenvs.tasks.amp.utils_amp.motion_lib import MotionLib
-from isaacgymenvs.utils.torch_jit_utils import *
+
+from .amp.humanoid_amp_base import HumanoidAMPBase, dof_to_obs
+from .amp.utils_amp.motion_lib import MotionLib
+from .utils.torch_jit_utils import *
+
+NUM_AMP_OBS_PER_STEP = 13 + 52 + 28 + 12  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
 
 
-NUM_AMP_OBS_PER_STEP = 13 + 52 + 28 + 12 # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
-
-
-class HumanoidAMPTask(HumanoidAMPBase):
-
+class HumanoidAMP(HumanoidAMPBase):
     class StateInit(Enum):
         Default = 0
         Start = 1
@@ -53,32 +53,36 @@ class HumanoidAMPTask(HumanoidAMPBase):
         self._state_init = HumanoidAMP.StateInit[state_init]
         self._hybrid_init_prob = cfg["env"]["hybridInitProb"]
         self._num_amp_obs_steps = cfg["env"]["numAMPObsSteps"]
-        assert(self._num_amp_obs_steps >= 2)
+        assert (self._num_amp_obs_steps >= 2)
 
         self._reset_default_env_ids = []
         self._reset_ref_env_ids = []
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         motion_file = cfg['env'].get('motion_file', "amp_humanoid_backflip.npy")
-        motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../assets/amp/motions/" + motion_file)
+        motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "../../assets/amp/motions/" + motion_file)
         self._load_motion(motion_file_path)
 
         self.num_amp_obs = self._num_amp_obs_steps * NUM_AMP_OBS_PER_STEP
 
         self._amp_obs_space = spaces.Box(np.ones(self.num_amp_obs) * -np.Inf, np.ones(self.num_amp_obs) * np.Inf)
 
-        self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, NUM_AMP_OBS_PER_STEP), device=self.device, dtype=torch.float)
+        self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, NUM_AMP_OBS_PER_STEP),
+                                        device=self.device, dtype=torch.float)
         self._curr_amp_obs_buf = self._amp_obs_buf[:, 0]
         self._hist_amp_obs_buf = self._amp_obs_buf[:, 1:]
-        
+
         self._amp_obs_demo_buf = None
 
         return
 
     def post_physics_step(self):
         super().post_physics_step()
-        
+
         self._update_hist_amp_obs()
         self._compute_amp_observations()
 
@@ -104,8 +108,8 @@ class HumanoidAMPTask(HumanoidAMPBase):
         if (self._amp_obs_demo_buf is None):
             self._build_amp_obs_demo_buf(num_samples)
         else:
-            assert(self._amp_obs_demo_buf.shape[0] == num_samples)
-            
+            assert (self._amp_obs_demo_buf.shape[0] == num_samples)
+
         motion_times0 = self._motion_lib.sample_time(motion_ids)
         motion_ids = np.tile(np.expand_dims(motion_ids, axis=-1), [1, self._num_amp_obs_steps])
         motion_times = np.expand_dims(motion_times0, axis=-1)
@@ -115,27 +119,27 @@ class HumanoidAMPTask(HumanoidAMPBase):
         motion_ids = motion_ids.flatten()
         motion_times = motion_times.flatten()
         root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
-               = self._motion_lib.get_motion_state(motion_ids, motion_times)
+            = self._motion_lib.get_motion_state(motion_ids, motion_times)
         root_states = torch.cat([root_pos, root_rot, root_vel, root_ang_vel], dim=-1)
         amp_obs_demo = build_amp_observations(root_states, dof_pos, dof_vel, key_pos,
-                                      self._local_root_obs)
+                                              self._local_root_obs)
         self._amp_obs_demo_buf[:] = amp_obs_demo.view(self._amp_obs_demo_buf.shape)
 
         amp_obs_demo_flat = self._amp_obs_demo_buf.view(-1, self.get_num_amp_obs())
         return amp_obs_demo_flat
 
     def _build_amp_obs_demo_buf(self, num_samples):
-        self._amp_obs_demo_buf = torch.zeros((num_samples, self._num_amp_obs_steps, NUM_AMP_OBS_PER_STEP), device=self.device, dtype=torch.float)
+        self._amp_obs_demo_buf = torch.zeros((num_samples, self._num_amp_obs_steps, NUM_AMP_OBS_PER_STEP),
+                                             device=self.device, dtype=torch.float)
         return
-        
 
     def _load_motion(self, motion_file):
-        self._motion_lib = MotionLib(motion_file=motion_file, 
+        self._motion_lib = MotionLib(motion_file=motion_file,
                                      num_dofs=self.num_dof,
-                                     key_body_ids=self._key_body_ids.cpu().numpy(), 
+                                     key_body_ids=self._key_body_ids.cpu().numpy(),
                                      device=self.device)
         return
-    
+
     def reset_idx(self, env_ids):
         super().reset_idx(env_ids)
         self._init_amp_obs(env_ids)
@@ -150,14 +154,14 @@ class HumanoidAMPTask(HumanoidAMPBase):
         elif (self._state_init == HumanoidAMP.StateInit.Hybrid):
             self._reset_hybrid_state_init(env_ids)
         else:
-            assert(False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert (False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
 
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
         self._terminate_buf[env_ids] = 0
 
         return
-    
+
     def _reset_default(self, env_ids):
         self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
         self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
@@ -175,24 +179,24 @@ class HumanoidAMPTask(HumanoidAMPBase):
     def _reset_ref_state_init(self, env_ids):
         num_envs = env_ids.shape[0]
         motion_ids = self._motion_lib.sample_motions(num_envs)
-        
+
         if (self._state_init == HumanoidAMP.StateInit.Random
-            or self._state_init == HumanoidAMP.StateInit.Hybrid):
+                or self._state_init == HumanoidAMP.StateInit.Hybrid):
             motion_times = self._motion_lib.sample_time(motion_ids)
         elif (self._state_init == HumanoidAMP.StateInit.Start):
             motion_times = np.zeros(num_envs)
         else:
-            assert(False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert (False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
 
         root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
-               = self._motion_lib.get_motion_state(motion_ids, motion_times)
-        
-        self._set_env_state(env_ids=env_ids, 
-                            root_pos=root_pos, 
-                            root_rot=root_rot, 
-                            dof_pos=dof_pos, 
-                            root_vel=root_vel, 
-                            root_ang_vel=root_ang_vel, 
+            = self._motion_lib.get_motion_state(motion_ids, motion_times)
+
+        self._set_env_state(env_ids=env_ids,
+                            root_pos=root_pos,
+                            root_rot=root_rot,
+                            dof_pos=dof_pos,
+                            root_vel=root_vel,
+                            root_ang_vel=root_ang_vel,
                             dof_vel=dof_vel)
 
         self._reset_ref_env_ids = env_ids
@@ -241,45 +245,47 @@ class HumanoidAMPTask(HumanoidAMPBase):
         motion_ids = motion_ids.flatten()
         motion_times = motion_times.flatten()
         root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
-               = self._motion_lib.get_motion_state(motion_ids, motion_times)
+            = self._motion_lib.get_motion_state(motion_ids, motion_times)
         root_states = torch.cat([root_pos, root_rot, root_vel, root_ang_vel], dim=-1)
         amp_obs_demo = build_amp_observations(root_states, dof_pos, dof_vel, key_pos,
-                                      self._local_root_obs)
+                                              self._local_root_obs)
         self._hist_amp_obs_buf[env_ids] = amp_obs_demo.view(self._hist_amp_obs_buf[env_ids].shape)
         return
-    
+
     def _set_env_state(self, env_ids, root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel):
         self._root_states[env_ids, 0:3] = root_pos
         self._root_states[env_ids, 3:7] = root_rot
         self._root_states[env_ids, 7:10] = root_vel
         self._root_states[env_ids, 10:13] = root_ang_vel
-        
+
         self._dof_pos[env_ids] = dof_pos
         self._dof_vel[env_ids] = dof_vel
 
         env_ids_int32 = env_ids.to(dtype=torch.int32)
-        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states), 
-                                                    gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
+                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
         self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._dof_state),
-                                                    gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
         return
 
     def _update_hist_amp_obs(self, env_ids=None):
         if (env_ids is None):
-            self._hist_amp_obs_buf[:] = self._amp_obs_buf[:, 0:(self._num_amp_obs_steps - 1)]
+            for i in reversed(range(self._amp_obs_buf.shape[1] - 1)):
+                self._amp_obs_buf[:, i + 1] = self._amp_obs_buf[:, i]
         else:
-            self._hist_amp_obs_buf[env_ids] = self._amp_obs_buf[env_ids, 0:(self._num_amp_obs_steps - 1)]
+            for i in reversed(range(self._amp_obs_buf.shape[1] - 1)):
+                self._amp_obs_buf[env_ids, i + 1] = self._amp_obs_buf[env_ids, i]
         return
-    
+
     def _compute_amp_observations(self, env_ids=None):
         key_body_pos = self._rigid_body_pos[:, self._key_body_ids, :]
         if (env_ids is None):
-            self._curr_amp_obs_buf[:] = build_amp_observations(self._root_states, self._dof_pos, self._dof_vel, key_body_pos,
-                                                                self._local_root_obs)
+            self._curr_amp_obs_buf[:] = build_amp_observations(self._root_states, self._dof_pos, self._dof_vel,
+                                                               key_body_pos, self._local_root_obs)
         else:
-            self._curr_amp_obs_buf[env_ids] = build_amp_observations(self._root_states[env_ids], self._dof_pos[env_ids], 
-                                                                    self._dof_vel[env_ids], key_body_pos[env_ids],
-                                                                    self._local_root_obs)
+            self._curr_amp_obs_buf[env_ids] = build_amp_observations(self._root_states[env_ids], self._dof_pos[env_ids],
+                                                                     self._dof_vel[env_ids], key_body_pos[env_ids],
+                                                                     self._local_root_obs)
         return
 
 
@@ -309,16 +315,19 @@ def build_amp_observations(root_states, dof_pos, dof_vel, key_body_pos, local_ro
 
     root_pos_expand = root_pos.unsqueeze(-2)
     local_key_body_pos = key_body_pos - root_pos_expand
-    
+
     heading_rot_expand = heading_rot.unsqueeze(-2)
     heading_rot_expand = heading_rot_expand.repeat((1, local_key_body_pos.shape[1], 1))
-    flat_end_pos = local_key_body_pos.view(local_key_body_pos.shape[0] * local_key_body_pos.shape[1], local_key_body_pos.shape[2])
-    flat_heading_rot = heading_rot_expand.view(heading_rot_expand.shape[0] * heading_rot_expand.shape[1], 
+    flat_end_pos = local_key_body_pos.view(local_key_body_pos.shape[0] * local_key_body_pos.shape[1],
+                                           local_key_body_pos.shape[2])
+    flat_heading_rot = heading_rot_expand.view(heading_rot_expand.shape[0] * heading_rot_expand.shape[1],
                                                heading_rot_expand.shape[2])
     local_end_pos = my_quat_rotate(flat_heading_rot, flat_end_pos)
-    flat_local_key_pos = local_end_pos.view(local_key_body_pos.shape[0], local_key_body_pos.shape[1] * local_key_body_pos.shape[2])
-    
+    flat_local_key_pos = local_end_pos.view(local_key_body_pos.shape[0],
+                                            local_key_body_pos.shape[1] * local_key_body_pos.shape[2])
+
     dof_obs = dof_to_obs(dof_pos)
 
-    obs = torch.cat((root_h, root_rot_obs, local_root_vel, local_root_ang_vel, dof_obs, dof_vel, flat_local_key_pos), dim=-1)
+    obs = torch.cat((root_h, root_rot_obs, local_root_vel, local_root_ang_vel, dof_obs, dof_vel, flat_local_key_pos),
+                    dim=-1)
     return obs
