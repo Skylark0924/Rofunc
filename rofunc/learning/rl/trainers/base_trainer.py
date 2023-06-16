@@ -1,6 +1,7 @@
 import copy
 import datetime
 import os
+import random
 from typing import Union, Optional
 
 import gym
@@ -20,7 +21,6 @@ from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
 class BaseTrainer:
-
     def __init__(self,
                  cfg: DictConfig,
                  env: Union[gym.Env, gymnasium.Env],
@@ -32,35 +32,26 @@ class BaseTrainer:
 
         '''Experiment log directory'''
         directory = self.cfg.Trainer.experiment_directory
-        experiment_name = self.cfg.Trainer.experiment_name
-        if not directory:
-            directory = os.path.join(os.getcwd(), "runs")
-        if not experiment_name:
-            experiment_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f")
-        if hasattr(env, 'cfg'):
-            env_name = env.cfg['name']
-        elif hasattr(env, 'envs'):
-            env_name = env.envs[0].spec.id
-        else:  # vectorized env
-            env_name = env.spec.id
-        experiment_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, experiment_name)
-
-        self.experiment_dir = os.path.join(directory, experiment_name)
-        rf.utils.create_dir(self.experiment_dir)
+        exp_name = self.cfg.Trainer.experiment_name
+        directory = os.path.join(os.getcwd(), "runs") if not directory else directory
+        exp_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f") if not exp_name else exp_name
+        env_name = env.cfg['name'] if hasattr(env, 'cfg') else env.envs[0].spec.id if hasattr(env, 'envs') else env.spec.id
+        exp_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, exp_name)
+        self.exp_dir = os.path.join(directory, exp_name)
+        rf.utils.create_dir(self.exp_dir)
 
         '''Rofunc logger'''
-        self.rofunc_logger = BeautyLogger(self.experiment_dir, 'rofunc.log',
-                                          verbose=self.cfg.Trainer.rofunc_logger_kwargs.verbose)
+        self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.Trainer.rofunc_logger_kwargs.verbose)
         self.rofunc_logger.info(f"Configurations:\n{OmegaConf.to_yaml(self.cfg)}")
 
         '''TensorBoard'''
         # main entry to log data for consumption and visualization by TensorBoard
         self.write_interval = self.cfg.Trainer.write_interval
-        self.writer = SummaryWriter(log_dir=self.experiment_dir)
+        self.writer = SummaryWriter(log_dir=self.exp_dir)
         tb = program.TensorBoard()
         # Find a free port
         with reserve_sock_addr() as (h, p):
-            argv = ['tensorboard', f"--logdir={self.experiment_dir}", f"--port={p}"]
+            argv = ['tensorboard', f"--logdir={self.exp_dir}", f"--port={p}"]
             tb_extra_args = os.getenv('TB_EXTRA_ARGS', "")
             if tb_extra_args:
                 argv += tb_extra_args.split(' ')
@@ -78,16 +69,39 @@ class BaseTrainer:
         self._rollout = 0
         self._update_times = 0
         self.start_time = None
+        self.eval_steps = self.cfg.Trainer.eval_steps
         self.inference_steps = self.cfg.Trainer.inference_steps
 
         '''Environment'''
         env.device = self.device
         self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.Trainer.seed)
+        self.eval_env = wrap_env(env, logger=self.rofunc_logger, seed=random.randint(0, 10000))
         self.rofunc_logger.info(f"Environment:\n  action_space: {self.env.action_space.shape}\n  observation_space: "
                                 f"{self.env.observation_space.shape}\n  num_envs: {self.env.num_envs}")
 
         '''Normalization'''
         self.state_norm = Normalization(shape=self.env.observation_space.shape[0], device=device)
+
+    def setup_wandb(self):
+        # setup Weights & Biases
+        if self.cfg.get("Trainer", {}).get("wandb", False):
+            # save experiment config
+            trainer_cfg = None  # TODO: check
+            trainer_cfg = trainer_cfg if trainer_cfg is not None else {}
+            try:
+                models_cfg = {k: v.net._modules for (k, v) in self.agent.models.items()}
+            except AttributeError:
+                models_cfg = {k: v._modules for (k, v) in self.agent.models.items()}
+            config = {**self.cfg, **trainer_cfg, **models_cfg}
+            # set default values
+            wandb_kwargs = copy.deepcopy(self.cfg.get("Trainer", {}).get("wandb_kwargs", {}))
+            wandb_kwargs.setdefault("name", os.path.split(self.exp_dir)[-1])
+            wandb_kwargs.setdefault("sync_tensorboard", True)
+            wandb_kwargs.setdefault("config", {})
+            wandb_kwargs["config"].update(config)
+            # init Weights & Biases
+            import wandb
+            wandb.init(**wandb_kwargs)
 
     def get_action(self, states):
         if self._step < self.random_steps:
@@ -142,48 +156,35 @@ class BaseTrainer:
         self.rofunc_logger.info('Training complete.')
 
     def eval(self):
-        # TODO: implement evaluation
         # reset env
-        states, infos = self.env.reset()
-
-        for _ in tqdm.trange(self.num_episodes):
-            self._episodes += 1
-
+        states, infos = self.eval_env.reset()
+        for _ in tqdm.trange(self.eval_steps):
             with torch.no_grad():
                 # Obtain action from agent
-                actions = self.agent.act(states)
+                actions, _ = self.agent.act(states, deterministic=True)  # TODO: check
 
                 # Interact with environment
-                next_states, rewards, dones, infos = self.env.step(actions)
-
-                # Store transition
-                self.agent.store_transition(states, actions, rewards, next_states, dones)
+                next_states, rewards, terminated, truncated, infos = self.eval_env.step(actions)
 
                 # Reset the environment
-                if dones.any():
-                    states, infos = self.env.reset()
+                if terminated.any() or truncated.any():
+                    states, infos = self.eval_env.reset()
                 else:
-                    states = next_states.copy()
-
+                    states = next_states.clone()
         # close the environment
-        self.env.close()
-
-        # close the logger
-        self.writer.close()
-        self.rofunc_logger.info('Training complete.')
+        self.eval_env.close()
+        self.rofunc_logger.info('Evaluation complete.')
 
     def inference(self):
         # reset env
         states, infos = self.env.reset()
         for _ in tqdm.trange(self.inference_steps):
             with torch.no_grad():
-                # states = self.state_norm(states)
                 # Obtain action from agent
                 actions, _ = self.agent.act(states, deterministic=True)  # TODO: check
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.env.step(actions)
-                # next_states = self.state_norm(next_states)
 
                 # Reset the environment
                 if terminated.any() or truncated.any():
