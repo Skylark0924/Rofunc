@@ -13,9 +13,16 @@ We compare the performance of the AMP algorithm with different tricks and an ope
 ([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments were conducted on the `Humanoid` environment.
 The results are shown below:
 
-### Humanoid
-![HumanoidAMP](../../../img/RofuncAMP_Humanoid_perf.png)
+### Humanoid Run
+![HumanoidAMPRun](../../../img/RofuncAMP_HumanoidRun_perf.png)
 - `Pink`: SKRL AMP
 - `Green`: Rofunc AMP 
 
-![HumanoidAMP Inference](../../../img/RofuncAMP_Humanoid.gif)
+![HumanoidAMPRun Inference](../../../img/RofuncAMP_HumanoidRun.gif)
+
+
+### Humanoid BackFlip
+![HumanoidAMPFlip](../../../img/RofuncAMP_HumanoidFlip_perf.png)
+- `Pink`: Rofunc AMP
+
+![HumanoidAMPFlip Inference](../../../img/RofuncAMP_HumanoidFlip.gif)
