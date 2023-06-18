@@ -35,7 +35,8 @@ class BaseTrainer:
         exp_name = self.cfg.Trainer.experiment_name
         directory = os.path.join(os.getcwd(), "runs") if not directory else directory
         exp_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f") if not exp_name else exp_name
-        env_name = env.cfg['name'] if hasattr(env, 'cfg') else env.envs[0].spec.id if hasattr(env, 'envs') else env.spec.id
+        env_name = env.cfg['name'] if hasattr(env, 'cfg') else env.envs[0].spec.id if hasattr(env,
+                                                                                              'envs') else env.spec.id
         exp_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, exp_name)
         self.exp_dir = os.path.join(directory, exp_name)
         rf.utils.create_dir(self.exp_dir)
@@ -127,28 +128,30 @@ class BaseTrainer:
         """
         # reset env
         states, infos = self.env.reset()
-        for _ in tqdm.trange(self.maximum_steps):
-            self.pre_interaction()
-            # Obtain action from agent
-            with torch.no_grad():
-                actions = self.get_action(states)
+        with tqdm.trange(self.maximum_steps, colour='green') as self.t_bar:
+            for _ in self.t_bar:
+                self.pre_interaction()
+                # Obtain action from agent
+                with torch.no_grad():
+                    actions = self.get_action(states)
 
-            # Interact with environment
-            next_states, rewards, terminated, truncated, infos = self.env.step(actions)
+                # Interact with environment
+                next_states, rewards, terminated, truncated, infos = self.env.step(actions)
 
-            with torch.no_grad():
-                # Store transition
-                self.agent.store_transition(states=states, actions=actions, next_states=next_states, rewards=rewards,
-                                            terminated=terminated, truncated=truncated, infos=infos)
-            self._step += 1
-            self.post_interaction()
+                with torch.no_grad():
+                    # Store transition
+                    self.agent.store_transition(states=states, actions=actions, next_states=next_states,
+                                                rewards=rewards,
+                                                terminated=terminated, truncated=truncated, infos=infos)
+                self._step += 1
+                self.post_interaction()
 
-            with torch.no_grad():
-                # Reset the environment
-                if terminated.any() or truncated.any():
-                    states, infos = self.env.reset()
-                else:
-                    states = next_states.clone()
+                with torch.no_grad():
+                    # Reset the environment
+                    if terminated.any() or truncated.any():
+                        states, infos = self.env.reset()
+                    else:
+                        states = next_states.clone()
 
         # close the environment
         self.env.close()
@@ -213,6 +216,10 @@ class BaseTrainer:
 
             # Update tensorboard
             self.write_tensorboard()
+
+            # Update tqdm bar message
+            self.t_bar.set_postfix_str(
+                f"Reward: {reward:.2f} | Best reward: {self.agent.checkpoint_best_modules['reward']:.2f}")
 
         # Save checkpoints
         if not self._step % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
