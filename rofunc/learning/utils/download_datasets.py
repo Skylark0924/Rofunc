@@ -1,11 +1,10 @@
+import collections
+import os
+import pickle
+
 import gym
 import numpy as np
 
-import collections
-import pickle
-import os
-
-import d4rl
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
@@ -60,5 +59,5 @@ def download_d4rl_dataset():
     beauty_print('D4RL dataset downloaded', type='info')
 
 
-if __name__ == '__main__':
-    download_d4rl_dataset()
+# if __name__ == '__main__':
+#     download_d4rl_dataset()
