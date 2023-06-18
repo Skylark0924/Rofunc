@@ -43,11 +43,11 @@ def train(custom_args):
                                              env=env,
                                              device=cfg.rl_device)
 
-    # start training
+    # Start training
     trainer.train()
 
 
-def eval(custom_args, ckpt_path=None):
+def inference(custom_args, ckpt_path=None):
     beauty_print("Start evaluating")
 
     # TODO
@@ -69,10 +69,11 @@ if __name__ == '__main__':
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--test", action="store_true", help="turn to test mode while adding this argument")
+    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
+    parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
-    if not custom_args.test:
+    if not custom_args.inference:
         train(custom_args)
     else:
-        eval(custom_args)
+        inference(custom_args, ckpt_path=custom_args.ckpt_path)
