@@ -47,7 +47,7 @@ def train(custom_args):
     trainer.train()
 
 
-def eval(custom_args, ckpt_path=None):
+def inference(custom_args, ckpt_path=None):
     beauty_print("Start evaluating")
 
     # TODO
@@ -66,10 +66,11 @@ if __name__ == '__main__':
     parser.add_argument("--agent", type=str, default="a2c")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--render_mode", type=str, default=None)  # Available render_mode: None, "human", "rgb_array"
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--test", action="store_true", help="turn to test mode while adding this argument")
+    parser.add_argument("--inference", action="store_true", help="turn to test mode while adding this argument")
+    parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
-    if not custom_args.test:
+    if not custom_args.inference:
         train(custom_args)
     else:
-        eval(custom_args)
+        inference(custom_args, custom_args.ckpt_path)

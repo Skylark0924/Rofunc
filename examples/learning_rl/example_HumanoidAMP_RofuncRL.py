@@ -20,8 +20,10 @@ from rofunc.learning.utils.utils import set_seed
 
 def train(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
-    sys.argv.append("task={}".format(custom_args.task))
-    sys.argv.append("train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()))
+    task, motion_file = custom_args.task.split('_')
+
+    sys.argv.append("task={}".format(task))
+    sys.argv.append("train={}{}RofuncRL".format(task, custom_args.agent.upper()))
     sys.argv.append("sim_device={}".format(custom_args.sim_device))
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
@@ -29,18 +31,19 @@ def train(custom_args):
     sys.argv.append("num_envs={}".format(4096))
     args = get_args_parser().parse_args()
     cfg = get_config('./learning/rl', 'config', args=args)
+    cfg.task.env.motion_file = f'amp_humanoid_{motion_file}.npy'
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
 
     # Instantiate the Isaac Gym environment
-    env = task_map[custom_args.task](cfg=cfg_dict,
-                                     rl_device=cfg.rl_device,
-                                     sim_device=cfg.sim_device,
-                                     graphics_device_id=cfg.graphics_device_id,
-                                     headless=cfg.headless,
-                                     virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                     force_render=cfg.force_render)
+    env = task_map[task](cfg=cfg_dict,
+                         rl_device=cfg.rl_device,
+                         sim_device=cfg.sim_device,
+                         graphics_device_id=cfg.graphics_device_id,
+                         headless=cfg.headless,
+                         virtual_screen_capture=cfg.capture_video,  # TODO: check
+                         force_render=cfg.force_render)
 
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
@@ -53,8 +56,10 @@ def train(custom_args):
 
 def inference(custom_args, ckpt_path=None):
     # Config task and trainer parameters for Isaac Gym environments
-    sys.argv.append("task={}".format(custom_args.task))
-    sys.argv.append("train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()))
+    task, motion_file = custom_args.task.split('_')
+
+    sys.argv.append("task={}".format(task))
+    sys.argv.append("train={}{}RofuncRL".format(task, custom_args.agent.upper()))
     sys.argv.append("sim_device={}".format(custom_args.sim_device))
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
@@ -67,13 +72,13 @@ def inference(custom_args, ckpt_path=None):
     set_seed(cfg.train.Trainer.seed)
 
     # Instantiate the Isaac Gym environment
-    infer_env = task_map[custom_args.task](cfg=cfg_dict,
-                                           rl_device=cfg.rl_device,
-                                           sim_device=cfg.sim_device,
-                                           graphics_device_id=cfg.graphics_device_id,
-                                           headless=cfg.headless,
-                                           virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                           force_render=cfg.force_render)
+    infer_env = task_map[task](cfg=cfg_dict,
+                               rl_device=cfg.rl_device,
+                               sim_device=cfg.sim_device,
+                               graphics_device_id=cfg.graphics_device_id,
+                               headless=cfg.headless,
+                               virtual_screen_capture=cfg.capture_video,  # TODO: check
+                               force_render=cfg.force_render)
 
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
@@ -81,7 +86,7 @@ def inference(custom_args, ckpt_path=None):
                                              device=cfg.rl_device)
     # load checkpoint
     if ckpt_path is None:
-        ckpt_path = model_zoo(name="HumanoidRofuncRLPPO_left_arm.pt")  # TODO
+        ckpt_path = model_zoo(name=f"{custom_args.task}.pth")
     trainer.agent.load_ckpt(ckpt_path)
 
     # Start inference
@@ -92,17 +97,18 @@ if __name__ == '__main__':
     gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="HumanoidAMP")
-    parser.add_argument("--agent", type=str, default="amp")
+    # Available tasks: HumanoidAMP_backflip, HumanoidAMP_walk, HumanoidAMP_run, HumanoidAMP_dance, HumanoidAMP_hop
+    parser.add_argument("--task", type=str, default="HumanoidAMP_dance")
+    parser.add_argument("--agent", type=str, default="amp")  # Available agent: amp
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
+    parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
     if not custom_args.inference:
         train(custom_args)
     else:
-        ckpt_path = '/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/examples/learning_rl/runs/RofuncRL_AMPTrainer_HumanoidAMP_23-06-16_18-29-11-318272/checkpoints/ckpt_81000.pth'
-        inference(custom_args, ckpt_path=ckpt_path)
+        inference(custom_args, ckpt_path=custom_args.ckpt_path)
