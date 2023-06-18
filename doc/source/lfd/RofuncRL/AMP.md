@@ -26,3 +26,11 @@ The results are shown below:
 - `Pink`: Rofunc AMP
 
 ![HumanoidAMPFlip Inference](../../../img/RofuncAMP_HumanoidFlip.gif)
+
+
+### Humanoid Dance
+![HumanoidAMPFlip Inference](../../../img/RofuncAMP_HumanoidDance.gif)
+
+
+### Humanoid Hop
+![HumanoidAMPFlip Inference](../../../img/RofuncAMP_HumanoidHop.gif)
