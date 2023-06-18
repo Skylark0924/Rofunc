@@ -13,9 +13,6 @@ def set_seed(seed: Optional[int] = None, deterministic: bool = False) -> int:
     Set the seed for the random number generators
     :param seed: The seed to set. Is None, a random seed will be generated (default: ``None``)
     :param deterministic: Whether PyTorch is configured to use deterministic algorithms (default: ``False``).
-                          The following environment variables should be established for CUDA 10.1 (``CUDA_LAUNCH_BLOCKING=1``)
-                          and for CUDA 10.2 or later (``CUBLAS_WORKSPACE_CONFIG=:16:8`` or ``CUBLAS_WORKSPACE_CONFIG=:4096:2``).
-                          See PyTorch `Reproducibility <https://pytorch.org/docs/stable/notes/randomness.html>`_ for details
     """
     # generate a random seed
     if seed is None:
