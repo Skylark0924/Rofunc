@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     # Available tasks: HumanoidAMP_backflip, HumanoidAMP_walk, HumanoidAMP_run, HumanoidAMP_dance, HumanoidAMP_hop
-    parser.add_argument("--task", type=str, default="HumanoidAMP_dance")
+    parser.add_argument("--task", type=str, default="HumanoidAMP_walk")
     parser.add_argument("--agent", type=str, default="amp")  # Available agent: amp
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
