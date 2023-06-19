@@ -134,6 +134,7 @@ The available functions and plans can be found as follows.
 |                                                                                 |   |                                `DTrans(RofuncRL)`                                | 🔃 |                                                                         |     |                  |    |                                                                           |    |
 |                                                                                 |   |                                 `EDAC(RofuncRL)`                                 | ⛔  |                                                                         |     |                  |    |                                                                           |    |
 |                                                                                 |   | [`AMP(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html) | ✅  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   | [`ASE(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html) | ✅  |                                                                         |     |                  |    |                                                                           |    |
 
 
 
