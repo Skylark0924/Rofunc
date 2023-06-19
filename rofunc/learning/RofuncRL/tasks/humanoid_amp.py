@@ -64,7 +64,7 @@ class HumanoidAMPTask(HumanoidAMPBase):
 
         motion_file = cfg['env'].get('motion_file', "amp_humanoid_backflip.npy")
         motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        "../../../simulator/assets/amp/motions/" + motion_file)
+                                        "../../../../examples/data/amp/motions/" + motion_file)
         self._load_motion(motion_file_path)
 
         self.num_amp_obs = self._num_amp_obs_steps * NUM_AMP_OBS_PER_STEP
