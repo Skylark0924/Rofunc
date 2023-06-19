@@ -25,6 +25,7 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.mixline.amp_agent import AMPAgent
+from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -73,14 +74,18 @@ class ASEAgent(AMPAgent):
         if self._current_states is not None:
             states = self._current_states
 
-        super().store_transition(states=states, actions=actions, next_states=next_states, rewards=rewards,
-                                 terminated=terminated, truncated=truncated, infos=infos)
+        BaseAgent.store_transition(self, states=states, actions=actions, next_states=next_states, rewards=rewards,
+                                   terminated=terminated, truncated=truncated, infos=infos)
 
         amp_states = infos["amp_obs"]
+        n = len(env_ids)
+        z = self._sample_latents(n)
+        self.ase_latents[env_ids] = z
 
         # reward shaping
         if self._rewards_shaper is not None:
             rewards = self._rewards_shaper(rewards)
+
 
         # compute values
         values = self.value(self._state_preprocessor(states))
@@ -90,10 +95,14 @@ class ASEAgent(AMPAgent):
         next_values = self._value_preprocessor(next_values, inverse=True)
         next_values *= infos['terminate'].view(-1, 1).logical_not()
 
+
+
+
         # storage transition in memory
         self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
                                 terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
-                                values=values, amp_states=amp_states, next_values=next_values)
+                                values=values, amp_states=amp_states, next_values=next_values,
+                                ase_latents=self.ase_latents)
 
     def update_net(self):
         """
