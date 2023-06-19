@@ -100,8 +100,9 @@ Compare the performance of AMP with different discriminator loss functions in `H
 - `Light blue`: Rofunc AMP with standard discriminator
 - `Pink`: Rofunc AMP with least-squares discriminator
 
-> **Note**
-> Least-squares discriminator is a stable trick used in the original AMP paper, but it seems not necessary.
+:::{attention}
+Least-squares discriminator is a stable trick used in the original AMP paper, but it seems not necessary.
+:::
 
 
 ### Gradient penalty
@@ -109,11 +110,11 @@ Compare the performance of AMP with different discriminator loss functions in `H
 
 ```python
 amp_motion_gradient = torch.autograd.grad(amp_motion_logits,
-                                            sampled_amp_motion_states,
-                                            grad_outputs=torch.ones_like(amp_motion_logits),
-                                            create_graph=True,
-                                            retain_graph=True,
-                                            only_inputs=True)
+                                          sampled_amp_motion_states,
+                                          grad_outputs=torch.ones_like(amp_motion_logits),
+                                          create_graph=True,
+                                          retain_graph=True,
+                                          only_inputs=True)
 gradient_penalty = torch.sum(torch.square(amp_motion_gradient[0]), dim=-1).mean()
 discriminator_loss += self._discriminator_gradient_penalty_scale * gradient_penalty
 ```

@@ -14,7 +14,7 @@
  limitations under the License.
  """
 
-from typing import Callable, Union, Tuple, Optional
+from typing import Callable, Union, Tuple, Optional, List
 
 import gym
 import gymnasium
@@ -37,7 +37,7 @@ from rofunc.learning.RofuncRL.models.critic_models import Critic
 class AMPAgent(BaseAgent):
     def __init__(self,
                  cfg: DictConfig,
-                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  memory: Optional[Union[Memory, Tuple[Memory]]] = None,
                  device: Optional[Union[str, torch.device]] = None,
@@ -340,7 +340,6 @@ class AMPAgent(BaseAgent):
                 amp_logits = self.discriminator(sampled_amp_states)
                 amp_replay_logits = self.discriminator(sampled_amp_replay_states)
                 amp_motion_logits = self.discriminator(sampled_amp_motion_states)
-
                 amp_cat_logits = torch.cat([amp_logits, amp_replay_logits], dim=0)
 
                 # discriminator prediction loss
@@ -379,6 +378,7 @@ class AMPAgent(BaseAgent):
 
                 discriminator_loss *= self._discriminator_loss_scale
 
+                '''Update networks'''
                 # Update policy network
                 self.optimizer_policy.zero_grad()
                 (policy_loss + entropy_loss).backward()

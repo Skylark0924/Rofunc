@@ -37,7 +37,12 @@ class BaseCritic(nn.Module):
         if isinstance(observation_space, List):
             self.state_dim = 0
             for i in range(len(observation_space)):
-                self.state_dim += observation_space[i].shape[0]
+                if isinstance(observation_space[i], gym.Space) or isinstance(observation_space[i], gymnasium.Space):
+                    self.state_dim += observation_space[i].shape[0]
+                elif isinstance(observation_space[i], int):
+                    self.state_dim += observation_space[i]
+                else:
+                    raise ValueError(f'observation_space[{i}] is not a valid type.')
         else:
             self.state_dim = observation_space.shape[0]
         self.action_dim = action_space.shape[0]
