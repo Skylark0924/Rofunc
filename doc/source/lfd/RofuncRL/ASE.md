@@ -6,6 +6,7 @@
 
 ## Performance comparison
 
+![](../../../img/ASE1.gif)
 
 ## Tricks
 
