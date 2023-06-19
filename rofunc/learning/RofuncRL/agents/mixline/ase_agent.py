@@ -18,14 +18,15 @@ from typing import Callable, Union, Tuple, Optional
 
 import gym
 import gymnasium
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from isaacgym.torch_utils import *
 from omegaconf import DictConfig
 
 import rofunc as rf
-from rofunc.learning.RofuncRL.agents.mixline.amp_agent import AMPAgent
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
+from rofunc.learning.RofuncRL.agents.mixline.amp_agent import AMPAgent
+from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -59,15 +60,79 @@ class ASEAgent(AMPAgent):
         :param replay_buffer: Replay buffer
         :param collect_reference_motions: Function for collecting reference motions
         """
-        super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger,
-                         amp_observation_space, motion_dataset, replay_buffer, collect_reference_motions)
-
+        """ASE specific parameters"""
+        self._lr_e = self.cfg.Agent.lr_e
         self._ase_latent_dim = self.cfg.Agent.ase_latent_dim
+        self._ase_latent_steps_min = self.cfg.Agent.ase_latent_steps_min
+        self._ase_latent_steps_max = self.cfg.Agent.ase_latent_steps_max
+        self._amp_diversity_bonus = self.cfg.Agent.amp_diversity_bonus
+        self._amp_diversity_tar = self.cfg.Agent.amp_diversity_tar
+        self._enc_coef = self.cfg.Agent.enc_coef
+        self._enc_weight_decay = self.cfg.Agent.enc_weight_decay
+        self._enc_reward_scale = self.cfg.Agent.enc_reward_scale
+        self._enc_gradient_penalty_scale = self.cfg.Agent.enc_gradient_penalty_scale
+        self._enc_reward_weight = self.cfg.Agent.enc_reward_weight
 
+        super().__init__(cfg, [observation_space, self._ase_latent_dim], action_space, memory, device, experiment_dir,
+                         rofunc_logger, amp_observation_space, motion_dataset, replay_buffer, collect_reference_motions)
+
+        '''Define ASE specific models except for AMP'''
+        self.encoder = Critic(cfg.Model, amp_observation_space, action_space, cfg_name='encoder').to(self.device)
+        self.models['encoder'] = self.encoder
+        self.checkpoint_modules['encoder'] = self.encoder
+        self.rofunc_logger.module(f"Encoder model", self.encoder)
+
+        '''Create ASE specific tensors in memory except for AMP'''
         self.memory.create_tensor(name="ase_latents", size=self._ase_latent_dim, dtype=torch.float32)
-        # tensors sampled during training
-        self._tensors_names = ["states", "actions", "rewards", "next_states", "terminated", "log_prob", "values",
-                               "returns", "advantages", "amp_states", "next_values", "ase_latents"]
+        self._tensors_names.append("ase_latents")
+
+        self._ase_latents = torch.zeros((16, self._ase_latent_dim), dtype=torch.float32, device=device)  # TODO: batch
+
+        self._latent_reset_steps = torch.zeros(16, dtype=torch.int32, device=device)
+        num_envs = self.vec_env.env.task.num_envs
+        env_ids = to_torch(np.arange(num_envs), dtype=torch.long, device=device)
+        self._reset_latent_step_count(env_ids)
+
+    def _set_up(self):
+        super()._set_up()
+        self.optimizer_enc = torch.optim.Adam(self.encoder.parameters(), lr=self._lr_e, eps=self._adam_eps)
+        if self._lr_scheduler is not None:
+            self.scheduler_enc = self._lr_scheduler(self.optimizer_enc, **self._lr_scheduler_kwargs)
+        self.checkpoint_modules["optimizer_enc"] = self.optimizer_enc
+
+    def _reset_latent_step_count(self):
+        self._ase_latent_step_count = np.random.randint(self._ase_latent_steps_min, self._ase_latent_steps_max)
+
+    def _update_latents(self):
+        if self._ase_latent_step_count <= 0:
+            self._reset_latents()
+            self._reset_latent_step_count()
+        else:
+            self._ase_latent_step_count -= 1
+
+    def _sample_latents(self, n):
+        z = self.model.a2c_network.sample_latents(n)
+        return z
+
+    def _reset_latents(self, env_ids):
+        n = len(env_ids)
+        z = self._sample_latents(n)
+        self._ase_latents[env_ids] = z
+
+    def act(self, states: torch.Tensor, deterministic: bool = False):
+        if self._current_states is not None:
+            states = self._current_states
+
+        if not deterministic:
+            # sample stochastic actions
+            self._update_latents()
+            actions, log_prob = self.policy(self._state_preprocessor(states), ase_latents=self._ase_latents)
+            self._current_log_prob = log_prob
+        else:
+            # choose deterministic actions for evaluation
+            actions, _ = self.policy(self._state_preprocessor(states), deterministic=True)
+            log_prob = None
+        return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
@@ -78,31 +143,24 @@ class ASEAgent(AMPAgent):
                                    terminated=terminated, truncated=truncated, infos=infos)
 
         amp_states = infos["amp_obs"]
-        n = len(env_ids)
-        z = self._sample_latents(n)
-        self.ase_latents[env_ids] = z
 
         # reward shaping
         if self._rewards_shaper is not None:
             rewards = self._rewards_shaper(rewards)
 
-
         # compute values
         values = self.value(self._state_preprocessor(states))
         values = self._value_preprocessor(values, inverse=True)
 
-        next_values = self.value(self._state_preprocessor(next_states))
+        next_values = self.value(self._state_preprocessor(next_states), ase_latents=self._ase_latents)
         next_values = self._value_preprocessor(next_values, inverse=True)
         next_values *= infos['terminate'].view(-1, 1).logical_not()
-
-
-
 
         # storage transition in memory
         self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
                                 terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
                                 values=values, amp_states=amp_states, next_values=next_values,
-                                ase_latents=self.ase_latents)
+                                ase_latents=self._ase_latents)
 
     def update_net(self):
         """
@@ -114,8 +172,10 @@ class ASEAgent(AMPAgent):
         '''Compute combined rewards'''
         rewards = self.memory.get_tensor_by_name("rewards")
         amp_states = self.memory.get_tensor_by_name("amp_states")
+        ase_latents = self.memory.get_tensor_by_name("ase_latents")
 
         with torch.no_grad():
+            # Compute style reward from discriminator
             amp_logits = self.discriminator(self._amp_state_preprocessor(amp_states))
             if self._least_square_discriminator:
                 style_reward = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
@@ -125,7 +185,14 @@ class ASEAgent(AMPAgent):
                                                         torch.tensor(0.0001, device=self.device)))
             style_reward *= self._discriminator_reward_scale
 
-        combined_rewards = self._task_reward_weight * rewards + self._style_reward_weight * style_reward
+            # Compute encoder reward
+            enc_pred = self.encoder(self._amp_state_preprocessor(amp_states))
+            enc_reward = torch.clamp_min(-torch.sum(enc_pred * ase_latents, dim=-1, keepdim=True), 0.0)
+            enc_reward *= self._enc_reward_scale
+
+        combined_rewards = self._task_reward_weight * rewards + \
+                           self._style_reward_weight * style_reward + \
+                           self._enc_reward_weight * enc_reward
 
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
@@ -167,13 +234,14 @@ class ASEAgent(AMPAgent):
         cumulative_entropy_loss = 0
         cumulative_value_loss = 0
         cumulative_discriminator_loss = 0
+        cumulative_encoder_loss = 0
 
         # learning epochs
         for epoch in range(self._learning_epochs):
             # mini-batches loop
             for i, (sampled_states, sampled_actions, sampled_rewards, samples_next_states, samples_terminated,
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
-                    _) in enumerate(sampled_batches):
+                    _, sampled_ase_latents) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
                 _, log_prob_now = self.policy(sampled_states, sampled_actions)
 
@@ -214,7 +282,6 @@ class ASEAgent(AMPAgent):
                 amp_logits = self.discriminator(sampled_amp_states)
                 amp_replay_logits = self.discriminator(sampled_amp_replay_states)
                 amp_motion_logits = self.discriminator(sampled_amp_motion_states)
-
                 amp_cat_logits = torch.cat([amp_logits, amp_replay_logits], dim=0)
 
                 # discriminator prediction loss
@@ -253,6 +320,29 @@ class ASEAgent(AMPAgent):
 
                 discriminator_loss *= self._discriminator_loss_scale
 
+                # encoder loss
+                enc_pred = self.encoder(self._amp_state_preprocessor(sampled_amp_states))
+                enc_err = torch.clamp_min(-torch.sum(enc_pred * sampled_ase_latents, dim=-1, keepdim=True), 0.0)
+                enc_loss = torch.mean(enc_err)
+
+                # discriminator gradient penalty
+                if self._discriminator_gradient_penalty_scale:
+                    enc_obs_grad = torch.autograd.grad(enc_err,
+                                                       sampled_ase_latents,
+                                                       grad_outputs=torch.ones_like(enc_err),
+                                                       create_graph=True,
+                                                       retain_graph=True,
+                                                       only_inputs=True)
+                    gradient_penalty = torch.sum(torch.square(enc_obs_grad[0]), dim=-1).mean()
+                    enc_loss += self._enc_gradient_penalty_scale * gradient_penalty
+
+                # if self._enable_amp_diversity_bonus():
+                #     diversity_loss = self._diversity_loss(batch_dict['obs'], mu, batch_dict['ase_latents'])
+                #     diversity_loss = torch.sum(rand_action_mask * diversity_loss) / rand_action_sum
+                #     loss += self._amp_diversity_bonus * diversity_loss
+                #     a_info['amp_diversity_loss'] = diversity_loss
+
+                '''Update networks'''
                 # Update policy network
                 self.optimizer_policy.zero_grad()
                 (policy_loss + entropy_loss).backward()
@@ -274,18 +364,27 @@ class ASEAgent(AMPAgent):
                     nn.utils.clip_grad_norm_(self.discriminator.parameters(), self._grad_norm_clip)
                 self.optimizer_disc.step()
 
+                # Update encoder network
+                self.optimizer_enc.zero_grad()
+                enc_loss.backward()
+                if self._grad_norm_clip > 0:
+                    nn.utils.clip_grad_norm_(self.encoder.parameters(), self._grad_norm_clip)
+                self.optimizer_enc.step()
+
                 # update cumulative losses
                 cumulative_policy_loss += policy_loss.item()
                 cumulative_value_loss += value_loss.item()
                 if self._entropy_loss_scale:
                     cumulative_entropy_loss += entropy_loss.item()
                 cumulative_discriminator_loss += discriminator_loss.item()
+                cumulative_encoder_loss += enc_loss.item()
 
             # update learning rate
             if self._lr_scheduler:
                 self.scheduler_policy.step()
                 self.scheduler_value.step()
                 self.scheduler_disc.step()
+                self.scheduler_enc.step()
 
         # update AMP replay buffer
         self.replay_buffer.add_samples(states=amp_states.view(-1, amp_states.shape[-1]))
@@ -295,6 +394,8 @@ class ASEAgent(AMPAgent):
         self.track_data("Loss / Value loss", cumulative_value_loss / (self._learning_epochs * self._mini_batch_size))
         self.track_data("Loss / Discriminator loss",
                         cumulative_discriminator_loss / (self._learning_epochs * self._mini_batch_size))
+        self.track_data("Loss / Encoder loss",
+                        cumulative_encoder_loss / (self._learning_epochs * self._mini_batch_size))
         if self._entropy_loss_scale:
             self.track_data("Loss / Entropy loss",
                             cumulative_entropy_loss / (self._learning_epochs * self._mini_batch_size))
@@ -302,3 +403,4 @@ class ASEAgent(AMPAgent):
             self.track_data("Learning / Learning rate (policy)", self.scheduler_policy.get_last_lr()[0])
             self.track_data("Learning / Learning rate (value)", self.scheduler_value.get_last_lr()[0])
             self.track_data("Learning / Learning rate (discriminator)", self.scheduler_disc.get_last_lr()[0])
+            self.track_data("Learning / Learning rate (encoder)", self.scheduler_enc.get_last_lr()[0])

@@ -14,7 +14,7 @@
  limitations under the License.
  """
 
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, List
 
 import gym
 import gymnasium
@@ -29,11 +29,22 @@ from .utils import build_mlp, init_layers, activation_func
 
 
 class BaseActor(nn.Module):
-    def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+    def __init__(self, cfg: DictConfig,
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
         super().__init__()
         self.cfg = cfg
-        self.state_dim = observation_space.shape[0]
+        if isinstance(observation_space, List):
+            self.state_dim = 0
+            for i in range(len(observation_space)):
+                if isinstance(observation_space[i], gym.Space) or isinstance(observation_space[i], gymnasium.Space):
+                    self.state_dim += observation_space[i].shape[0]
+                elif isinstance(observation_space[i], int):
+                    self.state_dim += observation_space[i]
+                else:
+                    raise ValueError(f'observation_space[{i}] is not a valid type.')
+        else:
+            self.state_dim = observation_space.shape[0]
         self.action_dim = action_space.shape[0]
         self.mlp_hidden_dims = cfg.actor.mlp_hidden_dims
         self.mlp_activation = activation_func(cfg.actor.mlp_activation)
