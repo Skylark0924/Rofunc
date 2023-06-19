@@ -18,23 +18,17 @@ from typing import Callable, Union, Tuple, Optional
 
 import gym
 import gymnasium
-import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
 
 import rofunc as rf
-from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
-from rofunc.learning.RofuncRL.processors.normalizers import empty_preprocessor
-from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
-from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
+from rofunc.learning.RofuncRL.agents.mixline.amp_agent import AMPAgent
 from rofunc.learning.RofuncRL.utils.memory import Memory
-from rofunc.learning.RofuncRL.models.actor_models import ActorAMP
-from rofunc.learning.RofuncRL.models.critic_models import Critic
 
 
-class AMPAgent(BaseAgent):
+class ASEAgent(AMPAgent):
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -48,10 +42,10 @@ class AMPAgent(BaseAgent):
                  replay_buffer: Optional[Union[Memory, Tuple[Memory]]] = None,
                  collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None):
         """
-        Adversarial Motion Priors (AMP) agent
-        “AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control”. Peng et al. 2021.
-            https://arxiv.org/abs/2104.02180
-        Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html
+        Adversarial Skill Embeddings (ASE) agent
+        “ASE: Large-Scale Reusable Adversarial Skill Embeddings for Physically Simulated Characters”. Peng et al. 2022.
+            https://arxiv.org/abs/2205.01906
+        Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html
         :param cfg: Custom configuration
         :param observation_space: Observation/state space or shape
         :param action_space: Action space or shape
@@ -59,149 +53,20 @@ class AMPAgent(BaseAgent):
         :param device: Device on which the torch tensor is allocated
         :param experiment_dir: Directory where experiment outputs are saved
         :param rofunc_logger: Rofunc logger
-        :param amp_observation_space: cfg["env"]["numAMPObsSteps"] * NUM_AMP_OBS_PER_STEP
+        :param amp_observation_space: cfg["env"]["numASEObsSteps"] * NUM_ASE_OBS_PER_STEP
         :param motion_dataset: Motion dataset
         :param replay_buffer: Replay buffer
         :param collect_reference_motions: Function for collecting reference motions
         """
-        super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
+        super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger,
+                         amp_observation_space, motion_dataset, replay_buffer, collect_reference_motions)
 
-        self.amp_observation_space = amp_observation_space
-        self.motion_dataset = motion_dataset
-        self.replay_buffer = replay_buffer
-        self.collect_reference_motions = collect_reference_motions
+        self._ase_latent_dim = self.cfg.Agent.ase_latent_dim
 
-        '''Define models for AMP'''
-        self.policy = ActorAMP(cfg.Model, observation_space, action_space).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
-        self.discriminator = Critic(cfg.Model, amp_observation_space, action_space, cfg_name='discriminator').to(
-            self.device)
-        self.models = {"policy": self.policy, "value": self.value, "discriminator": self.discriminator}
-        # checkpoint models
-        self.checkpoint_modules["policy"] = self.policy
-        self.checkpoint_modules["value"] = self.value
-        self.checkpoint_modules["discriminator"] = self.discriminator
-        self.rofunc_logger.module(f"Policy model: {self.policy}")
-        self.rofunc_logger.module(f"Value model: {self.value}")
-        self.rofunc_logger.module(f"Discriminator model: {self.discriminator}")
-
-        '''Create tensors in memory'''
-        self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
-        self.memory.create_tensor(name="next_states", size=self.observation_space, dtype=torch.float32)
-        self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
-        self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
-        self.memory.create_tensor(name="terminated", size=1, dtype=torch.bool)
-        self.memory.create_tensor(name="log_prob", size=1, dtype=torch.float32)
-        self.memory.create_tensor(name="values", size=1, dtype=torch.float32)
-        self.memory.create_tensor(name="returns", size=1, dtype=torch.float32)
-        self.memory.create_tensor(name="advantages", size=1, dtype=torch.float32)
-        self.memory.create_tensor(name="amp_states", size=amp_observation_space, dtype=torch.float32)
-        self.memory.create_tensor(name="next_values", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="ase_latents", size=self._ase_latent_dim, dtype=torch.float32)
         # tensors sampled during training
         self._tensors_names = ["states", "actions", "rewards", "next_states", "terminated", "log_prob", "values",
-                               "returns", "advantages", "amp_states", "next_values"]
-
-        '''Get hyper-parameters from config'''
-        self._horizon = self.cfg.Agent.horizon
-        self._discount = self.cfg.Agent.discount
-        self._td_lambda = self.cfg.Agent.td_lambda
-        self._learning_epochs = self.cfg.Agent.learning_epochs
-        self._mini_batch_size = self.cfg.Agent.mini_batch_size
-        self._amp_batch_size = self.cfg.Agent.amp_batch_size
-        self._task_reward_weight = self.cfg.Agent.task_reward_weight
-        self._style_reward_weight = self.cfg.Agent.style_reward_weight
-        self._lr_a = self.cfg.Agent.lr_a
-        self._lr_c = self.cfg.Agent.lr_c
-        self._lr_d = self.cfg.Agent.lr_d
-        self._lr_scheduler = self.cfg.get("Agent", {}).get("lr_scheduler", KLAdaptiveRL)
-        self._lr_scheduler_kwargs = self.cfg.get("Agent", {}).get("lr_scheduler_kwargs", {'kl_threshold': 0.008})
-        self._adam_eps = self.cfg.Agent.adam_eps
-        self._entropy_loss_scale = self.cfg.Agent.entropy_loss_scale
-        self._value_loss_scale = self.cfg.Agent.value_loss_scale
-        self._grad_norm_clip = self.cfg.Agent.grad_norm_clip
-        self._ratio_clip = self.cfg.Agent.ratio_clip
-        self._value_clip = self.cfg.Agent.value_clip
-        self._clip_predicted_values = self.cfg.Agent.clip_predicted_values
-        self._least_square_discriminator = self.cfg.Agent.least_square_discriminator
-        self._discriminator_loss_scale = self.cfg.Agent.discriminator_loss_scale
-        self._discriminator_batch_size = self.cfg.Agent.discriminator_batch_size
-        self._discriminator_reward_scale = self.cfg.Agent.discriminator_reward_scale
-        self._discriminator_logit_regularization_scale = self.cfg.Agent.discriminator_logit_regularization_scale
-        self._discriminator_gradient_penalty_scale = self.cfg.Agent.discriminator_gradient_penalty_scale
-        self._discriminator_weight_decay_scale = self.cfg.Agent.discriminator_weight_decay_scale
-        self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
-        self._state_preprocessor = RunningStandardScaler
-        self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
-                                                                        {"size": observation_space, "device": device})
-        self._value_preprocessor = RunningStandardScaler
-        self._value_preprocessor_kwargs = self.cfg.get("Agent", {}).get("value_preprocessor_kwargs",
-                                                                        {"size": 1, "device": device})
-        self._amp_state_preprocessor = RunningStandardScaler
-        self._amp_state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("amp_state_preprocessor_kwargs",
-                                                                            {"size": amp_observation_space,
-                                                                             "device": device})
-
-        '''Misc variables'''
-        self._current_log_prob = None
-        self._current_next_states = None
-        self._current_states = None
-
-        self._set_up()
-
-    def _set_up(self):
-        """
-        Set up optimizer, learning rate scheduler and state/value preprocessors
-        """
-        # Set up optimizer and learning rate scheduler
-        self.optimizer_policy = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a, eps=self._adam_eps)
-        self.optimizer_value = torch.optim.Adam(self.value.parameters(), lr=self._lr_c, eps=self._adam_eps)
-        self.optimizer_disc = torch.optim.Adam(self.discriminator.parameters(), lr=self._lr_d, eps=self._adam_eps)
-        if self._lr_scheduler is not None:
-            self.scheduler_policy = self._lr_scheduler(self.optimizer_policy, **self._lr_scheduler_kwargs)
-            self.scheduler_value = self._lr_scheduler(self.optimizer_value, **self._lr_scheduler_kwargs)
-            self.scheduler_disc = self._lr_scheduler(self.optimizer_disc, **self._lr_scheduler_kwargs)
-        self.checkpoint_modules["optimizer_policy"] = self.optimizer_policy
-        self.checkpoint_modules["optimizer_value"] = self.optimizer_value
-        self.checkpoint_modules["optimizer_disc"] = self.optimizer_disc
-
-        # set up preprocessors
-        if self._state_preprocessor:
-            self._state_preprocessor = self._state_preprocessor(**self._state_preprocessor_kwargs)
-            self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
-        else:
-            self._state_preprocessor = empty_preprocessor
-        if self._value_preprocessor:
-            self._value_preprocessor = self._value_preprocessor(**self._value_preprocessor_kwargs)
-            self.checkpoint_modules["value_preprocessor"] = self._value_preprocessor
-        else:
-            self._value_preprocessor = empty_preprocessor
-        if self._amp_state_preprocessor:
-            self._amp_state_preprocessor = self._amp_state_preprocessor(**self._amp_state_preprocessor_kwargs)
-            self.checkpoint_modules["amp_state_preprocessor"] = self._amp_state_preprocessor
-        else:
-            self._amp_state_preprocessor = empty_preprocessor
-
-        # Create tensors for motion dataset and replay buffer
-        self.motion_dataset.create_tensor(name="states", size=self.amp_observation_space, dtype=torch.float32)
-        self.replay_buffer.create_tensor(name="states", size=self.amp_observation_space, dtype=torch.float32)
-
-        # initialize motion dataset
-        for _ in range(math.ceil(self.motion_dataset.memory_size / self._amp_batch_size)):
-            self.motion_dataset.add_samples(states=self.collect_reference_motions(self._amp_batch_size))
-
-    def act(self, states: torch.Tensor, deterministic: bool = False):
-        if self._current_states is not None:
-            states = self._current_states
-
-        if not deterministic:
-            # sample stochastic actions
-            actions, log_prob = self.policy(self._state_preprocessor(states))
-            self._current_log_prob = log_prob
-        else:
-            # choose deterministic actions for evaluation
-            actions, _ = self.policy(self._state_preprocessor(states), deterministic=True)
-            log_prob = None
-        return actions, log_prob
+                               "returns", "advantages", "amp_states", "next_values", "ase_latents"]
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
@@ -346,8 +211,8 @@ class AMPAgent(BaseAgent):
                 # discriminator prediction loss
                 if self._least_square_discriminator:
                     discriminator_loss = 0.5 * (
-                                F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean') \
-                                + F.mse_loss(amp_motion_logits, torch.ones_like(amp_motion_logits), reduction='mean'))
+                            F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean') \
+                            + F.mse_loss(amp_motion_logits, torch.ones_like(amp_motion_logits), reduction='mean'))
                 else:
                     discriminator_loss = 0.5 * (nn.BCEWithLogitsLoss()(amp_cat_logits, torch.zeros_like(amp_cat_logits)) \
                                                 + nn.BCEWithLogitsLoss()(amp_motion_logits,

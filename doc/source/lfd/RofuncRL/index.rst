@@ -15,10 +15,6 @@ Online reinforcement learning
     TD3 implementation and explanation of tricks in `RofuncRL`
 :doc:`SAC`
     SAC implementation and explanation of tricks in `RofuncRL`
-:doc:`AMP`
-    AMP implementation and explanation of tricks in `RofuncRL`
-:doc:`ODTrans`
-    ODTrans implementation and explanation of tricks in `RofuncRL`
 
 Offline reinforcement learning
 ------------------------------
@@ -35,6 +31,18 @@ Offline reinforcement learning
     EDAC implementation and explanation of tricks in `RofuncRL`
 
 
+Mixline (Mixing online and offline) reinforcement learning
+----------------------------------------------------------
+
+:doc:`AMP`
+    AMP implementation and explanation of tricks in `RofuncRL`
+:doc:`ASE`
+    ASE implementation and explanation of tricks in `RofuncRL`
+:doc:`ODTrans`
+    ODTrans implementation and explanation of tricks in `RofuncRL`
+
+
+
 
 .. toctree::
    :maxdepth: 2
@@ -46,10 +54,11 @@ Offline reinforcement learning
    PPO
    TD3
    SAC
-   AMP
-   ODTrans
    CQL
    BCQ
    DTrans
    TD3-BC
    EDAC
+   AMP
+   ASE
+   ODTrans
