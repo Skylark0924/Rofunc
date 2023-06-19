@@ -29,8 +29,8 @@ The results are shown below:
 
 
 ### Humanoid Dance
-![HumanoidAMPFlip Inference](../../../img/RofuncAMP_HumanoidDance.gif)
+![HumanoidAMPDance Inference](../../../img/RofuncAMP_HumanoidDance.gif)
 
 
 ### Humanoid Hop
-![HumanoidAMPFlip Inference](../../../img/RofuncAMP_HumanoidHop.gif)
+![HumanoidAMPHop Inference](../../../img/RofuncAMP_HumanoidHop.gif)
