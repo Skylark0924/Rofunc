@@ -22,6 +22,9 @@ env:
   terminationHeight: 0.15
   enableEarlyTermination: True
 
+  # animation files to learn from
+  motion_file: None
+
   asset:
     assetRoot: "ase/data/assets"
     assetFileName: "mjcf/amp_humanoid_sword_shield.xml"
@@ -33,6 +36,7 @@ env:
 
 sim:
   substeps: 2
+  up_axis: "z"
   physx:
     num_threads: 4
     solver_type: 1  # 0: pgs, 1: tgs

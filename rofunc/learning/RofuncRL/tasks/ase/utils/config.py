@@ -148,7 +148,7 @@ def load_cfg(args):
     return cfg, cfg_train, logdir
 
 
-def parse_sim_params(args, cfg, cfg_train):
+def parse_sim_params(args, cfg, cfg_train=None):
     # initialize sim
     sim_params = gymapi.SimParams()
     sim_params.dt = SIM_TIMESTEP
@@ -193,11 +193,11 @@ def get_args(benchmark=False):
             "help": "Resume training or start testing from a checkpoint"},
         {"name": "--checkpoint", "type": str, "default": "Base",
             "help": "Path to the saved weights, only for rl_games RL library"},
-        {"name": "--headless", "action": "store_true", "default": False,
+        {"name": "--headless", "action": "store_true", "default": True,
             "help": "Force display off at all times"},
         {"name": "--horovod", "action": "store_true", "default": False,
             "help": "Use horovod for multi-gpu training, have effect only with rl_games RL library"},
-        {"name": "--task", "type": str, "default": "Humanoid",
+        {"name": "--task", "type": str, "default": "humanoid_ase_sword_shield_getup",
             "help": "Can be BallBalance, Cartpole, CartpoleYUp, Ant, Humanoid, Anymal, FrankaCabinet, Quadcopter, ShadowHand, Ingenuity"},
         {"name": "--task_type", "type": str,
             "default": "Python", "help": "Choose Python or C++"},
@@ -208,10 +208,10 @@ def get_args(benchmark=False):
             "help": "Experiment name. If used with --metadata flag an additional information about physics engine, sim device, pipeline and domain randomization will be added to the name"},
         {"name": "--metadata", "action": "store_true", "default": False,
             "help": "Requires --experiment flag, adds physics engine, sim device, pipeline info and if domain randomization is used to the experiment name provided by user"},
-        {"name": "--cfg_env", "type": str, "default": "Base", "help": "Environment configuration file (.yaml)"},
-        {"name": "--cfg_train", "type": str, "default": "Base", "help": "Training configuration file (.yaml)"},
+        {"name": "--cfg_env", "type": str, "default": "ase/data/cfg/humanoid_ase_sword_shield_getup.yaml", "help": "Environment configuration file (.yaml)"},
+        {"name": "--cfg_train", "type": str, "default": "ase/data/cfg/train/rlg/ase_humanoid.yaml", "help": "Training configuration file (.yaml)"},
         {"name": "--motion_file", "type": str,
-            "default": "", "help": "Specify reference motion file"},
+            "default": "ase/data/motions/reallusion_sword_shield/dataset_reallusion_sword_shield.yaml", "help": "Specify reference motion file"},
         {"name": "--num_envs", "type": int, "default": 0,
             "help": "Number of environments to create - override config file"},
         {"name": "--episode_length", "type": int, "default": 0,

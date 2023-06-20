@@ -28,13 +28,13 @@
 
 import os
 
-from isaacgym import gymtorch
 from isaacgym import gymapi
+from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
+from rofunc.utils.file.path import get_rofunc_path
+from .base_task import BaseTask
 from ..utils import torch_jit_utils as torch_utils
-
-from base_task import BaseTask
 
 
 class Humanoid(BaseTask):
@@ -245,12 +245,10 @@ class Humanoid(BaseTask):
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
         upper = gymapi.Vec3(spacing, spacing, spacing)
 
-        asset_root = self.cfg["env"]["asset"]["assetRoot"]
-        asset_file = self.cfg["env"]["asset"]["assetFileName"]
-
-        asset_path = os.path.join(asset_root, asset_file)
-        asset_root = os.path.dirname(asset_path)
-        asset_file = os.path.basename(asset_path)
+        # get rofunc path from rofunc package metadata
+        rofunc_path = get_rofunc_path()
+        asset_root = os.path.join(rofunc_path, "simulator/assets")
+        asset_file = "mjcf/amp_humanoid_sword_shield.xml"
 
         asset_options = gymapi.AssetOptions()
         asset_options.angular_damping = 0.01

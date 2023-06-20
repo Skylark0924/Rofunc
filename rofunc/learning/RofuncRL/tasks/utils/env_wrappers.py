@@ -197,7 +197,10 @@ class IsaacGymPreview3Wrapper(Wrapper):
         """
         self._obs_dict, reward, terminated, info = self._env.step(actions)
         truncated = torch.zeros_like(terminated)
-        return self._obs_dict["obs"], reward.view(-1, 1), terminated.view(-1, 1), truncated.view(-1, 1), info
+        if isinstance(self._obs_dict, dict):
+            return self._obs_dict["obs"], reward.view(-1, 1), terminated.view(-1, 1), truncated.view(-1, 1), info
+        else:
+            return self._obs_dict, reward.view(-1, 1), terminated.view(-1, 1), truncated.view(-1, 1), info
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -208,7 +211,10 @@ class IsaacGymPreview3Wrapper(Wrapper):
         if self._reset_once:
             self._obs_dict = self._env.reset()
             self._reset_once = False
-        return self._obs_dict["obs"], {}
+        if isinstance(self._obs_dict, dict):
+            return self._obs_dict["obs"], {}
+        else:
+            return self._obs_dict, {}
 
     def render(self, *args, **kwargs) -> None:
         """Render the environment

@@ -26,15 +26,18 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from gym import spaces
 import numpy as np
 import torch
-from env.tasks.vec_task import VecTaskCPU, VecTaskGPU, VecTaskPython
+from gym import spaces
+
+from .vec_task import VecTaskCPU, VecTaskGPU, VecTaskPython
+
 
 class VecTaskCPUWrapper(VecTaskCPU):
     def __init__(self, task, rl_device, sync_frame_time=False, clip_observations=5.0, clip_actions=1.0):
         super().__init__(task, rl_device, sync_frame_time, clip_observations, clip_actions)
         return
+
 
 class VecTaskGPUWrapper(VecTaskGPU):
     def __init__(self, task, rl_device, clip_observations=5.0, clip_actions=1.0):
@@ -46,7 +49,8 @@ class VecTaskPythonWrapper(VecTaskPython):
     def __init__(self, task, rl_device, clip_observations=5.0, clip_actions=1.0):
         super().__init__(task, rl_device, clip_observations, clip_actions)
 
-        self._amp_obs_space = spaces.Box(np.ones(task.get_num_amp_obs()) * -np.Inf, np.ones(task.get_num_amp_obs()) * np.Inf)
+        self._amp_obs_space = spaces.Box(np.ones(task.get_num_amp_obs()) * -np.Inf,
+                                         np.ones(task.get_num_amp_obs()) * np.Inf)
         return
 
     def reset(self, env_ids=None):

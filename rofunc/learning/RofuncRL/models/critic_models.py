@@ -44,7 +44,10 @@ class BaseCritic(nn.Module):
                 else:
                     raise ValueError(f'observation_space[{i}] is not a valid type.')
         else:
-            self.state_dim = observation_space.shape[0]
+            if isinstance(observation_space, gym.Space) or isinstance(observation_space, gymnasium.Space):
+                self.state_dim = observation_space.shape[0]
+            else:
+                self.state_dim = observation_space
         self.action_dim = action_space.shape[0]
         cfg_dict = omegaconf_to_dict(cfg)
         self.mlp_hidden_dims = cfg_dict[cfg_name]['mlp_hidden_dims']
@@ -111,3 +114,5 @@ class Critic(BaseCritic):
         value = self.backbone_net(state)
         value = self.value_net(value)
         return value
+
+

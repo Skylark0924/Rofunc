@@ -26,12 +26,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import os
 from enum import Enum
 
-from .humanoid import Humanoid, dof_to_obs
-from ..utils.motion_lib import MotionLib
 from isaacgym.torch_utils import *
 
+from .humanoid import Humanoid, dof_to_obs
+from .utils.motion_lib import MotionLib
 from ..utils import torch_jit_utils as torch_utils
 
 
@@ -59,8 +60,11 @@ class HumanoidAMP(Humanoid):
                          device_id=device_id,
                          headless=headless)
 
-        motion_file = cfg['env']['motion_file']
-        self._load_motion(motion_file)
+        motion_file = cfg['env'].get('motion_file', None)
+        motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "../../../../../examples/data/amp/" + motion_file)
+
+        self._load_motion(motion_file_path)
 
         self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
                                         device=self.device, dtype=torch.float)
