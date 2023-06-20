@@ -196,15 +196,18 @@ class Memory:
         # check dtype and size if the tensor exists
         if name in self.tensors:
             tensor = self.tensors[name]
-            if tensor.size(-1) != size:
-                raise ValueError("The size of the tensor {} ({}) doesn't match the existing one ({})".format(name, size,
-                                                                                                             tensor.size(
-                                                                                                                 -1)))
-            if dtype is not None and tensor.dtype != dtype:
-                raise ValueError(
-                    "The dtype of the tensor {} ({}) doesn't match the existing one ({})".format(name, dtype,
-                                                                                                 tensor.dtype))
-            return False
+            # if tensor.size(-1) != size:
+            #     raise ValueError("The size of the tensor {} ({}) doesn't match the existing one ({})".format(name, size,
+            #                                                                                                  tensor.size(
+            #                                                                                                      -1)))
+            # if dtype is not None and tensor.dtype != dtype:
+            #     raise ValueError(
+            #         "The dtype of the tensor {} ({}) doesn't match the existing one ({})".format(name, dtype,
+            #                                                                                      tensor.dtype))
+            # return False
+            # TODO: Check
+            # Overwrite
+
         # define tensor shape
         tensor_shape = (self.memory_size, self.num_envs, *size) if keep_dimensions else (
         self.memory_size, self.num_envs, size)

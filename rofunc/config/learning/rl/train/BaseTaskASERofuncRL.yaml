@@ -31,6 +31,7 @@ Agent:
   lr_a: 5e-5                       # Learning rate for actor.
   lr_c: 5e-5                        # Learning rate for critic.
   lr_d: 5e-5                        # Learning rate for discriminator.
+  lr_e: 5e-5                        # Learning rate for encoder.
 #  lr_scheduler:                    # Learning rate scheduler type.
 #  lr_scheduler_kwargs:             # Learning rate scheduler kwargs.
   adam_eps: 1e-5                    # Adam epsilon.
@@ -52,6 +53,11 @@ Agent:
   discriminator_logit_regularization_scale: 0.05
   discriminator_gradient_penalty_scale: 5
   discriminator_weight_decay_scale: 0.0001
+
+  ase_latent_dim: 64
+  enc_reward_scale: 1
+  enc_reward_weight: 0.5
+  enc_gradient_penalty_scale: 0
 
   kl_threshold: 0                  # Initial coefficient for KL divergence.
 
@@ -92,6 +98,15 @@ Model:
     max_seq_len: 20
 
   discriminator:
+    mlp_hidden_dims: [ 1024, 512 ]
+    mlp_activation: relu
+    use_lstm: false
+    lstm_cell_size: 256
+    lstm_use_prev_action: false
+    lstm_use_prev_reward: false
+    max_seq_len: 20
+
+  encoder:
     mlp_hidden_dims: [ 1024, 512 ]
     mlp_activation: relu
     use_lstm: false
