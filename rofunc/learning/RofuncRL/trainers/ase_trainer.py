@@ -25,7 +25,7 @@ class ASETrainer(BaseTrainer):
         self.memory = RandomMemory(memory_size=self.rollouts, num_envs=self.env.num_envs, device=device)
         self.motion_dataset = RandomMemory(memory_size=200000, device=device)
         self.replay_buffer = RandomMemory(memory_size=1000000, device=device)
-        self.collect_observation = lambda: self.env.reset_done()[0]["obs"]
+        self.collect_observation = None
         self.agent = ASEAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
                               device, self.exp_dir, self.rofunc_logger,
                               amp_observation_space=self.env.amp_observation_space,
@@ -37,8 +37,6 @@ class ASETrainer(BaseTrainer):
     def pre_interaction(self):
         if self.collect_observation is not None:
             self.agent._current_states = self.collect_observation()
-
-        self._update_latents()
 
     def post_interaction(self):
         self._rollout += 1

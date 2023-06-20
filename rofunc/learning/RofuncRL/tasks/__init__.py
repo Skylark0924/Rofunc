@@ -6,6 +6,7 @@ from .curi_coffee_stirring import CURICoffeeStirringTask
 from .franka_cabinet import FrankaCabinetTask
 from .humanoid import HumanoidTask
 from .humanoid_amp import HumanoidAMPTask
+from .ase.humanoid_amp_getup import HumanoidAMPGetupTask
 
 task_map = {
     "Ant": AntTask,
@@ -16,4 +17,5 @@ task_map = {
     "CURICoffeeStirring": CURICoffeeStirringTask,
     "Humanoid": HumanoidTask,
     "HumanoidAMP": HumanoidAMPTask,
+    "humanoid_ase_sword_shield_getup": HumanoidAMPGetupTask,
 }
