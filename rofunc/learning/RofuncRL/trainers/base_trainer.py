@@ -144,7 +144,7 @@ class BaseTrainer:
         """
         # reset env
         states, infos = self.env.reset()
-        with tqdm.trange(self.maximum_steps, colour='green') as self.t_bar:
+        with tqdm.trange(self.maximum_steps, ncols=80, colour='green') as self.t_bar:
             for _ in self.t_bar:
                 self.pre_interaction()
                 # Obtain action from agent
@@ -159,8 +159,8 @@ class BaseTrainer:
                     self.agent.store_transition(states=states, actions=actions, next_states=next_states,
                                                 rewards=rewards,
                                                 terminated=terminated, truncated=truncated, infos=infos)
-                self._step += 1
                 self.post_interaction()
+                self._step += 1
 
                 with torch.no_grad():
                     # Reset the environment
@@ -174,6 +174,44 @@ class BaseTrainer:
         # close the logger
         self.writer.close()
         self.rofunc_logger.info('Training complete.')
+
+    def pre_interaction(self):
+        pass
+
+    def post_interaction(self):
+        # Update best models and tensorboard
+        if not self._step % self.write_interval and self.write_interval > 0:
+            # update best models
+            reward = np.mean(self.agent.tracking_data.get("Reward / Total reward (mean)", -2 ** 31))
+            if reward > self.agent.checkpoint_best_modules["reward"]:
+                self.agent.checkpoint_best_modules["timestep"] = self._step
+                self.agent.checkpoint_best_modules["reward"] = reward
+                self.agent.checkpoint_best_modules["saved"] = False
+                self.agent.checkpoint_best_modules["modules"] = {k: copy.deepcopy(self.agent._get_internal_value(v)) for
+                                                                 k, v in self.agent.checkpoint_modules.items()}
+
+            # Update tensorboard
+            self.write_tensorboard()
+
+            # Update tqdm bar message
+            self.t_bar.set_postfix_str(f"Rew/Best: {reward:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}")
+
+        # Save checkpoints
+        if not self._step % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
+            self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step}.pth"))
+
+    def write_tensorboard(self):
+        for k, v in self.agent.tracking_data.items():
+            if k.endswith("(min)"):
+                self.writer.add_scalar(k, np.min(v), self._step)
+            elif k.endswith("(max)"):
+                self.writer.add_scalar(k, np.max(v), self._step)
+            else:
+                self.writer.add_scalar(k, np.mean(v), self._step)
+        # reset data containers for next iteration
+        self.agent.track_rewards.clear()
+        self.agent.track_timesteps.clear()
+        self.agent.tracking_data.clear()
 
     def eval(self):
         # reset env
@@ -214,42 +252,3 @@ class BaseTrainer:
         # close the environment
         self.env.close()
         self.rofunc_logger.info('Inference complete.')
-
-    def pre_interaction(self):
-        pass
-
-    def post_interaction(self):
-        # Update best models and tensorboard
-        if not self._step % self.write_interval and self.write_interval > 0 and self._step > 1:
-            # update best models
-            reward = np.mean(self.agent.tracking_data.get("Reward / Total reward (mean)", -2 ** 31))
-            if reward > self.agent.checkpoint_best_modules["reward"]:
-                self.agent.checkpoint_best_modules["timestep"] = self._step
-                self.agent.checkpoint_best_modules["reward"] = reward
-                self.agent.checkpoint_best_modules["saved"] = False
-                self.agent.checkpoint_best_modules["modules"] = {k: copy.deepcopy(self.agent._get_internal_value(v)) for
-                                                                 k, v in self.agent.checkpoint_modules.items()}
-
-            # Update tensorboard
-            self.write_tensorboard()
-
-            # Update tqdm bar message
-            self.t_bar.set_postfix_str(
-                f"Reward: {reward:.2f} | Best reward: {self.agent.checkpoint_best_modules['reward']:.2f}")
-
-        # Save checkpoints
-        if not self._step % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
-            self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step}.pth"))
-
-    def write_tensorboard(self):
-        for k, v in self.agent.tracking_data.items():
-            if k.endswith("(min)"):
-                self.writer.add_scalar(k, np.min(v), self._step)
-            elif k.endswith("(max)"):
-                self.writer.add_scalar(k, np.max(v), self._step)
-            else:
-                self.writer.add_scalar(k, np.mean(v), self._step)
-        # reset data containers for next iteration
-        self.agent.track_rewards.clear()
-        self.agent.track_timesteps.clear()
-        self.agent.tracking_data.clear()
