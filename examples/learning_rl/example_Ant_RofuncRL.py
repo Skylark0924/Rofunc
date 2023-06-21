@@ -20,18 +20,19 @@ from rofunc.learning.utils.utils import set_seed
 
 def train(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
-    sys.argv.append("task={}".format(custom_args.task))
-    sys.argv.append("train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()))
-    sys.argv.append("sim_device={}".format(custom_args.sim_device))
-    sys.argv.append("rl_device={}".format(custom_args.rl_device))
-    sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
-    sys.argv.append("headless={}".format(custom_args.headless))
     if custom_args.agent.upper() in ["SAC", "TD3"]:
-        sys.argv.append("num_envs={}".format(64))
+        custom_args.num_envs = 64
     else:
-        sys.argv.append("num_envs={}".format(4096))
-    args = get_args_parser().parse_args()
-    cfg = get_config('./learning/rl', 'config', args=args)
+        custom_args.num_envs = 4096
+
+    args_overrides = ["task={}".format(custom_args.task),
+                      "train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()),
+                      "sim_device={}".format(custom_args.sim_device),
+                      "rl_device={}".format(custom_args.rl_device),
+                      "graphics_device_id={}".format(custom_args.graphics_device_id),
+                      "headless={}".format(custom_args.headless),
+                      "num_envs={}".format(custom_args.num_envs)]
+    cfg = get_config('./learning/rl', 'config', args=args_overrides)
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -54,17 +55,16 @@ def train(custom_args):
     trainer.train()
 
 
-def inference(custom_args, ckpt_path=None):
+def inference(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
-    sys.argv.append("task={}".format(custom_args.task))
-    sys.argv.append("train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()))
-    sys.argv.append("sim_device={}".format(custom_args.sim_device))
-    sys.argv.append("rl_device={}".format(custom_args.rl_device))
-    sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
-    sys.argv.append("headless={}".format(False))
-    sys.argv.append("num_envs={}".format(16))
-    args = get_args_parser().parse_args()
-    cfg = get_config('./learning/rl', 'config', args=args)
+    args_overrides = ["task={}".format(custom_args.task),
+                      "train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()),
+                      "sim_device={}".format(custom_args.sim_device),
+                      "rl_device={}".format(custom_args.rl_device),
+                      "graphics_device_id={}".format(custom_args.graphics_device_id),
+                      "headless={}".format(False),
+                      "num_envs={}".format(16)]
+    cfg = get_config('./learning/rl', 'config', args=args_overrides)
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -83,9 +83,9 @@ def inference(custom_args, ckpt_path=None):
                                              env=infer_env,
                                              device=cfg.rl_device)
     # load checkpoint
-    if ckpt_path is None:
-        ckpt_path = model_zoo(name="AntRofuncRLPPO_left_arm.pt")
-    trainer.agent.load_ckpt(ckpt_path)
+    if custom_args.ckpt_path is None:
+        custom_args.ckpt_path = model_zoo(name="AntRofuncRLPPO.pt")  # TODO: check
+    trainer.agent.load_ckpt(custom_args.ckpt_path)
 
     # Start inference
     trainer.inference()
@@ -108,4 +108,4 @@ if __name__ == '__main__':
     if not custom_args.inference:
         train(custom_args)
     else:
-        inference(custom_args, ckpt_path=custom_args.ckpt_path)
+        inference(custom_args)
