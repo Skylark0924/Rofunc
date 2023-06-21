@@ -7,17 +7,14 @@ Humanoid soldier, trained by RofuncRL
 
 import argparse
 import sys
-import isaacgym
 
 from hydra._internal.utils import get_args_parser
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
-from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.RofuncRL.tasks import task_map
 from rofunc.learning.RofuncRL.trainers import trainer_map
+from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
-from rofunc.learning.RofuncRL.tasks.ase.utils.config import parse_sim_params, get_args
-from rofunc.learning.RofuncRL.tasks.ase.utils.parse_task import parse_task
 
 
 def train(custom_args):
@@ -108,7 +105,7 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="True")
+    parser.add_argument("--headless", type=str, default="False")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()

@@ -13,7 +13,7 @@ Trainer:
   random_steps: 0                     # The number of random exploration steps to take.
   start_learning_steps: 0             # The number of steps to take before starting network updating.
   seed: 42                            # The random seed.
-  rollouts: 16                        # The number of rollouts before updating.
+  rollouts: 32                        # The number of rollouts before updating.
   eval_steps: 1000                    # The number of steps to run for evaluation.
   inference_steps: 1000               # The number of steps to run for inference.
 
@@ -26,7 +26,7 @@ Agent:
 
   learning_epochs: 6                 # The number of epochs to train for per update.
   mini_batch_size: 8                 # The number of samples per update.
-  amp_batch_size: 1024                  # The number of samples per update.
+  amp_batch_size: 512                  # The number of samples per update.
 
   lr_a: 5e-5                       # Learning rate for actor.
   lr_c: 5e-5                        # Learning rate for critic.
@@ -46,18 +46,19 @@ Agent:
 
   least_square_discriminator: true
   discriminator_loss_scale: 5.0
-  task_reward_weight: 0.0
-  style_reward_weight: 1.0
   discriminator_batch_size: 4096
-  discriminator_reward_scale: 2
-  discriminator_logit_regularization_scale: 0.05
+  discriminator_logit_regularization_scale: 0.01
   discriminator_gradient_penalty_scale: 5
   discriminator_weight_decay_scale: 0.0001
 
   ase_latent_dim: 64
   enc_reward_scale: 1
-  enc_reward_weight: 0.5
   enc_gradient_penalty_scale: 0
+
+  task_reward_weight: 0.0
+  style_reward_weight: 1.0
+  enc_reward_weight: 0.5
+  discriminator_reward_scale: 2
 
   kl_threshold: 0                  # Initial coefficient for KL divergence.
 
