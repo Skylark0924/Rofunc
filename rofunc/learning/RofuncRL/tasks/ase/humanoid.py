@@ -33,7 +33,6 @@ from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
 from rofunc.utils.file.path import get_rofunc_path
-# from .base_task import BaseTask
 from ..utils import torch_jit_utils as torch_utils
 from ..base.vec_task import VecTask
 
@@ -228,7 +227,7 @@ class Humanoid(VecTask):
 
         else:
             print("Unsupported character config file: {s}".format(asset_file))
-            assert (False)
+            assert False
 
         return
 
@@ -590,7 +589,7 @@ def dof_to_obs(pose, dof_obs_size, dof_offsets):
             joint_pose_q = quat_from_angle_axis(joint_pose[..., 0], axis)
         else:
             joint_pose_q = None
-            assert (False), "Unsupported joint type"
+            assert False, "Unsupported joint type"
 
         joint_dof_obs = torch_utils.quat_to_tan_norm(joint_pose_q)
         dof_obs[:, (j * joint_obs_size):((j + 1) * joint_obs_size)] = joint_dof_obs

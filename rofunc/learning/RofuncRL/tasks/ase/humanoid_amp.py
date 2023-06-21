@@ -176,15 +176,15 @@ class HumanoidAMP(Humanoid):
         return
 
     def _reset_actors(self, env_ids):
-        if (self._state_init == HumanoidAMP.StateInit.Default):
+        if self._state_init == HumanoidAMP.StateInit.Default:
             self._reset_default(env_ids)
         elif (self._state_init == HumanoidAMP.StateInit.Start
               or self._state_init == HumanoidAMP.StateInit.Random):
             self._reset_ref_state_init(env_ids)
-        elif (self._state_init == HumanoidAMP.StateInit.Hybrid):
+        elif self._state_init == HumanoidAMP.StateInit.Hybrid:
             self._reset_hybrid_state_init(env_ids)
         else:
-            assert (False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert False, "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
 
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
@@ -241,11 +241,11 @@ class HumanoidAMP(Humanoid):
         ref_init_mask = torch.bernoulli(ref_probs) == 1.0
 
         ref_reset_ids = env_ids[ref_init_mask]
-        if (len(ref_reset_ids) > 0):
+        if len(ref_reset_ids) > 0:
             self._reset_ref_state_init(ref_reset_ids)
 
         default_reset_ids = env_ids[torch.logical_not(ref_init_mask)]
-        if (len(default_reset_ids) > 0):
+        if len(default_reset_ids) > 0:
             self._reset_default(default_reset_ids)
 
         return
@@ -253,10 +253,10 @@ class HumanoidAMP(Humanoid):
     def _init_amp_obs(self, env_ids):
         self._compute_amp_observations(env_ids)
 
-        if (len(self._reset_default_env_ids) > 0):
+        if len(self._reset_default_env_ids) > 0:
             self._init_amp_obs_default(self._reset_default_env_ids)
 
-        if (len(self._reset_ref_env_ids) > 0):
+        if len(self._reset_ref_env_ids) > 0:
             self._init_amp_obs_ref(self._reset_ref_env_ids, self._reset_ref_motion_ids,
                                    self._reset_ref_motion_times)
         return
@@ -311,7 +311,7 @@ class HumanoidAMP(Humanoid):
 
     def _compute_amp_observations(self, env_ids=None):
         key_body_pos = self._rigid_body_pos[:, self._key_body_ids, :]
-        if (env_ids is None):
+        if env_ids is None:
             self._curr_amp_obs_buf[:] = build_amp_observations(self._rigid_body_pos[:, 0, :],
                                                                self._rigid_body_rot[:, 0, :],
                                                                self._rigid_body_vel[:, 0, :],
