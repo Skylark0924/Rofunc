@@ -101,7 +101,7 @@ class HumanoidAMPGetupTask(HumanoidAMP):
         recovery_mask = torch.logical_and(recovery_mask, terminated_mask)
 
         recovery_ids = env_ids[recovery_mask]
-        if (len(recovery_ids) > 0):
+        if len(recovery_ids) > 0:
             self._reset_recovery_episode(recovery_ids)
 
         nonrecovery_ids = env_ids[torch.logical_not(recovery_mask)]
@@ -112,7 +112,7 @@ class HumanoidAMPGetupTask(HumanoidAMP):
             self._reset_fall_episode(fall_ids)
 
         nonfall_ids = nonrecovery_ids[torch.logical_not(fall_mask)]
-        if (len(nonfall_ids) > 0):
+        if len(nonfall_ids) > 0:
             super()._reset_actors(nonfall_ids)
             self._recovery_counter[nonfall_ids] = 0
 
