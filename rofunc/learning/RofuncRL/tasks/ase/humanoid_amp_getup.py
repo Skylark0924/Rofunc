@@ -33,7 +33,8 @@ from isaacgym.torch_utils import *
 
 
 class HumanoidAMPGetupTask(HumanoidAMP):
-    def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
+        self.cfg = cfg
 
         self._recovery_episode_prob = cfg["env"]["recoveryEpisodeProb"]
         self._recovery_steps = cfg["env"]["recoverySteps"]
@@ -41,12 +42,9 @@ class HumanoidAMPGetupTask(HumanoidAMP):
 
         self._reset_fall_env_ids = []
 
-        super().__init__(cfg=cfg,
-                         sim_params=sim_params,
-                         physics_engine=physics_engine,
-                         device_type=device_type,
-                         device_id=device_id,
-                         headless=headless)
+        super().__init__(cfg=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         self._recovery_counter = torch.zeros(self.num_envs, device=self.device, dtype=torch.int)
 
@@ -133,15 +131,15 @@ class HumanoidAMPGetupTask(HumanoidAMP):
         self._reset_fall_env_ids = env_ids
         return
 
-    def _reset_envs(self, env_ids):
+    def reset_idx(self, env_ids):
         self._reset_fall_env_ids = []
-        super()._reset_envs(env_ids)
+        super().reset_idx(env_ids)
         return
 
     def _init_amp_obs(self, env_ids):
         super()._init_amp_obs(env_ids)
 
-        if (len(self._reset_fall_env_ids) > 0):
+        if len(self._reset_fall_env_ids) > 0:
             self._init_amp_obs_default(self._reset_fall_env_ids)
 
         return

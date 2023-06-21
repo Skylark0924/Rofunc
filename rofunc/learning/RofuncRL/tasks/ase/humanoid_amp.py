@@ -29,6 +29,8 @@
 import os
 from enum import Enum
 
+from gym import spaces
+from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
 from .humanoid import Humanoid, dof_to_obs
@@ -43,7 +45,9 @@ class HumanoidAMP(Humanoid):
         Random = 2
         Hybrid = 3
 
-    def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
+        self.cfg = cfg
+
         state_init = cfg["env"]["stateInit"]
         self._state_init = HumanoidAMP.StateInit[state_init]
         self._hybrid_init_prob = cfg["env"]["hybridInitProb"]
@@ -53,12 +57,9 @@ class HumanoidAMP(Humanoid):
         self._reset_default_env_ids = []
         self._reset_ref_env_ids = []
 
-        super().__init__(cfg=cfg,
-                         sim_params=sim_params,
-                         physics_engine=physics_engine,
-                         device_type=device_type,
-                         device_id=device_id,
-                         headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         motion_file = cfg['env'].get('motion_file', None)
         motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -66,6 +67,7 @@ class HumanoidAMP(Humanoid):
 
         self._load_motion(motion_file_path)
 
+        self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf, np.ones(self.get_num_amp_obs()) * np.Inf)
         self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
                                         device=self.device, dtype=torch.float)
         self._curr_amp_obs_buf = self._amp_obs_buf[:, 0]
@@ -89,14 +91,21 @@ class HumanoidAMP(Humanoid):
     def get_num_amp_obs(self):
         return self._num_amp_obs_steps * self._num_amp_obs_per_step
 
-    def fetch_amp_obs_demo(self, num_samples):
+    @property
+    def amp_observation_space(self):
+        return self._amp_obs_space
 
-        if (self._amp_obs_demo_buf is None):
+    def fetch_amp_obs_demo(self, num_samples):
+        return self.task.fetch_amp_obs_demo(num_samples)
+
+    def fetch_amp_obs_demo(self, num_samples):
+        dt = self.dt
+        motion_ids = self._motion_lib.sample_motions(num_samples)
+
+        if self._amp_obs_demo_buf is None:
             self._build_amp_obs_demo_buf(num_samples)
         else:
             assert (self._amp_obs_demo_buf.shape[0] == num_samples)
-
-        motion_ids = self._motion_lib.sample_motions(num_samples)
 
         # since negative times are added to these values in build_amp_obs_demo,
         # we shift them into the range [0 + truncate_time, end of clip]
@@ -145,7 +154,7 @@ class HumanoidAMP(Humanoid):
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 31 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
         else:
             print("Unsupported character config file: {s}".format(asset_file))
-            assert (False)
+            assert False
 
         return
 
@@ -158,13 +167,12 @@ class HumanoidAMP(Humanoid):
                                      device=self.device)
         return
 
-    def _reset_envs(self, env_ids):
+    def reset_idx(self, env_ids):
         self._reset_default_env_ids = []
         self._reset_ref_env_ids = []
 
-        super()._reset_envs(env_ids)
+        super().reset_idx(env_ids)
         self._init_amp_obs(env_ids)
-
         return
 
     def _reset_actors(self, env_ids):
@@ -177,12 +185,25 @@ class HumanoidAMP(Humanoid):
             self._reset_hybrid_state_init(env_ids)
         else:
             assert (False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+
+        self.progress_buf[env_ids] = 0
+        self.reset_buf[env_ids] = 0
+        self._terminate_buf[env_ids] = 0
+
         return
 
     def _reset_default(self, env_ids):
         self._humanoid_root_states[env_ids] = self._initial_humanoid_root_states[env_ids]
         self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
         self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
+
+        env_ids_int32 = env_ids.to(dtype=torch.int32)
+        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
+                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+
+        self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._dof_state),
+                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+
         self._reset_default_env_ids = env_ids
         return
 
@@ -238,7 +259,6 @@ class HumanoidAMP(Humanoid):
         if (len(self._reset_ref_env_ids) > 0):
             self._init_amp_obs_ref(self._reset_ref_env_ids, self._reset_ref_motion_ids,
                                    self._reset_ref_motion_times)
-
         return
 
     def _init_amp_obs_default(self, env_ids):
@@ -272,6 +292,12 @@ class HumanoidAMP(Humanoid):
 
         self._dof_pos[env_ids] = dof_pos
         self._dof_vel[env_ids] = dof_vel
+
+        env_ids_int32 = env_ids.to(dtype=torch.int32)
+        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
+                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+        self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._dof_state),
+                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
         return
 
     def _update_hist_amp_obs(self, env_ids=None):

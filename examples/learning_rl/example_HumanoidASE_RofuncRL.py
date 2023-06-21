@@ -18,7 +18,7 @@ from rofunc.learning.RofuncRL.trainers import trainer_map
 from rofunc.learning.utils.utils import set_seed
 from rofunc.learning.RofuncRL.tasks.ase.utils.config import parse_sim_params, get_args
 from rofunc.learning.RofuncRL.tasks.ase.utils.parse_task import parse_task
-from isaacgym import gymutil
+
 
 def train(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
@@ -37,15 +37,16 @@ def train(custom_args):
     set_seed(cfg.train.Trainer.seed)
 
     # Instantiate the Isaac Gym environment
-    args = get_args()
-    sim_params = parse_sim_params(args, cfg)
-    task, env = parse_task(args, cfg_dict, omegaconf_to_dict(cfg.train), sim_params)
-    # env = task_map[custom_args.task](cfg=cfg_dict,
-    #                                  sim_params=cfg.task.sim,
-    #                                  physics_engine=gymapi.SIM_PHYSX,
-    #                                  device_type="cuda",
-    #                                  device_id=0,
-    #                                  headless=custom_args.headless)
+    # args = get_args()
+    # sim_params = parse_sim_params(args, cfg)
+    # task, env = parse_task(args, cfg_dict, omegaconf_to_dict(cfg.train), sim_params)
+    env = task_map[custom_args.task](cfg=cfg_dict,
+                                     rl_device=cfg.rl_device,
+                                     sim_device=cfg.sim_device,
+                                     graphics_device_id=cfg.graphics_device_id,
+                                     headless=cfg.headless,
+                                     virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                     force_render=cfg.force_render)
 
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
@@ -56,7 +57,7 @@ def train(custom_args):
     trainer.train()
 
 
-def inference(custom_args, ckpt_path=None):
+def inference(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
     task, motion_file = custom_args.task.split('_')
 
@@ -87,7 +88,7 @@ def inference(custom_args, ckpt_path=None):
                                              env=infer_env,
                                              device=cfg.rl_device)
     # load checkpoint
-    if ckpt_path is None:
+    if custom_args.ckpt_path is None:
         ckpt_path = model_zoo(name=f"{custom_args.task}.pth")
     trainer.agent.load_ckpt(ckpt_path)
 
@@ -99,8 +100,8 @@ if __name__ == '__main__':
     gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    # Available tasks: HumanoidAMP_backflip, HumanoidAMP_walk, HumanoidAMP_run, HumanoidAMP_dance, HumanoidAMP_hop
-    parser.add_argument("--task", type=str, default="humanoid_ase_sword_shield_getup")
+    # Available tasks: HumanoidASEGetupSwordShield
+    parser.add_argument("--task", type=str, default="HumanoidASEGetupSwordShield")
     parser.add_argument("--motion_file", type=str,
                         default="reallusion_sword_shield/dataset_reallusion_sword_shield.yaml")
     parser.add_argument("--agent", type=str, default="ase")  # Available agent: ase
@@ -115,4 +116,4 @@ if __name__ == '__main__':
     if not custom_args.inference:
         train(custom_args)
     else:
-        inference(custom_args, ckpt_path=custom_args.ckpt_path)
+        inference(custom_args)
