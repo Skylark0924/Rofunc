@@ -116,7 +116,9 @@ class ASEAgent(AMPAgent):
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
-            actions, _ = self.policy(self._state_preprocessor(states), deterministic=True)
+            self._update_latents(states.shape[0])
+            actions, _ = self.policy(self._state_preprocessor(torch.hstack((states, self._ase_latents))),
+                                     deterministic=True)
             log_prob = None
         return actions, log_prob
 
@@ -231,7 +233,8 @@ class ASEAgent(AMPAgent):
             for i, (sampled_states, sampled_actions, sampled_rewards, samples_next_states, samples_terminated,
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
                     _, sampled_ase_latents) in enumerate(sampled_batches):
-                sampled_states = self._state_preprocessor(torch.hstack((sampled_states, sampled_ase_latents)), train=True)
+                sampled_states = self._state_preprocessor(torch.hstack((sampled_states, sampled_ase_latents)),
+                                                          train=True)
                 # sampled_states = self._state_preprocessor(sampled_states, train=True)
                 _, log_prob_now = self.policy(sampled_states, sampled_actions)
 
