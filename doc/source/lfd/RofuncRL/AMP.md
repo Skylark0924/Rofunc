@@ -30,8 +30,40 @@ with torch.no_grad():
     combined_rewards = self._task_reward_weight * rewards + self._style_reward_weight * style_reward
 ```
 
+## Demos
 
-## Performance comparison
+### Humanoid Run
+
+![HumanoidAMPRun Inference](../../../img/RofuncAMP_HumanoidRun.gif)
+
+```shell
+python examples/learning_rl/example_HumanoidAMP_RofuncRL.py --task HumanoidAMP_run --inference
+```
+
+### Humanoid BackFlip
+
+![HumanoidAMPFlip Inference](../../../img/RofuncAMP_HumanoidFlip.gif)
+
+```shell
+python examples/learning_rl/example_HumanoidAMP_RofuncRL.py --task HumanoidAMP_backflip --inference
+```
+
+### Humanoid Dance
+
+![HumanoidAMPDance Inference](../../../img/RofuncAMP_HumanoidDance.gif)
+
+```shell
+python examples/learning_rl/example_HumanoidAMP_RofuncRL.py --task HumanoidAMP_dance --inference
+```
+
+### Humanoid Hop
+![HumanoidAMPHop Inference](../../../img/RofuncAMP_HumanoidHop.gif)
+
+```shell
+python examples/learning_rl/example_HumanoidAMP_RofuncRL.py --task HumanoidAMP_hop --inference
+```
+
+## Baseline comparison
 
 We compare the performance of the AMP algorithm with different tricks and an open source baseline 
 ([SKRL](https://github.com/Toni-SM/skrl/tree/main)). These experiments were conducted on the `Humanoid` environment.
@@ -42,22 +74,12 @@ The results are shown below:
 - `Pink`: SKRL AMP
 - `Green`: Rofunc AMP 
 
-![HumanoidAMPRun Inference](../../../img/RofuncAMP_HumanoidRun.gif)
-
-
 ### Humanoid BackFlip
 ![HumanoidAMPFlip](../../../img/RofuncAMP_HumanoidFlip_perf.png)
 - `Pink`: Rofunc AMP
 
-![HumanoidAMPFlip Inference](../../../img/RofuncAMP_HumanoidFlip.gif)
 
 
-### Humanoid Dance
-![HumanoidAMPDance Inference](../../../img/RofuncAMP_HumanoidDance.gif)
-
-
-### Humanoid Hop
-![HumanoidAMPHop Inference](../../../img/RofuncAMP_HumanoidHop.gif)
 
 
 ## Tricks

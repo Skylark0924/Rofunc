@@ -38,5 +38,10 @@
     "url": "https://drive.google.com/uc?id=1o-KNebRzb8lBoPxDTURAH4770O-sd38j&export=download",
     "name": "HumanoidAMP_walk.pth",
     "md5": ""
+  },
+  "HumanoidASEGetupSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=15LAak6-er1cspVKZmRXYDZOKHou59gqH&export=download",
+    "name": "HumanoidASEGetupSwordShield.pth",
+    "md5": ""
   }
 }
