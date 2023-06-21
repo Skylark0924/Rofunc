@@ -213,10 +213,10 @@ class MotionLib():
         motion_files, motion_weights = self._fetch_motion_files(motion_file)
         num_motion_files = len(motion_files)
         import tqdm
-        with tqdm.trange(num_motion_files, colour='green') as t_bar:
+        with tqdm.trange(num_motion_files, ncols=100, colour='green') as t_bar:
             for f in t_bar:
                 curr_file = motion_files[f]
-                t_bar.set_postfix_str("Loading {:d}/{:d} motion files: {:s}".format(f + 1, num_motion_files, curr_file))
+                t_bar.set_postfix_str("Loading: {:s}".format(curr_file.split('/')[-1]))
                 curr_motion = SkeletonMotion.from_file(curr_file)
 
                 motion_fps = curr_motion.fps

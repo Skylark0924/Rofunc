@@ -170,26 +170,16 @@ class Memory:
                       size: Union[int, Tuple[int], gym.Space, gymnasium.Space],
                       dtype: Optional[torch.dtype] = None,
                       keep_dimensions: bool = False) -> bool:
-        """Create a new internal tensor in memory
-
+        """
+        Create a new internal tensor in memory
         The tensor will have a 3-components shape (memory size, number of environments, size).
         The internal representation will use _tensor_<name> as the name of the class property
-
         :param name: Tensor name (the name has to follow the python PEP 8 style)
-        :type name: str
         :param size: Number of elements in the last dimension (effective data size).
                      The product of the elements will be computed for sequences or gym/gymnasium spaces
-        :type size: int, tuple or list of integers, gym.Space, or gymnasium.Space
         :param dtype: Data type (torch.dtype).
                       If None, the global default torch data type will be used (default)
-        :type dtype: torch.dtype or None, optional
         :param keep_dimensions: Whether or not to keep the dimensions defined through the size parameter (default: False)
-        :type keep_dimensions: bool
-
-        :raises ValueError: The tensor name exists already but the size or dtype are different
-
-        :return: True if the tensor was created, otherwise False
-        :rtype: bool
         """
         # compute data size
         size = self._get_space_size(size, keep_dimensions)
