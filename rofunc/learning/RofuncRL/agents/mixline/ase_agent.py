@@ -79,12 +79,13 @@ class ASEAgent(AMPAgent):
                                output_dim=self._ase_latent_dim,
                                cfg_name='encoder').to(device)
 
-        super().__init__(cfg, observation_space.shape[0] + self._ase_latent_dim, action_space, memory, device,
+        # observation_space.shape[0] + self._ase_latent_dim
+        super().__init__(cfg, observation_space, action_space, memory, device,
                          experiment_dir, rofunc_logger, amp_observation_space, motion_dataset, replay_buffer,
                          collect_reference_motions)
         self.models['encoder'] = self.encoder
         self.checkpoint_modules['encoder'] = self.encoder
-        self.rofunc_logger.module(f"Encoder model", self.encoder)
+        self.rofunc_logger.module(f"Encoder model: {self.encoder}")
 
         '''Create ASE specific tensors in memory except for AMP'''
         self.memory.create_tensor(name="states", size=observation_space, dtype=torch.float32)
@@ -111,7 +112,8 @@ class ASEAgent(AMPAgent):
         if not deterministic:
             # sample stochastic actions
             self._update_latents(states.shape[0])
-            actions, log_prob = self.policy(self._state_preprocessor(torch.hstack((states, self._ase_latents))))
+            # actions, log_prob = self.policy(self._state_preprocessor(torch.hstack((states, self._ase_latents))))
+            actions, log_prob = self.policy(self._state_preprocessor(states))
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
@@ -134,10 +136,12 @@ class ASEAgent(AMPAgent):
             rewards = self._rewards_shaper(rewards)
 
         # compute values
-        values = self.value(self._state_preprocessor(torch.hstack((states, self._ase_latents))))
+        # values = self.value(self._state_preprocessor(torch.hstack((states, self._ase_latents))))
+        values = self.value(self._state_preprocessor(states))
         values = self._value_preprocessor(values, inverse=True)
 
-        next_values = self.value(self._state_preprocessor(torch.hstack((next_states, self._ase_latents))))
+        # next_values = self.value(self._state_preprocessor(torch.hstack((next_states, self._ase_latents))))
+        next_values = self.value(self._state_preprocessor(next_states))
         next_values = self._value_preprocessor(next_values, inverse=True)
         next_values *= infos['terminate'].view(-1, 1).logical_not()
 
@@ -177,8 +181,8 @@ class ASEAgent(AMPAgent):
             enc_reward *= self._enc_reward_scale
 
         combined_rewards = self._task_reward_weight * rewards + \
-                           self._style_reward_weight * style_reward + \
-                           self._enc_reward_weight * enc_reward
+                           self._style_reward_weight * style_reward
+                           # self._enc_reward_weight * enc_reward
 
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
@@ -228,7 +232,8 @@ class ASEAgent(AMPAgent):
             for i, (sampled_states, sampled_actions, sampled_rewards, samples_next_states, samples_terminated,
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
                     _, sampled_ase_latents) in enumerate(sampled_batches):
-                sampled_states = self._state_preprocessor(torch.hstack((sampled_states, sampled_ase_latents)), train=True)
+                # sampled_states = self._state_preprocessor(torch.hstack((sampled_states, sampled_ase_latents)), train=True)
+                sampled_states = self._state_preprocessor(sampled_states, train=True)
                 _, log_prob_now = self.policy(sampled_states, sampled_actions)
 
                 # compute entropy loss

@@ -33,20 +33,25 @@ from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
 from rofunc.utils.file.path import get_rofunc_path
-from .base_task import BaseTask
+# from .base_task import BaseTask
 from ..utils import torch_jit_utils as torch_utils
+from ..base.vec_task import VecTask
 
 
-class Humanoid(BaseTask):
-    def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
-        self.cfg = cfg
-        self.sim_params = sim_params
-        self.physics_engine = physics_engine
+class Humanoid(VecTask):
+    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture,
+                 force_render):
+        # def __init__(self, config, sim_params, physics_engine, device_type, device_id, headless):
+        self.cfg = config
+        # self.sim_params = sim_params
+        # self.physics_engine = physics_engine
 
         self._pd_control = self.cfg["env"]["pdControl"]
         self.power_scale = self.cfg["env"]["powerScale"]
+        self.randomize = self.cfg["task"]["randomize"]
 
         self.debug_viz = self.cfg["env"]["enableDebugVis"]
+        self.camera_follow = self.cfg["env"].get("cameraFollow", False)
         self.plane_static_friction = self.cfg["env"]["plane"]["staticFriction"]
         self.plane_dynamic_friction = self.cfg["env"]["plane"]["dynamicFriction"]
         self.plane_restitution = self.cfg["env"]["plane"]["restitution"]
@@ -54,6 +59,8 @@ class Humanoid(BaseTask):
         self.max_episode_length = self.cfg["env"]["episodeLength"]
         self._local_root_obs = self.cfg["env"]["localRootObs"]
         self._root_height_obs = self.cfg["env"].get("rootHeightObs", True)
+        self._contact_bodies = self.cfg["env"]["contactBodies"]
+        self._termination_height = self.cfg["env"]["terminationHeight"]
         self._enable_early_termination = self.cfg["env"]["enableEarlyTermination"]
 
         key_bodies = self.cfg["env"]["keyBodies"]
@@ -62,13 +69,17 @@ class Humanoid(BaseTask):
         self.cfg["env"]["numObservations"] = self.get_obs_size()
         self.cfg["env"]["numActions"] = self.get_action_size()
 
-        self.cfg["device_type"] = device_type
-        self.cfg["device_id"] = device_id
-        self.cfg["headless"] = headless
+        # self.cfg["device_type"] = device_type
+        # self.cfg["device_id"] = device_id
+        # self.cfg["headless"] = headless
+        #
+        # super().__init__(cfg=self.cfg)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
-        super().__init__(cfg=self.cfg)
-
-        self.dt = self.control_freq_inv * sim_params.dt
+        dt = self.cfg["sim"]["dt"]
+        self.dt = self.control_freq_inv * dt
 
         # get gym GPU state tensors
         actor_root_state = self.gym.acquire_actor_root_state_tensor(self.sim)
@@ -127,7 +138,7 @@ class Humanoid(BaseTask):
         self._key_body_ids = self._build_key_body_ids_tensor(key_bodies)
         self._contact_body_ids = self._build_contact_body_ids_tensor(contact_bodies)
 
-        if self.viewer != None:
+        if self.viewer is not None:
             self._init_camera()
 
         return
@@ -143,51 +154,50 @@ class Humanoid(BaseTask):
         return num_actors
 
     def create_sim(self):
-        self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, 'z')
+        # self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, 'z')
+        self.up_axis_idx = 2  # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
 
         self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
+
+        # If randomizing, apply once immediately on startup before the fist sim step
+        if self.randomize:
+            self.apply_randomizations(self.randomization_params)
+
         return
 
-    def reset(self, env_ids=None):
-        if (env_ids is None):
-            env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
-        self._reset_envs(env_ids)
+    def reset_idx(self, env_ids):
+        self._reset_actors(env_ids)
+        self._refresh_sim_tensors()
+        self._compute_observations(env_ids)
         return
 
-    def set_char_color(self, col, env_ids):
-        for env_id in env_ids:
-            env_ptr = self.envs[env_id]
-            handle = self.humanoid_handles[env_id]
+    # def reset(self, env_ids=None):  # TODO
+    #     if env_ids is None:
+    #         env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
+    #     self._reset_envs(env_ids)
+    #     return
+
+    def set_char_color(self, col):
+        for i in range(self.num_envs):
+            env_ptr = self.envs[i]
+            handle = self.humanoid_handles[i]
 
             for j in range(self.num_bodies):
                 self.gym.set_rigid_body_color(env_ptr, handle, j, gymapi.MESH_VISUAL,
                                               gymapi.Vec3(col[0], col[1], col[2]))
 
-        return
-
-    def _reset_envs(self, env_ids):
-        if (len(env_ids) > 0):
-            self._reset_actors(env_ids)
-            self._reset_env_tensors(env_ids)
-            self._refresh_sim_tensors()
-            self._compute_observations(env_ids)
-        return
-
-    def _reset_env_tensors(self, env_ids):
-        env_ids_int32 = self._humanoid_actor_ids[env_ids]
-        self.gym.set_actor_root_state_tensor_indexed(self.sim,
-                                                     gymtorch.unwrap_tensor(self._root_states),
-                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-        self.gym.set_dof_state_tensor_indexed(self.sim,
-                                              gymtorch.unwrap_tensor(self._dof_state),
-                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-
-        self.progress_buf[env_ids] = 0
-        self.reset_buf[env_ids] = 0
-        self._terminate_buf[env_ids] = 0
-        return
+    # def set_char_color(self, col, env_ids):
+    #     for env_id in env_ids:
+    #         env_ptr = self.envs[env_id]
+    #         handle = self.humanoid_handles[env_id]
+    #
+    #         for j in range(self.num_bodies):
+    #             self.gym.set_rigid_body_color(env_ptr, handle, j, gymapi.MESH_VISUAL,
+    #                                           gymapi.Vec3(col[0], col[1], col[2]))
+    #
+    #     return
 
     def _create_ground_plane(self):
         plane_params = gymapi.PlaneParams()
@@ -202,14 +212,14 @@ class Humanoid(BaseTask):
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         num_key_bodies = len(key_bodies)
 
-        if (asset_file == "mjcf/amp_humanoid.xml"):
+        if asset_file == "mjcf/amp_humanoid.xml":
             self._dof_body_ids = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]
             self._dof_obs_size = 72
             self._num_actions = 28
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
 
-        elif (asset_file == "mjcf/amp_humanoid_sword_shield.xml"):
+        elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
             self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 11, 12, 13, 14, 15, 16]
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 21, 24, 27, 28, 31]
             self._dof_obs_size = 78
@@ -233,7 +243,7 @@ class Humanoid(BaseTask):
         self._termination_heights[head_id] = max(head_term_height, self._termination_heights[head_id])
 
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
-        if (asset_file == "mjcf/amp_humanoid_sword_shield.xml"):
+        if asset_file == "mjcf/amp_humanoid_sword_shield.xml":
             left_arm_id = self.gym.find_actor_rigid_body_handle(self.envs[0], self.humanoid_handles[0],
                                                                 "left_lower_arm")
             self._termination_heights[left_arm_id] = max(shield_term_height, self._termination_heights[left_arm_id])
@@ -248,7 +258,7 @@ class Humanoid(BaseTask):
         # get rofunc path from rofunc package metadata
         rofunc_path = get_rofunc_path()
         asset_root = os.path.join(rofunc_path, "simulator/assets")
-        asset_file = "mjcf/amp_humanoid_sword_shield.xml"
+        asset_file = self.cfg["env"]["asset"]["assetFileName"]
 
         asset_options = gymapi.AssetOptions()
         asset_options.angular_damping = 0.01
@@ -299,7 +309,7 @@ class Humanoid(BaseTask):
         self.dof_limits_lower = to_torch(self.dof_limits_lower, device=self.device)
         self.dof_limits_upper = to_torch(self.dof_limits_upper, device=self.device)
 
-        if (self._pd_control):
+        if self._pd_control:
             self._build_pd_action_offset_scale()
 
         return
@@ -324,7 +334,7 @@ class Humanoid(BaseTask):
         for j in range(self.num_bodies):
             self.gym.set_rigid_body_color(env_ptr, humanoid_handle, j, gymapi.MESH_VISUAL, gymapi.Vec3(0.54, 0.85, 0.2))
 
-        if (self._pd_control):
+        if self._pd_control:
             dof_prop = self.gym.get_asset_dof_properties(humanoid_asset)
             dof_prop["driveMode"] = gymapi.DOF_MODE_POS
             self.gym.set_actor_dof_properties(env_ptr, humanoid_handle, dof_prop)
@@ -343,7 +353,7 @@ class Humanoid(BaseTask):
             dof_offset = self._dof_offsets[j]
             dof_size = self._dof_offsets[j + 1] - self._dof_offsets[j]
 
-            if (dof_size == 3):
+            if dof_size == 3:
                 curr_low = lim_low[dof_offset:(dof_offset + dof_size)]
                 curr_high = lim_high[dof_offset:(dof_offset + dof_size)]
                 curr_low = np.max(np.abs(curr_low))
@@ -358,8 +368,7 @@ class Humanoid(BaseTask):
                 # lim_low[dof_offset:(dof_offset + dof_size)] = -np.pi
                 # lim_high[dof_offset:(dof_offset + dof_size)] = np.pi
 
-
-            elif (dof_size == 1):
+            elif dof_size == 1:
                 curr_low = lim_low[dof_offset]
                 curr_high = lim_high[dof_offset]
                 curr_mid = 0.5 * (curr_high + curr_low)
@@ -409,7 +418,7 @@ class Humanoid(BaseTask):
     def _compute_observations(self, env_ids=None):
         obs = self._compute_humanoid_obs(env_ids)
 
-        if (env_ids is None):
+        if env_ids is None:
             self.obs_buf[:] = obs
         else:
             self.obs_buf[env_ids] = obs
@@ -417,7 +426,7 @@ class Humanoid(BaseTask):
         return
 
     def _compute_humanoid_obs(self, env_ids=None):
-        if (env_ids is None):
+        if env_ids is None:
             body_pos = self._rigid_body_pos
             body_rot = self._rigid_body_rot
             body_vel = self._rigid_body_vel
@@ -436,10 +445,24 @@ class Humanoid(BaseTask):
         self._humanoid_root_states[env_ids] = self._initial_humanoid_root_states[env_ids]
         self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
         self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
+
+        env_ids_int32 = self._humanoid_actor_ids[env_ids]
+        self.gym.set_actor_root_state_tensor_indexed(self.sim,
+                                                     gymtorch.unwrap_tensor(self._root_states),
+                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+
+        self.gym.set_dof_state_tensor_indexed(self.sim,
+                                              gymtorch.unwrap_tensor(self._dof_state),
+                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+
+        self.progress_buf[env_ids] = 0
+        self.reset_buf[env_ids] = 0
+        self._terminate_buf[env_ids] = 0
         return
 
     def pre_physics_step(self, actions):
         self.actions = actions.to(self.device).clone()
+
         if (self._pd_control):
             pd_tar = self._action_to_pd_targets(self.actions)
             pd_tar_tensor = gymtorch.unwrap_tensor(pd_tar)
@@ -468,7 +491,7 @@ class Humanoid(BaseTask):
         return
 
     def render(self, sync_frame_time=False):
-        if self.viewer:
+        if self.viewer and self.camera_follow:
             self._update_camera()
 
         super().render(sync_frame_time)

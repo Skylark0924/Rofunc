@@ -17,5 +17,5 @@ task_map = {
     "CURICoffeeStirring": CURICoffeeStirringTask,
     "Humanoid": HumanoidTask,
     "HumanoidAMP": HumanoidAMPTask,
-    "humanoid_ase_sword_shield_getup": HumanoidAMPGetupTask,
+    "HumanoidASEGetupSwordShield": HumanoidAMPGetupTask,
 }

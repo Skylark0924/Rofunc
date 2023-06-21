@@ -193,7 +193,7 @@ def get_args(benchmark=False):
             "help": "Resume training or start testing from a checkpoint"},
         {"name": "--checkpoint", "type": str, "default": "Base",
             "help": "Path to the saved weights, only for rl_games RL library"},
-        {"name": "--headless", "action": "store_true", "default": True,
+        {"name": "--headless", "action": "store_false", "default": True,
             "help": "Force display off at all times"},
         {"name": "--horovod", "action": "store_true", "default": False,
             "help": "Use horovod for multi-gpu training, have effect only with rl_games RL library"},
