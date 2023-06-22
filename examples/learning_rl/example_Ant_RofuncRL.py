@@ -6,24 +6,17 @@ Ant RL using RofuncRL
 """
 
 import argparse
-import sys
-import isaacgym
-
-from hydra._internal.utils import get_args_parser
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
-from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.RofuncRL.tasks import task_map
 from rofunc.learning.RofuncRL.trainers import trainer_map
+from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
 
 
 def train(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
-    if custom_args.agent.upper() in ["SAC", "TD3"]:
-        custom_args.num_envs = 64
-    else:
-        custom_args.num_envs = 4096
+    custom_args.num_envs = 64 if custom_args.agent.upper() in ["SAC", "TD3"] else custom_args.num_envs
 
     args_overrides = ["task={}".format(custom_args.task),
                       "train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()),
@@ -97,6 +90,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Ant")
     parser.add_argument("--agent", type=str, default="td3")  # Available agents: ppo, sac, td3
+    parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
