@@ -45,10 +45,11 @@ def inference(custom_args, ckpt_path=None):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 0
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Humanoid")
     parser.add_argument("--agent", type=str, default="PPO")
+    parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)

@@ -6,29 +6,22 @@ Gym Tasks RL using RofuncRL
 """
 
 import argparse
-import sys
-import gymnasium as gym
-import isaacgym
 
-from hydra._internal.utils import get_args_parser
+import gymnasium as gym
 
 from rofunc.config.utils import get_config
 from rofunc.learning.RofuncRL.trainers import trainer_map
 from rofunc.learning.utils.utils import set_seed
-from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def train(custom_args):
-    beauty_print("Start training")
-    # get config
-    sys.argv.append("task={}".format(custom_args.task))
-    sys.argv.append("train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()))
-    sys.argv.append("sim_device={}".format(custom_args.sim_device))
-    sys.argv.append("rl_device={}".format(custom_args.rl_device))
-    sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))
-    sys.argv.append("headless={}".format(custom_args.headless))
-    args = get_args_parser().parse_args()
-    cfg = get_config('./learning/rl', 'config', args=args)
+    args_overrides = ["task={}".format(custom_args.task),
+                      "train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()),
+                      "sim_device={}".format(custom_args.sim_device),
+                      "rl_device={}".format(custom_args.rl_device),
+                      "graphics_device_id={}".format(custom_args.graphics_device_id),
+                      "headless={}".format(custom_args.headless)]
+    cfg = get_config('./learning/rl', 'config', args=args_overrides)
     gym_task_name = custom_args.task.split('_')[1]
     cfg.task.name = gym_task_name
 
@@ -47,9 +40,8 @@ def train(custom_args):
     trainer.train()
 
 
-def inference(custom_args, ckpt_path=None):
-    beauty_print("Start evaluating")
-
+def inference(custom_args):
+    ...
     # TODO
 
 
@@ -76,4 +68,4 @@ if __name__ == '__main__':
     if not custom_args.inference:
         train(custom_args)
     else:
-        inference(custom_args, ckpt_path=custom_args.ckpt_path)
+        inference(custom_args)

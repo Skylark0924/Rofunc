@@ -6,11 +6,9 @@ Gym Tasks RL using SKRL
 """
 
 import argparse
-import sys
-import isaacgym
 
+import isaacgym
 import gymnasium as gym
-from hydra._internal.utils import get_args_parser
 from skrl.trainers.torch import SequentialTrainer
 
 from rofunc.config.utils import get_config
@@ -21,13 +19,11 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def train(custom_args):
-    beauty_print("Start training")
     # get config
-    sys.argv.append("task={}".format(custom_args.task))
-    sys.argv.append("train={}{}SKRL".format(custom_args.task, custom_args.agent.upper()))
-    sys.argv.append("headless={}".format(custom_args.headless))
-    args = get_args_parser().parse_args()
-    cfg = get_config('./learning/rl', 'config', args=args)
+    args_overrides = ["task={}".format(custom_args.task),
+                      "train={}{}SKRL".format(custom_args.task, custom_args.agent.upper()),
+                      "headless={}".format(custom_args.headless)]
+    cfg = get_config('./learning/rl', 'config', args=args_overrides)
     gym_task_name = custom_args.task.split('_')[1]
     cfg.task.name = gym_task_name
 
@@ -54,8 +50,8 @@ def inference(custom_args, ckpt_path=None):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
     gym_task_name = 'Pendulum-v1'
+    # Available tasks:
     # Classic: ['Acrobot-v1', 'CartPole-v1', 'MountainCarContinuous-v0', 'MountainCar-v0', 'Pendulum-v1']
     # Box2D: ['BipedalWalker-v3', 'CarRacing-v1', 'LunarLander-v2']  `pip install gymnasium[box2d]`
     # MuJoCo: ['Ant-v2', 'HalfCheetah-v2', 'Hopper-v2', 'Humanoid-v2', 'InvertedDoublePendulum-v2',
@@ -63,7 +59,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Gym_{}".format(gym_task_name))  # Start with 'Gym_'
-    parser.add_argument("--agent", type=str, default="a2c")  # Available agents: ppo, sac, td3, a2c
+    parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--render_mode", type=str, default=None)  # Available render_mode: None, "human", "rgb_array"
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_true", help="turn to test mode while adding this argument")
