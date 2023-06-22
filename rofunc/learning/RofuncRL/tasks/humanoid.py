@@ -253,8 +253,8 @@ class HumanoidTask(VecTask):
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
 
-        positions = torch_rand_float(-0.2, 0.2, (len(env_ids), self.num_dof), device=self.device)
-        velocities = torch_rand_float(-0.1, 0.1, (len(env_ids), self.num_dof), device=self.device)
+        positions = torch_rand_float(-0.2, 0.2, (len(env_ids), self.num_dof), device=str(self.device))
+        velocities = torch_rand_float(-0.1, 0.1, (len(env_ids), self.num_dof), device=str(self.device))
 
         self.dof_pos[env_ids] = tensor_clamp(self.initial_dof_pos[env_ids] + positions, self.dof_limits_lower,
                                              self.dof_limits_upper)

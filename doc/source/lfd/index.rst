@@ -3,6 +3,8 @@ Learning from Demonstration
 
 :doc:`ml/index`
     Machine learning methods for learning from demonstration
+:doc:`RLBaseLine/index`
+    Reinforcement learning methods for learning from demonstration
 :doc:`RofuncIL/index`
     Rofunc imitation learning methods for robot learning
 :doc:`RofuncRL/index`
@@ -18,6 +20,7 @@ Learning from Demonstration
    :glob:
 
    ml/index
+   RLBaseLine/index
    RofuncIL/index
    RofuncRL/index
 

@@ -27,14 +27,14 @@ def train(custom_args):
     trainer.train()
 
 
-def inference(custom_args, ckpt_path=None):
+def inference(custom_args):
     beauty_print("Start evaluating")
     custom_args.headless = False
 
     env, agent = setup(custom_args, eval_mode=True)
 
     # load checkpoint (agent)
-    agent.load(ckpt_path)
+    agent.load(custom_args.ckpt_path)
 
     # Configure and instantiate the RL trainer
     cfg_trainer = {"timesteps": 1600, "headless": True}
@@ -49,6 +49,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="HumanoidAMP")
     parser.add_argument("--agent", type=str, default="AMP")
+    parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
@@ -60,4 +61,4 @@ if __name__ == '__main__':
     if not custom_args.inference:
         train(custom_args)
     else:
-        inference(custom_args, custom_args.ckpt_path)
+        inference(custom_args)
