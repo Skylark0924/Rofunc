@@ -95,7 +95,7 @@ if __name__ == '__main__':
     # HumanoidASEPerturbSwordShield -> reallusion_sword_shield/dataset_reallusion_sword_shield.yaml
     # HumanoidASEHeadingSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
     # HumanoidASEReachSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
-    parser.add_argument("--task", type=str, default="HumanoidASEPerturbSwordShield")
+    parser.add_argument("--task", type=str, default="HumanoidASEGetupSwordShield")
     parser.add_argument("--motion_file", type=str,
                         default="reallusion_sword_shield/dataset_reallusion_sword_shield.yaml")
     parser.add_argument("--agent", type=str, default="ase")  # Available agent: ase

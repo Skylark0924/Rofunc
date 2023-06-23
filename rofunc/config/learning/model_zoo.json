@@ -43,5 +43,10 @@
     "url": "https://drive.google.com/uc?id=15LAak6-er1cspVKZmRXYDZOKHou59gqH&export=download",
     "name": "HumanoidASEGetupSwordShield.pth",
     "md5": ""
+  },
+  "HumanoidASEPerturbSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=15LAak6-er1cspVKZmRXYDZOKHou59gqH&export=download",
+    "name": "HumanoidASEPerturbSwordShield.pth",
+    "md5": ""
   }
 }
