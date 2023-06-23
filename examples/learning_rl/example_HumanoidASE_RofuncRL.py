@@ -4,7 +4,8 @@ HumanoidASE (RofuncRL)
 
 Humanoid soldier, trained by RofuncRL
 """
-
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 import argparse
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
@@ -12,6 +13,7 @@ from rofunc.learning.RofuncRL.tasks import task_map
 from rofunc.learning.RofuncRL.trainers import trainer_map
 from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
+
 
 
 def train(custom_args):
@@ -85,11 +87,15 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
-    # Available tasks: HumanoidASEGetupSwordShield
-    parser.add_argument("--task", type=str, default="HumanoidASEGetupSwordShield")
+    # Available tasks and motion files:
+    # HumanoidASEGetupSwordShield -> reallusion_sword_shield/dataset_reallusion_sword_shield.yaml
+    # HumanoidASEPerturbSwordShield -> reallusion_sword_shield/dataset_reallusion_sword_shield.yaml
+    # HumanoidASEHeadingSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
+    # HumanoidASEReachSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
+    parser.add_argument("--task", type=str, default="HumanoidASEPerturbSwordShield")
     parser.add_argument("--motion_file", type=str,
                         default="reallusion_sword_shield/dataset_reallusion_sword_shield.yaml")
     parser.add_argument("--agent", type=str, default="ase")  # Available agent: ase

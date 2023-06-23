@@ -7,6 +7,9 @@ from .franka_cabinet import FrankaCabinetTask
 from .humanoid import HumanoidTask
 from .humanoid_amp import HumanoidAMPTask
 from .ase.humanoid_amp_getup import HumanoidAMPGetupTask
+from .ase.humanoid_perturb import HumanoidPerturbTask
+from .ase.humanoid_heading import HumanoidHeadingTask
+
 
 task_map = {
     "Ant": AntTask,
@@ -18,4 +21,6 @@ task_map = {
     "Humanoid": HumanoidTask,
     "HumanoidAMP": HumanoidAMPTask,
     "HumanoidASEGetupSwordShield": HumanoidAMPGetupTask,
+    "HumanoidASEPerturbSwordShield": HumanoidPerturbTask,
+    "HumanoidASEHeadingSwordShield": HumanoidHeadingTask,
 }

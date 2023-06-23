@@ -44,7 +44,7 @@ Agent:
   value_clip: 0.2                  # clipping coefficient for computing the value loss (if clip_predicted_values is True)
   clip_predicted_values: false     # clip predicted values during value loss computation
 
-  least_square_discriminator: true
+  least_square_discriminator: false
   discriminator_loss_scale: 5.0
   discriminator_batch_size: 4096
   discriminator_logit_regularization_scale: 0.01
@@ -53,6 +53,7 @@ Agent:
 
   ase_latent_dim: 64
   enc_reward_scale: 1
+  enc_weight_decay_scale: 0
   enc_gradient_penalty_scale: 0
 
   task_reward_weight: 0.0

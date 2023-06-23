@@ -148,9 +148,9 @@ class HumanoidAMP(Humanoid):
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         num_key_bodies = len(key_bodies)
 
-        if (asset_file == "mjcf/amp_humanoid.xml"):
+        if asset_file == "mjcf/amp_humanoid.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 28 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
-        elif (asset_file == "mjcf/amp_humanoid_sword_shield.xml"):
+        elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 31 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
         else:
             print("Unsupported character config file: {s}".format(asset_file))
@@ -178,32 +178,18 @@ class HumanoidAMP(Humanoid):
     def _reset_actors(self, env_ids):
         if self._state_init == HumanoidAMP.StateInit.Default:
             self._reset_default(env_ids)
-        elif (self._state_init == HumanoidAMP.StateInit.Start
-              or self._state_init == HumanoidAMP.StateInit.Random):
+        elif self._state_init == HumanoidAMP.StateInit.Start or self._state_init == HumanoidAMP.StateInit.Random:
             self._reset_ref_state_init(env_ids)
         elif self._state_init == HumanoidAMP.StateInit.Hybrid:
             self._reset_hybrid_state_init(env_ids)
         else:
             assert False, "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
-
-        self.progress_buf[env_ids] = 0
-        self.reset_buf[env_ids] = 0
-        self._terminate_buf[env_ids] = 0
-
         return
 
     def _reset_default(self, env_ids):
         self._humanoid_root_states[env_ids] = self._initial_humanoid_root_states[env_ids]
         self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
         self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
-
-        env_ids_int32 = env_ids.to(dtype=torch.int32)
-        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
-                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-
-        self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._dof_state),
-                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-
         self._reset_default_env_ids = env_ids
         return
 
@@ -211,13 +197,12 @@ class HumanoidAMP(Humanoid):
         num_envs = env_ids.shape[0]
         motion_ids = self._motion_lib.sample_motions(num_envs)
 
-        if (self._state_init == HumanoidAMP.StateInit.Random
-                or self._state_init == HumanoidAMP.StateInit.Hybrid):
+        if self._state_init == HumanoidAMP.StateInit.Random or self._state_init == HumanoidAMP.StateInit.Hybrid:
             motion_times = self._motion_lib.sample_time(motion_ids)
-        elif (self._state_init == HumanoidAMP.StateInit.Start):
+        elif self._state_init == HumanoidAMP.StateInit.Start:
             motion_times = torch.zeros(num_envs, device=self.device)
         else:
-            assert (False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert False, "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
 
         root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
             = self._motion_lib.get_motion_state(motion_ids, motion_times)
@@ -244,7 +229,7 @@ class HumanoidAMP(Humanoid):
         if len(ref_reset_ids) > 0:
             self._reset_ref_state_init(ref_reset_ids)
 
-        default_reset_ids = env_ids[torch.logical_not(ref_init_mask)]
+        default_reset_ids = env_ids[torch.logical_not(torch.tensor(ref_init_mask))]
         if len(default_reset_ids) > 0:
             self._reset_default(default_reset_ids)
 
@@ -292,12 +277,6 @@ class HumanoidAMP(Humanoid):
 
         self._dof_pos[env_ids] = dof_pos
         self._dof_vel[env_ids] = dof_vel
-
-        env_ids_int32 = env_ids.to(dtype=torch.int32)
-        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
-                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-        self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._dof_state),
-                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
         return
 
     def _update_hist_amp_obs(self, env_ids=None):

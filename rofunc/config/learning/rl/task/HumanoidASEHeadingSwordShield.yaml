@@ -1,5 +1,5 @@
 # used to create the object
-name: HumanoidASEGetupSwordShield
+name: HumanoidASEHeadingSwordShield
 
 physics_engine: ${..physics_engine}
 
@@ -15,12 +15,9 @@ env:
   pdControl: True
   powerScale: 1.0
   controlFrequencyInv: 2 # 30 Hz
-  stateInit: "Hybrid"
+  stateInit: "Default"
   hybridInitProb: 0.5
   numAMPObsSteps: 10
-  recoveryEpisodeProb: 0.2
-  recoverySteps: 60
-  fallInitProb: 0.1
   
   localRootObs: True
   keyBodies: [ "right_hand", "left_hand", "right_foot", "left_foot", "sword", "shield" ]
@@ -30,6 +27,13 @@ env:
 
   # animation files to learn from
   motion_file: None
+
+  tarSpeedMin: 1.5
+  tarSpeedMax: 1.6
+  headingChangeStepsMin: 100
+  headingChangeStepsMax: 200
+  enableRandHeading: True
+  enableTaskObs: True
 
   asset:
     assetFileName: "mjcf/amp_humanoid_sword_shield.xml"
@@ -47,7 +51,7 @@ sim:
   gravity: [ 0.0, 0.0, -9.81 ]
   physx:
     num_threads: ${....num_threads}
-    solver_type: ${....solver_type}
+    solver_type: ${....solver_type}  # 0: pgs, 1: tgs
     use_gpu: ${contains:"cuda",${....sim_device}} # set to False to run on CPU
     num_position_iterations: 4
     num_velocity_iterations: 0
@@ -56,9 +60,6 @@ sim:
     bounce_threshold_velocity: 0.2
     max_depenetration_velocity: 10.0
     default_buffer_size_multiplier: 10.0
-    max_gpu_contact_pairs: 8388608 # 8*1024*1024
-    num_subscenes: ${....num_subscenes}
-    contact_collection: 2 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (default - all contacts)
 
   flex:
     num_inner_iterations: 10
@@ -135,4 +136,6 @@ task:
             schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
             schedule_steps: 3000
 
-
+  flex:
+    num_inner_iterations: 10
+    warm_start: 0.25

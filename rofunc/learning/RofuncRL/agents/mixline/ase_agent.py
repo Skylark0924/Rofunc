@@ -68,7 +68,7 @@ class ASEAgent(AMPAgent):
         # self._amp_diversity_bonus = self.cfg.Agent.amp_diversity_bonus
         # self._amp_diversity_tar = self.cfg.Agent.amp_diversity_tar
         # self._enc_coef = self.cfg.Agent.enc_coef
-        # self._enc_weight_decay = self.cfg.Agent.enc_weight_decay
+        self._enc_weight_decay_scale = cfg.Agent.enc_weight_decay_scale
         self._enc_reward_scale = cfg.Agent.enc_reward_scale
         self._enc_gradient_penalty_scale = cfg.Agent.enc_gradient_penalty_scale
         self._enc_reward_weight = cfg.Agent.enc_reward_weight
@@ -178,7 +178,7 @@ class ASEAgent(AMPAgent):
             # Compute encoder reward
             enc_output = self.encoder(self._amp_state_preprocessor(amp_states))
             enc_output = torch.nn.functional.normalize(enc_output, dim=-1)
-            enc_reward = torch.clamp_min(-torch.sum(enc_output * ase_latents, dim=-1, keepdim=True), 0.0)
+            enc_reward = torch.clamp_min(torch.sum(enc_output * ase_latents, dim=-1, keepdim=True), 0.0)
             enc_reward *= self._enc_reward_scale
 
         combined_rewards = self._task_reward_weight * rewards + \
@@ -316,7 +316,7 @@ class ASEAgent(AMPAgent):
                 # encoder loss
                 enc_output = self.encoder(self._amp_state_preprocessor(sampled_amp_states))
                 enc_output = torch.nn.functional.normalize(enc_output, dim=-1)
-                enc_err = torch.clamp_min(-torch.sum(enc_output * sampled_ase_latents, dim=-1, keepdim=True), 0.0)
+                enc_err = -torch.sum(enc_output * sampled_ase_latents, dim=-1, keepdim=True)
                 enc_loss = torch.mean(enc_err)
 
                 # encoder gradient penalty
@@ -329,6 +329,13 @@ class ASEAgent(AMPAgent):
                                                        only_inputs=True)
                     gradient_penalty = torch.sum(torch.square(enc_obs_grad[0]), dim=-1).mean()
                     enc_loss += self._enc_gradient_penalty_scale * gradient_penalty
+
+                # encoder weight decay
+                if self._enc_weight_decay_scale:
+                    weights = [torch.flatten(module.weight) for module in self.encoder.modules() \
+                               if isinstance(module, torch.nn.Linear)]
+                    weight_decay = torch.sum(torch.square(torch.cat(weights, dim=-1)))
+                    enc_loss += self._enc_weight_decay_scale * weight_decay
 
                 # if self._enable_amp_diversity_bonus():
                 #     diversity_loss = self._diversity_loss(batch_dict['obs'], mu, batch_dict['ase_latents'])
@@ -384,7 +391,13 @@ class ASEAgent(AMPAgent):
         self.replay_buffer.add_samples(states=amp_states.view(-1, amp_states.shape[-1]))
 
         # record data
-        self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._mini_batch_size))
+        self.track_data("Info / Combined rewards", combined_rewards.mean().cpu())
+        self.track_data("Info / Style rewards", style_reward.mean().cpu())
+        self.track_data("Info / Encoder rewards", enc_reward.mean().cpu())
+        self.track_data("Info / Task rewards", rewards.mean().cpu())
+
+        self.track_data("Loss / Policy loss",
+                        cumulative_policy_loss / (self._learning_epochs * self._mini_batch_size))
         self.track_data("Loss / Value loss", cumulative_value_loss / (self._learning_epochs * self._mini_batch_size))
         self.track_data("Loss / Discriminator loss",
                         cumulative_discriminator_loss / (self._learning_epochs * self._mini_batch_size))
@@ -395,6 +408,6 @@ class ASEAgent(AMPAgent):
                             cumulative_entropy_loss / (self._learning_epochs * self._mini_batch_size))
         if self._lr_scheduler:
             self.track_data("Learning / Learning rate (policy)", self.scheduler_policy.get_last_lr()[0])
-            self.track_data("Learning / Learning rate (value)", self.scheduler_value.get_last_lr()[0])
-            self.track_data("Learning / Learning rate (discriminator)", self.scheduler_disc.get_last_lr()[0])
-            self.track_data("Learning / Learning rate (encoder)", self.scheduler_enc.get_last_lr()[0])
+        self.track_data("Learning / Learning rate (value)", self.scheduler_value.get_last_lr()[0])
+        self.track_data("Learning / Learning rate (discriminator)", self.scheduler_disc.get_last_lr()[0])
+        self.track_data("Learning / Learning rate (encoder)", self.scheduler_enc.get_last_lr()[0])
