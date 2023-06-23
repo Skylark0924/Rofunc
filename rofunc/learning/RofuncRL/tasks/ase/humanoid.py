@@ -33,8 +33,8 @@ from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
 from rofunc.utils.file.path import get_rofunc_path
-from ..utils import torch_jit_utils as torch_utils
 from ..base.vec_task import VecTask
+from ..utils import torch_jit_utils as torch_utils
 
 
 class Humanoid(VecTask):
@@ -168,15 +168,28 @@ class Humanoid(VecTask):
 
     def reset_idx(self, env_ids):
         self._reset_actors(env_ids)
+        self._reset_env_tensors(env_ids)
         self._refresh_sim_tensors()
         self._compute_observations(env_ids)
         return
 
-    # def reset(self, env_ids=None):  # TODO
-    #     if env_ids is None:
-    #         env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
-    #     self._reset_envs(env_ids)
-    #     return
+    def _reset_actors(self, env_ids):
+        self._humanoid_root_states[env_ids] = self._initial_humanoid_root_states[env_ids]
+        self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
+        self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
+
+    def _reset_env_tensors(self, env_ids):
+        env_ids_int32 = self._humanoid_actor_ids[env_ids]
+        self.gym.set_actor_root_state_tensor_indexed(self.sim,
+                                                     gymtorch.unwrap_tensor(self._root_states),
+                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+        self.gym.set_dof_state_tensor_indexed(self.sim,
+                                              gymtorch.unwrap_tensor(self._dof_state),
+                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+
+        self.progress_buf[env_ids] = 0
+        self.reset_buf[env_ids] = 0
+        self._terminate_buf[env_ids] = 0
 
     def set_char_color(self, col):
         for i in range(self.num_envs):
@@ -440,29 +453,10 @@ class Humanoid(VecTask):
                                                 self._root_height_obs)
         return obs
 
-    def _reset_actors(self, env_ids):
-        self._humanoid_root_states[env_ids] = self._initial_humanoid_root_states[env_ids]
-        self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
-        self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
-
-        env_ids_int32 = self._humanoid_actor_ids[env_ids]
-        self.gym.set_actor_root_state_tensor_indexed(self.sim,
-                                                     gymtorch.unwrap_tensor(self._root_states),
-                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-
-        self.gym.set_dof_state_tensor_indexed(self.sim,
-                                              gymtorch.unwrap_tensor(self._dof_state),
-                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-
-        self.progress_buf[env_ids] = 0
-        self.reset_buf[env_ids] = 0
-        self._terminate_buf[env_ids] = 0
-        return
-
     def pre_physics_step(self, actions):
         self.actions = actions.to(self.device).clone()
 
-        if (self._pd_control):
+        if self._pd_control:
             pd_tar = self._action_to_pd_targets(self.actions)
             pd_tar_tensor = gymtorch.unwrap_tensor(pd_tar)
             self.gym.set_dof_position_target_tensor(self.sim, pd_tar_tensor)
@@ -704,7 +698,7 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, contact_body_id
     # type: (Tensor, Tensor, Tensor, Tensor, Tensor, float, bool, Tensor) -> Tuple[Tensor, Tensor]
     terminated = torch.zeros_like(reset_buf)
 
-    if (enable_early_termination):
+    if enable_early_termination:
         masked_contact_buf = contact_buf.clone()
         masked_contact_buf[:, contact_body_ids, :] = 0
         fall_contact = torch.any(torch.abs(masked_contact_buf) > 0.1, dim=-1)

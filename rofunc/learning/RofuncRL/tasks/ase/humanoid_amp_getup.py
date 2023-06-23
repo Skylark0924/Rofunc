@@ -27,9 +27,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from isaacgym import gymtorch
+from isaacgym.torch_utils import *
 
 from .humanoid_amp import HumanoidAMP
-from isaacgym.torch_utils import *
 
 
 class HumanoidAMPGetupTask(HumanoidAMP):
@@ -50,13 +50,9 @@ class HumanoidAMPGetupTask(HumanoidAMP):
 
         self._generate_fall_states()
 
-        return
-
     def pre_physics_step(self, actions):
         super().pre_physics_step(actions)
-
         self._update_recovery_count()
-        return
 
     def _generate_fall_states(self):
         max_steps = 150
@@ -91,8 +87,6 @@ class HumanoidAMPGetupTask(HumanoidAMP):
         self._fall_dof_pos = self._dof_pos.clone()
         self._fall_dof_vel = torch.zeros_like(self._dof_vel, device=self.device, dtype=torch.float)
 
-        return
-
     def _reset_actors(self, env_ids):
         num_envs = env_ids.shape[0]
         recovery_probs = to_torch(np.array([self._recovery_episode_prob] * num_envs), device=self.device)
@@ -108,7 +102,7 @@ class HumanoidAMPGetupTask(HumanoidAMP):
         fall_probs = to_torch(np.array([self._fall_init_prob] * nonrecovery_ids.shape[0]), device=self.device)
         fall_mask = torch.bernoulli(fall_probs) == 1.0
         fall_ids = nonrecovery_ids[fall_mask]
-        if (len(fall_ids) > 0):
+        if len(fall_ids) > 0:
             self._reset_fall_episode(fall_ids)
 
         nonfall_ids = nonrecovery_ids[torch.logical_not(fall_mask)]
@@ -116,11 +110,8 @@ class HumanoidAMPGetupTask(HumanoidAMP):
             super()._reset_actors(nonfall_ids)
             self._recovery_counter[nonfall_ids] = 0
 
-        return
-
     def _reset_recovery_episode(self, env_ids):
         self._recovery_counter[env_ids] = self._recovery_steps
-        return
 
     def _reset_fall_episode(self, env_ids):
         fall_state_ids = torch.randint_like(env_ids, low=0, high=self._fall_root_states.shape[0])
@@ -129,12 +120,10 @@ class HumanoidAMPGetupTask(HumanoidAMP):
         self._dof_vel[env_ids] = self._fall_dof_vel[fall_state_ids]
         self._recovery_counter[env_ids] = self._recovery_steps
         self._reset_fall_env_ids = env_ids
-        return
 
     def reset_idx(self, env_ids):
         self._reset_fall_env_ids = []
         super().reset_idx(env_ids)
-        return
 
     def _init_amp_obs(self, env_ids):
         super()._init_amp_obs(env_ids)
@@ -142,12 +131,9 @@ class HumanoidAMPGetupTask(HumanoidAMP):
         if len(self._reset_fall_env_ids) > 0:
             self._init_amp_obs_default(self._reset_fall_env_ids)
 
-        return
-
     def _update_recovery_count(self):
         self._recovery_counter -= 1
         self._recovery_counter = torch.clamp_min(self._recovery_counter, 0)
-        return
 
     def _compute_reset(self):
         super()._compute_reset()
@@ -155,4 +141,3 @@ class HumanoidAMPGetupTask(HumanoidAMP):
         is_recovery = self._recovery_counter > 0
         self.reset_buf[is_recovery] = 0
         self._terminate_buf[is_recovery] = 0
-        return

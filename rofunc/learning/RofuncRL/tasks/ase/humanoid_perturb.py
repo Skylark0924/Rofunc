@@ -26,16 +26,18 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import torch
+import os
 
 from isaacgym import gymapi, gymtorch
 from isaacgym.torch_utils import *
 
-import env.tasks.humanoid_amp as humanoid_amp
-import env.tasks.humanoid_amp_getup as humanoid_amp_getup
-import env.tasks.humanoid_strike as humanoid_strike
-import env.tasks.humanoid_location as humanoid_location
-from utils import torch_utils
+from rofunc.utils.file.path import get_rofunc_path
+from .humanoid_amp import HumanoidAMP
+
+# import env.tasks.humanoid_amp_getup as humanoid_amp_getup
+# # import env.tasks.humanoid_strike as humanoid_strike
+# # import env.tasks.humanoid_location as humanoid_location
+# # from utils import torch_utils
 
 PERTURB_OBJS = [
     ["small", 60],
@@ -53,15 +55,14 @@ PERTURB_OBJS = [
     ["small", 300],
 ]
 
-class HumanoidPerturb(humanoid_amp.HumanoidAMP):
-    def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
-        super().__init__(cfg=cfg,
-                         sim_params=sim_params,
-                         physics_engine=physics_engine,
-                         device_type=device_type,
-                         device_id=device_id,
-                         headless=headless)
-        
+
+class HumanoidPerturbTask(HumanoidAMP):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
+        self.cfg = cfg
+        super().__init__(cfg=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+
         self._proj_dist_min = 4
         self._proj_dist_max = 5
         self._proj_h_min = 0.25
@@ -70,13 +71,13 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
         self._proj_warmup_steps = 1
         self._proj_speed_min = 30
         self._proj_speed_max = 40
-        assert(self._proj_warmup_steps < self._proj_steps)
+        assert (self._proj_warmup_steps < self._proj_steps)
 
         self._build_proj_tensors()
         self._calc_perturb_times()
 
         return
-    
+
     def _create_envs(self, num_envs, spacing, num_per_row):
         self._proj_handles = []
         self._load_proj_asset()
@@ -90,7 +91,7 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
         return
 
     def _load_proj_asset(self):
-        asset_root = "ase/data/assets/mjcf/"
+        asset_root = os.path.join(get_rofunc_path(), "simulator/assets/mjcf/")
 
         small_asset_file = "block_projectile.urdf"
         small_asset_options = gymapi.AssetOptions()
@@ -100,7 +101,7 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
         small_asset_options.density = 200.0
         small_asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
         self._small_proj_asset = self.gym.load_asset(self.sim, asset_root, small_asset_file, small_asset_options)
-        
+
         large_asset_file = "block_projectile_large.urdf"
         large_asset_options = gymapi.AssetOptions()
         large_asset_options.angular_damping = 0.01
@@ -121,15 +122,14 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
             default_pose.p.x = 200 + i
             default_pose.p.z = 1
             obj_type = obj[0]
-            if (obj_type == "small"):
+            if obj_type == "small":
                 proj_asset = self._small_proj_asset
-            elif (obj_type == "large"):
+            elif obj_type == "large":
                 proj_asset = self._large_proj_asset
 
-            proj_handle = self.gym.create_actor(env_ptr, proj_asset, default_pose, "proj{:d}".format(i), col_group, col_filter, segmentation_id)
+            proj_handle = self.gym.create_actor(env_ptr, proj_asset, default_pose, "proj{:d}".format(i), col_group,
+                                                col_filter, segmentation_id)
             self._proj_handles.append(proj_handle)
-
-        return
 
     def _build_body_ids_tensor(self, env_ptr, actor_handle, body_names):
         env_ptr = self.envs[0]
@@ -138,7 +138,7 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
 
         for body_name in body_names:
             body_id = self.gym.find_actor_rigid_body_handle(env_ptr, actor_handle, body_name)
-            assert(body_id != -1)
+            assert (body_id != -1)
             body_ids.append(body_id)
 
         body_ids = to_torch(body_ids, device=self.device, dtype=torch.long)
@@ -147,20 +147,21 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
     def _build_proj_tensors(self):
         num_actors = self.get_num_actors_per_env()
         num_objs = self._get_num_objs()
-        self._proj_states = self._root_states.view(self.num_envs, num_actors, self._root_states.shape[-1])[..., (num_actors - num_objs):, :]
-        
+        self._proj_states = self._root_states.view(self.num_envs, num_actors, self._root_states.shape[-1])[...,
+                            (num_actors - num_objs):, :]
+
         self._proj_actor_ids = num_actors * np.arange(self.num_envs)
         self._proj_actor_ids = np.expand_dims(self._proj_actor_ids, axis=-1)
-        self._proj_actor_ids = self._proj_actor_ids + np.reshape(np.array(self._proj_handles), [self.num_envs, num_objs])
+        self._proj_actor_ids = self._proj_actor_ids + np.reshape(np.array(self._proj_handles),
+                                                                 [self.num_envs, num_objs])
         self._proj_actor_ids = self._proj_actor_ids.flatten()
         self._proj_actor_ids = to_torch(self._proj_actor_ids, device=self.device, dtype=torch.int32)
-        
+
         bodies_per_env = self._rigid_body_state.shape[0] // self.num_envs
         contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
         contact_force_tensor = gymtorch.wrap_tensor(contact_force_tensor)
-        self._proj_contact_forces = contact_force_tensor.view(self.num_envs, bodies_per_env, 3)[..., (num_actors - num_objs):, :]
-        
-        return
+        self._proj_contact_forces = contact_force_tensor.view(self.num_envs, bodies_per_env, 3)[...,
+                                    (num_actors - num_objs):, :]
 
     def _calc_perturb_times(self):
         self._perturb_timesteps = []
@@ -172,8 +173,6 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
 
         self._perturb_timesteps = np.array(self._perturb_timesteps)
 
-        return
-    
     def _reset_env_tensors(self, env_ids):
         super()._reset_env_tensors(env_ids)
 
@@ -184,43 +183,46 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
 
     def _compute_reset(self):
         self.reset_buf[:], self._terminate_buf[:] = compute_humanoid_reset(self.reset_buf, self.progress_buf,
-                                                               self._contact_forces, self._contact_body_ids,
-                                                               self._rigid_body_pos, self.max_episode_length,
-                                                               self._enable_early_termination, self._termination_heights)
-        return
+                                                                           self._contact_forces, self._contact_body_ids,
+                                                                           self._rigid_body_pos,
+                                                                           self.max_episode_length,
+                                                                           self._enable_early_termination,
+                                                                           self._termination_heights)
 
     def post_physics_step(self):
         self._update_proj()
         super().post_physics_step()
         return
-    
+
     def _get_num_objs(self):
         return len(PERTURB_OBJS)
 
     def _update_proj(self):
-        
+
         curr_timestep = self.progress_buf.cpu().numpy()[0]
         curr_timestep = curr_timestep % (self._perturb_timesteps[-1] + 1)
         perturb_step = np.where(self._perturb_timesteps == curr_timestep)[0]
-        
-        if (len(perturb_step) > 0):
+
+        if len(perturb_step) > 0:
             perturb_id = perturb_step[0]
             n = self.num_envs
             humanoid_root_pos = self._humanoid_root_states[..., 0:3]
 
             rand_theta = torch.rand([n], dtype=self._proj_states.dtype, device=self._proj_states.device)
             rand_theta *= 2 * np.pi
-            rand_dist = (self._proj_dist_max - self._proj_dist_min) * torch.rand([n], dtype=self._proj_states.dtype, device=self._proj_states.device) + self._proj_dist_min
+            rand_dist = (self._proj_dist_max - self._proj_dist_min) * torch.rand([n], dtype=self._proj_states.dtype,
+                                                                                 device=self._proj_states.device) + self._proj_dist_min
             pos_x = rand_dist * torch.cos(rand_theta)
             pos_y = -rand_dist * torch.sin(rand_theta)
-            pos_z = (self._proj_h_max - self._proj_h_min) * torch.rand([n], dtype=self._proj_states.dtype, device=self._proj_states.device) + self._proj_h_min
-            
+            pos_z = (self._proj_h_max - self._proj_h_min) * torch.rand([n], dtype=self._proj_states.dtype,
+                                                                       device=self._proj_states.device) + self._proj_h_min
+
             self._proj_states[..., perturb_id, 0] = humanoid_root_pos[..., 0] + pos_x
             self._proj_states[..., perturb_id, 1] = humanoid_root_pos[..., 1] + pos_y
             self._proj_states[..., perturb_id, 2] = pos_z
             self._proj_states[..., perturb_id, 3:6] = 0.0
             self._proj_states[..., perturb_id, 6] = 1.0
-            
+
             tar_body_idx = np.random.randint(self.num_bodies)
             tar_body_idx = 1
 
@@ -228,7 +230,8 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
             launch_dir = launch_tar_pos - self._proj_states[..., perturb_id, 0:3]
             launch_dir += 0.1 * torch.randn_like(launch_dir)
             launch_dir = torch.nn.functional.normalize(launch_dir, dim=-1)
-            launch_speed = (self._proj_speed_max - self._proj_speed_min) * torch.rand_like(launch_dir[:, 0:1]) + self._proj_speed_min
+            launch_speed = (self._proj_speed_max - self._proj_speed_min) * torch.rand_like(
+                launch_dir[:, 0:1]) + self._proj_speed_min
             launch_vel = launch_speed * launch_dir
             launch_vel[..., 0:2] += self._rigid_body_vel[..., tar_body_idx, 0:2]
             self._proj_states[..., perturb_id, 7:10] = launch_vel
@@ -238,11 +241,9 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
                                                          gymtorch.unwrap_tensor(self._proj_actor_ids),
                                                          len(self._proj_actor_ids))
 
-        return
-
     def _draw_task(self):
         super()._draw_task()
-        
+
         cols = np.array([[1.0, 0.0, 0.0]], dtype=np.float32)
 
         self.gym.clear_lines(self.viewer)
@@ -256,7 +257,6 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
             curr_verts = curr_verts.reshape([1, 6])
             self.gym.add_lines(self.viewer, env_ptr, curr_verts.shape[0], curr_verts, cols)
 
-        return
 
 #####################################################################
 ###=========================jit functions=========================###
@@ -266,7 +266,7 @@ class HumanoidPerturb(humanoid_amp.HumanoidAMP):
 def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, contact_body_ids, rigid_body_pos,
                            max_episode_length, enable_early_termination, termination_heights):
     # type: (Tensor, Tensor, Tensor, Tensor, Tensor, float, bool, Tensor) -> Tuple[Tensor, Tensor]
-    
+
     terminated = torch.zeros_like(reset_buf)
     reset = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(reset_buf), terminated)
 
