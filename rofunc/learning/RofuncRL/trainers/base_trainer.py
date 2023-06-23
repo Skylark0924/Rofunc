@@ -182,7 +182,7 @@ class BaseTrainer:
         # Update best models and tensorboard
         if not self._step % self.write_interval and self.write_interval > 0:
             # update best models
-            reward = np.mean(self.agent.tracking_data.get("Reward / Total reward (mean)", -2 ** 31))
+            reward = np.mean(self.agent.tracking_data.get("Reward / Total reward (mean)", -1e4))
             if reward > self.agent.checkpoint_best_modules["reward"]:
                 self.agent.checkpoint_best_modules["timestep"] = self._step
                 self.agent.checkpoint_best_modules["reward"] = reward
