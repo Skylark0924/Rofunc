@@ -13,6 +13,12 @@ import rofunc as rf
 from rofunc.config import *
 from rofunc.utils.file.path import get_rofunc_path
 
+"""
+Config loading rules
+
+
+"""
+
 
 def get_config(config_path=None, config_name=None, args=None, debug=False) -> DictConfig:
     # reset current hydra config if already parsed (but not passed in here)
