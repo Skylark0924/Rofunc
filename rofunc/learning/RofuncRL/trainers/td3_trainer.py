@@ -23,8 +23,8 @@ from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 
 
 class TD3Trainer(BaseTrainer):
-    def __init__(self, cfg, env, device):
-        super().__init__(cfg, env, device)
+    def __init__(self, cfg, env, device, env_name):
+        super().__init__(cfg, env, device, env_name)
         self.memory = RandomMemory(memory_size=10000, num_envs=self.env.num_envs, device=device, replacement=True)
         self.agent = TD3Agent(cfg, self.env.observation_space, self.env.action_space, self.memory,
                               device, self.exp_dir, self.rofunc_logger)

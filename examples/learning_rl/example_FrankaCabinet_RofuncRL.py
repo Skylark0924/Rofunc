@@ -42,7 +42,8 @@ def train(custom_args):
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=env,
-                                             device=cfg.rl_device)
+                                             device=cfg.rl_device,
+                                             env_name=custom_args.task)
 
     # Start training
     trainer.train()
@@ -74,7 +75,8 @@ def inference(custom_args):
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=infer_env,
-                                             device=cfg.rl_device)
+                                             device=cfg.rl_device,
+                                             env_name=custom_args.task)
     # load checkpoint
     if custom_args.ckpt_path is None:
         custom_args.ckpt_path = model_zoo(name=f"{custom_args.task}.pth")  # TODO: Check

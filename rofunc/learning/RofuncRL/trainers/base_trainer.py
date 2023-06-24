@@ -40,7 +40,8 @@ class BaseTrainer:
     def __init__(self,
                  cfg: DictConfig,
                  env: Union[gym.Env, gymnasium.Env],
-                 device: Optional[Union[str, torch.device]] = None):
+                 device: Optional[Union[str, torch.device]] = None,
+                 env_name: Optional[str] = None):
         self.cfg = cfg
         self.agent = None
         self.device = torch.device(
@@ -51,8 +52,6 @@ class BaseTrainer:
         exp_name = self.cfg.Trainer.experiment_name
         directory = os.path.join(os.getcwd(), "runs") if not directory else directory
         exp_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f") if not exp_name else exp_name
-        # env_name = env.cfg['name'] if hasattr(env, 'cfg') else env.envs[0].spec.id if hasattr(env, 'envs') else env.spec.id
-        env_name = 'ASE'
         exp_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, exp_name)
         self.exp_dir = os.path.join(directory, exp_name)
         rf.utils.create_dir(self.exp_dir)
