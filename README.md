@@ -162,7 +162,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
          publisher={IEEE}
 }
 ```
-2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer (IROS 2023)
+2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer ([IROS 2023](https://arxiv.org/abs/2306.12677) ｜ Code coming soon)
 3. Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration (IEEE CDC 2023 | [Code](./rofunc/learning/ml/tpgmm.py))
 
 
