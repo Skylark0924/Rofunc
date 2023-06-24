@@ -21,8 +21,8 @@ from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 
 
 class ASETrainer(BaseTrainer):
-    def __init__(self, cfg, env, device, hrl=False):
-        super().__init__(cfg, env, device)
+    def __init__(self, cfg, env, device, env_name, hrl=False):
+        super().__init__(cfg, env, device, env_name)
         self.memory = RandomMemory(memory_size=self.rollouts, num_envs=self.env.num_envs, device=device)
         self.motion_dataset = RandomMemory(memory_size=200000, device=device)
         self.replay_buffer = RandomMemory(memory_size=1000000, device=device)

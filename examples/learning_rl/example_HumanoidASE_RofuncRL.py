@@ -43,6 +43,7 @@ def train(custom_args):
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=env,
                                              device=cfg.rl_device,
+                                             env_name=custom_args.task,
                                              hrl=hrl)
 
     # Start training
@@ -78,6 +79,7 @@ def inference(custom_args):
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=infer_env,
                                              device=cfg.rl_device,
+                                             env_name=custom_args.task,
                                              hrl=hrl)
     # load checkpoint
     if custom_args.ckpt_path is None:
@@ -89,7 +91,7 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     # Available tasks and motion files:

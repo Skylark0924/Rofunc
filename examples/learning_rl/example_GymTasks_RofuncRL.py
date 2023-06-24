@@ -34,7 +34,8 @@ def train(custom_args):
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=env,
-                                             device=cfg.rl_device)
+                                             device=cfg.rl_device,
+                                             env_name=custom_args.task)
 
     # Start training
     trainer.train()
