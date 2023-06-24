@@ -9,6 +9,9 @@ from .humanoid_amp import HumanoidAMPTask
 from .ase.humanoid_amp_getup import HumanoidAMPGetupTask
 from .ase.humanoid_perturb import HumanoidPerturbTask
 from .ase.humanoid_heading import HumanoidHeadingTask
+from .ase.humanoid_location import HumanoidLocationTask
+from .ase.humanoid_reach import HumanoidReachTask
+from .ase.humanoid_strike import HumanoidStrikeTask
 
 
 task_map = {
@@ -23,4 +26,7 @@ task_map = {
     "HumanoidASEGetupSwordShield": HumanoidAMPGetupTask,
     "HumanoidASEPerturbSwordShield": HumanoidPerturbTask,
     "HumanoidASEHeadingSwordShield": HumanoidHeadingTask,
+    "HumanoidASELocationSwordShield": HumanoidLocationTask,
+    "HumanoidASEReachSwordShield": HumanoidReachTask,
+    "HumanoidASEStrikeSwordShield": HumanoidStrikeTask,
 }

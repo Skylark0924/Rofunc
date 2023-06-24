@@ -161,11 +161,11 @@ class ASEHRLAgent(BaseAgent):
 
         self._set_up()
 
-    def _get_llc_action(self, states: torch.Tensor, omega_actions: torch.Tensor, deterministic: bool = False):
+    def _get_llc_action(self, states: torch.Tensor, omega_actions: torch.Tensor):
         # get actions from low-level controller
         task_agnostic_states = states[:, :-self._task_related_state_size]
         z = torch.nn.functional.normalize(omega_actions, dim=-1)
-        actions, _ = self.llc_agent.act(task_agnostic_states, deterministic=deterministic, ase_latents=z)
+        actions, _ = self.llc_agent.act(task_agnostic_states, deterministic=True, ase_latents=z)
         return actions
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
@@ -177,7 +177,7 @@ class ASEHRLAgent(BaseAgent):
             self._states_for_llc = states
             self._omega_actions_for_llc = omega_actions
 
-        actions = self._get_llc_action(self._states_for_llc, self._omega_actions_for_llc, deterministic)
+        actions = self._get_llc_action(self._states_for_llc, self._omega_actions_for_llc)
         self._llc_step += 1
         return actions, self._current_log_prob
 
