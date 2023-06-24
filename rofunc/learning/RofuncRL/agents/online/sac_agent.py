@@ -29,7 +29,7 @@ import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorSAC
 from rofunc.learning.RofuncRL.models.critic_models import Critic
-from rofunc.learning.RofuncRL.processors.normalizers import empty_preprocessor
+from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.RofuncRL.utils.memory import Memory

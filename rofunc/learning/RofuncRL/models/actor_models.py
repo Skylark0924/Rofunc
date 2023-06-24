@@ -25,7 +25,7 @@ from omegaconf import DictConfig
 from torch import Tensor
 from torch.distributions import Beta, Normal
 
-from .utils import build_mlp, init_layers, activation_func
+from .utils import build_mlp, init_layers, activation_func, get_space_dim
 
 
 class BaseActor(nn.Module):
@@ -34,21 +34,8 @@ class BaseActor(nn.Module):
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
         super().__init__()
         self.cfg = cfg
-        if isinstance(observation_space, List):
-            self.state_dim = 0
-            for i in range(len(observation_space)):
-                if isinstance(observation_space[i], gym.Space) or isinstance(observation_space[i], gymnasium.Space):
-                    self.state_dim += observation_space[i].shape[0]
-                elif isinstance(observation_space[i], int):
-                    self.state_dim += observation_space[i]
-                else:
-                    raise ValueError(f'observation_space[{i}] is not a valid type.')
-        else:
-            if isinstance(observation_space, gym.Space) or isinstance(observation_space, gymnasium.Space):
-                self.state_dim = observation_space.shape[0]
-            else:
-                self.state_dim = observation_space
-        self.action_dim = action_space.shape[0]
+        self.state_dim = get_space_dim(observation_space)
+        self.action_dim = get_space_dim(action_space)
         self.mlp_hidden_dims = cfg.actor.mlp_hidden_dims
         self.mlp_activation = activation_func(cfg.actor.mlp_activation)
 

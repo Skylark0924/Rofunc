@@ -23,8 +23,8 @@ import torch.nn as nn
 from omegaconf import DictConfig
 from torch import Tensor
 
-from .utils import build_mlp, init_layers, activation_func
 from rofunc.config.utils import omegaconf_to_dict
+from .utils import build_mlp, init_layers, activation_func, get_space_dim
 
 
 class BaseCritic(nn.Module):
@@ -34,21 +34,8 @@ class BaseCritic(nn.Module):
                  cfg_name: str = 'critic'):
         super().__init__()
         self.cfg = cfg
-        if isinstance(observation_space, List):
-            self.state_dim = 0
-            for i in range(len(observation_space)):
-                if isinstance(observation_space[i], gym.Space) or isinstance(observation_space[i], gymnasium.Space):
-                    self.state_dim += observation_space[i].shape[0]
-                elif isinstance(observation_space[i], int):
-                    self.state_dim += observation_space[i]
-                else:
-                    raise ValueError(f'observation_space[{i}] is not a valid type.')
-        else:
-            if isinstance(observation_space, gym.Space) or isinstance(observation_space, gymnasium.Space):
-                self.state_dim = observation_space.shape[0]
-            else:
-                self.state_dim = observation_space
-        self.action_dim = action_space.shape[0]
+        self.state_dim = get_space_dim(observation_space)
+        self.action_dim = get_space_dim(action_space)
         cfg_dict = omegaconf_to_dict(cfg)
         self.mlp_hidden_dims = cfg_dict[cfg_name]['mlp_hidden_dims']
         self.mlp_activation = activation_func(cfg_dict[cfg_name]['mlp_activation'])
@@ -114,5 +101,3 @@ class Critic(BaseCritic):
         value = self.backbone_net(state)
         value = self.value_net(value)
         return value
-
-
