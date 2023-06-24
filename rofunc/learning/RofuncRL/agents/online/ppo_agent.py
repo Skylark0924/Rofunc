@@ -27,7 +27,6 @@ import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
 from rofunc.learning.RofuncRL.models.critic_models import Critic
-from rofunc.learning.RofuncRL.processors.normalizers import empty_preprocessor
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.RofuncRL.utils.memory import Memory
@@ -114,37 +113,6 @@ class PPOAgent(BaseAgent):
         self._current_next_states = None
 
         self._set_up()
-
-    def _set_up(self):
-        """
-        Set up optimizer, learning rate scheduler and state/value preprocessors
-        """
-        # Set up optimizer and learning rate scheduler
-        if self.policy is self.value:
-            self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a)
-            if self._lr_scheduler is not None:
-                self.scheduler = self._lr_scheduler(self.optimizer, **self._lr_scheduler_kwargs)
-            self.checkpoint_modules["optimizer"] = self.optimizer
-        else:
-            self.optimizer_policy = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a, eps=self._adam_eps)
-            self.optimizer_value = torch.optim.Adam(self.value.parameters(), lr=self._lr_c, eps=self._adam_eps)
-            if self._lr_scheduler is not None:
-                self.scheduler_policy = self._lr_scheduler(self.optimizer_policy, **self._lr_scheduler_kwargs)
-                self.scheduler_value = self._lr_scheduler(self.optimizer_value, **self._lr_scheduler_kwargs)
-            self.checkpoint_modules["optimizer_policy"] = self.optimizer_policy
-            self.checkpoint_modules["optimizer_value"] = self.optimizer_value
-
-        # set up preprocessors
-        if self._state_preprocessor:
-            self._state_preprocessor = self._state_preprocessor(**self._state_preprocessor_kwargs)
-            self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
-        else:
-            self._state_preprocessor = empty_preprocessor
-        if self._value_preprocessor:
-            self._value_preprocessor = self._value_preprocessor(**self._value_preprocessor_kwargs)
-            self.checkpoint_modules["value_preprocessor"] = self._value_preprocessor
-        else:
-            self._value_preprocessor = empty_preprocessor
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:
