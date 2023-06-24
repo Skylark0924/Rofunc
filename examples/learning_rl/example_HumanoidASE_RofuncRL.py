@@ -4,8 +4,7 @@ HumanoidASE (RofuncRL)
 
 Humanoid soldier, trained by RofuncRL
 """
-import os
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+
 import argparse
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
@@ -13,7 +12,6 @@ from rofunc.learning.RofuncRL.tasks import task_map
 from rofunc.learning.RofuncRL.trainers import trainer_map
 from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
-
 
 
 def train(custom_args):
@@ -41,9 +39,11 @@ def train(custom_args):
                                      force_render=cfg.force_render)
 
     # Instantiate the RL trainer
+    hrl = False if custom_args.task in ['HumanoidASEGetupSwordShield', 'HumanoidASEPerturbSwordShield'] else True
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=env,
-                                             device=cfg.rl_device)
+                                             device=cfg.rl_device,
+                                             hrl=hrl)
 
     # Start training
     trainer.train()
@@ -74,9 +74,11 @@ def inference(custom_args):
                                            force_render=cfg.force_render)
 
     # Instantiate the RL trainer
+    hrl = False if custom_args.task in ['HumanoidASEGetupSwordShield', 'HumanoidASEPerturbSwordShield'] else True
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=infer_env,
-                                             device=cfg.rl_device)
+                                             device=cfg.rl_device,
+                                             hrl=hrl)
     # load checkpoint
     if custom_args.ckpt_path is None:
         custom_args.ckpt_path = model_zoo(name=f"{custom_args.task}.pth")
@@ -95,9 +97,9 @@ if __name__ == '__main__':
     # HumanoidASEPerturbSwordShield -> reallusion_sword_shield/dataset_reallusion_sword_shield.yaml
     # HumanoidASEHeadingSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
     # HumanoidASEReachSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
-    parser.add_argument("--task", type=str, default="HumanoidASEGetupSwordShield")
+    parser.add_argument("--task", type=str, default="HumanoidASEHeadingSwordShield")
     parser.add_argument("--motion_file", type=str,
-                        default="reallusion_sword_shield/dataset_reallusion_sword_shield.yaml")
+                        default="reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy")
     parser.add_argument("--agent", type=str, default="ase")  # Available agent: ase
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))

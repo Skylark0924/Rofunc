@@ -104,20 +104,22 @@ class ASEAgent(AMPAgent):
         z_bar = torch.normal(torch.zeros([num_envs, self._ase_latent_dim]))
         self._ase_latents = z = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
 
-    def act(self, states: torch.Tensor, deterministic: bool = False):
+    def act(self, states: torch.Tensor, deterministic: bool = False, ase_latents: torch.Tensor = None):
         if self._current_states is not None:
             states = self._current_states
 
+        if ase_latents is None:
+            self._update_latents(states.shape[0])
+            ase_latents = self._ase_latents
+
         if not deterministic:
             # sample stochastic actions
-            self._update_latents(states.shape[0])
-            actions, log_prob = self.policy(self._state_preprocessor(torch.hstack((states, self._ase_latents))))
+            actions, log_prob = self.policy(self._state_preprocessor(torch.hstack((states, ase_latents))))
             # actions, log_prob = self.policy(self._state_preprocessor(states))
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
-            self._update_latents(states.shape[0])
-            actions, _ = self.policy(self._state_preprocessor(torch.hstack((states, self._ase_latents))),
+            actions, _ = self.policy(self._state_preprocessor(torch.hstack((states, ase_latents))),
                                      deterministic=True)
             log_prob = None
         return actions, log_prob
@@ -168,12 +170,12 @@ class ASEAgent(AMPAgent):
             # Compute style reward from discriminator
             amp_logits = self.discriminator(self._amp_state_preprocessor(amp_states))
             if self._least_square_discriminator:
-                style_reward = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
+                style_rewards = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
                                              torch.tensor(0.0001, device=self.device))
             else:
-                style_reward = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
+                style_rewards = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
                                                         torch.tensor(0.0001, device=self.device)))
-            style_reward *= self._discriminator_reward_scale
+            style_rewards *= self._discriminator_reward_scale
 
             # Compute encoder reward
             enc_output = self.encoder(self._amp_state_preprocessor(amp_states))
@@ -182,7 +184,7 @@ class ASEAgent(AMPAgent):
             enc_reward *= self._enc_reward_scale
 
         combined_rewards = self._task_reward_weight * rewards + \
-                           self._style_reward_weight * style_reward + \
+                           self._style_reward_weight * style_rewards + \
                            self._enc_reward_weight * enc_reward
 
         '''Compute Generalized Advantage Estimator (GAE)'''
@@ -392,7 +394,7 @@ class ASEAgent(AMPAgent):
 
         # record data
         self.track_data("Info / Combined rewards", combined_rewards.mean().cpu())
-        self.track_data("Info / Style rewards", style_reward.mean().cpu())
+        self.track_data("Info / Style rewards", style_rewards.mean().cpu())
         self.track_data("Info / Encoder rewards", enc_reward.mean().cpu())
         self.track_data("Info / Task rewards", rewards.mean().cpu())
 

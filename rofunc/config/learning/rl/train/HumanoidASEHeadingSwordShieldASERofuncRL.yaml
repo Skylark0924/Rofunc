@@ -30,8 +30,6 @@ Agent:
 
   lr_a: 5e-5                       # Learning rate for actor.
   lr_c: 5e-5                        # Learning rate for critic.
-  lr_d: 5e-5                        # Learning rate for discriminator.
-  lr_e: 5e-5                        # Learning rate for encoder.
 #  lr_scheduler:                    # Learning rate scheduler type.
 #  lr_scheduler_kwargs:             # Learning rate scheduler kwargs.
   adam_eps: 1e-5                    # Adam epsilon.
@@ -44,24 +42,17 @@ Agent:
   value_clip: 0.2                  # clipping coefficient for computing the value loss (if clip_predicted_values is True)
   clip_predicted_values: false     # clip predicted values during value loss computation
 
-  least_square_discriminator: false
-  discriminator_loss_scale: 5.0
-  discriminator_batch_size: 4096
-  discriminator_logit_regularization_scale: 0.01
-  discriminator_gradient_penalty_scale: 5
-  discriminator_weight_decay_scale: 0.0001
+  use_gae: True                     # If true, use generalized advantage estimation.
 
   ase_latent_dim: 64
-  enc_reward_scale: 1
-  enc_weight_decay_scale: 0
-  enc_gradient_penalty_scale: 0
 
-  task_reward_weight: 0.0
-  style_reward_weight: 1.0
-  enc_reward_weight: 0.5
-  discriminator_reward_scale: 2
+  task_reward_weight: 0.9
+  style_reward_weight: 0.1
 
   kl_threshold: 0                  # Initial coefficient for KL divergence.
+
+  llc_ckpt_path:
+  llc_steps_per_high_action: 5
 
 #  state_preprocessor:            # State preprocessor type.
 #  state_preprocessor_kwargs:     # State preprocessor kwargs.
@@ -99,21 +90,4 @@ Model:
     lstm_use_prev_reward: false
     max_seq_len: 20
 
-  discriminator:
-    mlp_hidden_dims: [ 1024, 512 ]
-    mlp_activation: relu
-    use_lstm: false
-    lstm_cell_size: 256
-    lstm_use_prev_action: false
-    lstm_use_prev_reward: false
-    max_seq_len: 20
-
-  encoder:
-    mlp_hidden_dims: [ 1024, 512 ]
-    mlp_activation: relu
-    use_lstm: false
-    lstm_cell_size: 256
-    lstm_use_prev_action: false
-    lstm_use_prev_reward: false
-    max_seq_len: 20
 

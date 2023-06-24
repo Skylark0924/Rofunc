@@ -58,13 +58,14 @@ class RunningStandardScaler(nn.Module):
 
         self.epsilon = epsilon
         self.clip_threshold = clip_threshold
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
+        self.device = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
 
         size = self._get_space_size(size)
 
-        self.register_buffer("running_mean", torch.zeros(size, dtype = torch.float64, device=self.device))
-        self.register_buffer("running_variance", torch.ones(size, dtype = torch.float64, device=self.device))
-        self.register_buffer("current_count", torch.ones((), dtype = torch.float64, device=self.device))
+        self.register_buffer("running_mean", torch.zeros(size, dtype=torch.float64, device=self.device))
+        self.register_buffer("running_variance", torch.ones(size, dtype=torch.float64, device=self.device))
+        self.register_buffer("current_count", torch.ones((), dtype=torch.float64, device=self.device))
 
     def _get_space_size(self, space: Union[int, Tuple[int], gym.Space, gymnasium.Space]) -> int:
         """Get the size (number of elements) of a space
@@ -112,7 +113,7 @@ class RunningStandardScaler(nn.Module):
         delta = input_mean - self.running_mean
         total_count = self.current_count + input_count
         M2 = (self.running_variance * self.current_count) + (input_var * input_count) \
-            + delta ** 2 * self.current_count * input_count / total_count
+             + delta ** 2 * self.current_count * input_count / total_count
 
         # update internal variables
         self.running_mean = self.running_mean + delta * input_count / total_count
@@ -131,7 +132,7 @@ class RunningStandardScaler(nn.Module):
         """
         if train:
             if x.dim() == 3:
-                self._parallel_variance(torch.mean(x, dim=(0,1)), torch.var(x, dim=(0,1)), x.shape[0] * x.shape[1])
+                self._parallel_variance(torch.mean(x, dim=(0, 1)), torch.var(x, dim=(0, 1)), x.shape[0] * x.shape[1])
             else:
                 self._parallel_variance(torch.mean(x, dim=0), torch.var(x, dim=0), x.shape[0])
 
@@ -141,10 +142,12 @@ class RunningStandardScaler(nn.Module):
                 * torch.clamp(x, min=-self.clip_threshold, max=self.clip_threshold) + self.running_mean.float()
         # standardization by centering and scaling
         else:
-            return torch.clamp((x - self.running_mean.float()) / (torch.sqrt(self.running_variance.float()) + self.epsilon),
-                                min=-self.clip_threshold, max=self.clip_threshold)
+            return torch.clamp(
+                (x - self.running_mean.float()) / (torch.sqrt(self.running_variance.float()) + self.epsilon),
+                min=-self.clip_threshold, max=self.clip_threshold)
 
-    def forward(self, x: torch.Tensor, train: bool = False, inverse: bool = False, no_grad: bool = True) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, train: bool = False, inverse: bool = False,
+                no_grad: bool = True) -> torch.Tensor:
         """Forward pass of the standardizer
 
         Example::
@@ -179,3 +182,7 @@ class RunningStandardScaler(nn.Module):
                 return self._compute(x, train, inverse)
         else:
             return self._compute(x, train, inverse)
+
+
+def empty_preprocessor(_input, *args, **kwargs):
+    return _input

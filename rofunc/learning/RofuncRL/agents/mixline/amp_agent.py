@@ -26,7 +26,7 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
-from rofunc.learning.RofuncRL.processors.normalizers import empty_preprocessor
+from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.RofuncRL.utils.memory import Memory
@@ -229,14 +229,14 @@ class AMPAgent(BaseAgent):
         with torch.no_grad():
             amp_logits = self.discriminator(self._amp_state_preprocessor(amp_states))
             if self._least_square_discriminator:
-                style_reward = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
+                style_rewards = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
                                              torch.tensor(0.0001, device=self.device))
             else:
-                style_reward = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
+                style_rewards = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
                                                         torch.tensor(0.0001, device=self.device)))
-            style_reward *= self._discriminator_reward_scale
+            style_rewards *= self._discriminator_reward_scale
 
-        combined_rewards = self._task_reward_weight * rewards + self._style_reward_weight * style_reward
+        combined_rewards = self._task_reward_weight * rewards + self._style_reward_weight * style_rewards
 
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
@@ -403,7 +403,7 @@ class AMPAgent(BaseAgent):
 
         # record data
         self.track_data("Info / Combined rewards", combined_rewards.mean().cpu())
-        self.track_data("Info / Style rewards", style_reward.mean().cpu())
+        self.track_data("Info / Style rewards", style_rewards.mean().cpu())
         self.track_data("Info / Task rewards", rewards.mean().cpu())
 
         self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._mini_batch_size))

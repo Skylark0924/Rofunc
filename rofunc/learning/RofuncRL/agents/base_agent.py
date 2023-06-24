@@ -25,7 +25,7 @@ import torch
 from omegaconf import DictConfig
 
 import rofunc as rf
-from rofunc.learning.RofuncRL.processors.normalizers import empty_preprocessor
+from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 

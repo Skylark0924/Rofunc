@@ -11,6 +11,7 @@ import numpy as np
 
 import torch
 from torch.utils.data.sampler import BatchSampler
+from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 
 
 class Memory:
@@ -152,7 +153,7 @@ class Memory:
         """
         return self.tensors[name] if keepdim else self.tensors_view[name]
 
-    def set_tensor_by_name(self, name: str, tensor: torch.Tensor) -> None:
+    def set_tensor_by_name(self, name: str, tensor: Union[torch.Tensor, RunningStandardScaler]) -> None:
         """Set a tensor by its name
 
         :param name: Name of the tensor to set
