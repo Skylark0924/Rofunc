@@ -77,7 +77,3 @@ class RewardScaling:
 
     def reset(self):  # When an episode is done,we should reset 'self.R'
         self.R = torch.zeros(self.shape).to(self.device)
-
-
-def empty_preprocessor(_input):
-    return _input

@@ -14,6 +14,8 @@
  limitations under the License.
  """
 
+import gym
+import gymnasium
 import torch
 import torch.nn as nn
 
@@ -66,3 +68,17 @@ def init_with_orthogonal(layer, gain=1.0, bias_const=1e-6):
     """
     torch.nn.init.orthogonal_(layer.weight, gain=gain)
     torch.nn.init.constant_(layer.bias, bias_const)
+
+
+def get_space_dim(space):
+    if isinstance(space, int):
+        dim = space
+    elif isinstance(space, tuple) or isinstance(space, list):
+        dim = 0
+        for i in range(len(space)):
+            dim += get_space_dim(space[i])
+    elif isinstance(space, gym.Space) or isinstance(space, gymnasium.Space):
+        dim = space.shape[0]
+    else:
+        raise NotImplementedError
+    return dim
