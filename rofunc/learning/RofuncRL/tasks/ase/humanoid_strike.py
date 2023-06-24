@@ -25,59 +25,54 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import os
 
-import torch
-
-from isaacgym import gymapi, gymtorch
+from isaacgym import gymapi
+from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
-import humanoid_amp
-import humanoid_amp_task
-from utils import torch_utils
+from rofunc.utils.file.path import get_rofunc_path
+from .humanoid_amp_task import HumanoidAMPTask
+from ..utils import torch_jit_utils as torch_utils
 
-class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
-    def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
-        super().__init__(cfg=cfg,
-                         sim_params=sim_params,
-                         physics_engine=physics_engine,
-                         device_type=device_type,
-                         device_id=device_id,
-                         headless=headless)
-        
+
+class HumanoidStrikeTask(HumanoidAMPTask):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
+        super().__init__(cfg=cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+        self.cfg = cfg
         self._tar_dist_min = 0.5
         self._tar_dist_max = 10.0
         self._near_dist = 1.5
         self._near_prob = 0.5
-        
+
         self._prev_root_pos = torch.zeros([self.num_envs, 3], device=self.device, dtype=torch.float)
-        
+
         strike_body_names = cfg["env"]["strikeBodyNames"]
-        self._strike_body_ids = self._build_strike_body_ids_tensor(self.envs[0], self.humanoid_handles[0], strike_body_names)
+        self._strike_body_ids = self._build_strike_body_ids_tensor(self.envs[0], self.humanoid_handles[0],
+                                                                   strike_body_names)
         self._build_target_tensors()
 
-        return
-    
     def get_task_obs_size(self):
         obs_size = 0
-        if (self._enable_task_obs):
+        if self._enable_task_obs:
             obs_size = 15
         return obs_size
-    
+
     def _create_envs(self, num_envs, spacing, num_per_row):
         self._target_handles = []
         self._load_target_asset()
 
         super()._create_envs(num_envs, spacing, num_per_row)
-        return
 
     def _build_env(self, env_id, env_ptr, humanoid_asset):
         super()._build_env(env_id, env_ptr, humanoid_asset)
         self._build_target(env_id, env_ptr)
-        return
 
     def _load_target_asset(self):
-        asset_root = "ase/data/assets/mjcf/"
-        asset_file = "strike_target.urdf"
+        asset_root = os.path.join(get_rofunc_path(), "simulator/assets")
+        asset_file = "mjcf/strike_target.urdf"
 
         asset_options = gymapi.AssetOptions()
         asset_options.angular_damping = 0.01
@@ -87,7 +82,6 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
 
         self._target_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
-        return
 
     def _build_target(self, env_id, env_ptr):
         col_group = env_id
@@ -96,11 +90,10 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
 
         default_pose = gymapi.Transform()
         default_pose.p.x = 1.0
-        
-        target_handle = self.gym.create_actor(env_ptr, self._target_asset, default_pose, "target", col_group, col_filter, segmentation_id)
-        self._target_handles.append(target_handle)
 
-        return
+        target_handle = self.gym.create_actor(env_ptr, self._target_asset, default_pose, "target", col_group,
+                                              col_filter, segmentation_id)
+        self._target_handles.append(target_handle)
 
     def _build_strike_body_ids_tensor(self, env_ptr, actor_handle, body_names):
         env_ptr = self.envs[0]
@@ -109,7 +102,7 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
 
         for body_name in body_names:
             body_id = self.gym.find_actor_rigid_body_handle(env_ptr, actor_handle, body_name)
-            assert(body_id != -1)
+            assert (body_id != -1)
             body_ids.append(body_id)
 
         body_ids = to_torch(body_ids, device=self.device, dtype=torch.long)
@@ -118,34 +111,34 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
     def _build_target_tensors(self):
         num_actors = self.get_num_actors_per_env()
         self._target_states = self._root_states.view(self.num_envs, num_actors, self._root_states.shape[-1])[..., 1, :]
-        
+
         self._tar_actor_ids = to_torch(num_actors * np.arange(self.num_envs), device=self.device, dtype=torch.int32) + 1
-        
+
         bodies_per_env = self._rigid_body_state.shape[0] // self.num_envs
         contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
         contact_force_tensor = gymtorch.wrap_tensor(contact_force_tensor)
         self._tar_contact_forces = contact_force_tensor.view(self.num_envs, bodies_per_env, 3)[..., self.num_bodies, :]
 
-        return
-
     def _reset_actors(self, env_ids):
         super()._reset_actors(env_ids)
         self._reset_target(env_ids)
-        return
 
     def _reset_target(self, env_ids):
         n = len(env_ids)
 
-        init_near = torch.rand([n], dtype=self._target_states.dtype, device=self._target_states.device) < self._near_prob
-        dist_max = self._tar_dist_max * torch.ones([n], dtype=self._target_states.dtype, device=self._target_states.device)
+        init_near = torch.rand([n], dtype=self._target_states.dtype,
+                               device=self._target_states.device) < self._near_prob
+        dist_max = self._tar_dist_max * torch.ones([n], dtype=self._target_states.dtype,
+                                                   device=self._target_states.device)
         dist_max[init_near] = self._near_dist
-        rand_dist = (dist_max - self._tar_dist_min) * torch.rand([n], dtype=self._target_states.dtype, device=self._target_states.device) + self._tar_dist_min
-        
+        rand_dist = (dist_max - self._tar_dist_min) * torch.rand([n], dtype=self._target_states.dtype,
+                                                                 device=self._target_states.device) + self._tar_dist_min
+
         rand_theta = 2 * np.pi * torch.rand([n], dtype=self._target_states.dtype, device=self._target_states.device)
         self._target_states[env_ids, 0] = rand_dist * torch.cos(rand_theta) + self._humanoid_root_states[env_ids, 0]
         self._target_states[env_ids, 1] = rand_dist * torch.sin(rand_theta) + self._humanoid_root_states[env_ids, 1]
         self._target_states[env_ids, 2] = 0.9
-        
+
         rand_rot_theta = 2 * np.pi * torch.rand([n], dtype=self._target_states.dtype, device=self._target_states.device)
         axis = torch.tensor([0.0, 0.0, 1.0], dtype=self._target_states.dtype, device=self._target_states.device)
         rand_rot = quat_from_angle_axis(rand_rot_theta, axis)
@@ -153,7 +146,6 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
         self._target_states[env_ids, 3:7] = rand_rot
         self._target_states[env_ids, 7:10] = 0.0
         self._target_states[env_ids, 10:13] = 0.0
-        return
 
     def _reset_env_tensors(self, env_ids):
         super()._reset_env_tensors(env_ids)
@@ -161,13 +153,11 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
         env_ids_int32 = self._tar_actor_ids[env_ids]
         self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
                                                      gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-        return
 
     def pre_physics_step(self, actions):
         super().pre_physics_step(actions)
         self._prev_root_pos[:] = self._humanoid_root_states[..., 0:3]
-        return
-    
+
     def _compute_task_obs(self, env_ids=None):
         if (env_ids is None):
             root_states = self._humanoid_root_states
@@ -175,7 +165,7 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
         else:
             root_states = self._humanoid_root_states[env_ids]
             tar_states = self._target_states[env_ids]
-        
+
         obs = compute_strike_observations(root_states, tar_states)
         return obs
 
@@ -185,18 +175,19 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
         char_root_state = self._humanoid_root_states
         strike_body_vel = self._rigid_body_vel[..., self._strike_body_ids[0], :]
 
-        self.rew_buf[:] = compute_strike_reward(tar_pos, tar_rot, char_root_state, 
+        self.rew_buf[:] = compute_strike_reward(tar_pos, tar_rot, char_root_state,
                                                 self._prev_root_pos, strike_body_vel,
                                                 self.dt, self._near_dist)
-        return
 
     def _compute_reset(self):
         self.reset_buf[:], self._terminate_buf[:] = compute_humanoid_reset(self.reset_buf, self.progress_buf,
-                                                           self._contact_forces, self._contact_body_ids,
-                                                           self._rigid_body_pos, self._tar_contact_forces,
-                                                           self._strike_body_ids, self.max_episode_length,
-                                                           self._enable_early_termination, self._termination_heights)
-        return
+                                                                           self._contact_forces, self._contact_body_ids,
+                                                                           self._rigid_body_pos,
+                                                                           self._tar_contact_forces,
+                                                                           self._strike_body_ids,
+                                                                           self.max_episode_length,
+                                                                           self._enable_early_termination,
+                                                                           self._termination_heights)
 
     def _draw_task(self):
         cols = np.array([[0.0, 1.0, 0.0]], dtype=np.float32)
@@ -212,7 +203,6 @@ class HumanoidStrike(humanoid_amp_task.HumanoidAMPTask):
             curr_verts = curr_verts.reshape([1, 6])
             self.gym.add_lines(self.viewer, env_ptr, curr_verts.shape[0], curr_verts, cols)
 
-        return
 
 #####################################################################
 ###=========================jit functions=========================###
@@ -230,7 +220,7 @@ def compute_strike_observations(root_states, tar_states):
     tar_ang_vel = tar_states[:, 10:13]
 
     heading_rot = torch_utils.calc_heading_quat_inv(root_rot)
-    
+
     local_tar_pos = tar_pos - root_pos
     local_tar_pos[..., -1] = tar_pos[..., -1]
     local_tar_pos = quat_rotate(heading_rot, local_tar_pos)
@@ -242,6 +232,7 @@ def compute_strike_observations(root_states, tar_states):
 
     obs = torch.cat([local_tar_pos, local_tar_rot_obs, local_tar_vel, local_tar_ang_vel], dim=-1)
     return obs
+
 
 @torch.jit.script
 def compute_strike_reward(tar_pos, tar_rot, root_state, prev_root_pos, strike_body_vel, dt, near_dist):
@@ -270,14 +261,13 @@ def compute_strike_reward(tar_pos, tar_rot, root_state, prev_root_pos, strike_bo
     speed_mask = tar_dir_speed <= 0
     vel_reward[speed_mask] = 0
 
-
     reward = tar_rot_w * tar_rot_r + vel_reward_w * vel_reward
-    
+
     succ = tar_rot_err < 0.2
     reward = torch.where(succ, torch.ones_like(reward), reward)
 
     return reward
-    
+
 
 @torch.jit.script
 def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, contact_body_ids, rigid_body_pos,
@@ -285,7 +275,7 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, contact_body_id
                            enable_early_termination, termination_heights):
     # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, bool, Tensor) -> Tuple[Tensor, Tensor]
     contact_force_threshold = 1.0
-    
+
     terminated = torch.zeros_like(reset_buf)
 
     if (enable_early_termination):
@@ -302,22 +292,22 @@ def compute_humanoid_reset(reset_buf, progress_buf, contact_buf, contact_body_id
         has_fallen = torch.logical_and(fall_contact, fall_height)
 
         tar_has_contact = torch.any(torch.abs(tar_contact_forces[..., 0:2]) > contact_force_threshold, dim=-1)
-        #strike_body_force = contact_buf[:, strike_body_id, :]
-        #strike_body_has_contact = torch.any(torch.abs(strike_body_force) > contact_force_threshold, dim=-1)
+        # strike_body_force = contact_buf[:, strike_body_id, :]
+        # strike_body_has_contact = torch.any(torch.abs(strike_body_force) > contact_force_threshold, dim=-1)
         nonstrike_body_force = masked_contact_buf
         nonstrike_body_force[:, strike_body_ids, :] = 0
         nonstrike_body_has_contact = torch.any(torch.abs(nonstrike_body_force) > contact_force_threshold, dim=-1)
         nonstrike_body_has_contact = torch.any(nonstrike_body_has_contact, dim=-1)
 
         tar_fail = torch.logical_and(tar_has_contact, nonstrike_body_has_contact)
-        
+
         has_failed = torch.logical_or(has_fallen, tar_fail)
 
         # first timestep can sometimes still have nonzero contact forces
         # so only check after first couple of steps
         has_failed *= (progress_buf > 1)
         terminated = torch.where(has_failed, torch.ones_like(reset_buf), terminated)
-    
+
     reset = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(reset_buf), terminated)
 
     return reset, terminated
