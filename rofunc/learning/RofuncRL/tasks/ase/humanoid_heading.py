@@ -26,14 +26,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import os
+
 from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
+from rofunc.utils.file.path import get_rofunc_path
 from .humanoid_amp_task import HumanoidAMPTask
 from ..utils import torch_jit_utils as torch_utils
-
-from rofunc.utils.file.path import get_rofunc_path
 
 TAR_ACTOR_ID = 1
 TAR_FACING_ACTOR_ID = 2
