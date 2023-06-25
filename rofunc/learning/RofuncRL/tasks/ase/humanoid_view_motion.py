@@ -30,23 +30,21 @@ import torch
 
 from isaacgym import gymtorch
 
-from env.tasks.humanoid_amp import HumanoidAMP
+from .humanoid_amp import HumanoidAMP
 
 
 class HumanoidViewMotion(HumanoidAMP):
-    def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
+        self.cfg = cfg
         control_freq_inv = cfg["env"]["controlFrequencyInv"]
         self._motion_dt = control_freq_inv * sim_params.dt
 
         cfg["env"]["controlFrequencyInv"] = 1
         cfg["env"]["pdControl"] = False
 
-        super().__init__(cfg=cfg,
-                         sim_params=sim_params,
-                         physics_engine=physics_engine,
-                         device_type=device_type,
-                         device_id=device_id,
-                         headless=headless)
+        super().__init__(cfg=cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
         
         num_motions = self._motion_lib.num_motions()
         self._motion_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.long)

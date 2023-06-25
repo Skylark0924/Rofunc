@@ -30,7 +30,6 @@ import os
 from enum import Enum
 
 from gym import spaces
-from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
 from .humanoid import Humanoid, dof_to_obs
@@ -67,7 +66,8 @@ class HumanoidAMP(Humanoid):
 
         self._load_motion(motion_file_path)
 
-        self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf, np.ones(self.get_num_amp_obs()) * np.Inf)
+        self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf,
+                                         np.ones(self.get_num_amp_obs()) * np.Inf)
         self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
                                         device=self.device, dtype=torch.float)
         self._curr_amp_obs_buf = self._amp_obs_buf[:, 0]
