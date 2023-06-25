@@ -127,7 +127,8 @@ class ASEHRLAgent(BaseAgent):
         self._task_reward_weight = self.cfg.Agent.task_reward_weight
         self._style_reward_weight = self.cfg.Agent.style_reward_weight
         self._kl_threshold = self.cfg.Agent.kl_threshold
-        self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
+        self._rewards_shaper = None
+        # self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
         self._state_preprocessor = RunningStandardScaler
         self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
                                                                         {"size": observation_space, "device": device})

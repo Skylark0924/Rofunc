@@ -52,6 +52,9 @@ Agent:
   discriminator_weight_decay_scale: 0.0001
 
   ase_latent_dim: 64
+  ase_latent_steps_min: 1
+  ase_latent_steps_max: 150
+
   enc_reward_scale: 1
   enc_weight_decay_scale: 0
   enc_gradient_penalty_scale: 0

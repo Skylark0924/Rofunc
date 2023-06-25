@@ -13,6 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  """
+import torch
 
 from rofunc.learning.RofuncRL.agents.mixline.ase_agent import ASEAgent
 from rofunc.learning.RofuncRL.agents.mixline.ase_hrl_agent import ASEHRLAgent
@@ -46,9 +47,42 @@ class ASETrainer(BaseTrainer):
                                       num_samples))
         self.setup_wandb()
 
+        '''Misc variables'''
+        self._latent_reset_steps = torch.zeros(self.env.num_envs, dtype=torch.int32).to(self.device)
+        self._latent_steps_min = self.cfg.Agent.ase_latent_steps_min
+        self._latent_steps_max = self.cfg.Agent.ase_latent_steps_max
+
+    def _reset_latents(self, env_ids):
+        # Equ. 11, provide the model with a latent space
+        z_bar = torch.normal(torch.zeros([len(env_ids), self.agent._ase_latent_dim]))
+        self.agent._ase_latents[env_ids] = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
+
+    def _reset_latent_step_count(self, env_ids):
+        self._latent_reset_steps[env_ids] = torch.randint_like(self._latent_reset_steps[env_ids],
+                                                               low=self._latent_steps_min,
+                                                               high=self._latent_steps_max)
+
+    def _update_latents(self):
+        new_latent_envs = self._latent_reset_steps <= self.env.progress_buf
+
+        need_update = torch.any(new_latent_envs)
+        if need_update:
+            new_latent_env_ids = new_latent_envs.nonzero(as_tuple=False).flatten()
+            self._reset_latents(new_latent_env_ids)
+            self._latent_reset_steps[new_latent_env_ids] += torch.randint_like(
+                self._latent_reset_steps[new_latent_env_ids],
+                low=self._latent_steps_min,
+                high=self._latent_steps_max)
+
     def pre_interaction(self):
-        if self.collect_observation is not None:
-            self.agent._current_states = self.collect_observation()
+        if self.collect_observation is not None:  # Reset failed envs
+            obs_dict, done_env_ids = self.env.reset_done()
+            self.agent._current_states = obs_dict["obs"]
+            if len(done_env_ids) > 0:
+                self._reset_latents(done_env_ids)
+                self._reset_latent_step_count(done_env_ids)
+
+        self._update_latents()
 
     def post_interaction(self):
         self._rollout += 1
