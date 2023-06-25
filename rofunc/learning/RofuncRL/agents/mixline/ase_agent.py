@@ -63,8 +63,6 @@ class ASEAgent(AMPAgent):
         """ASE specific parameters"""
         self._lr_e = cfg.Agent.lr_e
         self._ase_latent_dim = cfg.Agent.ase_latent_dim
-        # self._ase_latent_steps_min = self.cfg.Agent.ase_latent_steps_min
-        # self._ase_latent_steps_max = self.cfg.Agent.ase_latent_steps_max
         # self._amp_diversity_bonus = self.cfg.Agent.amp_diversity_bonus
         # self._amp_diversity_tar = self.cfg.Agent.amp_diversity_tar
         # self._enc_coef = self.cfg.Agent.enc_coef
@@ -92,6 +90,9 @@ class ASEAgent(AMPAgent):
         self.memory.create_tensor(name="ase_latents", size=self._ase_latent_dim, dtype=torch.float32)
         self._tensors_names.append("ase_latents")
 
+        self._ase_latents = torch.zeros((self.memory.num_envs, self._ase_latent_dim), dtype=torch.float32,
+                                        device=self.device)
+
     def _set_up(self):
         super()._set_up()
         self.optimizer_enc = torch.optim.Adam(self.encoder.parameters(), lr=self._lr_e, eps=self._adam_eps)
@@ -99,17 +100,11 @@ class ASEAgent(AMPAgent):
             self.scheduler_enc = self._lr_scheduler(self.optimizer_enc, **self._lr_scheduler_kwargs)
         self.checkpoint_modules["optimizer_enc"] = self.optimizer_enc
 
-    def _update_latents(self, num_envs: int):
-        # Equ. 11, provide the model with a latent space
-        z_bar = torch.normal(torch.zeros([num_envs, self._ase_latent_dim]))
-        self._ase_latents = z = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
-
     def act(self, states: torch.Tensor, deterministic: bool = False, ase_latents: torch.Tensor = None):
         if self._current_states is not None:
             states = self._current_states
 
         if ase_latents is None:
-            self._update_latents(states.shape[0])
             ase_latents = self._ase_latents
 
         if not deterministic:
@@ -171,10 +166,10 @@ class ASEAgent(AMPAgent):
             amp_logits = self.discriminator(self._amp_state_preprocessor(amp_states))
             if self._least_square_discriminator:
                 style_rewards = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
-                                             torch.tensor(0.0001, device=self.device))
+                                              torch.tensor(0.0001, device=self.device))
             else:
                 style_rewards = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
-                                                        torch.tensor(0.0001, device=self.device)))
+                                                         torch.tensor(0.0001, device=self.device)))
             style_rewards *= self._discriminator_reward_scale
 
             # Compute encoder reward

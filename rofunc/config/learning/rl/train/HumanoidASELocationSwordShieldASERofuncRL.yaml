@@ -45,6 +45,8 @@ Agent:
   use_gae: True                     # If true, use generalized advantage estimation.
 
   ase_latent_dim: 64
+  ase_latent_steps_min: 1
+  ase_latent_steps_max: 150
 
   task_reward_weight: 0.9
   style_reward_weight: 0.1
