@@ -196,8 +196,8 @@ class BaseTrainer:
             self.t_bar.set_postfix_str(f"Rew/Best: {reward:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}")
 
         # Save checkpoints
-        if not self._step % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
-            self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step}.pth"))
+        if not (self._step + 1) % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
+            self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))
 
     def write_tensorboard(self):
         for k, v in self.agent.tracking_data.items():

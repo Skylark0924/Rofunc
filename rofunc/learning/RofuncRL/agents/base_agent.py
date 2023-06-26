@@ -118,7 +118,7 @@ class BaseAgent:
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
         """
-        Record the transition.
+        Record the transition. (Only rewards, truncated and terminated are used in this base class)
         """
         if self.cumulative_rewards is None:
             self.cumulative_rewards = torch.zeros_like(rewards, dtype=torch.float32)

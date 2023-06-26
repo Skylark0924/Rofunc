@@ -28,7 +28,8 @@ class ASETrainer(BaseTrainer):
         self.motion_dataset = RandomMemory(memory_size=200000, device=device)
         self.replay_buffer = RandomMemory(memory_size=1000000, device=device)
         self.collect_observation = lambda: self.env.reset_done()[0]["obs"]
-        if hrl:
+        self.hrl = hrl
+        if self.hrl:
             self.agent = ASEHRLAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
                                      device, self.exp_dir, self.rofunc_logger,
                                      amp_observation_space=self.env.amp_observation_space,
@@ -78,17 +79,21 @@ class ASETrainer(BaseTrainer):
         if self.collect_observation is not None:  # Reset failed envs
             obs_dict, done_env_ids = self.env.reset_done()
             self.agent._current_states = obs_dict["obs"]
-            if len(done_env_ids) > 0:
-                self._reset_latents(done_env_ids)
-                self._reset_latent_step_count(done_env_ids)
+            if not self.hrl:
+                if len(done_env_ids) > 0:
+                    self._reset_latents(done_env_ids)
+                    self._reset_latent_step_count(done_env_ids)
 
-        self._update_latents()
+        if not self.hrl:
+            self._update_latents()
 
     def post_interaction(self):
-        self._rollout += 1
+        if self.agent._llc_step == self.cfg.Agent.llc_steps_per_high_action:
+            self._rollout += 1
+            self.agent._llc_step = 0
 
         # Update agent
-        if not self._rollout % self.rollouts and self._step >= self.start_learning_steps:
+        if not self._rollout % self.rollouts and self._step >= self.start_learning_steps and self._rollout > 0:
             self.agent.update_net()
             self._update_times += 1
             self.rofunc_logger.info(f'Update {self._update_times} times.', local_verbose=False)
