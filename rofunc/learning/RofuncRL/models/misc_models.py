@@ -18,29 +18,31 @@ import torch.nn as nn
 from omegaconf import DictConfig
 from torch import Tensor
 
-from rofunc.config.utils import omegaconf_to_dict
-from .utils import build_mlp, init_layers, activation_func
+from .base_models import BaseMLP
+from .utils import init_layers
 
 
-class BaseMLP(nn.Module):
+class ASEDiscEnc(BaseMLP):
     def __init__(self, cfg: DictConfig,
                  input_dim: int,
-                 output_dim: int,
+                 enc_output_dim: int,
+                 disc_output_dim: int,
                  cfg_name: str):
-        super().__init__()
-
-        self.cfg = cfg
-        self.cfg_dict = omegaconf_to_dict(self.cfg)
-        self.mlp_hidden_dims = self.cfg_dict[cfg_name]['mlp_hidden_dims']
-        self.mlp_activation = activation_func(self.cfg_dict[cfg_name]['mlp_activation'])
-
-        self.backbone_net = build_mlp(dims=[input_dim, *self.mlp_hidden_dims], hidden_activation=self.mlp_activation)
-        self.output_net = nn.Linear(self.mlp_hidden_dims[-1], output_dim)
+        super().__init__(cfg, input_dim, disc_output_dim, cfg_name)
+        self.encoder_layer = nn.Linear(self.mlp_hidden_dims[-1], enc_output_dim)
+        self.disc_layer = self.output_net
         if self.cfg.use_init:
-            init_layers(self.backbone_net, gain=1.0)
-            init_layers(self.output_net, gain=1.0)
+            init_layers(self.encoder_layer, gain=1.0)
 
     def forward(self, x: Tensor) -> Tensor:
+        return super().forward(x)  # Same as self.get_disc(x)
+
+    def get_enc(self, x: Tensor) -> Tensor:
         x = self.backbone_net(x)
-        x = self.output_net(x)
+        x = self.encoder_layer(x)
+        return x
+
+    def get_disc(self, x: Tensor) -> Tensor:
+        x = self.backbone_net(x)
+        x = self.disc_layer(x)
         return x

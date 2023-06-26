@@ -26,6 +26,7 @@ from omegaconf import DictConfig
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.agents.mixline.amp_agent import AMPAgent
+from rofunc.learning.RofuncRL.models.misc_models import ASEDiscEnc
 from rofunc.learning.RofuncRL.models.base_models import BaseMLP
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
@@ -72,6 +73,13 @@ class ASEAgent(AMPAgent):
         self._enc_reward_weight = cfg.Agent.enc_reward_weight
 
         '''Define ASE specific models except for AMP'''
+        # self.discriminator = ASEDiscEnc(cfg.Model,
+        #                                 input_dim=amp_observation_space.shape[0],
+        #                                 enc_output_dim=self._ase_latent_dim,
+        #                                 disc_output_dim=1,
+        #                                 cfg_name='encoder').to(device)
+        # self.encoder = self.discriminator
+
         self.encoder = BaseMLP(cfg.Model,
                                input_dim=amp_observation_space.shape[0],
                                output_dim=self._ase_latent_dim,
@@ -95,10 +103,11 @@ class ASEAgent(AMPAgent):
 
     def _set_up(self):
         super()._set_up()
-        self.optimizer_enc = torch.optim.Adam(self.encoder.parameters(), lr=self._lr_e, eps=self._adam_eps)
-        if self._lr_scheduler is not None:
-            self.scheduler_enc = self._lr_scheduler(self.optimizer_enc, **self._lr_scheduler_kwargs)
-        self.checkpoint_modules["optimizer_enc"] = self.optimizer_enc
+        if self.encoder is not self.discriminator:
+            self.optimizer_enc = torch.optim.Adam(self.encoder.parameters(), lr=self._lr_e, eps=self._adam_eps)
+            if self._lr_scheduler is not None:
+                self.scheduler_enc = self._lr_scheduler(self.optimizer_enc, **self._lr_scheduler_kwargs)
+            self.checkpoint_modules["optimizer_enc"] = self.optimizer_enc
 
     def act(self, states: torch.Tensor, deterministic: bool = False, ase_latents: torch.Tensor = None):
         if self._current_states is not None:
@@ -173,7 +182,10 @@ class ASEAgent(AMPAgent):
             style_rewards *= self._discriminator_reward_scale
 
             # Compute encoder reward
-            enc_output = self.encoder(self._amp_state_preprocessor(amp_states))
+            if self.encoder is self.discriminator:
+                enc_output = self.encoder.get_enc(self._amp_state_preprocessor(amp_states))
+            else:
+                enc_output = self.encoder(self._amp_state_preprocessor(amp_states))
             enc_output = torch.nn.functional.normalize(enc_output, dim=-1)
             enc_reward = torch.clamp_min(torch.sum(enc_output * ase_latents, dim=-1, keepdim=True), 0.0)
             enc_reward *= self._enc_reward_scale
@@ -311,7 +323,10 @@ class ASEAgent(AMPAgent):
                 discriminator_loss *= self._discriminator_loss_scale
 
                 # encoder loss
-                enc_output = self.encoder(self._amp_state_preprocessor(sampled_amp_states))
+                if self.encoder is self.discriminator:
+                    enc_output = self.encoder.get_enc(self._amp_state_preprocessor(sampled_amp_states))
+                else:
+                    enc_output = self.encoder(self._amp_state_preprocessor(sampled_amp_states_batch))
                 enc_output = torch.nn.functional.normalize(enc_output, dim=-1)
                 enc_err = -torch.sum(enc_output * sampled_ase_latents, dim=-1, keepdim=True)
                 enc_loss = torch.mean(enc_err)
@@ -357,17 +372,21 @@ class ASEAgent(AMPAgent):
 
                 # Update discriminator network
                 self.optimizer_disc.zero_grad()
-                discriminator_loss.backward()
+                if self.encoder is self.discriminator:
+                    (discriminator_loss + enc_loss).backward()
+                else:
+                    discriminator_loss.backward()
                 if self._grad_norm_clip > 0:
                     nn.utils.clip_grad_norm_(self.discriminator.parameters(), self._grad_norm_clip)
                 self.optimizer_disc.step()
 
                 # Update encoder network
-                self.optimizer_enc.zero_grad()
-                enc_loss.backward()
-                if self._grad_norm_clip > 0:
-                    nn.utils.clip_grad_norm_(self.encoder.parameters(), self._grad_norm_clip)
-                self.optimizer_enc.step()
+                if self.encoder is not self.discriminator:
+                    self.optimizer_enc.zero_grad()
+                    enc_loss.backward()
+                    if self._grad_norm_clip > 0:
+                        nn.utils.clip_grad_norm_(self.encoder.parameters(), self._grad_norm_clip)
+                    self.optimizer_enc.step()
 
                 # update cumulative losses
                 cumulative_policy_loss += policy_loss.item()
@@ -382,7 +401,8 @@ class ASEAgent(AMPAgent):
                 self.scheduler_policy.step()
                 self.scheduler_value.step()
                 self.scheduler_disc.step()
-                self.scheduler_enc.step()
+                if self.encoder is not self.discriminator:
+                    self.scheduler_enc.step()
 
         # update AMP replay buffer
         self.replay_buffer.add_samples(states=amp_states.view(-1, amp_states.shape[-1]))
@@ -407,4 +427,5 @@ class ASEAgent(AMPAgent):
             self.track_data("Learning / Learning rate (policy)", self.scheduler_policy.get_last_lr()[0])
         self.track_data("Learning / Learning rate (value)", self.scheduler_value.get_last_lr()[0])
         self.track_data("Learning / Learning rate (discriminator)", self.scheduler_disc.get_last_lr()[0])
-        self.track_data("Learning / Learning rate (encoder)", self.scheduler_enc.get_last_lr()[0])
+        if self.encoder is not self.discriminator:
+            self.track_data("Learning / Learning rate (encoder)", self.scheduler_enc.get_last_lr()[0])

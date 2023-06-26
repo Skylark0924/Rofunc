@@ -16,6 +16,7 @@
 
 from typing import Callable, Union, Tuple, Optional
 
+import os
 import gym
 import gymnasium
 import torch.nn as nn
@@ -35,6 +36,12 @@ from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardS
 from rofunc.learning.RofuncRL.utils.memory import Memory
 from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 from rofunc.learning.pre_trained_models.download import model_zoo
+
+from .utils import ase_network_builder
+from .utils import ase_agent
+from .utils import ase_models
+import yaml, copy
+from .utils.observer import RLGPUAlgoObserver
 
 
 class ASEHRLAgent(BaseAgent):
@@ -102,9 +109,10 @@ class ASEHRLAgent(BaseAgent):
         self.memory.create_tensor(name="advantages", size=1, dtype=torch.float32)
         self.memory.create_tensor(name="amp_states", size=amp_observation_space, dtype=torch.float32)
         self.memory.create_tensor(name="next_values", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="disc_rewards", size=1, dtype=torch.float32)
         # tensors sampled during training
         self._tensors_names = ["states", "actions", "rewards", "next_states", "terminated", "log_prob", "values",
-                               "returns", "advantages", "amp_states", "next_values", "omega_actions"]
+                               "returns", "advantages", "amp_states", "next_values", "omega_actions", "disc_rewards"]
 
         '''Get hyper-parameters from config'''
         self._horizon = self.cfg.Agent.horizon
@@ -151,74 +159,85 @@ class ASEHRLAgent(BaseAgent):
                                   experiment_dir, rofunc_logger, amp_observation_space,
                                   motion_dataset, replay_buffer, collect_reference_motions)
         self.llc_agent.load_ckpt(llc_ckpt_path)
+        # self._build_llc()
 
         '''Misc variables'''
         self._current_states = None
         self._current_log_prob = None
         self._current_next_states = None
         self._llc_step = 0
-        self._states_for_llc = None
         self._omega_actions_for_llc = None
+        self.pre_states = None
+        self.llc_cum_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
+        self.llc_cum_disc_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
 
         self._set_up()
 
+    def _build_llc(self):
+        with open(
+                "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/learning/RofuncRL/agents/mixline/utils/ase_humanoid_hrl.yaml",
+                'r') as f:
+            llc_config = yaml.load(f, Loader=yaml.SafeLoader)
+            llc_config_params = llc_config['params']
+
+        llc_checkpoint = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/learning/RofuncRL/agents/mixline/utils/ase_llc_reallusion_sword_shield.pth"
+        assert (llc_checkpoint != "")
+
+        network_params = llc_config_params['network']
+        network_builder = ase_network_builder.ASEBuilder()
+        network_builder.load(network_params)
+
+        network = ase_models.ModelASEContinuous(network_builder)
+        llc_agent_config = self._build_llc_agent_config(llc_config_params, network)
+
+        self.llc_agent = ase_agent.ASEAgent('llc', llc_agent_config)
+        self.llc_agent.restore(llc_checkpoint)
+        print("Loaded LLC checkpoint from {:s}".format(llc_checkpoint))
+        self.llc_agent.set_eval()
+
+    def _build_llc_agent_config(self, config_params, network):
+        llc_env_info = {'action_space': gym.spaces.Box(-1.0, 1.0, (31,)),
+                        'observation_space': gym.spaces.Box(-np.inf, np.inf, (253,)),
+                        'amp_observation_space': gym.spaces.Box(-np.inf, np.inf, (1400,))}
+        # obs_space = llc_env_info['observation_space']
+        # obs_size = obs_space.shape[0]
+        # obs_size -= self._task_related_state_size
+        # llc_env_info['observation_space'] = gym.spaces.Box(obs_space.low[:obs_size], obs_space.high[:obs_size])
+
+        config = config_params['config']
+        config['network'] = network
+        config['num_actors'] = 4096
+        config['features'] = {'observer': RLGPUAlgoObserver()}
+        config['env_info'] = llc_env_info
+        return config
+
     def _get_llc_action(self, states: torch.Tensor, omega_actions: torch.Tensor):
+        omega_actions = torch.clamp(omega_actions, -1.0, 1.0)
+
         # get actions from low-level controller
         task_agnostic_states = states[:, :-self._task_related_state_size]
         z = torch.nn.functional.normalize(omega_actions, dim=-1)
-        actions, _ = self.llc_agent.act(task_agnostic_states, deterministic=True, ase_latents=z)
+        actions, _ = self.llc_agent.act(task_agnostic_states, deterministic=False, ase_latents=z)
+        # actions, _ = self.llc_agent.model.a2c_network.eval_actor(obs=task_agnostic_states, ase_latents=z)
+        actions = torch.clamp(actions, -1.0, 1.0)
+        self._llc_step += 1
         return actions
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
-        if not self._llc_step % self.cfg.Agent.llc_steps_per_high_action:
+        if self._llc_step == 0:
             if self._current_states is not None:
                 states = self._current_states
+            self.pre_states = states
+            self.llc_cum_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
+            self.llc_cum_disc_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
             omega_actions, self._current_log_prob = self.policy(self._state_preprocessor(states),
                                                                 deterministic=deterministic)
-            self._states_for_llc = states
             self._omega_actions_for_llc = omega_actions
 
-        actions = self._get_llc_action(self._states_for_llc, self._omega_actions_for_llc)
-        self._llc_step += 1
+        actions = self._get_llc_action(self._state_preprocessor(states), self._omega_actions_for_llc)
         return actions, self._current_log_prob
 
-    def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
-                         rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
-        if self._current_states is not None:
-            states = self._current_states
-
-        super().store_transition(states=states, actions=actions, next_states=next_states, rewards=rewards,
-                                 terminated=terminated, truncated=truncated, infos=infos)
-
-        amp_states = infos["amp_obs"]
-
-        # reward shaping
-        if self._rewards_shaper is not None:
-            rewards = self._rewards_shaper(rewards)
-
-        # compute values
-        values = self.value(self._state_preprocessor(states))
-        values = self._value_preprocessor(values, inverse=True)
-
-        next_values = self.value(self._state_preprocessor(next_states))
-        next_values = self._value_preprocessor(next_values, inverse=True)
-        next_values *= infos['terminate'].view(-1, 1).logical_not()
-
-        # storage transition in memory
-        self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
-                                terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
-                                values=values, amp_states=amp_states, next_values=next_values,
-                                omega_actions=self._omega_actions_for_llc)
-
-    def update_net(self):
-        """
-        Update the network
-        """
-        # update dataset of reference motions
-        '''Compute combined rewards'''
-        rewards = self.memory.get_tensor_by_name("rewards")
-        amp_states = self.memory.get_tensor_by_name("amp_states")
-
+    def get_disc_reward(self, amp_states):
         with torch.no_grad():
             amp_logits = self.llc_agent.discriminator(self.llc_agent._amp_state_preprocessor(amp_states))
             if self.llc_agent._least_square_discriminator:
@@ -227,7 +246,66 @@ class ASEHRLAgent(BaseAgent):
             else:
                 style_rewards = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
                                                          torch.tensor(0.0001, device=self.device)))
-            # style_rewards *= self.llc_agent._discriminator_reward_scale
+            style_rewards *= self.llc_agent._discriminator_reward_scale
+        return style_rewards
+
+    def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
+                         rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
+
+        self.llc_cum_rew.add_(rewards)
+        amp_obs = infos['amp_obs']
+        curr_disc_reward = self.get_disc_reward(amp_obs)
+        self.llc_cum_disc_rew.add_(curr_disc_reward)
+        if self._llc_step == self.cfg.Agent.llc_steps_per_high_action:
+            super().store_transition(states=self.pre_states, actions=actions, next_states=next_states,
+                                     rewards=self.llc_cum_rew / self.cfg.Agent.llc_steps_per_high_action,
+                                     terminated=terminated, truncated=truncated, infos=infos)
+
+            amp_states = infos["amp_obs"]
+
+            # reward shaping
+            if self._rewards_shaper is not None:
+                rewards = self._rewards_shaper(rewards)
+
+            # compute values
+            values = self.value(self._state_preprocessor(self.pre_states))
+            values = self._value_preprocessor(values, inverse=True)
+
+            next_values = self.value(self._state_preprocessor(next_states))
+            next_values = self._value_preprocessor(next_values, inverse=True)
+            next_values *= infos['terminate'].view(-1, 1).logical_not()
+
+            # storage transition in memory
+            self.memory.add_samples(states=self.pre_states, actions=actions,
+                                    rewards=self.llc_cum_rew / self.cfg.Agent.llc_steps_per_high_action,
+                                    next_states=next_states,
+                                    terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
+                                    values=values, amp_states=amp_states, next_values=next_values,
+                                    omega_actions=self._omega_actions_for_llc,
+                                    disc_rewards=self.llc_cum_disc_rew / self.cfg.Agent.llc_steps_per_high_action)
+
+    def update_net(self):
+        """
+        Update the network
+        """
+        # update dataset of reference motions
+        '''Compute combined rewards'''
+        rewards = self.memory.get_tensor_by_name("rewards")
+        style_rewards = self.memory.get_tensor_by_name("disc_rewards")
+
+        # with torch.no_grad():
+        #     amp_logits = self.llc_agent.discriminator(self.llc_agent._amp_state_preprocessor(amp_states))
+        #     if self.llc_agent._least_square_discriminator:
+        #         style_rewards = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
+        #                                       torch.tensor(0.0001, device=self.device))
+        #     else:
+        #         style_rewards = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
+        #                                                  torch.tensor(0.0001, device=self.device)))
+        #     style_rewards *= self.llc_agent._discriminator_reward_scale
+        # disc_logits = self.llc_agent._eval_disc(amp_states)
+        # prob = 1 / (1 + torch.exp(-disc_logits))
+        # style_rewards = -torch.log(torch.maximum(1 - prob, torch.tensor(0.0001, device=self.device)))
+        # style_rewards *= self.llc_agent._disc_reward_scale
 
         combined_rewards = self._task_reward_weight * rewards + self._style_reward_weight * style_rewards
 
@@ -266,9 +344,12 @@ class ASEHRLAgent(BaseAgent):
             # mini-batches loop
             for i, (sampled_states, sampled_actions, sampled_rewards, samples_next_states, samples_terminated,
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
-                    _, sampled_omega_actions) in enumerate(sampled_batches):
+                    _, sampled_omega_actions, _) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
-                _, log_prob_now = self.policy(sampled_states, sampled_omega_actions)
+                try:
+                    _, log_prob_now = self.policy(sampled_states, sampled_omega_actions)
+                except:
+                    pass
 
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
