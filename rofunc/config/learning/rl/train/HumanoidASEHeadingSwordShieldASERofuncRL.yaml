@@ -54,7 +54,7 @@ Agent:
   kl_threshold: 0                  # Initial coefficient for KL divergence.
 
   llc_ckpt_path:
-  llc_steps_per_high_action: 5
+  llc_steps_per_high_action: 1
 
 #  state_preprocessor:            # State preprocessor type.
 #  state_preprocessor_kwargs:     # State preprocessor kwargs.
