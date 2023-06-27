@@ -340,10 +340,7 @@ class ASEHRLAgent(BaseAgent):
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
                     _, sampled_omega_actions, _) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
-                try:
-                    _, log_prob_now = self.policy(sampled_states, sampled_omega_actions)
-                except:
-                    pass
+                _, log_prob_now = self.policy(sampled_states, sampled_omega_actions)
 
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
