@@ -234,47 +234,93 @@ class HRLPlayer(common_player.CommonPlayer):
                 dones = np.expand_dims(np.asarray(dones), 0)
             return torch.from_numpy(obs).to(self.device), torch.from_numpy(rewards), torch.from_numpy(dones), infos
     
+    # def _build_llc(self, config_params, checkpoint_file):
+    #     network_params = config_params['network']
+    #     network_builder = ase_network_builder.ASEBuilder()
+    #     network_builder.load(network_params)
+    #
+    #     network = ase_models.ModelASEContinuous(network_builder)
+    #     llc_agent_config = self._build_llc_agent_config(config_params, network)
+    #
+    #     self._llc_agent = ase_players.ASEPlayer(llc_agent_config)
+    #     self._llc_agent.restore(checkpoint_file)
+    #     print("Loaded LLC checkpoint from {:s}".format(checkpoint_file))
+    #     return
+    #
+    # def _build_llc_agent_config(self, config_params, network):
+    #     llc_env_info = copy.deepcopy(self.env_info)
+    #     obs_space = llc_env_info['observation_space']
+    #     obs_size = obs_space.shape[0]
+    #     obs_size -= self._task_size
+    #     llc_env_info['observation_space'] = spaces.Box(obs_space.low[:obs_size], obs_space.high[:obs_size])
+    #     llc_env_info['amp_observation_space'] = self.env.amp_observation_space.shape
+    #     llc_env_info['num_envs'] = self.env.task.num_envs
+    #
+    #     config = config_params['config']
+    #     config['network'] = network
+    #     config['env_info'] = llc_env_info
+    #
+    #     return config
+
     def _build_llc(self, config_params, checkpoint_file):
-        network_params = config_params['network']
-        network_builder = ase_network_builder.ASEBuilder()
-        network_builder.load(network_params)
+        from hydra.core.global_hydra import GlobalHydra
+        from rofunc.config.utils import get_config
+        from rofunc.learning.RofuncRL.utils.memory import RandomMemory
+        from rofunc.learning.RofuncRL.agents.mixline.ase_agent import ASEAgent
+        import rofunc as rf
+        from rofunc.utils.logger.beauty_logger import BeautyLogger
+        from datetime import datetime
 
-        network = ase_models.ModelASEContinuous(network_builder)
-        llc_agent_config = self._build_llc_agent_config(config_params, network)
+        GlobalHydra.instance().clear()
+        args_overrides = ["task=HumanoidASEGetupSwordShield", "train=HumanoidASEGetupSwordShieldASERofuncRL"]
+        self.llc_config = get_config('./learning/rl', 'config', args=args_overrides)
+        llc_ckpt_path = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/examples/learning_rl/runs/RofuncRL_ASETrainer_HumanoidASEGetupSwordShield_23-06-26_12-49-35-111331/checkpoints/ckpt_87000.pth"
 
-        self._llc_agent = ase_players.ASEPlayer(llc_agent_config)
-        self._llc_agent.restore(checkpoint_file)
-        print("Loaded LLC checkpoint from {:s}".format(checkpoint_file))
-        return
-
-    def _build_llc_agent_config(self, config_params, network):
         llc_env_info = copy.deepcopy(self.env_info)
         obs_space = llc_env_info['observation_space']
         obs_size = obs_space.shape[0]
         obs_size -= self._task_size
-        llc_env_info['observation_space'] = spaces.Box(obs_space.low[:obs_size], obs_space.high[:obs_size])
-        llc_env_info['amp_observation_space'] = self.env.amp_observation_space.shape
-        llc_env_info['num_envs'] = self.env.task.num_envs
+        llc_observation_space = spaces.Box(obs_space.low[:obs_size], obs_space.high[:obs_size])
+        llc_memory = RandomMemory(memory_size=32, num_envs=4096)
+        motion_dataset = RandomMemory(memory_size=200000)
+        replay_buffer = RandomMemory(memory_size=1000000)
+        collect_reference_motions = lambda num_samples: self.env.task.fetch_amp_obs_demo(num_samples)
 
-        config = config_params['config']
-        config['network'] = network
-        config['env_info'] = llc_env_info
+        directory = os.path.join(os.getcwd(), "runs")
+        exp_name = datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f")
+        exp_dir = os.path.join(directory, exp_name)
+        rf.utils.create_dir(exp_dir)
+        rofunc_logger = BeautyLogger(exp_dir, verbose=True)
+        amp_observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1400,))
 
-        return config
+        self._llc_agent = ASEAgent(self.llc_config.train, llc_observation_space, llc_env_info['action_space'],
+                                   llc_memory,
+                                   'cuda:0', exp_dir, rofunc_logger, amp_observation_space,
+                                   motion_dataset, replay_buffer, collect_reference_motions)
+        self._llc_agent.load_ckpt(llc_ckpt_path)
+        return
+
 
     def _setup_action_space(self):
         super()._setup_action_space()
         self.actions_num = self._latent_dim
         return
 
+    # def _compute_llc_action(self, obs, actions):
+    #     llc_obs = self._extract_llc_obs(obs)
+    #     processed_obs = self._llc_agent._preproc_obs(llc_obs)
+    #
+    #     z = torch.nn.functional.normalize(actions, dim=-1)
+    #     mu, _ = self._llc_agent.model.a2c_network.eval_actor(obs=processed_obs, ase_latents=z)
+    #     llc_action = players.rescale_actions(self.actions_low, self.actions_high, torch.clamp(mu, -1.0, 1.0))
+    #
+    #     return llc_action
+
     def _compute_llc_action(self, obs, actions):
         llc_obs = self._extract_llc_obs(obs)
-        processed_obs = self._llc_agent._preproc_obs(llc_obs)
-
         z = torch.nn.functional.normalize(actions, dim=-1)
-        mu, _ = self._llc_agent.model.a2c_network.eval_actor(obs=processed_obs, ase_latents=z)
-        llc_action = players.rescale_actions(self.actions_low, self.actions_high, torch.clamp(mu, -1.0, 1.0))
-
+        mu, _ = self._llc_agent.act(llc_obs, ase_latents=z)
+        llc_action = mu
         return llc_action
 
     def _extract_llc_obs(self, obs):
@@ -282,6 +328,18 @@ class HRLPlayer(common_player.CommonPlayer):
         llc_obs = obs[..., :obs_size - self._task_size]
         return llc_obs
     
+    # def _calc_disc_reward(self, amp_obs):
+    #     disc_reward = self._llc_agent._calc_disc_rewards(amp_obs)
+    #     return disc_reward
+
     def _calc_disc_reward(self, amp_obs):
-        disc_reward = self._llc_agent._calc_disc_rewards(amp_obs)
-        return disc_reward
+        with torch.no_grad():
+            amp_logits = self._llc_agent.discriminator(self._llc_agent._amp_state_preprocessor(amp_obs))
+            if self._llc_agent._least_square_discriminator:
+                style_rewards = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
+                                              torch.tensor(0.0001, device=self.device))
+            else:
+                style_rewards = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
+                                                         torch.tensor(0.0001, device=self.device)))
+            style_rewards *= self._llc_agent._discriminator_reward_scale
+        return style_rewards
