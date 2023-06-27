@@ -168,8 +168,9 @@ class ASEHRLAgent(BaseAgent):
         self._llc_step = 0
         self._omega_actions_for_llc = None
         self.pre_states = None
-        self.llc_cum_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
-        self.llc_cum_disc_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
+        self.llc_cum_rew = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
+        self.llc_cum_disc_rew = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
+        self.need_reset = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
 
         self._set_up()
 
@@ -219,22 +220,20 @@ class ASEHRLAgent(BaseAgent):
         z = torch.nn.functional.normalize(omega_actions, dim=-1)
         actions, _ = self.llc_agent.act(task_agnostic_states, deterministic=False, ase_latents=z)
         # actions, _ = self.llc_agent.model.a2c_network.eval_actor(obs=task_agnostic_states, ase_latents=z)
-        actions = torch.clamp(actions, -1.0, 1.0)
-        self._llc_step += 1
+        # self._llc_step += 1
         return actions
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
-        if self._llc_step == 0:
-            if self._current_states is not None:
-                states = self._current_states
-            self.pre_states = states
-            self.llc_cum_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
-            self.llc_cum_disc_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
-            omega_actions, self._current_log_prob = self.policy(self._state_preprocessor(states),
-                                                                deterministic=deterministic)
-            self._omega_actions_for_llc = omega_actions
-
-        actions = self._get_llc_action(self._state_preprocessor(states), self._omega_actions_for_llc)
+        # if self._llc_step == 0:
+        if self._current_states is not None:
+            states = self._current_states
+        self.pre_states = states
+        self.llc_cum_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
+        self.llc_cum_disc_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
+        omega_actions, self._current_log_prob = self.policy(self._state_preprocessor(states),
+                                                            deterministic=deterministic)
+        self._omega_actions_for_llc = omega_actions
+        actions = self._get_llc_action(states, self._omega_actions_for_llc)
         return actions, self._current_log_prob
 
     def get_disc_reward(self, amp_states):
@@ -252,37 +251,47 @@ class ASEHRLAgent(BaseAgent):
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
 
-        self.llc_cum_rew.add_(rewards)
+        # self.llc_cum_rew.add_(rewards)
         amp_obs = infos['amp_obs']
-        curr_disc_reward = self.get_disc_reward(amp_obs)
-        self.llc_cum_disc_rew.add_(curr_disc_reward)
-        if self._llc_step == self.cfg.Agent.llc_steps_per_high_action:
-            super().store_transition(states=self.pre_states, actions=actions, next_states=next_states,
-                                     rewards=self.llc_cum_rew / self.cfg.Agent.llc_steps_per_high_action,
-                                     terminated=terminated, truncated=truncated, infos=infos)
+        # curr_disc_reward = self.get_disc_reward(amp_obs)
+        # self.llc_cum_disc_rew.add_(curr_disc_reward)
+        # if self._llc_step == self.cfg.Agent.llc_steps_per_high_action:
+        # super().store_transition(states=self.pre_states, actions=actions, next_states=next_states,
+        #                          rewards=self.llc_cum_rew / self.cfg.Agent.llc_steps_per_high_action,
+        #                          terminated=terminated, truncated=truncated, infos=infos)
+        super().store_transition(states=states, actions=actions, next_states=next_states,
+                                 rewards=rewards, terminated=terminated, truncated=truncated, infos=infos)
 
-            amp_states = infos["amp_obs"]
+        amp_states = infos["amp_obs"]
 
-            # reward shaping
-            if self._rewards_shaper is not None:
-                rewards = self._rewards_shaper(rewards)
+        # reward shaping
+        if self._rewards_shaper is not None:
+            rewards = self._rewards_shaper(rewards)
 
-            # compute values
-            values = self.value(self._state_preprocessor(self.pre_states))
-            values = self._value_preprocessor(values, inverse=True)
+        # compute values
+        # values = self.value(self._state_preprocessor(self.pre_states))
+        values = self.value(self._state_preprocessor(states))
+        values = self._value_preprocessor(values, inverse=True)
 
-            next_values = self.value(self._state_preprocessor(next_states))
-            next_values = self._value_preprocessor(next_values, inverse=True)
-            next_values *= infos['terminate'].view(-1, 1).logical_not()
+        next_values = self.value(self._state_preprocessor(next_states))
+        next_values = self._value_preprocessor(next_values, inverse=True)
+        next_values *= infos['terminate'].view(-1, 1).logical_not()
 
-            # storage transition in memory
-            self.memory.add_samples(states=self.pre_states, actions=actions,
-                                    rewards=self.llc_cum_rew / self.cfg.Agent.llc_steps_per_high_action,
-                                    next_states=next_states,
-                                    terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
-                                    values=values, amp_states=amp_states, next_values=next_values,
-                                    omega_actions=self._omega_actions_for_llc,
-                                    disc_rewards=self.llc_cum_disc_rew / self.cfg.Agent.llc_steps_per_high_action)
+        # storage transition in memory
+        # self.memory.add_samples(states=self.pre_states, actions=actions,
+        #                         rewards=self.llc_cum_rew / self.cfg.Agent.llc_steps_per_high_action,
+        #                         next_states=next_states,
+        #                         terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
+        #                         values=values, amp_states=amp_states, next_values=next_values,
+        #                         omega_actions=self._omega_actions_for_llc,
+        #                         disc_rewards=self.llc_cum_disc_rew / self.cfg.Agent.llc_steps_per_high_action)
+        self.memory.add_samples(states=states, actions=actions,
+                                rewards=rewards,
+                                next_states=next_states,
+                                terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
+                                values=values, amp_states=amp_states, next_values=next_values,
+                                omega_actions=self._omega_actions_for_llc,
+                                disc_rewards=self.get_disc_reward(amp_obs))
 
     def update_net(self):
         """
@@ -292,21 +301,6 @@ class ASEHRLAgent(BaseAgent):
         '''Compute combined rewards'''
         rewards = self.memory.get_tensor_by_name("rewards")
         style_rewards = self.memory.get_tensor_by_name("disc_rewards")
-
-        # with torch.no_grad():
-        #     amp_logits = self.llc_agent.discriminator(self.llc_agent._amp_state_preprocessor(amp_states))
-        #     if self.llc_agent._least_square_discriminator:
-        #         style_rewards = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
-        #                                       torch.tensor(0.0001, device=self.device))
-        #     else:
-        #         style_rewards = -torch.log(torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits))),
-        #                                                  torch.tensor(0.0001, device=self.device)))
-        #     style_rewards *= self.llc_agent._discriminator_reward_scale
-        # disc_logits = self.llc_agent._eval_disc(amp_states)
-        # prob = 1 / (1 + torch.exp(-disc_logits))
-        # style_rewards = -torch.log(torch.maximum(1 - prob, torch.tensor(0.0001, device=self.device)))
-        # style_rewards *= self.llc_agent._disc_reward_scale
-
         combined_rewards = self._task_reward_weight * rewards + self._style_reward_weight * style_rewards
 
         '''Compute Generalized Advantage Estimator (GAE)'''

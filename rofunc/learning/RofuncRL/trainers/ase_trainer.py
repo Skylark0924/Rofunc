@@ -88,9 +88,9 @@ class ASETrainer(BaseTrainer):
             self._update_latents()
 
     def post_interaction(self):
-        if self.agent._llc_step == self.cfg.Agent.llc_steps_per_high_action:
-            self._rollout += 1
-            self.agent._llc_step = 0
+        # if self.agent._llc_step == self.cfg.Agent.llc_steps_per_high_action:
+        self._rollout += 1
+        self.agent._llc_step = 0
 
         # Update agent
         if not self._rollout % self.rollouts and self._step >= self.start_learning_steps and self._rollout > 0:
