@@ -210,7 +210,7 @@ def main():
 
     set_np_formatting()
     args = get_args()
-    gpu_id = 1
+    gpu_id = 0
     args.device_id = gpu_id
     args.rl_device = 'cuda:' + str(gpu_id)
     args.compute_device_id = gpu_id
