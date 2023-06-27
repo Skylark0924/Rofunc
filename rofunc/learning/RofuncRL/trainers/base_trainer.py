@@ -50,7 +50,7 @@ class BaseTrainer:
         '''Experiment log directory'''
         directory = self.cfg.Trainer.experiment_directory
         exp_name = self.cfg.Trainer.experiment_name
-        directory = os.path.join(os.getcwd(), "runs") if not directory else directory
+        directory = os.path.join(os.getcwd(), "`runs`") if not directory else directory
         exp_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f") if not exp_name else exp_name
         exp_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, exp_name)
         self.exp_dir = os.path.join(directory, exp_name)
