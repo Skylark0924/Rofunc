@@ -26,48 +26,36 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from tasks.humanoid import Humanoid
-from tasks.humanoid_amp import HumanoidAMP
-from tasks.humanoid_amp_getup import HumanoidAMPGetup
-from tasks.humanoid_heading import HumanoidHeading
-from tasks.humanoid_location import HumanoidLocation
-from tasks.humanoid_strike import HumanoidStrike
-from tasks.humanoid_reach import HumanoidReach
-from tasks.humanoid_perturb import HumanoidPerturb
-from tasks.humanoid_view_motion import HumanoidViewMotion
-from vec_task_wrappers import VecTaskPythonWrapper
-
-from isaacgym import rlgpu
-
-import json
+from gym import spaces
 import numpy as np
+import torch
+from tasks.vec_task import VecTaskCPU, VecTaskGPU, VecTaskPython
+
+class VecTaskCPUWrapper(VecTaskCPU):
+    def __init__(self, task, rl_device, sync_frame_time=False, clip_observations=5.0, clip_actions=1.0):
+        super().__init__(task, rl_device, sync_frame_time, clip_observations, clip_actions)
+        return
+
+class VecTaskGPUWrapper(VecTaskGPU):
+    def __init__(self, task, rl_device, clip_observations=5.0, clip_actions=1.0):
+        super().__init__(task, rl_device, clip_observations, clip_actions)
+        return
 
 
-def warn_task_name():
-    raise Exception(
-        "Unrecognized task!\nTask should be one of: [BallBalance, Cartpole, CartpoleYUp, Ant, Humanoid, Anymal, FrankaCabinet, Quadcopter, ShadowHand, ShadowHandLSTM, ShadowHandFFOpenAI, ShadowHandFFOpenAITest, ShadowHandOpenAI, ShadowHandOpenAITest, Ingenuity]")
+class VecTaskPythonWrapper(VecTaskPython):
+    def __init__(self, task, rl_device, clip_observations=5.0, clip_actions=1.0):
+        super().__init__(task, rl_device, clip_observations, clip_actions)
 
-def parse_task(args, cfg, cfg_train, sim_params):
+        self._amp_obs_space = spaces.Box(np.ones(task.get_num_amp_obs()) * -np.Inf, np.ones(task.get_num_amp_obs()) * np.Inf)
+        return
 
-    # create native task and pass custom config
-    device_id = args.device_id
-    rl_device = args.rl_device
+    def reset(self, env_ids=None):
+        self.task.reset(env_ids)
+        return torch.clamp(self.task.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
 
-    cfg["seed"] = cfg_train.get("seed", -1)
-    cfg_task = cfg["env"]
-    cfg_task["seed"] = cfg["seed"]
+    @property
+    def amp_observation_space(self):
+        return self._amp_obs_space
 
-    try:
-        task = eval(args.task)(
-            cfg=cfg,
-            sim_params=sim_params,
-            physics_engine=args.physics_engine,
-            device_type=args.device,
-            device_id=device_id,
-            headless=args.headless)
-    except NameError as e:
-        print(e)
-        warn_task_name()
-    env = VecTaskPythonWrapper(task, rl_device, cfg_train.get("clip_observations", np.inf), cfg_train.get("clip_actions", 1.0))
-
-    return task, env
+    def fetch_amp_obs_demo(self, num_samples):
+        return self.task.fetch_amp_obs_demo(num_samples)
