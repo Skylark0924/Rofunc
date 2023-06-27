@@ -193,7 +193,7 @@ def get_args(benchmark=False):
             "help": "Resume training or start testing from a checkpoint"},
         {"name": "--checkpoint", "type": str, "default": "Base",
             "help": "Path to the saved weights, only for rl_games RL library"},
-        {"name": "--headless", "action": "store_true", "default": True,
+        {"name": "--headless", "action": "store_false", "default": True,
             "help": "Force display off at all times"},
         {"name": "--horovod", "action": "store_true", "default": False,
             "help": "Use horovod for multi-gpu training, have effect only with rl_games RL library"},
@@ -228,7 +228,7 @@ def get_args(benchmark=False):
         {"name": "--torch_deterministic", "action": "store_true", "default": False,
             "help": "Apply additional PyTorch settings for more deterministic behaviour"},
         {"name": "--output_path", "type": str, "default": "output/", "help": "Specify output directory"},
-        {"name": "--llc_checkpoint", "type": str, "default": "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/learning/RofuncRL/agents/mixline/utils/ase_llc_reallusion_sword_shield.pth",
+        {"name": "--llc_checkpoint", "type": str, "default": "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/examples/learning_rl/runs/RofuncRL_ASETrainer_HumanoidASEGetupSwordShield_23-06-26_12-49-35-111331/checkpoints/ckpt_87000.pth",
             "help": "Path to the saved weights for the low-level controller of an HRL agent."}]
 
     if benchmark:
