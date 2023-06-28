@@ -171,6 +171,7 @@ class ASEHRLAgent(BaseAgent):
         self.llc_cum_rew = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
         self.llc_cum_disc_rew = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
         self.need_reset = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
+        self.need_terminate = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
 
         self._set_up()
 
@@ -213,8 +214,6 @@ class ASEHRLAgent(BaseAgent):
         return config
 
     def _get_llc_action(self, states: torch.Tensor, omega_actions: torch.Tensor):
-        omega_actions = torch.clamp(omega_actions, -1.0, 1.0)
-
         # get actions from low-level controller
         task_agnostic_states = states[:, :-self._task_related_state_size]
         z = torch.nn.functional.normalize(omega_actions, dim=-1)
@@ -228,15 +227,17 @@ class ASEHRLAgent(BaseAgent):
         if self._current_states is not None:
             states = self._current_states
         self.pre_states = states
-        self.llc_cum_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
-        self.llc_cum_disc_rew = torch.zeros((4096, 1), dtype=torch.float32).to(self.device)
+        self.llc_cum_rew = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
+        self.llc_cum_disc_rew = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
+        self.need_reset = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
+        self.need_terminate = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
         omega_actions, self._current_log_prob = self.policy(self._state_preprocessor(states),
                                                             deterministic=deterministic)
         self._omega_actions_for_llc = omega_actions
         actions = self._get_llc_action(states, self._omega_actions_for_llc)
         return actions, self._current_log_prob
 
-    def get_disc_reward(self, amp_states):
+    def _get_disc_reward(self, amp_states):
         with torch.no_grad():
             amp_logits = self.llc_agent.discriminator(self.llc_agent._amp_state_preprocessor(amp_states))
             if self.llc_agent._least_square_discriminator:
@@ -253,12 +254,14 @@ class ASEHRLAgent(BaseAgent):
 
         # self.llc_cum_rew.add_(rewards)
         amp_obs = infos['amp_obs']
-        # curr_disc_reward = self.get_disc_reward(amp_obs)
+        # curr_disc_reward = self._get_disc_reward(amp_obs)
         # self.llc_cum_disc_rew.add_(curr_disc_reward)
+        # self.need_reset.add_(terminated + truncated)
+        # self.need_terminate.add_(infos['terminate'].view(-1, 1))
         # if self._llc_step == self.cfg.Agent.llc_steps_per_high_action:
         # super().store_transition(states=self.pre_states, actions=actions, next_states=next_states,
-        #                          rewards=self.llc_cum_rew / self.cfg.Agent.llc_steps_per_high_action,
-        #                          terminated=terminated, truncated=truncated, infos=infos)
+        #                          rewards=self.llc_cum_rew,
+        #                          terminated=self.need_reset, truncated=self.need_reset, infos=infos)
         super().store_transition(states=states, actions=actions, next_states=next_states,
                                  rewards=rewards, terminated=terminated, truncated=truncated, infos=infos)
 
@@ -272,26 +275,29 @@ class ASEHRLAgent(BaseAgent):
         # values = self.value(self._state_preprocessor(self.pre_states))
         values = self.value(self._state_preprocessor(states))
         values = self._value_preprocessor(values, inverse=True)
+        if (values.isnan()==True).any():
+            print("values is nan")
 
         next_values = self.value(self._state_preprocessor(next_states))
         next_values = self._value_preprocessor(next_values, inverse=True)
-        next_values *= infos['terminate'].view(-1, 1).logical_not()
+        next_values *= self.need_terminate.logical_not()
 
         # storage transition in memory
         # self.memory.add_samples(states=self.pre_states, actions=actions,
-        #                         rewards=self.llc_cum_rew / self.cfg.Agent.llc_steps_per_high_action,
+        #                         rewards=self.llc_cum_rew,
         #                         next_states=next_states,
-        #                         terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
+        #                         terminated=self.need_reset, truncated=self.need_reset,
+        #                         log_prob=self._current_log_prob,
         #                         values=values, amp_states=amp_states, next_values=next_values,
         #                         omega_actions=self._omega_actions_for_llc,
-        #                         disc_rewards=self.llc_cum_disc_rew / self.cfg.Agent.llc_steps_per_high_action)
+        #                         disc_rewards=self.llc_cum_disc_rew)
         self.memory.add_samples(states=states, actions=actions,
                                 rewards=rewards,
                                 next_states=next_states,
                                 terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
                                 values=values, amp_states=amp_states, next_values=next_values,
                                 omega_actions=self._omega_actions_for_llc,
-                                disc_rewards=self.get_disc_reward(amp_obs))
+                                disc_rewards=self._get_disc_reward(amp_obs))
 
     def update_net(self):
         """
@@ -306,6 +312,8 @@ class ASEHRLAgent(BaseAgent):
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
         next_values = self.memory.get_tensor_by_name("next_values")
+        if (values.isnan() == True).any():
+            print("values is nan")
 
         advantage = 0
         advantages = torch.zeros_like(combined_rewards)
@@ -336,11 +344,14 @@ class ASEHRLAgent(BaseAgent):
         # learning epochs
         for epoch in range(self._learning_epochs):
             # mini-batches loop
-            for i, (sampled_states, sampled_actions, sampled_rewards, samples_next_states, samples_terminated,
+            for i, (sampled_states, _, sampled_rewards, samples_next_states, samples_terminated,
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
                     _, sampled_omega_actions, _) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
-                _, log_prob_now = self.policy(sampled_states, sampled_omega_actions)
+                try:
+                    _, log_prob_now = self.policy(sampled_states, sampled_omega_actions)
+                except:
+                    pass
 
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
