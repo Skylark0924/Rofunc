@@ -22,8 +22,8 @@ from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 
 
 class ASETrainer(BaseTrainer):
-    def __init__(self, cfg, env, device, env_name, hrl=False):
-        super().__init__(cfg, env, device, env_name)
+    def __init__(self, cfg, env, device, env_name, hrl=False, inference=False):
+        super().__init__(cfg, env, device, env_name, inference)
         self.memory = RandomMemory(memory_size=self.rollouts, num_envs=self.env.num_envs, device=device)
         self.motion_dataset = RandomMemory(memory_size=200000, device=device)
         self.replay_buffer = RandomMemory(memory_size=1000000, device=device)
@@ -76,21 +76,28 @@ class ASETrainer(BaseTrainer):
                 high=self._latent_steps_max)
 
     def pre_interaction(self):
-        if self.collect_observation is not None:  # Reset failed envs
-            obs_dict, done_env_ids = self.env.reset_done()
-            self.agent._current_states = obs_dict["obs"]
-            if not self.hrl:
+        # if self.hrl and self.agent._llc_step == 0:
+        #     if self.collect_observation is not None:  # Reset failed envs
+        #         self.env.reset_buf = self.env.reset_buf + self.agent.need_reset
+        #         obs_dict, done_env_ids = self.env.reset_done()
+        #         self.agent._current_states = obs_dict["obs"]
+        if self.hrl:
+            if self.collect_observation is not None:  # Reset failed envs
+                obs_dict, done_env_ids = self.env.reset_done()
+                self.agent._current_states = obs_dict["obs"]
+        elif not self.hrl:
+            if self.collect_observation is not None:  # Reset failed envs
+                obs_dict, done_env_ids = self.env.reset_done()
+                self.agent._current_states = obs_dict["obs"]
                 if len(done_env_ids) > 0:
                     self._reset_latents(done_env_ids)
                     self._reset_latent_step_count(done_env_ids)
-
-        if not self.hrl:
             self._update_latents()
 
     def post_interaction(self):
         # if self.agent._llc_step == self.cfg.Agent.llc_steps_per_high_action:
         self._rollout += 1
-        self.agent._llc_step = 0
+        # self.agent._llc_step = 0
 
         # Update agent
         if not self._rollout % self.rollouts and self._step >= self.start_learning_steps and self._rollout > 0:
