@@ -80,7 +80,8 @@ def inference(custom_args):
                                              env=infer_env,
                                              device=cfg.rl_device,
                                              env_name=custom_args.task,
-                                             hrl=hrl)
+                                             hrl=hrl,
+                                             inference=True)
     # load checkpoint
     if custom_args.ckpt_path is None:
         custom_args.ckpt_path = model_zoo(name=f"{custom_args.task}.pth")
@@ -91,7 +92,7 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     # Available tasks and motion files:

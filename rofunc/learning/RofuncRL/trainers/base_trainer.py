@@ -41,7 +41,8 @@ class BaseTrainer:
                  cfg: DictConfig,
                  env: Union[gym.Env, gymnasium.Env],
                  device: Optional[Union[str, torch.device]] = None,
-                 env_name: Optional[str] = None):
+                 env_name: Optional[str] = None,
+                 inference: bool = False):
         self.cfg = cfg
         self.agent = None
         self.device = torch.device(
@@ -52,7 +53,10 @@ class BaseTrainer:
         exp_name = self.cfg.Trainer.experiment_name
         directory = os.path.join(os.getcwd(), "runs") if not directory else directory
         exp_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f") if not exp_name else exp_name
-        exp_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, exp_name)
+        if not inference:
+            exp_name = "RofuncRL_{}_{}_{}".format(self.__class__.__name__, env_name, exp_name)
+        else:
+            exp_name = "RofuncRL_{}_{}_{}_inference".format(self.__class__.__name__, env_name, exp_name)
         self.exp_dir = os.path.join(directory, exp_name)
         rf.utils.create_dir(self.exp_dir)
 
@@ -156,8 +160,8 @@ class BaseTrainer:
                 with torch.no_grad():
                     # Store transition
                     self.agent.store_transition(states=states, actions=actions, next_states=next_states,
-                                                rewards=rewards,
-                                                terminated=terminated, truncated=truncated, infos=infos)
+                                                rewards=rewards, terminated=terminated, truncated=truncated,
+                                                infos=infos)
                 self.post_interaction()
                 self._step += 1
 
@@ -178,6 +182,11 @@ class BaseTrainer:
         pass
 
     def post_interaction(self):
+        """
+        Base post-interaction function
+        - Write to tensorboard
+        - Save checkpoints
+        """
         # Update best models and tensorboard
         if not self._step % self.write_interval and self.write_interval > 0:
             # update best models
@@ -196,7 +205,8 @@ class BaseTrainer:
             self.t_bar.set_postfix_str(f"Rew/Best: {reward:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}")
 
         # Save checkpoints
-        if not (self._step + 1) % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
+        if not (
+                       self._step + 1) % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
             self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))
 
     def write_tensorboard(self):
