@@ -2,7 +2,7 @@ import os
 
 
 class BeautyLogger:
-    def __init__(self, log_path: str, log_name: str, verbose: bool = True):
+    def __init__(self, log_path: str, log_name: str = 'rofunc.log', verbose: bool = True):
         """
         Lightweight logger for Rofunc package.
         :param log_path: the path for saving the log file

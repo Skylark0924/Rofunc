@@ -4,5 +4,5 @@ import shutup
 shutup.please()
 
 from .ml import *
-from .dl import *
-from .rl import *
+from .RofuncIL import *
+from .RofuncRL import *

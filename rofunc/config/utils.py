@@ -9,8 +9,15 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 from omegaconf import DictConfig
 
+import rofunc as rf
 from rofunc.config import *
 from rofunc.utils.file.path import get_rofunc_path
+
+"""
+Config loading rules
+
+
+"""
 
 
 def get_config(config_path=None, config_name=None, args=None, debug=False) -> DictConfig:
@@ -26,7 +33,29 @@ def get_config(config_path=None, config_name=None, args=None, debug=False) -> Di
             absl_config_path = os.path.join(rofunc_path, "config/{}".format(config_path))
             search_path = create_automatic_config_search_path(config_name, None, absl_config_path)
             hydra_object = Hydra.create_main_hydra2(task_name='load_isaacgymenv', config_search_path=search_path)
-            cfg = hydra_object.compose_config(config_name, args.overrides, run_mode=RunMode.RUN)
+
+            # Find the available task and train config files
+            try:
+                cfg = hydra_object.compose_config(config_name, args, run_mode=RunMode.RUN)
+                rf.logger.beauty_print('Use task config: {}.yaml'.format(args[0].split('=')[1]), type='info')
+                rf.logger.beauty_print('Use train config: {}.yaml'.format(args[1].split('=')[1]), type='info')
+            except Exception as e:
+                rf.logger.beauty_print(e, type='warning')
+                original_task = args[0].split('=')[1]
+                if args[0].split('=')[1].split('_')[0] == 'Gym':
+                    task = 'GymBaseTask'
+                    args[0] = 'task={}'.format(task)
+                    rf.logger.beauty_print('Use task config: {}.yaml'.format(task), type='warning')
+                try:
+                    cfg = hydra_object.compose_config(config_name, args, run_mode=RunMode.RUN)
+                    rf.logger.beauty_print('Use train config: {}.yaml'.format(args[1].split('=')[1]),
+                                           type='info')
+                except Exception as e:
+                    rf.logger.beauty_print(e, type='warning')
+                    train = 'BaseTask' + args[1].split('=')[1].split(original_task)[1]
+                    args[1] = 'train={}'.format(train)
+                    cfg = hydra_object.compose_config(config_name, args, run_mode=RunMode.RUN)
+                    rf.logger.beauty_print('Use train config: {}.yaml'.format(train), type='warning')
     else:
         with initialize(config_path="./", version_base=None):
             cfg = compose(config_name="lqt")
