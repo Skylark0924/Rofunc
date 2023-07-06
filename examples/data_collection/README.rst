@@ -1,4 +1,4 @@
-Examples of data collection and processing
+Data collection and processing
 -----------------------------
 
 The following examples show how to collect multimodal demonstration data.

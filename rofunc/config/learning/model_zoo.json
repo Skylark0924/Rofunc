@@ -1,12 +1,52 @@
 {
-    "CURICabinetPPO_right_arm.pt": {
-        "url": "https://drive.google.com/uc?id=1lKPYiJK3N-2uE9C5oekmLs1QiwTmFpJL&export=download",
-        "name": "CURICabinetPPO_right_arm.pt",
-        "md5": "18cb53afc488df80cb988f2e9efa79b4"
-    },
-    "FrankaCabinetPPO.pt": {
-        "url": "https://drive.google.com/uc?id=1K6TpD-yyDPonCkhWZUOxcWlPQhbnBYFH&export=download",
-        "name": "FrankaCabinetPPO.pt",
-        "md5": "6ec13ea27b8be8500d91208fdee3ead2"
-    }
+  "CURICabinetPPO_right_arm.pth": {
+    "url": "https://drive.google.com/uc?id=1lKPYiJK3N-2uE9C5oekmLs1QiwTmFpJL&export=download",
+    "name": "CURICabinetPPO_right_arm.pth",
+    "md5": "18cb53afc488df80cb988f2e9efa79b4"
+  },
+  "FrankaCabinetPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1K6TpD-yyDPonCkhWZUOxcWlPQhbnBYFH&export=download",
+    "name": "FrankaCabinetPPO.pth",
+    "md5": "6ec13ea27b8be8500d91208fdee3ead2"
+  },
+  "CURICabinetRofuncRLPPO_left_arm.pth": {
+    "url": "https://drive.google.com/uc?id=1JG4asCw6RV_Kv_ApD_LJX--XxetMtuSR&export=download",
+    "name": "CURICabinetRofuncRLPPO_left_arm.pth",
+    "md5": "0c4d8a0495ecc033def5b0c619ad8d19"
+  },
+  "HumanoidAMP_backflip.pth": {
+    "url": "https://drive.google.com/uc?id=17RZW8SUDufWZMm_g75XgoMtC8FlZDO9I&export=download",
+    "name": "HumanoidAMP_backflip.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_run.pth": {
+    "url": "https://drive.google.com/uc?id=1AAhWR9YmXZgcYkiQhnToDkFiGeEZrlOa&export=download",
+    "name": "HumanoidAMP_run.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_hop.pth": {
+    "url": "https://drive.google.com/uc?id=1lzq9qtFxdjCK2ap4RNs9iJbjfQ1hYS7X&export=download",
+    "name": "HumanoidAMP_hop.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_dance.pth": {
+    "url": "https://drive.google.com/uc?id=1o-KNebRzb8lBoPxDTURAH4770O-sd38j&export=download",
+    "name": "HumanoidAMP_dance.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_walk.pth": {
+    "url": "https://drive.google.com/uc?id=1o-KNebRzb8lBoPxDTURAH4770O-sd38j&export=download",
+    "name": "HumanoidAMP_walk.pth",
+    "md5": ""
+  },
+  "HumanoidASEGetupSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1Rkzmxrq_f3vf6chvV4UWl46tJVadlt_I&export=download",
+    "name": "HumanoidASEGetupSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASEPerturbSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1Rkzmxrq_f3vf6chvV4UWl46tJVadlt_I&export=download",
+    "name": "HumanoidASEPerturbSwordShield.pth",
+    "md5": ""
+  }
 }

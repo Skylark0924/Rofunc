@@ -1,0 +1,83 @@
+# ========== Trainer parameters ==========
+Trainer:
+  experiment_name:                    # Experiment name for logging.
+  experiment_directory:               # Experiment directory for logging.
+  write_interval: 100                 # TensorBoard write interval for logging. (timesteps)
+  checkpoint_interval: 1000           # Checkpoint interval for logging. (timesteps)
+  wandb: False                        # If true, log to Weights & Biases.
+  wandb_kwargs:                       # Weights & Biases kwargs. https://docs.wandb.ai/ref/python/init
+    project:                          # Weights & Biases project name.
+  rofunc_logger_kwargs:               # Rofunc BeautyLogger kwargs.
+    verbose: True                     # If true, print to stdout.
+  maximum_steps: 100000               # The maximum number of steps to run for.
+  random_steps: 0                     # The number of random exploration steps to take.
+  start_learning_steps: 0             # The number of steps to take before starting network updating.
+  seed: 42                            # The random seed.
+  rollouts: 16                        # The number of rollouts before updating.
+  eval_steps: 1000                    # The number of steps to run for evaluation.
+  inference_steps: 1000               # The number of steps to run for inference.
+
+
+# ========== Agent parameters ==========
+Agent:
+  horizon: 200                        # The maximum number of steps per episode.
+  discount: 0.99                      # The discount factor, gamma.
+  polyak: 0.005                       # soft update hyperparameter (tau)
+
+  gradient_steps: 1                  # The number of gradient steps to take per update.
+  batch_size: 64                     # The number of samples per update.
+
+  lr_a: 1e-3                        # Learning rate for actor.
+  lr_c: 1e-3                        # Learning rate for critic.
+#  lr_scheduler:                    # Learning rate scheduler type.
+#  lr_scheduler_kwargs:             # Learning rate scheduler kwargs.
+  adam_eps: 1e-5                    # Adam epsilon.
+
+  exploration:
+    noise:
+    initial_scale: 1.0
+    final_scale: 1e-3
+    steps:
+
+  grad_norm_clip: 0.0              # clipping coefficient for the norm of the gradients
+
+  policy_update_delay: 2            # Delay policy updates w.r.t critic updates.
+  smooth_regularization_noise:      # smooth noise for regularization
+  smooth_regularization_clip: 0.1   # clip for smooth regularization
+
+  kl_threshold: 0              # Initial coefficient for KL divergence.
+
+#  state_preprocessor:            # State preprocessor type.
+#  state_preprocessor_kwargs:     # State preprocessor kwargs.
+#  value_preprocessor:            # Value preprocessor type.
+#  value_preprocessor_kwargs:     # Value preprocessor kwargs.
+#  rewards_shaper:                # Rewards shaper type.
+
+
+# ========= Model parameters ==========
+Model:
+  use_init: True
+  use_action_clip: False               # If true, clip actions to the action space range.
+  action_clip: 1.0                     # clipping coefficient for the norm of the actions
+  use_log_std_clip: True               # If true, clip log standard deviations to the range [-20, 2].
+  log_std_clip_max: 2.0                # clipping coefficient for the log standard deviations
+  log_std_clip_min: -20                # clipping coefficient for the log standard deviations
+
+  actor:
+    mlp_hidden_dims: [ 512, 256, 128 ]
+    mlp_activation: elu
+    use_lstm: false
+    lstm_cell_size: 256
+    lstm_use_prev_action: false
+    lstm_use_prev_reward: false
+    max_seq_len: 20
+
+  critic:
+    mlp_hidden_dims: [ 512, 256, 128 ]
+    mlp_activation: elu
+    use_lstm: false
+    lstm_cell_size: 256
+    lstm_use_prev_action: false
+    lstm_use_prev_reward: false
+    max_seq_len: 20
+

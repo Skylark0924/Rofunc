@@ -158,7 +158,7 @@ examples/learning/rllib_example.py
 examples/learning/skrl_example.py
 examples/learning/skrl_example2.py
 
-rofunc/learning/rl/utils/result
+rofunc/learning/RofuncRL/utils/result
 examples/learning/result
 
 rofunc/others/
@@ -175,3 +175,7 @@ rofunc/.DS_Store
 .DS_Store
 others/
 
+doc/source/auto_examples
+doc/source/apidocs
+.vscode/
+*.pth

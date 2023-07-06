@@ -1,0 +1,27 @@
+gradient_steps: 1
+batch_size: 512
+discount_factor: 0.99
+polyak: 0.005
+actor_learning_rate: 0.001
+critic_learning_rate: 0.001
+learning_rate_scheduler: null
+learning_rate_scheduler_kwargs: {}
+state_preprocessor: null
+state_preprocessor_kwargs: {}
+random_timesteps: 0
+learning_starts: 0
+exploration:
+  noise: null
+  initial_scale: 1.0
+  final_scale: 0.001
+  timesteps: null
+policy_delay: 2
+smooth_regularization_noise: null
+smooth_regularization_clip: 0.1
+rewards_shaper: null
+experiment:
+  directory: ''
+  experiment_name: ''
+  write_interval: 100
+  checkpoint_interval: 1000
+  store_separately: false

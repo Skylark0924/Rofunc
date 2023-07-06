@@ -12,8 +12,8 @@
 
 > **Repository address: https://github.com/Skylark0924/Rofunc**
 
-Rofunc package focuses on the **robotic Imitation Learning (IL) and Learning from Demonstration (LfD)** fields and
-provides valuable and convenient python functions for robotics, including _demonstration collection, data
+Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for 
+**(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including _demonstration collection, data
 pre-processing, LfD algorithms, planning, and control methods_. We also provide an Isaac Gym-based robot simulator for
 evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that
 simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on
@@ -27,7 +27,7 @@ robots.
     - [Install from Source (nightly version, recommended)](#install-from-source-nightly-version-recommended)
   - [Documentation](#documentation)
   - [Star History](#star-history)
-  - [Cite](#cite)
+  - [Citation](#citation)
   - [Related Papers](#related-papers)
   - [The Team](#the-team)
   - [Acknowledge](#acknowledge)
@@ -41,8 +41,11 @@ robots.
 
 The installation is very easy,
 
-```
+```shell
 pip install rofunc
+
+# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3) and Envs (gymnasium[all], mujoco_py)
+pip install rofunc[baselines]
 ```
 
 and as you'll find later, it's easy to use as well!
@@ -54,11 +57,11 @@ import rofunc as rf
 Thus, have fun in the robotics world!
 > **Note**
 > Several requirements need to be installed before using the package. Please refer to
-> the [installation guide](https://rofunc.readthedocs.io/en/latest/overview.html#installation) for more details.
+> the [installation guide](https://rofunc.readthedocs.io/en/latest/installation.html) for more details.
 
 ### Install from Source (nightly version, recommended)
 
-```python
+```shell
 git clone https://github.com/Skylark0924/Rofunc.git
 cd Rofunc
 
@@ -68,7 +71,9 @@ conda create -n rofunc python=3.8
 
 # For Linux user
 sh ./scripts/install.sh
-# For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
+# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
+sh ./scripts/install_w_baselines.sh
+# [Option] For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
 sh ./scripts/mac_install.sh
 ```
 
@@ -83,13 +88,6 @@ sh ./scripts/mac_install.sh
 [![Documentation](https://img.shields.io/badge/Documentation-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/)
 [![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)
 
-> **Note**
-> Currently, we provide a simple document; please refer to [here](./rofunc/).
-> A comprehensive one with both English and Chinese versions is built via
-> the [readthedoc](https://rofunc.readthedocs.io/en/latest/).
-> We provide a simple but interesting example: learning to play
-> Taichi by learning from human demonstration.
-
 To give you a quick overview of the pipeline of `rofunc`, we provide an interesting example of learning to play Taichi
 from human demonstration. You can find it in the [Quick start](https://rofunc.readthedocs.io/en/latest/quickstart.html)
 section of the documentation.
@@ -99,44 +97,35 @@ The available functions and plans can be found as follows.
 > **Note**
 > ✅: Achieved 🔃: Reformatting ⛔: TODO
 
-|                                      Data                                       |   |      Learning       |    |                                   P&C                                   |     |      Tools       |    |                                 Simulator                                 |    |
-|:-------------------------------------------------------------------------------:|---|:-------------------:|----|:-----------------------------------------------------------------------:|-----|:----------------:|----|:-------------------------------------------------------------------------:|----|
-|  [`xsens.record`](https://rofunc.readthedocs.io/en/latest/devices/xsens.html)   | ✅ |        `DMP`        | ⛔  |   [`LQT`](https://rofunc.readthedocs.io/en/latest/planning/lqt.html)    | ✅   |     `Config`     | ✅  | [`Franka`](https://rofunc.readthedocs.io/en/latest/simulator/franka.html) | ✅  |
-|  [`xsens.export`](https://rofunc.readthedocs.io/en/latest/devices/xsens.html)   | ✅ |        `GMR`        | ✅  |                                 `LQTBi`                                 | ✅   | `robolab.coord`  | ✅  |   [`CURI`](https://rofunc.readthedocs.io/en/latest/simulator/curi.html)   | ✅  |
-|  [`xsens.visual`](https://rofunc.readthedocs.io/en/latest/devices/xsens.html)   | ✅ |       `TPGMM`       | ✅  | [`LQTFb`](https://rofunc.readthedocs.io/en/latest/planning/lqt_fb.html) | ✅   |   `robolab.fk`   | ✅  |                                `CURIMini`                                 | 🔃 |
-| [`opti.record`](https://rofunc.readthedocs.io/en/latest/devices/optitrack.html) | ✅ |      `TPGMMBi`      | ✅  | [`LQTCP`](https://rofunc.readthedocs.io/en/latest/planning/lqt_cp.html) | ✅   |   `robolab.ik`   | ✅  |                              `CURISoftHand`                               | ✅  |
-| [`opti.export`](https://rofunc.readthedocs.io/en/latest/devices/optitrack.html) | ✅ |    `TPGMM_RPCtl`    | ✅  |                               `LQTCPDMP`                                | ✅   |   `robolab.fd`   | ⛔  |                                 `Walker`                                  | ✅  |
-| [`opti.visual`](https://rofunc.readthedocs.io/en/latest/devices/optitrack.html) | ✅ |   `TPGMM_RPRepr`    | ✅  |                                  `LQR`                                  | ✅   |   `robolab.id`   | ⛔  |                                  `Gluon`                                  | 🔃 |
-|    [`zed.record`](https://rofunc.readthedocs.io/en/latest/devices/zed.html)     | ✅ |       `TPGMR`       | ✅  |                               `PoGLQRBi`                                | ✅   | `visualab.dist`  | ✅  |                                 `Baxter`                                  | 🔃 |
-|    [`zed.export`](https://rofunc.readthedocs.io/en/latest/devices/zed.html)     | ✅ |      `TPGMRBi`      | ✅  |  [`iLQR`](https://rofunc.readthedocs.io/en/latest/planning/ilqr.html)   | 🔃  | `visualab.ellip` | ✅  |                                 `Sawyer`                                  | 🔃 |
-|    [`zed.visual`](https://rofunc.readthedocs.io/en/latest/devices/zed.html)     | ✅ |      `TPHSMM`       | ✅  |                                `iLQRBi`                                 | 🔃  | `visualab.traj`  | ✅  |                               `Multi-Robot`                               | ✅  |
-|                                  `emg.record`                                   | ✅ |        `BCO`        | 🔃 |                                `iLQRFb`                                 | 🔃  |                  |    |                                                                           |    |
-|                                  `emg.export`                                   | ✅ |      `STrans`       | ⛔  |                                `iLQRCP`                                 | 🔃  |                  |    |                                                                           |    |
-|                                  `emg.visual`                                   | ✅ |     `PPO(SKRL)`     | ✅  |                               `iLQRDyna`                                | 🔃  |                  |    |                                                                           |    |
-|                                 `mmodal.record`                                 | ⛔ |     `SAC(SKRL)`     | ✅  |                                `iLQRObs`                                | 🔃  |                  |    |                                                                           |    |
-|                                 `mmodal.export`                                 | ✅ |     `TD3(SKRL)`     | ✅  |                                  `MPC`                                  | ⛔   |                  |    |                                                                           |    |
-|                                                                                 |   |     `PPO(SB3)`      | ⛔  |                                  `RMP`                                  | ⛔   |                  |    |                                                                           |    |
-|                                                                                 |   |     `SAC(SB3)`      | ⛔  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |     `TD3(SB3)`      | ⛔  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |    `PPO(RLlib)`     | ✅  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |    `SAC(RLlib)`     | ✅  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |    `TD3(RLlib)`     | ✅  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |    `PPO(ElegRL)`    | ✅  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |    `SAC(ElegRL)`    | ✅  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |    `TD3(ElegRL)`    | ✅  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |   `PPO(RofuncRL)`   | ✅  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |   `SAC(RofuncRL)`   | 🔃 |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |   `TD3(RofuncRL)`   | 🔃 |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   | `ODTrans(RofuncRL)` | ⛔  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |  `RT-1(RofuncRL)`   | ⛔  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |   `CQL(RofuncRL)`   | ⛔  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |  `TD3BC(RofuncRL)`  | ⛔  |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   | `DTrans(RofuncRL)`  | 🔃 |                                                                         |     |                  |    |                                                                           |    |
-|                                                                                 |   |  `EDAC(RofuncRL)`   | ⛔  |                                                                         |     |                  |    |                                                                           |    |
-                                                                                  
-
-
-  
+|                                      Data                                       |   |                                        Learning                                        |    |                                   P&C                                   |     |      Tools       |    |                                 Simulator                                 |    |
+|:-------------------------------------------------------------------------------:|---|:--------------------------------------------------------------------------------------:|----|:-----------------------------------------------------------------------:|-----|:----------------:|----|:-------------------------------------------------------------------------:|----|
+|  [`xsens.record`](https://rofunc.readthedocs.io/en/latest/devices/xsens.html)   | ✅ |                                         `DMP`                                          | ⛔  |   [`LQT`](https://rofunc.readthedocs.io/en/latest/planning/lqt.html)    | ✅   |     `Config`     | ✅  | [`Franka`](https://rofunc.readthedocs.io/en/latest/simulator/franka.html) | ✅  |
+|  [`xsens.export`](https://rofunc.readthedocs.io/en/latest/devices/xsens.html)   | ✅ |                                         `GMR`                                          | ✅  |                                 `LQTBi`                                 | ✅   | `robolab.coord`  | ✅  |   [`CURI`](https://rofunc.readthedocs.io/en/latest/simulator/curi.html)   | ✅  |
+|  [`xsens.visual`](https://rofunc.readthedocs.io/en/latest/devices/xsens.html)   | ✅ |                                        `TPGMM`                                         | ✅  | [`LQTFb`](https://rofunc.readthedocs.io/en/latest/planning/lqt_fb.html) | ✅   |   `robolab.fk`   | ✅  |                                `CURIMini`                                 | 🔃 |
+| [`opti.record`](https://rofunc.readthedocs.io/en/latest/devices/optitrack.html) | ✅ |                                       `TPGMMBi`                                        | ✅  | [`LQTCP`](https://rofunc.readthedocs.io/en/latest/planning/lqt_cp.html) | ✅   |   `robolab.ik`   | ✅  |                              `CURISoftHand`                               | ✅  |
+| [`opti.export`](https://rofunc.readthedocs.io/en/latest/devices/optitrack.html) | ✅ |                                     `TPGMM_RPCtl`                                      | ✅  |                               `LQTCPDMP`                                | ✅   |   `robolab.fd`   | ⛔  |                                 `Walker`                                  | ✅  |
+| [`opti.visual`](https://rofunc.readthedocs.io/en/latest/devices/optitrack.html) | ✅ |                                     `TPGMM_RPRepr`                                     | ✅  |                                  `LQR`                                  | ✅   |   `robolab.id`   | ⛔  |                                  `Gluon`                                  | 🔃 |
+|    [`zed.record`](https://rofunc.readthedocs.io/en/latest/devices/zed.html)     | ✅ |                                        `TPGMR`                                         | ✅  |                               `PoGLQRBi`                                | ✅   | `visualab.dist`  | ✅  |                                 `Baxter`                                  | 🔃 |
+|    [`zed.export`](https://rofunc.readthedocs.io/en/latest/devices/zed.html)     | ✅ |                                       `TPGMRBi`                                        | ✅  |  [`iLQR`](https://rofunc.readthedocs.io/en/latest/planning/ilqr.html)   | 🔃  | `visualab.ellip` | ✅  |                                 `Sawyer`                                  | 🔃 |
+|    [`zed.visual`](https://rofunc.readthedocs.io/en/latest/devices/zed.html)     | ✅ |                                        `TPHSMM`                                        | ✅  |                                `iLQRBi`                                 | 🔃  | `visualab.traj`  | ✅  |                               `Multi-Robot`                               | ✅  |
+|                                  `emg.record`                                   | ✅ | [`RLBaseLine(SKRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RLBaseLine/SKRL.html) | ✅  |                                `iLQRFb`                                 | 🔃  |                  |    |                                                                           |    |
+|                                  `emg.export`                                   | ✅ |                                  `RLBaseLine(RLlib)`                                   | ✅  |                                `iLQRCP`                                 | 🔃  |                  |    |                                                                           |    |
+|                                  `emg.visual`                                   | ✅ |                                  `RLBaseLine(ElegRL)`                                  | ✅  |                               `iLQRDyna`                                | 🔃  |                  |    |                                                                           |    |
+|                                 `mmodal.record`                                 | ⛔ |                                    `BCO(RofuncIL)`                                     | 🔃 |                                `iLQRObs`                                | 🔃  |                  |    |                                                                           |    |
+|                                 `mmodal.export`                                 | ✅ |                                    `BC-Z(RofuncIL)`                                    | ⛔  |                                  `MPC`                                  | ⛔   |                  |    |                                                                           |    |
+|                                                                                 |   |                                   `STrans(RofuncIL)`                                   | ⛔  |                                  `RMP`                                  | ⛔   |                  |    |                                                                           |    |
+|                                                                                 |   |                                    `RT-1(RofuncIL)`                                    | ⛔  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |    [`A2C(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/A2C.html)    | ✅  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |    [`PPO(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/PPO.html)    | ✅  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |    [`SAC(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/SAC.html)    | ✅  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |    [`TD3(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/TD3.html)    | ✅  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |                                    `CQL(RofuncRL)`                                     | ⛔  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |                                   `TD3BC(RofuncRL)`                                    | ⛔  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |                                   `DTrans(RofuncRL)`                                   | 🔃 |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |                                    `EDAC(RofuncRL)`                                    | ⛔  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |    [`AMP(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html)    | ✅  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |    [`ASE(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html)    | ✅  |                                                                         |     |                  |    |                                                                           |    |
+|                                                                                 |   |                                  `ODTrans(RofuncRL)`                                   | ⛔  |                                                                         |     |                  |    |                                                                           |    |
 
 
 ## Star History
@@ -160,7 +149,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 ## Related Papers
 
-1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](./rofunc/learning/dl/structured_transformer/strans.py))
+1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](rofunc/learning/RofuncIL/structured_transformer/strans.py))
 ```
 @article{liu2022robot,
          title={Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects},
@@ -173,7 +162,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
          publisher={IEEE}
 }
 ```
-2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer (IROS 2023)
+2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer ([IROS 2023](https://arxiv.org/abs/2306.12677) ｜ Code coming soon)
 3. Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration (IEEE CDC 2023 | [Code](./rofunc/learning/ml/tpgmm.py))
 
 
