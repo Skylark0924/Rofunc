@@ -10,7 +10,7 @@ DT = 1e-1
 damp = 1e-12
 
 
-def get_ik_from_model(model, POSE, ORI, JOINT_ID):
+def ik(model, POSE, ORI, JOINT_ID):
     data = model.createData()
 
     oMdes = pinocchio.SE3(ORI, np.array(POSE))
@@ -49,14 +49,14 @@ def get_ik_from_model(model, POSE, ORI, JOINT_ID):
     return q_ik
 
 
-# if __name__ == '__main__':
-#     model = pinocchio.buildModelFromUrdf(
-#         "/home/ubuntu/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
-#     print('model name: ' + model.name)
-#     POSE = [1, 0, 1]
-#     ORI = np.array([-1, 0, 0, 0, -1, 0, 0, 0, 1]).reshape(3, 3)
-#     JOINT_ID = 18
-#     q_rearrange = ik(model, POSE, ORI, JOINT_ID)
-#     a = q_rearrange.take(
-#         [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 21, 11, 13, 22, 23, 14, 15, 24, 16, 25, 26, 17, 18, 27, 19, 28])
-#     print('\nresult: %s' % a.flatten().tolist())
+if __name__ == '__main__':
+    model = pinocchio.buildModelFromUrdf(
+        "/home/lee/Rofunc/rofunc/simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf")
+    print('model name: ' + model.name)
+    POSE = [1, 0, 1]
+    ORI = np.array([-1, 0, 0, 0, -1, 0, 0, 0, 1]).reshape(3, 3)
+    JOINT_ID = 18
+    q_rearrange = ik(model, POSE, ORI, JOINT_ID)
+    a = q_rearrange.take(
+        [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 21, 11, 13, 22, 23, 14, 15, 24, 16, 25, 26, 17, 18, 27, 19, 28])
+    print('\nresult: %s' % a.flatten().tolist())
