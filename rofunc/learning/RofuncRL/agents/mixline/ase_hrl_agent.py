@@ -37,12 +37,6 @@ from rofunc.learning.RofuncRL.utils.memory import Memory
 from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 from rofunc.learning.pre_trained_models.download import model_zoo
 
-from .utils import ase_network_builder
-from .utils import ase_agent
-from .utils import ase_models
-import yaml, copy
-from .utils.observer import RLGPUAlgoObserver
-
 
 class ASEHRLAgent(BaseAgent):
     def __init__(self,
@@ -176,6 +170,10 @@ class ASEHRLAgent(BaseAgent):
         self._set_up()
 
     def _build_llc(self):
+        from .utils import ase_network_builder
+        from .utils import ase_agent
+        from .utils import ase_models
+        import yaml, copy
         with open(
                 "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/learning/RofuncRL/agents/mixline/utils/ase_humanoid_hrl.yaml",
                 'r') as f:
@@ -198,6 +196,8 @@ class ASEHRLAgent(BaseAgent):
         self.llc_agent.set_eval()
 
     def _build_llc_agent_config(self, config_params, network):
+        from .utils.observer import RLGPUAlgoObserver
+
         llc_env_info = {'action_space': gym.spaces.Box(-1.0, 1.0, (31,)),
                         'observation_space': gym.spaces.Box(-np.inf, np.inf, (253,)),
                         'amp_observation_space': gym.spaces.Box(-np.inf, np.inf, (1400,))}
@@ -275,7 +275,7 @@ class ASEHRLAgent(BaseAgent):
         # values = self.value(self._state_preprocessor(self.pre_states))
         values = self.value(self._state_preprocessor(states))
         values = self._value_preprocessor(values, inverse=True)
-        if (values.isnan()==True).any():
+        if (values.isnan() == True).any():
             print("values is nan")
 
         next_values = self.value(self._state_preprocessor(next_states))
