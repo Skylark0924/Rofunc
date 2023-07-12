@@ -53,7 +53,7 @@ Agent:
 
   kl_threshold: 0                  # Initial coefficient for KL divergence.
 
-  llc_ckpt_path: /home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/examples/learning_rl/runs/RofuncRL_ASETrainer_HumanoidASEGetupSwordShield_23-06-26_12-49-35-111331/checkpoints/ckpt_87000.pth
+  llc_ckpt_path:
   llc_steps_per_high_action: 1
 
 #  state_preprocessor:            # State preprocessor type.
