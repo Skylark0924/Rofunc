@@ -1,0 +1,28 @@
+seed: 42
+rollouts: 1024
+learning_epochs: 10
+mini_batches: 32
+discount_factor: 0.9
+lambda: 0.95
+learning_rate: 0.001
+learning_rate_scheduler: null
+learning_rate_scheduler_kwargs: {}
+state_preprocessor: null
+state_preprocessor_kwargs: {}
+value_preprocessor: null
+value_preprocessor_kwargs: {}
+random_timesteps: 0
+learning_starts: 0
+grad_norm_clip: 0.5
+ratio_clip: 0.2
+value_clip: 0.2
+clip_predicted_values: false
+entropy_loss_scale: 0.0
+kl_threshold: 0
+rewards_shaper: null
+experiment:
+  directory: ''
+  experiment_name: ''
+  write_interval: 100
+  checkpoint_interval: 1000
+  store_separately: false

@@ -1,3 +1,19 @@
+"""
+ Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
+
 import os
 import math
 import matplotlib.pyplot as plt
@@ -13,6 +29,7 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 class PlaygroundSim:
     def __init__(self, args):
         self.args = args
+        self.up_axis = None
         self.init_sim()
         self.init_viewer()
         self.init_plane()
@@ -22,6 +39,7 @@ class PlaygroundSim:
 
         if hasattr(self.args, "up_axis"):
             up_axis = self.args.up_axis.upper()
+        self.up_axis = up_axis
 
         # Initialize gym
         self.gym = gymapi.acquire_gym()
@@ -69,8 +87,15 @@ class PlaygroundSim:
             beauty_print("Failed to create sim", type="warning")
             quit()
 
-    def init_viewer(self, cam_pos=(3.0, 2.0, 0.0), cam_target=(0.0, 0.0, 0.0)):
+    def init_viewer(self):
         from isaacgym import gymapi
+
+        if self.up_axis == "Y":
+            cam_pos = (3.0, 2.0, 0.0)
+            cam_target = (0.0, 0.0, 0.0)
+        elif self.up_axis == "Z":
+            cam_pos = (3.0, 0.0, 2.0)
+            cam_target = (0.0, 0.0, 0.0)
 
         if hasattr(self.args, 'cam_pos') and hasattr(self.args, 'cam_target'):
             cam_pos = self.args.cam_pos
@@ -93,19 +118,20 @@ class PlaygroundSim:
         self.gym.viewer_camera_look_at(self.viewer, None, gymapi.Vec3(cam_pos[0], cam_pos[1], cam_pos[2]),
                                        gymapi.Vec3(cam_target[0], cam_target[1], cam_target[2]))
 
-    def init_plane(self, plane_vec=None):
+    def init_plane(self):
         from isaacgym import gymapi
         # Add ground plane
         plane_params = gymapi.PlaneParams()
-        if plane_vec is not None:
-            plane_params.normal = plane_vec  # z-up! gymapi.Vec3(0, 0, 1)
+        if self.up_axis == "Y":
+            plane_params.normal = gymapi.Vec3(0, 1, 0)
+        elif self.up_axis == "Z":
+            plane_params.normal = gymapi.Vec3(0, 0, 1)
         self.gym.add_ground(self.sim, plane_params)
 
 
 class RobotSim:
     def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=False,
-                 flip_visual_attachments=True,
-                 init_pose_vec=None, num_envs=1, device="cpu"):
+                 flip_visual_attachments=True, init_pose_vec=None, num_envs=1, device="cpu"):
         """
         Initialize the robot simulator
         :param args: arguments
@@ -123,7 +149,7 @@ class RobotSim:
         self.num_envs = num_envs
         self.device = device
         if self.robot_name == "CURI":
-            self.asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+            self.asset_file = "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
             self.init_pose_vec = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         elif self.robot_name == "walker":
             self.asset_file = "urdf/walker/urdf/walker_cartesio.urdf"
@@ -150,13 +176,20 @@ class RobotSim:
         elif self.robot_name == "human":
             self.asset_file = asset_file
             self.flip_visual_attachments = False
-            self.fix_base_link = False
-            self.init_pose_vec = (0., 2., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+            self.fix_base_link = True
+            pos_y, pos_z = 2., 0.
         else:
             raise ValueError(
                 "The robot {} is not supported. Please choose a robot in [CURI, walker, CURI-mini, baxter, sawyer]".format(
                     self.robot_name))
 
+        if hasattr(self.args, "up_axis"):  # TODO: suit for z-up setting
+            up_axis = self.args.up_axis.upper()
+            if up_axis == "Z":
+                pos_z, pos_y = pos_y, pos_z
+        self.init_pose_vec = (0., pos_y, pos_z, -0.707107, 0., 0., 0.707107) if self.init_pose_vec is None else self.init_pose_vec
+
+        # Find the asset root folder
         if asset_root is None:
             import site
             pip_root_path = site.getsitepackages()[0]

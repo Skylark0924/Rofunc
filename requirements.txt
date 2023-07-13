@@ -1,22 +1,2 @@
-# rofunc
-scikit-learn
-sphinx!=5.2.0.post0
-sphinx_markdown_tables
-sphinx_gallery
-sphinx-book-theme 
-pillow
-neurokit2
-skrl
-gdown
-nestle
-hydra-core
-omegaconf
-pynput
-pytransform3d
-shutup
-ray[rllib]==2.2.0
-elegantrl
 https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl
 https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4-py3-none-any.whl
-matplotlib==3.7.0
-numpy==1.21.6

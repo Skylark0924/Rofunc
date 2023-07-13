@@ -1,0 +1,23 @@
+gradient_steps: 1
+batch_size: 512
+discount_factor: 0.99
+polyak: 0.005
+actor_learning_rate: 0.001
+critic_learning_rate: 0.001
+learning_rate_scheduler: null
+learning_rate_scheduler_kwargs: {}
+state_preprocessor: null
+state_preprocessor_kwargs: {}
+random_timesteps: 1000
+learning_starts: 1000
+learn_entropy: true
+entropy_learning_rate: 0.001
+initial_entropy_value: 0.2
+target_entropy: null
+rewards_shaper: null
+experiment:
+  base_directory: ''
+  experiment_name: ''
+  write_interval: 100
+  checkpoint_interval: 1000
+  store_separately: false

@@ -1,6 +1,6 @@
-import rofunc as rf
 import numpy as np
-import os
+
+import rofunc as rf
 
 
 def test_2d_uni_tpgmm():
@@ -9,11 +9,14 @@ def test_2d_uni_tpgmm():
                             [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
     demos_x = rf.data_generator.multi_bezier_demos(demo_points)  # (3, 50, 2): 3 demos, each has 50 points
 
-    representation = rf.learning.tpgmm.TPGMM(demos_x, plot=False)
-    model = representation.fit()
+    start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
+    end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
+    task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
+    Repr = rf.ml.TPGMM(demos_x, task_params, plot=False)
+    model = Repr.fit()
 
     # Reproductions for the same situations
-    traj, _ = representation.reproduce(model, show_demo_idx=2)
+    traj, _ = Repr.reproduce(model, show_demo_idx=2)
 
 
 def test_2d_bi_tpgmm():
@@ -26,51 +29,70 @@ def test_2d_bi_tpgmm():
     demos_left_x = rf.data_generator.multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
     demos_right_x = rf.data_generator.multi_bezier_demos(right_demo_points)
 
-    representation = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, plot=False)
-    model_l, model_r = representation.fit()
+    # Define the task parameters
+    start_xdx_l = [demos_left_x[i][0] for i in range(len(demos_left_x))]  # TODO: change to xdx
+    end_xdx_l = [demos_left_x[i][-1] for i in range(len(demos_left_x))]
+    start_xdx_r = [demos_right_x[i][0] for i in range(len(demos_right_x))]
+    end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
+    task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
+                   'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
+    Repr = rf.ml.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
+    model_l, model_r = Repr.fit()
 
-    traj_l, traj_r, _, _ = representation.reproduce(model_l, model_r, show_demo_idx=2)
+    traj_l, traj_r, _, _ = Repr.reproduce([model_l, model_r], show_demo_idx=2)
 
 
 def test_7d_uni_tpgmm():
-    raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
+    raw_demo = np.load('../examples/data/LFD_ML/LeftHand.npy')
     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
-    representation = rf.learning.tpgmm.TPGMM(demos_x, plot=False)
-    model = representation.fit()
+    start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
+    end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
+    task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
+    Repr = rf.ml.TPGMM(demos_x, task_params, plot=False)
+    model = Repr.fit()
 
     # Reproductions for the same situations
-    traj, _ = representation.reproduce(model, show_demo_idx=2)
+    traj, _ = Repr.reproduce(model, show_demo_idx=2)
 
     # Reproductions for new situations
     ref_demo_idx = 2
-    start_xdx = representation.demos_xdx[ref_demo_idx][0]
-    end_xdx = representation.demos_xdx[ref_demo_idx][0]
-    task_params = {'start_xdx': start_xdx, 'end_xdx': end_xdx}
-    traj, _ = representation.generate(model, ref_demo_idx, task_params)
+    start_xdx = [Repr.demos_xdx[ref_demo_idx][0]]
+    end_xdx = [Repr.demos_xdx[ref_demo_idx][0]]
+    Repr.task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
+    traj, _ = Repr.generate(model, ref_demo_idx)
 
 
 def test_7d_bi_tpgmm():
-    left_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/LeftHand.npy'))
-    right_raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/RightHand.npy'))
+    left_raw_demo = np.load('../examples/data/LFD_ML/LeftHand.npy')
+    right_raw_demo = np.load('../examples/data/LFD_ML/RightHand.npy')
     demos_left_x = [left_raw_demo[500:635, :], left_raw_demo[635:770, :], left_raw_demo[770:905, :]]
     demos_right_x = [right_raw_demo[500:635, :], right_raw_demo[635:770, :], right_raw_demo[770:905, :]]
 
-    representation = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, plot=False)
-    model_l, model_r = representation.fit()
+    # --- TP-GMMBi ---
+    # Define the task parameters
+    start_xdx_l = [demos_left_x[i][0] for i in range(len(demos_left_x))]  # TODO: change to xdx
+    end_xdx_l = [demos_left_x[i][-1] for i in range(len(demos_left_x))]
+    start_xdx_r = [demos_right_x[i][0] for i in range(len(demos_right_x))]
+    end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
+    task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
+                   'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
+    # Fit the model
+    Repr = rf.ml.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
+    model_l, model_r = Repr.fit()
 
     # Reproductions for the same situations
-    traj_l, traj_r, _, _ = representation.reproduce(model_l, model_r, show_demo_idx=2)
+    traj_l, traj_r, _, _ = Repr.reproduce([model_l, model_r], show_demo_idx=2)
 
     # Reproductions for new situations
     ref_demo_idx = 2
-    start_xdx_l = representation.repr_l.demos_xdx[ref_demo_idx][0]
-    end_xdx_l = representation.repr_l.demos_xdx[ref_demo_idx][0]
-    start_xdx_r = representation.repr_r.demos_xdx[ref_demo_idx][0]
-    end_xdx_r = representation.repr_r.demos_xdx[ref_demo_idx][0]
-    task_params = {'left': {'start_xdx': start_xdx_l, 'end_xdx': end_xdx_l},
-                   'right': {'start_xdx': start_xdx_r, 'end_xdx': end_xdx_r}}
-    traj_l, traj_r, _, _ = representation.generate(model_l, model_r, ref_demo_idx, task_params)
+    start_xdx_l = [Repr.repr_l.demos_xdx[ref_demo_idx][0]]
+    end_xdx_l = [Repr.repr_l.demos_xdx[ref_demo_idx][0]]
+    start_xdx_r = [Repr.repr_r.demos_xdx[ref_demo_idx][0]]
+    end_xdx_r = [Repr.repr_r.demos_xdx[ref_demo_idx][0]]
+    Repr.task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
+                        'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
+    traj_l, traj_r, _, _ = Repr.generate([model_l, model_r], ref_demo_idx)
 
 
 if __name__ == '__main__':

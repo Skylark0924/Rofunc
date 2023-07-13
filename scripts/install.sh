@@ -19,11 +19,11 @@ export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH # Ada
 export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
 
 # Downgrade pip to 21.0 for avoiding useless installation of different versions
-pip3rf install pip==21.0
+pip3rf install pip==21.3.1
 
 # Install the requirements and rofunc
 pip3rf install -r requirements.txt
-pip3rf install .
+pip3rf install . --use-deprecated=legacy-resolver
 
 
 
