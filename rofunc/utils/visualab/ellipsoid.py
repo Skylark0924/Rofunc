@@ -1,3 +1,19 @@
+"""
+ Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
+
 import rofunc as rf
 import numpy as np
 from numpy import linalg
@@ -34,9 +50,9 @@ def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
             center = ellipsoids[index, :3]
 
             if mode == 'quaternion':
-                R = rf.robolab.coord.quaternion_matrix(ellipsoids[index, 3:7])
+                R = rf.robolab.coord.homo_matrix_from_quaternion(ellipsoids[index, 3:7])
             elif mode == 'euler':
-                R = rf.robolab.coord.euler_matrix(ellipsoids[index, 3], ellipsoids[index, 4], ellipsoids[index, 5],
+                R = rf.robolab.coord.homo_matrix_from_euler(ellipsoids[index, 3], ellipsoids[index, 4], ellipsoids[index, 5],
                                                   'sxyz')
 
             # find the rotation matrix and radii of the axes
@@ -99,7 +115,7 @@ def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
 #     y = sigma_multiplier * r[1] * sin(phi) * sin(theta) + c[1]
 #     z = sigma_multiplier * r[2] * cos(phi) + c[2]
 #     # if ori is not None:
-#     #     ori_matrix = rf.coord.quaternion_matrix(ori)
+#     #     ori_matrix = rf.coord.homo_matrix_from_quaternion(ori)
 #     #     xyz = np.matmul(ori_matrix, np.vstack((x, y, z)))
 #     #     x, y, z = xyz[0], xyz[1], xyz[2]
 #     ax.plot_surface(x, y, z, color=color, alpha=alpha, linewidth=1)

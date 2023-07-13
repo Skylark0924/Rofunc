@@ -5,6 +5,7 @@ import sys
 
 import cv2
 import numpy as np
+import rofunc as rf
 
 
 class AppType(enum.Enum):
@@ -40,8 +41,7 @@ def export(filepath, mode=1):
     svo_input_path = filepath
     root_path = filepath.split('.svo')[0]
     output_dir = root_path + '_export'
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+    rf.utils.create_dir(output_dir)
 
     output_as_video = True
     if mode == 0:
@@ -69,8 +69,7 @@ def export(filepath, mode=1):
         output_as_video = False
 
     if not output_as_video:
-        if not os.path.exists(output_path):
-            os.mkdir(output_path)
+        rf.utils.create_dir(output_path)
 
     # Specify SVO path parameter
     init_params = sl.InitParameters()

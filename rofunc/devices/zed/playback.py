@@ -1,5 +1,6 @@
 import os.path
 import cv2
+import rofunc as rf
 
 saving_cnt = 0
 
@@ -76,8 +77,7 @@ def saving_image(root_path, key, mat):
         img = sl.ERROR_CODE.FAILURE
         while img != sl.ERROR_CODE.SUCCESS:
             saving_img_dir = root_path + '_saving_img'
-            if not os.path.exists(saving_img_dir):
-                os.mkdir(saving_img_dir)
+            rf.utils.create_dir(saving_img_dir)
             filepath = os.path.join(saving_img_dir, '{}.png'.format(saving_cnt))
             img = mat.write(filepath)
             print("Saving image {}.png : {}".format(saving_cnt, repr(img)))

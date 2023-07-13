@@ -1,3 +1,19 @@
+"""
+ Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
+
 import os
 
 import numpy as np
@@ -151,8 +167,8 @@ def get_human_params(mvnx_file, human_mass, human_height):
     # - Head -
     # box size
     head_data = mvnx_file.file_data['segments']['elements']['Head']
-    pTopOfHead = head_data['points_mvn']['pTopOfHead']
-    human_params['head_z'] = np.abs(pTopOfHead[2])
+    pTopHead = head_data['points_mvn']['pTopOfHead']
+    human_params['head_z'] = np.abs(pTopHead[2])
     # box origin
     human_params['headBoxOrigin'] = 0.5 * np.array([0, 0, human_params['head_z']])  # wrt C1Head
     # mass and inertia
@@ -264,7 +280,7 @@ def get_human_params(mvnx_file, human_mass, human_height):
     human_params['leftSho_y'] = np.abs(human_params['jLeftShoulder'][1])
     human_params['leftSho_z'] = np.abs(pLeftAcromion[2])  # assumption
     # box origin
-    human_params['leftShoulderBoxOrigin'] = 0.5 * np.array([0, human_params['leftSho_y'], 0])  # wrt jLeftShoulder
+    human_params['leftShoulderBoxOrigin'] = 0.5 * np.array([0, human_params['leftSho_y'], 0])  # wrt jLeftT4Shoulder
     # mass and inertia
     human_params['leftShoulderMass'] = 0.031 * human_mass
     human_params['leftShoulderIxx'] = human_params['leftShoulderMass'] / 12. * (
@@ -440,7 +456,7 @@ def get_human_params(mvnx_file, human_mass, human_height):
     # box size
     pLeftTro = left_upper_leg_data['points_mvn']['pLeftGreaterTrochanter']
     pLeftKneeUL = left_upper_leg_data['points_mvn']['pLeftKneeMedEpicondyle']
-    human_params['leftUpperLeg_x'] = pLeftKneeUL[1] - pLeftTro[1]
+    human_params['leftUpperLeg_x'] = np.abs(pLeftKneeUL[1] - pLeftTro[1])
     human_params['leftUpperLeg_z'] = np.abs(human_params['jLeftKnee'][2])
     # box origin
     human_params['leftUpperLegBoxOrigin'] = 0.5 * np.array([0, 0, -human_params['leftUpperLeg_z']])  # wrt jLeftHip
@@ -463,7 +479,7 @@ def get_human_params(mvnx_file, human_mass, human_height):
     # box size
     pLeftKneeLatLL = left_upper_leg_data['points_mvn']['pLeftKneeLatEpicondyle']  # TODO: check if this is correct
     pLeftKneeMedLL = left_upper_leg_data['points_mvn']['pLeftKneeMedEpicondyle']
-    human_params['leftLowerLeg_x'] = pLeftKneeMedLL[1] - pLeftKneeLatLL[1]
+    human_params['leftLowerLeg_x'] = np.abs(pLeftKneeMedLL[1] - pLeftKneeLatLL[1])
     human_params['leftLowerLeg_z'] = np.abs(human_params['jLeftAnkle'][2])
     # box origin
     human_params['leftLowerLegBoxOrigin'] = 0.5 * np.array([0, 0, -human_params['leftLowerLeg_z']])  # wrt jLeftKnee
@@ -512,7 +528,7 @@ def get_human_params(mvnx_file, human_mass, human_height):
     left_toe_data = mvnx_file.file_data['segments']['elements']['LeftToe']
     pLeftToe = left_toe_data['points_mvn']['pLeftToe']
     leftToe_x = np.abs(pLeftToe[0])
-    leftToe_y = leftFoot_y
+    leftToe_y = rightFoot_y
     leftToe_z = np.abs(pLeftToe[2])
     human_params['leftToeBox'] = np.array([leftToe_x, leftToe_y, leftToe_z])
     # box origin
@@ -627,7 +643,6 @@ def xsens2urdf(mvnx_path, save_dir=None, human_mass=70, human_height=183):
                    'RIGHTFOREARMINERTIAIXX': human_params['rightForeArmIxx'],
                    'RIGHTFOREARMINERTIAIYY': human_params['rightForeArmIyy'],
                    'RIGHTFOREARMINERTIAIZZ': human_params['rightForeArmIzz'],
-                   'jRightElbow_ORIGIN': human_params['jRightElbow'],
                    'jRightWrist_ORIGIN': human_params['jRightWrist'],
 
                    'RIGHTHAND_BOX_ORIGIN': human_params['rightHandBoxOrigin'],
@@ -666,7 +681,6 @@ def xsens2urdf(mvnx_path, save_dir=None, human_mass=70, human_height=183):
                    'LEFTFOREARMINERTIAIXX': human_params['leftForeArmIxx'],
                    'LEFTFOREARMINERTIAIYY': human_params['leftForeArmIyy'],
                    'LEFTFOREARMINERTIAIZZ': human_params['leftForeArmIzz'],
-                   'jLeftElbow_ORIGIN': human_params['jLeftElbow'],  # TODO: check this
                    'jLeftWrist_ORIGIN': human_params['jLeftWrist'],
 
                    'LEFTHAND_BOX_ORIGIN': human_params['leftHandBoxOrigin'],
@@ -755,7 +769,7 @@ def xsens2urdf(mvnx_path, save_dir=None, human_mass=70, human_height=183):
     # Open template urdf
     rofunc_path = get_rofunc_path()
     human_urdf_dir = os.path.join(rofunc_path, 'simulator/assets/urdf/human')
-    urdf_template_path = os.path.join(human_urdf_dir, 'human_xsenstemplate_48dof.urdf')
+    urdf_template_path = os.path.join(human_urdf_dir, 'human_xsenstemplate_48dof_zxy.urdf')
     with open(urdf_template_path, 'r') as f:
         urdf_template = f.read()
 

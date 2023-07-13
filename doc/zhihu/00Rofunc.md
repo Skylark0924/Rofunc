@@ -34,7 +34,7 @@
 
 除了 learning 模块外，我们还有更大的野心：**提供从多模态数据采集与处理、示教学习到机器人规划与控制、以及具有多种类人机器人仿真器的全流程示教学习 pipeline。** 对于高冗余度的类人型机器人来说，从人类演示中学习 (learning from human demonstration) 是获取新的、复杂的技能最自然且便捷的解决方案。我们提供了多视角视觉（ZED camera）、人类运动学（Xsens MTw Awinda）、物体运动学（Optitrack）以及人体生物力学（Delsys sEMG）的多传感器、多模态采集与处理方案，提供了基于优化的机器人规划与控制方法，也同样提供了基于 Isaac Gym 的多种机器人（Franka, CURI, Ubetch Walker, Diablo等）仿真器。
 
-![](../img/../../img/pipeline.png)
+![](../img/pipeline.png)
 
 
 ## 目录

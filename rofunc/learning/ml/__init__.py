@@ -1,7 +1,9 @@
 from __future__ import absolute_import
 
-from . import hmm
-from . import gmm
-from . import gmr
-from . import tpgmm
-from . import tpgmr
+from .hmm import *
+from .gmm import *
+from .gmr import *
+from .tpgmm import *
+from .tpgmr import *
+from .tphsmm import *
+from .visualize import *

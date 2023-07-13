@@ -9,7 +9,11 @@ def get_jacobian_from_model(file_path, end_link_name, joint_values):
     :return:
     """
     import kinpy as kp
-    if file_path.endswith('.urdf'):
+    if file_path.endswith('gluon.urdf'):
+        data = open(file_path)
+        xslt_content = data.read().encode()
+        chain = kp.build_serial_chain_from_urdf(xslt_content, end_link_name=end_link_name)
+    elif file_path.endswith('.urdf'):
         chain = kp.build_serial_chain_from_urdf(open(file_path).read(), end_link_name=end_link_name)
     elif file_path.endswith('.xml'):
         chain = kp.build_serial_chain_from_mjcf(open(file_path).read(), end_link_name=end_link_name)
@@ -26,6 +30,6 @@ def get_jacobian_from_model(file_path, end_link_name, joint_values):
 
 
 if __name__ == '__main__':
-    urdf_path = "/home/ubuntu/Github/Manipulation/kinpy/examples/kuka_iiwa/model.urdf"
-    joint_values = [0.0, -np.pi / 4.0, 0.0, np.pi / 2.0, 0.0, np.pi / 4.0, -np.pi / 4.0]
-    get_jacobian_from_model(urdf_path, end_link_name='lbr_iiwa_link_7', joint_values=joint_values)
+    urdf_path = "/home/hengyi/GitHub/Rofunc/rofunc/simulator/assets/urdf/gluon/gluon.urdf"
+    joint_values = [0.0, -np.pi / 4.0, 0.0, np.pi / 2.0, 0.0, np.pi / 4.0]
+    get_jacobian_from_model(urdf_path, end_link_name='6_Link', joint_values=joint_values)

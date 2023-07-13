@@ -1,5 +1,6 @@
-import rofunc as rf
 import numpy as np
+
+import rofunc as rf
 from rofunc.config.utils import get_config
 
 

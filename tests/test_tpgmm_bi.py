@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
 import rofunc as rf
@@ -17,10 +16,17 @@ def test_bi_spatial_data():
     demos_left_x = multi_bezier_demos(left_demo_points)  # (3, 50, 2): 3 demos, each has 50 points
     demos_right_x = multi_bezier_demos(right_demo_points)
 
-    representation = rf.tpgmm.TPGMM_RPCtl(demos_left_x, demos_right_x, plot=False)
-    model_l, model_r, model_c = representation.fit()
+    start_xdx_l = [demos_left_x[i][0] for i in range(len(demos_left_x))]  # TODO: change to xdx
+    end_xdx_l = [demos_left_x[i][-1] for i in range(len(demos_left_x))]
+    start_xdx_r = [demos_right_x[i][0] for i in range(len(demos_right_x))]
+    end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
+    task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
+                   'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
 
-    representation.reproduce(model_l, model_r, model_c, show_demo_idx=2)
+    Repr = rf.ml.TPGMM_RPCtrl(demos_left_x, demos_right_x, task_params, plot=False)
+    model_l, model_r, model_c = Repr.fit()
+
+    Repr.reproduce([model_l, model_r, model_c], show_demo_idx=2)
 
 
 def test_bi_temporal_data():
@@ -30,7 +36,6 @@ def test_bi_temporal_data():
                             [-1 * np.pi / 4, 2 * np.pi / 7],
                             [-1 * np.pi / 4, 1 * np.pi / 7]])
     theta_left = np.pi + theta_right
-    # theta_right[:, 1] = theta_right[:, 1] + 1 * np.pi / 3
 
     demos_left_x = np.vstack((draw_arc([-1, 0], 1, theta_left[0, 0], theta_left[0, 1], 'orange'),
                               draw_arc([2, -3], 2, theta_left[1, 0], theta_left[1, 1], 'purple'),
@@ -42,10 +47,17 @@ def test_bi_temporal_data():
                                draw_arc([1, -2], 4, theta_right[2, 0], theta_right[2, 1], 'grey'),
                                draw_arc([1, -2], 1, theta_right[3, 0], theta_right[3, 1], 'blue')))
 
-    representation = rf.tpgmm.TPGMM_RPCtl(demos_left_x, demos_right_x, plot=False)
-    model_l, model_r, model_c = representation.fit()
+    start_xdx_l = [demos_left_x[i][0] for i in range(len(demos_left_x))]  # TODO: change to xdx
+    end_xdx_l = [demos_left_x[i][-1] for i in range(len(demos_left_x))]
+    start_xdx_r = [demos_right_x[i][0] for i in range(len(demos_right_x))]
+    end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
+    task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
+                   'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
 
-    representation.reproduce(model_l, model_r, model_c, show_demo_idx=2)
+    Repr = rf.ml.TPGMM_RPCtrl(demos_left_x, demos_right_x, task_params, plot=False)
+    model_l, model_r, model_c = Repr.fit()
+
+    Repr.reproduce([model_l, model_r, model_c], show_demo_idx=2)
 
 
 if __name__ == '__main__':

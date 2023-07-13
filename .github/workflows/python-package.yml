@@ -45,4 +45,5 @@ jobs:
           export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
       - name: Test with pytest
         run: |
-          pytest tests/test_*.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+          cd tests
+          pytest test_*.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
