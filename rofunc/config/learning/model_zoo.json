@@ -48,5 +48,25 @@
     "url": "https://drive.google.com/uc?id=1Pfsf3aTaP7BtMa1cMmIEoIZPHaEwEBKY&export=download",
     "name": "HumanoidASEPerturbSwordShield.pth",
     "md5": ""
+  },
+  "HumanoidASEStrikeSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1I62R1IHPhAVbdzoHfpF85oUy86rKjC3I&export=download",
+    "name": "HumanoidASEStrikeSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASEReachSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=12CZ2TYi4koEeBFg9bX7m-IlpcwA9fM-e&export=download",
+    "name": "HumanoidASEReachSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASELocationSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1gXSSs69t0xqgQ3GiMKIKEGn8po8uRWW1&export=download",
+    "name": "HumanoidASELocationSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASEHeadingSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1VVXm1aZknEw3tTgRKfQoA0vaSDvublIF&export=download",
+    "name": "HumanoidASEHeadingSwordShield.pth",
+    "md5": ""
   }
 }
