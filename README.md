@@ -171,8 +171,15 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
   year={2023}
 }
 ```
-3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration ([IEEE CDC 2023]() | [Code](./rofunc/learning/ml/tpgmm.py))
-
+3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](./rofunc/learning/ml/tpgmm.py))
+```
+@article{liu2023birp,
+  title={BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration},
+  author={Liu, Junjia and Sim, Hengyi and Li, Chenzui and Chen, Fei},
+  journal={arXiv preprint arXiv:2307.05933},
+  year={2023}
+}
+```
 
 ## The Team
 
