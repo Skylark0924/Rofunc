@@ -37,6 +37,22 @@ python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEPe
 python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEHeadingSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
 ```
 
+### High-level policy learning with pre-trained latent space model (Location)
+
+`HumanoidASELocationSwordShield` task: the humanoid robot should walk to the red location.
+
+```shell
+python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASELocationSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
+```
+
+### High-level policy learning with pre-trained latent space model (Reach)
+
+`HumanoidASEReachSwordShield` task: the humanoid robot should let the sword reach the red point.
+
+```shell
+python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEReachSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
+```
+
 ### High-level policy learning with pre-trained latent space model (Strike)
 
 `HumanoidASEStrikeSwordShield` task: the humanoid robot should strike the sword to the block.
