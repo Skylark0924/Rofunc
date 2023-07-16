@@ -31,7 +31,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.processors.normalizers import Normalization
-from rofunc.learning.RofuncRL.tasks.utils.env_wrappers import wrap_env
+from rofunc.learning.utils.env_wrappers import wrap_env
 from rofunc.utils.file.internet import reserve_sock_addr
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
