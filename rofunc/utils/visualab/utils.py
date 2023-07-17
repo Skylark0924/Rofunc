@@ -37,7 +37,10 @@ def set_axis(ax, data=None, labels=None, elev=45, azim=45, roll=0):
     :param roll:
     :return:
     """
-    ax.view_init(elev=elev, azim=azim, roll=roll)
+    try:
+        ax.view_init(elev=elev, azim=azim, roll=roll)
+    except:
+        ax.view_init(elev=elev, azim=azim)
     # ax.set_aspect('equal', 'box')
     ax.set_box_aspect([1, 1, 1])
     if labels is None:
