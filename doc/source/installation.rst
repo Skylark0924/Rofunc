@@ -23,7 +23,7 @@ Installation
          .. code-block:: shell
 
             # Install pbdlib
-            pip install https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.7.1/pbdlib-0.1-py3-none-any.whl
+            pip install https://github.com/Skylark0924/Rofunc/releases/download/v0.0.2.3/pbdlib-0.1-py3-none-any.whl
             # Install Isaac Gym
             pip install https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4-py3-none-any.whl
 
