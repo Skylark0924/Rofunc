@@ -45,7 +45,7 @@ setup(
                       'gymnasium==0.28.1',
                       'tensorboard',
                       'networkx'],
-    python_requires=">=3.7,<=3.8",
+    python_requires=">=3.7,<3.9",
     keywords=['robotics', 'learning from demonstration', 'reinforcement learning', 'robot manipulation'],
     license='MIT',
     entry_points={
