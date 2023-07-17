@@ -42,8 +42,9 @@ setup(
                       'transformers==4.30.1',
                       'kinpy==0.2.1',
                       'gym==0.26.2',
-                      'gymnasium==0.28.1'],
-    python_requires=">3.7,<3.9",
+                      'gymnasium==0.28.1',
+                      'tensorboard==2.13.0'],
+    python_requires=">=3.7,<=3.9",
     keywords=['robotics', 'learning from demonstration', 'reinforcement learning', 'robot manipulation'],
     license='MIT',
     entry_points={
