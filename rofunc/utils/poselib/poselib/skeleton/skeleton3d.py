@@ -28,15 +28,13 @@
 
 import os
 import xml.etree.ElementTree as ET
-from collections import OrderedDict
-from typing import List, Optional, Type, Dict
+from typing import List, Type, Dict
 
 import numpy as np
-import torch
-
-from ..core import *
-from .backend.fbx.fbx_read_wrapper import fbx_to_array
 import scipy.ndimage.filters as filters
+
+from rofunc.utils.poselib.poselib.core import *
+from rofunc.utils.poselib.poselib.skeleton.backend.fbx.fbx_read_wrapper import fbx_to_array
 
 
 class SkeletonTree(Serializable):

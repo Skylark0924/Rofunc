@@ -31,8 +31,7 @@ import os
 import yaml
 from isaacgym.torch_utils import *
 
-from ...amp.poselib.poselib.core.rotation3d import *
-from ...amp.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
+from rofunc.utils.poselib.poselib.skeleton import SkeletonMotion
 from ...utils import torch_jit_utils as torch_utils
 
 USE_CACHE = True

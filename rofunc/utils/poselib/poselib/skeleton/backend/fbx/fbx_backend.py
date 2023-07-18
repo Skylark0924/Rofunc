@@ -33,8 +33,6 @@ This script reads an fbx file and returns the joint names, parents, and transfor
 NOTE: It requires the Python FBX package to be installed.
 """
 
-import sys
-
 import numpy as np
 
 try:
