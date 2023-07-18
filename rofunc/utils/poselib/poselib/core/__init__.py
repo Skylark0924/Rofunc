@@ -5,6 +5,6 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-from .tensor_utils import *
-from .rotation3d import *
-from .backend import Serializable, logger
+from rofunc.utils.poselib.poselib.core.tensor_utils import *
+from rofunc.utils.poselib.poselib.core.rotation3d import *
+from rofunc.utils.poselib.poselib.core.backend import Serializable, logger

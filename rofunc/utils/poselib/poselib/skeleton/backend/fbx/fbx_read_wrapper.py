@@ -12,14 +12,9 @@ This requires a configs file, which contains the command necessary to switch con
 environments to run the fbx reading script from python
 """
 
-from ....core import logger
-
-import inspect
 import os
 
-import numpy as np
-
-from .fbx_backend import parse_fbx
+from rofunc.utils.poselib.poselib.skeleton.backend.fbx.fbx_backend import parse_fbx
 
 
 def fbx_to_array(fbx_file_path, root_joint, fps):

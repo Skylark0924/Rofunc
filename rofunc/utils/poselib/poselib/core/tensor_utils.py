@@ -6,7 +6,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 from collections import OrderedDict
-from .backend import Serializable
+from rofunc.utils.poselib.poselib.core.backend import Serializable
 import torch
 
 

@@ -5,6 +5,6 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-from .abstract import Serializable
+from rofunc.utils.poselib.poselib.core.backend.abstract import Serializable
 
-from .logger import logger
+from rofunc.utils.poselib.poselib.core.backend.logger import logger
