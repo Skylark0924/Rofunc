@@ -92,7 +92,7 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 3
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     # Available tasks and motion files:
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     # HumanoidASEReachSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
     # HumanoidASELocationSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
     # HumanoidASEStrikeSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
-    parser.add_argument("--task", type=str, default="HumanoidASELocationSwordShield")
+    parser.add_argument("--task", type=str, default="HumanoidASEStrikeSwordShield")
     parser.add_argument("--motion_file", type=str,
                         default="reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy")
     parser.add_argument("--agent", type=str, default="ase")  # Available agent: ase

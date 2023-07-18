@@ -31,7 +31,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.processors.normalizers import Normalization
-from rofunc.learning.RofuncRL.tasks.utils.env_wrappers import wrap_env
+from rofunc.learning.utils.env_wrappers import wrap_env
 from rofunc.utils.file.internet import reserve_sock_addr
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
@@ -205,8 +205,8 @@ class BaseTrainer:
             self.t_bar.set_postfix_str(f"Rew/Best: {reward:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}")
 
         # Save checkpoints
-        if not (
-                       self._step + 1) % self.agent.checkpoint_interval and self.agent.checkpoint_interval > 0 and self._step > 1:
+        if not (self._step + 1) % self.agent.checkpoint_interval and \
+                self.agent.checkpoint_interval > 0 and self._step > 1:
             self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))
 
     def write_tensorboard(self):

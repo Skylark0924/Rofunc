@@ -14,16 +14,15 @@
  limitations under the License.
  """
 
-from typing import Callable, Union, Tuple, Optional
-
-import os
 import gym
 import gymnasium
+import numpy as np
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from hydra.core.global_hydra import GlobalHydra
-from isaacgym.torch_utils import *
 from omegaconf import DictConfig
+from typing import Callable, Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.config.utils import get_config
@@ -173,7 +172,7 @@ class ASEHRLAgent(BaseAgent):
         from .utils import ase_network_builder
         from .utils import ase_agent
         from .utils import ase_models
-        import yaml, copy
+        import yaml
         with open(
                 "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/learning/RofuncRL/agents/mixline/utils/ase_humanoid_hrl.yaml",
                 'r') as f:
