@@ -14,19 +14,17 @@
  limitations under the License.
  """
 
-from typing import Callable, Union, Tuple, Optional
-
 import gym
 import gymnasium
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from isaacgym.torch_utils import *
 from omegaconf import DictConfig
+from typing import Callable, Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.agents.mixline.amp_agent import AMPAgent
-from rofunc.learning.RofuncRL.models.misc_models import ASEDiscEnc
 from rofunc.learning.RofuncRL.models.base_models import BaseMLP
 from rofunc.learning.RofuncRL.utils.memory import Memory
 

@@ -137,13 +137,14 @@ The available functions and plans can be found as follows.
 If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
 
 ```
-@misc{Rofunc2022,
-      author = {Liu, Junjia and Li, Chenzui and Delehelle, Donatien and Li, Zhihao and Chen, Fei},
-      title = {Rofunc: The full process python package for robot learning from demonstration and robot manipulation},
-      year = {2022},
-      publisher = {GitHub},
-      journal = {GitHub repository},
-      howpublished = {\url{https://github.com/Skylark0924/Rofunc}},
+@software{liu2023rofunc,
+          title={Rofunc: The full process python package for robot learning from demonstration and robot manipulation},
+          author={Liu, Junjia and Li, Chenzui and Delehelle, Donatien and Li, Zhihao and Chen, Fei},
+          month=jun,
+          year= 2023,
+          publisher={Zenodo},
+          doi={10.5281/zenodo.8084510},
+          url={https://doi.org/10.5281/zenodo.8084510}
 }
 ```
 
@@ -165,14 +166,21 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer ([IROS 2023](https://arxiv.org/abs/2306.12677)｜Code coming soon)
 ```
 @article{liu2023softgpt,
-  title={SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer},
-  author={Liu, Junjia and Li, Zhihao and Calinon, Sylvain and Chen, Fei},
-  journal={arXiv preprint arXiv:2306.12677},
-  year={2023}
+        title={SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer},
+        author={Liu, Junjia and Li, Zhihao and Calinon, Sylvain and Chen, Fei},
+        journal={arXiv preprint arXiv:2306.12677},
+        year={2023}
 }
 ```
-3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration ([IEEE CDC 2023]() | [Code](./rofunc/learning/ml/tpgmm.py))
-
+3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](./rofunc/learning/ml/tpgmm.py))
+```
+@article{liu2023birp,
+        title={BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration},
+        author={Liu, Junjia and Sim, Hengyi and Li, Chenzui and Chen, Fei},
+        journal={arXiv preprint arXiv:2307.05933},
+        year={2023}
+}
+```
 
 ## The Team
 

@@ -14,14 +14,15 @@
  limitations under the License.
  """
 
-from typing import Optional
-
 import os
+import random
 import sys
 import time
-import torch
-import random
+from typing import Optional
+
+import cv2
 import numpy as np
+import torch
 
 
 def set_seed(seed: Optional[int] = None, deterministic: bool = False) -> int:
@@ -43,6 +44,7 @@ def set_seed(seed: Optional[int] = None, deterministic: bool = False) -> int:
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+    cv2.setRNGSeed(seed)
 
     if deterministic:
         torch.backends.cudnn.benchmark = False

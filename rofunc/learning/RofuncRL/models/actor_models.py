@@ -170,7 +170,7 @@ class ActorSAC(BaseActor):
 
     def forward(self, state, action=None):
         state = self.backbone_net(state)
-        mean_action = self.cfg.actor.action_scale * torch.tanh(self.mean_layer(state))  # [-1,1]
+        mean_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-1,1]
 
         log_std = self.log_std
         if self.cfg.use_log_std_clip:

@@ -14,6 +14,7 @@ Trainer:
   start_learning_steps: 1000             # The number of steps to take before starting network updating.
   seed: 42                            # The random seed.
   rollouts: 16                        # The number of rollouts before updating.
+  eval_steps: 1000                    # The number of steps to run for evaluation.
   inference_steps: 1000               # The number of steps to run for inference.
 
 
@@ -52,6 +53,7 @@ Model:
   use_init: True
   use_action_clip: False               # If true, clip actions to the action space range.
   action_clip: 1.0                     # clipping coefficient for the norm of the actions
+  action_scale: 1.0                    # scaling coefficient for the actions
   use_log_std_clip: True               # If true, clip log standard deviations to the range [-20, 2].
   log_std_clip_max: 2.0                # clipping coefficient for the log standard deviations
   log_std_clip_min: -20                # clipping coefficient for the log standard deviations
