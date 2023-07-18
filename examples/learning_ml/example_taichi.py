@@ -36,9 +36,11 @@ def uni():
 
 def uni_Imp():
     raw_demo = np.load('/home/lee/Xsens_data/20230310_TaiChi/xsens data_mvnx/010-010/segment/14_LeftHand.npy')
-    raw_demo_imp = np.load('/home/lee/Xsens_data/20230310_TaiChi/xsens data_mvnx/010-010/segment/10_RightHand.npy')
+    raw_demo_imp = np.array(np.loadtxt('/home/lee/Xsens_data/20230310_TaiChi/stiffness estimation/stiffness_test.txt'))
+    raw_demo_imp = np.reshape(raw_demo_imp, (-1, 1))
+    raw_demo_imp = np.tile(raw_demo_imp, 2)
     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
-    demos_imp = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
+    demos_imp = [raw_demo_imp[:99], raw_demo_imp[100:199], raw_demo_imp[200:299]]
     # --- TP-GMM ---
     # Define the task parameters
     start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
@@ -75,7 +77,7 @@ def uni_Imp():
 
     controller = rf.planning_control.lqt.LQT(via_points)
     u_hat, x_hat, mu, idx_slices = controller.solve()
-    rf.lqt.plot_3d_uni(x_hat, mu, idx_slices, ori=False, save=True, save_file_name='v_right.npy')
+    rf.lqt.plot_3d_uni(x_hat, mu, idx_slices, ori=False, save=True, save_file_name=False)
 
 
 def bi():
