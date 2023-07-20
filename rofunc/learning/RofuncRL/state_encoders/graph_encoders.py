@@ -21,8 +21,8 @@ from .base_encoders import BaseEncoder
 
 
 class HomoGraphEncoder(BaseEncoder):
-    def __init__(self, in_dim, hidden_dim, recurrent=False):
-        super(HomoGraphEncoder, self).__init__(recurrent, hidden_dim, hidden_dim)
+    def __init__(self, in_dim, hidden_dim):
+        super(HomoGraphEncoder, self).__init__(hidden_dim)
         # init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
         #                        constant_(x, 0), nn.init.calculate_gain('relu'))
 
@@ -52,3 +52,8 @@ class HomoGraphEncoder(BaseEncoder):
             hg = self.linear(hg)
 
             return hg
+
+
+class HeteroGraphEncoder(BaseEncoder):
+    def __init__(self):
+        super(HeteroGraphEncoder, self).__init__()
