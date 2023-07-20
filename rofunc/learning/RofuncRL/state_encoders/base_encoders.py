@@ -28,8 +28,16 @@ class BaseEncoder(nn.Module):
 
         self.cfg = cfg
         self.cfg_dict = omegaconf_to_dict(self.cfg)
-        self.hidden_dims = self.cfg_dict[cfg_name]['hidden_dims']
-        self.activation = activation_func(self.cfg_dict[cfg_name]['activation'])
+
+        if 'hidden_dims' in self.cfg_dict[cfg_name]:
+            self.hidden_dims = self.cfg_dict[cfg_name]['hidden_dims']
+        if 'activation' in self.cfg_dict[cfg_name]:
+            self.activation = activation_func(self.cfg_dict[cfg_name]['activation'])
+
+        if 'mlp_hidden_dims' in self.cfg_dict[cfg_name]:
+            self.mlp_hidden_dims = self.cfg_dict[cfg_name]['mlp_hidden_dims']
+        if 'mlp_activation' in self.cfg_dict[cfg_name]:
+            self.mlp_activation = activation_func(self.cfg_dict[cfg_name]['mlp_activation'])
 
 
 class MLPEncoder(BaseMLP):
