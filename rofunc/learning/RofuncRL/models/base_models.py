@@ -19,7 +19,7 @@ from omegaconf import DictConfig
 from torch import Tensor
 
 from rofunc.config.utils import omegaconf_to_dict
-from .utils import build_mlp, init_layers, activation_func
+from rofunc.learning.RofuncRL.models.utils import build_mlp, init_layers, activation_func
 
 
 class BaseMLP(nn.Module):

@@ -14,24 +14,25 @@
  limitations under the License.
  """
 
-from typing import Union, Tuple, Optional, List
-
 import gym
 import gymnasium
 import torch
 import torch.nn as nn
 from omegaconf import DictConfig
 from torch import Tensor
+from typing import Union, Tuple, Optional, List
 
 from rofunc.config.utils import omegaconf_to_dict
-from .utils import build_mlp, init_layers, activation_func, get_space_dim
+from rofunc.learning.RofuncRL.models.utils import build_mlp, init_layers, activation_func, get_space_dim
+from rofunc.learning.RofuncRL.state_encoders.base_encoders import EmptyEncoder
 
 
 class BaseCritic(nn.Module):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 cfg_name: str = 'critic'):
+                 cfg_name: str = 'critic',
+                 state_encoder: Optional[nn.Module] = EmptyEncoder):
         super().__init__()
         self.cfg = cfg
         self.state_dim = get_space_dim(observation_space)
@@ -39,6 +40,11 @@ class BaseCritic(nn.Module):
         cfg_dict = omegaconf_to_dict(cfg)
         self.mlp_hidden_dims = cfg_dict[cfg_name]['mlp_hidden_dims']
         self.mlp_activation = activation_func(cfg_dict[cfg_name]['mlp_activation'])
+
+        # state encoder
+        self.state_encoder = state_encoder
+        if self.state_encoder is not EmptyEncoder:
+            self.state_dim = self.state_encoder.output_dim
 
         self.backbone_net = None  # build_mlp(dims=[state_dim + action_dim, *dims, 1])
 
@@ -86,8 +92,9 @@ class Critic(BaseCritic):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 cfg_name: str = 'critic'):
-        super().__init__(cfg, observation_space, action_space, cfg_name)
+                 cfg_name: str = 'critic',
+                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+        super().__init__(cfg, observation_space, action_space, cfg_name, state_encoder)
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
                                       hidden_activation=self.mlp_activation)
         self.value_net = nn.Linear(self.mlp_hidden_dims[-1], 1)
@@ -96,6 +103,7 @@ class Critic(BaseCritic):
             init_layers(self.value_net, gain=1.0)
 
     def forward(self, state: Tensor, action: Tensor = None) -> Tensor:
+        state = self.state_encoder(state)
         if action is not None:
             state = torch.cat((state, action), dim=1)
         value = self.backbone_net(state)
