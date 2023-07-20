@@ -22,6 +22,14 @@ from rofunc.learning.RofuncRL.models.base_models import BaseMLP
 from rofunc.learning.RofuncRL.models.utils import activation_func
 
 
+class EmptyEncoder(nn.Module):
+    def __init__(self):
+        super(EmptyEncoder, self).__init__()
+
+    def forward(self, x):
+        return x
+
+
 class BaseEncoder(nn.Module):
     def __init__(self, cfg: DictConfig, input_dim: int, output_dim: int, cfg_name: str = 'encoder'):
         super(BaseEncoder, self).__init__()

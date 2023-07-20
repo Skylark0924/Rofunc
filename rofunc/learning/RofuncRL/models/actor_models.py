@@ -25,18 +25,25 @@ from torch.distributions import Beta, Normal
 from typing import Union, Tuple, Optional, List
 
 from rofunc.learning.RofuncRL.models.utils import build_mlp, init_layers, activation_func, get_space_dim
+from rofunc.learning.RofuncRL.state_encoders.base_encoders import EmptyEncoder
 
 
 class BaseActor(nn.Module):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 state_encoder: Optional[nn.Module] = EmptyEncoder):
         super().__init__()
         self.cfg = cfg
         self.state_dim = get_space_dim(observation_space)
         self.action_dim = get_space_dim(action_space)
         self.mlp_hidden_dims = cfg.actor.mlp_hidden_dims
         self.mlp_activation = activation_func(cfg.actor.mlp_activation)
+
+        # state encoder
+        self.state_encoder = state_encoder
+        if self.state_encoder is not EmptyEncoder:
+            self.state_dim = self.state_encoder.output_dim
 
         self.backbone_net = None  # build_mlp(dims=[state_dim, *dims, action_dim])
 
@@ -76,9 +83,11 @@ class BaseActor(nn.Module):
 
 
 class ActorPPO_Beta(BaseActor):
-    def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
-        super().__init__(cfg, observation_space, action_space)
+    def __init__(self, cfg: DictConfig,
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+        super().__init__(cfg, observation_space, action_space, state_encoder)
         # Build mlp network except the output layer
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
                                       hidden_activation=self.mlp_activation)
@@ -89,6 +98,7 @@ class ActorPPO_Beta(BaseActor):
             init_layers([self.alpha_layer, self.beta_layer], gain=0.01)
 
     def forward(self, state: Tensor):
+        state = self.state_encoder(state)
         state = self.backbone_net(state)
         # alpha and beta need to be larger than 1,so we use 'softplus' as the activation function and then plus 1
         alpha = F.softplus(self.alpha_layer(state)) + 1.0
@@ -107,8 +117,10 @@ class ActorPPO_Beta(BaseActor):
 
 
 class ActorPPO_Gaussian(BaseActor):
-    def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
+    def __init__(self, cfg: DictConfig,
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 state_encoder: Optional[nn.Module] = EmptyEncoder):
         """
         Gaussian policy network for PPO
         ActorPPO_Gaussian(
@@ -128,8 +140,9 @@ class ActorPPO_Gaussian(BaseActor):
         :param cfg: model config
         :param observation_space: 
         :param action_space:
+        :param state_encoder:
         """
-        super().__init__(cfg, observation_space, action_space)
+        super().__init__(cfg, observation_space, action_space, state_encoder)
         # Build mlp network except the output layer
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
                                       hidden_activation=self.mlp_activation)
@@ -143,6 +156,7 @@ class ActorPPO_Gaussian(BaseActor):
             init_layers(self.mean_layer, gain=0.01)
 
     def forward(self, state, action=None, deterministic=False):
+        state = self.state_encoder(state)
         state = self.backbone_net(state)
         output_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-action_scale, action_scale]
 
@@ -173,9 +187,11 @@ class ActorPPO_Gaussian(BaseActor):
 
 
 class ActorSAC(BaseActor):
-    def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
-        super().__init__(cfg, observation_space, action_space)
+    def __init__(self, cfg: DictConfig,
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+        super().__init__(cfg, observation_space, action_space, state_encoder)
         # Build mlp network except the output layer
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
                                       hidden_activation=self.mlp_activation)
@@ -188,6 +204,7 @@ class ActorSAC(BaseActor):
             init_layers(self.mean_layer, gain=0.01)
 
     def forward(self, state, action=None):
+        state = self.state_encoder(state)
         state = self.backbone_net(state)
         mean_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-1,1]
 
@@ -207,20 +224,25 @@ class ActorSAC(BaseActor):
 
 
 class ActorTD3(ActorSAC):
-    def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
-        super().__init__(cfg, observation_space, action_space)
+    def __init__(self, cfg: DictConfig,
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+        super().__init__(cfg, observation_space, action_space, state_encoder)
 
     def forward(self, state):
+        state = self.state_encoder(state)
         state = self.backbone_net(state)
         mean_action = torch.tanh(self.mean_layer(state))
         return mean_action, None
 
 
 class ActorAMP(ActorPPO_Gaussian):
-    def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
-        super().__init__(cfg, observation_space, action_space)
+    def __init__(self, cfg: DictConfig,
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+        super().__init__(cfg, observation_space, action_space, state_encoder)
         self.log_std = nn.Parameter(torch.full((self.action_dim,), fill_value=-2.9), requires_grad=False)
 
 
