@@ -71,6 +71,7 @@ def build_cnn(dims: [int], kernel_size: Union[int, tuple, List], stride: Union[i
             nn.Conv2d(dims[i], dims[i + 1], kernel_size=kernel_size[i], stride=stride[i], padding=padding[i],
                       dilation=dilation[i]))
         layers.append(hidden_activation)
+        layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
     if output_activation is not None:
         layers.append(output_activation)
     return nn.Sequential(*layers)
@@ -101,20 +102,18 @@ def init_layers(layers, gain=1.0, bias_const=1e-6, init_type='orthogonal'):
     }
     torch_init = init_type_map[init_type]
 
-    if not isinstance(layers, list):
-        layers = [layers]
-    for layer in layers:
+    for layer in layers.children():
         if isinstance(layer, nn.Linear):
             torch_init(layer.weight, gain=gain)
         elif isinstance(layer, nn.Conv2d):
             assert init_type in ['kaiming_normal', 'kaiming_uniform', 'xavier_uniform']
-            torch_init(layer.weight, gain=gain)
+            torch_init(layer.weight)
         elif isinstance(layer, nn.LayerNorm):
             nn.init.constant_(layer.weight, 1)
         elif isinstance(layer, nn.BatchNorm2d):
             nn.init.constant_(layer.weight, 1)
 
-        if layer.bias is not None:
+        if hasattr(layer, 'bias'):
             nn.init.constant_(layer.bias, bias_const)
 
 
