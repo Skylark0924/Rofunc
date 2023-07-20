@@ -14,8 +14,6 @@
  limitations under the License.
  """
 
-from typing import Union, Tuple, Optional, List
-
 import gym
 import gymnasium
 import torch
@@ -24,8 +22,9 @@ import torch.nn.functional as F
 from omegaconf import DictConfig
 from torch import Tensor
 from torch.distributions import Beta, Normal
+from typing import Union, Tuple, Optional, List
 
-from .utils import build_mlp, init_layers, activation_func, get_space_dim
+from rofunc.learning.RofuncRL.models.utils import build_mlp, init_layers, activation_func, get_space_dim
 
 
 class BaseActor(nn.Module):
@@ -110,6 +109,26 @@ class ActorPPO_Beta(BaseActor):
 class ActorPPO_Gaussian(BaseActor):
     def __init__(self, cfg: DictConfig, observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
+        """
+        Gaussian policy network for PPO
+        ActorPPO_Gaussian(
+              (mlp_activation): ELU(alpha=1.0)
+              (backbone_net): Sequential(
+                (0): Linear(in_features=self.state_dim, out_features=self.mlp_hidden_dims[0], bias=True)
+                (1): hidden_activation
+                (2): Linear(in_features=self.mlp_hidden_dims[0], out_features=self.mlp_hidden_dims[1], bias=True)
+                (3): hidden_activation
+                ...
+                (4): Linear(in_features=self.mlp_hidden_dims[-2], out_features=self.mlp_hidden_dims[-1], bias=True)
+                (5): hidden_activation
+              )
+              (mean_layer): Linear(in_features=self.mlp_hidden_dims[-1], out_features=self.action_dim, bias=True)
+              (value_layer): Linear(in_features=self.mlp_hidden_dims[-1], out_features=self.action_dim, bias=True)
+            )
+        :param cfg: model config
+        :param observation_space: 
+        :param action_space:
+        """
         super().__init__(cfg, observation_space, action_space)
         # Build mlp network except the output layer
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
@@ -203,3 +222,14 @@ class ActorAMP(ActorPPO_Gaussian):
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]]):
         super().__init__(cfg, observation_space, action_space)
         self.log_std = nn.Parameter(torch.full((self.action_dim,), fill_value=-2.9), requires_grad=False)
+
+
+if __name__ == '__main__':
+    from omegaconf import DictConfig
+
+    cfg = DictConfig({'use_init': True, 'action_scale': 1.0, 'use_log_std_clip': True, 'log_std_clip_min': -20,
+                      'log_std_clip_max': 2, 'use_action_clip': True, 'action_clip': 1.0, 'actor':
+                          {'type': "Gaussian", 'mlp_hidden_dims': [512, 256, 128], 'mlp_activation': "elu",
+                           'use_lstm': False, 'lstm_cell_size': 256, 'lstm_use_prev_action': False, 'max_seq_len': 20}})
+    model = ActorPPO_Gaussian(cfg=cfg, observation_space=3, action_space=1)
+    print(model)
