@@ -87,11 +87,11 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 2
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Ant")
-    parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3
+    parser.add_argument("--agent", type=str, default="td3")  # Available agents: ppo, sac, td3
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))

@@ -31,8 +31,8 @@ class BaseCritic(nn.Module):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 cfg_name: str = 'critic',
-                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
+                 state_encoder: Optional[nn.Module] = EmptyEncoder(),
+                 cfg_name: str = 'critic'):
         super().__init__()
         self.cfg = cfg
         self.state_dim = get_space_dim(observation_space)
@@ -45,6 +45,8 @@ class BaseCritic(nn.Module):
         self.state_encoder = state_encoder
         if not isinstance(self.state_encoder, EmptyEncoder):
             self.state_dim = self.state_encoder.output_dim
+            if isinstance(observation_space, tuple) or isinstance(observation_space, list):
+                self.state_dim += get_space_dim(observation_space[1:])
 
         self.backbone_net = None  # build_mlp(dims=[state_dim + action_dim, *dims, 1])
 
@@ -92,9 +94,9 @@ class Critic(BaseCritic):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 cfg_name: str = 'critic',
-                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
-        super().__init__(cfg, observation_space, action_space, cfg_name, state_encoder)
+                 state_encoder: Optional[nn.Module] = EmptyEncoder(),
+                 cfg_name: str = 'critic'):
+        super().__init__(cfg, observation_space, action_space, state_encoder, cfg_name)
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
                                       hidden_activation=self.mlp_activation)
         self.value_net = nn.Linear(self.mlp_hidden_dims[-1], 1)

@@ -14,14 +14,13 @@
  limitations under the License.
  """
 
-from typing import Union, Tuple, Optional
-
 import gym
 import gymnasium
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
+from typing import Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
@@ -29,8 +28,8 @@ from rofunc.learning.RofuncRL.models.actor_models import ActorPPO_Beta, ActorPPO
 from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
-from rofunc.learning.RofuncRL.utils.memory import Memory
 from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
+from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class PPOAgent(BaseAgent):
@@ -60,15 +59,15 @@ class PPOAgent(BaseAgent):
         if hasattr(cfg.Model, "state_encoder"):
             se_type = cfg.Model.state_encoder.encoder_type
             se_output_dim = cfg.Model.state_encoder.out_dim
-            self.encoder = encoder_map[se_type](cfg.Model, input_dim=3, output_dim=se_output_dim).to(self.device)
+            self.se = encoder_map[se_type](cfg.Model, input_dim=3, output_dim=se_output_dim).to(self.device)
         else:
-            self.encoder = EmptyEncoder()
+            self.se = EmptyEncoder()
 
         if self.cfg.Model.actor.type == "Beta":
-            self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space, self.encoder).to(self.device)
+            self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space, self.se).to(self.device)
         else:
-            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space, self.encoder).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, action_space, state_encoder=self.encoder).to(self.device)
+            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space, self.se).to(self.device)
+        self.value = Critic(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
 
         # checkpoint models
@@ -79,11 +78,11 @@ class PPOAgent(BaseAgent):
 
         '''Create tensors in memory'''
         if hasattr(cfg.Model, "state_encoder"):
-            image_size = int(self.cfg.Model.state_encoder.image_size)
-            self.memory.create_tensor(name="states", size=(3, image_size, image_size), keep_dimensions=True,
-                                      dtype=torch.float32)
+            img_size = int(self.cfg.Model.state_encoder.image_size)
+            state_tensor_size = (3, img_size, img_size)
         else:
-            self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
+            state_tensor_size = self.observation_space
+        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32)
         self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
         self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
         self.memory.create_tensor(name="terminated", size=1, dtype=torch.bool)

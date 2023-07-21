@@ -32,6 +32,7 @@ from rofunc.learning.RofuncRL.models.actor_models import ActorPPO_Beta, ActorPPO
 from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
+from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
 from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 from rofunc.learning.pre_trained_models.download import model_zoo
@@ -76,11 +77,18 @@ class ASEHRLAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for ASE HRL agent'''
-        if self.cfg.Model.actor.type == "Beta":
-            self.policy = ActorPPO_Beta(cfg.Model, observation_space, self._ase_latent_dim).to(self.device)
+        if hasattr(cfg.Model, "state_encoder"):
+            se_type = cfg.Model.state_encoder.encoder_type
+            se_output_dim = cfg.Model.state_encoder.out_dim
+            self.se = encoder_map[se_type](cfg.Model, input_dim=3, output_dim=se_output_dim).to(self.device)
         else:
-            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, self._ase_latent_dim).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, self._ase_latent_dim).to(self.device)
+            self.se = EmptyEncoder()
+
+        if self.cfg.Model.actor.type == "Beta":
+            self.policy = ActorPPO_Beta(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
+        else:
+            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
+        self.value = Critic(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
@@ -90,8 +98,13 @@ class ASEHRLAgent(BaseAgent):
         self.rofunc_logger.module(f"Value model: {self.value}")
 
         '''Create tensors in memory'''
-        self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
-        self.memory.create_tensor(name="next_states", size=self.observation_space, dtype=torch.float32)
+        if hasattr(cfg.Model, "state_encoder"):
+            img_size = int(self.cfg.Model.state_encoder.image_size)
+            state_tensor_size = (3, img_size, img_size)
+        else:
+            state_tensor_size = self.observation_space
+        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32)
+        self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32)
         self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
         self.memory.create_tensor(name="omega_actions", size=self._ase_latent_dim, dtype=torch.float32)
         self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)

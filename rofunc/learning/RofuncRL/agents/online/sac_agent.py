@@ -14,24 +14,24 @@
  limitations under the License.
  """
 
-import itertools
-from typing import Union, Tuple, Optional
-
 import gym
 import gymnasium
+import itertools
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
+from typing import Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorSAC
 from rofunc.learning.RofuncRL.models.critic_models import Critic
-from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
+from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
+from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -59,11 +59,19 @@ class SACAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for SAC'''
-        self.actor = ActorSAC(cfg.Model, observation_space, action_space).to(self.device)
-        self.critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
-        self.critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
-        self.target_critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
-        self.target_critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
+        if hasattr(cfg.Model, "state_encoder"):
+            se_type = cfg.Model.state_encoder.encoder_type
+            se_output_dim = cfg.Model.state_encoder.out_dim
+            self.se = encoder_map[se_type](cfg.Model, input_dim=3, output_dim=se_output_dim).to(self.device)
+        else:
+            self.se = EmptyEncoder()
+
+        concat_space = [observation_space, action_space]
+        self.actor = ActorSAC(cfg.Model, observation_space, action_space, self.se).to(self.device)
+        self.critic_1 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
+        self.critic_2 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
+        self.target_critic_1 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
+        self.target_critic_2 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
 
         self.models = {"actor": self.actor, "critic_1": self.critic_1, "critic_2": self.critic_2,
                        "target_critic_1": self.target_critic_1, "target_critic_2": self.target_critic_2}
@@ -79,8 +87,13 @@ class SACAgent(BaseAgent):
         self.rofunc_logger.module(f"Critic model x4: {self.critic_1}")
 
         '''Create tensors in memory'''
-        self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
-        self.memory.create_tensor(name="next_states", size=self.observation_space, dtype=torch.float32)
+        if hasattr(cfg.Model, "state_encoder"):
+            img_size = int(self.cfg.Model.state_encoder.image_size)
+            state_tensor_size = (3, img_size, img_size)
+        else:
+            state_tensor_size = self.observation_space
+        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32)
+        self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32)
         self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
         self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
         self.memory.create_tensor(name="terminated", size=1, dtype=torch.bool)
