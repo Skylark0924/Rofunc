@@ -31,11 +31,15 @@ class EmptyEncoder(nn.Module):
 
 
 class BaseEncoder(nn.Module):
-    def __init__(self, cfg: DictConfig, input_dim: int, output_dim: int, cfg_name: str = 'encoder'):
+    def __init__(self, cfg: DictConfig, input_dim: int, output_dim: int, cfg_name: str = 'state_encoder'):
         super(BaseEncoder, self).__init__()
 
         self.cfg = cfg
         self.cfg_dict = omegaconf_to_dict(self.cfg)
+        self.cfg_name = cfg_name
+
+        self.input_dim = input_dim
+        self.output_dim = output_dim
 
         if 'hidden_dims' in self.cfg_dict[cfg_name]:
             self.hidden_dims = self.cfg_dict[cfg_name]['hidden_dims']

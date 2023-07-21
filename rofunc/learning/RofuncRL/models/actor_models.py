@@ -32,7 +32,7 @@ class BaseActor(nn.Module):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
         super().__init__()
         self.cfg = cfg
         self.state_dim = get_space_dim(observation_space)
@@ -42,7 +42,7 @@ class BaseActor(nn.Module):
 
         # state encoder
         self.state_encoder = state_encoder
-        if self.state_encoder is not EmptyEncoder:
+        if not isinstance(self.state_encoder, EmptyEncoder):
             self.state_dim = self.state_encoder.output_dim
 
         self.backbone_net = None  # build_mlp(dims=[state_dim, *dims, action_dim])
@@ -86,7 +86,7 @@ class ActorPPO_Beta(BaseActor):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
         super().__init__(cfg, observation_space, action_space, state_encoder)
         # Build mlp network except the output layer
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
@@ -120,7 +120,7 @@ class ActorPPO_Gaussian(BaseActor):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
         """
         Gaussian policy network for PPO
         ActorPPO_Gaussian(
@@ -190,7 +190,7 @@ class ActorSAC(BaseActor):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
         super().__init__(cfg, observation_space, action_space, state_encoder)
         # Build mlp network except the output layer
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
@@ -227,7 +227,7 @@ class ActorTD3(ActorSAC):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
         super().__init__(cfg, observation_space, action_space, state_encoder)
 
     def forward(self, state):
@@ -241,7 +241,7 @@ class ActorAMP(ActorPPO_Gaussian):
     def __init__(self, cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 state_encoder: Optional[nn.Module] = EmptyEncoder):
+                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
         super().__init__(cfg, observation_space, action_space, state_encoder)
         self.log_std = nn.Parameter(torch.full((self.action_dim,), fill_value=-2.9), requires_grad=False)
 

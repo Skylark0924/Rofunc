@@ -88,7 +88,7 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     # Available tasks: HumanoidAMP_backflip, HumanoidAMP_walk, HumanoidAMP_run, HumanoidAMP_dance, HumanoidAMP_hop

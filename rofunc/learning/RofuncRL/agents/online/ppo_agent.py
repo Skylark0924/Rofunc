@@ -30,6 +30,7 @@ from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.RofuncRL.utils.memory import Memory
+from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 
 
 class PPOAgent(BaseAgent):
@@ -56,21 +57,33 @@ class PPOAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for PPO'''
-        if self.cfg.Model.actor.type == "Beta":
-            self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space).to(self.device)
+        if hasattr(cfg.Model, "state_encoder"):
+            se_type = cfg.Model.state_encoder.encoder_type
+            se_output_dim = cfg.Model.state_encoder.num_classes
+            self.encoder = encoder_map[se_type](cfg.Model, input_dim=3, output_dim=se_output_dim).to(self.device)
         else:
-            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
+            self.encoder = EmptyEncoder()
+
+        if self.cfg.Model.actor.type == "Beta":
+            self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space, self.encoder).to(self.device)
+        else:
+            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space, self.encoder).to(self.device)
+        self.value = Critic(cfg.Model, observation_space, action_space, state_encoder=self.encoder).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
+
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
         self.checkpoint_modules["value"] = self.value
-
         self.rofunc_logger.module(f"Policy model: {self.policy}")
         self.rofunc_logger.module(f"Value model: {self.value}")
 
         '''Create tensors in memory'''
-        self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
+        if hasattr(cfg.Model, "state_encoder"):
+            image_size = int(self.cfg.Model.state_encoder.image_size)
+            self.memory.create_tensor(name="states", size=(3, image_size, image_size), keep_dimensions=True,
+                                      dtype=torch.float32)
+        else:
+            self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
         self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
         self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
         self.memory.create_tensor(name="terminated", size=1, dtype=torch.bool)
@@ -101,9 +114,10 @@ class PPOAgent(BaseAgent):
         self._clip_predicted_values = self.cfg.Agent.clip_predicted_values
         self._kl_threshold = self.cfg.Agent.kl_threshold
         self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
-        self._state_preprocessor = RunningStandardScaler
-        self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
-                                                                        {"size": observation_space, "device": device})
+        self._state_preprocessor = None
+        # self._state_preprocessor = RunningStandardScaler
+        # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
+        #                                                                 {"size": observation_space, "device": device})
         self._value_preprocessor = RunningStandardScaler
         self._value_preprocessor_kwargs = self.cfg.get("Agent", {}).get("value_preprocessor_kwargs",
                                                                         {"size": 1, "device": device})

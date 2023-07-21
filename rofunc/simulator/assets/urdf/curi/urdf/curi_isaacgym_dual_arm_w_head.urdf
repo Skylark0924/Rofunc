@@ -397,7 +397,7 @@
       <inertia ixx="6.56432e-04" ixy="-3.4976e-05" ixz="0.652e-6" iyy="6.42664e-04" iyz="-1.577e-06" izz="1.046862e-03"/>
     </inertial>
   </link>
-  <joint name="head_actuated_joint1" type="fixed">
+  <joint name="head_actuated_joint1" type="revolute">
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.5" soft_upper_limit="1.5"/>
     <origin rpy="0 0 0" xyz="0 0 0.045"/>
     <parent link="head_base"/>
@@ -426,7 +426,7 @@
       <inertia ixx="2.34142e-04" ixy="-3.129e-06" ixz="6.321e-05" iyy="5.09246e-04" iyz="1.49e-06" izz="4.3777e-04"/>
     </inertial>
   </link>
-  <joint name="head_actuated_joint2" type="fixed">
+  <joint name="head_actuated_joint2" type="revolute">
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.8" soft_upper_limit="0.5"/>
     <origin rpy="0 0 0" xyz="0 0 0.043"/>
     <parent link="head_link1"/>
