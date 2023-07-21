@@ -92,7 +92,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="CURICabinetImage")
     parser.add_argument("--agent", type=str, default="ppo")  # ppo
-    parser.add_argument("--num_envs", type=int, default=64)
+    parser.add_argument("--num_envs", type=int, default=32)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)

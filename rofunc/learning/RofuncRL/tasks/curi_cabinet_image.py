@@ -200,8 +200,8 @@ class CURICabinetImageTask(CURICabinetTask, CURIBaseTask):
 
         camera_props = gymapi.CameraProperties()
         camera_props.enable_tensors = True
-        camera_props.width = 128
-        camera_props.height = 128
+        camera_props.width = self.cfg['env']['image_size']
+        camera_props.height = self.cfg['env']['image_size']
         attached_body = "head_link2"
         local_transform = gymapi.Transform()
         local_transform.p = gymapi.Vec3(0.12, 0, 0.18)
