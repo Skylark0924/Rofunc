@@ -393,17 +393,18 @@ class GymWrapper(Wrapper):
         """
         observation_space = self._env.observation_space if self._vectorized else self.observation_space
         space = space if space is not None else observation_space
+        obs_shape = observation_space.shape  # TODO: Check if this is correct
 
         if self._vectorized and isinstance(space, gym.spaces.MultiDiscrete):
-            return torch.tensor(observation, device=self.device, dtype=torch.int64).view(self.num_envs, -1)
+            return torch.tensor(observation, device=self.device, dtype=torch.int64).view(self.num_envs, *obs_shape)
         elif isinstance(observation, int):
-            return torch.tensor(observation, device=self.device, dtype=torch.int64).view(self.num_envs, -1)
+            return torch.tensor(observation, device=self.device, dtype=torch.int64).view(self.num_envs, *obs_shape)
         elif isinstance(observation, np.ndarray):
-            return torch.tensor(observation, device=self.device, dtype=torch.float32).view(self.num_envs, -1)
+            return torch.tensor(observation, device=self.device, dtype=torch.float32).view(self.num_envs, *obs_shape)
         elif isinstance(space, gym.spaces.Discrete):
-            return torch.tensor(observation, device=self.device, dtype=torch.float32).view(self.num_envs, -1)
+            return torch.tensor(observation, device=self.device, dtype=torch.float32).view(self.num_envs, *obs_shape)
         elif isinstance(space, gym.spaces.Box):
-            return torch.tensor(observation, device=self.device, dtype=torch.float32).view(self.num_envs, -1)
+            return torch.tensor(observation, device=self.device, dtype=torch.float32).view(self.num_envs, *obs_shape)
         elif isinstance(space, gym.spaces.Dict):
             tmp = torch.cat([self._observation_to_tensor(observation[k], space[k]) \
                              for k in sorted(space.keys())], dim=-1).view(self.num_envs, -1)
