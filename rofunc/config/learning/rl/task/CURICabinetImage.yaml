@@ -31,6 +31,8 @@ env:
   numObservations: 128
   numActions: 20
 
+  image_size: 224
+
 #  asset:
 #    assetRoot: "../../assets"
 #    assetFileNameFranka: "urdf/franka_description/robots/franka_panda.urdf"

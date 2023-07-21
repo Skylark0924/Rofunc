@@ -86,10 +86,25 @@ Model:
     max_seq_len: 20
 
   state_encoder:
-    encoder_type: "resnet"
-    image_size: 128
+    encoder_type: "vit"  # ["resnet", "vit", "cnn"]
+    image_size: 224
     use_pretrained: False
-    num_classes: 512
-    resnet_type: "resnet18"
+    out_dim: 512
+
+    # Sub_type: only work when se_type in ['resnet', 'vit']
+    #       ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'],
+    #       ['vit_b_16', 'vit_b_32', 'vit_h_14', 'vit_l_16', 'vit_l_32']
+    sub_type: "vit_b_16"
+
+    # CNN args: only work when se_type in ['cnn']
+    cnn_kernel_size: 3
+    cnn_stride: 1
+    cnn_padding: 1
+    cnn_dilation: 1
+    hidden_dims: [32, 64, 128]
+    activation: 'relu'
+    mlp_inp_dims: 32768
+    mlp_hidden_dims: [128]
+    mlp_activation: 'relu'
 
 

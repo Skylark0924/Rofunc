@@ -28,6 +28,7 @@ class CNNEncoder(BaseEncoder):
         self.cnn_stride = self.cfg_dict[self.cfg_name]['cnn_stride']
         self.cnn_padding = self.cfg_dict[self.cfg_name]['cnn_padding']
         self.cnn_dilation = self.cfg_dict[self.cfg_name]['cnn_dilation']
+        self.mlp_inp_dims = self.cfg_dict[self.cfg_name]['mlp_inp_dims']
 
         self.backbone_net = build_cnn(dims=[input_dim, *self.hidden_dims], kernel_size=self.cnn_kernel_size,
                                       stride=self.cnn_stride, padding=self.cnn_padding, dilation=self.cnn_dilation,
@@ -35,10 +36,8 @@ class CNNEncoder(BaseEncoder):
 
         self.flatten = nn.Flatten(start_dim=1)
 
-        final_kernel_size = self.cnn_kernel_size[-1] if isinstance(self.cnn_kernel_size, list) else self.cnn_kernel_size
-        self.output_net = build_mlp(
-            dims=[final_kernel_size * final_kernel_size * self.hidden_dims[-1], *self.mlp_hidden_dims, output_dim],
-            hidden_activation=self.mlp_activation)
+        self.output_net = build_mlp(dims=[self.mlp_inp_dims, *self.mlp_hidden_dims, output_dim],
+                                    hidden_activation=self.mlp_activation)
 
         if self.cfg.use_init:
             init_layers(self.backbone_net, gain=1.0, init_type='kaiming_uniform')
@@ -55,11 +54,11 @@ class ResnetEncoder(BaseEncoder):
     def __init__(self, cfg, input_dim, output_dim):
         super().__init__(cfg, input_dim, output_dim)
 
-        self.resnet_type = self.cfg_dict[self.cfg_name]['resnet_type']
-        assert self.resnet_type in ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
+        self.sub_type = self.cfg_dict[self.cfg_name]['sub_type']
+        assert self.sub_type in ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
         self.use_pretrained = self.cfg_dict[self.cfg_name]['use_pretrained']
 
-        self.backbone_net = torch.hub.load('pytorch/vision', self.resnet_type, num_classes=output_dim,
+        self.backbone_net = torch.hub.load('pytorch/vision', self.sub_type, num_classes=output_dim,
                                            pretrained=self.use_pretrained)
 
     def forward(self, inputs):
@@ -71,11 +70,11 @@ class ViTEncoder(BaseEncoder):
     def __init__(self, cfg, input_dim, output_dim):
         super().__init__(cfg, input_dim, output_dim)
 
-        self.vit_type = self.cfg_dict[self.cfg_name]['vit_type']
-        assert self.vit_type in ['vit_b_16', 'vit_b_32', 'vit_h_14', 'vit_l_16', 'vit_l_32']
+        self.sub_type = self.cfg_dict[self.cfg_name]['sub_type']
+        assert self.sub_type in ['vit_b_16', 'vit_b_32', 'vit_h_14', 'vit_l_16', 'vit_l_32']
         self.use_pretrained = self.cfg_dict[self.cfg_name]['use_pretrained']
 
-        self.backbone_net = torch.hub.load('pytorch/vision', self.vit_type, num_classes=output_dim,
+        self.backbone_net = torch.hub.load('pytorch/vision', self.sub_type, num_classes=output_dim,
                                            pretrained=self.use_pretrained)
 
     def forward(self, inputs):
@@ -87,9 +86,7 @@ if __name__ == '__main__':
     from omegaconf import DictConfig
 
     # cfg = DictConfig(
-    #     {'use_init': True, 'state_encoder': {'cnn_kernel_size': 3, 'cnn_stride': 1, 'cnn_padding': 1, 'cnn_dilation': 1,
-    #                                    'hidden_dims': [32, 64, 128], 'activation': 'relu', 'mlp_hidden_dims': [128],
-    #                                    'mlp_activation': 'relu'}})
+    #     {'use_init': True, 'state_encoder': {})
     # model = CNNEncoder(cfg=cfg, input_dim=3, output_dim=128)
     # print(model)
 
