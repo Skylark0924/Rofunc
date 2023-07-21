@@ -14,24 +14,24 @@
  limitations under the License.
  """
 
-import itertools
-from typing import Union, Tuple, Optional
-
 import gym
 import gymnasium
+import itertools
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
+from typing import Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorTD3
 from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.noises import GaussianNoise
-from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
+from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
+from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -59,12 +59,20 @@ class TD3Agent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for TD3'''
-        self.actor = ActorTD3(cfg.Model, observation_space, action_space).to(self.device)
-        self.target_actor = ActorTD3(cfg.Model, observation_space, action_space).to(self.device)
-        self.critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
-        self.critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
-        self.target_critic_1 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
-        self.target_critic_2 = Critic(cfg.Model, [observation_space, action_space], action_space).to(self.device)
+        if hasattr(cfg.Model, "state_encoder"):
+            se_type = cfg.Model.state_encoder.encoder_type
+            se_output_dim = cfg.Model.state_encoder.out_dim
+            self.se = encoder_map[se_type](cfg.Model, input_dim=3, output_dim=se_output_dim).to(self.device)
+        else:
+            self.se = EmptyEncoder()
+
+        concat_space = [observation_space, action_space]
+        self.actor = ActorTD3(cfg.Model, observation_space, action_space, self.se).to(self.device)
+        self.target_actor = ActorTD3(cfg.Model, observation_space, action_space, self.se).to(self.device)
+        self.critic_1 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
+        self.critic_2 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
+        self.target_critic_1 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
+        self.target_critic_2 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
 
         self.models = {"actor": self.actor, "target_actor": self.target_actor, "critic_1": self.critic_1,
                        "critic_2": self.critic_2, "target_critic_1": self.target_critic_1,
