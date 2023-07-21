@@ -96,10 +96,13 @@ class AMPAgent(BaseAgent):
         if hasattr(cfg.Model, "state_encoder"):
             img_size = int(self.cfg.Model.state_encoder.image_size)
             state_tensor_size = (3, img_size, img_size)
+            kd = True
         else:
             state_tensor_size = self.observation_space
-        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32)
-        self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32)
+            kd = False
+        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
+        self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
+
         self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
         self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
         self.memory.create_tensor(name="terminated", size=1, dtype=torch.bool)
