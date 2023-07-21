@@ -14,23 +14,23 @@
  limitations under the License.
  """
 
-from typing import Union, Tuple, Optional
-
 import gym
 import gymnasium
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
+from typing import Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorPPO_Gaussian
 from rofunc.learning.RofuncRL.models.critic_models import Critic
-# from rofunc.learning.RofuncRL.utils.skrl_utils import Policy, Value
-from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
+# from rofunc.learning.RofuncRL.utils.skrl_utils import Policy, Value
+from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
+from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -58,8 +58,15 @@ class A2CAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for A2C'''
-        self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, action_space).to(self.device)
+        if hasattr(cfg.Model, "state_encoder"):
+            se_type = cfg.Model.state_encoder.encoder_type
+            se_output_dim = cfg.Model.state_encoder.out_dim
+            self.se = encoder_map[se_type](cfg.Model, input_dim=3, output_dim=se_output_dim).to(self.device)
+        else:
+            self.se = EmptyEncoder()
+
+        self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space, self.se).to(self.device)
+        self.value = Critic(cfg.Model, observation_space, action_space, self.se).to(self.device)
         # self.policy = Policy(observation_space, action_space, device, clip_actions=True).to(self.device)
         # self.value = Value(observation_space, action_space, device).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
@@ -71,7 +78,12 @@ class A2CAgent(BaseAgent):
         self.rofunc_logger.module(f"Value model: {self.value}")
 
         '''Create tensors in memory'''
-        self.memory.create_tensor(name="states", size=self.observation_space, dtype=torch.float32)
+        if hasattr(cfg.Model, "state_encoder"):
+            img_size = int(self.cfg.Model.state_encoder.image_size)
+            state_tensor_size = (3, img_size, img_size)
+        else:
+            state_tensor_size = self.observation_space
+        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32)
         self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
         self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
         self.memory.create_tensor(name="terminated", size=1, dtype=torch.bool)
