@@ -94,10 +94,13 @@ class ASEAgent(AMPAgent):
         if hasattr(cfg.Model, "state_encoder"):
             img_size = int(self.cfg.Model.state_encoder.image_size)
             state_tensor_size = (3, img_size, img_size)
+            kd = True
         else:
             state_tensor_size = self.observation_space
-        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32)
-        self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32)
+            kd = False
+        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
+        self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
+
         self.memory.create_tensor(name="ase_latents", size=self._ase_latent_dim, dtype=torch.float32)
         self._tensors_names.append("ase_latents")
 
