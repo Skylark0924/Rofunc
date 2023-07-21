@@ -1,6 +1,7 @@
 from .ant import AntTask
 from .cartpole import CartpoleTask
 from .curi_cabinet import CURICabinetTask
+from .curi_cabinet_image import CURICabinetImageTask
 from .curi_cabinet_bimanual import CURICabinetBimanualTask
 from .curi_coffee_stirring import CURICoffeeStirringTask
 from .franka_cabinet import FrankaCabinetTask
@@ -19,6 +20,7 @@ task_map = {
     "Cartpole": CartpoleTask,
     "FrankaCabinet": FrankaCabinetTask,
     "CURICabinet": CURICabinetTask,
+    "CURICabinetImage": CURICabinetImageTask,
     "CURICabinetBimanual": CURICabinetBimanualTask,
     "CURICoffeeStirring": CURICoffeeStirringTask,
     "Humanoid": HumanoidTask,
