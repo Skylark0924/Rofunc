@@ -24,10 +24,10 @@ class CNNEncoder(BaseEncoder):
     def __init__(self, cfg, input_dim, output_dim):
         super().__init__(cfg, input_dim, output_dim)
 
-        self.cnn_kernel_size = self.cfg_dict['encoder']['cnn_kernel_size']
-        self.cnn_stride = self.cfg_dict['encoder']['cnn_stride']
-        self.cnn_padding = self.cfg_dict['encoder']['cnn_padding']
-        self.cnn_dilation = self.cfg_dict['encoder']['cnn_dilation']
+        self.cnn_kernel_size = self.cfg_dict[self.cfg_name]['cnn_kernel_size']
+        self.cnn_stride = self.cfg_dict[self.cfg_name]['cnn_stride']
+        self.cnn_padding = self.cfg_dict[self.cfg_name]['cnn_padding']
+        self.cnn_dilation = self.cfg_dict[self.cfg_name]['cnn_dilation']
 
         self.backbone_net = build_cnn(dims=[input_dim, *self.hidden_dims], kernel_size=self.cnn_kernel_size,
                                       stride=self.cnn_stride, padding=self.cnn_padding, dilation=self.cnn_dilation,
@@ -55,12 +55,12 @@ class ResnetEncoder(BaseEncoder):
     def __init__(self, cfg, input_dim, output_dim):
         super().__init__(cfg, input_dim, output_dim)
 
-        self.resnet_type = self.cfg_dict['encoder']['resnet_type']
+        self.resnet_type = self.cfg_dict[self.cfg_name]['resnet_type']
         assert self.resnet_type in ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
-        self.resnet_pre_trained = self.cfg_dict['encoder']['resnet_pre_trained']
+        self.use_pretrained = self.cfg_dict[self.cfg_name]['use_pretrained']
 
         self.backbone_net = torch.hub.load('pytorch/vision', self.resnet_type, num_classes=output_dim,
-                                           pretrained=self.resnet_pre_trained)
+                                           pretrained=self.use_pretrained)
 
     def forward(self, inputs):
         x = self.backbone_net(inputs)
@@ -71,12 +71,12 @@ class ViTEncoder(BaseEncoder):
     def __init__(self, cfg, input_dim, output_dim):
         super().__init__(cfg, input_dim, output_dim)
 
-        self.vit_type = self.cfg_dict['encoder']['vit_type']
+        self.vit_type = self.cfg_dict[self.cfg_name]['vit_type']
         assert self.vit_type in ['vit_b_16', 'vit_b_32', 'vit_h_14', 'vit_l_16', 'vit_l_32']
-        self.vit_pre_trained = self.cfg_dict['encoder']['vit_pre_trained']
+        self.use_pretrained = self.cfg_dict[self.cfg_name]['use_pretrained']
 
         self.backbone_net = torch.hub.load('pytorch/vision', self.vit_type, num_classes=output_dim,
-                                           pretrained=self.vit_pre_trained)
+                                           pretrained=self.use_pretrained)
 
     def forward(self, inputs):
         x = self.backbone_net(inputs)
@@ -87,18 +87,16 @@ if __name__ == '__main__':
     from omegaconf import DictConfig
 
     # cfg = DictConfig(
-    #     {'use_init': True, 'encoder': {'cnn_kernel_size': 3, 'cnn_stride': 1, 'cnn_padding': 1, 'cnn_dilation': 1,
+    #     {'use_init': True, 'state_encoder': {'cnn_kernel_size': 3, 'cnn_stride': 1, 'cnn_padding': 1, 'cnn_dilation': 1,
     #                                    'hidden_dims': [32, 64, 128], 'activation': 'relu', 'mlp_hidden_dims': [128],
     #                                    'mlp_activation': 'relu'}})
     # model = CNNEncoder(cfg=cfg, input_dim=3, output_dim=128)
     # print(model)
 
-    # cfg = DictConfig(
-    #     {'use_init': True, 'encoder': {'resnet_type': 'resnet18', 'resnet_pre_trained': False}})
+    # cfg = DictConfig({'use_init': True, 'state_encoder': {'resnet_type': 'resnet18', 'use_pretrained': False}})
     # model = ResnetEncoder(cfg=cfg, input_dim=3, output_dim=128)
     # print(model)
 
-    cfg = DictConfig(
-        {'use_init': True, 'encoder': {'vit_type': 'vit_b_16', 'vit_pre_trained': False}})
+    cfg = DictConfig({'use_init': True, 'state_encoder': {'vit_type': 'vit_b_16', 'use_pretrained': False}})
     model = ViTEncoder(cfg=cfg, input_dim=3, output_dim=128)
     print(model)

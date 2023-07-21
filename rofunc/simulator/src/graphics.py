@@ -93,7 +93,7 @@ for i in range(len(asset_files)):
     assets.append(asset_handle)
 
 # Load textures from file. Loads all .jpgs from the specified directory as textures
-texture_files = os.listdir("../../assets/textures/")
+texture_files = os.listdir("../assets/textures/")
 texture_handles = []
 for file in texture_files:
     if file.endswith(".jpg"):

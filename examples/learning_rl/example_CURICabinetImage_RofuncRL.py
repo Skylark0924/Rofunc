@@ -1,8 +1,8 @@
 """
-Ant (RofuncRL)
-===========================
+CURICabinetImage (RofuncRL)
+=======================
 
-Ant RL using RofuncRL
+Open drawers with a humanoid CURI robot and image observation, trained by RofuncRL
 """
 
 import argparse
@@ -79,7 +79,7 @@ def inference(custom_args):
                                              env_name=custom_args.task)
     # load checkpoint
     if custom_args.ckpt_path is None:
-        custom_args.ckpt_path = model_zoo(name="AntRofuncRLPPO.pt")  # TODO: check
+        custom_args.ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO_left_arm.pth")  # TODO: Need to update the ckpt
     trainer.agent.load_ckpt(custom_args.ckpt_path)
 
     # Start inference
@@ -90,13 +90,13 @@ if __name__ == '__main__':
     gpu_id = 1
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="Ant")
-    parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3
-    parser.add_argument("--num_envs", type=int, default=4096)
+    parser.add_argument("--task", type=str, default="CURICabinetImage")
+    parser.add_argument("--agent", type=str, default="ppo")  # ppo
+    parser.add_argument("--num_envs", type=int, default=64)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="True")
+    parser.add_argument("--headless", type=str, default="False")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
