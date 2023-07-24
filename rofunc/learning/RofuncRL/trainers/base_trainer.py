@@ -197,6 +197,7 @@ class BaseTrainer:
                 self.agent.checkpoint_best_modules["saved"] = False
                 self.agent.checkpoint_best_modules["modules"] = {k: copy.deepcopy(self.agent._get_internal_value(v)) for
                                                                  k, v in self.agent.checkpoint_modules.items()}
+                self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, "best_ckpt.pth"))
 
             # Update tensorboard
             self.write_tensorboard()
