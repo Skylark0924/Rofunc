@@ -69,7 +69,7 @@ Model:
   actor:
     type: "Gaussian"  # ["Beta", "Gaussian"]
     mlp_hidden_dims: [ 512, 256, 128 ]
-    mlp_activation: elu
+    mlp_activation: relu
     use_lstm: false
     lstm_cell_size: 256
     lstm_use_prev_action: false
@@ -78,7 +78,7 @@ Model:
 
   critic:
     mlp_hidden_dims: [ 512, 256, 128 ]
-    mlp_activation: elu
+    mlp_activation: relu
     use_lstm: false
     lstm_cell_size: 256
     lstm_use_prev_action: false

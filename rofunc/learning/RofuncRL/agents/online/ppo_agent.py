@@ -132,7 +132,7 @@ class PPOAgent(BaseAgent):
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:
             # sample stochastic actions
-            if self.cfg.Model.actor.type == "Beta":
+            if self.cfg.Model.actor.type == "Beta":  # TODO: Check this
                 dist = self.policy.get_dist(self._state_preprocessor(states))
                 actions = dist.rsample()  # Sample the action according to the probability distribution
                 log_prob = dist.log_prob(actions)  # The log probability density of the action
@@ -141,11 +141,12 @@ class PPOAgent(BaseAgent):
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
-            if self.cfg.Model.actor.type == "Beta":
+            if self.cfg.Model.actor.type == "Beta":  # TODO: Check this
                 actions = self.policy.mean(self._state_preprocessor(states)).detach()
                 log_prob = None
             else:
-                actions = self.policy(self._state_preprocessor(states)).detach()
+                actions, _ = self.policy(self._state_preprocessor(states))
+                actions = actions.detach()
                 log_prob = None
         return actions, log_prob
 
