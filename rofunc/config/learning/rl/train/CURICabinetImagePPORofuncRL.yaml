@@ -3,7 +3,7 @@ Trainer:
   task_name: CURICabinetImage              # Task name for logging.
   experiment_name:                    # Experiment name for logging.
   experiment_directory:               # Experiment directory for logging.
-  write_interval: 500                 # TensorBoard write interval for logging. (timesteps)
+  write_interval: 100                 # TensorBoard write interval for logging. (timesteps)
   checkpoint_interval: 1000           # Checkpoint interval for logging. (timesteps)
   wandb: False                        # If true, log to Weights & Biases.
   wandb_kwargs:                       # Weights & Biases kwargs. https://docs.wandb.ai/ref/python/init
@@ -69,7 +69,7 @@ Model:
   actor:
     type: "Gaussian"  # ["Beta", "Gaussian"]
     mlp_hidden_dims: [ 512, 256, 128 ]
-    mlp_activation: elu
+    mlp_activation: relu
     use_lstm: false
     lstm_cell_size: 256
     lstm_use_prev_action: false
@@ -78,7 +78,7 @@ Model:
 
   critic:
     mlp_hidden_dims: [ 512, 256, 128 ]
-    mlp_activation: elu
+    mlp_activation: relu
     use_lstm: false
     lstm_cell_size: 256
     lstm_use_prev_action: false
@@ -86,7 +86,7 @@ Model:
     max_seq_len: 20
 
   state_encoder:
-    encoder_type: "vit"  # ["resnet", "vit", "cnn"]
+    encoder_type: "cnn"  # ["resnet", "vit", "cnn"]
     image_size: 224
     use_pretrained: False
     out_dim: 512
@@ -103,7 +103,7 @@ Model:
     cnn_dilation: 1
     hidden_dims: [32, 64, 128]
     activation: 'relu'
-    mlp_inp_dims: 32768
+    mlp_inp_dims: 100352
     mlp_hidden_dims: [128]
     mlp_activation: 'relu'
 

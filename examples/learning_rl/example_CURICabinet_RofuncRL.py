@@ -79,7 +79,7 @@ def inference(custom_args):
                                              env_name=custom_args.task)
     # load checkpoint
     if custom_args.ckpt_path is None:
-        custom_args.ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO_left_arm.pth")  # TODO: Need to update the ckpt
+        custom_args.ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO_left_arm.pth")
     trainer.agent.load_ckpt(custom_args.ckpt_path)
 
     # Start inference

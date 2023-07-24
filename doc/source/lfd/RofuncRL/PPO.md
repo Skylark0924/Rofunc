@@ -33,8 +33,15 @@ $$
 ```{literalinclude} ../../../../rofunc/learning/RofuncRL/agents/online/ppo_agent.py
 :pyobject: PPOAgent.update_net
 ```
+## Demos
 
+### CURICabinet
 
+![CURICabinet](../../../img/CURICabinet.gif)
+
+```shell
+python examples/learning_rl/example_CURICabinet_RofuncRL.py --inference
+```
 ## Performance comparison
 
 We compare the performance of the PPO algorithm with different tricks and an open source baseline 
