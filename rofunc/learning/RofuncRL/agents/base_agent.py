@@ -27,6 +27,7 @@ from omegaconf import DictConfig
 import rofunc as rf
 from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.utils.memory import Memory
+from rofunc.learning.RofuncRL.utils.device_utils import to_device
 
 
 class BaseAgent:
@@ -120,6 +121,9 @@ class BaseAgent:
         """
         Record the transition. (Only rewards, truncated and terminated are used in this base class)
         """
+        states, actions, next_states, rewards, terminated, truncated = to_device(
+            [states, actions, next_states, rewards, terminated, truncated], self.device)
+
         if self.cumulative_rewards is None:
             self.cumulative_rewards = torch.zeros_like(rewards, dtype=torch.float32)
             self.cumulative_timesteps = torch.zeros_like(rewards, dtype=torch.int32)

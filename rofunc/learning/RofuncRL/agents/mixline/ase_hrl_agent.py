@@ -79,8 +79,7 @@ class ASEHRLAgent(BaseAgent):
         '''Define models for ASE HRL agent'''
         if hasattr(cfg.Model, "state_encoder"):
             se_type = cfg.Model.state_encoder.encoder_type
-            se_output_dim = cfg.Model.state_encoder.out_dim
-            self.se = encoder_map[se_type](cfg.Model, input_dim=3, output_dim=se_output_dim).to(self.device)
+            self.se = encoder_map[se_type](cfg.Model).to(self.device)
         else:
             self.se = EmptyEncoder()
 
