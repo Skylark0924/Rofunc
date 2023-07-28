@@ -30,9 +30,7 @@ $$
     \delta_t^V=r_t+\gamma V\left(s_{t+1}\right)-V\left(s_{t}\right)
 $$
 
-```{literalinclude} ../../../../rofunc/learning/RofuncRL/agents/online/ppo_agent.py
-:pyobject: PPOAgent.update_net
-```
+
 ## Demos
 
 ### CURICabinet
@@ -93,3 +91,9 @@ We compare the performance of the PPO algorithm with different tricks and an ope
 ### Activation Function
 
 ### Optimizer
+
+## Network update function
+
+```{literalinclude} ../../../../rofunc/learning/RofuncRL/agents/online/ppo_agent.py
+:pyobject: PPOAgent.update_net
+```

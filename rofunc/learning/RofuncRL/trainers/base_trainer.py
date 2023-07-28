@@ -78,7 +78,7 @@ class BaseTrainer:
             tb.configure(argv)
         # Launch TensorBoard
         url = tb.launch()
-        self.rofunc_logger.info(f"Tensorflow listening on {url}")
+        self.rofunc_logger.info(f"Tensorboard listening on {url}")
 
         '''Misc variables'''
         self.maximum_steps = self.cfg.Trainer.maximum_steps
@@ -204,6 +204,7 @@ class BaseTrainer:
 
             # Update tqdm bar message
             self.t_bar.set_postfix_str(f"Rew/Best: {reward:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}")
+            self.rofunc_logger.info(f"Step: {self._step}, Reward: {reward:.2f}", local_verbose=False)
 
         # Save checkpoints
         if not (self._step + 1) % self.agent.checkpoint_interval and \

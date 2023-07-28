@@ -19,7 +19,6 @@ from omegaconf import DictConfig
 
 from rofunc.config.utils import omegaconf_to_dict
 from rofunc.learning.RofuncRL.models.base_models import BaseMLP
-from rofunc.learning.RofuncRL.models.utils import activation_func
 
 
 class EmptyEncoder(nn.Module):
@@ -31,27 +30,17 @@ class EmptyEncoder(nn.Module):
 
 
 class BaseEncoder(nn.Module):
-    def __init__(self, cfg: DictConfig, input_dim: int, output_dim: int, cfg_name: str = 'state_encoder'):
+    def __init__(self, cfg: DictConfig, cfg_name: str = 'state_encoder'):
         super(BaseEncoder, self).__init__()
 
         self.cfg = cfg
         self.cfg_dict = omegaconf_to_dict(self.cfg)
         self.cfg_name = cfg_name
 
-        self.input_dim = input_dim
-        self.output_dim = output_dim
-
-        if 'hidden_dims' in self.cfg_dict[cfg_name]:
-            self.hidden_dims = self.cfg_dict[cfg_name]['hidden_dims']
-        if 'activation' in self.cfg_dict[cfg_name]:
-            self.activation = activation_func(self.cfg_dict[cfg_name]['activation'])
-
-        if 'mlp_hidden_dims' in self.cfg_dict[cfg_name]:
-            self.mlp_hidden_dims = self.cfg_dict[cfg_name]['mlp_hidden_dims']
-        if 'mlp_activation' in self.cfg_dict[cfg_name]:
-            self.mlp_activation = activation_func(self.cfg_dict[cfg_name]['mlp_activation'])
+        self.input_dim = self.cfg_dict[cfg_name]['inp_channels']
+        self.output_dim = self.cfg_dict[cfg_name]['out_channels']
 
 
 class MLPEncoder(BaseMLP):
-    def __init__(self, cfg, input_dim, output_dim, cfg_name):
-        super().__init__(cfg, input_dim, output_dim, cfg_name)
+    def __init__(self, cfg, cfg_name):
+        super().__init__(cfg, cfg_name)
