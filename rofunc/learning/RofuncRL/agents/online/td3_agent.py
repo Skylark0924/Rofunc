@@ -90,8 +90,9 @@ class TD3Agent(BaseAgent):
 
         '''Create tensors in memory'''
         if hasattr(cfg.Model, "state_encoder"):
+            img_channel = int(self.cfg.Model.state_encoder.inp_channels)
             img_size = int(self.cfg.Model.state_encoder.image_size)
-            state_tensor_size = (3, img_size, img_size)
+            state_tensor_size = (img_channel, img_size, img_size)
             kd = True
         else:
             state_tensor_size = self.observation_space
