@@ -35,7 +35,7 @@ setup(
                       'gdown==4.7.1',
                       'pytz==2023.3',
                       'shutup==0.2.0',
-                      'numpy',
+                      'numpy<=1.23.0',
                       'matplotlib',
                       'open3d==0.17.0',
                       'transformers==4.30.1',
