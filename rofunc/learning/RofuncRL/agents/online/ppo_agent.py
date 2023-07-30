@@ -66,7 +66,11 @@ class PPOAgent(BaseAgent):
             self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space, self.se).to(self.device)
         else:
             self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space, self.se).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, action_space, self.se).to(self.device)
+
+        if self.cfg.Model.use_same_model:
+            self.value = self.policy
+        else:
+            self.value = Critic(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
 
         # checkpoint models
@@ -162,7 +166,10 @@ class PPOAgent(BaseAgent):
             rewards = self._rewards_shaper(rewards)
 
         # compute values
-        values = self.value(self._state_preprocessor(states))
+        if self.cfg.Model.use_same_model:
+            values = self.value.get_value(self._state_preprocessor(states))
+        else:
+            values = self.value(self._state_preprocessor(states))
         values = self._value_preprocessor(values, inverse=True)
 
         # storage transition in memory
@@ -178,9 +185,10 @@ class PPOAgent(BaseAgent):
         values = self.memory.get_tensor_by_name("values")
 
         with torch.no_grad():
-            self.value.train(False)
-            next_values = self.value(self._state_preprocessor(self._current_next_states.float()))
-            self.value.train(True)
+            if self.cfg.Model.use_same_model:
+                next_values = self.value.get_value(self._state_preprocessor(self._current_next_states.float()))
+            else:
+                next_values = self.value(self._state_preprocessor(self._current_next_states.float()))
         next_values = self._value_preprocessor(next_values, inverse=True)
 
         advantage = 0
@@ -242,7 +250,10 @@ class PPOAgent(BaseAgent):
                 policy_loss = -torch.min(surrogate, surrogate_clipped).mean()
 
                 # compute value loss
-                predicted_values = self.value(sampled_states)
+                if self.cfg.Model.use_same_model:
+                    predicted_values = self.value.get_value(sampled_states)
+                else:
+                    predicted_values = self.value(sampled_states)
 
                 if self._clip_predicted_values:
                     predicted_values = sampled_values + torch.clip(predicted_values - sampled_values,
