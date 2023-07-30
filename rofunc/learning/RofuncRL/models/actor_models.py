@@ -180,10 +180,11 @@ class ActorPPO_Gaussian(BaseActor):
     def get_entropy(self):
         return self.dist.entropy()
 
-    # def get_value(self, state):
-    #     state = self.backbone_net(state)
-    #     value = self.value_layer(state)
-    #     return value
+    def get_value(self, state):
+        state = self.state_encoder(state)
+        state = self.backbone_net(state)
+        value = self.value_layer(state)
+        return value
 
 
 class ActorSAC(BaseActor):

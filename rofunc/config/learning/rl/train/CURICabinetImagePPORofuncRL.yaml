@@ -59,6 +59,7 @@ Agent:
 # ========= Model parameters ==========
 Model:
   use_init: True
+  use_same_model: False                 # If true, use the same model for actor and critic.
   use_action_clip: False               # If true, clip actions to the action space range.
   action_clip: 1.0                     # clipping coefficient for the norm of the actions
   action_scale: 1.0                    # scaling coefficient for the actions
@@ -93,13 +94,19 @@ Model:
     out_channels: 512
 
     cnn_args:
-      cnn_structure: [ 'conv', 'relu', 'pool', 'conv', 'relu' ]  # TODO: Check
+      cnn_structure: [ 'conv', 'relu', 'pool', 'conv', 'relu' ]  # TODO: doest not work for now
+      cnn_hidden_dims: [ 32, 64, 128 ]
       cnn_kernel_size: 3
       cnn_stride: 1
       cnn_padding: 1
       cnn_dilation: 1
-      cnn_hidden_dims: [32, 64, 128]
       cnn_activation: 'relu'
+      cnn_pooling: max    # ['max', 'avg']
+      cnn_pooling_args:
+        cnn_pooling_kernel_size: 2
+        cnn_pooling_stride: 2
+        cnn_pooling_padding: 0
+        cnn_pooling_dilation: 1
       mlp_inp_dims: 100352
       mlp_hidden_dims: [ 128 ]
       mlp_activation: 'relu'
