@@ -40,7 +40,8 @@ def build_mlp(dims: [int], hidden_activation: nn = nn.ReLU, output_activation: n
 
 def build_cnn(dims: [int], kernel_size: Union[int, tuple, List], stride: Union[int, tuple, List] = 1,
               padding: Union[int, tuple, List] = 0, dilation: Union[int, tuple, List] = 1,
-              hidden_activation: nn = nn.ReLU, output_activation: nn = None) -> nn.Sequential:
+              hidden_activation: nn = nn.ReLU, output_activation: nn = None, pooling=None,
+              pooling_args: dict = None) -> nn.Sequential:
     """
     Build convolutional neural network
     :param dims: layer dimensions, including input and output layers
@@ -50,6 +51,8 @@ def build_cnn(dims: [int], kernel_size: Union[int, tuple, List], stride: Union[i
     :param dilation: dilation controls the spacing between the kernel points
     :param hidden_activation: activation function for hidden layers
     :param output_activation: activation function for output layer
+    :param pooling: pooling layer type, ['max', 'avg', 'none']
+    :param pooling_args: pooling layer arguments
 
     The parameters kernel_size, stride, padding, dilation can either be:
     - a single int: in which case the same value is used for the height and width dimension
@@ -65,13 +68,31 @@ def build_cnn(dims: [int], kernel_size: Union[int, tuple, List], stride: Union[i
     if isinstance(dilation, int) or isinstance(dilation, tuple):
         dilation = [dilation] * (len(dims) - 1)
 
+    if pooling is not None:
+        if isinstance(pooling_args['cnn_pooling_kernel_size'], int) or isinstance(kernel_size, tuple):
+            pooling_kernel_size = [pooling_args['cnn_pooling_kernel_size']] * (len(dims) - 1)
+        if isinstance(pooling_args['cnn_pooling_stride'], int) or isinstance(stride, tuple):
+            pooling_stride = [pooling_args['cnn_pooling_stride']] * (len(dims) - 1)
+        if isinstance(pooling_args['cnn_pooling_padding'], int) or isinstance(padding, tuple):
+            pooling_padding = [pooling_args['cnn_pooling_padding']] * (len(dims) - 1)
+        if isinstance(pooling_args['cnn_pooling_dilation'], int) or isinstance(dilation, tuple):
+            pooling_dilation = [pooling_args['cnn_pooling_dilation']] * (len(dims) - 1)
+
+        if pooling == 'max':
+            pooling_method = nn.MaxPool2d
+        elif pooling == 'avg':
+            pooling_method = nn.AvgPool2d
+
     layers = []
     for i in range(len(dims) - 1):
         layers.append(
             nn.Conv2d(dims[i], dims[i + 1], kernel_size=kernel_size[i], stride=stride[i], padding=padding[i],
                       dilation=dilation[i]))
         layers.append(hidden_activation)
-        layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+        if pooling is not None:
+            layers.append(
+                pooling_method(kernel_size=pooling_kernel_size[i], stride=pooling_stride[i], padding=pooling_padding[i],
+                               dilation=pooling_dilation[i]))
     if output_activation is not None:
         layers.append(output_activation)
     return nn.Sequential(*layers)

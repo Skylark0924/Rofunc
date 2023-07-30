@@ -31,13 +31,16 @@ class CNNEncoder(BaseEncoder):
         self.cnn_dilation = self.cfg_dict[self.cfg_name]['cnn_args']['cnn_dilation']
         self.cnn_hidden_dims = self.cfg_dict[self.cfg_name]['cnn_args']['cnn_hidden_dims']
         self.cnn_activation = activation_func(self.cfg_dict[self.cfg_name]['cnn_args']['cnn_activation'])
+        self.cnn_pooling = self.cfg_dict[self.cfg_name]['cnn_args']['cnn_pooling']
+        self.cnn_pooling_args = self.cfg_dict[self.cfg_name]['cnn_args']['cnn_pooling_args']
         self.mlp_inp_dims = self.cfg_dict[self.cfg_name]['cnn_args']['mlp_inp_dims']
         self.mlp_hidden_dims = self.cfg_dict[self.cfg_name]['cnn_args']['mlp_hidden_dims']
         self.mlp_activation = activation_func(self.cfg_dict[self.cfg_name]['cnn_args']['mlp_activation'])
 
         self.backbone_net = build_cnn(dims=[self.input_dim, *self.cnn_hidden_dims], kernel_size=self.cnn_kernel_size,
                                       stride=self.cnn_stride, padding=self.cnn_padding, dilation=self.cnn_dilation,
-                                      hidden_activation=self.cnn_activation)
+                                      hidden_activation=self.cnn_activation, pooling=self.cnn_pooling,
+                                      pooling_args=self.cnn_pooling_args)
 
         self.flatten = nn.Flatten(start_dim=1)
 
