@@ -158,7 +158,10 @@ class ActorPPO_Gaussian(BaseActor):
     def forward(self, state, action=None, deterministic=False):
         state = self.state_encoder(state)
         state = self.backbone_net(state)
-        output_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-action_scale, action_scale]
+        if self.cfg.use_action_out_tanh:
+            output_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-action_scale, action_scale]
+        else:
+            output_action = self.cfg.action_scale * self.mean_layer(state)
 
         log_prob = None
         if not deterministic:
