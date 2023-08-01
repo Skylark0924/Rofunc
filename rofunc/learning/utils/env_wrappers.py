@@ -474,7 +474,7 @@ class GymWrapper(Wrapper):
 
         return observation, reward, terminated, truncated, info
 
-    def reset(self) -> Tuple[torch.Tensor, Any]:
+    def reset(self, seed=None) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
 
         :return: Observation, info
@@ -491,7 +491,7 @@ class GymWrapper(Wrapper):
             observation = self._env.reset()
             info = {}
         else:
-            observation, info = self._env.reset()
+            observation, info = self._env.reset(seed=seed) if seed is not None else self._env.reset()
         return self._observation_to_tensor(observation), info
 
     def render(self, *args, **kwargs) -> None:
