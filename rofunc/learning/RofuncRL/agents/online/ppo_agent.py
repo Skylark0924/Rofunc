@@ -119,7 +119,7 @@ class PPOAgent(BaseAgent):
         self._clip_predicted_values = self.cfg.Agent.clip_predicted_values
         self._kl_threshold = self.cfg.Agent.kl_threshold
         self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
-        self._state_preprocessor = None
+        self._state_preprocessor = None  # TODO: Check
         # self._state_preprocessor = RunningStandardScaler
         # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
         #                                                                 {"size": observation_space, "device": device})
