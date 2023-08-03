@@ -29,7 +29,7 @@ from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorSAC
 from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
-from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
+from rofunc.learning.RofuncRL.processors.normalizers import Normalization
 from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
@@ -119,9 +119,10 @@ class SACAgent(BaseAgent):
         self._entropy_learning_rate = self.cfg.Agent.entropy_learning_rate
         self._entropy_coefficient = self.cfg.Agent.initial_entropy_value
         self._target_entropy = self.cfg.Agent.target_entropy
-        self._state_preprocessor = RunningStandardScaler
+        # self._state_preprocessor = None  # TODO: Check
+        self._state_preprocessor = Normalization
         self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
-                                                                        {"size": observation_space, "device": device})
+                                                                        {"shape": observation_space, "device": device})
 
         '''Misc variables'''
         self._current_log_prob = None
