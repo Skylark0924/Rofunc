@@ -146,7 +146,9 @@ def get_space_dim(space):
         for i in range(len(space)):
             dim += get_space_dim(space[i])
     elif isinstance(space, gym.Space) or isinstance(space, gymnasium.Space):
-        dim = space.shape[0]
+        dim = space.shape
+        if isinstance(dim, tuple) and len(dim) == 1:
+            dim = dim[0]
     else:
         raise NotImplementedError
     return dim
