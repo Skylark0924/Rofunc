@@ -102,7 +102,7 @@ class BaseTrainer:
                                 f"  num_envs: {self.env.num_envs}")
 
         '''Normalization'''
-        self.state_norm = Normalization(shape=self.env.observation_space.shape[0], device=device)
+        self.state_norm = Normalization(shape=self.env.observation_space, device=device)
 
     def setup_wandb(self):
         # setup Weights & Biases

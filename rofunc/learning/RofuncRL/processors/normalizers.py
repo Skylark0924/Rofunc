@@ -15,17 +15,23 @@
  """
 
 import torch
+from rofunc.learning.RofuncRL.models.utils import get_space_dim
 
 
 class RunningMeanStd:
     # Dynamically calculate mean and std
     def __init__(self, shape, device):  # shape:the dimension of input data
+        self.shape = get_space_dim(shape)
         self.n = 0
-        self.mean = torch.zeros(shape).to(device)
-        self.S = torch.zeros(shape).to(device)
+        self.mean = torch.zeros(self.shape).to(device)
+        self.S = torch.zeros(self.shape).to(device)
         self.std = torch.sqrt(self.S).to(device)
 
-    def update(self, x):
+    def train(self, x):
+        if len(x.shape) == len(self.shape) + 1:  # Batch data
+            batch_size = x.shape[0]
+            x = torch.sum(x, dim=0) / batch_size
+
         self.n += 1
         if self.n == 1:
             self.mean = x
@@ -46,10 +52,10 @@ class Normalization:
         self.device = device
         self.running_ms = RunningMeanStd(shape=shape, device=self.device)
 
-    def __call__(self, x, update=True):
-        # Whether to update the mean and std,during the evaluating,update=False
-        if update:
-            self.running_ms.update(x)
+    def __call__(self, x, train=False):
+        # Whether to update the mean and std, during the evaluating, update=False
+        if train:
+            self.running_ms.train(x)
         x = (x - self.running_ms.mean) / (self.running_ms.std + 1e-8)
 
         return x

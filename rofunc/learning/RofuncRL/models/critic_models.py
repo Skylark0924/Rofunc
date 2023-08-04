@@ -35,7 +35,6 @@ class BaseCritic(nn.Module):
                  cfg_name: str = 'critic'):
         super().__init__()
         self.cfg = cfg
-        self.state_dim = get_space_dim(observation_space)
         self.action_dim = get_space_dim(action_space)
         cfg_dict = omegaconf_to_dict(cfg)
         self.mlp_hidden_dims = cfg_dict[cfg_name]['mlp_hidden_dims']
@@ -43,7 +42,9 @@ class BaseCritic(nn.Module):
 
         # state encoder
         self.state_encoder = state_encoder
-        if not isinstance(self.state_encoder, EmptyEncoder):
+        if isinstance(self.state_encoder, EmptyEncoder):
+            self.state_dim = get_space_dim(observation_space)
+        else:
             self.state_dim = self.state_encoder.output_dim
             if isinstance(observation_space, tuple) or isinstance(observation_space, list):
                 self.state_dim += get_space_dim(observation_space[1:])

@@ -35,14 +35,15 @@ class BaseActor(nn.Module):
                  state_encoder: Optional[nn.Module] = EmptyEncoder()):
         super().__init__()
         self.cfg = cfg
-        self.state_dim = get_space_dim(observation_space)
         self.action_dim = get_space_dim(action_space)
         self.mlp_hidden_dims = cfg.actor.mlp_hidden_dims
         self.mlp_activation = activation_func(cfg.actor.mlp_activation)
 
         # state encoder
         self.state_encoder = state_encoder
-        if not isinstance(self.state_encoder, EmptyEncoder):
+        if isinstance(self.state_encoder, EmptyEncoder):
+            self.state_dim = get_space_dim(observation_space)
+        else:
             self.state_dim = self.state_encoder.output_dim
 
         self.backbone_net = None  # build_mlp(dims=[state_dim, *dims, action_dim])
