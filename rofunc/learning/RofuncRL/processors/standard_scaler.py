@@ -24,6 +24,8 @@ import torch
 import torch.nn as nn
 
 
+# TODO: This class is deprecated and will be removed in the future
+
 class RunningStandardScaler(nn.Module):
     def __init__(self,
                  size: Union[int, Tuple[int], gym.Space, gymnasium.Space],
