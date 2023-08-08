@@ -92,6 +92,7 @@ class BaseTrainer:
         self.eval_steps = self.cfg.Trainer.eval_steps
         self.inference_steps = self.cfg.Trainer.inference_steps
         self.total_rew_mean = -1e4
+        self.eval_rew = 0
 
         '''Environment'''
         env.device = self.device
@@ -204,9 +205,12 @@ class BaseTrainer:
             self.write_tensorboard()
 
             # Update tqdm bar message
-            self.t_bar.set_postfix_str(
-                f"Rew/Best: {self.total_rew_mean:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}")
-            self.rofunc_logger.info(f"Step: {self._step}, Reward: {self.total_rew_mean:.2f}", local_verbose=False)
+            if self.eval_rew == 0:
+                post_str = f"Rew/Best: {self.total_rew_mean:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}"
+            else:
+                post_str = f"Rew/Best/Eval: {self.total_rew_mean:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}/{self.eval_rew:.2f}"
+            self.t_bar.set_postfix_str(post_str)
+            self.rofunc_logger.info(f"Step: {self._step}, {post_str}", local_verbose=False)
 
         # Save checkpoints
         if not (self._step + 1) % self.agent.checkpoint_interval and \
