@@ -10,7 +10,8 @@ def delete_lines(in_path, out_path, head, tail=0):
         fout.write(b)
 
 
-def create_dir(path):
+def create_dir(path, local_verbose=False):
     if not pathlib.Path(path).exists():
-        rf.utils.beauty_print('{} not exist, created.'.format(path), type='info')
+        if local_verbose:
+            rf.utils.beauty_print('{} not exist, created.'.format(path), type='info')
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
