@@ -47,9 +47,14 @@ class CNNEncoder(BaseEncoder):
         self.output_net = build_mlp(dims=[self.mlp_inp_dims, *self.mlp_hidden_dims, self.output_dim],
                                     hidden_activation=self.mlp_activation)
 
+        self.checkpoint_modules = {'backbone_net': self.backbone_net, 'output_net': self.output_net}
+
         if self.cfg.use_init:
             init_layers(self.backbone_net, gain=1.0, init_type='kaiming_uniform')
             init_layers(self.output_net, gain=1.0)
+
+        self.freeze_net_list = [self.backbone_net, self.output_net]
+        self.set_up()
 
     def forward(self, inputs):
         x = self.backbone_net(inputs)
@@ -69,6 +74,9 @@ class ResnetEncoder(BaseEncoder):
         self.backbone_net = torch.hub.load('pytorch/vision', self.sub_type, num_classes=self.output_dim,
                                            pretrained=self.use_pretrained)
 
+        self.freeze_net_list = [self.backbone_net]
+        self.set_up()
+
     def forward(self, inputs):
         x = self.backbone_net(inputs)
         return x
@@ -85,6 +93,9 @@ class ViTEncoder(BaseEncoder):
         self.backbone_net = torch.hub.load('pytorch/vision', self.sub_type, num_classes=self.output_dim,
                                            pretrained=self.use_pretrained)
 
+        self.freeze_net_list = [self.backbone_net]
+        self.set_up()
+
     def forward(self, inputs):
         x = self.backbone_net(inputs)
         return x
@@ -92,22 +103,32 @@ class ViTEncoder(BaseEncoder):
 
 if __name__ == '__main__':
     from omegaconf import DictConfig
+    import rofunc as rf
 
-    # cfg = DictConfig({'use_init': True, 'state_encoder': {'inp_channels': 4, 'out_channels': 512,
-    #                                                       'cnn_args': {
-    #                                                           'cnn_structure': ['conv', 'relu', 'conv', 'relu', 'pool'],
-    #                                                           'cnn_kernel_size': [8, 4],
-    #                                                           'cnn_stride': 1,
-    #                                                           'cnn_padding': 1,
-    #                                                           'cnn_dilation': 1,
-    #                                                           'cnn_hidden_dims': [32, 64],
-    #                                                           'cnn_activation': 'relu',
-    #                                                           'mlp_inp_dims': 2304,
-    #                                                           'mlp_hidden_dims': [128],
-    #                                                           'mlp_activation': 'relu',
-    #                                                       }}})
-    # model = CNNEncoder(cfg=cfg)
-    # print(model)
+    cfg = DictConfig({'use_init': True, 'state_encoder': {'inp_channels': 4, 'out_channels': 512,
+                                                          'use_pretrained': False,
+                                                          'freeze': False,
+                                                          'model_ckpt': 'test.ckpt',
+                                                          'cnn_args': {
+                                                              'cnn_structure': ['conv', 'relu', 'conv', 'relu', 'pool'],
+                                                              'cnn_kernel_size': [8, 4],
+                                                              'cnn_stride': 1,
+                                                              'cnn_padding': 1,
+                                                              'cnn_dilation': 1,
+                                                              'cnn_hidden_dims': [32, 64],
+                                                              'cnn_activation': 'relu',
+                                                              'cnn_pooling': None,  # ['max', 'avg']
+                                                              'cnn_pooling_args': {
+                                                                  'cnn_pooling_kernel_size': 2,
+                                                                  'cnn_pooling_stride': 2,
+                                                                  'cnn_pooling_padding': 0,
+                                                                  'cnn_pooling_dilation': 1},
+                                                              'mlp_inp_dims': 215296,
+                                                              'mlp_hidden_dims': [512],
+                                                              'mlp_activation': 'relu',
+                                                          }}})
+    model = CNNEncoder(cfg=cfg).to('cuda:0')
+    print(model)
 
     # cfg = DictConfig(
     #     {'use_init': True,
@@ -116,8 +137,28 @@ if __name__ == '__main__':
     # model = ResnetEncoder(cfg=cfg)
     # print(model)
 
-    cfg = DictConfig({'use_init': True,
-                      'state_encoder': {'inp_channels': 4, 'out_channels': 512, 'vit_args': {'sub_type': 'vit_b_16'},
-                                        'use_pretrained': False}})
-    model = ViTEncoder(cfg=cfg)
-    print(model)
+    # cfg = DictConfig({'use_init': True,
+    #                   'state_encoder': {'inp_channels': 4, 'out_channels': 512, 'vit_args': {'sub_type': 'vit_b_16'},
+    #                                     'use_pretrained': False}})
+    # model = ViTEncoder(cfg=cfg)
+    # print(model)
+
+    inp_latent_vector = torch.randn(32, 4, 64, 64).to('cuda:0')  # [B, C, H, W]
+    gt_latent_vector = torch.randn(32, 512).to('cuda:0')
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    for i in range(10000):
+        out_latent_vector = model(inp_latent_vector)
+        # predicted_latent_vector = out_latent_vector.last_hidden_state[:, -1:, :]
+        # print(out_latent_vector)
+
+        loss = nn.MSELoss()(out_latent_vector, gt_latent_vector)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        if i % 100 == 0:
+            model.save_ckpt('test.ckpt')
+            rf.utils.beauty_print('Save ckpt')
+
+        print(loss)

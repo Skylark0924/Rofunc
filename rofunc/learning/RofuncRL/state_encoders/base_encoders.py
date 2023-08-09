@@ -13,7 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  """
-
+import torch
 import torch.nn as nn
 from omegaconf import DictConfig
 
@@ -39,6 +39,49 @@ class BaseEncoder(nn.Module):
 
         self.input_dim = self.cfg_dict[cfg_name]['inp_channels']
         self.output_dim = self.cfg_dict[cfg_name]['out_channels']
+
+        self.use_pretrained = self.cfg_dict[cfg_name]['use_pretrained']
+        self.freeze = self.cfg_dict[cfg_name]['freeze']
+        self.model_ckpt = self.cfg_dict[cfg_name]['model_ckpt']
+
+    def set_up(self):
+        if self.freeze:
+            self.freeze_network()
+        if self.use_pretrained:
+            self.pre_trained_mode()
+
+    def freeze_network(self):
+        for net in self.freeze_net_list:
+            for param in net.parameters():
+                param.requires_grad = False
+
+    def pre_trained_mode(self):
+        if self.use_pretrained is True and self.model_ckpt is None:
+            raise ValueError("Cannot freeze the encoder without a checkpoint")
+        if self.use_pretrained:
+            self.load_ckpt(self.model_ckpt)
+
+    def _get_internal_value(self, module):
+        return module.state_dict() if hasattr(module, "state_dict") else module
+
+    def save_ckpt(self, path: str):
+        modules = {}
+        for name, module in self.checkpoint_modules.items():
+            modules[name] = self._get_internal_value(module)
+        torch.save(modules, path)
+
+    def load_ckpt(self, path: str):
+        modules = torch.load(path)
+        if type(modules) is dict:
+            for name, data in modules.items():
+                module = self.checkpoint_modules.get(name, None)
+                if module is not None:
+                    if hasattr(module, "load_state_dict"):
+                        module.load_state_dict(data)
+                        if hasattr(module, "eval"):
+                            module.eval()
+                    else:
+                        raise NotImplementedError
 
 
 class MLPEncoder(BaseMLP):

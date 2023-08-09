@@ -77,11 +77,9 @@ class ASEHRLAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for ASE HRL agent'''
-        if hasattr(cfg.Model, "state_encoder"):
-            se_type = cfg.Model.state_encoder.encoder_type
-            self.se = encoder_map[se_type](cfg.Model).to(self.device)
-        else:
-            self.se = EmptyEncoder()
+        se_type = cfg.Model.state_encoder.encoder_type
+        self.se = encoder_map[se_type](cfg.Model) if hasattr(cfg.Model, "state_encoder") else EmptyEncoder()
+        self.se.to(self.device)
 
         if self.cfg.Model.actor.type == "Beta":
             self.policy = ActorPPO_Beta(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
