@@ -72,11 +72,9 @@ class AMPAgent(BaseAgent):
         self.collect_reference_motions = collect_reference_motions
 
         '''Define models for AMP'''
-        if hasattr(cfg.Model, "state_encoder"):
-            se_type = cfg.Model.state_encoder.encoder_type
-            self.se = encoder_map[se_type](cfg.Model).to(self.device)
-        else:
-            self.se = EmptyEncoder()
+        se_type = cfg.Model.state_encoder.encoder_type
+        self.se = encoder_map[se_type](cfg.Model) if hasattr(cfg.Model, "state_encoder") else EmptyEncoder()
+        self.se.to(self.device)
 
         self.policy = ActorAMP(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.value = Critic(cfg.Model, observation_space, action_space, self.se).to(self.device)
