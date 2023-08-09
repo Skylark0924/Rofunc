@@ -106,7 +106,7 @@ if __name__ == '__main__':
     import rofunc as rf
 
     cfg = DictConfig({'use_init': True, 'state_encoder': {'inp_channels': 4, 'out_channels': 512,
-                                                          'use_pretrained': False,
+                                                          'use_pretrained': True,
                                                           'freeze': False,
                                                           'model_ckpt': 'test.ckpt',
                                                           'cnn_args': {

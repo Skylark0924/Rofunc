@@ -31,7 +31,6 @@ from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.normalizers import Normalization
 from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
-from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -59,10 +58,6 @@ class SACAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for SAC'''
-        se_type = cfg.Model.state_encoder.encoder_type
-        self.se = encoder_map[se_type](cfg.Model) if hasattr(cfg.Model, "state_encoder") else EmptyEncoder()
-        self.se.to(self.device)
-
         concat_space = [observation_space, action_space]
         self.actor = ActorSAC(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.critic_1 = Critic(cfg.Model, concat_space, action_space, self.se).to(self.device)
