@@ -59,11 +59,9 @@ class SACAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for SAC'''
-        if hasattr(cfg.Model, "state_encoder"):
-            se_type = cfg.Model.state_encoder.encoder_type
-            self.se = encoder_map[se_type](cfg.Model).to(self.device)
-        else:
-            self.se = EmptyEncoder()
+        se_type = cfg.Model.state_encoder.encoder_type
+        self.se = encoder_map[se_type](cfg.Model) if hasattr(cfg.Model, "state_encoder") else EmptyEncoder()
+        self.se.to(self.device)
 
         concat_space = [observation_space, action_space]
         self.actor = ActorSAC(cfg.Model, observation_space, action_space, self.se).to(self.device)
