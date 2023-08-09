@@ -28,7 +28,6 @@ from rofunc.learning.RofuncRL.models.actor_models import ActorPPO_Beta, ActorPPO
 from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
-from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -56,10 +55,6 @@ class PPOAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for PPO'''
-        se_type = cfg.Model.state_encoder.encoder_type
-        self.se = encoder_map[se_type](cfg.Model) if hasattr(cfg.Model, "state_encoder") else EmptyEncoder()
-        self.se.to(self.device)
-
         if self.cfg.Model.actor.type == "Beta":
             self.policy = ActorPPO_Beta(cfg.Model, observation_space, action_space, self.se).to(self.device)
         else:

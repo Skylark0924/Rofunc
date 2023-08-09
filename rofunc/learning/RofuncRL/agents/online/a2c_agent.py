@@ -30,7 +30,6 @@ from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 # from rofunc.learning.RofuncRL.utils.skrl_utils import Policy, Value
 from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
-from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -58,10 +57,6 @@ class A2CAgent(BaseAgent):
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
         '''Define models for A2C'''
-        se_type = cfg.Model.state_encoder.encoder_type
-        self.se = encoder_map[se_type](cfg.Model) if hasattr(cfg.Model, "state_encoder") else EmptyEncoder()
-        self.se.to(self.device)
-
         self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.value = Critic(cfg.Model, observation_space, action_space, self.se).to(self.device)
         # self.policy = Policy(observation_space, action_space, device, clip_actions=True).to(self.device)
