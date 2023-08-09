@@ -15,19 +15,19 @@
  """
 
 import collections
-import os
-from typing import Union, Tuple, Optional
-
 import gym
 import gymnasium
 import numpy as np
+import os
 import torch
 from omegaconf import DictConfig
+from typing import Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
-from rofunc.learning.RofuncRL.utils.memory import Memory
+from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.device_utils import to_device
+from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class BaseAgent:
@@ -75,6 +75,10 @@ class BaseAgent:
         '''Set up'''
         self._lr_scheduler = None
         self._lr_scheduler_kwargs = {}
+
+        '''Define state encoder'''
+        self.se = encoder_map[cfg.Model.state_encoder.encoder_type](cfg.Model).to(self.device) \
+            if hasattr(cfg.Model, "state_encoder") else EmptyEncoder()
 
     def _set_up(self):
         """

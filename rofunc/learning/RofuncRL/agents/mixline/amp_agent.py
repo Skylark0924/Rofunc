@@ -30,7 +30,6 @@ from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
-from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -72,10 +71,6 @@ class AMPAgent(BaseAgent):
         self.collect_reference_motions = collect_reference_motions
 
         '''Define models for AMP'''
-        se_type = cfg.Model.state_encoder.encoder_type
-        self.se = encoder_map[se_type](cfg.Model) if hasattr(cfg.Model, "state_encoder") else EmptyEncoder()
-        self.se.to(self.device)
-
         self.policy = ActorAMP(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.value = Critic(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.discriminator = Critic(cfg.Model, amp_observation_space, action_space, self.se,
