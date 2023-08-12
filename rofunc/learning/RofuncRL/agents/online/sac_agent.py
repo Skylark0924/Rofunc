@@ -95,7 +95,6 @@ class SACAgent(BaseAgent):
         self._tensors_names = ["states", "actions", "rewards", "next_states", "terminated"]
 
         '''Get hyper-parameters from config'''
-        self._horizon = self.cfg.Agent.horizon
         self._discount = self.cfg.Agent.discount
         self._gradient_steps = self.cfg.Agent.gradient_steps
         self._polyak = self.cfg.Agent.polyak
