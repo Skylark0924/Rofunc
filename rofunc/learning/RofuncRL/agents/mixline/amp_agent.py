@@ -110,7 +110,6 @@ class AMPAgent(BaseAgent):
                                "returns", "advantages", "amp_states", "next_values"]
 
         '''Get hyper-parameters from config'''
-        self._horizon = self.cfg.Agent.horizon
         self._discount = self.cfg.Agent.discount
         self._td_lambda = self.cfg.Agent.td_lambda
         self._learning_epochs = self.cfg.Agent.learning_epochs

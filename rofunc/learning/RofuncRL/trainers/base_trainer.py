@@ -85,14 +85,20 @@ class BaseTrainer:
         self.start_learning_steps = self.cfg.Trainer.start_learning_steps
         self.random_steps = self.cfg.Trainer.random_steps
         self.rollouts = self.cfg.Trainer.rollouts
+        self.max_episode_steps = self.cfg.Trainer.max_episode_steps
         self._step = 0
         self._rollout = 0
         self._update_times = 0
         self.start_time = None
-        self.eval_steps = self.cfg.Trainer.eval_steps
-        self.inference_steps = self.cfg.Trainer.inference_steps
+
+        self.eval_flag = self.cfg.Trainer.eval_flag if hasattr(self.cfg.Trainer, "eval_flag") else False
+        self.eval_freq = self.cfg.Trainer.eval_freq if hasattr(self.cfg.Trainer, "eval_freq") else 0
+        self.eval_steps = self.cfg.Trainer.eval_steps if hasattr(self.cfg.Trainer, "eval_steps") else 0
+        assert self.eval_steps % self.max_episode_steps == 0, \
+            f"eval_steps ({self.eval_steps}) must be a multiple of max_episode_steps ({self.max_episode_steps})."
+        self.inference_steps = self.cfg.Trainer.inference_steps if hasattr(self.cfg.Trainer, "inference_steps") else 0
         self.total_rew_mean = -1e4
-        self.eval_rew = 0
+        self.eval_rew_mean = 0
 
         '''Environment'''
         env.device = self.device
@@ -205,10 +211,10 @@ class BaseTrainer:
             self.write_tensorboard()
 
             # Update tqdm bar message
-            if self.eval_rew == 0:
-                post_str = f"Rew/Best: {self.total_rew_mean:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}"
+            if self.eval_flag:
+                post_str = f"Rew/Best/Eval: {self.total_rew_mean:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}/{self.eval_rew_mean:.2f}"
             else:
-                post_str = f"Rew/Best/Eval: {self.total_rew_mean:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}/{self.eval_rew:.2f}"
+                post_str = f"Rew/Best: {self.total_rew_mean:.2f}/{self.agent.checkpoint_best_modules['reward']:.2f}"
             self.t_bar.set_postfix_str(post_str)
             self.rofunc_logger.info(f"Step: {self._step}, {post_str}", local_verbose=False)
 
@@ -216,6 +222,12 @@ class BaseTrainer:
         if not (self._step + 1) % self.agent.checkpoint_interval and \
                 self.agent.checkpoint_interval > 0 and self._step > 1:
             self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))
+
+        # Evaluate per self.eval_freq steps
+        if self.eval_flag:
+            if not (self._step + 1) % self.eval_freq and (self._step + 1) > self.start_learning_steps:
+                self.rofunc_logger.info(f'Evaluate at step {self._step + 1}.', local_verbose=False)
+                self.eval()
 
     def write_tensorboard(self):
         for k, v in self.agent.tracking_data.items():
