@@ -12,7 +12,7 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
- """
+"""
 
 from rofunc.learning.RofuncRL.agents.online.a2c_agent import A2CAgent
 from rofunc.learning.RofuncRL.trainers.base_trainer import BaseTrainer
