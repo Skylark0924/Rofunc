@@ -14,6 +14,10 @@
  limitations under the License.
  """
 
+# Self-implemented human simulation with urdf built from xsens model
+# Deprecated since the xsens model is not accurate enough
+# Try use humanoid robot simulation instead (see humanoid_sim.py)
+
 from rofunc.simulator.base.base_sim import RobotSim
 import numpy as np
 

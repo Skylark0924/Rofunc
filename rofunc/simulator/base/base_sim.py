@@ -176,7 +176,7 @@ class RobotSim:
         elif self.robot_name == "human":
             self.asset_file = asset_file
             self.flip_visual_attachments = False
-            self.fix_base_link = True
+            self.fix_base_link = False
             pos_y, pos_z = 2., 0.
         else:
             raise ValueError(
