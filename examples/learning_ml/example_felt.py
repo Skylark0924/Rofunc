@@ -6,16 +6,23 @@ The coder for the paper "FeLT: Fully Tactile-driven Robot Plate Cleaning Skill L
  with Tactile Sensor" by Junjia LIU, et al.
 """
 import numpy as np
-
+import os
 import rofunc as rf
 
 
 # --- Data processing ---
-def data_process(dat_path):
-    raw_demo = np.load('../../data/LFD_ML/LeftHand.npy')
+def data_process(data_path):
+    for trial in os.listdir(data_path):
+        if trial.startswith('trial'):
+            trial_path = os.path.join(data_path, trial)
+            hand_rigid = np.load(os.path.join(trial_path, 'mocap_hand_rigid.npy'))
+            object_rigid = np.load(os.path.join(trial_path, 'mocap_object_rigid.npy'))
+    raw_demo = np.load(data_path)
+
+    return demos_x
 
 
-demos_x = data_process('../data/LFD_ML/LeftHand.npy')
+demos_x = data_process('../data/felt/wipe_circle')
 
 # --- TP-GMM ---
 # Define the task parameters
