@@ -1,8 +1,9 @@
 """
-TP-GMM learning from real human demonstration data
+BiRP
 =================================================
 
-This example shows how to learn a TP-GMM from real human demonstration data.
+The code for the paper "BiRP: BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization
+Method on Human Demonstration" by Junjia LIU, et al. (https://arxiv.org/abs/2307.05933)
 """
 
 from isaacgym import gymutil
