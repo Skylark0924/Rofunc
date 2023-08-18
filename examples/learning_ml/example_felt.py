@@ -11,13 +11,11 @@ import rofunc as rf
 
 
 # --- Data processing ---
-def data_process(data_path):
-    for trial in os.listdir(data_path):
-        if trial.startswith('trial'):
-            trial_path = os.path.join(data_path, trial)
-            hand_rigid = np.load(os.path.join(trial_path, 'mocap_hand_rigid.npy'))
-            object_rigid = np.load(os.path.join(trial_path, 'mocap_object_rigid.npy'))
-    raw_demo = np.load(data_path)
+def data_process(data_dir):
+    all_files = rf.file.list_absl_path(data_dir, recursive=False, prefix='trial')
+    for file in all_files:
+        hand_rigid = np.load(os.path.join(file, 'mocap_hand_rigid.npy'))
+        object_rigid = np.load(os.path.join(file, 'mocap_object_rigid.npy'))
 
     return demos_x
 
