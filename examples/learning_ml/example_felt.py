@@ -1,15 +1,21 @@
 """
-TP-GMM
+FeLT
 =================
 
-This example shows how to use the TP-GMM to learn a human demonstration motion.
+The coder for the paper "FeLT: Fully Tactile-driven Robot Plate Cleaning Skill Learning from Human Demonstration
+ with Tactile Sensor" by Junjia LIU, et al.
 """
 import numpy as np
 
 import rofunc as rf
 
-raw_demo = np.load('../data/LFD_ML/LeftHand.npy')
-demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
+
+# --- Data processing ---
+def data_process(dat_path):
+    raw_demo = np.load('../../data/LFD_ML/LeftHand.npy')
+
+
+demos_x = data_process('../data/LFD_ML/LeftHand.npy')
 
 # --- TP-GMM ---
 # Define the task parameters
