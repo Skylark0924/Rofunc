@@ -2,25 +2,29 @@ import os
 import rofunc as rf
 
 
-def list_absl_path(dir, recursive=False):
+def list_absl_path(dir, recursive=False, prefix=None, suffix=None):
     """
     Get the absolute path of each file in the directory.
 
     Example::
 
-    >>> list_absl_path('/home/ubuntu/Github/Rofunc/examples/data/felt', recursive=True)
-    ['/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1/mocap_hand_rigid.npy',
-        '/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1/mocap_object_rigid.npy',
-        ...]
+        >>> list_absl_path('/home/ubuntu/Github/Rofunc/examples/data/felt', recursive=True)
+        ['/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1/mocap_hand_rigid.npy',
+            '/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1/mocap_object_rigid.npy',
+            ...]
 
     :param dir: directory path
     :param recursive: if True, list the files in the subdirectories as well
+    :param prefix: if not None, only list the files with the appointed prefix
+    :param suffix: if not None, only list the files with the appointed suffix
     :return: list
     """
     if recursive:
-        return [os.path.join(root, file) for root, dirs, files in os.walk(dir) for file in files]
+        return [os.path.join(root, file) for root, dirs, files in os.walk(dir) for file in files if
+                suffix is None or file.endswith(suffix) and prefix is None or file.startswith(prefix)]
     else:
-        return [os.path.join(dir, file) for file in os.listdir(dir)]
+        return [os.path.join(dir, file) for file in os.listdir(dir) if
+                suffix is None or file.endswith(suffix) and prefix is None or file.startswith(prefix)]
 
 
 def delete_files(dir, file_list_to_delete, recursive=False):
@@ -32,11 +36,11 @@ def delete_files(dir, file_list_to_delete, recursive=False):
         >>> delete_files('/home/ubuntu/Github/Rofunc/examples/data/felt', ['desktop.ini'], recursive=True)
 
     :param dir: directory path
-    :param file_list_to_delete: the list of file names need to be deleted
+    :param file_list_to_delete: the list of file names need to be deleted, need suffix
     :param recursive: if True, delete the files in the subdirectories as well
     :return: None
     """
-    all_files = list_absl_path(dir, recursive=recursive)
+    all_files = list_absl_path(dir, recursive=recursive, )
     for file in all_files:
         if os.path.basename(file) in file_list_to_delete:
             os.remove(file)
@@ -55,8 +59,8 @@ def rename_files(dir, source_file_list=None, target_file_list=None, recursive=Fa
                     recursive=True)
 
     :param dir: directory path
-    :param source_file_list:
-    :param target_file_list:
+    :param source_file_list: the list of file names need to be renamed, need suffix
+    :param target_file_list: the list of file names need to be renamed to, need suffix
     :param recursive: if True, rename the files in the subdirectories as well
     :return: None
     """
