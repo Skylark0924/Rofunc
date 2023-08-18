@@ -8,14 +8,31 @@ The coder for the paper "FeLT: Fully Tactile-driven Robot Plate Cleaning Skill L
 import numpy as np
 import os
 import rofunc as rf
+import pandas as pd
 
 
 # --- Data processing ---
 def data_process(data_dir):
     all_files = rf.file.list_absl_path(data_dir, recursive=False, prefix='trial')
     for file in all_files:
-        hand_rigid = np.load(os.path.join(file, 'mocap_hand_rigid.npy'))
-        object_rigid = np.load(os.path.join(file, 'mocap_object_rigid.npy'))
+        hand_rigid = pd.read_csv(os.path.join(file, 'mocap_hand_rigid.csv'))
+        object_rigid = pd.read_csv(os.path.join(file, 'mocap_object_rigid.csv'))
+        hand_marker_positions = pd.read_csv(os.path.join(file, 'mocap_hand.csv'))
+        object_marker_positions = pd.read_csv(os.path.join(file, 'mocap_object.csv'))
+
+        def get_center_position(df):
+            data = df.to_numpy().reshape((len(df.to_numpy()), -1, 3))
+            return np.mean(data, axis=1)
+
+        def get_orientation(df):
+            data = df.to_numpy().reshape((len(df.to_numpy()), 3, 3))
+            data = np.array([rf.robolab.quaternion_from_matrix(rf.robolab.homo_matrix_from_rot_matrix(i)) for i in data])
+            return data
+
+        hand_position = get_center_position(hand_marker_positions)
+        object_position = get_center_position(object_marker_positions)
+        hand_ori = get_orientation(hand_rigid)
+        object_ori = get_orientation(object_rigid)
 
     return demos_x
 

@@ -948,6 +948,23 @@ def rot_matrix_from_euler(ai, aj, ak, axes='sxyz'):
     return rot_matrix
 
 
+def homo_matrix_from_rot_matrix(rot_matrix, translation=None):
+    """Construct homogeneous matrix from rotation matrix
+    >>> R = homo_matrix_from_rot_matrix(np.array([[-0.64287284,  0.05872664, -0.76371834], \
+                                                [-0.68124272,  0.41198225,  0.60512725], \
+                                                [ 0.35017549,  0.90929743, -0.2248451 ]]))
+
+    :param rot_matrix: [3, 3] array
+    :param translation: quaternion
+    """
+    check_rot_matrix(rot_matrix)
+    homo_matrix = np.identity(4)
+    homo_matrix[:3, :3] = rot_matrix
+    if translation is not None:
+        homo_matrix[:, 3] = translation
+    return homo_matrix
+
+
 def euler_from_matrix(matrix, axes='sxyz'):
     """Return Euler angles from rotation matrix for specified axis sequence.
     axes : One of 24 axis sequences as string or encoded tuple
@@ -1080,35 +1097,6 @@ def quaternion_about_axis(angle, axis):
     return quaternion
 
 
-def homo_matrix_from_quaternion(quaternion):
-    """Return homogeneous rotation matrix from quaternion.
-    >>> R = homo_matrix_from_quaternion([0.06146124, 0, 0, 0.99810947])
-    >>> np.allclose(R, rotation_matrix(0.123, (1, 0, 0)))
-    True
-    """
-    q = np.array(quaternion[:4], dtype=np.float64, copy=True)
-    nq = np.dot(q, q)
-    if nq < _EPS:
-        return np.identity(4)
-    q *= math.sqrt(2.0 / nq)
-    q = np.outer(q, q)
-    return np.array((
-        (1.0 - q[1, 1] - q[2, 2], q[0, 1] - q[2, 3], q[0, 2] + q[1, 3], 0.0),
-        (q[0, 1] + q[2, 3], 1.0 - q[0, 0] - q[2, 2], q[1, 2] - q[0, 3], 0.0),
-        (q[0, 2] - q[1, 3], q[1, 2] + q[0, 3], 1.0 - q[0, 0] - q[1, 1], 0.0),
-        (0.0, 0.0, 0.0, 1.0)
-    ), dtype=np.float64)
-
-
-def rot_matrix_from_quaternion(quaternion):
-    """Return rotation matrix from quaternion.
-    >>> R = rot_matrix_from_quaternion([0.06146124, 0, 0, 0.99810947])
-    """
-    homo_matrix = homo_matrix_from_quaternion(quaternion)
-    rot_matrix = homo_matrix[:3, :3]
-    return rot_matrix
-
-
 def quaternion_from_matrix(matrix):
     """Return quaternion from rotation matrix.
     >>> R = rotation_matrix(0.123, (1, 2, 3))
@@ -1239,6 +1227,35 @@ def random_quaternion(rand=None):
                      np.cos(t1) * r1,
                      np.sin(t2) * r2,
                      np.cos(t2) * r2), dtype=np.float64)
+
+
+def homo_matrix_from_quaternion(quaternion):
+    """Return homogeneous rotation matrix from quaternion.
+    >>> R = homo_matrix_from_quaternion([0.06146124, 0, 0, 0.99810947])
+    >>> np.allclose(R, rotation_matrix(0.123, (1, 0, 0)))
+    True
+    """
+    q = np.array(quaternion[:4], dtype=np.float64, copy=True)
+    nq = np.dot(q, q)
+    if nq < _EPS:
+        return np.identity(4)
+    q *= math.sqrt(2.0 / nq)
+    q = np.outer(q, q)
+    return np.array((
+        (1.0 - q[1, 1] - q[2, 2], q[0, 1] - q[2, 3], q[0, 2] + q[1, 3], 0.0),
+        (q[0, 1] + q[2, 3], 1.0 - q[0, 0] - q[2, 2], q[1, 2] - q[0, 3], 0.0),
+        (q[0, 2] - q[1, 3], q[1, 2] + q[0, 3], 1.0 - q[0, 0] - q[1, 1], 0.0),
+        (0.0, 0.0, 0.0, 1.0)
+    ), dtype=np.float64)
+
+
+def rot_matrix_from_quaternion(quaternion):
+    """Return rotation matrix from quaternion.
+    >>> R = rot_matrix_from_quaternion([0.06146124, 0, 0, 0.99810947])
+    """
+    homo_matrix = homo_matrix_from_quaternion(quaternion)
+    rot_matrix = homo_matrix[:3, :3]
+    return rot_matrix
 
 
 def random_rotation_matrix(rand=None):
