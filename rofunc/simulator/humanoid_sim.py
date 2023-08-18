@@ -15,8 +15,7 @@
 """
 
 from rofunc.simulator.base.base_sim import RobotSim
-import numpy as np
-from rofunc.learning.RofuncRL.tasks.amp.utils.motion_lib import MotionLib
+from rofunc.learning.RofuncRL.tasks.amp.motion_lib import MotionLib
 from isaacgym.torch_utils import *
 import torch
 
@@ -142,8 +141,6 @@ class HumanoidSim(RobotSim):
 
 if __name__ == '__main__':
     from isaacgym import gymutil
-
-    import rofunc as rf
 
     args = gymutil.parse_arguments()
     args.use_gpu_pipeline = False

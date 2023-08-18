@@ -33,7 +33,7 @@ from gym import spaces
 from isaacgym.torch_utils import *
 
 from .humanoid import Humanoid, dof_to_obs
-from .utils.motion_lib import MotionLib
+from rofunc.learning.RofuncRL.tasks.ase.motion_lib import MotionLib
 from ..utils import torch_jit_utils as torch_utils
 
 
