@@ -30,8 +30,8 @@ import os
 
 import yaml
 
-from ..poselib.poselib.core.rotation3d import *
-from ..poselib.poselib.skeleton.skeleton3d import SkeletonMotion
+from rofunc.utils.poselib.poselib.core.rotation3d import *
+from rofunc.utils.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
 from ...amp.humanoid_amp_base import DOF_BODY_IDS, DOF_OFFSETS
 from ...utils.torch_jit_utils import *
 
