@@ -157,6 +157,6 @@ if __name__ == '__main__':
 
         if i % 100 == 0:
             model.save_ckpt('test.ckpt')
-            rf.utils.beauty_print('Save ckpt')
+            rf.logger.beauty_print('Save ckpt')
 
         print(loss)

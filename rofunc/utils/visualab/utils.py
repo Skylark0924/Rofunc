@@ -82,7 +82,7 @@ def save_img(fig, save_dir, fig_name=None, dpi=300, transparent=False, format=No
     """
     if format is None:
         format = ['eps', 'png']
-    rf.utils.create_dir(save_dir)
+    rf.rfos.create_dir(save_dir)
     if fig_name is None:
         nb_files = len(os.listdir(save_dir))
         fig_name = 'fig_{}'.format(nb_files)

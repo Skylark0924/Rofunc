@@ -39,7 +39,7 @@ class ODTransAgent(BaseAgent):
                  memory: Optional[Union[Memory, Tuple[Memory]]] = None,
                  device: Optional[Union[str, torch.device]] = None,
                  experiment_dir: Optional[str] = None,
-                 rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
+                 rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
         Online Decision Transformer (ODTrans) Agent
         "Online Decision Transformer". Qinqing Zheng. et al. https://arxiv.org/abs/2202.05607

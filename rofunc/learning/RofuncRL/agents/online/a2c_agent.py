@@ -39,7 +39,7 @@ class A2CAgent(BaseAgent):
                  memory: Optional[Union[Memory, Tuple[Memory]]] = None,
                  device: Optional[Union[str, torch.device]] = None,
                  experiment_dir: Optional[str] = None,
-                 rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
+                 rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
         Advantage Actor Critic (A2C) agent
         "Asynchronous Methods for Deep Reinforcement Learning". Mnih et al. 2016. https://arxiv.org/abs/1602.01783
