@@ -51,7 +51,7 @@ def reserve_sock_addr():
 
         >>> import os
         >>> from tensorboard import program
-        >>> from rofunc.utils.file.internet import reserve_sock_addr
+        >>> from rofunc.utils.rfos.internet import reserve_sock_addr
         >>> tb = program.TensorBoard()
         >>> # Find a free port
         >>> with reserve_sock_addr() as (h, p):

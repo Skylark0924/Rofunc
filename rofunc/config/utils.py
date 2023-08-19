@@ -11,7 +11,7 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.config import *
-from rofunc.utils.file.path import get_rofunc_path
+from rofunc.utils.rfos.path import get_rofunc_path
 
 """
 Config loading rules:

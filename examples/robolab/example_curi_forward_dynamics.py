@@ -10,7 +10,7 @@ import numpy as np
 import pinocchio
 
 import rofunc as rf
-from rofunc.utils.file.path import get_rofunc_path
+from rofunc.utils.rfos.path import get_rofunc_path
 
 model = pinocchio.buildModelFromUrdf(
     os.path.join(get_rofunc_path(), "simulator/assets/urdf/curi/urdf/curi_pinocchio_test.urdf"))

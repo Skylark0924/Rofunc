@@ -33,7 +33,7 @@ from tensorboard import program
 
 import rofunc as rf
 from rofunc.config.utils import get_config, omegaconf_to_dict
-from rofunc.utils.file.internet import reserve_sock_addr
+from rofunc.utils.rfos.internet import reserve_sock_addr
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 # set the seed for reproducibility
