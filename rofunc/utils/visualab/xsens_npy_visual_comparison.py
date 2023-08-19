@@ -1,3 +1,7 @@
+"""
+Warning: This file is deprecated and will be removed in a future release.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -6,6 +10,7 @@ def filter(interval, windowsize):
     window = np.ones(int(windowsize)) / float(windowsize)
     re = np.convolve(interval, window, 'same')
     return re
+
 
 def process(data):
     # pos_x = filter(data[:, 0], 10)
@@ -43,6 +48,7 @@ def process(data):
     data_processed = np.array([pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z])
     return data_processed
 
+
 data_1 = np.load('/home/ubuntu/Xsens_data/HKSI/20230412/xsens_mvnx/SQ_80kg/LeftHand.npy')
 data_2 = np.load('/home/ubuntu/Xsens_data/HKSI/20230412/xsens_mvnx/SQ_90kg/LeftHand.npy')
 data_3 = np.load('/home/ubuntu/Xsens_data/HKSI/20230412/xsens_mvnx/SQ_100kg/LeftHand.npy')
@@ -72,9 +78,9 @@ data_processed_5 = process(data_5)[:, 750:990]
 data_processed_6 = process(data_6)[:, 1150:1390]
 
 # t = np.arange(0, len(pos_y)/60, 1/60)
-t = np.arange(0, 240/60, 1/60)
-t_1 = np.arange(0, 330/60, 1/60)
-t_2 = np.arange(0, 220/60, 1/60)
+t = np.arange(0, 240 / 60, 1 / 60)
+t_1 = np.arange(0, 330 / 60, 1 / 60)
+t_2 = np.arange(0, 220 / 60, 1 / 60)
 
 plt.figure(figsize=(20, 10))
 plt.subplot(3, 3, 1)

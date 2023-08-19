@@ -23,8 +23,14 @@ import rofunc as rf
 def create_dir(path, local_verbose=False):
     """
     Create the directory if it does not exist.
-    :param path:
-    :param local_verbose:
+
+    Example::
+
+        >>> import rofunc as rf
+        >>> rf.utils.create_dir('/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1', local_verbose=True)
+
+    :param path: the path of the directory
+    :param local_verbose: if True, print the message
     :return:
     """
     if not pathlib.Path(path).exists():
@@ -64,7 +70,8 @@ def delete_files(dir, file_list_to_delete, recursive=False):
 
     Example::
 
-        >>> delete_files('/home/ubuntu/Github/Rofunc/examples/data/felt', ['desktop.ini'], recursive=True)
+        >>> import rofunc as rf
+        >>> rf.utils.delete_files('/home/ubuntu/Github/Rofunc/examples/data/felt', ['desktop.ini'], recursive=True)
 
     :param dir: directory path
     :param file_list_to_delete: the list of file names need to be deleted, need suffix
@@ -84,10 +91,11 @@ def rename_files(dir, src_file_list=None, dst_file_list=None, recursive=False):
 
     Example::
 
-        >>> rename_files('/home/ubuntu/Github/Rofunc/examples/data/felt',
-        ...              source_file_list=['wiping_spiral_mocap_hand.csv', 'wiping_spiral_mocap_hand_rigid.csv'],
-        ...              target_file_list=['mocap_hand.csv', 'mocap_hand_rigid.csv', 'mocap_object.csv'],
-        ...              recursive=True)
+        >>> import rofunc as rf
+        >>> rf.utils.rename_files('/home/ubuntu/Github/Rofunc/examples/data/felt',
+        ...                 source_file_list=['wiping_spiral_mocap_hand.csv', 'wiping_spiral_mocap_hand_rigid.csv'],
+        ...                 target_file_list=['mocap_hand.csv', 'mocap_hand_rigid.csv', 'mocap_object.csv'],
+        ...                 recursive=True)
 
     :param dir: directory path
     :param src_file_list: the list of file names need to be renamed, need suffix
@@ -110,9 +118,10 @@ def shutil_files(files, src_dir, dst_dir):
 
     Example::
 
-        >>> shutil_files(['mocap_hand.csv', 'mocap_hand_rigid.csv', 'mocap_object.csv'],
-        ...              '/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1',
-        ...              '/home/ubuntu/Github/Rofunc/examples/data/felt/trial_2')
+        >>> import rofunc as rf
+        >>> rf.utils.shutil_files(['mocap_hand.csv', 'mocap_hand_rigid.csv', 'mocap_object.csv'],
+        ...                 src_dir='/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1',
+        ...                 dst_dir='/home/ubuntu/Github/Rofunc/examples/data/felt/trial_2')
 
     :param files: the list of file names need to be copied, need suffix
     :param src_dir: source directory path

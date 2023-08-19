@@ -5,7 +5,7 @@ from time import time
 
 import numpy as np
 
-from process import process_all_channels
+from export import process_all_channels
 from src import pytrigno
 
 sample_rate = 2000

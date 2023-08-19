@@ -23,12 +23,6 @@ functions to decompose transformation matrices.
   `Christoph Gohlke <http://www.lfd.uci.edu/~gohlke/>`__,
   Laboratory for Fluorescence Dynamics, University of California, Irvine
 :Version: 20090418
-Requirements
-------------
-* `Python 2.6 <http://www.python.org>`__
-* `Numpy 1.3 <http://np.scipy.org>`__
-* `transformations.c 20090418 <http://www.lfd.uci.edu/~gohlke/>`__
-  (optional implementation of some functions in C)
 Notes
 -----
 Matrices (M) can be inverted using np.linalg.inv(M), concatenated using

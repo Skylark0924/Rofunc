@@ -22,9 +22,70 @@ from numpy import linalg
 import rofunc as rf
 
 
+def sphere_plot3d(mean, cov, color=[1, 0, 0], alpha=0.2, ax=None):
+    """
+    Plot 3D sphere or ellipsoid
+
+    Example::
+
+        >>> import rofunc as rf
+        >>> import numpy as np
+        >>> from matplotlib import pyplot as plt
+        >>> means = np.array([0.5, 0.0, 0.0])
+        >>> covs = np.diag([6, 12, 0.1])
+        >>> rf.visualab.sphere_plot3d(means, covs)
+        >>> plt.show()
+
+    :param mean: the mean point coordinate of sphere
+    :param cov: the covariance matrix of the sphere
+    :param color: the color of the ellipsoid
+    :param alpha: the transparency of the ellipsoid
+    :param ax: the axis to plot the ellipsoid
+    """
+    # ell_gen = nestle.Ellipsoid(mean, np.dot(cov.T, cov))
+    ell_gen = nestle.Ellipsoid(mean, np.linalg.inv(cov))
+    npoints = 100
+    points = ell_gen.samples(npoints)
+    pointvol = ell_gen.vol / npoints
+    # Find bounding ellipsoid(s)
+    ells = nestle.bounding_ellipsoids(points, pointvol)
+
+    # plot
+    if ax is None:
+        fig = plt.figure(figsize=(10., 10.))
+        ax = fig.add_subplot(111, projection='3d')
+    for ell in ells:
+        plot_ellipsoid_3d(ell, ax, color, alpha)
+
+
+def plot_ellipsoid_3d(ell, ax, color, alpha):
+    """
+    Plot the 3-d Ellipsoid ell on the Axes3D ax.
+
+    :param ell: the ellipsoid to plot
+    :param ax: the axis to plot the ellipsoid
+    :param color: the color of the ellipsoid
+    :param alpha: the transparency of the ellipsoid
+    """
+    # points on unit sphere
+    u = np.linspace(0.0, 2.0 * np.pi, 100)
+    v = np.linspace(0.0, np.pi, 100)
+    z = np.outer(np.cos(u), np.sin(v))
+    y = np.outer(np.sin(u), np.sin(v))
+    x = np.outer(np.ones_like(u), np.cos(v))
+
+    # transform points to ellipsoid
+    for i in range(len(x)):
+        for j in range(len(x)):
+            x[i, j], y[i, j], z[i, j] = ell.ctr + np.dot(ell.axes, [x[i, j], y[i, j], z[i, j]])
+
+    ax.plot_surface(x, y, z, rstride=4, cstride=4, color=color, alpha=alpha)
+
+
 def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
     """
-    Plot the ellipsoids in 3d
+    Plot the ellipsoids in 3d, used by `rf.robolab.manipulability.mpb.get_mpb_from_model`
+
     :param ellipsoids: list of ellipsoids to plot
     :param mode: 'quaternion' or 'euler' or 'given'
     :param Rs: rotation matrices
@@ -88,59 +149,3 @@ def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
 
     # rf.visualab.set_axis(ax)
     plt.show()
-
-
-def sphere_plot3d(mean, cov, color=[1, 0, 0], alpha=0.2, ax=None):
-    """
-    Plot 3D sphere or ellipsoid
-
-    Example::
-
-        >>> means = np.array([0.5, 0.0, 0.0])
-        >>> covs = np.diag([6, 12, 0.1])
-        >>> sphere_plot3d(means, covs)
-        >>> plt.show()
-
-    :param mean: the mean point coordinate of sphere
-    :param cov: the covariance matrix of the sphere
-    :param color: the color of the ellipsoid
-    :param alpha: the transparency of the ellipsoid
-    :param ax: the axis to plot the ellipsoid
-    """
-    # ell_gen = nestle.Ellipsoid(mean, np.dot(cov.T, cov))
-    ell_gen = nestle.Ellipsoid(mean, np.linalg.inv(cov))
-    npoints = 100
-    points = ell_gen.samples(npoints)
-    pointvol = ell_gen.vol / npoints
-    # Find bounding ellipsoid(s)
-    ells = nestle.bounding_ellipsoids(points, pointvol)
-
-    # plot
-    if ax is None:
-        fig = plt.figure(figsize=(10., 10.))
-        ax = fig.add_subplot(111, projection='3d')
-    for ell in ells:
-        plot_ellipsoid_3d(ell, ax, color, alpha)
-
-
-def plot_ellipsoid_3d(ell, ax, color, alpha):
-    """
-    Plot the 3-d Ellipsoid ell on the Axes3D ax.
-    :param ell: the ellipsoid to plot
-    :param ax: the axis to plot the ellipsoid
-    :param color: the color of the ellipsoid
-    :param alpha: the transparency of the ellipsoid
-    """
-    # points on unit sphere
-    u = np.linspace(0.0, 2.0 * np.pi, 100)
-    v = np.linspace(0.0, np.pi, 100)
-    z = np.outer(np.cos(u), np.sin(v))
-    y = np.outer(np.sin(u), np.sin(v))
-    x = np.outer(np.ones_like(u), np.cos(v))
-
-    # transform points to ellipsoid
-    for i in range(len(x)):
-        for j in range(len(x)):
-            x[i, j], y[i, j], z[i, j] = ell.ctr + np.dot(ell.axes, [x[i, j], y[i, j], z[i, j]])
-
-    ax.plot_surface(x, y, z, rstride=4, cstride=4, color=color, alpha=alpha)

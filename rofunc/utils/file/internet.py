@@ -21,6 +21,7 @@ from contextlib import contextmanager
 def get_so_reuseport():
     """
     Get the port with ``SO_REUSEPORT`` flag set.
+
     :return: port number or None
     """
     try:
@@ -48,13 +49,19 @@ def reserve_sock_addr():
 
     Example::
 
-        >>> with reserve_sock_addr() as (host, port):
-        ...     server = tf.train.Server.create_local_server()  # TODO: check if this is correct
-        ...     server.start()
-        ...     server.join()
-        ...     # do something with the server
-        ...     server.stop()
-        ...     # socket is closed here
+        >>> import os
+        >>> from tensorboard import program
+        >>> from rofunc.utils.file.internet import reserve_sock_addr
+        >>> tb = program.TensorBoard()
+        >>> # Find a free port
+        >>> with reserve_sock_addr() as (h, p):
+        ...     argv = ['tensorboard', f"--logdir={os.getcwd()}", f"--port={p}"]
+        ...     tb_extra_args = os.getenv('TB_EXTRA_ARGS', "")
+        ...     if tb_extra_args:
+        ...         argv += tb_extra_args.split(' ')
+        ...     tb.configure(argv)
+        >>> # Launch TensorBoard
+        >>> url = tb.launch()
     """
     so_reuseport = get_so_reuseport()
     if so_reuseport is None:
