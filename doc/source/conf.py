@@ -132,7 +132,7 @@ myst_enable_extensions = [
     "colon_fence",
     "smartquotes",
     "replacements",
-    "linkify",
+    # "linkify",
     "strikethrough",
     "substitution",
     "tasklist",
