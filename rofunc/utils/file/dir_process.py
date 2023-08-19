@@ -1,5 +1,36 @@
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
 import os
+import pathlib
+import shutil
+
 import rofunc as rf
+
+
+def create_dir(path, local_verbose=False):
+    """
+    Create the directory if it does not exist.
+    :param path:
+    :param local_verbose:
+    :return:
+    """
+    if not pathlib.Path(path).exists():
+        if local_verbose:
+            rf.utils.beauty_print('{} not exist, created.'.format(path), type='info')
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 
 def list_absl_path(dir, recursive=False, prefix=None, suffix=None):
@@ -47,27 +78,54 @@ def delete_files(dir, file_list_to_delete, recursive=False):
             rf.logger.beauty_print('File {} deleted.'.format(file), type='info')
 
 
-def rename_files(dir, source_file_list=None, target_file_list=None, recursive=False):
+def rename_files(dir, src_file_list=None, dst_file_list=None, recursive=False):
     """
     Rename the appointed files from source_file_list to target_file_list.
 
     Example::
 
-        >>> rename_files('/home/ubuntu/Github/Rofunc/examples/data/felt', \
-                    source_file_list=['wiping_spiral_mocap_hand.csv', 'wiping_spiral_mocap_hand_rigid.csv'], \
-                    target_file_list=['mocap_hand.csv', 'mocap_hand_rigid.csv', 'mocap_object.csv'], \
-                    recursive=True)
+        >>> rename_files('/home/ubuntu/Github/Rofunc/examples/data/felt',
+        ...              source_file_list=['wiping_spiral_mocap_hand.csv', 'wiping_spiral_mocap_hand_rigid.csv'],
+        ...              target_file_list=['mocap_hand.csv', 'mocap_hand_rigid.csv', 'mocap_object.csv'],
+        ...              recursive=True)
 
     :param dir: directory path
-    :param source_file_list: the list of file names need to be renamed, need suffix
-    :param target_file_list: the list of file names need to be renamed to, need suffix
+    :param src_file_list: the list of file names need to be renamed, need suffix
+    :param dst_file_list: the list of file names need to be renamed to, need suffix
     :param recursive: if True, rename the files in the subdirectories as well
     :return: None
     """
     all_files = list_absl_path(dir, recursive=recursive)
     for file in all_files:
-        if os.path.basename(file) in source_file_list:
-            target_name = target_file_list[source_file_list.index(os.path.basename(file))]
+        if os.path.basename(file) in src_file_list:
+            target_name = dst_file_list[src_file_list.index(os.path.basename(file))]
             os.rename(file, os.path.join(os.path.dirname(file), target_name))
             rf.logger.beauty_print('File {} renamed from {} to {}.'.format(file, os.path.basename(file), target_name),
                                    type='info')
+
+
+def shutil_files(files, src_dir, dst_dir):
+    """
+    Copy the appointed files from src_dir to dst_dir.
+
+    Example::
+
+        >>> shutil_files(['mocap_hand.csv', 'mocap_hand_rigid.csv', 'mocap_object.csv'],
+        ...              '/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1',
+        ...              '/home/ubuntu/Github/Rofunc/examples/data/felt/trial_2')
+
+    :param files: the list of file names need to be copied, need suffix
+    :param src_dir: source directory path
+    :param dst_dir: destination directory path
+    :return:
+    """
+    rf.utils.create_dir(dst_dir)
+
+    for file in files:
+        src = os.path.join(src_dir, file)
+        file = file.split("/")[-1]
+        dst = os.path.join(dst_dir, file)
+        if os.path.exists(src):
+            shutil.copyfile(src, dst)
+        else:
+            raise FileNotFoundError("File {} not found".format(src))
