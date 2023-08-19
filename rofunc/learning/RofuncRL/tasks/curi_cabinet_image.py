@@ -20,7 +20,7 @@ import tqdm
 import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.base.curi_base_task import CURIBaseTask
 from rofunc.learning.RofuncRL.tasks.curi_cabinet import CURICabinetTask
-from rofunc.utils.file.path import get_rofunc_path
+from rofunc.utils.rfos.path import get_rofunc_path
 
 
 class CURICabinetImageTask(CURICabinetTask, CURIBaseTask):

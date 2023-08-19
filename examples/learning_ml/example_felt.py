@@ -13,7 +13,7 @@ import pandas as pd
 
 # --- Data processing ---
 def data_process(data_dir):
-    all_files = rf.file.list_absl_path(data_dir, recursive=False, prefix='trial')
+    all_files = rf.rfos.list_absl_path(data_dir, recursive=False, prefix='trial')
     for file in all_files:
         hand_rigid = pd.read_csv(os.path.join(file, 'mocap_hand_rigid.csv'))
         object_rigid = pd.read_csv(os.path.join(file, 'mocap_object_rigid.csv'))
