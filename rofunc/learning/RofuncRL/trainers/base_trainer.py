@@ -30,7 +30,7 @@ from torch.utils.tensorboard import SummaryWriter
 import rofunc as rf
 from rofunc.learning.RofuncRL.processors.normalizers import Normalization
 from rofunc.learning.utils.env_wrappers import wrap_env
-from rofunc.utils.rfos.internet import reserve_sock_addr
+from rofunc.utils.oslab.internet import reserve_sock_addr
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 
@@ -56,7 +56,7 @@ class BaseTrainer:
         else:
             exp_name = "RofuncRL_{}_{}_{}_inference".format(self.__class__.__name__, env_name, exp_name)
         self.exp_dir = os.path.join(directory, exp_name)
-        rf.rfos.create_dir(self.exp_dir, local_verbose=True)
+        rf.oslab.create_dir(self.exp_dir, local_verbose=True)
 
         '''Rofunc logger'''
         self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.Trainer.rofunc_logger_kwargs.verbose)

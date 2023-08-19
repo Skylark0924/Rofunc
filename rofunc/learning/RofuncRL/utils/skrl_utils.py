@@ -33,7 +33,7 @@ from tensorboard import program
 
 import rofunc as rf
 from rofunc.config.utils import get_config, omegaconf_to_dict
-from rofunc.utils.rfos.internet import reserve_sock_addr
+from rofunc.utils.oslab.internet import reserve_sock_addr
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 # set the seed for reproducibility
@@ -534,7 +534,7 @@ def setup_agent(cfg, custom_args, env, eval_mode=False):
         tb.configure(argv)
     url = tb.launch()
     rf.logger.beauty_print(f"Tensorflow listening on {url}", type='info')
-    rf.rfos.create_dir(agent.experiment_dir)
+    rf.oslab.create_dir(agent.experiment_dir)
 
     rofunc_logger = BeautyLogger(agent.experiment_dir, 'rofunc.log')
     rofunc_logger.info("Configurations: \n{}".format(agent.cfg))

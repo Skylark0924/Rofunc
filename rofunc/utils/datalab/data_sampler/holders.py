@@ -53,7 +53,7 @@ class DataHolder(object):
         return self._sampled_data
 
     def _pre_load(self):
-        rf.rfos.create_dir(f".data_tmp/{self.__class__.__name__}/")
+        rf.oslab.create_dir(f".data_tmp/{self.__class__.__name__}/")
         self.tmp_folder = f".data_tmp/{self.__class__.__name__}/"
 
     def to_pcd(self, frame_number):

@@ -32,7 +32,7 @@ import torch
 
 from isaacgym import gymutil, gymtorch, gymapi
 from .base.vec_task import VecTask
-from rofunc.utils.rfos.path import get_rofunc_path
+from rofunc.utils.oslab.path import get_rofunc_path
 
 
 class CartpoleTask(VecTask):
