@@ -170,7 +170,7 @@ html_theme_options = {
     "use_edit_page_button": True,
     # "use_source_button": True,
     "use_issues_button": True,
-    # "use_repository_button": True,
+    "use_repository_button": True,
     "use_download_button": True,
     "use_sidenotes": True,
     "icon_links": [
