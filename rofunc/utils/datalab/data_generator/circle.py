@@ -23,7 +23,7 @@ def draw_arc(center, radius, theta1, theta2, color):
 
     Example::
 
-        >>> from rofunc.utils.data_generator.circle import draw_arc
+        >>> from rofunc.utils.datalab.data_generator.circle import draw_arc
         >>> import numpy as np
         >>> xy = draw_arc([-1, 0], 1, 0 * np.pi / 3, 2 * np.pi / 3, color='red')
 

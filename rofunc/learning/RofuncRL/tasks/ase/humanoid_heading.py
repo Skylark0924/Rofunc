@@ -31,7 +31,7 @@ from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
-from rofunc.utils.rfos.path import get_rofunc_path
+from rofunc.utils.oslab.path import get_rofunc_path
 from .humanoid_amp_task import HumanoidAMPTask
 from ..utils import torch_jit_utils as torch_utils
 

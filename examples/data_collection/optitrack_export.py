@@ -33,6 +33,6 @@ box_pos_x = data[:, data_ptr:data_ptr + 7]
 
 # TODO: export data as the format of objects
 root_dir = '/home/ubuntu/Data/optitrack_export/'
-rf.rfos.create_dir(root_dir)
+rf.oslab.create_dir(root_dir)
 exp_name = 'rigid_body.npy'
 np.save(os.path.join(root_dir, exp_name), data)

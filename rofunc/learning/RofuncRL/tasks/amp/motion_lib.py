@@ -30,8 +30,7 @@ import os
 
 import yaml
 
-from rofunc.utils.poselib.poselib.core.rotation3d import *
-from rofunc.utils.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
+from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
 from rofunc.learning.RofuncRL.tasks.amp.humanoid_amp_base import DOF_BODY_IDS, DOF_OFFSETS
 from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
 

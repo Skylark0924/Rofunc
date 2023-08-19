@@ -13,7 +13,7 @@ import pandas as pd
 
 # --- Data processing ---
 def data_process(data_dir):
-    all_files = rf.rfos.list_absl_path(data_dir, recursive=False, prefix='trial')
+    all_files = rf.oslab.list_absl_path(data_dir, recursive=False, prefix='trial')
 
     demos_x = []
     demos_taxels_pressure = []

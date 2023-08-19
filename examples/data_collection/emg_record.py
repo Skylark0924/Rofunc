@@ -20,7 +20,7 @@ args = parser.parse_args()
 
 root_dir = '/home/ubuntu/Data/emg_record/20230306'
 exp_name = datetime.now().strftime('%Y%m%d_%H%M%S')
-rf.rfos.create_dir(root_dir)
+rf.oslab.create_dir(root_dir)
 
 # For instance, 6 channels, 2000 samples per second and 30 seconds are chosen.
 rf.emg.record(args.host, 6, 2000, 40, root_dir, exp_name)

@@ -36,7 +36,7 @@ def show(args, object_name, asset_root=None):
 
     # Load CURI asset and set the env
     if asset_root is None:
-        from rofunc.utils.rfos import get_rofunc_path
+        from rofunc.utils.oslab import get_rofunc_path
         asset_root = os.path.join(get_rofunc_path(), "simulator/assets")
     if object_name == "Cabinet":
         asset_file = "urdf/sektion_cabinet_model/urdf/sektion_cabinet.urdf"

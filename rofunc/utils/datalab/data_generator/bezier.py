@@ -46,7 +46,7 @@ def plot_bezier(bx, by, x, y, bz=None, z=None, ax=None):
 
     Example::
 
-        >>> from rofunc.utils.data_generator.bezier import plot_bezier
+        >>> from rofunc.utils.datalab.data_generator.bezier import plot_bezier
         >>> import numpy as np
         >>> demo_points = np.array([[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]])
         >>> bx, by = evaluate_bezier(demo_points, 50)[:, 0], evaluate_bezier(demo_points, 50)[:, 1]
@@ -79,7 +79,7 @@ def multi_bezier_demos(demo_points, ax=None):
 
     Example::
 
-        >>> from rofunc.utils.data_generator.bezier import multi_bezier_demos
+        >>> from rofunc.utils.datalab.data_generator.bezier import multi_bezier_demos
         >>> import numpy as np
         >>> demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
         ...                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
