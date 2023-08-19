@@ -40,7 +40,7 @@ class SACAgent(BaseAgent):
                  memory: Optional[Union[Memory, Tuple[Memory]]] = None,
                  device: Optional[Union[str, torch.device]] = None,
                  experiment_dir: Optional[str] = None,
-                 rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
+                 rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
         Soft Actor-Critic (SAC) agent
         "Soft Actor-Critic Algorithms and Applications". Haarnoja et al. 2018. https://arxiv.org/abs/1812.05905

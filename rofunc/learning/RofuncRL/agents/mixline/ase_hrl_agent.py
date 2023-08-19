@@ -43,7 +43,7 @@ class ASEHRLAgent(BaseAgent):
                  memory: Optional[Union[Memory, Tuple[Memory]]] = None,
                  device: Optional[Union[str, torch.device]] = None,
                  experiment_dir: Optional[str] = None,
-                 rofunc_logger: Optional[rf.utils.BeautyLogger] = None,
+                 rofunc_logger: Optional[rf.logger.BeautyLogger] = None,
                  amp_observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]] = None,
                  motion_dataset: Optional[Union[Memory, Tuple[Memory]]] = None,
                  replay_buffer: Optional[Union[Memory, Tuple[Memory]]] = None,

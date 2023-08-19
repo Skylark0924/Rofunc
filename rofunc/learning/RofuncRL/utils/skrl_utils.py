@@ -534,7 +534,7 @@ def setup_agent(cfg, custom_args, env, eval_mode=False):
         tb.configure(argv)
     url = tb.launch()
     rf.logger.beauty_print(f"Tensorflow listening on {url}", type='info')
-    rf.utils.create_dir(agent.experiment_dir)
+    rf.rfos.create_dir(agent.experiment_dir)
 
     rofunc_logger = BeautyLogger(agent.experiment_dir, 'rofunc.log')
     rofunc_logger.info("Configurations: \n{}".format(agent.cfg))

@@ -40,7 +40,7 @@ class TD3Agent(BaseAgent):
                  memory: Optional[Union[Memory, Tuple[Memory]]] = None,
                  device: Optional[Union[str, torch.device]] = None,
                  experiment_dir: Optional[str] = None,
-                 rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
+                 rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
         Twin Delayed Deep Deterministic Policy Gradient (TD3) agent
         “Addressing Function Approximation Error in Actor-Critic Methods”. Fujimoto. et al. 2018. https://arxiv.org/abs/1802.09477
