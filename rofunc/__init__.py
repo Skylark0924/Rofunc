@@ -12,7 +12,7 @@ from .devices import zed, xsens, optitrack, mmodal, emg
 from . import simulator as sim
 from .learning import ml, RofuncIL, RofuncRL
 from .planning_control import lqt, lqr
-from .utils import visualab, robolab, data_generator, primitive, logger, file
+from .utils import visualab, robolab, data_generator, primitive, logger, rfos
 from . import config
 
 from .learning.ml import tpgmm, gmr, tpgmr

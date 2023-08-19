@@ -253,7 +253,7 @@ viewer = gym.create_viewer(sim, gymapi.CameraProperties())
 if viewer is None:
     raise Exception("Failed to create viewer")
 
-rofunc_path = rf.file.get_rofunc_path()
+rofunc_path = rf.rfos.get_rofunc_path()
 asset_root = os.path.join(rofunc_path, "simulator/assets")
 
 # create table asset

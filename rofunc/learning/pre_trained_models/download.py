@@ -15,7 +15,7 @@
 import gdown
 import json
 import os
-from rofunc.utils.file.path import get_rofunc_path, check_ckpt_exist
+from rofunc.utils.rfos.path import get_rofunc_path, check_ckpt_exist
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
