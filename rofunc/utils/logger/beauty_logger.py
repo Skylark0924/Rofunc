@@ -98,7 +98,7 @@ def beauty_print(content, level=None, type=None):
     Example::
 
         >>> import rofunc as rf
-        >>> rf.utils.beauty_print("This is a warning message.", type="warning")
+        >>> rf.logger.beauty_print("This is a warning message.", type="warning")
 
     :param content: the content to be printed
     :param level: support 0-3, 0 for error and warning, 1 for module, 2 for info

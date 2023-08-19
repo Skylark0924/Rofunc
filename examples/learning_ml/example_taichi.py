@@ -1,3 +1,10 @@
+"""
+Taichi
+======
+
+This example shows how to use the TPGMM and TPGMMBi classes to learn Taichi pushing hand on a humanoid robot./
+"""
+
 import numpy as np
 import rofunc as rf
 

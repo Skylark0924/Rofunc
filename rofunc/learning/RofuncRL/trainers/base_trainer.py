@@ -56,7 +56,7 @@ class BaseTrainer:
         else:
             exp_name = "RofuncRL_{}_{}_{}_inference".format(self.__class__.__name__, env_name, exp_name)
         self.exp_dir = os.path.join(directory, exp_name)
-        rf.utils.create_dir(self.exp_dir, local_verbose=True)
+        rf.rfos.create_dir(self.exp_dir, local_verbose=True)
 
         '''Rofunc logger'''
         self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.Trainer.rofunc_logger_kwargs.verbose)

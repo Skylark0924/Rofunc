@@ -37,7 +37,7 @@ class PPOAgent(BaseAgent):
                  memory: Optional[Union[Memory, Tuple[Memory]]] = None,
                  device: Optional[Union[str, torch.device]] = None,
                  experiment_dir: Optional[str] = None,
-                 rofunc_logger: Optional[rf.utils.BeautyLogger] = None):
+                 rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
         Proximal Policy Optimization (PPO) agent
         “Proximal Policy Optimization Algorithms”. John Schulman. et al. 2017. https://arxiv.org/abs/1707.06347

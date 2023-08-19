@@ -1212,7 +1212,7 @@ def random_quaternion(rand=None):
                      np.cos(t2) * r2), dtype=np.float64)
 
 
-def homo_matrix_from_quaternion(quaternion):
+def homo_matrix_from_quaternion(quaternion, translation=None):
     """Return homogeneous rotation matrix from quaternion.
     >>> R = homo_matrix_from_quaternion([0.06146124, 0, 0, 0.99810947])
     >>> np.allclose(R, rotation_matrix(0.123, (1, 0, 0)))
@@ -1224,12 +1224,21 @@ def homo_matrix_from_quaternion(quaternion):
         return np.identity(4)
     q *= math.sqrt(2.0 / nq)
     q = np.outer(q, q)
-    return np.array((
-        (1.0 - q[1, 1] - q[2, 2], q[0, 1] - q[2, 3], q[0, 2] + q[1, 3], 0.0),
-        (q[0, 1] + q[2, 3], 1.0 - q[0, 0] - q[2, 2], q[1, 2] - q[0, 3], 0.0),
-        (q[0, 2] - q[1, 3], q[1, 2] + q[0, 3], 1.0 - q[0, 0] - q[1, 1], 0.0),
-        (0.0, 0.0, 0.0, 1.0)
-    ), dtype=np.float64)
+    if translation is None:
+        return np.array((
+            (1.0 - q[1, 1] - q[2, 2], q[0, 1] - q[2, 3], q[0, 2] + q[1, 3], 0.0),
+            (q[0, 1] + q[2, 3], 1.0 - q[0, 0] - q[2, 2], q[1, 2] - q[0, 3], 0.0),
+            (q[0, 2] - q[1, 3], q[1, 2] + q[0, 3], 1.0 - q[0, 0] - q[1, 1], 0.0),
+            (0.0, 0.0, 0.0, 1.0)
+        ), dtype=np.float64)
+    else:
+        p = translation
+        return np.array((
+            (1.0 - q[1, 1] - q[2, 2], q[0, 1] - q[2, 3], q[0, 2] + q[1, 3], p[0]),
+            (q[0, 1] + q[2, 3], 1.0 - q[0, 0] - q[2, 2], q[1, 2] - q[0, 3], p[1]),
+            (q[0, 2] - q[1, 3], q[1, 2] + q[0, 3], 1.0 - q[0, 0] - q[1, 1], p[2]),
+            (0.0, 0.0, 0.0, 1.0)
+        ), dtype=np.float64)
 
 
 def rot_matrix_from_quaternion(quaternion):

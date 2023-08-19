@@ -27,7 +27,7 @@ def create_dir(path, local_verbose=False):
     Example::
 
         >>> import rofunc as rf
-        >>> rf.utils.create_dir('/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1', local_verbose=True)
+        >>> rf.rfos.create_dir('/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1', local_verbose=True)
 
     :param path: the path of the directory
     :param local_verbose: if True, print the message
@@ -35,7 +35,7 @@ def create_dir(path, local_verbose=False):
     """
     if not pathlib.Path(path).exists():
         if local_verbose:
-            rf.utils.beauty_print('{} not exist, created.'.format(path), type='info')
+            rf.logger.beauty_print('{} not exist, created.'.format(path), type='info')
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 
@@ -128,7 +128,7 @@ def shutil_files(files, src_dir, dst_dir):
     :param dst_dir: destination directory path
     :return:
     """
-    rf.utils.create_dir(dst_dir)
+    rf.rfos.create_dir(dst_dir)
 
     for file in files:
         src = os.path.join(src_dir, file)
