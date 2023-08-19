@@ -1,7 +1,20 @@
-#!/usr/bin/python3
-# !--*-- coding: utf-8 --*--
-import numpy as np
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
 import matplotlib.pyplot as plt
+import numpy as np
 from math import factorial
 
 
@@ -15,13 +28,40 @@ def get_bezier_curve(points):
 
 
 def evaluate_bezier(points, total):
+    """
+
+    :param points:
+    :param total:
+    :return:
+    """
     bezier = get_bezier_curve(points)
     new_points = np.array([bezier(t) for t in np.linspace(0, 1, total)])
     return new_points
 
 
 def plot_bezier(bx, by, x, y, bz=None, z=None, ax=None):
-    assert isinstance(bx, list)
+    """
+    Plot the Bezier curve, either in 2D or 3D.
+
+    Example::
+
+        >>> from rofunc.utils.data_generator.bezier import plot_bezier
+        >>> import numpy as np
+        >>> demo_points = np.array([[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]])
+        >>> bx, by = evaluate_bezier(demo_points, 50)[:, 0], evaluate_bezier(demo_points, 50)[:, 1]
+        >>> x, y = demo_points[:, 0], demo_points[:, 1]
+        >>> plot_bezier(bx, by, x, y)
+
+    :param bx: the x coordinates of the Bezier curve
+    :param by: the y coordinates of the Bezier curve
+    :param x: the x coordinates of the demonstration points
+    :param y: the y coordinates of the demonstration points
+    :param bz: the z coordinates of the Bezier curve, default None
+    :param z: the z coordinates of the demonstration points, default None
+    :param ax: the axis to plot the Bezier curve, default None
+    :return:
+    """
+    assert isinstance(bx, list) or isinstance(bx, np.ndarray)
     if bz is not None and z is not None:
         for i in range(len(bx)):
             ax.plot(bx[i], by[i], bz[i])
@@ -33,6 +73,22 @@ def plot_bezier(bx, by, x, y, bz=None, z=None, ax=None):
 
 
 def multi_bezier_demos(demo_points, ax=None):
+    """
+    Generate multiple Bezier curves as demonstrations.
+
+    Example::
+
+        >>> from rofunc.utils.data_generator.bezier import multi_bezier_demos
+        >>> import numpy as np
+        >>> demo_points = np.array([[[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]],
+        ...                         [[0, -2], [-1, 7], [3, 2.5], [2, 1.6], [4, 3]],
+        ...                         [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
+        >>> demos_x = multi_bezier_demos(demo_points)
+
+    :param demo_points: the demonstration points of the Bezier curves
+    :param ax: the axis to plot the Bezier curves, default None
+    :return:
+    """
     bx_lst = [evaluate_bezier(demo_point, 50)[:, 0] for demo_point in demo_points]
     by_lst = [evaluate_bezier(demo_point, 50)[:, 1] for demo_point in demo_points]
     x_lst = [demo_point[:, 0] for demo_point in demo_points]
@@ -51,11 +107,3 @@ def multi_bezier_demos(demo_points, ax=None):
             (np.array(bx_lst).reshape((len(demo_points), -1, 1)), np.array(by_lst).reshape((len(demo_points), -1, 1))),
             axis=2)
     return demos_x
-
-
-if __name__ == '__main__':
-    points = np.array([[0, 0], [-1, 8], [4, 3], [2, 1], [4, 3]])
-    x, y = points[:, 0], points[:, 1]
-    bx, by = evaluate_bezier(points, 50)
-
-    plot_bezier(bx, by, x, y)

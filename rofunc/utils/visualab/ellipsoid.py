@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import rofunc as rf
-import numpy as np
-from numpy import linalg
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-from matplotlib import cm
 import matplotlib.colors as colors
+import matplotlib.pyplot as plt
 import nestle
+import numpy as np
+from matplotlib import cm
+from numpy import linalg
+
+import rofunc as rf
 
 
 def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
@@ -50,8 +50,9 @@ def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
             if mode == 'quaternion':
                 R = rf.robolab.coord.homo_matrix_from_quaternion(ellipsoids[index, 3:7])
             elif mode == 'euler':
-                R = rf.robolab.coord.homo_matrix_from_euler(ellipsoids[index, 3], ellipsoids[index, 4], ellipsoids[index, 5],
-                                                  'sxyz')
+                R = rf.robolab.coord.homo_matrix_from_euler(ellipsoids[index, 3], ellipsoids[index, 4],
+                                                            ellipsoids[index, 5],
+                                                            'sxyz')
 
             # find the rotation matrix and radii of the axes
             U, s, rotation = linalg.svd(R)
@@ -89,37 +90,23 @@ def ellipsoid_plot3d(ellipsoids, mode='quaternion', Rs=None):
     plt.show()
 
 
-# def sphere_plot3d(c, r, ori=None, color=[1, 0, 0], alpha=0.2, subdev=100, ax=None, sigma_multiplier=3):
-#     """
-#         plot a sphere surface
-#         Input:
-#             c: 3 elements list, sphere center
-#             r: 3 element list, sphere original scale in each axis ( allowing to draw elipsoids)
-#             subdiv: scalar, number of subdivisions (subdivision^2 points sampled on the surface)
-#             ax: optional pyplot axis object to plot the sphere in.
-#             sigma_multiplier: sphere additional scale (choosing an std value when plotting gaussians)
-#         Output:
-#             ax: pyplot axis object
-#     """
-#
-#     if ax is None:
-#         fig = plt.figure()
-#         ax = fig.add_subplot(111, projection='3d')
-#     pi = np.pi
-#     cos = np.cos
-#     sin = np.sin
-#     phi, theta = np.mgrid[0.0:pi:complex(0, subdev), 0.0:2.0 * pi:complex(0, subdev)]
-#     x = sigma_multiplier * r[0] * sin(phi) * cos(theta) + c[0]
-#     y = sigma_multiplier * r[1] * sin(phi) * sin(theta) + c[1]
-#     z = sigma_multiplier * r[2] * cos(phi) + c[2]
-#     # if ori is not None:
-#     #     ori_matrix = rf.coord.homo_matrix_from_quaternion(ori)
-#     #     xyz = np.matmul(ori_matrix, np.vstack((x, y, z)))
-#     #     x, y, z = xyz[0], xyz[1], xyz[2]
-#     ax.plot_surface(x, y, z, color=color, alpha=alpha, linewidth=1)
-#     return ax
+def sphere_plot3d(mean, cov, color=[1, 0, 0], alpha=0.2, ax=None):
+    """
+    Plot 3D sphere or ellipsoid
 
-def sphere_plot3d(mean, cov, color=[1, 0, 0], alpha=0.2, subdev=100, ax=None, sigma_multiplier=3):
+    Example::
+
+        >>> means = np.array([0.5, 0.0, 0.0])
+        >>> covs = np.diag([6, 12, 0.1])
+        >>> sphere_plot3d(means, covs)
+        >>> plt.show()
+
+    :param mean: the mean point coordinate of sphere
+    :param cov: the covariance matrix of the sphere
+    :param color: the color of the ellipsoid
+    :param alpha: the transparency of the ellipsoid
+    :param ax: the axis to plot the ellipsoid
+    """
     # ell_gen = nestle.Ellipsoid(mean, np.dot(cov.T, cov))
     ell_gen = nestle.Ellipsoid(mean, np.linalg.inv(cov))
     npoints = 100
@@ -137,8 +124,13 @@ def sphere_plot3d(mean, cov, color=[1, 0, 0], alpha=0.2, subdev=100, ax=None, si
 
 
 def plot_ellipsoid_3d(ell, ax, color, alpha):
-    """Plot the 3-d Ellipsoid ell on the Axes3D ax."""
-
+    """
+    Plot the 3-d Ellipsoid ell on the Axes3D ax.
+    :param ell: the ellipsoid to plot
+    :param ax: the axis to plot the ellipsoid
+    :param color: the color of the ellipsoid
+    :param alpha: the transparency of the ellipsoid
+    """
     # points on unit sphere
     u = np.linspace(0.0, 2.0 * np.pi, 100)
     v = np.linspace(0.0, np.pi, 100)
@@ -152,19 +144,3 @@ def plot_ellipsoid_3d(ell, ax, color, alpha):
             x[i, j], y[i, j], z[i, j] = ell.ctr + np.dot(ell.axes, [x[i, j], y[i, j], z[i, j]])
 
     ax.plot_surface(x, y, z, rstride=4, cstride=4, color=color, alpha=alpha)
-
-
-if __name__ == '__main__':
-    # TODO
-    # means = np.array([0.5, 0.0, 0.0])
-    # covs = np.diag([6, 12, 0.1])
-    # eigen_value, eigen_vector = np.linalg.eig(covs)
-    # radii = np.sqrt(eigen_value)
-    # sphere_plot3d(means, radii)
-    # plt.show()
-    means = np.array([0.5, 0.0, 0.0])
-    covs = np.array([[0.25, 1., 0.5],
-                     [1., 0.25, 0.5],
-                     [0.5, 1., 0.25]])
-    sphere_plot3d(means, covs)
-    plt.show()

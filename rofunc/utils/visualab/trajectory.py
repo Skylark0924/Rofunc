@@ -27,6 +27,24 @@ matplotlib_axes_logger.setLevel('ERROR')
 
 
 def traj_plot2d(data_lst: List, legend: str = None, title: str = None, g_ax=None):
+    """
+    Plot multiple 2d trajectories
+
+    Example::
+
+        >>> from rofunc.utils.visualab.trajectory import traj_plot3d
+        >>> import numpy as np
+        >>> data_lst = [np.array([[0, 0], [1, 1], [2, 3]]),
+        ...             np.array([[0, 0], [1, 2], [4, 2]])]
+        >>> fig = traj_plot2d(data_lst, legend='test')
+        >>> plt.show()
+
+    :param data_lst:
+    :param legend:
+    :param title:
+    :param g_ax:
+    :return:
+    """
     if g_ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)  # , fc='white'
@@ -57,6 +75,25 @@ def traj_plot2d(data_lst: List, legend: str = None, title: str = None, g_ax=None
 
 
 def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None, ori: bool = False):
+    """
+    Plot multiple 3d trajectories
+
+    Example::
+
+        >>> from rofunc.utils.visualab.trajectory import traj_plot3d
+        >>> import numpy as np
+        >>> data_lst = [np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]]),
+        ...             np.array([[1, 0, 0], [1, 4, 6], [2, 4, 3]])]
+        >>> fig = traj_plot3d(data_lst, legend='test')
+        >>> plt.show()
+
+    :param data_lst: the list of trajectories
+    :param legend: the legend of the figure
+    :param title: the title of the figure
+    :param g_ax: whether to plot on a global axis
+    :param ori: plot orientation or not
+    :return: the figure
+    """
     if g_ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d', fc='white')
@@ -121,6 +158,23 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
 def traj_plot(data_lst: List, legend: str = None, title: str = None, mode: str = None, ori: bool = False, g_ax=None):
     """
     Plot 2d or 3d trajectories
+
+    Example::
+
+        >>> from rofunc.utils.visualab.trajectory import traj_plot
+        >>> import numpy as np
+        >>> data_lst = [np.array([[0, 0], [1, 1], [2, 3]]),
+        ...             np.array([[0, 0], [1, 2], [4, 2]])]
+        >>> fig = traj_plot(data_lst, legend='test')
+        >>> plt.show()
+
+        >>> from rofunc.utils.visualab.trajectory import traj_plot
+        >>> import numpy as np
+        >>> data_lst = [np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]]),
+        ...             np.array([[1, 0, 0], [1, 4, 6], [2, 4, 3]])]
+        >>> fig = traj_plot(data_lst, legend='test')
+        >>> plt.show()
+
     :param data_lst: list with 2d array or 3d array
     :param legend: legend of the figure
     :param title: title of the figure
