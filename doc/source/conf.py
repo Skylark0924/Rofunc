@@ -12,6 +12,8 @@
 #
 import os
 import sys
+from datetime import date
+from sphinx.application import Sphinx
 
 sys.path.insert(0, os.path.abspath('../../rofunc'))
 # from recommonmark.transform import AutoStructify
@@ -23,7 +25,7 @@ from sphinx_gallery.sorting import ExampleTitleSortKey, ExplicitOrder
 # -- Project information -----------------------------------------------------
 
 project = 'Rofunc'
-copyright = '2022, Junjia Liu'
+copyright = f"{date.today().year}, Junjia Liu"
 author = 'Junjia Liu'
 
 # The full version, including alpha/beta/rc tags
@@ -89,7 +91,6 @@ master_doc = 'index'
 exclude_patterns = []
 
 # -- Autodoc settings ---------------------------------------------------
-
 autodoc2_packages = [
     {
         "path": "../../rofunc",
@@ -107,9 +108,20 @@ autodoc2_docstring_parser_regexes = [
     ("myst_parser", "myst"),
     (r"myst_parser\.setup", "myst"),
 ]
+nitpicky = True
+nitpick_ignore_regex = [
+    (r"py:.*", r"docutils\..*"),
+    (r"py:.*", r"pygments\..*"),
+]
+nitpick_ignore = [
+    ("py:obj", "myst_parser._docs._ConfigBase"),
+    ("py:exc", "MarkupError"),
+    ("py:class", "sphinx.util.typing.Inventory"),
+    ("py:class", "sphinx.writers.html.HTMLTranslator"),
+    ("py:obj", "sphinx.transforms.post_transforms.ReferencesResolver"),
+]
 
 # -- MyST settings ---------------------------------------------------
-
 myst_enable_extensions = [
     "dollarmath",
     "amsmath",
@@ -120,7 +132,7 @@ myst_enable_extensions = [
     "colon_fence",
     "smartquotes",
     "replacements",
-    # "linkify",
+    "linkify",
     "strikethrough",
     "substitution",
     "tasklist",
@@ -136,8 +148,8 @@ myst_substitutions = {
     "role": "[role](#syntax/roles)",
     "directive": "[directive](#syntax/directives)",
 }
-# -- Options for HTML output -------------------------------------------------
 
+# -- Options for HTML output -------------------------------------------------
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
@@ -150,6 +162,38 @@ html_theme = 'sphinx_book_theme'
 html_static_path = ['_static']
 html_logo = "_static/logo3.png"
 html_favicon = "_static/logo2.ico"
+
+html_theme_options = {
+    "path_to_docs": "doc",
+    "repository_url": "https://github.com/Skylark0924/Rofunc",
+    "repository_branch": "master",
+    "use_edit_page_button": True,
+    # "use_source_button": True,
+    "use_issues_button": True,
+    # "use_repository_button": True,
+    "use_download_button": True,
+    "use_sidenotes": True,
+    "icon_links": [
+        {
+            "name": "Executable Books",
+            "url": "https://executablebooks.org/",
+            "icon": "_static/ebp-logo.png",
+            "type": "local",
+        },
+        {
+            "name": "GitHub",
+            "url": "https://github.com/Skylark0924/Rofunc",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/rofunc/",
+            "icon": "https://img.shields.io/github/downloads/skylark0924/Rofunc/total",
+            "type": "url",
+        },
+    ],
+}
+
 
 # mathjax_path = 'https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
