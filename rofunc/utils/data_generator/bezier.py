@@ -29,9 +29,10 @@ def get_bezier_curve(points):
 
 def evaluate_bezier(points, total):
     """
+    Generate the Bezier curve from points.
 
-    :param points:
-    :param total:
+    :param points: points for shaping the Bezier curve
+    :param total: the number of points on the Bezier curve
     :return:
     """
     bezier = get_bezier_curve(points)
@@ -85,7 +86,7 @@ def multi_bezier_demos(demo_points, ax=None):
         ...                         [[0, -1], [-1, 8], [4, 5.2], [2, 1.1], [4, 3.5]]])
         >>> demos_x = multi_bezier_demos(demo_points)
 
-    :param demo_points: the demonstration points of the Bezier curves
+    :param demo_points: points for shaping the Bezier curve
     :param ax: the axis to plot the Bezier curves, default None
     :return:
     """

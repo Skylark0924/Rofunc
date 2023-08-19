@@ -21,6 +21,7 @@ import rofunc as rf
 def get_rofunc_path():
     """
     Get the path of the rofunc package.
+
     :return: the absolute path of the rofunc package
     """
     if not hasattr(rf, "__path__"):
@@ -32,6 +33,7 @@ def get_rofunc_path():
 def get_elegantrl_path():
     """
     Get the path of the elegantrl package.
+
     :return: the absolute path of the elegantrl package
     """
     import elegantrl as erl
@@ -44,6 +46,7 @@ def get_elegantrl_path():
 def check_ckpt_exist(ckpt_name):
     """
     Check if the checkpoint file exists.
+
     :param ckpt_name: the name of the checkpoint file
     :return: True if the checkpoint file exists, False otherwise
     """

@@ -20,6 +20,7 @@ from math import factorial
 def build_phi_piecewise(nb_data, nb_fct):
     """
     Build piecewise constant basis functions.
+
     :param nb_data: number of data points
     :param nb_fct: number of basis functions
     :return: phi
@@ -31,6 +32,7 @@ def build_phi_piecewise(nb_data, nb_fct):
 def build_phi_rbf(nb_data, nb_fct):
     """
     Build radial basis functions (RBFs).
+
     :param nb_data: number of data points
     :param nb_fct: number of basis functions
     :return: the
@@ -44,6 +46,7 @@ def build_phi_rbf(nb_data, nb_fct):
 def build_phi_bernstein(nb_data, nb_fct):
     """
     Build Bernstein basis functions.
+
     :param nb_data: number of data points
     :param nb_fct: number of basis functions
     :return: phi
@@ -59,6 +62,7 @@ def build_phi_bernstein(nb_data, nb_fct):
 def build_phi_fourier(nb_data, nb_fct):
     """
     Build Fourier basis functions.
+
     :param nb_data: number of data points
     :param nb_fct: number of basis functions
     :return: phi

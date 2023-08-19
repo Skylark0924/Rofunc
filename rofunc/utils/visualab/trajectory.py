@@ -32,11 +32,11 @@ def traj_plot2d(data_lst: List, legend: str = None, title: str = None, g_ax=None
 
     Example::
 
-        >>> from rofunc.utils.visualab.trajectory import traj_plot3d
+        >>> import rofunc as rf
         >>> import numpy as np
         >>> data_lst = [np.array([[0, 0], [1, 1], [2, 3]]),
         ...             np.array([[0, 0], [1, 2], [4, 2]])]
-        >>> fig = traj_plot2d(data_lst, legend='test')
+        >>> fig = rf.visualab.traj_plot2d(data_lst, legend='test')
         >>> plt.show()
 
     :param data_lst:
@@ -80,11 +80,11 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
 
     Example::
 
-        >>> from rofunc.utils.visualab.trajectory import traj_plot3d
+        >>> import rofunc as rf
         >>> import numpy as np
         >>> data_lst = [np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]]),
         ...             np.array([[1, 0, 0], [1, 4, 6], [2, 4, 3]])]
-        >>> fig = traj_plot3d(data_lst, legend='test')
+        >>> fig = rf.visualab.traj_plot3d(data_lst, legend='test')
         >>> plt.show()
 
     :param data_lst: the list of trajectories
@@ -161,18 +161,16 @@ def traj_plot(data_lst: List, legend: str = None, title: str = None, mode: str =
 
     Example::
 
-        >>> from rofunc.utils.visualab.trajectory import traj_plot
+        >>> import rofunc as rf
         >>> import numpy as np
         >>> data_lst = [np.array([[0, 0], [1, 1], [2, 3]]),
         ...             np.array([[0, 0], [1, 2], [4, 2]])]
-        >>> fig = traj_plot(data_lst, legend='test')
+        >>> fig = rf.visualab.traj_plot(data_lst, legend='test')
         >>> plt.show()
 
-        >>> from rofunc.utils.visualab.trajectory import traj_plot
-        >>> import numpy as np
         >>> data_lst = [np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]]),
         ...             np.array([[1, 0, 0], [1, 4, 6], [2, 4, 3]])]
-        >>> fig = traj_plot(data_lst, legend='test')
+        >>> fig = rf.visualab.traj_plot(data_lst, legend='test')
         >>> plt.show()
 
     :param data_lst: list with 2d array or 3d array

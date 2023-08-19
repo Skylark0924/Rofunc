@@ -48,6 +48,7 @@ def draw_arc(center, radius, theta1, theta2, color):
 def draw_connect(l_curve, r_curve, type):
     """
     Draw the connection between two curves.
+
     :param l_curve: the left curve
     :param r_curve: the right curve
     :param type: line style
@@ -55,7 +56,3 @@ def draw_connect(l_curve, r_curve, type):
     """
     for i in range(0, len(l_curve), 10):
         plt.plot([l_curve[i, 0], r_curve[i, 0]], [l_curve[i, 1], r_curve[i, 1]], ls=type, alpha=0.7)
-
-
-if __name__ == '__main__':
-    draw_arc([-1, 0], 1, 0 * np.pi / 3, 2 * np.pi / 3, color='red')

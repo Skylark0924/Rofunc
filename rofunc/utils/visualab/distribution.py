@@ -182,6 +182,7 @@ def gmm_plot(Mu, Sigma, dim=None, color=[1, 0, 0], alpha=0.5, linewidth=1, marke
              border=False, nb=1, swap=True, center=True, zorder=20, scale=0.2):
     """
     This function displays the parameters of a Gaussian Mixture Model (GMM), either in 2D or 3D.
+
     :param Mu: the mean point coordinate of the GMM
     :param Sigma: the covariance matrix of the GMM
     :param dim: the dimension of the GMM
