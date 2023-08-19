@@ -1,3 +1,17 @@
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import random
 from typing import List
 
@@ -5,8 +19,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes._axes import _log as matplotlib_axes_logger
 from matplotlib.pyplot import cm
-from pytransform3d.rotations import matrix_from_quaternion, plot_basis
-from rofunc.utils.visualab.utils import set_axis
+
+from rofunc.utils.robolab.coord.transform import homo_matrix_from_quaternion
+from rofunc.utils.visualab.utils import set_axis, plot_basis
 
 matplotlib_axes_logger.setLevel('ERROR')
 
@@ -71,7 +86,7 @@ def traj_plot3d(data_lst: List, legend: str = None, title: str = None, g_ax=None
             data_ori = data_lst[i][:, 3:7]
             for t in range(len(data_ori)):
                 try:
-                    R = matrix_from_quaternion(data_ori[t])
+                    R = homo_matrix_from_quaternion(data_ori[t])
                 except:
                     pass
                 p = data_lst[i][t, :3]

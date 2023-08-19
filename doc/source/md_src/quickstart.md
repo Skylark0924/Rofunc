@@ -21,7 +21,7 @@ Two types of Tai Chi pushing hand with fixed step are defined and demonstrated b
 
 ### Data pre-processing
 
-As describing in the [`Demonstration collection and pre-processing`](./devices/index) section.
+As describing in the [`Demonstration collection and pre-processing`](./devices/index.rst) section.
 
 
 ## Learning from demonstration

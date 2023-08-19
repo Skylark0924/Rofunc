@@ -5,6 +5,7 @@ Multimodal data fusion
 This example shows how to synchronise and use multimodal data.
 """
 
+import sys
 import time
 import argparse
 import numpy as np
@@ -154,4 +155,10 @@ if __name__ == "__main__":
                         default=0,
                         help='Frame to visualize')
     args = parser.parse_args()
+    
+    if not osp.exists(args.data_path):
+        print(f"Argument data_path ({args.data_path}) points to invalid folder. Please make sure to point to Rofunc/examples/data/MULTIMODAL.")
+        print("Exiting...")
+        sys.exit(1)
+
     main(args)

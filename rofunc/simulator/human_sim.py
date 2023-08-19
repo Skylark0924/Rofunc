@@ -1,9 +1,28 @@
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Self-implemented human simulation with urdf built from xsens model
+# Deprecated since the xsens model is not accurate enough
+# Try use humanoid robot simulation instead (see humanoid_sim.py)
+
 from rofunc.simulator.base.base_sim import RobotSim
 import numpy as np
 
 
 class HumanSim(RobotSim):
     def __init__(self, args, **kwargs):
+        args.up_axis = 'Y'
         super().__init__(args, robot_name="human", **kwargs)
 
     def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
@@ -84,11 +103,11 @@ class HumanSim(RobotSim):
                 for dof_name in dof_info['dof_names']:
                     # dof_handle = self.gym.find_actor_dof_handle(self.envs[i], self.robot_handles[i], dof_name)
                     if dof_name[-1] == 'x':
-                        index = 0
-                    elif dof_name[-1] == 'y':
                         index = 1
-                    elif dof_name[-1] == 'z':
+                    elif dof_name[-1] == 'y':
                         index = 2
+                    elif dof_name[-1] == 'z':
+                        index = 0
                     else:
                         raise ValueError('Invalid dof name')
 

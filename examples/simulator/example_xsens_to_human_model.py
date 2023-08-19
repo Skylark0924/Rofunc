@@ -12,7 +12,7 @@ import rofunc as rf
 args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
 
-mvnx_path = '/home/ubuntu/Data/xsens_mvnx/2023_05_16_joint_angle_test/010-003.mvnx'
+mvnx_path = '/home/ubuntu/Data/xsens_mvnx/2023_05_16_joint_angle_test/010-004.mvnx'
 save_dir = '/home/ubuntu/Data/xsens_mvnx/2023_05_16_joint_angle_test'
 mvnx_file = rf.sim.xsens2urdf(mvnx_path, save_dir, human_mass=7, human_height=1.8)
 

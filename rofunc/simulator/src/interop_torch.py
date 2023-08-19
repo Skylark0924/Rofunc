@@ -25,7 +25,7 @@ gym = gymapi.acquire_gym()
 # Parse arguments
 args = gymutil.parse_arguments(description="PyTorch tensor interop example",
                                custom_parameters=[
-                                   {"name": "--headless", "action": "store_true", "help": ""}])
+                                   {"name": "--headless", "action": "store_false", "help": ""}])
 
 # configure sim
 sim_params = gymapi.SimParams()

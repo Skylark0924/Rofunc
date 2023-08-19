@@ -12,7 +12,7 @@ import rofunc as rf
 args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
 
-traj = np.load('../../data/taichi_1l.npy')
+traj = np.load('../data/LQT_LQR/taichi_1l.npy')
 # print(traj)
 traj = traj*0.2
 rf.lqt.plot_3d_uni(traj, ori=False)

@@ -1,6 +1,6 @@
-import rofunc as rf
 import numpy as np
-import os
+
+import rofunc as rf
 
 
 def test_2d_uni_tpgmm():
@@ -12,7 +12,7 @@ def test_2d_uni_tpgmm():
     start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
     end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
     task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
-    Repr = rf.learning.tpgmm.TPGMM(demos_x, task_params, plot=False)
+    Repr = rf.ml.TPGMM(demos_x, task_params, plot=False)
     model = Repr.fit()
 
     # Reproductions for the same situations
@@ -36,20 +36,20 @@ def test_2d_bi_tpgmm():
     end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
     task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                    'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
-    Repr = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
+    Repr = rf.ml.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
     model_l, model_r = Repr.fit()
 
     traj_l, traj_r, _, _ = Repr.reproduce([model_l, model_r], show_demo_idx=2)
 
 
 def test_7d_uni_tpgmm():
-    raw_demo = np.load('../data/LFD_ML/LeftHand.npy')
+    raw_demo = np.load('../examples/data/LFD_ML/LeftHand.npy')
     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 
     start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
     end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
     task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
-    Repr = rf.learning.tpgmm.TPGMM(demos_x, task_params, plot=False)
+    Repr = rf.ml.TPGMM(demos_x, task_params, plot=False)
     model = Repr.fit()
 
     # Reproductions for the same situations
@@ -64,8 +64,8 @@ def test_7d_uni_tpgmm():
 
 
 def test_7d_bi_tpgmm():
-    left_raw_demo = np.load('../data/LFD_ML/LeftHand.npy')
-    right_raw_demo = np.load('../data/LFD_ML/RightHand.npy')
+    left_raw_demo = np.load('../examples/data/LFD_ML/LeftHand.npy')
+    right_raw_demo = np.load('../examples/data/LFD_ML/RightHand.npy')
     demos_left_x = [left_raw_demo[500:635, :], left_raw_demo[635:770, :], left_raw_demo[770:905, :]]
     demos_right_x = [right_raw_demo[500:635, :], right_raw_demo[635:770, :], right_raw_demo[770:905, :]]
 
@@ -78,7 +78,7 @@ def test_7d_bi_tpgmm():
     task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                    'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
     # Fit the model
-    Repr = rf.learning.tpgmm.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
+    Repr = rf.ml.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=False)
     model_l, model_r = Repr.fit()
 
     # Reproductions for the same situations

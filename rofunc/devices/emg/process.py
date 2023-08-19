@@ -10,13 +10,10 @@ n = 2
 def process_one_channel(data, sampling_rate, k):
     """
 
-    Args:
-        data: raw emg data
-        sampling_rate: recorded at samples / second
-        k: filtering rate of data to samples / k / second
-
-
-    Returns:
+    :param data: raw emg data
+    :param sampling_rate: recorded at samples / second
+    :param k: filtering rate of data to samples / k / second
+    :return:
     data_filter: Filter the original EMG signals (from the Delsys system, 2000 Hz) to the desired frequency
     data_clean: Clean the raw EMG signals
     data_mvc: Calculate the Maximum Voluntary Contraction (MVC) of the EMG signals
@@ -43,14 +40,11 @@ def process_one_channel(data, sampling_rate, k):
 def process_all_channels(data, n, sampling_rate, k):
     """
 
-    Args:
-        data: raw emg data
-        n: number of emg channels
-        sampling_rate: recorded at samples / second
-        k: filtering rate of data to samples / k / second
-
-
-    Returns:
+    :param data: raw emg data
+    :param n: number of emg channels
+    :param sampling_rate: recorded at samples / second
+    :param k: filtering rate of data to samples / k / second
+    :return:
     DATA_FILTER: Filter the original EMG signals (from the Delsys system, 2000 Hz) to the desired frequency
     DATA_CLEAN: Clean the raw EMG signals
     DATA_MVC: Calculate the Maximum Voluntary Contraction (MVC) of the EMG signals
@@ -127,6 +121,7 @@ def plot_abs_and_mvc(data_abs, data_mvc, k):
     ax0.legend(loc="upper left", frameon=True, prop=legend_font)
     ax1.legend(loc="upper right", frameon=True, prop=legend_font)
 
+
 def plot_mvcscale_and_activity(data_mvcscale, data_activity, k):
     fig, ax0 = plt.subplots(nrows=1, ncols=1, sharex=True)
     ax0.set_xlabel("Time (seconds)", fontweight="bold", fontdict={'family': 'Times New Roman'}, fontsize=12)
@@ -153,6 +148,6 @@ def plot_mvcscale_and_activity(data_mvcscale, data_activity, k):
 #         plot_abs_and_mvc(data_abs[:, i], data_mvc[:, i], k)
 #     plt.show()
 
-    # # process single channel
-    # data_filter_1, data_clean_1, data_mvc_1, data_abs_1 = process(emg[:, 0], SAMPING_RATE, n)
-    # data_filter_2, data_clean_2, data_mvc_2, data_abs_2 = process(emg[:, 1], SAMPING_RATE, n)
+# # process single channel
+# data_filter_1, data_clean_1, data_mvc_1, data_abs_1 = process(emg[:, 0], SAMPING_RATE, n)
+# data_filter_2, data_clean_2, data_mvc_2, data_abs_2 = process(emg[:, 1], SAMPING_RATE, n)

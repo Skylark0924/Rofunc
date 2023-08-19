@@ -1,0 +1,37 @@
+rollouts: 16
+learning_epochs: 6
+mini_batches: 2
+discount_factor: 0.99
+lambda: 0.95
+learning_rate: 5e-5
+learning_rate_scheduler: null
+learning_rate_scheduler_kwargs: {}
+state_preprocessor: null
+state_preprocessor_kwargs: {}
+value_preprocessor: null
+value_preprocessor_kwargs: {}
+random_timesteps: 0
+learning_starts: 0
+grad_norm_clip: 0.0
+ratio_clip: 0.2
+value_clip: 0.2
+clip_predicted_values: false
+entropy_loss_scale: 0.0
+value_loss_scale: 2.5
+amp_batch_size: 512
+discriminator_loss_scale: 5.0
+task_reward_weight: 0.0
+style_reward_weight: 1.0
+discriminator_batch_size: 4096
+discriminator_reward_scale: 2
+discriminator_logit_regularization_scale: 0.05
+discriminator_gradient_penalty_scale: 5
+discriminator_weight_decay_scale: 0.0001
+kl_threshold: 0
+rewards_shaper: null
+experiment:
+  directory: ''
+  experiment_name: ''
+  write_interval: 100
+  checkpoint_interval: 1000
+  store_separately: false

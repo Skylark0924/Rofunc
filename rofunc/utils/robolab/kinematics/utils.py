@@ -1,8 +1,9 @@
-from urdfpy import URDF
 import rofunc as rf
 
 
 def check_urdf(urdf_path):
+    from urdfpy import URDF
+
     robot = URDF.load(urdf_path)
     # link_number = len(robot.links)
     # joint_number = len(robot.joints)

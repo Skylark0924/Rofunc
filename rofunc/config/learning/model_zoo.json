@@ -1,12 +1,72 @@
 {
-    "CURICabinetPPO_right_arm.pt": {
-        "url": "https://drive.google.com/uc?id=1lKPYiJK3N-2uE9C5oekmLs1QiwTmFpJL&export=download",
-        "name": "CURICabinetPPO_right_arm.pt",
-        "md5": "18cb53afc488df80cb988f2e9efa79b4"
-    },
-    "FrankaCabinetPPO.pt": {
-        "url": "https://drive.google.com/uc?id=1K6TpD-yyDPonCkhWZUOxcWlPQhbnBYFH&export=download",
-        "name": "FrankaCabinetPPO.pt",
-        "md5": "6ec13ea27b8be8500d91208fdee3ead2"
-    }
+  "CURICabinetPPO_right_arm.pth": {
+    "url": "https://drive.google.com/uc?id=1lKPYiJK3N-2uE9C5oekmLs1QiwTmFpJL&export=download",
+    "name": "CURICabinetPPO_right_arm.pth",
+    "md5": "18cb53afc488df80cb988f2e9efa79b4"
+  },
+  "FrankaCabinetPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1K6TpD-yyDPonCkhWZUOxcWlPQhbnBYFH&export=download",
+    "name": "FrankaCabinetPPO.pth",
+    "md5": "6ec13ea27b8be8500d91208fdee3ead2"
+  },
+  "CURICabinetRofuncRLPPO_left_arm.pth": {
+    "url": "https://drive.google.com/uc?id=1k-XY089wUAg1XfWL_Vayh--pSot0esaw&export=download",
+    "name": "CURICabinetRofuncRLPPO_left_arm.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_backflip.pth": {
+    "url": "https://drive.google.com/uc?id=17RZW8SUDufWZMm_g75XgoMtC8FlZDO9I&export=download",
+    "name": "HumanoidAMP_backflip.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_run.pth": {
+    "url": "https://drive.google.com/uc?id=1AAhWR9YmXZgcYkiQhnToDkFiGeEZrlOa&export=download",
+    "name": "HumanoidAMP_run.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_hop.pth": {
+    "url": "https://drive.google.com/uc?id=1lzq9qtFxdjCK2ap4RNs9iJbjfQ1hYS7X&export=download",
+    "name": "HumanoidAMP_hop.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_dance.pth": {
+    "url": "https://drive.google.com/uc?id=1o-KNebRzb8lBoPxDTURAH4770O-sd38j&export=download",
+    "name": "HumanoidAMP_dance.pth",
+    "md5": ""
+  },
+  "HumanoidAMP_walk.pth": {
+    "url": "https://drive.google.com/uc?id=1o-KNebRzb8lBoPxDTURAH4770O-sd38j&export=download",
+    "name": "HumanoidAMP_walk.pth",
+    "md5": ""
+  },
+  "HumanoidASEGetupSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1Pfsf3aTaP7BtMa1cMmIEoIZPHaEwEBKY&export=download",
+    "name": "HumanoidASEGetupSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASEPerturbSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1Pfsf3aTaP7BtMa1cMmIEoIZPHaEwEBKY&export=download",
+    "name": "HumanoidASEPerturbSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASEStrikeSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1I62R1IHPhAVbdzoHfpF85oUy86rKjC3I&export=download",
+    "name": "HumanoidASEStrikeSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASEReachSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=12CZ2TYi4koEeBFg9bX7m-IlpcwA9fM-e&export=download",
+    "name": "HumanoidASEReachSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASELocationSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1gXSSs69t0xqgQ3GiMKIKEGn8po8uRWW1&export=download",
+    "name": "HumanoidASELocationSwordShield.pth",
+    "md5": ""
+  },
+  "HumanoidASEHeadingSwordShield.pth": {
+    "url": "https://drive.google.com/uc?id=1VVXm1aZknEw3tTgRKfQoA0vaSDvublIF&export=download",
+    "name": "HumanoidASEHeadingSwordShield.pth",
+    "md5": ""
+  }
 }
