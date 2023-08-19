@@ -10,6 +10,8 @@ build:
 python:
   install:
     - requirements: doc/requirements_doc.txt
+    - method: pip
+      path: .
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
