@@ -81,7 +81,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 ## Related Papers
 
-1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](../rofunc/learning/RofuncIL/structured_transformer/strans.py))
+1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](../../rofunc/learning/RofuncIL/structured_transformer/strans.py))
 ```
 @article{liu2022robot,
          title={Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects},
@@ -103,7 +103,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
         year={2023}
 }
 ```
-3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](../rofunc/learning/ml/tpgmm.py))
+3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](../../rofunc/learning/ml/tpgmm.py))
 ```
 @article{liu2023birp,
         title={BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration},

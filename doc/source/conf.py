@@ -175,12 +175,6 @@ html_theme_options = {
     "use_sidenotes": True,
     "icon_links": [
         {
-            "name": "Executable Books",
-            "url": "https://executablebooks.org/",
-            "icon": "_static/ebp-logo.png",
-            "type": "local",
-        },
-        {
             "name": "GitHub",
             "url": "https://github.com/Skylark0924/Rofunc",
             "icon": "fa-brands fa-github",
