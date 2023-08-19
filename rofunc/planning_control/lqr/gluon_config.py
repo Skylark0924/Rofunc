@@ -1,6 +1,6 @@
 import numpy as np
 from rofunc.utils.robolab.kinematics import get_fk_from_model, get_jacobian_from_model
-from rofunc.utils.rfos.path import get_rofunc_path
+from rofunc.utils.oslab.path import get_rofunc_path
 
 class robot_config:
 

@@ -77,7 +77,7 @@ def saving_image(root_path, key, mat):
         img = sl.ERROR_CODE.FAILURE
         while img != sl.ERROR_CODE.SUCCESS:
             saving_img_dir = root_path + '_saving_img'
-            rf.rfos.create_dir(saving_img_dir)
+            rf.oslab.create_dir(saving_img_dir)
             filepath = os.path.join(saving_img_dir, '{}.png'.format(saving_cnt))
             img = mat.write(filepath)
             print("Saving image {}.png : {}".format(saving_cnt, repr(img)))

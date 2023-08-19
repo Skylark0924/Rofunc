@@ -74,7 +74,7 @@ def record(root_dir, exp_name):
         raise Exception('There are already some files in {}, please rename the exp_name.'.format(
             '{}/{}'.format(root_dir, exp_name)))
     else:
-        rf.rfos.create_dir('{}/{}'.format(root_dir, exp_name))
+        rf.oslab.create_dir('{}/{}'.format(root_dir, exp_name))
         rf.logger.beauty_print('Recording folder: {}/{}'.format(root_dir, exp_name), type='info')
 
     left_list = []

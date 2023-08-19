@@ -17,7 +17,7 @@ import os
 import numpy as np
 
 from rofunc.devices.xsens.src.load_mvnx import load_mvnx
-from rofunc.utils.rfos.path import get_rofunc_path
+from rofunc.utils.oslab.path import get_rofunc_path
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 

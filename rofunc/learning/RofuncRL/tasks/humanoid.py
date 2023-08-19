@@ -31,7 +31,7 @@ import os
 from isaacgym import gymapi
 from isaacgym import gymtorch
 
-from rofunc.utils.rfos.path import get_rofunc_path
+from rofunc.utils.oslab.path import get_rofunc_path
 from .base.vec_task import VecTask
 from .utils.torch_jit_utils import *
 

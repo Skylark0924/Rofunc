@@ -117,7 +117,7 @@ def data_clean(input_path: str, legacy: bool = True, objs: dict = None, save: bo
     # TODO: Must work for **file** or folder input path
     out_path = os.path.join(input_path, 'process')
     if save:
-        rf.rfos.create_dir(out_path)
+        rf.oslab.create_dir(out_path)
     demo_csvs = os.listdir(input_path)
     demo_csvs = sorted(demo_csvs)
     out_list = list()
@@ -180,7 +180,7 @@ def data_clean_legacy(input_path: str, demo_csv: str, out_path: str):
     if 'Manus' in demo_csv:
         demo_path = os.path.join(input_path, demo_csv)
         out_file_path = os.path.join(out_path, demo_csv)
-        rf.rfos.delete_lines(demo_path, out_file_path, 14)
+        rf.oslab.delete_lines(demo_path, out_file_path, 14)
         csv_data = pd.read_csv(out_file_path)
         # csv_data = pd.read_csv(demo_path, skiprows=6)
         if '3f6ec26f' in demo_csv:

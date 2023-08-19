@@ -61,7 +61,7 @@ def get_skeleton_from_json(json_path):
     """
     json_name = json_path.split('/')[-1].split('.')[0]
     json_root_path = json_path.split('.json')[0]
-    rf.rfos.create_dir(json_root_path)
+    rf.oslab.create_dir(json_root_path)
 
     with open(json_path, 'r') as f:
         raw_data = json.load(f)
@@ -121,7 +121,7 @@ def export(mvnx_path, output_type='segment', output_dir=None):
     if output_dir is None:
         output_dir = mvnx_path.split('.mvnx')[0]
         output_dir = os.path.join(output_dir, output_type)
-    rf.rfos.create_dir(output_dir)
+    rf.oslab.create_dir(output_dir)
     rf.logger.beauty_print('Save .npys in {}'.format(output_dir), level=2)
 
     if output_type == 'segment':
@@ -187,7 +187,7 @@ def export_time(mvnx_path, output_dir=None):
 
     if output_dir is None:
         output_dir = mvnx_path.split('.mvnx')[0]
-    rf.rfos.create_dir(output_dir)
+    rf.oslab.create_dir(output_dir)
 
     time = [int(i) for i in mvnx_file.file_data['frames']['ms']]
     np.save(os.path.join(output_dir, "ms.npy"), np.array(time))

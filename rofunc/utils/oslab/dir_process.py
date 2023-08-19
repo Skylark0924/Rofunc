@@ -27,7 +27,7 @@ def create_dir(path, local_verbose=False):
     Example::
 
         >>> import rofunc as rf
-        >>> rf.rfos.create_dir('/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1', local_verbose=True)
+        >>> rf.oslab.create_dir('/home/ubuntu/Github/Rofunc/examples/data/felt/trial_1', local_verbose=True)
 
     :param path: the path of the directory
     :param local_verbose: if True, print the message
@@ -128,7 +128,7 @@ def shutil_files(files, src_dir, dst_dir):
     :param dst_dir: destination directory path
     :return:
     """
-    rf.rfos.create_dir(dst_dir)
+    rf.oslab.create_dir(dst_dir)
 
     for file in files:
         src = os.path.join(src_dir, file)

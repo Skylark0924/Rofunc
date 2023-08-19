@@ -13,8 +13,8 @@ import rofunc as rf
 import open3d as o3d
 import os.path as osp
 
-from rofunc.utils.data_sampler.utils import pcd_concat
-from rofunc.utils.data_sampler import XsensDataHolder, OptitrackDataHolder, MultimodalDataHandler
+from rofunc.utils.datalab.data_sampler.utils import pcd_concat
+from rofunc.utils.datalab.data_sampler import XsensDataHolder, OptitrackDataHolder, MultimodalDataHandler
 
 # Bounds of the demonstrations in the data.
 # (start_frame, end_frame)

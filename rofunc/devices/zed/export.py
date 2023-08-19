@@ -41,7 +41,7 @@ def export(filepath, mode=1):
     svo_input_path = filepath
     root_path = filepath.split('.svo')[0]
     output_dir = root_path + '_export'
-    rf.rfos.create_dir(output_dir)
+    rf.oslab.create_dir(output_dir)
 
     output_as_video = True
     if mode == 0:
@@ -69,7 +69,7 @@ def export(filepath, mode=1):
         output_as_video = False
 
     if not output_as_video:
-        rf.rfos.create_dir(output_path)
+        rf.oslab.create_dir(output_path)
 
     # Specify SVO path parameter
     init_params = sl.InitParameters()
