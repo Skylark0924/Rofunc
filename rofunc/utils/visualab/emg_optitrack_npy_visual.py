@@ -1,3 +1,7 @@
+"""
+Warning: This file is deprecated and will be removed in a future release.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import math

@@ -15,6 +15,7 @@
 def delete_lines(in_path, out_path, head, tail=0):
     """
     Delete the appointed lines in the file.
+
     :param in_path: the input file path.
     :param out_path: the output file path.
     :param head: number of lines to be deleted from the head of the file.

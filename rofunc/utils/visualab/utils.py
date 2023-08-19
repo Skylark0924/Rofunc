@@ -30,12 +30,12 @@ def set_axis(ax, data=None, labels=None, elev=45, azim=45, roll=0):
 
     Example::
 
-        >>> from rofunc.utils.visualab.utils import set_axis
+        >>> import rofunc as rf
         >>> import numpy as np
         >>> fig = plt.figure()
         >>> ax = fig.add_subplot(111, projection='3d')
         >>> data = [np.array([0, 1, 2]), np.array([0, 1, 2]), np.array([0, 1, 2])]
-        >>> set_axis(ax, data)
+        >>> rf.visualab.set_axis(ax, data)
         >>> plt.show()
 
     :param ax: the axis of the figure
@@ -71,6 +71,7 @@ def set_axis(ax, data=None, labels=None, elev=45, azim=45, roll=0):
 def save_img(fig, save_dir, fig_name=None, dpi=300, transparent=False, format=None):
     """
     Save the figure to the specified directory.
+
     :param fig: the figure to be saved
     :param save_dir: the directory to save the figure
     :param fig_name: the name of the figure, if None, the name will be fig_{nb_files}
@@ -197,6 +198,7 @@ class Frame(artist.Artist):
 def make_3d_axis(ax_s, pos=111, unit=None, n_ticks=5):
     """
     Generate new 3D axis for plotting the basis.
+
     :param ax_s: Scaling of the new matplotlib 3d axis
     :param pos: Position indicator (nrows, ncols, plot_number)
     :param unit: Unit of axes. For example, 'm', 'cm', 'km', ... The unit will be shown in the axis label, for example,
@@ -245,6 +247,7 @@ def plot_basis(ax=None, R=None, p=np.zeros(3), s=1.0, ax_s=1,
                strict_check=True, **kwargs):
     """
     Plot basis of a rotation matrix.
+
     :param ax: the axis to plot the basis
     :param R: rotation matrix, each column contains a basis vector
     :param p: offset from the origin
