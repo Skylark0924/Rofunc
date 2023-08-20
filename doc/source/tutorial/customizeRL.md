@@ -98,5 +98,6 @@ if __name__ == '__main__':
 ```
 
 :::{tip}
-More examples can be found in [example-RofuncRL](https://rofunc.readthedocs.io/en/latest/auto_examples/learning_rl/index.html)
+1. For more details about the configuration system, please refer to [Configuration System](https://rofunc.readthedocs.io/en/latest/tutorial/config_system.html).
+2. More examples can be found in [example-RofuncRL](https://rofunc.readthedocs.io/en/latest/auto_examples/learning_rl/index.html)
 :::

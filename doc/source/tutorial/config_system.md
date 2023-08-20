@@ -66,7 +66,11 @@ More examples can be found in [example-RofuncRL](https://rofunc.readthedocs.io/e
 
 ## Customize configurations
 
-You can customize the configurations for your own task and agent by directly pass the absolute path of the configuration file to `get_config` function. For example, if you want to customize the configurations for `DoughRolling` task, you can create a `DoughRolling.yaml` file in `[path]/task` and pass the absolute path of the file to `get_config` function. Then, you can customize the configurations for `PPO` algorithm by creating a `DoughRollingPPO.yaml` file in `[path]/train` and pass the absolute path of the file to `get_config` function. Remember to copy the `config` file to your own `[path]`.
+You can customize the configurations for your own task and agent by directly pass the absolute path of the configuration file to [`get_config`](https://rofunc.readthedocs.io/en/latest/apidocs/rofunc/rofunc.config.utils.html) function. For example, if you want to customize the configurations for `DoughRolling` task, you need to
+
+1. create a `DoughRolling.yaml` file in `[path]/task`
+2. customize the configurations for `PPO` algorithm by creating a `DoughRollingPPO.yaml` file in `[path]/train`
+3. remember to copy the `config` file to your own `[path]`
 
 ```python
 import argparse
