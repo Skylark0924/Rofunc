@@ -32,7 +32,7 @@ def data_process(data_dir):
         def get_orientation(df):
             data = df.to_numpy().reshape((len(df.to_numpy()), 3, 3))
             data = np.array(
-                [rf.robolab.quaternion_from_matrix(rf.robolab.homo_matrix_from_rot_matrix(i)) for i in data])
+                [rf.robolab.quaternion_from_homo_matrix(rf.robolab.homo_matrix_from_rot_matrix(i)) for i in data])
             return data
 
         hand_position = get_center_position(hand_marker_positions)  # p_WH
