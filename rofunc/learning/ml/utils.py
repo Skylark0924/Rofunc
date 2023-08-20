@@ -26,7 +26,7 @@ plt.style.use('ggplot')
 import scipy.sparse as ss
 
 
-def quaternion_from_matrix(matrix, isprecise=False):
+def quaternion_from_homo_matrix(matrix, isprecise=False):
 	"""Return quaternion from rotation matrix.
 
 	If isprecise is True, the input matrix is assumed to be a precise rotation

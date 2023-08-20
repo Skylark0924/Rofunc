@@ -130,6 +130,19 @@ auto_examples/index
 
 ```{toctree}
 :maxdepth: 3
+:caption: Tutorial
+:hidden:
+:glob:
+
+tutorial/config_system
+tutorial/customizeRL
+tutorial/customizeIL
+tutorial/customizeML
+tutorial/customizePC
+```
+
+```{toctree}
+:maxdepth: 3
 :caption: Core Modules
 :hidden:
 :glob:
