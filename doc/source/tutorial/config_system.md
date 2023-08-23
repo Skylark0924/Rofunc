@@ -7,7 +7,7 @@ We adopt `hydra` as our configuration system. It is a powerful tool to manage AI
 The pre-defined configurations for `RofuncRL` can be found in [`rofunc/config/learning/rl`](https://github.com/Skylark0924/Rofunc/tree/main/rofunc/config/learning/rl). Configurations for learning each task contains three files:
 
 - `task/TaskName.yaml`: the task-related configurations for the task `TaskName` (e.g. DoughRolling)
-- `train/TaskNameAgent`: the agent-related configurations for training. (e.g. DoughRollingPPORofuncRL)
+- `train/TaskNameAgent.yaml`: the agent-related configurations for training. (e.g. DoughRollingPPORofuncRL)
 - `config`: the template for generating configurations for both task and training algorithm.
 
 Therefore, in each `main.py` script, you need to specify the task and the agent you want to train. For example, if you want to train the `DoughRolling` task with `PPO` algorithm, you need to specify `task=DoughRolling` and `train=DoughRollingPPORofuncRL` in the command line arguments. Then, the configuration system will automatically load the corresponding configurations for the task and the agent.
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 ```
 
 :::{tip}
-More examples can be found in [example-RofuncRL](https://rofunc.readthedocs.io/en/latest/auto_examples/learning_rl/index.html)
+More examples can be found in [Example/RofuncRL](https://rofunc.readthedocs.io/en/latest/auto_examples/learning_rl/index.html).
 :::
 
 ## Customize configurations
