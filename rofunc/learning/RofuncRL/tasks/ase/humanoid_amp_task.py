@@ -28,7 +28,7 @@
 
 import torch
 
-from .humanoid_amp import HumanoidAMP
+from rofunc.learning.RofuncRL.tasks.ase.humanoid_amp import HumanoidAMP
 
 
 class HumanoidAMPTask(HumanoidAMP):

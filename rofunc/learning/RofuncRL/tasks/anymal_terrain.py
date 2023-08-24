@@ -31,7 +31,7 @@ import os
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
-from .base.vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
 
 
 class AnymalTerrain(VecTask):
@@ -358,7 +358,7 @@ class AnymalTerrain(VecTask):
 
         # stumbling penalty
         stumble = (torch.norm(self.contact_forces[:, self.feet_indices, :2], dim=2) > 5.) * (
-                    torch.abs(self.contact_forces[:, self.feet_indices, 2]) < 1.)
+                torch.abs(self.contact_forces[:, self.feet_indices, 2]) < 1.)
         rew_stumble = torch.sum(stumble, dim=1) * self.rew_scales["stumble"]
 
         # action rate penalty
@@ -456,7 +456,7 @@ class AnymalTerrain(VecTask):
             return
         distance = torch.norm(self.root_states[env_ids, :2] - self.env_origins[env_ids, :2], dim=1)
         self.terrain_levels[env_ids] -= 1 * (
-                    distance < torch.norm(self.commands[env_ids, :2]) * self.max_episode_length_s * 0.25)
+                distance < torch.norm(self.commands[env_ids, :2]) * self.max_episode_length_s * 0.25)
         self.terrain_levels[env_ids] += 1 * (distance > self.terrain.env_length / 2)
         self.terrain_levels[env_ids] = torch.clip(self.terrain_levels[env_ids], 0) % self.terrain.env_rows
         self.env_origins[env_ids] = self.terrain_origins[self.terrain_levels[env_ids], self.terrain_types[env_ids]]
@@ -469,7 +469,7 @@ class AnymalTerrain(VecTask):
         self.actions = actions.clone().to(self.device)
         for i in range(self.decimation):
             torques = torch.clip(self.Kp * (
-                        self.action_scale * self.actions + self.default_dof_pos - self.dof_pos) - self.Kd * self.dof_vel,
+                    self.action_scale * self.actions + self.default_dof_pos - self.dof_pos) - self.Kd * self.dof_vel,
                                  -80., 80.)
             self.gym.set_dof_actuation_force_tensor(self.sim, gymtorch.unwrap_tensor(torques))
             self.torques = torques.view(self.torques.shape)
@@ -554,7 +554,7 @@ class AnymalTerrain(VecTask):
                                     self.height_points[env_ids]) + (self.root_states[env_ids, :3]).unsqueeze(1)
         else:
             points = quat_apply_yaw(self.base_quat.repeat(1, self.num_height_points), self.height_points) + (
-            self.root_states[:, :3]).unsqueeze(1)
+                self.root_states[:, :3]).unsqueeze(1)
 
         points += self.terrain.border_size
         points = (points / self.terrain.horizontal_scale).long()

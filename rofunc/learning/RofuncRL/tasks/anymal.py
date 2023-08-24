@@ -33,7 +33,7 @@ from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
-from .base.vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
 
 
 class Anymal(VecTask):

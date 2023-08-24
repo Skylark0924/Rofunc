@@ -28,10 +28,11 @@
 
 import os
 
-from isaacgym import gymtorch
 from isaacgym import gymapi
-from .base.vec_task import VecTask
-from .utils.torch_jit_utils import *
+from isaacgym import gymtorch
+
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
 from rofunc.utils.oslab.path import get_rofunc_path
 
 
@@ -64,7 +65,9 @@ class AntTask(VecTask):
         self.cfg["env"]["numObservations"] = 60
         self.cfg["env"]["numActions"] = 8
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         if self.viewer != None:
             cam_pos = gymapi.Vec3(50.0, 25.0, 2.4)
@@ -93,7 +96,8 @@ class AntTask(VecTask):
         self.initial_dof_pos = torch.zeros_like(self.dof_pos, device=self.device, dtype=torch.float)
         zero_tensor = torch.tensor([0.0], device=self.device)
         self.initial_dof_pos = torch.where(self.dof_limits_lower > zero_tensor, self.dof_limits_lower,
-                                           torch.where(self.dof_limits_upper < zero_tensor, self.dof_limits_upper, self.initial_dof_pos))
+                                           torch.where(self.dof_limits_upper < zero_tensor, self.dof_limits_upper,
+                                                       self.initial_dof_pos))
         self.initial_dof_vel = torch.zeros_like(self.dof_vel, device=self.device, dtype=torch.float)
 
         # initialize some data used later on
@@ -107,11 +111,11 @@ class AntTask(VecTask):
         self.targets = to_torch([1000, 0, 0], device=self.device).repeat((self.num_envs, 1))
         self.target_dirs = to_torch([1, 0, 0], device=self.device).repeat((self.num_envs, 1))
         self.dt = self.cfg["sim"]["dt"]
-        self.potentials = to_torch([-1000./self.dt], device=self.device).repeat(self.num_envs)
+        self.potentials = to_torch([-1000. / self.dt], device=self.device).repeat(self.num_envs)
         self.prev_potentials = self.potentials.clone()
 
     def create_sim(self):
-        self.up_axis_idx = 2 # index of up axis: Y=1, Z=2
+        self.up_axis_idx = 2  # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
 
         self._create_ground_plane()
@@ -162,7 +166,8 @@ class AntTask(VecTask):
         start_pose = gymapi.Transform()
         start_pose.p = gymapi.Vec3(*get_axis_params(0.44, self.up_axis_idx))
 
-        self.start_rotation = torch.tensor([start_pose.r.x, start_pose.r.y, start_pose.r.z, start_pose.r.w], device=self.device)
+        self.start_rotation = torch.tensor([start_pose.r.x, start_pose.r.y, start_pose.r.z, start_pose.r.w],
+                                           device=self.device)
 
         self.torso_index = 0
         self.num_bodies = self.gym.get_asset_rigid_body_count(ant_asset)
@@ -208,7 +213,8 @@ class AntTask(VecTask):
         self.dof_limits_upper = to_torch(self.dof_limits_upper, device=self.device)
 
         for i in range(len(extremity_names)):
-            self.extremities_index[i] = self.gym.find_actor_rigid_body_handle(self.envs[0], self.ant_handles[0], extremity_names[i])
+            self.extremities_index[i] = self.gym.find_actor_rigid_body_handle(self.envs[0], self.ant_handles[0],
+                                                                              extremity_names[i])
 
     def compute_reward(self, actions):
         self.rew_buf[:], self.reset_buf[:] = compute_ant_reward(
@@ -232,10 +238,11 @@ class AntTask(VecTask):
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_force_sensor_tensor(self.sim)
-        #print("Feet forces and torques: ", self.vec_sensor_tensor[0, :])
+        # print("Feet forces and torques: ", self.vec_sensor_tensor[0, :])
         # print(self.vec_sensor_tensor.shape)
 
-        self.obs_buf[:], self.potentials[:], self.prev_potentials[:], self.up_vec[:], self.heading_vec[:] = compute_ant_observations(
+        self.obs_buf[:], self.potentials[:], self.prev_potentials[:], self.up_vec[:], self.heading_vec[
+                                                                                      :] = compute_ant_observations(
             self.obs_buf, self.root_states, self.targets, self.potentials,
             self.inv_start_rot, self.dof_pos, self.dof_vel,
             self.dof_limits_lower, self.dof_limits_upper, self.dof_vel_scale,
@@ -250,7 +257,8 @@ class AntTask(VecTask):
         positions = torch_rand_float(-0.2, 0.2, (len(env_ids), self.num_dof), device=str(self.device))
         velocities = torch_rand_float(-0.1, 0.1, (len(env_ids), self.num_dof), device=str(self.device))
 
-        self.dof_pos[env_ids] = tensor_clamp(self.initial_dof_pos[env_ids] + positions, self.dof_limits_lower, self.dof_limits_upper)
+        self.dof_pos[env_ids] = tensor_clamp(self.initial_dof_pos[env_ids] + positions, self.dof_limits_lower,
+                                             self.dof_limits_upper)
         self.dof_vel[env_ids] = velocities
 
         env_ids_int32 = env_ids.to(dtype=torch.int32)
@@ -299,15 +307,18 @@ class AntTask(VecTask):
                 origin = self.gym.get_env_origin(self.envs[i])
                 pose = self.root_states[:, 0:3][i].cpu().numpy()
                 glob_pos = gymapi.Vec3(origin.x + pose[0], origin.y + pose[1], origin.z + pose[2])
-                points.append([glob_pos.x, glob_pos.y, glob_pos.z, glob_pos.x + 4 * self.heading_vec[i, 0].cpu().numpy(),
-                               glob_pos.y + 4 * self.heading_vec[i, 1].cpu().numpy(),
-                               glob_pos.z + 4 * self.heading_vec[i, 2].cpu().numpy()])
+                points.append(
+                    [glob_pos.x, glob_pos.y, glob_pos.z, glob_pos.x + 4 * self.heading_vec[i, 0].cpu().numpy(),
+                     glob_pos.y + 4 * self.heading_vec[i, 1].cpu().numpy(),
+                     glob_pos.z + 4 * self.heading_vec[i, 2].cpu().numpy()])
                 colors.append([0.97, 0.1, 0.06])
-                points.append([glob_pos.x, glob_pos.y, glob_pos.z, glob_pos.x + 4 * self.up_vec[i, 0].cpu().numpy(), glob_pos.y + 4 * self.up_vec[i, 1].cpu().numpy(),
+                points.append([glob_pos.x, glob_pos.y, glob_pos.z, glob_pos.x + 4 * self.up_vec[i, 0].cpu().numpy(),
+                               glob_pos.y + 4 * self.up_vec[i, 1].cpu().numpy(),
                                glob_pos.z + 4 * self.up_vec[i, 2].cpu().numpy()])
                 colors.append([0.05, 0.99, 0.04])
 
             self.gym.add_lines(self.viewer, None, self.num_envs * 2, points, colors)
+
 
 #####################################################################
 ###=========================jit functions=========================###
@@ -316,20 +327,20 @@ class AntTask(VecTask):
 
 @torch.jit.script
 def compute_ant_reward(
-    obs_buf,
-    reset_buf,
-    progress_buf,
-    actions,
-    up_weight,
-    heading_weight,
-    potentials,
-    prev_potentials,
-    actions_cost_scale,
-    energy_cost_scale,
-    joints_at_limit_cost_scale,
-    termination_height,
-    death_cost,
-    max_episode_length
+        obs_buf,
+        reset_buf,
+        progress_buf,
+        actions,
+        up_weight,
+        heading_weight,
+        potentials,
+        prev_potentials,
+        actions_cost_scale,
+        energy_cost_scale,
+        joints_at_limit_cost_scale,
+        termination_height,
+        death_cost,
+        max_episode_length
 ):
     # type: (Tensor, Tensor, Tensor, Tensor, float, float, Tensor, Tensor, float, float, float, float, float, float) -> Tuple[Tensor, Tensor]
 
@@ -351,10 +362,11 @@ def compute_ant_reward(
     progress_reward = potentials - prev_potentials
 
     total_reward = progress_reward + alive_reward + up_reward + heading_reward - \
-        actions_cost_scale * actions_cost - energy_cost_scale * electricity_cost - dof_at_limit_cost * joints_at_limit_cost_scale
+                   actions_cost_scale * actions_cost - energy_cost_scale * electricity_cost - dof_at_limit_cost * joints_at_limit_cost_scale
 
     # adjust reward for fallen agents
-    total_reward = torch.where(obs_buf[:, 0] < termination_height, torch.ones_like(total_reward) * death_cost, total_reward)
+    total_reward = torch.where(obs_buf[:, 0] < termination_height, torch.ones_like(total_reward) * death_cost,
+                               total_reward)
 
     # reset agents
     reset = torch.where(obs_buf[:, 0] < termination_height, torch.ones_like(reset_buf), reset_buf)

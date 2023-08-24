@@ -15,7 +15,7 @@
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
 
-from .vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
 
 
 class CURIBaseTask(VecTask):
