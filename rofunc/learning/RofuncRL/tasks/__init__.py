@@ -13,6 +13,7 @@ from .ase.humanoid_heading import HumanoidHeadingTask
 from .ase.humanoid_location import HumanoidLocationTask
 from .ase.humanoid_reach import HumanoidReachTask
 from .ase.humanoid_strike import HumanoidStrikeTask
+from .ase.humanoid_view_motion import HumanoidViewMotionTask
 
 
 task_map = {
@@ -31,4 +32,5 @@ task_map = {
     "HumanoidASELocationSwordShield": HumanoidLocationTask,
     "HumanoidASEReachSwordShield": HumanoidReachTask,
     "HumanoidASEStrikeSwordShield": HumanoidStrikeTask,
+    "HumanoidViewMotion": HumanoidViewMotionTask,
 }

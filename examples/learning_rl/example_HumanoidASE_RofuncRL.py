@@ -39,7 +39,8 @@ def train(custom_args):
                                      force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    hrl = False if custom_args.task in ['HumanoidASEGetupSwordShield', 'HumanoidASEPerturbSwordShield'] else True
+    hrl = False if custom_args.task in ['HumanoidASEGetupSwordShield', 'HumanoidASEPerturbSwordShield',
+                                        'HumanoidViewMotion'] else True
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=env,
                                              device=cfg.rl_device,
@@ -75,7 +76,8 @@ def inference(custom_args):
                                            force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    hrl = False if custom_args.task in ['HumanoidASEGetupSwordShield', 'HumanoidASEPerturbSwordShield'] else True
+    hrl = False if custom_args.task in ['HumanoidASEGetupSwordShield', 'HumanoidASEPerturbSwordShield',
+                                        'HumanoidViewMotion'] else True
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
                                              env=infer_env,
                                              device=cfg.rl_device,
@@ -83,9 +85,10 @@ def inference(custom_args):
                                              hrl=hrl,
                                              inference=True)
     # load checkpoint
-    if custom_args.ckpt_path is None:
-        custom_args.ckpt_path = model_zoo(name=f"{custom_args.task}.pth")
-    trainer.agent.load_ckpt(custom_args.ckpt_path)
+    if custom_args.task not in ['HumanoidViewMotion']:
+        if custom_args.ckpt_path is None:
+            custom_args.ckpt_path = model_zoo(name=f"{custom_args.task}.pth")
+        trainer.agent.load_ckpt(custom_args.ckpt_path)
 
     # Start inference
     trainer.inference()
