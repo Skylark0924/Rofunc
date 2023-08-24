@@ -55,3 +55,13 @@ def check_ckpt_exist(ckpt_name):
         return True
     else:
         return False
+
+
+def is_absl_path(path):
+    """
+    Check if the path is an absolute path.
+
+    :param path: the path to be checked
+    :return: True if the path is an absolute path, False otherwise
+    """
+    return os.path.isabs(path)

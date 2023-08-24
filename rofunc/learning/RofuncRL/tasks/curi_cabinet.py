@@ -17,8 +17,8 @@ import os
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
 
-from rofunc.utils.oslab.path import get_rofunc_path
 from rofunc.learning.RofuncRL.tasks.base.curi_base_task import CURIBaseTask
+from rofunc.utils.oslab.path import get_rofunc_path
 
 
 class CURICabinetTask(CURIBaseTask):

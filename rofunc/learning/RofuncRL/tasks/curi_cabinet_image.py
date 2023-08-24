@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import torch
+
+import tqdm
 from isaacgym import gymapi, gymtorch
 from isaacgym.torch_utils import *
-import tqdm
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.base.curi_base_task import CURIBaseTask

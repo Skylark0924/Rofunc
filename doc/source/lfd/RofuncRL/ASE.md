@@ -65,7 +65,7 @@ python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASESt
 
 ### Motion visualization
 
-Visualize the motion `reallusion_sword_shield/RL_Avatar_Atk_2xCombo01_Motion.npy` by using `HumanoidViewMotion`.
+If you want to visualize the motion, you can use `HumanoidViewMotion` task. For example, you can use the following command to visualize the motion `reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy` by using `HumanoidViewMotion`.
 
 ```shell
 python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidViewMotion --motion_file reallusion_sword_shield/RL_Avatar_Atk_2xCombo01_Motion.npy --inference --headless=False

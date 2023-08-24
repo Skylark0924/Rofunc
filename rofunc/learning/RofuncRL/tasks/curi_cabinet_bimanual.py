@@ -16,8 +16,9 @@ import os
 
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
-from rofunc.utils.oslab.path import get_rofunc_path
+
 from rofunc.learning.RofuncRL.tasks.base.curi_base_task import CURIBaseTask
+from rofunc.utils.oslab.path import get_rofunc_path
 
 
 class CURICabinetBimanualTask(CURIBaseTask):
@@ -237,14 +238,14 @@ class CURICabinetBimanualTask(CURIBaseTask):
 
         # Left arm
         self.hand_handle_l, self.lfinger_handle_l, self.rfinger_handle_l, self.curi_local_grasp_pos, \
-        self.curi_local_grasp_rot, self.curi_grasp_pos_l, self.curi_grasp_rot_l, self.curi_lfinger_pos_l, \
-        self.curi_rfinger_pos_l, self.curi_lfinger_rot_l, self.curi_rfinger_rot_l \
+            self.curi_local_grasp_rot, self.curi_grasp_pos_l, self.curi_grasp_rot_l, self.curi_lfinger_pos_l, \
+            self.curi_rfinger_pos_l, self.curi_lfinger_rot_l, self.curi_rfinger_rot_l \
             = self.init_data_curi("panda_left_link7", "panda_left_leftfinger", "panda_left_rightfinger", env_ptr,
                                   curi_actor)
         # Right arm
         self.hand_handle_r, self.lfinger_handle_r, self.rfinger_handle_r, self.curi_local_grasp_pos, \
-        self.curi_local_grasp_rot, self.curi_grasp_pos_r, self.curi_grasp_rot_r, self.curi_lfinger_pos_r, \
-        self.curi_rfinger_pos_r, self.curi_lfinger_rot_r, self.curi_rfinger_rot_r \
+            self.curi_local_grasp_rot, self.curi_grasp_pos_r, self.curi_grasp_rot_r, self.curi_lfinger_pos_r, \
+            self.curi_rfinger_pos_r, self.curi_lfinger_rot_r, self.curi_rfinger_rot_r \
             = self.init_data_curi("panda_right_link7", "panda_right_leftfinger", "panda_right_rightfinger", env_ptr,
                                   curi_actor)
 
@@ -291,7 +292,7 @@ class CURICabinetBimanualTask(CURIBaseTask):
         curi_rfinger_rot = torch.zeros_like(curi_local_grasp_rot)
 
         return hand_handle, lfinger_handle, rfinger_handle, curi_local_grasp_pos, curi_local_grasp_rot, curi_grasp_pos, \
-               curi_grasp_rot, curi_lfinger_pos, curi_rfinger_pos, curi_lfinger_rot, curi_rfinger_rot
+            curi_grasp_rot, curi_lfinger_pos, curi_rfinger_pos, curi_lfinger_rot, curi_rfinger_rot
 
     def init_data_cabinet(self, env_ptr, cabinet_actor):
         self.drawer_handle_top = self.gym.find_actor_rigid_body_handle(env_ptr, cabinet_actor, "drawer_top")
