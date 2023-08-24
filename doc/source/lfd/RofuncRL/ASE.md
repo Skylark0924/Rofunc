@@ -63,6 +63,14 @@ python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASERe
 python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEStrikeSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
 ```
 
+### Motion visualization
+
+Visualize the motion `reallusion_sword_shield/RL_Avatar_Atk_2xCombo01_Motion.npy` by using `HumanoidViewMotion`.
+
+```shell
+python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidViewMotion --motion_file reallusion_sword_shield/RL_Avatar_Atk_2xCombo01_Motion.npy --inference --headless=False
+```
+
 ## Baseline comparison
 
 ## Tricks

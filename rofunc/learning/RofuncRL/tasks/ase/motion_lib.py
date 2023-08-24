@@ -32,6 +32,7 @@ import yaml
 from isaacgym.torch_utils import *
 
 from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
+from rofunc.utils.datalab.poselib.poselib.core.rotation3d import *
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 USE_CACHE = True
