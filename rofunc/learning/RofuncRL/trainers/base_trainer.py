@@ -93,8 +93,8 @@ class BaseTrainer:
         self.eval_flag = self.cfg.Trainer.eval_flag if hasattr(self.cfg.Trainer, "eval_flag") else False
         self.eval_freq = self.cfg.Trainer.eval_freq if hasattr(self.cfg.Trainer, "eval_freq") else 0
         self.eval_steps = self.cfg.Trainer.eval_steps if hasattr(self.cfg.Trainer, "eval_steps") else 0
-        self.use_eval_thread = self.cfg.Trainer.eval_multi_thread if hasattr(self.cfg.Trainer,
-                                                                             "use_eval_thread") else False
+        self.use_eval_thread = self.cfg.Trainer.use_eval_thread if hasattr(self.cfg.Trainer,
+                                                                           "use_eval_thread") else False
         assert self.eval_steps % self.max_episode_steps == 0, \
             f"eval_steps ({self.eval_steps}) must be a multiple of max_episode_steps ({self.max_episode_steps})."
         self.inference_steps = self.cfg.Trainer.inference_steps if hasattr(self.cfg.Trainer, "inference_steps") else 0
