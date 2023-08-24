@@ -87,7 +87,7 @@ Model:
     lstm_use_prev_reward: false
     max_seq_len: 20
 
-  state_encoder:
+  state_encoder:  #  Delete this key means no encoder
     encoder_type: "cnn"  # ["resnet", "vit", "cnn"]
     image_size: 224
     use_pretrained: False
