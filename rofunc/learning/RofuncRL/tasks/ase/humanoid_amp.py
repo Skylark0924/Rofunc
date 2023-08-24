@@ -66,7 +66,7 @@ class HumanoidAMP(Humanoid):
             motion_file_path = motion_file
         else:
             motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                            "../../../../examples/data/amp/" + motion_file)
+                                            "../../../../../examples/data/amp/" + motion_file)
         self._load_motion(motion_file_path)
 
         self._load_motion(motion_file_path)
