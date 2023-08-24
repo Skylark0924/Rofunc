@@ -57,7 +57,7 @@ def data_process(data_dir):
     return demos_x, demos_taxels_pressure
 
 
-demos_x, demos_taxels_pressure = data_process('../data/felt/wipe_circle')
+demos_x, demos_taxels_pressure = data_process('../data/felt/wipe_spiral')
 
 # --- TP-GMM ---
 demos_x = [demo_x[:, :3] for demo_x in demos_x]
