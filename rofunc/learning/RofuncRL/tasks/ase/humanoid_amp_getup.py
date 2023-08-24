@@ -29,7 +29,7 @@
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
-from .humanoid_amp import HumanoidAMP
+from rofunc.learning.RofuncRL.tasks.ase.humanoid_amp import HumanoidAMP
 
 
 class HumanoidAMPGetupTask(HumanoidAMP):

@@ -30,7 +30,7 @@ import torch
 
 from isaacgym import gymtorch
 
-from .humanoid_amp import HumanoidAMP
+from rofunc.learning.RofuncRL.tasks.ase.humanoid_amp import HumanoidAMP
 
 
 class HumanoidViewMotionTask(HumanoidAMP):

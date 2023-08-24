@@ -31,8 +31,8 @@ import os
 from isaacgym import gymapi
 from isaacgym import gymtorch
 
-from .base.vec_task import VecTask
-from .utils.torch_jit_utils import *
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
 
 
 @torch.jit.script

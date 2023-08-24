@@ -32,9 +32,10 @@ from enum import Enum
 from gym import spaces
 from isaacgym.torch_utils import *
 
-from .humanoid import Humanoid, dof_to_obs
+import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.ase.motion_lib import MotionLib
-from ..utils import torch_jit_utils as torch_utils
+from rofunc.learning.RofuncRL.tasks.ase.humanoid import Humanoid, dof_to_obs
+from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 
 class HumanoidAMP(Humanoid):
@@ -61,8 +62,12 @@ class HumanoidAMP(Humanoid):
                          virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         motion_file = cfg['env'].get('motion_file', None)
-        motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        "../../../../../examples/data/amp/" + motion_file)
+        if rf.oslab.is_absl_path(motion_file):
+            motion_file_path = motion_file
+        else:
+            motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            "../../../../examples/data/amp/" + motion_file)
+        self._load_motion(motion_file_path)
 
         self._load_motion(motion_file_path)
 

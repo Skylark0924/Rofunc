@@ -14,10 +14,11 @@
 
 import os
 
-from rofunc.utils.oslab.path import get_rofunc_path
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
-from .base.vec_task import VecTask
+
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
+from rofunc.utils.oslab.path import get_rofunc_path
 
 
 class IKEABaseTask(VecTask):
