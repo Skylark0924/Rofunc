@@ -299,8 +299,8 @@ def amp_npy_from_fbx(fbx_file):
             "right_wrist": "right_hand"
         },
         "rotation": [0.707, 0, 0, 0.707],  # xyzw
-        "scale": 0.01,
-        "root_height_offset": -0.2,
+        "scale": 1,
+        "root_height_offset": -0.1,
         "trim_frame_beg": 0,
         "trim_frame_end": -1
     }
@@ -317,3 +317,4 @@ if __name__ == '__main__':
 
     pool = multiprocessing.Pool()
     pool.map(amp_npy_from_fbx, fbx_files)
+    # amp_npy_from_fbx(fbx_files[0])
