@@ -1,56 +1,33 @@
-# Copyright (c) 2018-2023, NVIDIA Corporation
-# All rights reserved.
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
+#      https://www.apache.org/licenses/LICENSE-2.0
 #
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-#
-# 3. Neither the name of the copyright holder nor the names of its
-#    contributors may be used to endorse or promote products derived from
-#    this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# from isaacgym.torch_utils import *
-# import torch
-import json
+"""
+Attention: Since the Autodesk FBX SDK just supports Python 3.7, this script should be run with Python 3.7.
+"""
+
+import multiprocessing
+
 import numpy as np
 
-from poselib.core.rotation3d import *
-from poselib.skeleton.skeleton3d import SkeletonTree, SkeletonState, SkeletonMotion
-from poselib.visualization.common import plot_skeleton_state, plot_skeleton_motion_interactive
-
-"""
-This scripts shows how to retarget a motion clip from the source skeleton to a target skeleton.
-Data required for retargeting are stored in a retarget config dictionary as a json file. This file contains:
-  - source_motion: a SkeletonMotion npy format representation of a motion sequence. The motion clip should use the same skeleton as the source T-Pose skeleton.
-  - target_motion_path: path to save the retargeted motion to
-  - source_tpose: a SkeletonState npy format representation of the source skeleton in it's T-Pose state
-  - target_tpose: a SkeletonState npy format representation of the target skeleton in it's T-Pose state (pose should match source T-Pose)
-  - joint_mapping: mapping of joint names from source to target
-  - rotation: root rotation offset from source to target skeleton (for transforming across different orientation axes), represented as a quaternion in XYZW order.
-  - scale: scale offset from source to target skeleton
-"""
-
-VISUALIZE = False
+import rofunc as rf
+from rofunc.utils.datalab.poselib.poselib.core.rotation3d import *
+from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonState, SkeletonMotion
+from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skeleton_motion_interactive, \
+    plot_skeleton_state
 
 
-def project_joints(motion):
+def _project_joints(motion):
     right_upper_arm_id = motion.skeleton_tree._node_indices["right_upper_arm"]
     right_lower_arm_id = motion.skeleton_tree._node_indices["right_lower_arm"]
     right_hand_id = motion.skeleton_tree._node_indices["right_hand"]
@@ -112,7 +89,8 @@ def project_joints(motion):
     left_elbow_dot = torch.clamp(left_elbow_dot, -1.0, 1.0)
     left_elbow_theta = torch.acos(left_elbow_dot)
     left_elbow_q = quat_from_angle_axis(-torch.abs(left_elbow_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]),
-                                                                                   device=device, dtype=torch.float32))
+                                                                                   device=device,
+                                                                                   dtype=torch.float32))
 
     left_elbow_local_dir = motion.skeleton_tree.local_translation[left_hand_id]
     left_elbow_local_dir = left_elbow_local_dir / torch.norm(left_elbow_local_dir)
@@ -141,7 +119,8 @@ def project_joints(motion):
     right_knee_dot = torch.clamp(right_knee_dot, -1.0, 1.0)
     right_knee_theta = torch.acos(right_knee_dot)
     right_knee_q = quat_from_angle_axis(torch.abs(right_knee_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]),
-                                                                                  device=device, dtype=torch.float32))
+                                                                                  device=device,
+                                                                                  dtype=torch.float32))
 
     right_knee_local_dir = motion.skeleton_tree.local_translation[right_foot_id]
     right_knee_local_dir = right_knee_local_dir / torch.norm(right_knee_local_dir)
@@ -205,45 +184,48 @@ def project_joints(motion):
     return new_motion
 
 
-def main(retarget_cfg_path):
-    # load retarget config
-    with open(retarget_cfg_path) as f:
-        retarget_data = json.load(f)
+def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=False):
+    # import fbx file - make sure to provide a valid joint name for root_joint
+    motion = SkeletonMotion.from_fbx(
+        fbx_file_path=fbx_file_path,
+        root_joint=root_joint,
+        fps=fps
+    )
+    # visualize motion
+    if visualize:
+        plot_skeleton_motion_interactive(motion)
+    return motion
 
+
+def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     # load and visualize t-pose files
-    source_tpose = SkeletonState.from_file(retarget_data["source_tpose"])
-    if VISUALIZE:
+    source_tpose = SkeletonState.from_file(retarget_cfg["source_tpose"])
+    if visualize:
         plot_skeleton_state(source_tpose)
 
-    target_tpose = SkeletonState.from_file(retarget_data["target_tpose"])
-    if VISUALIZE:
+    target_tpose = SkeletonState.from_file(retarget_cfg["target_tpose"])
+    if visualize:
         plot_skeleton_state(target_tpose)
 
-    # load and visualize source motion sequence
-    source_motion = SkeletonMotion.from_file(retarget_data["source_motion"])
-    if VISUALIZE:
-        plot_skeleton_motion_interactive(source_motion)
-
     # parse data from retarget config
-    joint_mapping = retarget_data["joint_mapping"]
-    rotation_to_target_skeleton = torch.tensor(retarget_data["rotation"])
+    rotation_to_target_skeleton = torch.tensor(retarget_cfg["rotation"])
 
     # run retargeting
     target_motion = source_motion.retarget_to_by_tpose(
-        joint_mapping=retarget_data["joint_mapping"],
+        joint_mapping=retarget_cfg["joint_mapping"],
         source_tpose=source_tpose,
         target_tpose=target_tpose,
         rotation_to_target_skeleton=rotation_to_target_skeleton,
-        scale_to_target_skeleton=retarget_data["scale"]
+        scale_to_target_skeleton=retarget_cfg["scale"]
     )
 
     # keep frames between [trim_frame_beg, trim_frame_end - 1]
-    frame_beg = retarget_data["trim_frame_beg"]
-    frame_end = retarget_data["trim_frame_end"]
-    if (frame_beg == -1):
+    frame_beg = retarget_cfg["trim_frame_beg"]
+    frame_end = retarget_cfg["trim_frame_end"]
+    if frame_beg == -1:
         frame_beg = 0
 
-    if (frame_end == -1):
+    if frame_end == -1:
         frame_end = target_motion.local_rotation.shape[0]
 
     local_rotation = target_motion.local_rotation
@@ -256,7 +238,7 @@ def main(retarget_cfg_path):
     target_motion = SkeletonMotion.from_skeleton_state(new_sk_state, fps=target_motion.fps)
 
     # need to convert some joints from 3D to 1D (e.g. elbows and knees)
-    target_motion = project_joints(target_motion)
+    target_motion = _project_joints(target_motion)
 
     # move the root so that the feet are on the ground
     local_rotation = target_motion.local_rotation
@@ -266,7 +248,7 @@ def main(retarget_cfg_path):
     root_translation[:, 2] += -min_h
 
     # adjust the height of the root to avoid ground penetration
-    root_height_offset = retarget_data["root_height_offset"]
+    root_height_offset = retarget_cfg["root_height_offset"]
     root_translation[:, 2] += root_height_offset
 
     new_sk_state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, local_rotation,
@@ -274,14 +256,62 @@ def main(retarget_cfg_path):
     target_motion = SkeletonMotion.from_skeleton_state(new_sk_state, fps=target_motion.fps)
 
     # save retargeted motion
-    target_motion.to_file(retarget_data["target_motion_path"])
+    target_motion.to_file(retarget_cfg["target_motion_path"])
 
-    # visualize retargeted motion
-    plot_skeleton_motion_interactive(target_motion)
+    if visualize:
+        # visualize retargeted motion
+        plot_skeleton_motion_interactive(target_motion)
 
-    return
+
+def amp_npy_from_fbx(fbx_file):
+    """
+    This scripts shows how to retarget a motion clip from the source skeleton to a target skeleton.
+    Data required for retargeting are stored in a retarget config dictionary as a json file. This file contains:
+      - source_motion: a SkeletonMotion npy format representation of a motion sequence. The motion clip should use the same skeleton as the source T-Pose skeleton.
+      - target_motion_path: path to save the retargeted motion to
+      - source_tpose: a SkeletonState npy format representation of the source skeleton in it's T-Pose state
+      - target_tpose: a SkeletonState npy format representation of the target skeleton in it's T-Pose state (pose should match source T-Pose)
+      - joint_mapping: mapping of joint names from source to target
+      - rotation: root rotation offset from source to target skeleton (for transforming across different orientation axes), represented as a quaternion in XYZW order.
+      - scale: scale offset from source to target skeleton
+    """
+
+    config = {
+        "target_motion_path": "/home/ubuntu/Data/fbx/armchair003_amp.npy",
+        "source_tpose": "/home/ubuntu/Data/fbx/armchair003_tpose.npy",
+        "target_tpose": "data/amp_humanoid_tpose.npy",
+        "joint_mapping": {
+            "pelvis": "pelvis",
+            "left_hip": "left_thigh",
+            "left_knee": "left_shin",
+            "left_foot": "left_foot",
+            "right_hip": "right_thigh",
+            "right_knee": "right_shin",
+            "right_foot": "right_foot",
+            "spine1": "torso",
+            "head": "head",
+            "left_shoulder": "left_upper_arm",
+            "left_elbow": "left_lower_arm",
+            "left_wrist": "left_hand",
+            "right_shoulder": "right_upper_arm",
+            "right_elbow": "right_lower_arm",
+            "right_wrist": "right_hand"
+        },
+        "rotation": [0.707, 0, 0, 0.707],  # xyzw
+        "scale": 0.01,
+        "root_height_offset": 0.0,
+        "trim_frame_beg": 0,
+        "trim_frame_end": -1
+    }
+
+    motion = motion_from_fbx(fbx_file, root_joint="pelvis", fps=60, visualize=False)
+    config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
+    motion_retargeting(config, motion, visualize=False)
 
 
 if __name__ == '__main__':
-    retarget_cfg_path = "data/configs/retarget_samp_to_amp.json"
-    main(retarget_cfg_path)
+    fbx_dir = "/home/ubuntu/Data/fbx"
+    fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
+
+    pool = multiprocessing.Pool()
+    pool.map(amp_npy_from_fbx, fbx_files)
