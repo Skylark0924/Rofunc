@@ -15,10 +15,10 @@ import rofunc as rf
 
 input_path = '/home/lee/BoB_data/2022-12-03/BoB data/bench_press/'
 out_path = os.path.join(input_path, 'process')
-rf.utils.create_dir(out_path)
+rf.oslab.create_dir(out_path)
 demo_path = os.path.join(input_path, "all_muscle_forces.csv")
 out_file_path = os.path.join(out_path, "all_muscle_forces_processed.csv")
-rf.utils.delete_lines(demo_path, out_file_path, 1)
+rf.oslab.delete_lines(demo_path, out_file_path, 1)
 data = pd.read_csv(out_file_path, index_col=0)
 
 # Pectoralis major clavicular; Pectoralis major sternocostal; Deltoideus clavicular; Deltoideus scapular;

@@ -11,7 +11,7 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.config import *
-from rofunc.utils.file.path import get_rofunc_path
+from rofunc.utils.oslab.path import get_rofunc_path
 
 """
 Config loading rules:
@@ -26,6 +26,7 @@ Config loading rules:
 def get_config(config_path=None, config_name=None, args=None, debug=False, absl_config_path=None) -> DictConfig:
     """
     Load config file and rewrite some params by args.
+    
     :param config_path: relative path to the config file (only for rofunc package)
     :param config_name: name of the config file (without .yaml)
     :param args: custom args to rewrite some params in the config file

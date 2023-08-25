@@ -28,10 +28,11 @@
 
 import os
 
-from rofunc.utils.file.path import get_rofunc_path
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
-from .base.vec_task import VecTask
+
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
+from rofunc.utils.oslab.path import get_rofunc_path
 
 
 class FrankaCabinetTask(VecTask):
@@ -406,7 +407,7 @@ class FrankaCabinetTask(VecTask):
         # reset franka
         pos = tensor_clamp(
             self.franka_default_dof_pos.unsqueeze(0) + 0.25 * (
-                        torch.rand((len(env_ids), self.num_franka_dofs), device=self.device) - 0.5),
+                    torch.rand((len(env_ids), self.num_franka_dofs), device=self.device) - 0.5),
             self.franka_dof_lower_limits, self.franka_dof_upper_limits)
         self.franka_dof_pos[env_ids, :] = pos
         self.franka_dof_vel[env_ids, :] = torch.zeros_like(self.franka_dof_vel[env_ids])

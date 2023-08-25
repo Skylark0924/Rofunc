@@ -1,26 +1,22 @@
-"""
- Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- """
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import datetime
 import os
-import sys
 
 import torch
 import torch.nn as nn
-from hydra._internal.utils import get_args_parser
 from skrl.agents.torch.a2c import A2C as A2CAgent
 from skrl.agents.torch.amp import AMP as AMPAgent
 from skrl.agents.torch.ppo import PPO as PPOAgent
@@ -37,7 +33,7 @@ from tensorboard import program
 
 import rofunc as rf
 from rofunc.config.utils import get_config, omegaconf_to_dict
-from rofunc.utils.file.internet import reserve_sock_addr
+from rofunc.utils.oslab.internet import reserve_sock_addr
 from rofunc.utils.logger.beauty_logger import BeautyLogger
 
 # set the seed for reproducibility
@@ -538,7 +534,7 @@ def setup_agent(cfg, custom_args, env, eval_mode=False):
         tb.configure(argv)
     url = tb.launch()
     rf.logger.beauty_print(f"Tensorflow listening on {url}", type='info')
-    rf.utils.create_dir(agent.experiment_dir)
+    rf.oslab.create_dir(agent.experiment_dir)
 
     rofunc_logger = BeautyLogger(agent.experiment_dir, 'rofunc.log')
     rofunc_logger.info("Configurations: \n{}".format(agent.cfg))

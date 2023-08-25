@@ -26,13 +26,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
 import os
-import torch
 
-from isaacgym import gymutil, gymtorch, gymapi
-from .base.vec_task import VecTask
-from rofunc.utils.file.path import get_rofunc_path
+import numpy as np
+import torch
+from isaacgym import gymtorch, gymapi
+
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
+from rofunc.utils.oslab.path import get_rofunc_path
 
 
 class CartpoleTask(VecTask):
@@ -48,7 +49,9 @@ class CartpoleTask(VecTask):
         self.cfg["env"]["numObservations"] = 4
         self.cfg["env"]["numActions"] = 1
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
         self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)
@@ -71,7 +74,8 @@ class CartpoleTask(VecTask):
 
     def _create_envs(self, num_envs, spacing, num_per_row):
         # define plane on which environments are initialized
-        lower = gymapi.Vec3(0.5 * -spacing, -spacing, 0.0) if self.up_axis == 'z' else gymapi.Vec3(0.5 * -spacing, 0.0, -spacing)
+        lower = gymapi.Vec3(0.5 * -spacing, -spacing, 0.0) if self.up_axis == 'z' else gymapi.Vec3(0.5 * -spacing, 0.0,
+                                                                                                   -spacing)
         upper = gymapi.Vec3(0.5 * spacing, spacing, spacing)
 
         # get rofunc path from rofunc package metadata
@@ -99,7 +103,7 @@ class CartpoleTask(VecTask):
             pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
         else:
             pose.p.y = 2.0
-            pose.r = gymapi.Quat(-np.sqrt(2)/2, 0.0, 0.0, np.sqrt(2)/2)
+            pose.r = gymapi.Quat(-np.sqrt(2) / 2, 0.0, 0.0, np.sqrt(2) / 2)
 
         self.cartpole_handles = []
         self.envs = []
@@ -175,6 +179,7 @@ class CartpoleTask(VecTask):
 
         self.compute_observations()
         self.compute_reward()
+
 
 #####################################################################
 ###=========================jit functions=========================###

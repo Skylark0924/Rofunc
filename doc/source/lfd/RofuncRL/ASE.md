@@ -1,6 +1,6 @@
 # RofuncRL ASE (Adversarial Skill Embeddings)
 
-## Algorithm 
+## Algorithm
 
 ![](../../../img/ASE2.png)
 
@@ -16,7 +16,10 @@ python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEGe
 
 ### Pre-trained latent space model with perturbation
 
-You can test the robustness of the latent space model by changing to `HumanoidASEPerturbSwordShield` task (throwing boxes to the humanoid robot). It will use **the same pre-trained latent space model as previous demo**, but set the `reset` function to reset by the maximum length of the episode, rather than resetting immediately when robots fall on the ground.
+You can test the robustness of the latent space model by changing to `HumanoidASEPerturbSwordShield` task (throwing
+boxes to the humanoid robot). It will use **the same pre-trained latent space model as previous demo**, but set
+the `reset` function to reset by the maximum length of the episode, rather than resetting immediately when robots fall
+on the ground.
 
 ![](../../../img/ASE1.gif)
 
@@ -25,7 +28,8 @@ python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEPe
 ```
 
 > **Note**
-> By using the pre-trained latent space model, we can train some high-level policies for complex tasks with simple task-specific reward functions.
+> By using the pre-trained latent space model, we can train some high-level policies for complex tasks with simple
+> task-specific reward functions.
 
 ### High-level policy learning with pre-trained latent space model (Heading)
 
@@ -61,6 +65,22 @@ python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASERe
 
 ```shell
 python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEStrikeSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
+```
+
+### Motion visualization
+
+If you want to visualize the motion, you can use `HumanoidViewMotion` task. For example, you can use the following
+command to visualize the motion `reallusion_sword_shield/RL_Avatar_Atk_2xCombo01_Motion.npy` by
+using `HumanoidViewMotion`. 
+
+```shell
+python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidViewMotion --motion_file reallusion_sword_shield/RL_Avatar_Atk_2xCombo01_Motion.npy --inference --headless=False
+```
+
+You can also use the absolute path of the motion file.
+
+```shell
+python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidViewMotion --motion_file /home/ubuntu/Github/Rofunc/examples/data/amp/reallusion_sword_shield/RL_Avatar_Atk_Jump_Motion.npy --inference --headless=False
 ```
 
 ## Baseline comparison

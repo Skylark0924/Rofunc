@@ -1,18 +1,16 @@
-"""
- Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- """
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
 
@@ -29,13 +27,23 @@ from rofunc.utils.robolab.coord.transform import check_rot_matrix
 def set_axis(ax, data=None, labels=None, elev=45, azim=45, roll=0):
     """
     Set the axis of the figure.
-    :param ax:
-    :param data: [X, Y, Z]
-    :param labels:
-    :param elev:
-    :param azim:
-    :param roll:
-    :return:
+
+    Example::
+
+        >>> import rofunc as rf
+        >>> import numpy as np
+        >>> fig = plt.figure()
+        >>> ax = fig.add_subplot(111, projection='3d')
+        >>> data = [np.array([0, 1, 2]), np.array([0, 1, 2]), np.array([0, 1, 2])]
+        >>> rf.visualab.set_axis(ax, data)
+        >>> plt.show()
+
+    :param ax: the axis of the figure
+    :param data: the data to be plotted, used for setting the range of the axis, should be a list 【X, Y, Z】
+    :param labels: the labels of the axis
+    :param elev: the elevation of the axis
+    :param azim: the azimuth of the axis
+    :param roll: the roll of the axis
     """
     try:
         ax.view_init(elev=elev, azim=azim, roll=roll)
@@ -61,9 +69,20 @@ def set_axis(ax, data=None, labels=None, elev=45, azim=45, roll=0):
 
 
 def save_img(fig, save_dir, fig_name=None, dpi=300, transparent=False, format=None):
+    """
+    Save the figure to the specified directory.
+
+    :param fig: the figure to be saved
+    :param save_dir: the directory to save the figure
+    :param fig_name: the name of the figure, if None, the name will be fig_{nb_files}
+    :param dpi: the dpi of the figure
+    :param transparent: transparent or not
+    :param format: the format of the figure, default ['eps', 'png'] together with the same name
+    :return:
+    """
     if format is None:
         format = ['eps', 'png']
-    rf.utils.create_dir(save_dir)
+    rf.oslab.create_dir(save_dir)
     if fig_name is None:
         nb_files = len(os.listdir(save_dir))
         fig_name = 'fig_{}'.format(nb_files)
@@ -177,28 +196,15 @@ class Frame(artist.Artist):
 
 
 def make_3d_axis(ax_s, pos=111, unit=None, n_ticks=5):
-    """Generate new 3D axis.
+    """
+    Generate new 3D axis for plotting the basis.
 
-    Parameters
-    ----------
-    ax_s : float, optional (default: 1)
-        Scaling of the new matplotlib 3d axis
-
-    pos : int, optional (default: 111)
-        Position indicator (nrows, ncols, plot_number)
-
-    unit : str, optional (default: None)
-        Unit of axes. For example, 'm', 'cm', 'km', ...
-        The unit will be shown in the axis label, for example,
-        as 'X [m]'.
-
-    n_ticks : int, optional (default: 5)
-        Number of ticks on each axis
-
-    Returns
-    -------
-    ax : Matplotlib 3d axis
-        New axis
+    :param ax_s: Scaling of the new matplotlib 3d axis
+    :param pos: Position indicator (nrows, ncols, plot_number)
+    :param unit: Unit of axes. For example, 'm', 'cm', 'km', ... The unit will be shown in the axis label, for example,
+                as 'X [m]'.
+    :param n_ticks: Number of ticks on each axis
+    :return: New axis
     """
     try:
         ax = plt.subplot(pos, projection="3d", aspect="equal")
@@ -239,36 +245,18 @@ def make_3d_axis(ax_s, pos=111, unit=None, n_ticks=5):
 
 def plot_basis(ax=None, R=None, p=np.zeros(3), s=1.0, ax_s=1,
                strict_check=True, **kwargs):
-    """Plot basis of a rotation matrix.
+    """
+    Plot basis of a rotation matrix.
 
-    Parameters
-    ----------
-    ax : Matplotlib 3d axis, optional (default: None)
-        If the axis is None, a new 3d axis will be created
-
-    R : array-like, shape (3, 3), optional (default: I)
-        Rotation matrix, each column contains a basis vector
-
-    p : array-like, shape (3,), optional (default: [0, 0, 0])
-        Offset from the origin
-
-    s : float, optional (default: 1)
-        Scaling of the frame that will be drawn
-
-    ax_s : float, optional (default: 1)
-        Scaling of the new matplotlib 3d axis
-
-    strict_check : bool, optional (default: True)
-        Raise a ValueError if the rotation matrix is not numerically close
-        enough to a real rotation matrix. Otherwise, we print a warning.
-
-    kwargs : dict, optional (default: {})
-        Additional arguments for the plotting functions, e.g. alpha
-
-    Returns
-    -------
-    ax : Matplotlib 3d axis
-        New or old axis
+    :param ax: the axis to plot the basis
+    :param R: rotation matrix, each column contains a basis vector
+    :param p: offset from the origin
+    :param s: scaling of the frame that will be drawn
+    :param ax_s: scaling of the new matplotlib 3d axis
+    :param strict_check: raise a ValueError if the rotation matrix is not numerically close enough to a real rotation
+                        matrix. Otherwise, we print a warning.
+    :param kwargs: additional arguments for the plotting functions, e.g. alpha
+    :return: ax
     """
     if ax is None:
         ax = make_3d_axis(ax_s)

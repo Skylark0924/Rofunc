@@ -1,24 +1,23 @@
-"""
- Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- """
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import matplotlib.pyplot as plt
 import numpy as np
-import rofunc as rf
 import scipy as sp
 from tqdm import tqdm
+
+import rofunc as rf
 
 
 def gmm_plot2d(Mu, Sigma, nbStates, color=[1, 0, 0], alpha=0.5, linewidth=1, markersize=6,
@@ -123,15 +122,30 @@ def gmm_plot2d(Mu, Sigma, nbStates, color=[1, 0, 0], alpha=0.5, linewidth=1, mar
 
 def gmm_plot3d(mu, covariance, color, alpha=0.5, ax=None, scale=0.1, max_gaussian=10):
     """
-    plots points and their corresponding gmm model in 3D
-    Input:
-        points: N X 3, sampled points
-        w: n_gaussians, gmm weights
-        mu: 3 X n_gaussians, gmm means
-        stdev: 3 X n_gaussians, gmm standard deviation (assuming diagonal covariance matrix)
-        max_gaussian: the maximum number of Gaussian to show
-    Output:
-        None
+    Visualize the 3D GMM as ellipsoids.
+
+    Example::
+
+        >>> from rofunc.utils.visualab.distribution import gmm_plot3d
+        >>> import numpy as np
+        >>> mu = np.array([[0.5, 0.0, 0.0],
+        ...                [0.0, 0.0, 0.0],
+        ...                [-0.5, -0.5, -0.5],
+        ...                [-0.8, 0.3, 0.4]])
+        >>> covs = np.array([np.diag([0.01, 0.01, 0.03]),
+        ...                  np.diag([0.08, 0.01, 0.01]),
+        ...                  np.diag([0.01, 0.05, 0.01]),
+        ...                  np.diag([0.03, 0.07, 0.01])])
+        >>> gmm_plot3d(mu, covs, [0, 0, 0, 0])
+
+    :param mu: the mean point coordinate of the GMM
+    :param covariance: the covariance matrix of the GMM
+    :param color: the color of the ellipsoid
+    :param alpha: the transparency of the ellipsoid
+    :param ax: the axis to plot the GMM
+    :param scale: the scale of the ellipsoid
+    :param max_gaussian: the maximum number of Gaussian to plot
+    :return:
     """
     n_gaussian = mu.shape[0]
     # Visualize data
@@ -166,6 +180,29 @@ def gmm_plot3d(mu, covariance, color, alpha=0.5, ax=None, scale=0.1, max_gaussia
 def gmm_plot(Mu, Sigma, dim=None, color=[1, 0, 0], alpha=0.5, linewidth=1, markersize=6,
              ax=None, empty=False, edgecolor=None, edgealpha=None, priors=None,
              border=False, nb=1, swap=True, center=True, zorder=20, scale=0.2):
+    """
+    This function displays the parameters of a Gaussian Mixture Model (GMM), either in 2D or 3D.
+
+    :param Mu: the mean point coordinate of the GMM
+    :param Sigma: the covariance matrix of the GMM
+    :param dim: the dimension of the GMM
+    :param color: the color of the ellipsoid
+    :param alpha: the transparency of the ellipsoid
+    :param linewidth: the width of the ellipsoid
+    :param markersize: the size of the marker
+    :param ax: the axis to plot the GMM
+    :param empty: whether to empty the axis
+    :param edgecolor: the color of the edge
+    :param edgealpha: the transparency of the edge
+    :param priors: the prior of the GMM
+    :param border: the border of the GMM
+    :param nb:
+    :param swap:
+    :param center:
+    :param zorder: the plotting order
+    :param scale: the scale of the ellipsoid
+    :return:
+    """
     Mu = np.array(Mu)
     Sigma = np.array(Sigma)
     if Mu.ndim == 1:
@@ -215,37 +252,3 @@ def gmm_plot(Mu, Sigma, dim=None, color=[1, 0, 0], alpha=0.5, linewidth=1, marke
         gmm_plot3d(Mu, Sigma, color, alpha, ax, scale)
     else:
         raise Exception('Dimension is less than 2, cannot plot')
-
-
-if __name__ == '__main__':
-    # from sklearn.mixture import GaussianMixture
-
-    means = np.array([[0.5, 0.0, 0.0],
-                      [0.0, 0.0, 0.0],
-                      [-0.5, -0.5, -0.5],
-                      [-0.8, 0.3, 0.4]])
-    # # covs = np.array([[0.25471843, 0.10747855, 0.17343172, 0.10100491],
-    # #                  [0.09279714, 0.1013973, 0.257998, 0.21407591],
-    # #                  [0.09945191, 0.17013928, 0.09957319, 0.09709307]]).T
-    covs = np.array([np.diag([0.01, 0.01, 0.03]),
-                     np.diag([0.08, 0.01, 0.01]),
-                     np.diag([0.01, 0.05, 0.01]),
-                     np.diag([0.03, 0.07, 0.01])])
-    # n_gaussians = means.shape[0]
-    # points = []
-    # for i in range(len(means)):
-    #     x = np.random.multivariate_normal(means[i], covs[i], 1000)
-    #     points.append(x)
-    # points = np.concatenate(points)
-    #
-    # # fit the gaussian model
-    # gmm = GaussianMixture(n_components=n_gaussians, covariance_type='full')
-    # gmm.fit(points)
-    #
-    # gmm_plot3d(means.T, covs.T, [0, 0, 0, 0])
-
-    # means = np.array([0.5, 0.0, 0.0])
-    # covs = np.diag([6, 12, 0.1])
-    # eigen_value, eigen_vector = np.linalg.eig(covs)
-    # radii = np.sqrt(eigen_value)
-    gmm_plot3d(means, covs)

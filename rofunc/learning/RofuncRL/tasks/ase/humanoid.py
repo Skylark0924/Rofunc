@@ -32,9 +32,9 @@ from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
-from rofunc.utils.file.path import get_rofunc_path
-from ..base.vec_task import VecTask
-from ..utils import torch_jit_utils as torch_utils
+from rofunc.utils.oslab.path import get_rofunc_path
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 
 class Humanoid(VecTask):

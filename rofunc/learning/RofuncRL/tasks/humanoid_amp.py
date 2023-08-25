@@ -32,9 +32,10 @@ from enum import Enum
 from gym import spaces
 from isaacgym import gymtorch
 
-from .amp.humanoid_amp_base import HumanoidAMPBase, dof_to_obs
-from .amp.utils.motion_lib import MotionLib
-from .utils.torch_jit_utils import *
+import rofunc as rf
+from rofunc.learning.RofuncRL.tasks.amp.humanoid_amp_base import HumanoidAMPBase, dof_to_obs
+from rofunc.learning.RofuncRL.tasks.amp.motion_lib import MotionLib
+from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
 
 NUM_AMP_OBS_PER_STEP = 13 + 52 + 28 + 12  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
 
@@ -63,8 +64,11 @@ class HumanoidAMPTask(HumanoidAMPBase):
                          virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         motion_file = cfg['env'].get('motion_file', "amp_humanoid_backflip.npy")
-        motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        "../../../../examples/data/amp/" + motion_file)
+        if rf.oslab.is_absl_path(motion_file):
+            motion_file_path = motion_file
+        else:
+            motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            "../../../../examples/data/amp/" + motion_file)
         self._load_motion(motion_file_path)
 
         self.num_amp_obs = self._num_amp_obs_steps * NUM_AMP_OBS_PER_STEP

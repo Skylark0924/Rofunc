@@ -1,18 +1,16 @@
-"""
- Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- """
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os.path
 
@@ -38,7 +36,7 @@ def show(args, object_name, asset_root=None):
 
     # Load CURI asset and set the env
     if asset_root is None:
-        from rofunc.utils.file import get_rofunc_path
+        from rofunc.utils.oslab import get_rofunc_path
         asset_root = os.path.join(get_rofunc_path(), "simulator/assets")
     if object_name == "Cabinet":
         asset_file = "urdf/sektion_cabinet_model/urdf/sektion_cabinet.urdf"

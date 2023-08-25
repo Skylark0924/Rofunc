@@ -32,9 +32,9 @@ import os
 from isaacgym import gymapi
 from isaacgym import gymtorch
 
-from rofunc.utils.file.path import get_rofunc_path
-from ..base.vec_task import VecTask
-from ..utils.torch_jit_utils import *
+from rofunc.utils.oslab.path import get_rofunc_path
+from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
 
 DOF_BODY_IDS = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]
 DOF_OFFSETS = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]

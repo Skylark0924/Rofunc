@@ -16,7 +16,10 @@ Trainer:
   start_learning_steps: 0             # The number of steps to take before starting network updating.
   seed: 42                            # The random seed.
   rollouts: 16                        # The number of rollouts before updating.
+  eval_flag: False                     # If true, run evaluation.
+  eval_freq: 2500                     # The frequency of evaluation. (timesteps)
   eval_steps: 1000                    # The number of steps to run for evaluation.
+  use_eval_thread: True               # If true, use a separate thread for evaluation.
   inference_steps: 1000               # The number of steps to run for inference.
   max_episode_steps: 200              # The maximum number of steps per episode.
 
@@ -87,7 +90,7 @@ Model:
     lstm_use_prev_reward: false
     max_seq_len: 20
 
-  state_encoder:
+  state_encoder:  #  Delete this key means no encoder
     encoder_type: "cnn"  # ["resnet", "vit", "cnn"]
     image_size: 224
     use_pretrained: False

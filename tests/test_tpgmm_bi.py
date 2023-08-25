@@ -1,8 +1,8 @@
 import numpy as np
 
 import rofunc as rf
-from rofunc.utils.data_generator.bezier import multi_bezier_demos
-from rofunc.utils.data_generator.circle import draw_arc
+from rofunc.utils.datalab.data_generator.bezier import multi_bezier_demos
+from rofunc.utils.datalab.data_generator import draw_arc
 
 
 def test_bi_spatial_data():

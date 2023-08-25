@@ -1,6 +1,8 @@
 Reinforcement learning class (RofuncRL)
 =================================
 
+.. figure:: ../../../img/RofuncRL.png
+       :alt:
 
 Online reinforcement learning
 -----------------------------

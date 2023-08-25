@@ -1,21 +1,20 @@
-"""
- Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- """
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import copy
 import datetime
+import multiprocessing
 import os
 import random
 from typing import Union, Optional
@@ -32,8 +31,8 @@ from torch.utils.tensorboard import SummaryWriter
 import rofunc as rf
 from rofunc.learning.RofuncRL.processors.normalizers import Normalization
 from rofunc.learning.utils.env_wrappers import wrap_env
-from rofunc.utils.file.internet import reserve_sock_addr
 from rofunc.utils.logger.beauty_logger import BeautyLogger
+from rofunc.utils.oslab.internet import reserve_sock_addr
 
 
 class BaseTrainer:
@@ -58,7 +57,7 @@ class BaseTrainer:
         else:
             exp_name = "RofuncRL_{}_{}_{}_inference".format(self.__class__.__name__, env_name, exp_name)
         self.exp_dir = os.path.join(directory, exp_name)
-        rf.utils.create_dir(self.exp_dir, local_verbose=True)
+        rf.oslab.create_dir(self.exp_dir, local_verbose=True)
 
         '''Rofunc logger'''
         self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.Trainer.rofunc_logger_kwargs.verbose)
@@ -94,6 +93,8 @@ class BaseTrainer:
         self.eval_flag = self.cfg.Trainer.eval_flag if hasattr(self.cfg.Trainer, "eval_flag") else False
         self.eval_freq = self.cfg.Trainer.eval_freq if hasattr(self.cfg.Trainer, "eval_freq") else 0
         self.eval_steps = self.cfg.Trainer.eval_steps if hasattr(self.cfg.Trainer, "eval_steps") else 0
+        self.use_eval_thread = self.cfg.Trainer.use_eval_thread if hasattr(self.cfg.Trainer,
+                                                                           "use_eval_thread") else False
         assert self.eval_steps % self.max_episode_steps == 0, \
             f"eval_steps ({self.eval_steps}) must be a multiple of max_episode_steps ({self.max_episode_steps})."
         self.inference_steps = self.cfg.Trainer.inference_steps if hasattr(self.cfg.Trainer, "inference_steps") else 0
@@ -227,7 +228,13 @@ class BaseTrainer:
         if self.eval_flag:
             if not (self._step + 1) % self.eval_freq and (self._step + 1) > self.start_learning_steps:
                 self.rofunc_logger.info(f'Evaluate at step {self._step + 1}.', local_verbose=False)
-                self.eval()
+                if self.use_eval_thread:  # Use a separate thread to run evaluation
+                    self.rofunc_logger.info('Start evaluation thread.', local_verbose=False)
+                    eval_thread = multiprocessing.Process(target=self.eval)
+                    eval_thread.start()
+                    eval_thread.join()
+                else:
+                    self.eval()
 
     def write_tensorboard(self):
         for k, v in self.agent.tracking_data.items():

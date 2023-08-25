@@ -1,18 +1,16 @@
-"""
- Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- """
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -156,8 +154,8 @@ def generate_plot_2d(xi, prod, demos_x, demo_idx):
 
     plt.title('Trajectory reproduction')
     rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold', alpha=0.5)
-    plt.plot(xi[:, 0], xi[:, 1], color='r', lw=2, label='generated line')
     plt.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], 'k--', lw=2, label='demo line')
+    plt.plot(xi[:, 0], xi[:, 1], color='r', lw=2, label='generated line')
     plt.axis('equal')
     plt.legend()
     return fig
@@ -168,10 +166,10 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, pl
     ax = fig.add_subplot(111, projection='3d', fc='white')
 
     ax.set_title('Trajectory reproduction')
-    ax.plot(xi[:, 0], xi[:, 1], xi[:, 2], color='r', lw=2, label='generated line')
     if plot_gmm:
         rf.visualab.gmm_plot(prod.mu, prod.sigma, dim=[0, 1, 2], color='gold', scale=0.01, ax=ax)
     ax.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2], 'k--', lw=2, label='demo line')
+    ax.plot(xi[:, 0], xi[:, 1], xi[:, 2], color='r', lw=2, label='generated line')
     rf.visualab.set_axis(ax, data=[demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2]])
     plt.legend()
 
@@ -179,22 +177,22 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, pl
         t = np.arange(len(xi))
         plt.figure()
         plt.subplot(2, 2, 1)
-        plt.plot(t, xi[:, 3], color='r', lw=2, label='generated line')
         plt.plot(np.arange(len(demos_x[demo_idx][:, 3])), demos_x[demo_idx][:, 3], 'k--', lw=2, label='demo line')
+        plt.plot(t, xi[:, 3], color='r', lw=2, label='generated line')
         plt.title('w-t')
 
         plt.subplot(2, 2, 2)
-        plt.plot(t, xi[:, 4], color='r', lw=2, label='generated line')
         plt.plot(np.arange(len(demos_x[demo_idx][:, 4])), demos_x[demo_idx][:, 4], 'k--', lw=2, label='demo line')
+        plt.plot(t, xi[:, 4], color='r', lw=2, label='generated line')
         plt.title('x-t')
 
         plt.subplot(2, 2, 3)
-        plt.plot(t, xi[:, 5], color='r', lw=2, label='generated line')
         plt.plot(np.arange(len(demos_x[demo_idx][:, 5])), demos_x[demo_idx][:, 5], 'k--', lw=2, label='demo line')
+        plt.plot(t, xi[:, 5], color='r', lw=2, label='generated line')
         plt.title('y-t')
 
         plt.subplot(2, 2, 4)
-        plt.plot(t, xi[:, 6], color='r', lw=2, label='generated line')
         plt.plot(np.arange(len(demos_x[demo_idx][:, 6])), demos_x[demo_idx][:, 6], 'k--', lw=2, label='demo line')
+        plt.plot(t, xi[:, 6], color='r', lw=2, label='generated line')
         plt.title('z-t')
     return fig
