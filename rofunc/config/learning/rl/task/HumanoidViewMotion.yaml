@@ -20,7 +20,7 @@ env:
   numAMPObsSteps: 10
 
   localRootObs: False
-  keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot", "sword", "shield"]
+  keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot"]
   contactBodies: ["right_foot", "left_foot"]
   terminationHeight: 0.15
   enableEarlyTermination: True
@@ -29,7 +29,7 @@ env:
   motion_file: None
 
   asset:
-    assetFileName: "mjcf/amp_humanoid_sword_shield.xml"
+    assetFileName: "mjcf/amp_humanoid.xml"
 
   plane:
     staticFriction: 1.0
@@ -39,9 +39,9 @@ env:
 sim:
   dt: 0.0166 # 1/60 s
   substeps: 2
-  up_axis: "y"
+  up_axis: "z"
   use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
-  gravity: [ 0.0, -9.81, 0.0 ]
+  gravity: [ 0.0, 0.0, -9.81 ]
   physx:
     num_threads: 4
     solver_type: 1  # 0: pgs, 1: tgs

@@ -1,0 +1,28 @@
+{
+    "source_motion": "/home/ubuntu/Data/fbx/armchair003.npy",
+    "target_motion_path": "/home/ubuntu/Data/fbx/armchair003_amp.npy",
+    "source_tpose": "/home/ubuntu/Data/fbx/armchair003_tpose.npy",
+    "target_tpose": "data/amp_humanoid_tpose.npy",
+    "joint_mapping": {
+         "pelvis": "pelvis",
+         "left_hip": "left_thigh",
+         "left_knee": "left_shin",
+         "left_foot": "left_foot",
+         "right_hip": "right_thigh",
+         "right_knee": "right_shin",
+         "right_foot": "right_foot",
+         "spine1": "torso",
+         "head": "head",
+         "left_shoulder": "left_upper_arm",
+         "left_elbow": "left_lower_arm",
+         "left_wrist": "left_hand",
+         "right_shoulder": "right_upper_arm",
+         "right_elbow": "right_lower_arm",
+         "right_wrist": "right_hand"
+    },
+    "rotation": [0.707, 0, 0, 0.707],
+    "scale": 0.01,
+    "root_height_offset": 0.0,
+    "trim_frame_beg": 0,
+    "trim_frame_end": -1
+}

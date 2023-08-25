@@ -61,6 +61,7 @@ Agent:
 Model:
   use_init: True
   use_action_clip: False               # If true, clip actions to the action space range.
+  use_action_out_tanh: True            # If true, apply tanh to the output of the actor.
   action_clip: 1.0                     # clipping coefficient for the norm of the actions
   action_scale: 1.0                    # scaling action range from [-1, 1] after tanh to [-action_scale, action_scale]
   use_log_std_clip: True               # If true, clip log standard deviations to the range [-20, 2].
