@@ -530,6 +530,15 @@ class Humanoid(VecTask):
         cam_target = gymapi.Vec3(self._cam_prev_char_pos[0],
                                  self._cam_prev_char_pos[1],
                                  1.0)
+        if self.cfg['sim']['up_axis'] == 'y':
+            cam_pos = gymapi.Vec3(self._cam_prev_char_pos[0],
+                                  1.0,
+                                  self._cam_prev_char_pos[1] - 3.0,
+                                  )
+            cam_target = gymapi.Vec3(self._cam_prev_char_pos[0],
+                                     1.0,
+                                     self._cam_prev_char_pos[1],
+                                     )
         self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
         return
 
@@ -543,8 +552,12 @@ class Humanoid(VecTask):
 
         new_cam_target = gymapi.Vec3(char_root_pos[0], char_root_pos[1], 1.0)
         new_cam_pos = gymapi.Vec3(char_root_pos[0] + cam_delta[0],
-                                  char_root_pos[1] + cam_delta[1],
-                                  cam_pos[2])
+                                  char_root_pos[1] + cam_delta[1], cam_pos[2])
+
+        if self.cfg['sim']['up_axis'] == 'y':
+            new_cam_target = gymapi.Vec3(char_root_pos[0], 1.0, char_root_pos[1])
+            new_cam_pos = gymapi.Vec3(char_root_pos[0] + cam_delta[0],
+                                      cam_pos[2], char_root_pos[1] + cam_delta[1])
 
         self.gym.viewer_camera_look_at(self.viewer, None, new_cam_pos, new_cam_target)
 

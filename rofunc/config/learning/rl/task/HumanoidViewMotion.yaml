@@ -8,7 +8,7 @@ env:
   numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 5
   episodeLength: 300
-  cameraFollow: True # if the camera follows humanoid or not
+  cameraFollow: False # if the camera follows humanoid or not
   isFlagrun: False
   enableDebugVis: False
 
@@ -39,9 +39,9 @@ env:
 sim:
   dt: 0.0166 # 1/60 s
   substeps: 2
-  up_axis: "z"
+  up_axis: "y"
   use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
-  gravity: [ 0.0, 0.0, -9.81 ]
+  gravity: [ 0.0, -9.81, 0.0 ]
   physx:
     num_threads: 4
     solver_type: 1  # 0: pgs, 1: tgs
