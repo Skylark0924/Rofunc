@@ -197,12 +197,15 @@ def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=False):
     return motion
 
 
-def motion_retargeting(retarget_cfg, source_motion, visualize=False):
-    # load and visualize t-pose files
-    source_tpose = SkeletonState.from_file(retarget_cfg["source_tpose"])
+def get_tpose(motion, visualize=False):
+    tpose = SkeletonState.from_rotation_and_root_translation(motion.skeleton_tree, motion.rotation[0],
+                                                             motion.root_translation[0], is_local=True)
     if visualize:
-        plot_skeleton_state(source_tpose)
+        plot_skeleton_state(tpose)
+    return tpose
 
+
+def motion_retargeting(retarget_cfg, source_motion, source_tpose, visualize=False):
     target_tpose = SkeletonState.from_file(retarget_cfg["target_tpose"])
     if visualize:
         plot_skeleton_state(target_tpose)
@@ -277,8 +280,6 @@ def amp_npy_from_fbx(fbx_file):
     """
 
     config = {
-        "target_motion_path": "/home/ubuntu/Data/fbx/armchair003_amp.npy",
-        "source_tpose": "/home/ubuntu/Data/fbx/armchair003_tpose.npy",
         "target_tpose": "data/amp_humanoid_tpose.npy",
         "joint_mapping": {
             "pelvis": "pelvis",
@@ -299,14 +300,15 @@ def amp_npy_from_fbx(fbx_file):
         },
         "rotation": [0.707, 0, 0, 0.707],  # xyzw
         "scale": 0.01,
-        "root_height_offset": 0.0,
+        "root_height_offset": -0.2,
         "trim_frame_beg": 0,
         "trim_frame_end": -1
     }
 
-    motion = motion_from_fbx(fbx_file, root_joint="pelvis", fps=60, visualize=False)
+    source_motion = motion_from_fbx(fbx_file, root_joint="pelvis", fps=60, visualize=False)
     config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, motion, visualize=False)
+    source_tpose = get_tpose(source_motion, visualize=False)
+    motion_retargeting(config, source_motion, source_tpose, visualize=False)
 
 
 if __name__ == '__main__':
