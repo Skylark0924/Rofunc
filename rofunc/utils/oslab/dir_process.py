@@ -58,10 +58,10 @@ def list_absl_path(dir, recursive=False, prefix=None, suffix=None):
     """
     if recursive:
         return [os.path.join(root, file) for root, dirs, files in os.walk(dir) for file in files if
-                suffix is None or file.endswith(suffix) and prefix is None or file.startswith(prefix)]
+                (suffix is None or file.endswith(suffix)) and (prefix is None or file.startswith(prefix))]
     else:
         return [os.path.join(dir, file) for file in os.listdir(dir) if
-                suffix is None or file.endswith(suffix) and prefix is None or file.startswith(prefix)]
+                (suffix is None or file.endswith(suffix)) and (prefix is None or file.startswith(prefix))]
 
 
 def delete_files(dir, file_list_to_delete, recursive=False):
