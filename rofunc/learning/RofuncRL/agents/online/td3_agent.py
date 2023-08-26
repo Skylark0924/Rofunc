@@ -141,13 +141,6 @@ class TD3Agent(BaseAgent):
         self.checkpoint_modules["actor_optimizer"] = self.actor_optimizer
         self.checkpoint_modules["critic_optimizer"] = self.critic_optimizer
 
-        # set up preprocessors
-        if self._state_preprocessor:
-            self._state_preprocessor = self._state_preprocessor(**self._state_preprocessor_kwargs)
-            self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
-        else:
-            self._state_preprocessor = empty_preprocessor
-
         # freeze target networks with respect to optimizers (update via .update_parameters())
         self.target_actor.freeze_parameters(True)
         self.target_critic_1.freeze_parameters(True)
@@ -156,6 +149,9 @@ class TD3Agent(BaseAgent):
         self.target_actor.update_parameters(self.actor, polyak=1)
         self.target_critic_1.update_parameters(self.critic_1, polyak=1)
         self.target_critic_2.update_parameters(self.critic_2, polyak=1)
+        
+        # set up preprocessors
+        super()._set_up()
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:

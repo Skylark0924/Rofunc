@@ -26,9 +26,14 @@ class RunningMeanStd:
         self.std = torch.sqrt(self.S).to(device)
 
     def train(self, x):
-        if len(x.shape) == len(self.shape) + 1:  # Batch data
-            batch_size = x.shape[0]
-            x = torch.sum(x, dim=0) / batch_size
+        if isinstance(self.shape, int):
+            if len(x.shape) == 2:
+                batch_size = x.shape[0]
+                x = torch.sum(x, dim=0) / batch_size
+        else:
+            if len(x.shape) == len(self.shape) + 1:
+                batch_size = x.shape[0]
+                x = torch.sum(x, dim=0) / batch_size
 
         self.n += 1
         if self.n == 1:

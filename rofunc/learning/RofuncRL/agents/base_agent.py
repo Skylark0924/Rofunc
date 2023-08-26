@@ -73,6 +73,10 @@ class BaseAgent:
         '''Set up'''
         self._lr_scheduler = None
         self._lr_scheduler_kwargs = {}
+        self._state_preprocessor = None
+        self._state_preprocessor_kwargs = {}
+        self._value_preprocessor = None
+        self._value_preprocessor_kwargs = {}
 
         '''Define state encoder'''
         self.se = encoder_map[cfg.Model.state_encoder.encoder_type](cfg.Model).to(self.device) \
@@ -80,33 +84,15 @@ class BaseAgent:
 
     def _set_up(self):
         """
-        Set up optimizer, learning rate scheduler and state/value preprocessors
+        Set up state/value preprocessors
         """
-        assert hasattr(self, "policy"), "Policy is not defined."
-        assert hasattr(self, "value"), "Value is not defined."
-
-        # Set up optimizer and learning rate scheduler
-        if self.policy is self.value:
-            self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a)
-            if self._lr_scheduler is not None:
-                self.scheduler = self._lr_scheduler(self.optimizer, **self._lr_scheduler_kwargs)
-            self.checkpoint_modules["optimizer"] = self.optimizer
-        else:
-            self.optimizer_policy = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a, eps=self._adam_eps)
-            self.optimizer_value = torch.optim.Adam(self.value.parameters(), lr=self._lr_c, eps=self._adam_eps)
-            if self._lr_scheduler is not None:
-                self.scheduler_policy = self._lr_scheduler(self.optimizer_policy, **self._lr_scheduler_kwargs)
-                self.scheduler_value = self._lr_scheduler(self.optimizer_value, **self._lr_scheduler_kwargs)
-            self.checkpoint_modules["optimizer_policy"] = self.optimizer_policy
-            self.checkpoint_modules["optimizer_value"] = self.optimizer_value
-
         # set up preprocessors
-        if self._state_preprocessor:
+        if self._state_preprocessor is not None:
             self._state_preprocessor = self._state_preprocessor(**self._state_preprocessor_kwargs)
             self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
         else:
             self._state_preprocessor = empty_preprocessor
-        if self._value_preprocessor:
+        if self._value_preprocessor is not None:
             self._value_preprocessor = self._value_preprocessor(**self._value_preprocessor_kwargs)
             self.checkpoint_modules["value_preprocessor"] = self._value_preprocessor
         else:
