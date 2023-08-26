@@ -138,16 +138,7 @@ class A2CAgent(BaseAgent):
             self.checkpoint_modules["optimizer_value"] = self.optimizer_value
 
         # set up preprocessors
-        if self._state_preprocessor:
-            self._state_preprocessor = self._state_preprocessor(**self._state_preprocessor_kwargs)
-            self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
-        else:
-            self._state_preprocessor = empty_preprocessor
-        if self._value_preprocessor:
-            self._value_preprocessor = self._value_preprocessor(**self._value_preprocessor_kwargs)
-            self.checkpoint_modules["value_preprocessor"] = self._value_preprocessor
-        else:
-            self._value_preprocessor = empty_preprocessor
+        super()._set_up()
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:

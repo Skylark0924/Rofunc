@@ -28,7 +28,6 @@ from rofunc.learning.RofuncRL.models.actor_models import ActorSAC
 from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.normalizers import Normalization
-from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
@@ -109,10 +108,10 @@ class SACAgent(BaseAgent):
         self._entropy_learning_rate = self.cfg.Agent.entropy_learning_rate
         self._entropy_coefficient = self.cfg.Agent.initial_entropy_value
         self._target_entropy = self.cfg.Agent.target_entropy
-        # self._state_preprocessor = None  # TODO: Check
-        self._state_preprocessor = Normalization
-        self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
-                                                                        {"shape": observation_space, "device": device})
+        self._state_preprocessor = None  # TODO: Check
+        # self._state_preprocessor = Normalization
+        # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
+        #                                                                 {"shape": observation_space, "device": device})
 
         '''Misc variables'''
         self._current_log_prob = None
@@ -154,19 +153,15 @@ class SACAgent(BaseAgent):
 
             self.checkpoint_modules["entropy_optimizer"] = self.entropy_optimizer
 
-        # set up preprocessors
-        if self._state_preprocessor:
-            self._state_preprocessor = self._state_preprocessor(**self._state_preprocessor_kwargs)
-            self.checkpoint_modules["state_preprocessor"] = self._state_preprocessor
-        else:
-            self._state_preprocessor = empty_preprocessor
-
         # freeze target networks with respect to optimizers (update via .update_parameters())
         self.target_critic_1.freeze_parameters(True)
         self.target_critic_2.freeze_parameters(True)
         # update target networks (hard update)
         self.target_critic_1.update_parameters(self.critic_1, polyak=1)
         self.target_critic_2.update_parameters(self.critic_2, polyak=1)
+
+        # set up preprocessors
+        super()._set_up()
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:

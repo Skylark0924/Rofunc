@@ -27,6 +27,7 @@ from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.RofuncRL.utils.memory import Memory
+from rofunc.learning.RofuncRL.processors.normalizers import Normalization
 
 
 class PPOAgent(BaseAgent):
@@ -109,10 +110,14 @@ class PPOAgent(BaseAgent):
         self._clip_predicted_values = self.cfg.Agent.clip_predicted_values
         self._kl_threshold = self.cfg.Agent.kl_threshold
         self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
-        self._state_preprocessor = None  # TODO: Check
+        # self._state_preprocessor = None  # TODO: Check
         # self._state_preprocessor = RunningStandardScaler
         # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
         #                                                                 {"size": observation_space, "device": device})
+        # self._state_preprocessor = Normalization
+        # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
+        #                                                                 {"shape": observation_space, "device": device})
+
         self._value_preprocessor = RunningStandardScaler
         self._value_preprocessor_kwargs = self.cfg.get("Agent", {}).get("value_preprocessor_kwargs",
                                                                         {"size": 1, "device": device})
@@ -122,6 +127,31 @@ class PPOAgent(BaseAgent):
         self._current_next_states = None
 
         self._set_up()
+
+    def _set_up(self):
+        """
+        Set up optimizer, learning rate scheduler and state/value preprocessors
+        """
+        assert hasattr(self, "policy"), "Policy is not defined."
+        assert hasattr(self, "value"), "Value is not defined."
+
+        # Set up optimizer and learning rate scheduler
+        if self.policy is self.value:
+            self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a)
+            if self._lr_scheduler is not None:
+                self.scheduler = self._lr_scheduler(self.optimizer, **self._lr_scheduler_kwargs)
+            self.checkpoint_modules["optimizer"] = self.optimizer
+        else:
+            self.optimizer_policy = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a, eps=self._adam_eps)
+            self.optimizer_value = torch.optim.Adam(self.value.parameters(), lr=self._lr_c, eps=self._adam_eps)
+            if self._lr_scheduler is not None:
+                self.scheduler_policy = self._lr_scheduler(self.optimizer_policy, **self._lr_scheduler_kwargs)
+                self.scheduler_value = self._lr_scheduler(self.optimizer_value, **self._lr_scheduler_kwargs)
+            self.checkpoint_modules["optimizer_policy"] = self.optimizer_policy
+            self.checkpoint_modules["optimizer_value"] = self.optimizer_value
+
+        # set up preprocessors
+        super()._set_up()
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:

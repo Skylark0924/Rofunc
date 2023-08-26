@@ -14,6 +14,7 @@
 
 import copy
 import datetime
+import json
 import multiprocessing
 import os
 import random
@@ -61,7 +62,7 @@ class BaseTrainer:
 
         '''Rofunc logger'''
         self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.Trainer.rofunc_logger_kwargs.verbose)
-        self.rofunc_logger.info(f"Configurations:\n{OmegaConf.to_yaml(self.cfg)}")
+        self.rofunc_logger.info(f"Trainer configurations:\n{OmegaConf.to_yaml(self.cfg)}")
 
         '''TensorBoard'''
         # main entry to log data for consumption and visualization by TensorBoard
@@ -90,9 +91,12 @@ class BaseTrainer:
         self._update_times = 0
         self.start_time = None
 
+        '''Evaluation and inference configurations'''
         self.eval_flag = self.cfg.Trainer.eval_flag if hasattr(self.cfg.Trainer, "eval_flag") else False
         self.eval_freq = self.cfg.Trainer.eval_freq if hasattr(self.cfg.Trainer, "eval_freq") else 0
         self.eval_steps = self.cfg.Trainer.eval_steps if hasattr(self.cfg.Trainer, "eval_steps") else 0
+        self.eval_env_seed = self.cfg.Trainer.eval_env_seed if hasattr(self.cfg.Trainer,
+                                                                       "eval_env_seed") else random.randint(0, 10000)
         self.use_eval_thread = self.cfg.Trainer.use_eval_thread if hasattr(self.cfg.Trainer,
                                                                            "use_eval_thread") else False
         assert self.eval_steps % self.max_episode_steps == 0, \
@@ -104,11 +108,12 @@ class BaseTrainer:
         '''Environment'''
         env.device = self.device
         self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.Trainer.seed)
-        self.eval_env = wrap_env(env, logger=self.rofunc_logger, seed=random.randint(0, 10000))
+        self.eval_env = wrap_env(env, logger=self.rofunc_logger, seed=self.eval_env_seed) if self.eval_flag else None
         self.rofunc_logger.info(f"Environment:\n  "
                                 f"  action_space: {self.env.action_space.shape}\n  "
                                 f"  observation_space: {self.env.observation_space.shape}\n  "
                                 f"  num_envs: {self.env.num_envs}")
+        self.rofunc_logger.info(f"Task configurations:\n{self.env._env.cfg}")
 
         '''Normalization'''
         self.state_norm = Normalization(shape=self.env.observation_space, device=device)
