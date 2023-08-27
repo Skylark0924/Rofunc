@@ -32,6 +32,12 @@ from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class ODTransAgent(BaseAgent):
+    """
+    Online Decision Transformer (ODTrans) Agent \n
+    "Online Decision Transformer". Qinqing Zheng. et al. https://arxiv.org/abs/2202.05607 \n
+    Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ODTrans.html
+    """
+
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -41,15 +47,12 @@ class ODTransAgent(BaseAgent):
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
-        Online Decision Transformer (ODTrans) Agent
-        "Online Decision Transformer". Qinqing Zheng. et al. https://arxiv.org/abs/2202.05607
-        Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ODTrans.html
-        :param cfg:
-        :param observation_space:
-        :param action_space:
-        :param memory:
-        :param device:
-        :param experiment_dir:
-        :param rofunc_logger:
+        :param cfg: Configurations
+        :param observation_space: Observation space
+        :param action_space: Action space
+        :param memory: Memory for storing transitions
+        :param device: Device on which the torch tensor is allocated
+        :param experiment_dir: Directory for storing experiment data
+        :param rofunc_logger: Rofunc logger
         """
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)

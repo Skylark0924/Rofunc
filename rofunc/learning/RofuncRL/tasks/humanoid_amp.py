@@ -102,14 +102,14 @@ class HumanoidAMPTask(HumanoidAMPBase):
     def amp_observation_space(self):
         return self._amp_obs_space
 
-    def fetch_amp_obs_demo(self, num_samples):
-        return self.task.fetch_amp_obs_demo(num_samples)
+    # def fetch_amp_obs_demo(self, num_samples):
+    #     return self.task.fetch_amp_obs_demo(num_samples)
 
     def fetch_amp_obs_demo(self, num_samples):
         dt = self.dt
         motion_ids = self._motion_lib.sample_motions(num_samples)
 
-        if (self._amp_obs_demo_buf is None):
+        if self._amp_obs_demo_buf is None:
             self._build_amp_obs_demo_buf(num_samples)
         else:
             assert (self._amp_obs_demo_buf.shape[0] == num_samples)
@@ -150,15 +150,15 @@ class HumanoidAMPTask(HumanoidAMPBase):
         return
 
     def _reset_actors(self, env_ids):
-        if (self._state_init == HumanoidAMPTask.StateInit.Default):
+        if self._state_init == HumanoidAMPTask.StateInit.Default:
             self._reset_default(env_ids)
-        elif (self._state_init == HumanoidAMPTask.StateInit.Start
-              or self._state_init == HumanoidAMPTask.StateInit.Random):
+        elif self._state_init == HumanoidAMPTask.StateInit.Start \
+              or self._state_init == HumanoidAMPTask.StateInit.Random:
             self._reset_ref_state_init(env_ids)
-        elif (self._state_init == HumanoidAMPTask.StateInit.Hybrid):
+        elif self._state_init == HumanoidAMPTask.StateInit.Hybrid:
             self._reset_hybrid_state_init(env_ids)
         else:
-            assert (False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert False, "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
 
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
@@ -184,13 +184,13 @@ class HumanoidAMPTask(HumanoidAMPBase):
         num_envs = env_ids.shape[0]
         motion_ids = self._motion_lib.sample_motions(num_envs)
 
-        if (self._state_init == HumanoidAMPTask.StateInit.Random
-                or self._state_init == HumanoidAMPTask.StateInit.Hybrid):
+        if self._state_init == HumanoidAMPTask.StateInit.Random \
+                or self._state_init == HumanoidAMPTask.StateInit.Hybrid:
             motion_times = self._motion_lib.sample_time(motion_ids)
-        elif (self._state_init == HumanoidAMPTask.StateInit.Start):
+        elif self._state_init == HumanoidAMPTask.StateInit.Start:
             motion_times = np.zeros(num_envs)
         else:
-            assert (False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
+            assert False, "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
 
         root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
             = self._motion_lib.get_motion_state(motion_ids, motion_times)
@@ -214,11 +214,11 @@ class HumanoidAMPTask(HumanoidAMPBase):
         ref_init_mask = torch.bernoulli(ref_probs) == 1.0
 
         ref_reset_ids = env_ids[ref_init_mask]
-        if (len(ref_reset_ids) > 0):
+        if len(ref_reset_ids) > 0:
             self._reset_ref_state_init(ref_reset_ids)
 
         default_reset_ids = env_ids[torch.logical_not(ref_init_mask)]
-        if (len(default_reset_ids) > 0):
+        if len(default_reset_ids) > 0:
             self._reset_default(default_reset_ids)
 
         return
@@ -226,10 +226,10 @@ class HumanoidAMPTask(HumanoidAMPBase):
     def _init_amp_obs(self, env_ids):
         self._compute_amp_observations(env_ids)
 
-        if (len(self._reset_default_env_ids) > 0):
+        if len(self._reset_default_env_ids) > 0:
             self._init_amp_obs_default(self._reset_default_env_ids)
 
-        if (len(self._reset_ref_env_ids) > 0):
+        if len(self._reset_ref_env_ids) > 0:
             self._init_amp_obs_ref(self._reset_ref_env_ids, self._reset_ref_motion_ids,
                                    self._reset_ref_motion_times)
         return
@@ -273,7 +273,7 @@ class HumanoidAMPTask(HumanoidAMPBase):
         return
 
     def _update_hist_amp_obs(self, env_ids=None):
-        if (env_ids is None):
+        if env_ids is None:
             for i in reversed(range(self._amp_obs_buf.shape[1] - 1)):
                 self._amp_obs_buf[:, i + 1] = self._amp_obs_buf[:, i]
         else:
@@ -283,7 +283,7 @@ class HumanoidAMPTask(HumanoidAMPBase):
 
     def _compute_amp_observations(self, env_ids=None):
         key_body_pos = self._rigid_body_pos[:, self._key_body_ids, :]
-        if (env_ids is None):
+        if env_ids is None:
             self._curr_amp_obs_buf[:] = build_amp_observations(self._root_states, self._dof_pos, self._dof_vel,
                                                                key_body_pos, self._local_root_obs)
         else:
@@ -308,7 +308,7 @@ def build_amp_observations(root_states, dof_pos, dof_vel, key_body_pos, local_ro
     root_h = root_pos[:, 2:3]
     heading_rot = calc_heading_quat_inv(root_rot)
 
-    if (local_root_obs):
+    if local_root_obs:
         root_rot_obs = quat_mul(heading_rot, root_rot)
     else:
         root_rot_obs = root_rot

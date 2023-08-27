@@ -29,6 +29,10 @@ from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class BaseAgent:
+    """
+    Base class of Rofunc RL Agents.
+    """
+
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -39,10 +43,9 @@ class BaseAgent:
                  rofunc_logger: Optional[rf.logger.BeautyLogger] = None
                  ):
         """
-        Base class of Rofunc RL Agents.
-        :param cfg: Custom configuration
-        :param observation_space: Observation/state space or shape
-        :param action_space: Action space or shape
+        :param cfg: Configurations
+        :param observation_space: Observation space
+        :param action_space: Action space
         :param memory: Memory for storing transitions
         :param device: Device on which the torch tensor is allocated
         """
