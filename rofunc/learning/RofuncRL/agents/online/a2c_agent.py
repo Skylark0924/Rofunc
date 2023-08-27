@@ -32,6 +32,12 @@ from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class A2CAgent(BaseAgent):
+    """
+    Advantage Actor Critic (A2C) agent \n
+    "Asynchronous Methods for Deep Reinforcement Learning". Mnih et al. 2016. https://arxiv.org/abs/1602.01783 \n
+    Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/A2C.html
+    """
+
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -41,15 +47,12 @@ class A2CAgent(BaseAgent):
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
-        Advantage Actor Critic (A2C) agent
-        "Asynchronous Methods for Deep Reinforcement Learning". Mnih et al. 2016. https://arxiv.org/abs/1602.01783
-        Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/A2C.html
-        :param cfg: Custom configuration
-        :param observation_space: Observation/state space or shape
-        :param action_space: Action space or shape
+        :param cfg: Configurations
+        :param observation_space: Observation space
+        :param action_space: Action space
         :param memory: Memory for storing transitions
         :param device: Device on which the torch tensor is allocated
-        :param experiment_dir: Directory where experiment outputs are saved
+        :param experiment_dir: Directory for storing experiment data
         :param rofunc_logger: Rofunc logger
         """
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)

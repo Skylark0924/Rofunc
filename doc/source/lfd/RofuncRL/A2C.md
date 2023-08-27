@@ -1,5 +1,6 @@
 # RofuncRL A2C (Advantage Actor-Critic)
 
+**Paper:** "Asynchronous Methods for Deep Reinforcement Learning". Mnih et al. 2016. https://arxiv.org/abs/1602.01783
 
 ## Algorithm 
 

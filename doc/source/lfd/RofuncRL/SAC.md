@@ -1,5 +1,7 @@
 # RofuncRL SAC (Soft Actor-Critic)
 
+**Paper:** "Soft Actor-Critic Algorithms and Applications". Haarnoja et al. 2018. https://arxiv.org/abs/1812.05905
+
 
 ## Algorithm 
 

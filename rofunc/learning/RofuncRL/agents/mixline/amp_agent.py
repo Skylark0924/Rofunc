@@ -32,6 +32,12 @@ from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class AMPAgent(BaseAgent):
+    """
+    Adversarial Motion Priors (AMP) agent \n
+    “AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control”. Peng et al. 2021. https://arxiv.org/abs/2104.02180 \n
+    Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html
+    """
+
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
@@ -45,13 +51,9 @@ class AMPAgent(BaseAgent):
                  replay_buffer: Optional[Union[Memory, Tuple[Memory]]] = None,
                  collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None):
         """
-        Adversarial Motion Priors (AMP) agent
-        “AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control”. Peng et al. 2021.
-            https://arxiv.org/abs/2104.02180
-        Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html
-        :param cfg: Custom configuration
-        :param observation_space: Observation/state space or shape
-        :param action_space: Action space or shape
+        :param cfg: Configuration
+        :param observation_space: Observation space
+        :param action_space: Action space
         :param memory: Memory for storing transitions
         :param device: Device on which the torch tensor is allocated
         :param experiment_dir: Directory where experiment outputs are saved
