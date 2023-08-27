@@ -12,27 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
-import torch
-import torch.nn as nn
 import collections
+from typing import Union, Tuple, Optional
+
 import gym
 import gymnasium
-import numpy as np
-import os
 import torch
 from omegaconf import DictConfig
-from typing import Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
-from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
-from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
-from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
-from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
-from rofunc.learning.RofuncRL.utils.device_utils import to_device
-from rofunc.learning.RofuncRL.utils.memory import Memory
 from rofunc.learning.RofuncRL.models.actor_models import ActorDTrans
+from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class DTransAgent(BaseAgent):
@@ -62,140 +53,102 @@ class DTransAgent(BaseAgent):
 
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
-        self.policy = ActorDTrans()
+        self.dtrans = ActorDTrans(cfg.Model, observation_space, action_space, device)
+        self.models = {"dtrans": self.dtrans}
 
+        # checkpoint models
+        self.checkpoint_modules["dtrans"] = self.dtrans
+        self.rofunc_logger.module(f"DTrans model: {self.dtrans}")
 
-def evaluate_episode(
-        env,
-        state_dim,
-        act_dim,
-        model,
-        max_ep_len=1000,
-        device='cuda',
-        target_return=None,
-        mode='normal',
-        state_mean=0.,
-        state_std=1.,
-):
-    model.eval()
-    model.to(device=device)
+        self.track_losses = collections.deque(maxlen=100)
+        self.tracking_data = collections.defaultdict(list)
 
-    state_mean = torch.from_numpy(state_mean).to(device=device)
-    state_std = torch.from_numpy(state_std).to(device=device)
+        '''Get hyper-parameters from config'''
+        self._td_lambda = self.cfg.Agent.td_lambda
+        self._lr = self.cfg.Agent.lr
+        self._adam_eps = self.cfg.Agent.adam_eps
+        self._weight_decay = self.cfg.Agent.weight_decay
+        self._max_length = self.cfg.Agent.max_length
 
-    state = env.reset()
+        self._set_up()
 
-    # we keep all the histories on the device
-    # note that the latest action and reward will be "padding"
-    states = torch.from_numpy(state).reshape(1, state_dim).to(device=device, dtype=torch.float32)
-    actions = torch.zeros((0, act_dim), device=device, dtype=torch.float32)
-    rewards = torch.zeros(0, device=device, dtype=torch.float32)
-    target_return = torch.tensor(target_return, device=device, dtype=torch.float32)
-    sim_states = []
+    def _set_up(self):
+        """
+        Set up optimizer, learning rate scheduler and state/value preprocessors
+        """
+        self.optimizer = torch.optim.AdamW(self.dtrans.parameters(), lr=self._lr, eps=self._adam_eps,
+                                           weight_decay=self._weight_decay)
+        if self._lr_scheduler is not None:
+            self.scheduler = self._lr_scheduler(self.optimizer, **self._lr_scheduler_kwargs)
+        self.checkpoint_modules["optimizer_policy"] = self.optimizer
 
-    episode_return, episode_length = 0, 0
-    for t in range(max_ep_len):
+        self.loss_fn = lambda s_hat, a_hat, r_hat, s, a, r: torch.mean((a_hat - a) ** 2)
 
-        # add padding
-        actions = torch.cat([actions, torch.zeros((1, act_dim), device=device)], dim=0)
-        rewards = torch.cat([rewards, torch.zeros(1, device=device)])
+        # set up preprocessors
+        super()._set_up()
 
-        action = model.act(
-            (states.to(dtype=torch.float32) - state_mean) / state_std,
-            actions.to(dtype=torch.float32),
-            rewards.to(dtype=torch.float32),
-            target_return=target_return,
-        )
-        actions[-1] = action
-        action = action.detach().cpu().numpy()
+    def act(self, states, actions, rewards, returns_to_go, timesteps):
+        # we don't care about the past rewards in this model
+        states = states.reshape(1, -1, self.dtrans.state_dim)
+        actions = actions.reshape(1, -1, self.dtrans.action_dim)
+        returns_to_go = returns_to_go.reshape(1, -1, 1)
+        timesteps = timesteps.reshape(1, -1)
 
-        state, reward, done, _ = env.step(action)
+        if self._max_length is not None:
+            states = states[:, -self._max_length:]
+            actions = actions[:, -self._max_length:]
+            returns_to_go = returns_to_go[:, -self._max_length:]
+            timesteps = timesteps[:, -self._max_length:]
 
-        cur_state = torch.from_numpy(state).to(device=device).reshape(1, state_dim)
-        states = torch.cat([states, cur_state], dim=0)
-        rewards[-1] = reward
-
-        episode_return += reward
-        episode_length += 1
-
-        if done:
-            break
-
-    return episode_return, episode_length
-
-
-def evaluate_episode_rtg(
-        env,
-        state_dim,
-        act_dim,
-        model,
-        max_ep_len=1000,
-        scale=1000.,
-        state_mean=0.,
-        state_std=1.,
-        device='cuda',
-        target_return=None,
-        mode='normal',
-):
-    model.eval()
-    model.to(device=device)
-
-    state_mean = torch.from_numpy(state_mean).to(device=device)
-    state_std = torch.from_numpy(state_std).to(device=device)
-
-    state = env.reset()
-    if mode == 'noise':
-        state = state + np.random.normal(0, 0.1, size=state.shape)
-
-    # we keep all the histories on the device
-    # note that the latest action and reward will be "padding"
-    states = torch.from_numpy(state).reshape(1, state_dim).to(device=device, dtype=torch.float32)
-    actions = torch.zeros((0, act_dim), device=device, dtype=torch.float32)
-    rewards = torch.zeros(0, device=device, dtype=torch.float32)
-
-    ep_return = target_return
-    target_return = torch.tensor(ep_return, device=device, dtype=torch.float32).reshape(1, 1)
-    timesteps = torch.tensor(0, device=device, dtype=torch.long).reshape(1, 1)
-
-    sim_states = []
-
-    episode_return, episode_length = 0, 0
-    for t in range(max_ep_len):
-
-        # add padding
-        actions = torch.cat([actions, torch.zeros((1, act_dim), device=device)], dim=0)
-        rewards = torch.cat([rewards, torch.zeros(1, device=device)])
-
-        action = model.act(
-            (states.to(dtype=torch.float32) - state_mean) / state_std,
-            actions.to(dtype=torch.float32),
-            rewards.to(dtype=torch.float32),
-            target_return.to(dtype=torch.float32),
-            timesteps.to(dtype=torch.long),
-        )
-        actions[-1] = action
-        action = action.detach().cpu().numpy()
-
-        state, reward, done, _ = env.step(action)
-
-        cur_state = torch.from_numpy(state).to(device=device).reshape(1, state_dim)
-        states = torch.cat([states, cur_state], dim=0)
-        rewards[-1] = reward
-
-        if mode != 'delayed':
-            pred_return = target_return[0, -1] - (reward / scale)
+            # pad all tokens to sequence length
+            attention_mask = torch.cat([torch.zeros(self._max_length - states.shape[1]), torch.ones(states.shape[1])])
+            attention_mask = attention_mask.to(dtype=torch.long, device=states.device).reshape(1, -1)
+            states = torch.cat(
+                [torch.zeros((states.shape[0], self._max_length - states.shape[1], self.dtrans.state_dim),
+                             device=states.device), states], dim=1).to(dtype=torch.float32)
+            actions = torch.cat(
+                [torch.zeros((actions.shape[0], self._max_length - actions.shape[1], self.dtrans.action_dim),
+                             device=actions.device), actions], dim=1).to(dtype=torch.float32)
+            returns_to_go = torch.cat(
+                [torch.zeros((returns_to_go.shape[0], self._max_length - returns_to_go.shape[1], 1),
+                             device=returns_to_go.device), returns_to_go], dim=1).to(dtype=torch.float32)
+            timesteps = torch.cat([torch.zeros((timesteps.shape[0], self._max_length - timesteps.shape[1]),
+                                               device=timesteps.device), timesteps], dim=1).to(dtype=torch.long)
         else:
-            pred_return = target_return[0, -1]
-        target_return = torch.cat(
-            [target_return, pred_return.reshape(1, 1)], dim=1)
-        timesteps = torch.cat(
-            [timesteps,
-             torch.ones((1, 1), device=device, dtype=torch.long) * (t + 1)], dim=1)
+            attention_mask = None
 
-        episode_return += reward
-        episode_length += 1
+        _, action_preds, return_preds = self.dtrans(states, actions, None, returns_to_go, timesteps,
+                                                    attention_mask=attention_mask)
 
-        if done:
-            break
+        return action_preds[0, -1]
 
-    return episode_return, episode_length
+    def update_net(self):
+        states, actions, rewards, dones, rtg, timesteps, attention_mask = self.get_batch(self.batch_size)
+        action_target = torch.clone(actions)
+
+        state_preds, action_preds, reward_preds = self.dtrans.forward(
+            states, actions, rewards, rtg[:, :-1], timesteps, attention_mask=attention_mask,
+        )
+
+        act_dim = action_preds.shape[2]
+        action_preds = action_preds.reshape(-1, act_dim)[attention_mask.reshape(-1) > 0]
+        action_target = action_target.reshape(-1, act_dim)[attention_mask.reshape(-1) > 0]
+
+        loss = self.loss_fn(None, action_preds, None,
+                            None, action_target, None)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), .25)
+        self.optimizer.step()
+
+        with torch.no_grad():
+            self.diagnostics['training/action_error'] = torch.mean(
+                (action_preds - action_target) ** 2).detach().cpu().item()
+
+        # update learning rate
+        if self._lr_scheduler is not None:
+            self._lr_scheduler.step()
+
+        # record data
+        self.track_data("Loss", loss.item())
