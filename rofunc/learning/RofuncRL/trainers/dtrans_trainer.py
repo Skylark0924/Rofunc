@@ -12,37 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import torch
+import tqdm
 
-from .base_trainer import Trainer
+from rofunc.learning.RofuncRL.agents.offline.dtrans_agent import DTransAgent
+from rofunc.learning.RofuncRL.trainers.base_trainer import BaseTrainer
 
 
-class SequenceTrainer(Trainer):
+class DTransTrainer(BaseTrainer):
+    def __init__(self, cfg, env, device, env_name):
+        super().__init__(cfg, env, device, env_name)
+        self.agent = DTransAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
+                                 device, self.exp_dir, self.rofunc_logger)
+        self.setup_wandb()
 
-    def train_step(self):
-        states, actions, rewards, dones, rtg, timesteps, attention_mask = self.get_batch(self.batch_size)
-        action_target = torch.clone(actions)
+    def train(self):
+        """
+        Main training loop.
+        """
+        with tqdm.trange(self.maximum_steps, ncols=80, colour='green') as self.t_bar:
+            for _ in self.t_bar:
+                self.agent.update_net()
 
-        state_preds, action_preds, reward_preds = self.model.forward(
-            states, actions, rewards, rtg[:, :-1], timesteps, attention_mask=attention_mask,
-        )
-
-        act_dim = action_preds.shape[2]
-        action_preds = action_preds.reshape(-1, act_dim)[attention_mask.reshape(-1) > 0]
-        action_target = action_target.reshape(-1, act_dim)[attention_mask.reshape(-1) > 0]
-
-        loss = self.loss_fn(
-            None, action_preds, None,
-            None, action_target, None,
-        )
-
-        self.optimizer.zero_grad()
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), .25)
-        self.optimizer.step()
-
-        with torch.no_grad():
-            self.diagnostics['training/action_error'] = torch.mean(
-                (action_preds - action_target) ** 2).detach().cpu().item()
-
-        return loss.detach().cpu().item()
+        # close the logger
+        self.writer.close()
+        self.rofunc_logger.info('Training complete.')
