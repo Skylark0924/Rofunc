@@ -148,7 +148,7 @@ class BaseTrainer:
 
     def train(self):
         """
-        Main training loop.
+        Main training loop. \n
         - Reset the environment
         - For each step:
             - Pre-interaction
