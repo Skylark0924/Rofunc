@@ -31,6 +31,12 @@ from rofunc.learning.RofuncRL.processors.normalizers import Normalization
 
 
 class PPOAgent(BaseAgent):
+    """
+    Proximal Policy Optimization (PPO) agent \n
+    “Proximal Policy Optimization Algorithms”. John Schulman. et al. 2017. https://arxiv.org/abs/1707.06347 \n
+    Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/PPO.html
+    """
+
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -40,15 +46,12 @@ class PPOAgent(BaseAgent):
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
-        Proximal Policy Optimization (PPO) agent
-        “Proximal Policy Optimization Algorithms”. John Schulman. et al. 2017. https://arxiv.org/abs/1707.06347
-        Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/PPO.html
-        :param cfg: Custom configuration
-        :param observation_space: Observation/state space or shape
-        :param action_space: Action space or shape
+        :param cfg: Configurations
+        :param observation_space: Observation space
+        :param action_space: Action space
         :param memory: Memory for storing transitions
         :param device: Device on which the torch tensor is allocated
-        :param experiment_dir: Directory where experiment outputs are saved
+        :param experiment_dir: Directory for storing experiment data
         :param rofunc_logger: Rofunc logger
         """
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)

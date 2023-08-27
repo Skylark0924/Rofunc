@@ -33,6 +33,12 @@ from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class TD3Agent(BaseAgent):
+    """
+    Twin Delayed Deep Deterministic Policy Gradient (TD3) agent \n
+    “Addressing Function Approximation Error in Actor-Critic Methods”. Fujimoto. et al. 2018. https://arxiv.org/abs/1802.09477 \n
+    Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/TD3.html
+    """
+
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -42,15 +48,12 @@ class TD3Agent(BaseAgent):
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
-        Twin Delayed Deep Deterministic Policy Gradient (TD3) agent
-        “Addressing Function Approximation Error in Actor-Critic Methods”. Fujimoto. et al. 2018. https://arxiv.org/abs/1802.09477
-        Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/TD3.html
-        :param cfg: Custom configuration
-        :param observation_space: Observation/state space or shape
-        :param action_space: Action space or shape
+        :param cfg: Configurations
+        :param observation_space: Observation space
+        :param action_space: Action space
         :param memory: Memory for storing transitions
         :param device: Device on which the torch tensor is allocated
-        :param experiment_dir: Directory where experiment outputs are saved
+        :param experiment_dir: Directory for storing experiment data
         :param rofunc_logger: Rofunc logger
         """
         super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
@@ -149,7 +152,7 @@ class TD3Agent(BaseAgent):
         self.target_actor.update_parameters(self.actor, polyak=1)
         self.target_critic_1.update_parameters(self.critic_1, polyak=1)
         self.target_critic_2.update_parameters(self.critic_2, polyak=1)
-        
+
         # set up preprocessors
         super()._set_up()
 

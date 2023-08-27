@@ -1,5 +1,7 @@
 # RofuncRL ASE (Adversarial Skill Embeddings)
 
+**Paper:** “ASE: Large-Scale Reusable Adversarial Skill Embeddings for Physically Simulated Characters”. Peng et al. 2022. https://arxiv.org/abs/2205.01906
+
 ## Algorithm
 
 ![](../../../img/ASE2.png)

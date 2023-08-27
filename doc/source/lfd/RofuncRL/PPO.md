@@ -1,5 +1,7 @@
 # RofuncRL PPO (Proximal Policy Optimization)
 
+**Paper:** “Proximal Policy Optimization Algorithms”. John Schulman. et al. 2017. https://arxiv.org/abs/1707.06347
+
 ## Algorithm 
 
 The PPO algorithm is a policy gradient method that uses a surrogate objective function to constrain the policy update. 

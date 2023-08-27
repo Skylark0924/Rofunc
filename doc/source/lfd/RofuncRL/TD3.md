@@ -1,5 +1,7 @@
 # RofuncRL TD3 (Twin Delayed Deep Deterministic Policy Gradient)
 
+**Paper:** “Addressing Function Approximation Error in Actor-Critic Methods”. Fujimoto. et al. 2018. https://arxiv.org/abs/1802.09477
+
 ## Algorithm 
 
 ```{literalinclude} ../../../../rofunc/learning/RofuncRL/agents/online/td3_agent.py

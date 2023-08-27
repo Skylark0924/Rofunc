@@ -36,6 +36,12 @@ from rofunc.learning.pre_trained_models.download import model_zoo
 
 
 class ASEHRLAgent(BaseAgent):
+    """
+    Adversarial Skill Embeddings (ASE) agent for hierarchical reinforcement learning (HRL) using pre-trained low-level controller. \n
+    “ASE: Large-Scale Reusable Adversarial Skill Embeddings for Physically Simulated Characters”. Peng et al. 2022. https://arxiv.org/abs/2205.01906 \n
+    Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html
+    """
+
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -50,14 +56,9 @@ class ASEHRLAgent(BaseAgent):
                  collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None,
                  task_related_state_size: Optional[int] = None, ):
         """
-        Adversarial Skill Embeddings (ASE) agent for hierarchical reinforcement learning (HRL) using pre-trained
-            low-level controller.
-        “ASE: Large-Scale Reusable Adversarial Skill Embeddings for Physically Simulated Characters”. Peng et al. 2022.
-            https://arxiv.org/abs/2205.01906
-        Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html
-        :param cfg: Custom configuration
-        :param observation_space: Observation/state space or shape
-        :param action_space: Action space or shape
+        :param cfg: Configuration
+        :param observation_space: Observation space
+        :param action_space: Action space
         :param memory: Memory for storing transitions
         :param device: Device on which the torch tensor is allocated
         :param experiment_dir: Directory where experiment outputs are saved

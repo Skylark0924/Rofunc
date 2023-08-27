@@ -1,6 +1,8 @@
 # RofuncRL AMP (Adversarial Motion Priors)
 
 
+**Paper:** “AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control”. Peng et al. 2021. https://arxiv.org/abs/2104.02180
+
 ## Algorithm 
 
 ![AMP framework](../../../img/AMP1.png)
@@ -8,7 +10,7 @@
 AMP is a *mixline (mixed online and offline) method* that combines imitation learning and reinforcement learning, it is achieved by combining two-part reward functions $r^G$ and $r^S$:
 
 $$
-r\left(\mathrm{~s}_t, \mathrm{a}_t, \mathrm{~s}_{t+1}, \mathrm{~g}\right)=w^G r^G\left(\mathrm{~s}_t, \mathrm{a}_t, \mathrm{~s}_t, \mathrm{~g}\right)+w^S r^S\left(\mathrm{~s}_t, \mathrm{~s}_{t+1}\right)
+r\left(\mathrm{~s}_t, \mathrm{a}_t, \mathrm{~s}_{t+1}, \mathrm{~g}\right)=w^G r^G\left(\mathrm{~s}_t, \mathrm{a}_t, \mathrm{~s}_{t+1}, \mathrm{~g}\right)+w^S r^S\left(\mathrm{~s}_t, \mathrm{~s}_{t+1}\right)
 $$
 
 where $r^G\left(\mathrm{~s}_t, \mathrm{a}_t, \mathrm{~s}_t, \mathrm{~g}\right)$ is the `task-specific` reinforcement learning reward which defines high-level objectives $g$ that a character should satisfy (e.g. moving to a target location), $r^S\left(\mathrm{~s}_t, \mathrm{~s}_{t+1}\right)$ is the `task-agnostic` imitation learning reward which specifies low-level details of the behaviors that the character should adopt when performing the task (e.g., walking vs. running to a target). $w^G$ and $w^S$ are the weights of the two reward functions.
