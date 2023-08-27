@@ -15,6 +15,7 @@ import torch
 import torch.nn as nn
 from omegaconf import DictConfig
 
+import rofunc as rf
 from rofunc.config.utils import omegaconf_to_dict
 from rofunc.learning.RofuncRL.models.base_models import BaseMLP
 
@@ -41,6 +42,8 @@ class BaseEncoder(nn.Module):
         self.use_pretrained = self.cfg_dict[cfg_name]['use_pretrained']
         self.freeze = self.cfg_dict[cfg_name]['freeze']
         self.model_ckpt = self.cfg_dict[cfg_name]['model_ckpt']
+        self.model_module_name = self.cfg_dict[cfg_name]['model_module_name'] if 'model_module_name' in self.cfg_dict[
+            cfg_name] else None
 
     def set_up(self):
         if self.freeze:
@@ -52,6 +55,7 @@ class BaseEncoder(nn.Module):
         for net in self.freeze_net_list:
             for param in net.parameters():
                 param.requires_grad = False
+        rf.logger.beauty_print(f"Freeze state encoder", type="info")
 
     def pre_trained_mode(self):
         if self.use_pretrained is True and self.model_ckpt is None:
@@ -70,6 +74,8 @@ class BaseEncoder(nn.Module):
 
     def load_ckpt(self, path: str):
         modules = torch.load(path)
+        if self.model_module_name is not None:
+            modules = modules[self.model_module_name]
         if type(modules) is dict:
             for name, data in modules.items():
                 module = self.checkpoint_modules.get(name, None)
@@ -80,6 +86,7 @@ class BaseEncoder(nn.Module):
                             module.eval()
                     else:
                         raise NotImplementedError
+        rf.logger.beauty_print(f"Loaded pretrained state encoder model from {self.model_ckpt}", type="info")
 
 
 class MLPEncoder(BaseMLP):
