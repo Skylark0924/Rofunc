@@ -17,13 +17,15 @@ import os
 import pickle
 
 import gym
+import d4rl  # Import required to register environments, you may need to also import the submodule
 import numpy as np
 
+import rofunc as rf
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
-def download_d4rl_dataset():
-    save_dir = os.path.join(os.getcwd(), '../../../examples/data/D4RL')
+def download_d4rl_dataset(save_dir):
+    rf.oslab.create_dir(save_dir)
 
     for env_name in ['halfcheetah', 'hopper', 'walker2d']:
         for dataset_type in ['medium', 'medium-replay', 'expert']:
@@ -64,14 +66,13 @@ def download_d4rl_dataset():
             returns = np.array([np.sum(p['rewards']) for p in paths])
             num_samples = np.sum([p['rewards'].shape[0] for p in paths])
             print(f'Number of samples collected: {num_samples}')
-            print(
-                f'Trajectory returns: mean = {np.mean(returns)}, std = {np.std(returns)}, max = {np.max(returns)}, min = {np.min(returns)}')
+            print(f'Trajectory returns: mean = {np.mean(returns)}, std = {np.std(returns)}, max = {np.max(returns)},'
+                  f' min = {np.min(returns)}')
 
             with open(f'{save_dir}/{name}.pkl', 'wb') as f:
                 pickle.dump(paths, f)
 
     beauty_print('D4RL dataset downloaded', type='info')
-
 
 # if __name__ == '__main__':
 #     download_d4rl_dataset()

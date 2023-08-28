@@ -4,6 +4,7 @@ from .td3_trainer import TD3Trainer
 from .a2c_trainer import A2CTrainer
 from .amp_trainer import AMPTrainer
 from .ase_trainer import ASETrainer
+from .dtrans_trainer import DTransTrainer
 
 trainer_map = {
     "ppo": PPOTrainer,
@@ -12,4 +13,5 @@ trainer_map = {
     "a2c": A2CTrainer,
     "amp": AMPTrainer,
     "ase": ASETrainer,
+    "dtrans": DTransTrainer,
 }

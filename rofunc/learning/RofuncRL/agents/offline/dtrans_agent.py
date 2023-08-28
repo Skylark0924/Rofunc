@@ -23,7 +23,6 @@ from omegaconf import DictConfig
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorDTrans
-from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class DTransAgent(BaseAgent):
@@ -37,7 +36,6 @@ class DTransAgent(BaseAgent):
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
                  action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 memory: Optional[Union[Memory, Tuple[Memory]]] = None,
                  device: Optional[Union[str, torch.device]] = None,
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
@@ -45,15 +43,14 @@ class DTransAgent(BaseAgent):
         :param cfg: Configurations
         :param observation_space: Observation space
         :param action_space: Action space
-        :param memory: Memory for storing transitions
         :param device: Device on which the torch tensor is allocated
         :param experiment_dir: Directory for storing experiment data
         :param rofunc_logger: Rofunc logger
         """
 
-        super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
+        super().__init__(cfg, observation_space, action_space, None, device, experiment_dir, rofunc_logger)
 
-        self.dtrans = ActorDTrans(cfg.Model, observation_space, action_space, device)
+        self.dtrans = ActorDTrans(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.models = {"dtrans": self.dtrans}
 
         # checkpoint models
@@ -68,7 +65,8 @@ class DTransAgent(BaseAgent):
         self._lr = self.cfg.Agent.lr
         self._adam_eps = self.cfg.Agent.adam_eps
         self._weight_decay = self.cfg.Agent.weight_decay
-        self._max_length = self.cfg.Agent.max_length
+        self._max_seq_length = self.cfg.Trainer.max_seq_length
+
 
         self._set_up()
 
@@ -94,25 +92,25 @@ class DTransAgent(BaseAgent):
         returns_to_go = returns_to_go.reshape(1, -1, 1)
         timesteps = timesteps.reshape(1, -1)
 
-        if self._max_length is not None:
-            states = states[:, -self._max_length:]
-            actions = actions[:, -self._max_length:]
-            returns_to_go = returns_to_go[:, -self._max_length:]
-            timesteps = timesteps[:, -self._max_length:]
+        if self._max_seq_length is not None:
+            states = states[:, -self._max_seq_length:]
+            actions = actions[:, -self._max_seq_length:]
+            returns_to_go = returns_to_go[:, -self._max_seq_length:]
+            timesteps = timesteps[:, -self._max_seq_length:]
 
             # pad all tokens to sequence length
-            attention_mask = torch.cat([torch.zeros(self._max_length - states.shape[1]), torch.ones(states.shape[1])])
+            attention_mask = torch.cat([torch.zeros(self._max_seq_length - states.shape[1]), torch.ones(states.shape[1])])
             attention_mask = attention_mask.to(dtype=torch.long, device=states.device).reshape(1, -1)
             states = torch.cat(
-                [torch.zeros((states.shape[0], self._max_length - states.shape[1], self.dtrans.state_dim),
+                [torch.zeros((states.shape[0], self._max_seq_length - states.shape[1], self.dtrans.state_dim),
                              device=states.device), states], dim=1).to(dtype=torch.float32)
             actions = torch.cat(
-                [torch.zeros((actions.shape[0], self._max_length - actions.shape[1], self.dtrans.action_dim),
+                [torch.zeros((actions.shape[0], self._max_seq_length - actions.shape[1], self.dtrans.action_dim),
                              device=actions.device), actions], dim=1).to(dtype=torch.float32)
             returns_to_go = torch.cat(
-                [torch.zeros((returns_to_go.shape[0], self._max_length - returns_to_go.shape[1], 1),
+                [torch.zeros((returns_to_go.shape[0], self._max_seq_length - returns_to_go.shape[1], 1),
                              device=returns_to_go.device), returns_to_go], dim=1).to(dtype=torch.float32)
-            timesteps = torch.cat([torch.zeros((timesteps.shape[0], self._max_length - timesteps.shape[1]),
+            timesteps = torch.cat([torch.zeros((timesteps.shape[0], self._max_seq_length - timesteps.shape[1]),
                                                device=timesteps.device), timesteps], dim=1).to(dtype=torch.long)
         else:
             attention_mask = None
@@ -122,8 +120,8 @@ class DTransAgent(BaseAgent):
 
         return action_preds[0, -1]
 
-    def update_net(self):
-        states, actions, rewards, dones, rtg, timesteps, attention_mask = self.get_batch(self.batch_size)
+    def update_net(self, batch):
+        states, actions, rewards, dones, rtg, timesteps, attention_mask = batch
         action_target = torch.clone(actions)
 
         state_preds, action_preds, reward_preds = self.dtrans.forward(
@@ -139,12 +137,12 @@ class DTransAgent(BaseAgent):
 
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), .25)
+        torch.nn.utils.clip_grad_norm_(self.dtrans.parameters(), .25)
         self.optimizer.step()
 
-        with torch.no_grad():
-            self.diagnostics['training/action_error'] = torch.mean(
-                (action_preds - action_target) ** 2).detach().cpu().item()
+        # with torch.no_grad():
+        #     self.diagnostics['training/action_error'] = torch.mean(
+        #         (action_preds - action_target) ** 2).detach().cpu().item()
 
         # update learning rate
         if self._lr_scheduler is not None:

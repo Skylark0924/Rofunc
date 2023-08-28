@@ -31,7 +31,7 @@ def get_config(config_path=None, config_name=None, args=None, debug=False, absl_
     :param config_name: name of the config file (without .yaml)
     :param args: custom args to rewrite some params in the config file
     :param debug: if True, print the config
-    :param absl_config_path: absolute path to the config file (for external user)
+    :param absl_config_path: absolute path to the folder contains config file (for external user)
     :return:
     """
     # reset current hydra config if already parsed (but not passed in here)

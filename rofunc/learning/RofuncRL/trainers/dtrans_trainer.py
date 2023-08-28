@@ -11,7 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+import pickle
+import random
 
+import numpy as np
+import torch
 import tqdm
 
 from rofunc.learning.RofuncRL.agents.offline.dtrans_agent import DTransAgent
@@ -21,9 +26,119 @@ from rofunc.learning.RofuncRL.trainers.base_trainer import BaseTrainer
 class DTransTrainer(BaseTrainer):
     def __init__(self, cfg, env, device, env_name):
         super().__init__(cfg, env, device, env_name)
-        self.agent = DTransAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
-                                 device, self.exp_dir, self.rofunc_logger)
+        self.agent = DTransAgent(cfg, self.env.observation_space, self.env.action_space, device, self.exp_dir,
+                                 self.rofunc_logger)
         self.setup_wandb()
+
+        self.pct_traj = 1
+        self.dataset_type = self.cfg.Trainer.dataset_type
+        self.dataset_root_path = self.cfg.Trainer.dataset_root_path
+        self.mode = self.cfg.Trainer.mode
+        self.scale = self.cfg.Trainer.scale
+        self.max_episode_steps = self.cfg.Trainer.max_episode_steps
+        self.max_seq_length = self.cfg.Trainer.max_seq_length
+
+        self.load_dataset()
+
+    def load_dataset(self):
+        """Load dataset"""
+        dataset_path = os.path.join(self.dataset_root_path, f'{self.env_name.lower()}-{self.dataset_type}-v2.pkl')
+        with open(dataset_path, 'rb') as f:
+            self.trajectories = pickle.load(f)
+
+        # save all path information into separate lists
+        states, traj_lens, returns = [], [], []
+        for path in self.trajectories:
+            if self.mode == 'delayed':  # delayed: all rewards moved to end of trajectory
+                path['rewards'][-1] = path['rewards'].sum()
+                path['rewards'][:-1] = 0.
+            states.append(path['observations'])
+            traj_lens.append(len(path['observations']))
+            returns.append(path['rewards'].sum())
+        traj_lens, returns = np.array(traj_lens), np.array(returns)
+
+        # used for input normalization
+        states = np.concatenate(states, axis=0)
+        self.state_mean, self.state_std = np.mean(states, axis=0), np.std(states, axis=0) + 1e-6
+
+        num_timesteps = sum(traj_lens)
+
+        num_timesteps = max(int(self.pct_traj * num_timesteps), 1)
+        sorted_inds = np.argsort(returns)  # lowest to highest
+        self.num_trajectories = 1
+        timesteps = traj_lens[sorted_inds[-1]]
+        ind = len(self.trajectories) - 2
+        while ind >= 0 and timesteps + traj_lens[sorted_inds[ind]] <= num_timesteps:
+            timesteps += traj_lens[sorted_inds[ind]]
+            self.num_trajectories += 1
+            ind -= 1
+        self.sorted_inds = sorted_inds[-self.num_trajectories:]
+
+        # used to reweight sampling so we sample according to timesteps instead of trajectories
+        self.p_sample = traj_lens[sorted_inds] / sum(traj_lens[sorted_inds])
+
+        self.rofunc_logger.module(f'Starting new experiment: {self.env_name} {self.dataset_type}'
+                                  f' with {len(traj_lens)} trajectories and {num_timesteps} timesteps'
+                                  f' Average return: {np.mean(returns):.2f}, std: {np.std(returns):.2f}'
+                                  f' Max return: {np.max(returns):.2f}, min: {np.min(returns):.2f}')
+
+    def discount_cumsum(self, x, gamma):
+        tmp = np.zeros_like(x)
+        tmp[-1] = x[-1]
+        for t in reversed(range(x.shape[0] - 1)):
+            tmp[t] = x[t] + gamma * tmp[t + 1]
+        return tmp
+
+    def get_batch(self, batch_size=256):
+        state_dim = self.agent.dtrans.state_dim
+        act_dim = self.agent.dtrans.action_dim
+
+        batch_inds = np.random.choice(
+            np.arange(self.num_trajectories),
+            size=batch_size,
+            replace=True,
+            p=self.p_sample,  # reweights so we sample according to timesteps
+        )
+
+        s, a, r, d, rtg, timesteps, mask = [], [], [], [], [], [], []
+        for i in range(batch_size):
+            traj = self.trajectories[int(self.sorted_inds[batch_inds[i]])]
+            si = random.randint(0, traj['rewards'].shape[0] - 1)
+
+            # get sequences from dataset
+            s.append(traj['observations'][si:si + self.max_seq_length].reshape(1, -1, state_dim))
+            a.append(traj['actions'][si:si + self.max_seq_length].reshape(1, -1, act_dim))
+            r.append(traj['rewards'][si:si + self.max_seq_length].reshape(1, -1, 1))
+            if 'terminals' in traj:
+                d.append(traj['terminals'][si:si + self.max_seq_length].reshape(1, -1))
+            else:
+                d.append(traj['dones'][si:si + self.max_seq_length].reshape(1, -1))
+            timesteps.append(np.arange(si, si + s[-1].shape[1]).reshape(1, -1))
+            timesteps[-1][timesteps[-1] >= self.max_episode_steps] = self.max_episode_steps - 1  # padding cutoff
+            rtg.append(self.discount_cumsum(traj['rewards'][si:], gamma=1.)[:s[-1].shape[1] + 1].reshape(1, -1, 1))
+            if rtg[-1].shape[1] <= s[-1].shape[1]:
+                rtg[-1] = np.concatenate([rtg[-1], np.zeros((1, 1, 1))], axis=1)
+
+            # padding and state + reward normalization
+            tlen = s[-1].shape[1]
+            s[-1] = np.concatenate([np.zeros((1, self.max_seq_length - tlen, state_dim)), s[-1]], axis=1)
+            s[-1] = (s[-1] - self.state_mean) / self.state_std
+            a[-1] = np.concatenate([np.ones((1, self.max_seq_length - tlen, act_dim)) * -10., a[-1]], axis=1)
+            r[-1] = np.concatenate([np.zeros((1, self.max_seq_length - tlen, 1)), r[-1]], axis=1)
+            d[-1] = np.concatenate([np.ones((1, self.max_seq_length - tlen)) * 2, d[-1]], axis=1)
+            rtg[-1] = np.concatenate([np.zeros((1, self.max_seq_length - tlen, 1)), rtg[-1]], axis=1) / self.scale
+            timesteps[-1] = np.concatenate([np.zeros((1, self.max_seq_length - tlen)), timesteps[-1]], axis=1)
+            mask.append(np.concatenate([np.zeros((1, self.max_seq_length - tlen)), np.ones((1, tlen))], axis=1))
+
+        s = torch.from_numpy(np.concatenate(s, axis=0)).to(dtype=torch.float32, device=self.device)
+        a = torch.from_numpy(np.concatenate(a, axis=0)).to(dtype=torch.float32, device=self.device)
+        r = torch.from_numpy(np.concatenate(r, axis=0)).to(dtype=torch.float32, device=self.device)
+        d = torch.from_numpy(np.concatenate(d, axis=0)).to(dtype=torch.long, device=self.device)
+        rtg = torch.from_numpy(np.concatenate(rtg, axis=0)).to(dtype=torch.float32, device=self.device)
+        timesteps = torch.from_numpy(np.concatenate(timesteps, axis=0)).to(dtype=torch.long, device=self.device)
+        mask = torch.from_numpy(np.concatenate(mask, axis=0)).to(device=self.device)
+
+        return s, a, r, d, rtg, timesteps, mask
 
     def train(self):
         """
@@ -31,7 +146,8 @@ class DTransTrainer(BaseTrainer):
         """
         with tqdm.trange(self.maximum_steps, ncols=80, colour='green') as self.t_bar:
             for _ in self.t_bar:
-                self.agent.update_net()
+                batch = self.get_batch()
+                self.agent.update_net(batch)
 
         # close the logger
         self.writer.close()
