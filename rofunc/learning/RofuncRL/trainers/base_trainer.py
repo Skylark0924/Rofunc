@@ -47,6 +47,7 @@ class BaseTrainer:
         self.agent = None
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
+        self.env_name = env_name
 
         '''Experiment log directory'''
         directory = self.cfg.Trainer.experiment_directory
@@ -113,7 +114,9 @@ class BaseTrainer:
                                 f"  action_space: {self.env.action_space.shape}\n  "
                                 f"  observation_space: {self.env.observation_space.shape}\n  "
                                 f"  num_envs: {self.env.num_envs}")
-        self.rofunc_logger.info(f"Task configurations:\n{self.env._env.cfg}")
+
+        if hasattr(self.env._env, "cfg"):
+            self.rofunc_logger.info(f"Task configurations:\n{self.env._env.cfg}")
 
         '''Normalization'''
         self.state_norm = Normalization(shape=self.env.observation_space, device=device)
