@@ -22,17 +22,17 @@ processing, learning, and its deployment on robots.
 ![](doc/img/pipeline.png)
 
 - [Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation](#rofunc-the-full-process-python-package-for-robot-learning-from-demonstration-and-robot-manipulation)
-  - [Installation](#installation)
-    - [Install from PyPI (stable version)](#install-from-pypi-stable-version)
-    - [Install from Source (nightly version, recommended)](#install-from-source-nightly-version-recommended)
-  - [Documentation](#documentation)
-  - [Star History](#star-history)
-  - [Citation](#citation)
-  - [Related Papers](#related-papers)
-  - [The Team](#the-team)
-  - [Acknowledge](#acknowledge)
-    - [Learning from Demonstration](#learning-from-demonstration)
-    - [Planning and Control](#planning-and-control)
+    - [Installation](#installation)
+        - [Install from PyPI (stable version)](#install-from-pypi-stable-version)
+        - [Install from Source (nightly version, recommended)](#install-from-source-nightly-version-recommended)
+    - [Documentation](#documentation)
+    - [Star History](#star-history)
+    - [Citation](#citation)
+    - [Related Papers](#related-papers)
+    - [The Team](#the-team)
+    - [Acknowledge](#acknowledge)
+        - [Learning from Demonstration](#learning-from-demonstration)
+        - [Planning and Control](#planning-and-control)
 
 ## Installation
 
@@ -120,7 +120,7 @@ The available functions and plans can be found as follows.
 |                                                                                                         |   |            [`TD3(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/TD3.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |                                            `CQL(RofuncRL)`                                             | ⛔  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |                                           `TD3BC(RofuncRL)`                                            | ⛔  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
-|                                                                                                         |   |         [`DTrans(RofuncRL)](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/DTrans.html)          | 🔃 |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
+|                                                                                                         |   |         [`DTrans(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/DTrans.html)         | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |                                            `EDAC(RofuncRL)`                                            | ⛔  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |            [`AMP(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |            [`ASE(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
