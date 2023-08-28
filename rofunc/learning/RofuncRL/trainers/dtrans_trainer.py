@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
 import os
 import pickle
 import random
@@ -37,6 +38,8 @@ class DTransTrainer(BaseTrainer):
         self.scale = self.cfg.Trainer.scale
         self.max_episode_steps = self.cfg.Trainer.max_episode_steps
         self.max_seq_length = self.cfg.Trainer.max_seq_length
+
+        self.loss_mean = 0
 
         self.load_dataset()
 
@@ -148,7 +151,38 @@ class DTransTrainer(BaseTrainer):
             for _ in self.t_bar:
                 batch = self.get_batch()
                 self.agent.update_net(batch)
+                self.post_interaction()
+                self._step += 1
 
         # close the logger
         self.writer.close()
         self.rofunc_logger.info('Training complete.')
+
+    def post_interaction(self):
+        # Update best models and tensorboard
+        if not self._step % self.write_interval and self.write_interval > 0:
+            # update best models
+            self.loss_mean = np.mean(self.agent.tracking_data.get("Loss", -1e4))
+            if self.loss_mean < self.agent.checkpoint_best_modules["loss"]:
+                self.agent.checkpoint_best_modules["timestep"] = self._step
+                self.agent.checkpoint_best_modules["loss"] = self.loss_mean
+                self.agent.checkpoint_best_modules["saved"] = False
+                self.agent.checkpoint_best_modules["modules"] = {k: copy.deepcopy(self.agent._get_internal_value(v)) for
+                                                                 k, v in self.agent.checkpoint_modules.items()}
+                self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, "best_ckpt.pth"))
+
+            # Update tensorboard
+            self.write_tensorboard()
+
+            # Update tqdm bar message
+            if self.eval_flag:
+                post_str = f"Loss/Best/Eval: {self.loss_mean:.2f}/{self.agent.checkpoint_best_modules['loss']:.2f}/{self.eval_loss_mean:.2f}"
+            else:
+                post_str = f"Loss/Best: {self.loss_mean:.2f}/{self.agent.checkpoint_best_modules['loss']:.2f}"
+            self.t_bar.set_postfix_str(post_str)
+            self.rofunc_logger.info(f"Step: {self._step}, {post_str}", local_verbose=False)
+
+        # Save checkpoints
+        if not (self._step + 1) % self.agent.checkpoint_interval and \
+                self.agent.checkpoint_interval > 0 and self._step > 1:
+            self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))

@@ -59,6 +59,7 @@ class DTransAgent(BaseAgent):
 
         self.track_losses = collections.deque(maxlen=100)
         self.tracking_data = collections.defaultdict(list)
+        self.checkpoint_best_modules = {"timestep": 0, "loss": 2 ** 31, "saved": False, "modules": {}}
 
         '''Get hyper-parameters from config'''
         self._td_lambda = self.cfg.Agent.td_lambda
@@ -66,7 +67,6 @@ class DTransAgent(BaseAgent):
         self._adam_eps = self.cfg.Agent.adam_eps
         self._weight_decay = self.cfg.Agent.weight_decay
         self._max_seq_length = self.cfg.Trainer.max_seq_length
-
 
         self._set_up()
 
@@ -99,7 +99,8 @@ class DTransAgent(BaseAgent):
             timesteps = timesteps[:, -self._max_seq_length:]
 
             # pad all tokens to sequence length
-            attention_mask = torch.cat([torch.zeros(self._max_seq_length - states.shape[1]), torch.ones(states.shape[1])])
+            attention_mask = torch.cat(
+                [torch.zeros(self._max_seq_length - states.shape[1]), torch.ones(states.shape[1])])
             attention_mask = attention_mask.to(dtype=torch.long, device=states.device).reshape(1, -1)
             states = torch.cat(
                 [torch.zeros((states.shape[0], self._max_seq_length - states.shape[1], self.dtrans.state_dim),
@@ -150,3 +151,4 @@ class DTransAgent(BaseAgent):
 
         # record data
         self.track_data("Loss", loss.item())
+        self.track_data("Action_error", torch.mean((action_preds - action_target) ** 2).item())
