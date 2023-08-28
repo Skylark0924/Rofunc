@@ -260,8 +260,8 @@ class ActorDTrans(nn.Module):
 
         self.cfg = cfg
         self.action_dim = get_space_dim(action_space)
-        self.gpt2_hidden_size = cfg.actor.gpt2_hidden_size
-        self.max_ep_len = cfg.actor.max_ep_len
+        self.n_embd = cfg.actor.n_embd
+        self.max_ep_len = cfg.actor.max_episode_steps
 
         # state encoder
         self.state_encoder = state_encoder
@@ -272,22 +272,29 @@ class ActorDTrans(nn.Module):
 
         gpt_config = transformers.GPT2Config(
             vocab_size=1,  # doesn't matter -- we don't use the vocab
-            n_embd=self.gpt2_hidden_size,
+            n_embd=self.n_embd,
+            n_layer=self.cfg.actor.n_layer,
+            n_head=self.cfg.actor.n_head,
+            n_inner=self.n_embd * 4,
+            activation_function=self.cfg.actor.activation_function,
+            resid_pdrop=self.cfg.actor.dropout,
+            attn_pdrop=self.cfg.actor.dropout,
+            n_positions=1024
         )
 
-        self.embed_timestep = nn.Embedding(self.max_ep_len, self.gpt2_hidden_size)
-        self.embed_return = torch.nn.Linear(1, self.gpt2_hidden_size)
-        self.embed_state = torch.nn.Linear(self.state_dim, self.gpt2_hidden_size)
-        self.embed_action = torch.nn.Linear(self.action_dim, self.gpt2_hidden_size)
-        self.embed_ln = nn.LayerNorm(self.gpt2_hidden_size)
+        self.embed_timestep = nn.Embedding(self.max_ep_len, self.n_embd)
+        self.embed_return = torch.nn.Linear(1, self.n_embd)
+        self.embed_state = torch.nn.Linear(self.state_dim, self.n_embd)
+        self.embed_action = torch.nn.Linear(self.action_dim, self.n_embd)
+        self.embed_ln = nn.LayerNorm(self.n_embd)
 
         self.backbone_net = transformers.GPT2Model(gpt_config)
 
         # note: we don't predict states or returns for the paper
-        self.predict_state = torch.nn.Linear(self.gpt2_hidden_size, self.state_dim)
-        self.predict_action = nn.Sequential(*([nn.Linear(self.gpt2_hidden_size, self.action_dim)] +
+        self.predict_state = torch.nn.Linear(self.n_embd, self.state_dim)
+        self.predict_action = nn.Sequential(*([nn.Linear(self.n_embd, self.action_dim)] +
                                               ([nn.Tanh()] if self.cfg.use_action_out_tanh else [])))
-        self.predict_return = torch.nn.Linear(self.gpt2_hidden_size, 1)
+        self.predict_return = torch.nn.Linear(self.n_embd, 1)
 
     def forward(self, states, actions, rewards, returns_to_go, timesteps, attention_mask=None):
         batch_size, seq_length = states.shape[0], states.shape[1]
@@ -313,7 +320,7 @@ class ActorDTrans(nn.Module):
         # this makes the sequence look like (R_1, s_1, a_1, R_2, s_2, a_2, ...)
         # which works nice in an autoregressive sense since states predict actions
         stacked_inputs = torch.stack((returns_embeddings, state_embeddings, action_embeddings), dim=1
-                                     ).permute(0, 2, 1, 3).reshape(batch_size, 3 * seq_length, self.gpt2_hidden_size)
+                                     ).permute(0, 2, 1, 3).reshape(batch_size, 3 * seq_length, self.n_embd)
         stacked_inputs = self.embed_ln(stacked_inputs)
 
         # to make the attention mask fit the stacked inputs, have to stack it as well
@@ -327,7 +334,7 @@ class ActorDTrans(nn.Module):
 
         # reshape x so that the second dimension corresponds to the original
         # returns (0), states (1), or actions (2); i.e. x[:,1,t] is the token for s_t
-        x = x.reshape(batch_size, seq_length, 3, self.gpt2_hidden_size).permute(0, 2, 1, 3)
+        x = x.reshape(batch_size, seq_length, 3, self.n_embd).permute(0, 2, 1, 3)
 
         # get predictions
         return_preds = self.predict_return(x[:, 2])  # predict next return given state and action
