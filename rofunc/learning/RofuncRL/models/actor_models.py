@@ -19,7 +19,6 @@ import gymnasium
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import transformers
 from omegaconf import DictConfig
 from torch import Tensor
 from torch.distributions import Beta, Normal
@@ -249,99 +248,6 @@ class ActorAMP(ActorPPO_Gaussian):
                  state_encoder: Optional[nn.Module] = EmptyEncoder()):
         super().__init__(cfg, observation_space, action_space, state_encoder)
         self.log_std = nn.Parameter(torch.full((self.action_dim,), fill_value=-2.9), requires_grad=False)
-
-
-class ActorDTrans(nn.Module):
-    def __init__(self, cfg: DictConfig,
-                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-                 state_encoder: Optional[nn.Module] = EmptyEncoder()):
-        super().__init__()
-
-        self.cfg = cfg
-        self.action_dim = get_space_dim(action_space)
-        self.n_embd = cfg.actor.n_embd
-        self.max_ep_len = cfg.actor.max_episode_steps
-
-        # state encoder
-        self.state_encoder = state_encoder
-        if isinstance(self.state_encoder, EmptyEncoder):
-            self.state_dim = get_space_dim(observation_space)
-        else:
-            self.state_dim = self.state_encoder.output_dim
-
-        gpt_config = transformers.GPT2Config(
-            vocab_size=1,  # doesn't matter -- we don't use the vocab
-            n_embd=self.n_embd,
-            n_layer=self.cfg.actor.n_layer,
-            n_head=self.cfg.actor.n_head,
-            n_inner=self.n_embd * 4,
-            activation_function=self.cfg.actor.activation_function,
-            resid_pdrop=self.cfg.actor.dropout,
-            attn_pdrop=self.cfg.actor.dropout,
-            n_positions=1024
-        )
-
-        self.embed_timestep = nn.Embedding(self.max_ep_len, self.n_embd)
-        self.embed_return = torch.nn.Linear(1, self.n_embd)
-        self.embed_state = torch.nn.Linear(self.state_dim, self.n_embd)
-        self.embed_action = torch.nn.Linear(self.action_dim, self.n_embd)
-        self.embed_ln = nn.LayerNorm(self.n_embd)
-
-        self.backbone_net = transformers.GPT2Model(gpt_config)
-
-        # note: we don't predict states or returns for the paper
-        self.predict_state = torch.nn.Linear(self.n_embd, self.state_dim)
-        self.predict_action = nn.Sequential(*([nn.Linear(self.n_embd, self.action_dim)] +
-                                              ([nn.Tanh()] if self.cfg.use_action_out_tanh else [])))
-        self.predict_return = torch.nn.Linear(self.n_embd, 1)
-
-    def forward(self, states, actions, rewards, returns_to_go, timesteps, attention_mask=None):
-        batch_size, seq_length = states.shape[0], states.shape[1]
-
-        if attention_mask is None:
-            # attention mask for GPT: 1 if can be attended to, 0 if not
-            attention_mask = torch.ones((batch_size, seq_length), dtype=torch.long)
-
-        # state encoder
-        states = self.state_encoder(states)
-
-        # embed each modality with a different head
-        state_embeddings = self.embed_state(states)
-        action_embeddings = self.embed_action(actions)
-        returns_embeddings = self.embed_return(returns_to_go)
-        time_embeddings = self.embed_timestep(timesteps)
-
-        # time embeddings are treated similar to positional embeddings
-        state_embeddings = state_embeddings + time_embeddings
-        action_embeddings = action_embeddings + time_embeddings
-        returns_embeddings = returns_embeddings + time_embeddings
-
-        # this makes the sequence look like (R_1, s_1, a_1, R_2, s_2, a_2, ...)
-        # which works nice in an autoregressive sense since states predict actions
-        stacked_inputs = torch.stack((returns_embeddings, state_embeddings, action_embeddings), dim=1
-                                     ).permute(0, 2, 1, 3).reshape(batch_size, 3 * seq_length, self.n_embd)
-        stacked_inputs = self.embed_ln(stacked_inputs)
-
-        # to make the attention mask fit the stacked inputs, have to stack it as well
-        stacked_attention_mask = torch.stack((attention_mask, attention_mask, attention_mask), dim=1
-                                             ).permute(0, 2, 1).reshape(batch_size, 3 * seq_length)
-
-        # we feed in the input embeddings (not word indices as in NLP) to the model
-        transformer_outputs = self.backbone_net(inputs_embeds=stacked_inputs,
-                                                attention_mask=stacked_attention_mask)
-        x = transformer_outputs['last_hidden_state']
-
-        # reshape x so that the second dimension corresponds to the original
-        # returns (0), states (1), or actions (2); i.e. x[:,1,t] is the token for s_t
-        x = x.reshape(batch_size, seq_length, 3, self.n_embd).permute(0, 2, 1, 3)
-
-        # get predictions
-        return_preds = self.predict_return(x[:, 2])  # predict next return given state and action
-        state_preds = self.predict_state(x[:, 2])  # predict next state given state and action
-        action_preds = self.predict_action(x[:, 1])  # predict next action given state
-
-        return state_preds, action_preds, return_preds
 
 
 if __name__ == '__main__':
