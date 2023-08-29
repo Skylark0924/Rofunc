@@ -57,11 +57,11 @@ def data_process(data_dir):
     return demos_x, demos_taxels_pressure
 
 
-demos_x, demos_taxels_pressure = data_process('../data/felt/wipe_spiral')
+demos_x, demos_taxels_pressure = data_process('../data/felt/wipe_raster')
 
 # --- TP-GMM ---
-demos_x = [demo_x[:, :3] for demo_x in demos_x]
-demos_x = [demos_x[0]]
+demos_x = [demo_x[:500, :3] for demo_x in demos_x]
+# demos_x = [demos_x[0]]
 # Define the task parameters
 start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
 end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]

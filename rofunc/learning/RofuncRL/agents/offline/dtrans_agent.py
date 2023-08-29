@@ -22,7 +22,7 @@ from omegaconf import DictConfig
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
-from rofunc.learning.RofuncRL.models.actor_models import ActorDTrans
+from rofunc.learning.RofuncRL.models.misc_models import DTrans
 
 
 class DTransAgent(BaseAgent):
@@ -50,7 +50,7 @@ class DTransAgent(BaseAgent):
 
         super().__init__(cfg, observation_space, action_space, None, device, experiment_dir, rofunc_logger)
 
-        self.dtrans = ActorDTrans(cfg.Model, observation_space, action_space, self.se).to(self.device)
+        self.dtrans = DTrans(cfg.Model, observation_space, action_space, self.se).to(self.device)
         self.models = {"dtrans": self.dtrans}
 
         # checkpoint models
