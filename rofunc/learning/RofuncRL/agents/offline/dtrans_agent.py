@@ -116,8 +116,7 @@ class DTransAgent(BaseAgent):
         else:
             attention_mask = None
 
-        _, action_preds, return_preds = self.dtrans(states, actions, None, returns_to_go, timesteps,
-                                                    attention_mask=attention_mask)
+        _, action_preds, return_preds = self.dtrans(states, actions, None, returns_to_go, timesteps, attention_mask)
 
         return action_preds[0, -1]
 
