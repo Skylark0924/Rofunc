@@ -82,11 +82,11 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 3
 
     parser = argparse.ArgumentParser()
     # Available tasks: Hopper, HalfCheetah, Walker2d, Reacher2d
-    parser.add_argument("--task", type=str, default="Walker2d")
+    parser.add_argument("--task", type=str, default="Hopper")
     parser.add_argument("--agent", type=str, default="dtrans")  # dtrans
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))

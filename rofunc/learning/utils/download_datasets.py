@@ -17,7 +17,6 @@ import os
 import pickle
 
 import gym
-import d4rl  # Import required to register environments, you may need to also import the submodule
 import numpy as np
 
 import rofunc as rf
@@ -33,6 +32,8 @@ def download_d4rl_dataset(save_dir):
 
             if os.path.exists(f'{save_dir}/{name}.pkl'):
                 continue
+
+            import d4rl  # Import required to register environments, you may need to also import the submodule
 
             env = gym.make(name)
             dataset = env.get_dataset()
