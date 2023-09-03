@@ -189,9 +189,9 @@ class RobotSim:
 
         # Find the asset root folder
         if asset_root is None:
-            import site
-            pip_root_path = site.getsitepackages()[0]
-            self.asset_root = os.path.join(pip_root_path, "rofunc/simulator/assets")
+            self.asset_root = os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), "../assets"
+            )
         else:
             self.asset_root = asset_root
 
