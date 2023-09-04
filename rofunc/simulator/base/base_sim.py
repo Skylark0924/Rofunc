@@ -161,7 +161,6 @@ class RobotSim:
         :param args: arguments
         :param robot_name: name of the robot
         :param asset_root: path to the assets,
-                           e.g., /home/ubuntu/anaconda3/lib/python3.7/site-packages/rofunc/simulator/assets
         """
         from isaacgym import gymapi
 
@@ -170,8 +169,6 @@ class RobotSim:
         agent_configs = load_agent_config(self.robot_name)
 
         asset_file = agent_configs["description_file_path"]
-        self.fix_base_link = agent_configs["fix_base_link"]
-        self.flip_visual_attachments = agent_configs["flip_visual_attachments"]
         self.init_pose_vec = agent_configs["initial_base_pose"]
 
         self.num_envs = num_envs
@@ -184,8 +181,8 @@ class RobotSim:
             )
 
         self.asset_options = gymapi.AssetOptions()
-        self.asset_options.fix_base_link = self.fix_base_link
-        self.asset_options.flip_visual_attachments = self.flip_visual_attachments
+        self.asset_options.fix_base_link = agent_configs["fix_base_link"]
+        self.asset_options.flip_visual_attachments = agent_configs["flip_visual_attachments"]
         self.asset_options.armature = 0.01
 
         self.PlaygroundSim = PlaygroundSim(self.args)
