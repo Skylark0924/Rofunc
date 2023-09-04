@@ -41,6 +41,7 @@ class IkeaSim:
         asset_options = gymapi.AssetOptions()
         asset_options.flip_visual_attachments = False
         asset_options.collapse_fixed_joints = True
+        asset_options.fix_base_link = True
         asset_options.disable_gravity = False
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
         asset_options.armature = 0.005
@@ -95,7 +96,8 @@ class IkeaSim:
         furniture_assets.append(furniture_asset)
 
         furniture_pose = gymapi.Transform()
-        furniture_pose.p = gymapi.Vec3(0, 1, 0)
+        furniture_pose.p = gymapi.Vec3(0.7, 0.3, 0)
+        furniture_pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
         furniture_poses.append(furniture_pose)
 
         furniture_handles = []
@@ -148,6 +150,6 @@ if __name__ == "__main__":
     args = gymutil.parse_arguments()
     args.use_gpu_pipeline = False
 
-    furniture_name = "shelf_liden_0922"
+    furniture_name = "box_ivar_0666"
     ikea_sim = IkeaSim(args, furniture_name)
     ikea_sim.show()
