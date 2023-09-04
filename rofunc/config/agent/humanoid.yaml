@@ -1,0 +1,8 @@
+# Relevant to rofunc/simulator/assets
+description_file_path: "mjcf/amp_humanoid.xml"
+
+initial_base_pose: [0.0, 1.8, 0.0, -0.707107, 0.0, 0.0, 0.707107]
+
+fix_base_link: False
+
+flip_visual_attachments: False
