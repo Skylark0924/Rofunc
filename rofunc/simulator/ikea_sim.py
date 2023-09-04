@@ -163,5 +163,8 @@ if __name__ == "__main__":
     args = gymutil.parse_arguments()
     args.use_gpu_pipeline = False
 
-    ikea_sim = IkeaSim(args, ["shelf_liden_1"])
+    # The list hosts all objects to be added into the scene,
+    # To add multiple the same type of objects, multiple config files should be created
+    # The order is not restricted
+    ikea_sim = IkeaSim(args, ["shelf_liden_1", "box_ivar_1"])
     ikea_sim.show()

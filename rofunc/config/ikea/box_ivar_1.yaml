@@ -1,0 +1,20 @@
+name: "box_ivar_0666"
+
+# Relevant to rofunc/simulator/assets
+description_file_path: "mjcf/ikea/box_ivar_0666.xml"
+
+initial_base_pose: [0.2, 0.4, -0.5, 0.0, 0.7071067, 0.7071067, 0.0]
+
+fix_base_link: True
+
+flip_visual_attachments: False
+
+body_names: [
+    "0_part0",
+    "1_part1",
+    "2_part2",
+    "3_part3",
+    "4_part4",
+]
+
+texture_file_name: "metal.png"
