@@ -1,12 +1,12 @@
 import os
 from typing import Dict
 
-import hydra
-from hydra import compose, initialize
-from hydra._internal.hydra import Hydra
-from hydra._internal.utils import create_automatic_config_search_path
-from hydra.core.hydra_config import HydraConfig
-from hydra.types import RunMode
+# import hydra
+# from hydra import compose, initialize
+# from hydra._internal.hydra import Hydra
+# from hydra._internal.utils import create_automatic_config_search_path
+# from hydra.core.hydra_config import HydraConfig
+# from hydra.types import RunMode
 from omegaconf import DictConfig
 
 import rofunc as rf

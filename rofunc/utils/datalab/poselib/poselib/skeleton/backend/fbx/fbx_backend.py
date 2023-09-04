@@ -41,15 +41,19 @@ try:
     import fbx
     import FbxCommon
 except ImportError as e:
-    print("Error: FBX library failed to load - importing FBX data will not succeed. Message: {}".format(e))
-    print("FBX tools must be installed from https://help.autodesk.com/view/FBX/2020/ENU/?guid=FBX_Developer_Help_scripting_with_python_fbx_installing_python_fbx_html")
+    print(
+        "Error: FBX library failed to load - importing FBX data will not succeed. Message: {}".format(
+            e
+        )
+    )
+    print("FBX Python SDK must be installed")
 
 
 def fbx_to_npy(file_name_in, root_joint_name, fps):
     """
     This function reads in an fbx file, and saves the relevant info to a numpy array
 
-    Fbx files have a series of animation curves, each of which has animations at different 
+    Fbx files have a series of animation curves, each of which has animations at different
     times. This script assumes that for mocap data, there is only one animation curve that
     contains all the joints. Otherwise it is unclear how to read in the data.
 
@@ -73,7 +77,7 @@ def fbx_to_npy(file_name_in, root_joint_name, fps):
     animation curve attached
     """
 
-    search_root = (root_joint_name is None or root_joint_name == "")
+    search_root = root_joint_name is None or root_joint_name == ""
 
     # Get the root node of the skeleton, which is the child of the scene's root node
     possible_root_nodes = [fbx_scene.GetRootNode()]
@@ -111,7 +115,7 @@ def fbx_to_npy(file_name_in, root_joint_name, fps):
     anim_range, frame_count, frame_rate = _get_frame_count(fbx_scene)
 
     local_transforms = []
-    #for frame in range(frame_count):
+    # for frame in range(frame_count):
     time_sec = anim_range.GetStart().GetSecondDouble()
     time_range_sec = anim_range.GetStop().GetSecondDouble() - time_sec
     fbx_fps = frame_count / time_range_sec
@@ -125,7 +129,7 @@ def fbx_to_npy(file_name_in, root_joint_name, fps):
         transforms_current_frame = []
 
         # Fbx has a unique time object which you need
-        #fbx_time = root_curve.KeyGetTime(frame)
+        # fbx_time = root_curve.KeyGetTime(frame)
         for joint in joint_list:
             arr = np.array(_recursive_to_list(joint.EvaluateLocalTransform(fbx_time)))
             scales = np.array(_recursive_to_list(joint.EvaluateLocalScaling(fbx_time)))
@@ -142,12 +146,13 @@ def fbx_to_npy(file_name_in, root_joint_name, fps):
             transforms_current_frame.append(arr)
         local_transforms.append(transforms_current_frame)
 
-        time_sec += (1.0/fbx_fps)
+        time_sec += 1.0 / fbx_fps
 
     local_transforms = np.array(local_transforms)
     print("Frame Count: ", len(local_transforms))
 
     return joint_names, parents, local_transforms, fbx_fps
+
 
 def _get_frame_count(fbx_scene):
     # Get the animation stacks and layers, in order to pull off animation curves later
@@ -173,6 +178,7 @@ def _get_frame_count(fbx_scene):
     frame_count = duration.GetFrameCount(True)
 
     return anim_range, frame_count, fps
+
 
 def _get_animation_curve(joint, fbx_scene):
     # Get the animation stacks and layers, in order to pull off animation curves later
@@ -221,9 +227,7 @@ def _get_animation_curve(joint, fbx_scene):
         if _check_longest_curve(curve, max_curve_key_count):
             longest_curve = curve
 
-        curve = joint.LclRotation.GetCurve(
-            animation_layer, "X"
-        )
+        curve = joint.LclRotation.GetCurve(animation_layer, "X")
         if _check_longest_curve(curve, max_curve_key_count):
             longest_curve = curve
 
@@ -231,7 +235,6 @@ def _get_animation_curve(joint, fbx_scene):
 
 
 def _get_skeleton(root_joint):
-
     # Do a depth first search of the skeleton to extract all the joints
     joint_list = [root_joint]
     joint_names = [root_joint.GetName()]
@@ -257,7 +260,7 @@ def _get_skeleton(root_joint):
 
 def _recursive_to_list(array):
     """
-    Takes some iterable that might contain iterables and converts it to a list of lists 
+    Takes some iterable that might contain iterables and converts it to a list of lists
     [of lists... etc]
 
     Mainly used for converting the strange fbx wrappers for c++ arrays into python lists
