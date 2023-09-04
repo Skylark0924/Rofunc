@@ -179,3 +179,5 @@ doc/source/auto_examples
 doc/source/apidocs
 .vscode/
 *.pth
+
+data/
