@@ -20,9 +20,8 @@ import torch
 
 class HumanoidSim(RobotSim):
     def __init__(self, args, **kwargs):
-        args.up_axis = 'Z'
-        asset_file = "mjcf/amp_humanoid.xml"
-        super().__init__(args, robot_name="human", asset_file=asset_file, **kwargs)
+        # args.up_axis = 'Z'
+        super().__init__(args, robot_name="humanoid", **kwargs)
 
     def setup_robot_dof_prop(self, **kwargs):
         from isaacgym import gymtorch
@@ -144,10 +143,10 @@ if __name__ == '__main__':
     args.use_gpu_pipeline = False
     sim = HumanoidSim(args)
     sim.init()
-    # sim.show()
-    import os
-
-    motion_file = "amp_humanoid_backflip.npy"
-    motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                    "../../examples/data/amp/" + motion_file)
-    sim.run_traj_npy(motion_file_path)
+    sim.show()
+    # import os
+    #
+    # motion_file = "amp_humanoid_backflip.npy"
+    # motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    #                                 "../../examples/data/amp/" + motion_file)
+    # sim.run_traj_npy(motion_file_path)
