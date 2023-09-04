@@ -41,6 +41,24 @@ def load_agent_config(agent_name):
     return OmegaConf.load(agent_config_file_path)
 
 
+def load_ikea_config(ikea_name):
+    """Load the configs stored in ikea_name.yaml.
+
+    Args:
+        ikea_name (str): Name of the config file under config/ikea for the ikea furniture.
+
+    Returns:
+        (dict): A dict of configs.
+    """
+    agent_config_file_path = os.path.join(
+        os.path.dirname(__file__), f"ikea/{ikea_name}.yaml"
+    )
+    if not os.path.exists(agent_config_file_path):
+        raise FileNotFoundError(f"{agent_config_file_path} does not exist")
+
+    return OmegaConf.load(agent_config_file_path)
+
+
 def get_config(
     config_path=None, config_name=None, args=None, debug=False, absl_config_path=None
 ) -> DictConfig:

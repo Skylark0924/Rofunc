@@ -16,15 +16,17 @@ import isaacgym
 import os
 from github import Github
 
+from isaacgym import gymapi
+
 from rofunc.simulator.franka_sim import FrankaSim
 from rofunc.utils.logger.beauty_logger import beauty_print
+from rofunc.config.utils import load_ikea_config
 from rofunc.utils.downloader.github_downloader import download_folder, download_file
 
 
 class IkeaSim:
-    def __init__(self, args, furniture_name, **kwargs):
+    def __init__(self, args, furniture_ids, **kwargs):
         self.args = args
-        self.furniture_name = furniture_name
         self.robot_sim = FrankaSim(args)
         self.robot_sim.setup_robot_dof_prop()
 
@@ -32,32 +34,35 @@ class IkeaSim:
             os.path.dirname(os.path.realpath(__file__)), "assets"
         )
         self._texture_asset_folder = os.path.join(self.asset_root, "mjcf/textures")
-        self.furniture_asset_folder = os.path.join(self.asset_root, "mjcf/ikea")
-        self._init_env_w_furniture()
+        self._furniture_asset_folder = os.path.join(self.asset_root, "mjcf/ikea")
 
-    def _init_env_w_furniture(self):
-        from isaacgym import gymapi
+        for furniture_id in furniture_ids:
+            ikea_config = load_ikea_config(furniture_id)
+            self._init_furniture(ikea_config)
+
+    def _init_furniture(self, ikea_config):
+        furniture_name = ikea_config["name"]
 
         asset_options = gymapi.AssetOptions()
-        asset_options.flip_visual_attachments = False
+        asset_options.flip_visual_attachments = ikea_config["flip_visual_attachments"]
+        asset_options.fix_base_link = ikea_config["fix_base_link"]
         asset_options.collapse_fixed_joints = True
-        asset_options.fix_base_link = True
         asset_options.disable_gravity = False
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
         asset_options.armature = 0.005
 
         furniture_model_folder = os.path.join(
-            self.furniture_asset_folder, f"{self.furniture_name}"
+            self._furniture_asset_folder, f"{furniture_name}"
         )
         furniture_description = os.path.join(
-            self.furniture_asset_folder, f"{self.furniture_name}.xml"
+            self._furniture_asset_folder, f"{furniture_name}.xml"
         )
 
         repo = Github().get_repo("clvrai/furniture")
         if not os.path.exists(furniture_description):
             download_file(
                 repo,
-                f"furniture/env/models/assets/objects/{self.furniture_name}.xml",
+                f"furniture/env/models/assets/objects/{furniture_name}.xml",
                 furniture_description,
             )
 
@@ -65,7 +70,7 @@ class IkeaSim:
             os.makedirs(furniture_model_folder)
             download_folder(
                 repo,
-                f"furniture/env/models/assets/objects/{self.furniture_name}",
+                f"furniture/env/models/assets/objects/{furniture_name}",
                 furniture_model_folder,
                 False,
             )
@@ -91,54 +96,62 @@ class IkeaSim:
         # Worldbody with multiple direct child bodies not currently supported!
         # You need create a parent body for all child bodies
         furniture_asset = self.robot_sim.gym.load_asset(
-            self.robot_sim.sim, self.asset_root, f"mjcf/ikea/{self.furniture_name}.xml", asset_options
+            self.robot_sim.sim,
+            self.asset_root,
+            ikea_config["description_file_path"],
+            asset_options,
         )
         furniture_assets.append(furniture_asset)
 
+        pose = ikea_config["initial_base_pose"]
         furniture_pose = gymapi.Transform()
-        furniture_pose.p = gymapi.Vec3(0.7, 0.3, 0)
-        furniture_pose.r = gymapi.Quat(-0.707107, 0.0, 0.0, 0.707107)
+        furniture_pose.p = gymapi.Vec3(pose[0], pose[1], pose[2])
+        furniture_pose.r = gymapi.Quat(pose[-4], pose[-3], pose[-2], pose[-1])
         furniture_poses.append(furniture_pose)
 
         furniture_handles = []
         for i in range(self.robot_sim.num_envs):
             # add furniture
             for j in range(len(furniture_assets)):
-                handle = self.robot_sim.gym.create_actor(
+                actor_handle = self.robot_sim.gym.create_actor(
                     self.robot_sim.envs[i],
                     furniture_assets[j],
                     furniture_poses[j],
-                    "furniture",
+                    furniture_name,
                     i,
                     i,
                     1,
                 )
-                actor_handle = self.robot_sim.gym.find_actor_handle(
-                    self.robot_sim.envs[i], "furniture"
-                )
+                for body_name in ikea_config["body_names"]:
+                    self._apply_texture(
+                        self.robot_sim.envs[i],
+                        actor_handle,
+                        body_name,
+                        ikea_config["texture_file_name"],
+                    )
 
-                rigid_body_index = self.robot_sim.gym.find_actor_rigid_body_index(
-                    self.robot_sim.envs[i], actor_handle, "furniture", gymapi.DOMAIN_ENV
-                )
-                texture_handle = self.robot_sim.gym.get_rigid_body_texture(
-                    self.robot_sim.envs[i],
-                    handle,
-                    rigid_body_index,
-                    gymapi.MESH_VISUAL,
-                )
-                self.robot_sim.gym.set_rigid_body_texture(
-                    self.robot_sim.envs[i],
-                    handle,
-                    rigid_body_index,
-                    gymapi.MESH_VISUAL_AND_COLLISION,
-                    texture_handle,
-                )
-                # self.robot_sim.gym.set_rigid_body_color(self.robot_sim.envs[i], handle, rigid_body_index,
-                #                                         gymapi.MESH_VISUAL_AND_COLLISION, gymapi.Vec3(0.8, 0.8, 0.1))
+                # self.robot_sim.gym.set_rigid_body_color(self.robot_sim.envs[i], actor_handle, rigid_body_index,
+                #                                         gymapi.MESH_VISUAL, gymapi.Vec3(0.8, 0.1, 0.1))
                 self.robot_sim.gym.enable_actor_dof_force_sensors(
-                    self.robot_sim.envs[i], handle
+                    self.robot_sim.envs[i], actor_handle
                 )
-                furniture_handles.append(handle)
+                furniture_handles.append(actor_handle)
+
+    def _apply_texture(self, env, actor_handle, body_name, texture_file_name=None):
+        rigid_body_index = self.robot_sim.gym.find_actor_rigid_body_index(
+            env, actor_handle, body_name, gymapi.DOMAIN_ACTOR
+        )
+        texture_handle = self.robot_sim.gym.create_texture_from_file(
+            self.robot_sim.sim,
+            os.path.join(self._texture_asset_folder, texture_file_name),
+        )
+        self.robot_sim.gym.set_rigid_body_texture(
+            env,
+            actor_handle,
+            rigid_body_index,
+            gymapi.MESH_VISUAL,
+            texture_handle,
+        )
 
     def show(self):
         self.robot_sim.show()
@@ -150,6 +163,5 @@ if __name__ == "__main__":
     args = gymutil.parse_arguments()
     args.use_gpu_pipeline = False
 
-    furniture_name = "box_ivar_0666"
-    ikea_sim = IkeaSim(args, furniture_name)
+    ikea_sim = IkeaSim(args, ["shelf_liden_1"])
     ikea_sim.show()
