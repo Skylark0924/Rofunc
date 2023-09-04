@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import click
+
 from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonState, SkeletonMotion
 from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skeleton_state
 
@@ -19,7 +22,7 @@ from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skele
 def get_tpose_from_fbx(fbx_file_path, save_path, verbose=False):
     motion = SkeletonMotion.from_fbx(
         fbx_file_path=fbx_file_path,
-        root_joint="pelvis",
+        root_joint="Reference",
         fps=60
     )
 
@@ -32,7 +35,18 @@ def get_tpose_from_fbx(fbx_file_path, save_path, verbose=False):
         plot_skeleton_state(source_tpose)
 
 
+@click.command()
+@click.argument("fbx_name")
+def main(fbx_name):
+    data_dir = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "../../../../data"
+    )
+    os.makedirs(data_dir, exist_ok=True)
+    fbx_files = [os.path.join(data_dir, f"{fbx_name}.fbx")]
+    for fbx in fbx_files:
+        save_path = os.path.join(data_dir, f"{fbx_name}_tpose.npy")
+        get_tpose_from_fbx(fbx, save_path, verbose=True)
+
+
 if __name__ == '__main__':
-    fbx_file_path = "/home/ubuntu/Data/fbx/armchair003.fbx"
-    save_path = "/home/ubuntu/Data/fbx/armchair003_tpose.npy"
-    get_tpose_from_fbx(fbx_file_path, save_path, verbose=True)
+    main()
