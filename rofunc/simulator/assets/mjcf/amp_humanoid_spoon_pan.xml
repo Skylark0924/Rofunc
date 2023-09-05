@@ -4,6 +4,14 @@
 
   <option timestep="0.00555"/>
 
+  <compiler meshdir="models"/>
+<!--  <compiler meshdir="/home/dzp/Rofunc/rofunc/simulator/assets/models"/>-->
+
+  <asset>
+    <mesh name="spoon_mesh" file="spoon.obj"/>
+    <mesh name="pan_mesh" file="pan.obj"/>
+  </asset>
+
   <default>
     <motor ctrlrange="-1 1" ctrllimited="true"/>
     <default class="body">
@@ -70,9 +78,8 @@
               <geom name="right_hand" type="sphere" size=".04" density="1865"/>
               <site name="right_hand" class="touch" type="sphere" size=".041"/>
 
-              <body name="sword" pos="0.74 0 0">
-                <geom name="sword_hilt" fromto="-0.87 0 0 -0.64 0 0" size="0.023" density="300"/>
-			          <geom name="sword_blade" type="box" pos="-0.34 0 0" size="0.34 0.01 0.035" density="600"/>
+              <body name="spoon" pos="0.0 0 0">
+                <geom name="spoon" type="mesh" euler="-30 30 0" mesh="spoon_mesh" density="300"/>
               </body>
             </body>
           </body>
@@ -90,13 +97,16 @@
             <geom name="left_lower_arm" fromto="0 0 -0.0525 0 0 -0.1875" size="0.04" density="1056"/>
             <site name="left_lower_arm" class="touch" pos="0 0 -0.1" size="0.041 0.0685" zaxis="0 0 1"/>
 
-            <body name="shield" pos="0 0.07 -0.12">
-              <geom name="shield" type="cylinder" fromto="0 0 0 0 0.03 0" size="0.3" density="250"/>
-            </body>
-
             <body name="left_hand" pos="0 0 -0.258947">
+              <joint name="left_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
+              <joint name="left_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10" armature=".003"/>
+              <joint name="left_hand_z" axis="0 0 1"  range="-90 90" stiffness="100" damping="10" armature=".003"/>
               <geom name="left_hand" type="sphere" size=".04" density="1865"/>
               <site name="left_hand" class="touch" type="sphere" size=".041"/>
+
+              <body name="pan" pos="0.0 0 0">
+                <geom name="pan" type="mesh" euler="170 -30 0" mesh="pan_mesh" density="300"/>
+              </body>
             </body>
           </body>
         </body>
