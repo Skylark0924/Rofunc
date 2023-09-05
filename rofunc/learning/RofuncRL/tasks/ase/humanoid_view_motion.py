@@ -34,21 +34,38 @@ from rofunc.learning.RofuncRL.tasks.ase.humanoid_amp import HumanoidAMP
 
 
 class HumanoidViewMotionTask(HumanoidAMP):
-    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
+    def __init__(
+        self,
+        cfg,
+        rl_device,
+        sim_device,
+        graphics_device_id,
+        headless,
+        virtual_screen_capture,
+        force_render,
+    ):
         self.cfg = cfg
         control_freq_inv = cfg["env"]["controlFrequencyInv"]
 
         cfg["env"]["controlFrequencyInv"] = 1
         cfg["env"]["pdControl"] = False
 
-        super().__init__(cfg=cfg, rl_device=rl_device, sim_device=sim_device,
-                         graphics_device_id=graphics_device_id, headless=headless,
-                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
+        super().__init__(
+            cfg=cfg,
+            rl_device=rl_device,
+            sim_device=sim_device,
+            graphics_device_id=graphics_device_id,
+            headless=headless,
+            virtual_screen_capture=virtual_screen_capture,
+            force_render=force_render,
+        )
 
         self._motion_dt = control_freq_inv * self.sim_params.dt
 
         num_motions = self._motion_lib.num_motions()
-        self._motion_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.long)
+        self._motion_ids = torch.arange(
+            self.num_envs, device=self.device, dtype=torch.long
+        )
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
 
     def pre_physics_step(self, actions):
@@ -74,35 +91,51 @@ class HumanoidViewMotionTask(HumanoidAMP):
         motion_ids = self._motion_ids
         motion_times = self.progress_buf * self._motion_dt
 
-        root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
-            = self._motion_lib.get_motion_state(motion_ids, motion_times)
+        (
+            root_pos,
+            root_rot,
+            dof_pos,
+            root_vel,
+            root_ang_vel,
+            dof_vel,
+            key_pos,
+        ) = self._motion_lib.get_motion_state(motion_ids, motion_times)
 
         root_vel = torch.zeros_like(root_vel)
         root_ang_vel = torch.zeros_like(root_ang_vel)
         dof_vel = torch.zeros_like(dof_vel)
 
         env_ids = torch.arange(self.num_envs, dtype=torch.long, device=self.device)
-        self._set_env_state(env_ids=env_ids,
-                            root_pos=root_pos,
-                            root_rot=root_rot,
-                            dof_pos=dof_pos,
-                            root_vel=root_vel,
-                            root_ang_vel=root_ang_vel,
-                            dof_vel=dof_vel)
+        self._set_env_state(
+            env_ids=env_ids,
+            root_pos=root_pos,
+            root_rot=root_rot,
+            dof_pos=dof_pos,
+            root_vel=root_vel,
+            root_ang_vel=root_ang_vel,
+            dof_vel=dof_vel,
+        )
 
         env_ids_int32 = self._humanoid_actor_ids[env_ids]
-        self.gym.set_actor_root_state_tensor_indexed(self.sim,
-                                                     gymtorch.unwrap_tensor(self._root_states),
-                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-        self.gym.set_dof_state_tensor_indexed(self.sim,
-                                              gymtorch.unwrap_tensor(self._dof_state),
-                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+        self.gym.set_actor_root_state_tensor_indexed(
+            self.sim,
+            gymtorch.unwrap_tensor(self._root_states),
+            gymtorch.unwrap_tensor(env_ids_int32),
+            len(env_ids_int32),
+        )
+        self.gym.set_dof_state_tensor_indexed(
+            self.sim,
+            gymtorch.unwrap_tensor(self._dof_state),
+            gymtorch.unwrap_tensor(env_ids_int32),
+            len(env_ids_int32),
+        )
         return
 
     def _compute_reset(self):
         motion_lengths = self._motion_lib.get_motion_length(self._motion_ids)
-        self.reset_buf[:], self._terminate_buf[:] = compute_view_motion_reset(self.reset_buf, motion_lengths,
-                                                                              self.progress_buf, self._motion_dt)
+        self.reset_buf[:], self._terminate_buf[:] = compute_view_motion_reset(
+            self.reset_buf, motion_lengths, self.progress_buf, self._motion_dt
+        )
         return
 
     def _reset_actors(self, env_ids):
@@ -110,7 +143,9 @@ class HumanoidViewMotionTask(HumanoidAMP):
 
     def _reset_env_tensors(self, env_ids):
         num_motions = self._motion_lib.num_motions()
-        self._motion_ids[env_ids] = torch.remainder(self._motion_ids[env_ids] + self.num_envs, num_motions)
+        self._motion_ids[env_ids] = torch.remainder(
+            self._motion_ids[env_ids] + self.num_envs, num_motions
+        )
 
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
@@ -123,5 +158,7 @@ def compute_view_motion_reset(reset_buf, motion_lengths, progress_buf, dt):
     # type: (Tensor, Tensor, Tensor, float) -> Tuple[Tensor, Tensor]
     terminated = torch.zeros_like(reset_buf)
     motion_times = progress_buf * dt
-    reset = torch.where(motion_times > motion_lengths, torch.ones_like(reset_buf), terminated)
+    reset = torch.where(
+        motion_times > motion_lengths, torch.ones_like(reset_buf), terminated
+    )
     return reset, terminated
