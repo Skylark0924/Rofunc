@@ -22,7 +22,7 @@ from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skele
 def get_tpose_from_fbx(fbx_file_path, save_path, verbose=False):
     motion = SkeletonMotion.from_fbx(
         fbx_file_path=fbx_file_path,
-        root_joint="Reference",
+        root_joint="Hips",
         fps=60
     )
 
@@ -44,7 +44,7 @@ def main(fbx_name):
     os.makedirs(data_dir, exist_ok=True)
     fbx_files = [os.path.join(data_dir, f"{fbx_name}.fbx")]
     for fbx in fbx_files:
-        save_path = os.path.join(data_dir, f"{fbx_name}_tpose.npy")
+        save_path = os.path.join(data_dir, "tpose.npy")
         get_tpose_from_fbx(fbx, save_path, verbose=True)
 
 
