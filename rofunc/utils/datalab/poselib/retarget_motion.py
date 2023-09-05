@@ -208,6 +208,8 @@ def project_joints(motion):
 def main(retarget_cfg_path):
     # load retarget config
     with open(retarget_cfg_path) as f:
+    retarget_data_path = "data/configs/retarget_clover_to_amp.json"
+    with open(retarget_data_path) as f:
         retarget_data = json.load(f)
 
     # load and visualize t-pose files
