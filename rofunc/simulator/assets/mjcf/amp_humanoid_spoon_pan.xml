@@ -182,6 +182,9 @@
     <motor name='left_shoulder_y' 	gear='100' 	joint='left_shoulder_y'/>
     <motor name='left_shoulder_z' 	gear='100' 	joint='left_shoulder_z'/>
     <motor name='left_elbow'      	gear='70' 	joint='left_elbow'/>
+    <motor name='left_hand_x' 	  	gear='50' 	joint='left_hand_x'/>
+    <motor name='left_hand_y'    	  gear='50' 	joint='left_hand_y'/>
+    <motor name='left_hand_z'    	  gear='50' 	joint='left_hand_z'/>
     <motor name='right_hip_x'     	gear='200' 	joint='right_hip_x'/>
     <motor name='right_hip_z'     	gear='200' 	joint='right_hip_z'/>
     <motor name='right_hip_y'     	gear='200' 	joint='right_hip_y'/>
