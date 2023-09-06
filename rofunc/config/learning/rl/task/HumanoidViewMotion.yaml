@@ -20,7 +20,7 @@ env:
   numAMPObsSteps: 10
 
   localRootObs: False
-  keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot", "spoon", "pan"]
+  keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot"]
   contactBodies: ["right_foot", "left_foot"]
   terminationHeight: 0.15
   enableEarlyTermination: True
@@ -29,7 +29,7 @@ env:
   motion_file: None
 
   asset:
-    assetFileName: "mjcf/amp_humanoid_spoon_pan.xml"
+    assetFileName: "mjcf/amp_humanoid.xml"
 
   plane:
     staticFriction: 1.0
