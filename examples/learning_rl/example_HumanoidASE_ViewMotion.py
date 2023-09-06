@@ -1,15 +1,15 @@
 import click
 
-from rofunc.config.utils import omegaconf_to_dict, get_config
+from rofunc.config.utils import omegaconf_to_dict, get_config, load_view_motion_config
 from rofunc.learning.RofuncRL.tasks import task_map
 from rofunc.learning.RofuncRL.trainers import trainer_map
-from rofunc.learning.utils.utils import set_seed
 
 
-def inference(motion_file):
-    # Config task and trainer parameters for Isaac Gym environments
+def inference(config_name, motion_file):
+    view_motion_config = load_view_motion_config(config_name)
+    task_name = "HumanoidViewMotion"
     args_overrides = [
-        "task=HumanoidViewMotion",
+        f"task={task_name}",
         "train=HumanoidViewMotionASERofuncRL",
         "sim_device=cuda:0",
         "rl_device=cuda:0",
@@ -19,12 +19,15 @@ def inference(motion_file):
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg.task.env.motion_file = motion_file
+
+    # Overwrite
+    cfg.task.env.asset.assetFileName = view_motion_config["asset_name"]
+    cfg.task.env.asset.assetBodyNum = view_motion_config["asset_body_num"]
+
     cfg_dict = omegaconf_to_dict(cfg.task)
 
-    set_seed(cfg.train.Trainer.seed)
-
     # Instantiate the Isaac Gym environment
-    infer_env = task_map["HumanoidViewMotion"](
+    infer_env = task_map[task_name](
         cfg=cfg_dict,
         rl_device=cfg.rl_device,
         sim_device=cfg.sim_device,
@@ -39,7 +42,7 @@ def inference(motion_file):
         cfg=cfg.train,
         env=infer_env,
         device=cfg.rl_device,
-        env_name="HumanoidViewMotion",
+        env_name=task_name,
         hrl=False,
         inference=True,
     )
@@ -50,8 +53,9 @@ def inference(motion_file):
 
 @click.command()
 @click.argument("motion_file")
-def main(motion_file):
-    inference(motion_file)
+@click.option("--config_file", default="HumanoidSpoonPanSimple")
+def main(config_file, motion_file):
+    inference(config_file, motion_file)
 
 
 if __name__ == "__main__":

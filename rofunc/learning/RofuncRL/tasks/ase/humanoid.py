@@ -303,10 +303,10 @@ class Humanoid(VecTask):
         Returns:
 
         """
-        asset_file = self.cfg["env"]["asset"]["assetFileName"]
+        asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
         num_key_bodies = len(key_bodies)
 
-        if asset_file == "mjcf/amp_humanoid.xml":
+        if asset_body_num == 15:
             # The following are: body_name (body_id/body's joint num to its parent/offset pair)
             # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
             # right_hand (5/0, omitted as no joint to parent)
@@ -318,13 +318,13 @@ class Humanoid(VecTask):
             self._dof_obs_size = 72
             self._num_actions = 28
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
-        elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
+        elif asset_body_num == 16:
             self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 11, 12, 13, 14, 15, 16]
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 21, 24, 27, 28, 31]
             self._dof_obs_size = 78
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-        elif asset_file == "mjcf/amp_humanoid_spoon_pan.xml":
+        elif asset_body_num == 17:
             # The following are: body_name (body_id/body's joint num to its parent/offset pair)
             # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
             # right_hand (5/3/10 13), spoon (6/0), left_upper_arm (7/3/13 16), left_lower_arm (8/1/16 17),
@@ -335,13 +335,8 @@ class Humanoid(VecTask):
             self._dof_obs_size = 84
             self._num_actions = 34
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-            # self._dof_body_ids = [1, 2, 3, 4, 7, 8, 11, 12, 13, 14, 15, 16]  # len=12
-            # self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]  # len=12+1
-            # self._dof_obs_size = 72  # 12 * 6
-            # self._num_actions = 28
-            # self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
         else:
-            print("Unsupported character config file: {}".format(asset_file))
+            print(f"Unsupported humanoid body num: {asset_body_num}")
             assert False
 
         return
@@ -360,6 +355,7 @@ class Humanoid(VecTask):
             head_term_height, self._termination_heights[head_id]
         )
 
+        # TODO dzp/ljj fix this
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         if asset_file == "mjcf/amp_humanoid_sword_shield.xml":
             left_arm_id = self.gym.find_actor_rigid_body_handle(
@@ -451,7 +447,6 @@ class Humanoid(VecTask):
         segmentation_id = 0
 
         start_pose = gymapi.Transform()
-        asset_file = self.cfg["env"]["asset"]["assetFileName"]
         char_h = 0.89
 
         start_pose.p = gymapi.Vec3(*get_axis_params(char_h, self.up_axis_idx))
