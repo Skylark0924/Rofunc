@@ -41,14 +41,12 @@ print("MOVING MOTION DATA TO GPU, USING CACHE:", USE_CACHE)
 if not USE_CACHE:
     old_numpy = torch.Tensor.numpy
 
-
     class Patch:
         def numpy(self):
             if self.is_cuda:
                 return self.to("cpu").numpy()
             else:
                 return old_numpy(self)
-
 
     torch.Tensor.numpy = Patch.numpy
 
@@ -90,9 +88,17 @@ class DeviceCache:
         return out
 
 
-class MotionLib():
-    def __init__(self, motion_file, dof_body_ids, dof_offsets,
-                 key_body_ids, device):
+class MotionLib:
+    def __init__(self, motion_file, dof_body_ids, dof_offsets, key_body_ids, device):
+        """
+
+        Args:
+            motion_file:
+            dof_body_ids:
+            dof_offsets:
+            key_body_ids:
+            device:
+        """
         self._dof_body_ids = dof_body_ids
         self._dof_offsets = dof_offsets
         self._num_dof = dof_offsets[-1]
@@ -105,7 +111,9 @@ class MotionLib():
         self.grs = torch.cat([m.global_rotation for m in motions], dim=0).float()
         self.lrs = torch.cat([m.local_rotation for m in motions], dim=0).float()
         self.grvs = torch.cat([m.global_root_velocity for m in motions], dim=0).float()
-        self.gravs = torch.cat([m.global_root_angular_velocity for m in motions], dim=0).float()
+        self.gravs = torch.cat(
+            [m.global_root_angular_velocity for m in motions], dim=0
+        ).float()
         self.dvs = torch.cat([m.dof_vels for m in motions], dim=0).float()
 
         lengths = self._motion_num_frames
@@ -113,7 +121,9 @@ class MotionLib():
         lengths_shifted[0] = 0
         self.length_starts = lengths_shifted.cumsum(0)
 
-        self.motion_ids = torch.arange(len(self._motions), dtype=torch.long, device=self._device)
+        self.motion_ids = torch.arange(
+            len(self._motions), dtype=torch.long, device=self._device
+        )
 
         return
 
@@ -127,7 +137,9 @@ class MotionLib():
         return self._motions[motion_id]
 
     def sample_motions(self, n):
-        motion_ids = torch.multinomial(self._motion_weights, num_samples=n, replacement=True)
+        motion_ids = torch.multinomial(
+            self._motion_weights, num_samples=n, replacement=True
+        )
 
         # m = self.num_motions()
         # motion_ids = np.random.choice(m, size=n, replace=True, p=self._motion_weights)
@@ -139,8 +151,8 @@ class MotionLib():
         phase = torch.rand(motion_ids.shape, device=self._device)
 
         motion_len = self._motion_lengths[motion_ids]
-        if (truncate_time is not None):
-            assert (truncate_time >= 0.0)
+        if truncate_time is not None:
+            assert truncate_time >= 0.0
             motion_len -= truncate_time
 
         motion_time = phase * motion_len
@@ -158,7 +170,9 @@ class MotionLib():
         num_frames = self._motion_num_frames[motion_ids]
         dt = self._motion_dt[motion_ids]
 
-        frame_idx0, frame_idx1, blend = self._calc_frame_blend(motion_times, motion_len, num_frames, dt)
+        frame_idx0, frame_idx1, blend = self._calc_frame_blend(
+            motion_times, motion_len, num_frames, dt
+        )
 
         f0l = frame_idx0 + self.length_starts[motion_ids]
         f1l = frame_idx1 + self.length_starts[motion_ids]
@@ -181,7 +195,16 @@ class MotionLib():
 
         dof_vel = self.dvs[f0l]
 
-        vals = [root_pos0, root_pos1, local_rot0, local_rot1, root_vel, root_ang_vel, key_pos0, key_pos1]
+        vals = [
+            root_pos0,
+            root_pos1,
+            local_rot0,
+            local_rot1,
+            root_vel,
+            root_ang_vel,
+            key_pos0,
+            key_pos1,
+        ]
         for v in vals:
             assert v.dtype != torch.float64
 
@@ -194,7 +217,9 @@ class MotionLib():
         blend_exp = blend.unsqueeze(-1)
         key_pos = (1.0 - blend_exp) * key_pos0 + blend_exp * key_pos1
 
-        local_rot = torch_utils.slerp(local_rot0, local_rot1, torch.unsqueeze(blend, axis=-1))
+        local_rot = torch_utils.slerp(
+            local_rot0, local_rot1, torch.unsqueeze(blend, axis=-1)
+        )
         dof_pos = self._local_rotation_to_dof(local_rot)
 
         return root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos
@@ -213,10 +238,11 @@ class MotionLib():
         motion_files, motion_weights = self._fetch_motion_files(motion_file)
         num_motion_files = len(motion_files)
         import tqdm
-        with tqdm.trange(num_motion_files, ncols=100, colour='green') as t_bar:
+
+        with tqdm.trange(num_motion_files, ncols=100, colour="green") as t_bar:
             for f in t_bar:
                 curr_file = motion_files[f]
-                t_bar.set_postfix_str("Loading: {:s}".format(curr_file.split('/')[-1]))
+                t_bar.set_postfix_str("Loading: {:s}".format(curr_file.split("/")[-1]))
                 curr_motion = SkeletonMotion.from_file(curr_file)
 
                 motion_fps = curr_motion.fps
@@ -237,9 +263,12 @@ class MotionLib():
                     curr_motion = DeviceCache(curr_motion, self._device)
                 else:
                     curr_motion.tensor = curr_motion.tensor.to(self._device)
-                    curr_motion._skeleton_tree._parent_indices = curr_motion._skeleton_tree._parent_indices.to(self._device)
-                    curr_motion._skeleton_tree._local_translation = curr_motion._skeleton_tree._local_translation.to(
-                        self._device)
+                    curr_motion._skeleton_tree._parent_indices = (
+                        curr_motion._skeleton_tree._parent_indices.to(self._device)
+                    )
+                    curr_motion._skeleton_tree._local_translation = (
+                        curr_motion._skeleton_tree._local_translation.to(self._device)
+                    )
                     curr_motion._rotation = curr_motion._rotation.to(self._device)
 
                 self._motions.append(curr_motion)
@@ -249,37 +278,51 @@ class MotionLib():
                 self._motion_weights.append(curr_weight)
                 self._motion_files.append(curr_file)
 
-        self._motion_lengths = torch.tensor(self._motion_lengths, device=self._device, dtype=torch.float32)
+        self._motion_lengths = torch.tensor(
+            self._motion_lengths, device=self._device, dtype=torch.float32
+        )
 
-        self._motion_weights = torch.tensor(self._motion_weights, dtype=torch.float32, device=self._device)
+        self._motion_weights = torch.tensor(
+            self._motion_weights, dtype=torch.float32, device=self._device
+        )
         self._motion_weights /= self._motion_weights.sum()
 
-        self._motion_fps = torch.tensor(self._motion_fps, device=self._device, dtype=torch.float32)
-        self._motion_dt = torch.tensor(self._motion_dt, device=self._device, dtype=torch.float32)
-        self._motion_num_frames = torch.tensor(self._motion_num_frames, device=self._device)
+        self._motion_fps = torch.tensor(
+            self._motion_fps, device=self._device, dtype=torch.float32
+        )
+        self._motion_dt = torch.tensor(
+            self._motion_dt, device=self._device, dtype=torch.float32
+        )
+        self._motion_num_frames = torch.tensor(
+            self._motion_num_frames, device=self._device
+        )
 
         num_motions = self.num_motions()
         total_len = self.get_total_length()
 
-        print("Loaded {:d} motions with a total length of {:.3f}s.".format(num_motions, total_len))
+        print(
+            "Loaded {:d} motions with a total length of {:.3f}s.".format(
+                num_motions, total_len
+            )
+        )
 
         return
 
     def _fetch_motion_files(self, motion_file):
         ext = os.path.splitext(motion_file)[1]
-        if (ext == ".yaml"):
+        if ext == ".yaml":
             dir_name = os.path.dirname(motion_file)
             motion_files = []
             motion_weights = []
 
-            with open(os.path.join(os.getcwd(), motion_file), 'r') as f:
+            with open(os.path.join(os.getcwd(), motion_file), "r") as f:
                 motion_config = yaml.load(f, Loader=yaml.SafeLoader)
 
-            motion_list = motion_config['motions']
+            motion_list = motion_config["motions"]
             for motion_entry in motion_list:
-                curr_file = motion_entry['file']
-                curr_weight = motion_entry['weight']
-                assert (curr_weight >= 0)
+                curr_file = motion_entry["file"]
+                curr_weight = motion_entry["weight"]
+                assert curr_weight >= 0
 
                 curr_file = os.path.join(dir_name, curr_file)
                 motion_weights.append(curr_weight)
@@ -291,7 +334,6 @@ class MotionLib():
         return motion_files, motion_weights
 
     def _calc_frame_blend(self, time, len, num_frames, dt):
-
         phase = time / len
         phase = torch.clip(phase, 0.0, 1.0)
 
@@ -328,28 +370,32 @@ class MotionLib():
         dof_offsets = self._dof_offsets
 
         n = local_rot.shape[0]
-        dof_pos = torch.zeros((n, self._num_dof), dtype=torch.float, device=self._device)
+        dof_pos = torch.zeros(
+            (n, self._num_dof), dtype=torch.float, device=self._device
+        )
 
         for j in range(len(body_ids)):
             body_id = body_ids[j]
             joint_offset = dof_offsets[j]
             joint_size = dof_offsets[j + 1] - joint_offset
 
-            if (joint_size == 3):
+            if joint_size == 3:
                 joint_q = local_rot[:, body_id]
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
-                dof_pos[:, joint_offset:(joint_offset + joint_size)] = joint_exp_map
-            elif (joint_size == 1):
+                dof_pos[:, joint_offset : (joint_offset + joint_size)] = joint_exp_map
+            elif joint_size == 1:
                 joint_q = local_rot[:, body_id]
                 joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                joint_theta = joint_theta * joint_axis[..., 1]  # assume joint is always along y axis
+                joint_theta = (
+                    joint_theta * joint_axis[..., 1]
+                )  # assume joint is always along y axis
 
                 joint_theta = normalize_angle(joint_theta)
                 dof_pos[:, joint_offset] = joint_theta
 
             else:
                 print("Unsupported joint type")
-                assert (False)
+                assert False
 
         return dof_pos
 
@@ -362,24 +408,23 @@ class MotionLib():
         diff_quat_data = quat_mul_norm(quat_inverse(local_rot0), local_rot1)
         diff_angle, diff_axis = quat_angle_axis(diff_quat_data)
         local_vel = diff_axis * diff_angle.unsqueeze(-1) / dt
-        local_vel = local_vel
 
         for j in range(len(body_ids)):
             body_id = body_ids[j]
             joint_offset = dof_offsets[j]
             joint_size = dof_offsets[j + 1] - joint_offset
-
-            if (joint_size == 3):
+            if joint_size == 3:
                 joint_vel = local_vel[body_id]
-                dof_vel[joint_offset:(joint_offset + joint_size)] = joint_vel
-
-            elif (joint_size == 1):
-                assert (joint_size == 1)
+                dof_vel[joint_offset : (joint_offset + joint_size)] = joint_vel
+            elif joint_size == 1:
+                assert joint_size == 1
                 joint_vel = local_vel[body_id]
-                dof_vel[joint_offset] = joint_vel[1]  # assume joint is always along y axis
+                dof_vel[joint_offset] = joint_vel[
+                    1
+                ]  # assume joint is always along y axis
 
             else:
                 print("Unsupported joint type")
-                assert (False)
+                assert False
 
         return dof_vel
