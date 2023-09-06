@@ -23,6 +23,24 @@ Config loading rules:
 """
 
 
+def load_view_motion_config(config_name):
+    """Load the configs stored in config_name.yaml.
+
+    Args:
+        config_name (str): Name of the config file for viewing motion.
+
+    Returns:
+        (dict): A dict of configs.
+    """
+    config_file_path = os.path.join(
+        os.path.dirname(__file__), f"view_motion/{config_name}.yaml"
+    )
+    if not os.path.exists(config_file_path):
+        raise FileNotFoundError(f"{config_file_path} does not exist")
+
+    return OmegaConf.load(config_file_path)
+
+
 def load_agent_config(agent_name):
     """Load the configs stored in agent_name.yaml.
 
