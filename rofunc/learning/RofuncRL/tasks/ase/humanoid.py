@@ -189,7 +189,7 @@ class Humanoid(VecTask):
         num_actors = self._root_states.shape[0] // self.num_envs
         return num_actors
 
-    def create_sim(self):
+    def create_sim(self, **kwargs):
         # self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, 'z')
         self.up_axis_idx = 2  # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(
@@ -278,12 +278,43 @@ class Humanoid(VecTask):
         return
 
     def _setup_character_props(self, key_bodies):
+        """
+        dof_body_ids records the ids of the bodies that are connected to their parent bodies with joints
+        The order of these ids follows the define order of the body in the MJCF. The id start from 0, and
+        the body with id:0 is pelvis, which is not considered in the list.
+
+        dof_offset's length is always len(dof_body_ids) + 1, and it always start from 0.
+        Each 2 values' minus in the list represents how many dofs that corresponding body have.
+
+        dof_observation_size is equal to dof * 6, where 6 stands for position and rotation observations, dof is the
+        number of actuated dofs, it equals to the length of dof_body_ids
+
+        num_actions is equal to the number of actuatable joints' number in the character. It does not include the
+        joint connecting the character to the world.
+        dof_observation_size
+
+        num_observations is composed by 3 parts, the first observation is the height of the CoM of the character; the
+        second part is the observations for all bodies. The body number is multiplied by (3 position values, 6
+        orientation values, 3 linear velocity, and 3 angular velocity); finally, -3 stands for
+
+        Args:
+            key_bodies:
+
+        Returns:
+
+        """
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         num_key_bodies = len(key_bodies)
 
         if asset_file == "mjcf/amp_humanoid.xml":
-            self._dof_body_ids = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]
-            self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]
+            # The following are: body_name (body_id/body's joint num to its parent/offset pair)
+            # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
+            # right_hand (5/0, omitted as no joint to parent)
+            # left_upper_arm (6/3/10 13), left_lower_arm (7/1/13 14), left_hand (8/0), right_thigh (9/3/14 17),
+            # right_shin (10/1/17 18), right_foot (11/3/18 21), left_thigh (12/3/21 24), left_shin (13/1/24 25),
+            # left_foot (14/3/25 28)
+            self._dof_body_ids = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]  # len=12
+            self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]  # len=12+1
             self._dof_obs_size = 72
             self._num_actions = 28
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
@@ -294,13 +325,23 @@ class Humanoid(VecTask):
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
         elif asset_file == "mjcf/amp_humanoid_spoon_pan.xml":
-            self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 11, 12, 13, 14, 15, 16]
-            self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 21, 24, 27, 28, 31]
-            self._dof_obs_size = 78
+            # The following are: body_name (body_id/body's joint num to its parent/offset pair)
+            # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
+            # right_hand (5/3/10 13), spoon (6/0), left_upper_arm (7/3/13 16), left_lower_arm (8/1/16 17),
+            # left_hand (9/3/17 20), pan (10/0), right_thigh (11/3/20 23), right_shin (12/1/23 24),
+            # right_foot (13/3/24 27), left_thigh (14/3/27 30), left_shin (15/1/30 31), left_foot (16/3/31 34)
+            self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16]
+            self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
+            self._dof_obs_size = 84
             self._num_actions = 34
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
+            # self._dof_body_ids = [1, 2, 3, 4, 7, 8, 11, 12, 13, 14, 15, 16]  # len=12
+            # self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]  # len=12+1
+            # self._dof_obs_size = 72  # 12 * 6
+            # self._num_actions = 28
+            # self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
         else:
-            print("Unsupported character config file: {s}".format(asset_file))
+            print("Unsupported character config file: {}".format(asset_file))
             assert False
 
         return
