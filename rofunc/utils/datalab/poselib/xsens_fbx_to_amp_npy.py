@@ -319,7 +319,7 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         plot_skeleton_motion_interactive(target_motion)
 
 
-def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file):
+def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True):
     """
     This scripts shows how to retarget a motion clip from the source skeleton to a target skeleton.
     Data required for retargeting are stored in a retarget config dictionary as a json file. This file contains:
@@ -366,18 +366,23 @@ def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file):
         "trim_frame_end": -1,
     }
 
-    motion = motion_from_fbx(fbx_file, root_joint="Hips", fps=60, visualize=False)
+    motion = motion_from_fbx(fbx_file, root_joint="Hips", fps=60, visualize=verbose)
     config["target_motion_path"] = fbx_file.replace(".fbx", "_amp.npy")
-    motion_retargeting(config, motion, visualize=True)
+    motion_retargeting(config, motion, visualize=verbose)
 
 
 @click.command()
 @click.option(
     "--is_parallel",
     default=False,
-    help="Whether using SAM to generate fine segmentations before recognition.",
+    help="Whether using parallel conversion.",
 )
-def main(is_parallel):
+@click.option(
+    "--verbose",
+    default=False,
+    help="Whether visualize the conversion.",
+)
+def main(is_parallel, verbose):
     data_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "../../../../data"
     )
@@ -393,7 +398,7 @@ def main(is_parallel):
         pool.map(amp_npy_from_fbx, fbx_files)
     else:
         for fbx_file in fbx_files:
-            amp_npy_from_fbx(fbx_file, tpose_file, amp_humanoid_tpose_file)
+            amp_npy_from_fbx(fbx_file, tpose_file, amp_humanoid_tpose_file, verbose)
 
 
 if __name__ == "__main__":
