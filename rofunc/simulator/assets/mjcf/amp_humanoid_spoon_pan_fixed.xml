@@ -12,6 +12,7 @@
     <mesh name="handle_1_mesh" file="handle_1.obj"/>
     <mesh name="handle_2_mesh" file="handle_2.obj"/>
     <mesh name="knobs_mesh" file="knobs.obj"/>
+    <mesh name="pan_00_mesh" file="pan_00.obj"/>
     <mesh name="pan_01_mesh" file="pan_01.obj"/>
     <mesh name="pan_02_mesh" file="pan_02.obj"/>
     <mesh name="pan_03_mesh" file="pan_03.obj"/>
@@ -123,6 +124,7 @@
               <geom name="handle_2" type="mesh" euler="0 0 0" mesh="handle_2_mesh" density="300"/>
               <geom name="knobs" type="mesh" euler="0 0 0" mesh="knobs_mesh" density="300"/>
               <geom name="pan_bottom" type="mesh" euler="0 0 0" mesh="pan_bottom_mesh" density="300"/>
+              <geom name="pan_00" type="mesh" euler="0 0 0" mesh="pan_00_mesh" density="300"/>
               <geom name="pan_01" type="mesh" euler="0 0 0" mesh="pan_01_mesh" density="300"/>
               <geom name="pan_02" type="mesh" euler="0 0 0" mesh="pan_02_mesh" density="300"/>
               <geom name="pan_03" type="mesh" euler="0 0 0" mesh="pan_03_mesh" density="300"/>
