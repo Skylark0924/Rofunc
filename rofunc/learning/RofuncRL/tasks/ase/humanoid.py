@@ -238,6 +238,13 @@ class Humanoid(VecTask):
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
 
+        elif asset_file == "mjcf/hotu_humanoid.xml":
+            self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 16]
+            self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
+            self._dof_obs_size = 84
+            self._num_actions = 34
+            self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3  # Check
+
         else:
             print("Unsupported character config file: {s}".format(asset_file))
             assert False
