@@ -69,8 +69,6 @@ class HumanoidAMP(Humanoid):
                                             "../../../../../examples/data/amp/" + motion_file)
         self._load_motion(motion_file_path)
 
-        self._load_motion(motion_file_path)
-
         self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf,
                                          np.ones(self.get_num_amp_obs()) * np.Inf)
         self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
