@@ -279,7 +279,8 @@ class BaseTrainer:
     def inference(self):
         # reset env
         states, infos = self.env.reset()
-        for _ in tqdm.trange(self.inference_steps):
+        # for _ in tqdm.trange(self.inference_steps):
+        while True:
             self.pre_interaction()
             with torch.no_grad():
                 # Obtain action from agent
