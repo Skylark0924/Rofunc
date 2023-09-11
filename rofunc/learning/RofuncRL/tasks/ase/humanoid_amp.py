@@ -86,8 +86,6 @@ class HumanoidAMP(Humanoid):
             )
         self._load_motion(motion_file_path)
 
-        self._load_motion(motion_file_path)
-
         self._amp_obs_space = spaces.Box(
             np.ones(self.get_num_amp_obs()) * -np.Inf,
             np.ones(self.get_num_amp_obs()) * np.Inf,
@@ -102,8 +100,6 @@ class HumanoidAMP(Humanoid):
 
         self._amp_obs_demo_buf = None
 
-        return
-
     def post_physics_step(self):
         super().post_physics_step()
 
@@ -112,8 +108,6 @@ class HumanoidAMP(Humanoid):
 
         amp_obs_flat = self._amp_obs_buf.view(-1, self.get_num_amp_obs())
         self.extras["amp_obs"] = amp_obs_flat
-
-        return
 
     def get_num_amp_obs(self):
         return self._num_amp_obs_steps * self._num_amp_obs_per_step
