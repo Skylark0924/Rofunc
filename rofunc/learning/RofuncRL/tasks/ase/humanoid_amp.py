@@ -198,15 +198,21 @@ class HumanoidAMP(Humanoid):
         as a body; when bn=17, the humanoid holds 2 objects
         """
         asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
+        asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
         num_key_bodies = len(key_bodies)
 
         # 13 = root_h (1) + root_rot (6) + root_linear_vel (3) + root_angular_vel (3)},
         # dof_obs_size = dof_pos + dof_vel,
         # key_body_positions = 3 * num_key_bodies
         if asset_body_num == 15:
-            self._num_amp_obs_per_step = (
-                13 + self._dof_obs_size + 28 + 3 * num_key_bodies
-            )
+            if asset_joint_num == 28:
+                self._num_amp_obs_per_step = (
+                        13 + self._dof_obs_size + 28 + 3 * num_key_bodies
+                )
+            elif asset_joint_num == 34:
+                self._num_amp_obs_per_step = (
+                        13 + self._dof_obs_size + 34 + 3 * num_key_bodies
+                )
         elif asset_body_num == 16:
             self._num_amp_obs_per_step = (
                 13 + self._dof_obs_size + 31 + 3 * num_key_bodies
