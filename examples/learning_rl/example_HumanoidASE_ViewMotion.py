@@ -23,6 +23,7 @@ def inference(config_name, motion_file):
     # Overwrite
     cfg.task.env.asset.assetFileName = view_motion_config["asset_name"]
     cfg.task.env.asset.assetBodyNum = view_motion_config["asset_body_num"]
+    cfg.task.env.asset.assetJointNum = view_motion_config["asset_joint_num"]
 
     cfg_dict = omegaconf_to_dict(cfg.task)
 
@@ -53,9 +54,9 @@ def inference(config_name, motion_file):
 
 @click.command()
 @click.argument("motion_file")
-@click.option("--config_file", default="HumanoidSpoonPanSimple")
-def main(config_file, motion_file):
-    inference(config_file, motion_file)
+@click.option("--config_name", default="HumanoidSpoonPanSimple")
+def main(config_name, motion_file):
+    inference(config_name, motion_file)
 
 
 if __name__ == "__main__":
