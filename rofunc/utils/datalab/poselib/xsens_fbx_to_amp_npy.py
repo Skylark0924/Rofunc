@@ -377,7 +377,7 @@ def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True):
 )
 @click.option(
     "--verbose",
-    default=False,
+    default=True,
     help="Whether visualize the conversion.",
 )
 def main(is_parallel, verbose):
