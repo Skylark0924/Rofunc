@@ -439,6 +439,7 @@ class Humanoid(VecTask):
             # create env instance
             env_ptr = self.gym.create_env(self.sim, lower, upper, num_per_row)
             self._build_env(i, env_ptr, humanoid_asset)
+            # TODO if object is not needed, comment this out
             self._add_object(i, env_ptr, object_asset)
             self.envs.append(env_ptr)
 
