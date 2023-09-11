@@ -28,6 +28,7 @@
 
 import os
 
+import torch
 import yaml
 from isaacgym.torch_utils import *
 
@@ -104,6 +105,9 @@ class MotionLib:
         self._num_dof = dof_offsets[-1]
         self._key_body_ids = torch.tensor(key_body_ids, device=device)
         self._device = device
+
+        self._object_poses = torch.zeros((), device=device)
+
         self._load_motions(motion_file)
 
         motions = self._motions
@@ -161,7 +165,28 @@ class MotionLib:
     def get_motion_length(self, motion_ids):
         return self._motion_lengths[motion_ids]
 
+    def get_object_pose(self, frame_id):
+        """Return object pose at frame=id, where id is recorded in motion_ids
+
+        Args:
+            frame_id [list]: Same frame id * num_envs, where num_envs is the environment number.
+
+        Returns:
+
+        """
+        object_pose = self._object_poses[frame_id][0]
+        return object_pose
+
     def get_motion_state(self, motion_ids, motion_times):
+        """
+
+        Args:
+            motion_ids:
+            motion_times:
+
+        Returns:
+
+        """
         n = len(motion_ids)
         num_bodies = self._get_num_bodies()
         num_key_bodies = self._key_body_ids.shape[0]
@@ -278,6 +303,14 @@ class MotionLib:
                 self._motion_weights.append(curr_weight)
                 self._motion_files.append(curr_file)
 
+        for motion in self._motions:
+            if motion.object_poses is not None:
+                self._object_poses = motion.object_poses
+                self._object_poses = torch.tensor(
+                    self._object_poses, device=self._device, dtype=torch.float32
+                )
+                break
+
         self._motion_lengths = torch.tensor(
             self._motion_lengths, device=self._device, dtype=torch.float32
         )
@@ -306,9 +339,8 @@ class MotionLib:
             )
         )
 
-        return
-
-    def _fetch_motion_files(self, motion_file):
+    @staticmethod
+    def _fetch_motion_files(motion_file):
         ext = os.path.splitext(motion_file)[1]
         if ext == ".yaml":
             dir_name = os.path.dirname(motion_file)

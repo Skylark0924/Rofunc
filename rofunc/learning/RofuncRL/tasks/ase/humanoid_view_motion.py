@@ -28,7 +28,7 @@
 
 import torch
 
-from isaacgym import gymtorch
+from isaacgym import gymtorch, gymapi
 
 from rofunc.learning.RofuncRL.tasks.ase.humanoid_amp import HumanoidAMP
 
@@ -129,6 +129,11 @@ class HumanoidViewMotionTask(HumanoidAMP):
             gymtorch.unwrap_tensor(env_ids_int32),
             len(env_ids_int32),
         )
+
+        # TODO use the object pose to let the object move
+        frame_id = motion_ids.to("cpu").numpy()[0]
+        object_pose = self._motion_lib.get_object_pose(frame_id)
+
         return
 
     def _compute_reset(self):
