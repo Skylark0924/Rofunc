@@ -361,6 +361,7 @@ class SkeletonState(Serializable):
         self._skeleton_tree = skeleton_tree
         self._is_local = is_local
         self.tensor = tensor_backend.clone()
+        self._object_poses = None
 
     def __len__(self):
         return self.tensor.shape[0]
@@ -372,6 +373,13 @@ class SkeletonState(Serializable):
                 *(self.tensor.shape[:-1] + (self.num_joints, 4))
             )
         return self._rotation
+
+    @property
+    def object_poses(self):
+        return self._object_poses
+
+    def set_object_poses(self, object_poses):
+        self._object_poses = object_poses
 
     @property
     def _local_rotation(self):
@@ -1185,6 +1193,7 @@ class SkeletonMotion(SkeletonState):
                 ("skeleton_tree", self.skeleton_tree.to_dict()),
                 ("is_local", self.is_local),
                 ("fps", self.fps),
+                ("object_poses", tensor_to_dict(self.object_poses))
             ]
         )
 
