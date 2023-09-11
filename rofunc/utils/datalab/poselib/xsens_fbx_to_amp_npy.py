@@ -24,6 +24,7 @@ import glob
 import numpy as np
 
 import rofunc as rf
+from transform import unit_vector, quaternion_from_matrix
 from rofunc.utils.datalab.poselib.poselib.core.rotation3d import *
 from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import (
     SkeletonState,
@@ -234,6 +235,27 @@ def _project_joints(motion):
     return new_motion
 
 
+def calculate_object_pose(left_hand_position, right_hand_position):
+    left_hand_position_np = left_hand_position.numpy()
+    right_hand_position_np = right_hand_position.numpy()
+    object_origin = (left_hand_position_np + right_hand_position_np) / 2.0
+    rotated_x_axis = unit_vector(left_hand_position_np - object_origin)[:2]
+    rotation_matrix = np.array(
+        [
+            [rotated_x_axis[0], -rotated_x_axis[1], 0, 0],
+            [rotated_x_axis[1], rotated_x_axis[0], 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ],
+        dtype=float,
+    )
+
+    object_orientation = quaternion_from_matrix(rotation_matrix)
+    return torch.concatenate(
+        (torch.as_tensor(object_origin), torch.as_tensor(object_orientation))
+    )
+
+
 def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=True):
     # import fbx file - make sure to provide a valid joint name for root_joint
     motion = SkeletonMotion.from_fbx(
@@ -245,7 +267,7 @@ def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=True):
     return motion
 
 
-def motion_retargeting(retarget_cfg, source_motion, visualize=False):
+def motion_retargeting(retarget_cfg, source_motion, visualize=False, object_interaction_start_end=None):
     # load and visualize t-pose files
     source_tpose = SkeletonState.from_file(retarget_cfg["source_tpose"])
     if visualize:
@@ -311,6 +333,31 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         new_sk_state, fps=target_motion.fps
     )
 
+    # Get object motion (comment this if no object)
+    left_hand_id = 8
+    right_hand_id = 5
+    if object_interaction_start_end:
+        start_frame = object_interaction_start_end[0]
+        end_frame = object_interaction_start_end[1]
+
+        object_poses = torch.zeros_like(target_motion.global_transformation)
+        for i in range(start_frame, end_frame):
+            object_poses[i, ...] = calculate_object_pose(
+                target_motion.global_translation[i, left_hand_id, :],
+                target_motion.global_translation[i, right_hand_id, :],
+            )
+
+        object_poses[:start_frame, ...] = calculate_object_pose(
+            target_motion.global_translation[start_frame, left_hand_id, :],
+            target_motion.global_translation[start_frame, right_hand_id, :],
+        )
+
+        object_poses[end_frame:, ...] = calculate_object_pose(
+            target_motion.global_translation[end_frame, left_hand_id, :],
+            target_motion.global_translation[end_frame, right_hand_id, :],
+        )
+        target_motion.set_object_poses(object_poses)
+
     # save retargeted motion
     target_motion.to_file(retarget_cfg["target_motion_path"])
 
@@ -319,7 +366,7 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         plot_skeleton_motion_interactive(target_motion)
 
 
-def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True):
+def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True, start_stop=None):
     """
     This scripts shows how to retarget a motion clip from the source skeleton to a target skeleton.
     Data required for retargeting are stored in a retarget config dictionary as a json file. This file contains:
@@ -366,7 +413,7 @@ def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True):
 
     motion = motion_from_fbx(fbx_file, root_joint="Hips", fps=60, visualize=verbose)
     config["target_motion_path"] = fbx_file.replace(".fbx", "_amp.npy")
-    motion_retargeting(config, motion, visualize=verbose)
+    motion_retargeting(config, motion, visualize=verbose, object_interaction_start_end=start_stop)
 
 
 @click.command()
@@ -380,23 +427,38 @@ def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True):
     default=True,
     help="Whether visualize the conversion.",
 )
-def main(is_parallel, verbose):
+@click.option(
+    "--start",
+    default=None,
+)
+@click.option(
+    "--end",
+    default=None,
+)
+def main(is_parallel, verbose, start, stop):
     data_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "../../../../data"
     )
-    fbx_files = sorted(glob.glob(os.path.join(data_dir, '*.fbx')))
+    fbx_files = sorted(glob.glob(os.path.join(data_dir, "*.fbx")))
     tpose_file = os.path.join(data_dir, "tpose.npy")
 
-    amp_humanoid_tpose_file = os.path.join(os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "data/amp_humanoid_tpose.npy"
-    ))
+    amp_humanoid_tpose_file = os.path.join(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "data/amp_humanoid_tpose.npy"
+        )
+    )
+
+    if start and stop:
+        start_stop = [int(start), int(stop)]
+    else:
+        start_stop = None
 
     if is_parallel:
         pool = multiprocessing.Pool()
         pool.map(amp_npy_from_fbx, fbx_files)
     else:
         for fbx_file in fbx_files:
-            amp_npy_from_fbx(fbx_file, tpose_file, amp_humanoid_tpose_file, verbose)
+            amp_npy_from_fbx(fbx_file, tpose_file, amp_humanoid_tpose_file, verbose, start_stop)
 
 
 if __name__ == "__main__":
