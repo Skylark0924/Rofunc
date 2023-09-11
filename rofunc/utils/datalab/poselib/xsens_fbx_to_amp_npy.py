@@ -249,11 +249,11 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     # load and visualize t-pose files
     source_tpose = SkeletonState.from_file(retarget_cfg["source_tpose"])
     if visualize:
-        plot_skeleton_state(source_tpose)
+        plot_skeleton_state(source_tpose, "source_tpose")
 
     target_tpose = SkeletonState.from_file(retarget_cfg["target_tpose"])
     if visualize:
-        plot_skeleton_state(target_tpose)
+        plot_skeleton_state(target_tpose, "target_tpose")
 
     # parse data from retarget config
     rotation_to_target_skeleton = torch.tensor(retarget_cfg["rotation"])
@@ -354,9 +354,7 @@ def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True):
             "LeftHand": "left_hand",
             "RightArm": "right_upper_arm",
             "RightForeArm": "right_lower_arm",
-            "RightHand": "right_hand"
-            # "RightShoulder": "right_shoulder",
-            # "LeftShoulder": "left_shoulder"
+            "RightHand": "right_hand",
         },
         # "rotation": [0.707, 0, 0, 0.707], xyzw
         "rotation": [0.5, 0.5, 0.5, 0.5],
