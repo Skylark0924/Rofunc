@@ -197,9 +197,9 @@ class ASEAgent(AMPAgent):
             enc_reward = torch.clamp_min(torch.sum(enc_output * ase_latents, dim=-1, keepdim=True), 0.0)
             enc_reward *= self._enc_reward_scale
 
-        combined_rewards = self._task_reward_weight * rewards + \
-                           self._style_reward_weight * style_rewards + \
-                           self._enc_reward_weight * enc_reward
+        combined_rewards = (self._task_reward_weight * rewards
+                            + self._style_reward_weight * style_rewards
+                            + self._enc_reward_weight * enc_reward)
 
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
