@@ -1184,18 +1184,32 @@ class SkeletonMotion(SkeletonState):
         )
 
     def to_dict(self) -> OrderedDict:
-        return OrderedDict(
-            [
-                ("rotation", tensor_to_dict(self.rotation)),
-                ("root_translation", tensor_to_dict(self.root_translation)),
-                ("global_velocity", tensor_to_dict(self.global_velocity)),
-                ("global_angular_velocity", tensor_to_dict(self.global_angular_velocity)),
-                ("skeleton_tree", self.skeleton_tree.to_dict()),
-                ("is_local", self.is_local),
-                ("fps", self.fps),
-                ("object_poses", tensor_to_dict(self.object_poses))
-            ]
-        )
+        if self.object_poses is None:
+            return OrderedDict(
+                [
+                    ("rotation", tensor_to_dict(self.rotation)),
+                    ("root_translation", tensor_to_dict(self.root_translation)),
+                    ("global_velocity", tensor_to_dict(self.global_velocity)),
+                    ("global_angular_velocity", tensor_to_dict(self.global_angular_velocity)),
+                    ("skeleton_tree", self.skeleton_tree.to_dict()),
+                    ("is_local", self.is_local),
+                    ("fps", self.fps),
+                ]
+            )
+        else:
+            return OrderedDict(
+                [
+                    ("rotation", tensor_to_dict(self.rotation)),
+                    ("root_translation", tensor_to_dict(self.root_translation)),
+                    ("global_velocity", tensor_to_dict(self.global_velocity)),
+                    ("global_angular_velocity", tensor_to_dict(self.global_angular_velocity)),
+                    ("skeleton_tree", self.skeleton_tree.to_dict()),
+                    ("is_local", self.is_local),
+                    ("fps", self.fps),
+                    ("object_poses", tensor_to_dict(self.object_poses))
+                ]
+            )
+
 
     @classmethod
     def from_fbx(
