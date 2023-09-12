@@ -435,7 +435,7 @@ def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True, start_s
     "--end",
     default=None,
 )
-def main(is_parallel, verbose, start, stop):
+def main(is_parallel, verbose, start, end):
     data_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "../../../../data"
     )
@@ -448,17 +448,17 @@ def main(is_parallel, verbose, start, stop):
         )
     )
 
-    if start and stop:
-        start_stop = [int(start), int(stop)]
+    if start and end:
+        start_end = [int(start), int(end)]
     else:
-        start_stop = None
+        start_end = None
 
     if is_parallel:
         pool = multiprocessing.Pool()
         pool.map(amp_npy_from_fbx, fbx_files)
     else:
         for fbx_file in fbx_files:
-            amp_npy_from_fbx(fbx_file, tpose_file, amp_humanoid_tpose_file, verbose, start_stop)
+            amp_npy_from_fbx(fbx_file, tpose_file, amp_humanoid_tpose_file, verbose, start_end)
 
 
 if __name__ == "__main__":
