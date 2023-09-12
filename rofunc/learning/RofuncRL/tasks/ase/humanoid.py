@@ -254,7 +254,7 @@ class Humanoid(VecTask):
             self._num_actions = 34
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3  # Check
 
-        elif asset_file == "mjcf/hotu_humanoid2.xml":
+        elif asset_file in ["mjcf/hotu_humanoid2.xml", "mjcf/hotu_humanoid_spoon_pan.xml"]:
             # ['pelvis', 'torso', 'head', 'right_upper_arm', 'right_lower_arm', 'right_hand', 'left_upper_arm',
             # 'left_lower_arm', 'left_hand', 'right_thigh', 'right_shin', 'right_foot', 'left_thigh', 'left_shin',
             # 'left_foot']
