@@ -44,7 +44,7 @@ def main(fbx_name):
     os.makedirs(data_dir, exist_ok=True)
     fbx_files = [os.path.join(data_dir, f"{fbx_name}.fbx")]
     for fbx in fbx_files:
-        save_path = os.path.join(data_dir, "tpose.npy")
+        save_path = os.path.join(data_dir, "new_tpose.npy")
         get_tpose_from_fbx(fbx, save_path, verbose=True)
 
 

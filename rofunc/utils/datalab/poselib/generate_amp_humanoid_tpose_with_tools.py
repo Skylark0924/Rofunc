@@ -66,7 +66,7 @@ def main(xml_path):
     translation += torch.tensor([0, 0, 0.9])
 
     # save and visualize T-pose
-    zero_pose.to_file("data/amp_humanoid_generated_tpose.npy")
+    zero_pose.to_file("data/amp_humanoid_generated_new_tpose.npy")
     plot_skeleton_state(zero_pose)
 
 
