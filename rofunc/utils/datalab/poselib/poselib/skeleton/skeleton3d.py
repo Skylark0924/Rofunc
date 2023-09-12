@@ -1172,7 +1172,7 @@ class SkeletonMotion(SkeletonState):
             dict_repr["global_angular_velocity"], *args, **kwargs
         )
         # FIXME dict_repr["object_poses"] size is [num_frame, 15, 7], but we expect [num_frame, 7]
-        if dict_repr["object_poses"] is not None:
+        if hasattr(dict_repr, "object_pose") and dict_repr["object_poses"] is not None:
             object_poses = TensorUtils.from_dict(
                 dict_repr["object_poses"], *args, **kwargs
             )

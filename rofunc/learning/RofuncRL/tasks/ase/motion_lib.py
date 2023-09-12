@@ -174,6 +174,8 @@ class MotionLib:
         Returns:
 
         """
+        if self._object_poses.ndim == 0:
+            return None
         object_pose = self._object_poses[frame_id][0]
         return object_pose
 
