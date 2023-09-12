@@ -14,7 +14,6 @@
 
 from rofunc.simulator.base.base_sim import RobotSim
 import numpy as np
-import quaternion
 
 
 class WalkerSim(RobotSim):
