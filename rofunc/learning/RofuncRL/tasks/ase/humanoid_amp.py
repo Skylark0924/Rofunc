@@ -80,21 +80,14 @@ class HumanoidAMP(Humanoid):
         if rf.oslab.is_absl_path(motion_file):
             motion_file_path = motion_file
         else:
-            motion_file_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "../../../../../examples/data/amp/" + motion_file,
-            )
+            motion_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            "../../../../../examples/data/amp/" + motion_file)
         self._load_motion(motion_file_path)
 
-        self._amp_obs_space = spaces.Box(
-            np.ones(self.get_num_amp_obs()) * -np.Inf,
-            np.ones(self.get_num_amp_obs()) * np.Inf,
-        )
-        self._amp_obs_buf = torch.zeros(
-            (self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
-            device=self.device,
-            dtype=torch.float,
-        )
+        self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf,
+                                         np.ones(self.get_num_amp_obs()) * np.Inf)
+        self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
+                                        device=self.device, dtype=torch.float)
         self._curr_amp_obs_buf = self._amp_obs_buf[:, 0]
         self._hist_amp_obs_buf = self._amp_obs_buf[:, 1:]
 
@@ -195,26 +188,14 @@ class HumanoidAMP(Humanoid):
         asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
         num_key_bodies = len(key_bodies)
 
-        # 13 = root_h (1) + root_rot (6) + root_linear_vel (3) + root_angular_vel (3)},
-        # dof_obs_size = dof_pos + dof_vel,
-        # key_body_positions = 3 * num_key_bodies
-        if asset_body_num == 15:
-            if asset_joint_num == 28:
-                self._num_amp_obs_per_step = (
-                        13 + self._dof_obs_size + 28 + 3 * num_key_bodies
-                )
-            elif asset_joint_num == 34:
-                self._num_amp_obs_per_step = (
-                        13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-                )
-        elif asset_body_num == 16:
-            self._num_amp_obs_per_step = (
-                13 + self._dof_obs_size + 31 + 3 * num_key_bodies
-            )
-        elif asset_body_num == 17:
-            self._num_amp_obs_per_step = (
-                13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-            )
+        if asset_file == "mjcf/amp_humanoid.xml":
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 28 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
+        elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 31 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
+        elif asset_file == "mjcf/hotu_humanoid.xml":
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
+        elif asset_file in ["mjcf/hotu_humanoid2.xml", "mjcf/hotu_humanoid_spoon_pan.xml"]:
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
         else:
             print(f"Unsupported humanoid body num: {asset_body_num}")
             assert False
