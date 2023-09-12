@@ -108,9 +108,9 @@
               <joint name="right_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10" armature=".003"/>
               <geom name="right_hand" type="sphere" size=".04" density="1865"/>
               <site name="right_hand" class="touch" type="sphere" size=".041"/>
-              <geom name="spoon_head" type="mesh" mesh="spoon_head_mesh" density="300"/>
-              <geom name="spoon_neck" type="mesh" mesh="spoon_neck_mesh" density="300"/>
-              <geom name="spoon_handle" type="mesh" mesh="spoon_handle_mesh" density="300"/>
+              <geom name="spoon_head" type="mesh" mesh="spoon_head_mesh" quat="0 -0.707 0 0.707" density="300"/>
+              <geom name="spoon_neck" type="mesh" mesh="spoon_neck_mesh" quat="0 -0.707 0 0.707" density="300"/>
+              <geom name="spoon_handle" type="mesh" mesh="spoon_handle_mesh" quat="0 -0.707 0 0.707" density="300"/>
             </body>
           </body>
         </body>
@@ -134,34 +134,34 @@
               <geom name="left_hand" type="sphere" size=".04" density="1865"/>
               <site name="left_hand" class="touch" type="sphere" size=".041"/>
 
-              <geom name="handle_1" type="mesh" euler="0 0 0" mesh="handle_1_mesh" density="300"/>
-              <geom name="handle_2" type="mesh" euler="0 0 0" mesh="handle_2_mesh" density="300"/>
-              <geom name="knobs" type="mesh" euler="0 0 0" mesh="knobs_mesh" density="300"/>
-              <geom name="pan_bottom" type="mesh" euler="0 0 0" mesh="pan_bottom_mesh" density="300"/>
-              <geom name="pan_00" type="mesh" euler="0 0 0" mesh="pan_00_mesh" density="300"/>
-              <geom name="pan_01" type="mesh" euler="0 0 0" mesh="pan_01_mesh" density="300"/>
-              <geom name="pan_02" type="mesh" euler="0 0 0" mesh="pan_02_mesh" density="300"/>
-              <geom name="pan_03" type="mesh" euler="0 0 0" mesh="pan_03_mesh" density="300"/>
-              <geom name="pan_04" type="mesh" euler="0 0 0" mesh="pan_04_mesh" density="300"/>
-              <geom name="pan_05" type="mesh" euler="0 0 0" mesh="pan_05_mesh" density="300"/>
-              <geom name="pan_06" type="mesh" euler="0 0 0" mesh="pan_06_mesh" density="300"/>
-              <geom name="pan_07" type="mesh" euler="0 0 0" mesh="pan_07_mesh" density="300"/>
-              <geom name="pan_08" type="mesh" euler="0 0 0" mesh="pan_08_mesh" density="300"/>
-              <geom name="pan_09" type="mesh" euler="0 0 0" mesh="pan_09_mesh" density="300"/>
-              <geom name="pan_10" type="mesh" euler="0 0 0" mesh="pan_10_mesh" density="300"/>
-              <geom name="pan_11" type="mesh" euler="0 0 0" mesh="pan_11_mesh" density="300"/>
-              <geom name="pan_12" type="mesh" euler="0 0 0" mesh="pan_12_mesh" density="300"/>
-              <geom name="pan_13" type="mesh" euler="0 0 0" mesh="pan_13_mesh" density="300"/>
-              <geom name="pan_14" type="mesh" euler="0 0 0" mesh="pan_14_mesh" density="300"/>
-              <geom name="pan_15" type="mesh" euler="0 0 0" mesh="pan_15_mesh" density="300"/>
-              <geom name="pan_16" type="mesh" euler="0 0 0" mesh="pan_16_mesh" density="300"/>
-              <geom name="pan_17" type="mesh" euler="0 0 0" mesh="pan_17_mesh" density="300"/>
-              <geom name="pan_18" type="mesh" euler="0 0 0" mesh="pan_18_mesh" density="300"/>
-              <geom name="pan_19" type="mesh" euler="0 0 0" mesh="pan_19_mesh" density="300"/>
-              <geom name="pan_20" type="mesh" euler="0 0 0" mesh="pan_20_mesh" density="300"/>
-              <geom name="pan_21" type="mesh" euler="0 0 0" mesh="pan_21_mesh" density="300"/>
-              <geom name="pan_22" type="mesh" euler="0 0 0" mesh="pan_22_mesh" density="300"/>
-              <geom name="pan_23" type="mesh" euler="0 0 0" mesh="pan_23_mesh" density="300"/>
+              <geom name="handle_1" type="mesh" euler="0 45 -45" mesh="handle_1_mesh" density="300"/>
+              <geom name="handle_2" type="mesh" euler="0 45 -45" mesh="handle_2_mesh" density="300"/>
+              <geom name="knobs" type="mesh" euler="0 45 -45" mesh="knobs_mesh" density="300"/>
+              <geom name="pan_bottom" type="mesh" euler="0 45 -45" mesh="pan_bottom_mesh" density="300"/>
+              <geom name="pan_00" type="mesh" euler="0 45 -45" mesh="pan_00_mesh" density="300"/>
+              <geom name="pan_01" type="mesh" euler="0 45 -45" mesh="pan_01_mesh" density="300"/>
+              <geom name="pan_02" type="mesh" euler="0 45 -45" mesh="pan_02_mesh" density="300"/>
+              <geom name="pan_03" type="mesh" euler="0 45 -45" mesh="pan_03_mesh" density="300"/>
+              <geom name="pan_04" type="mesh" euler="0 45 -45" mesh="pan_04_mesh" density="300"/>
+              <geom name="pan_05" type="mesh" euler="0 45 -45" mesh="pan_05_mesh" density="300"/>
+              <geom name="pan_06" type="mesh" euler="0 45 -45" mesh="pan_06_mesh" density="300"/>
+              <geom name="pan_07" type="mesh" euler="0 45 -45" mesh="pan_07_mesh" density="300"/>
+              <geom name="pan_08" type="mesh" euler="0 45 -45" mesh="pan_08_mesh" density="300"/>
+              <geom name="pan_09" type="mesh" euler="0 45 -45" mesh="pan_09_mesh" density="300"/>
+              <geom name="pan_10" type="mesh" euler="0 45 -45" mesh="pan_10_mesh" density="300"/>
+              <geom name="pan_11" type="mesh" euler="0 45 -45" mesh="pan_11_mesh" density="300"/>
+              <geom name="pan_12" type="mesh" euler="0 45 -45" mesh="pan_12_mesh" density="300"/>
+              <geom name="pan_13" type="mesh" euler="0 45 -45" mesh="pan_13_mesh" density="300"/>
+              <geom name="pan_14" type="mesh" euler="0 45 -45" mesh="pan_14_mesh" density="300"/>
+              <geom name="pan_15" type="mesh" euler="0 45 -45" mesh="pan_15_mesh" density="300"/>
+              <geom name="pan_16" type="mesh" euler="0 45 -45" mesh="pan_16_mesh" density="300"/>
+              <geom name="pan_17" type="mesh" euler="0 45 -45" mesh="pan_17_mesh" density="300"/>
+              <geom name="pan_18" type="mesh" euler="0 45 -45" mesh="pan_18_mesh" density="300"/>
+              <geom name="pan_19" type="mesh" euler="0 45 -45" mesh="pan_19_mesh" density="300"/>
+              <geom name="pan_20" type="mesh" euler="0 45 -45" mesh="pan_20_mesh" density="300"/>
+              <geom name="pan_21" type="mesh" euler="0 45 -45" mesh="pan_21_mesh" density="300"/>
+              <geom name="pan_22" type="mesh" euler="0 45 -45" mesh="pan_22_mesh" density="300"/>
+              <geom name="pan_23" type="mesh" euler="0 45 -45" mesh="pan_23_mesh" density="300"/>
             </body>
           </body>
         </body>
