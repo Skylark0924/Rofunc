@@ -98,20 +98,13 @@ class WalkerSim(RobotSim):
             attractor_properties = self.gym.get_attractor_properties(self.envs[i], attractor_handles[i])
             pose = attractor_properties.target
             # pose.p: (x, y, z), pose.r: (w, x, y, z)
-            q1 = quaternion.from_float_array([traj[index, 6], traj[index, 3], traj[index, 4], traj[index, 5]])
-            q2 = quaternion.from_float_array([0.707, 0.0, -0.707, 0.0])
-            q3 = q1 * q2
-            pose.p.x = traj[index, 0] - 0.55
-            pose.p.y = traj[index, 2] + 0.1
-            pose.p.z = traj[index, 1] - 0.2
-            pose.r.w = q3.w
-            pose.r.x = q3.x
-            pose.r.y = q3.y
-            pose.r.z = q3.z
-            # pose.r.w = traj[index, 6]
-            # pose.r.x = traj[index, 3]
-            # pose.r.y = traj[index, 4]
-            # pose.r.z = traj[index, 5]
+            pose.p.x = traj[index, 0]
+            pose.p.y = traj[index, 2]
+            pose.p.z = traj[index, 1]
+            pose.r.w = traj[index, 6]
+            pose.r.x = traj[index, 3]
+            pose.r.y = traj[index, 4]
+            pose.r.z = traj[index, 5]
             self.gym.set_attractor_target(self.envs[i], attractor_handles[i], pose)
 
             # Draw axes and sphere at attractor location
