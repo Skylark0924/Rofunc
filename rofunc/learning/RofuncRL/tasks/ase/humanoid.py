@@ -297,59 +297,47 @@ class Humanoid(VecTask):
         second part is the observations for all bodies. The body number is multiplied by (3 position values, 6
         orientation values, 3 linear velocity, and 3 angular velocity); finally, -3 stands for
 
-        Args:
-            key_bodies:
 
-        Returns:
+        if asset_file == "mjcf/amp_humanoid.xml":
+            # ['pelvis', 'torso', 'head', 'right_upper_arm', 'right_lower_arm', 'right_hand', 'left_upper_arm',
+            # 'left_lower_arm', 'left_hand', 'right_thigh', 'right_shin', 'right_foot', 'left_thigh', 'left_shin',
+            # 'left_foot']
+            self._dof_body_ids = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]
+            self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]
+            self._dof_obs_size = 72
+            self._num_actions = 28
+            self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
 
-        """
-        asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
-        asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
-        num_key_bodies = len(key_bodies)
-
-        # The following are: body_name (body_id/body's joint num to its parent/offset pair)
-        if asset_body_num == 15:
-            if asset_joint_num == 28:
-                # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
-                # right_hand (5/0, omitted as no joint to parent)
-                # left_upper_arm (6/3/10 13), left_lower_arm (7/1/13 14), left_hand (8/0), right_thigh (9/3/14 17),
-                # right_shin (10/1/17 18), right_foot (11/3/18 21), left_thigh (12/3/21 24), left_shin (13/1/24 25),
-                # left_foot (14/3/25 28)
-                self._dof_body_ids = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]  # len=12
-                self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]  # len=12+1
-                self._dof_obs_size = 72
-                self._num_actions = 28
-                self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
-            elif asset_joint_num == 34:
-                # torso (1/3/0 3), head (2/3/3 6),
-                # right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10), right_hand (5/3/10 13)
-                # left_upper_arm (6/3/13 16), left_lower_arm (7/1/16 17), left_hand (8/3/17 20),
-                # right_thigh (9/3/20 23), right_shin (10/1/23 24), right_foot (11/3/24 27),
-                # left_thigh (12/3/27 30), left_shin (13/1/30 31), left_foot (14/3/31 34)
-                self._dof_body_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]  # len=14
-                self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]  # len=14+1
-                self._dof_obs_size = 84
-                self._num_actions = 34
-                self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
-            else:
-                raise NotImplementedError
-        elif asset_body_num == 16:
+        elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
+            # ['pelvis', 'torso', 'head', 'right_upper_arm', 'right_lower_arm', 'right_hand', 'sword', 'left_upper_arm',
+            # 'left_lower_arm', 'shield', 'left_hand', 'right_thigh', 'right_shin', 'right_foot', 'left_thigh',
+            # 'left_shin', 'left_foot']
             self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 11, 12, 13, 14, 15, 16]
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 21, 24, 27, 28, 31]
             self._dof_obs_size = 78
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-        elif asset_body_num == 17:
-            # The following are: body_name (body_id/body's joint num to its parent/offset pair)
-            # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
-            # right_hand (5/3/10 13), spoon (6/0), left_upper_arm (7/3/13 16), left_lower_arm (8/1/16 17),
-            # left_hand (9/3/17 20), pan (10/0), right_thigh (11/3/20 23), right_shin (12/1/23 24),
-            # right_foot (13/3/24 27), left_thigh (14/3/27 30), left_shin (15/1/30 31), left_foot (16/3/31 34)
-            self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16]
+
+        elif asset_file == "mjcf/hotu_humanoid.xml":
+            # ['pelvis', 'torso', 'head', 'right_upper_arm', 'right_lower_arm', 'right_hand', 'sword', 'left_upper_arm',
+            # 'left_lower_arm', 'shield', 'left_hand', 'right_thigh', 'right_shin', 'right_foot', 'left_thigh',
+            # 'left_shin', 'left_foot']
+            self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 16]
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
             self._dof_obs_size = 84
             self._num_actions = 34
-            self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
+            self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3  # Check
+
+        elif asset_file in ["mjcf/hotu_humanoid2.xml", "mjcf/hotu_humanoid_spoon_pan.xml"]:
+            # ['pelvis', 'torso', 'head', 'right_upper_arm', 'right_lower_arm', 'right_hand', 'left_upper_arm',
+            # 'left_lower_arm', 'left_hand', 'right_thigh', 'right_shin', 'right_foot', 'left_thigh', 'left_shin',
+            # 'left_foot']
+            self._dof_body_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+            self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
+            self._dof_obs_size = 84
+            self._num_actions = 34
+            self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3  # Check
+
         else:
             print(f"Unsupported humanoid body num: {asset_body_num}")
             assert False
