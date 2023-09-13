@@ -13,7 +13,13 @@
 # limitations under the License.
 
 from rofunc.simulator.base.base_sim import RobotSim
+from rofunc.utils.logger.beauty_logger import beauty_print
+from typing import List
+from isaacgym import gymtorch
+from isaacgym.torch_utils import *
 import numpy as np
+import torch
+from isaacgym import gymutil
 
 
 class WalkerSim(RobotSim):
@@ -110,7 +116,167 @@ class WalkerSim(RobotSim):
             gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
             gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
+    def build_key_body_ids_tensor(self, key_body_names):
+        env_ptr = self.envs[0]
+        actor_handle = self.robot_handles[0]
+        body_ids = []
+
+        for body_name in key_body_names:
+            body_id = self.gym.find_actor_rigid_body_handle(env_ptr, actor_handle, body_name)
+            assert (body_id != -1)
+            body_ids.append(body_id)
+
+        body_ids = to_torch(body_ids, device=self.device, dtype=torch.long)
+        return body_ids
+
     def run_traj(self, traj, attracted_joints=None, update_freq=0.001):
         if attracted_joints is None:
             attracted_joints = ["left_palm_link", "right_palm_link"]
-        self.run_traj_multi_joints(traj, attracted_joints, update_freq)
+        self.run_traj_multi_joints_with_prior(traj, attracted_joints, update_freq)
+
+    def run_traj_multi_joints_with_prior(self, traj: List, attracted_joints: List = None, update_freq=0.001):
+        """
+        Run the trajectory with multiple joints, the default is to run the trajectory with the left and right hand of
+        bimanual robot.
+        :param traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
+        :param attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
+        :param update_freq: the frequency of updating the robot pose
+        :return:
+        """
+        assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
+
+        beauty_print('Execute multi-joint trajectory with the Walker simulator')
+
+        # Create the attractor
+        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attracted_joints)
+
+        # Time to wait in seconds before moving robot
+        next_update_time = 0
+        index = 0
+
+        # initialize prior parameters
+        root_pos_list = []
+        root_rot_list = []
+        root_vel_list = []
+        root_ang_vel_list = []
+        dof_pos_list = []
+        dof_vel_list = []
+        key_body_pos_list = []
+
+        dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
+        rigid_body_state = self.gym.acquire_rigid_body_state_tensor(self.sim)
+
+        # create some wrapper tensors for different slices
+        self._dof_state = gymtorch.wrap_tensor(dof_state_tensor)
+        self._rigid_body_state = gymtorch.wrap_tensor(rigid_body_state)
+        bodies_per_env = self._rigid_body_state.shape[0] // self.num_envs
+        rigid_body_state_reshaped = self._rigid_body_state.view(self.num_envs, bodies_per_env, 13)
+
+        self.num_bodies = super().get_num_bodies()
+
+        dofs_per_env = self._dof_state.shape[0] // self.num_envs
+        key_bodies = ["left_limb_l7", "right_limb_l7", "left_leg_l6", "right_leg_l6"]
+        self._key_body_ids = self.build_key_body_ids_tensor(key_bodies)
+
+        while index < len(traj[0]):
+            # Every 0.01 seconds the pose of the attractor is updated
+            t = self.gym.get_sim_time(self.sim)
+            if t >= next_update_time:
+                self.gym.clear_lines(self.viewer)
+                for i in range(len(attracted_joints)):
+                    self.update_robot(traj[i], attractor_handles[i], axes_geoms[i], sphere_geoms[i], index)
+
+                next_update_time += update_freq
+                index += 1
+
+            # Step the physics
+            self.gym.simulate(self.sim)
+            self.gym.fetch_results(self.sim, True)
+
+            # Step rendering
+            self.gym.step_graphics(self.sim)
+            self.gym.draw_viewer(self.viewer, self.sim, False)
+            self.gym.sync_frame_time(self.sim)
+
+            # obtain the motion prior
+            self.gym.refresh_dof_state_tensor(self.sim)
+            self.gym.refresh_rigid_body_state_tensor(self.sim)
+
+            rigid_body_pos = rigid_body_state_reshaped[..., :self.num_bodies, 0:3]
+            rigid_body_rot = rigid_body_state_reshaped[..., :self.num_bodies, 3:7]
+            rigid_body_vel = rigid_body_state_reshaped[..., :self.num_bodies, 7:10]
+            rigid_body_ang_vel = rigid_body_state_reshaped[..., :self.num_bodies, 10:13]
+            dof_pos = self._dof_state.view(self.num_envs, dofs_per_env, 2)[..., :self.robot_dof, 0]
+            dof_vel = self._dof_state.view(self.num_envs, dofs_per_env, 2)[..., :self.robot_dof, 1]
+            key_body_pos = rigid_body_pos[:, self._key_body_ids, :]
+
+            # record the motion prior
+            root_pos_list.append(rigid_body_pos[:, 0, :])
+            root_rot_list.append(rigid_body_rot[:, 0, :])
+            root_vel_list.append(rigid_body_vel[:, 0, :])
+            root_ang_vel_list.append(rigid_body_ang_vel[:, 0, :])
+            dof_pos_list.append(dof_pos)
+            dof_vel_list.append(dof_vel)
+            key_body_pos_list.append(key_body_pos)
+
+        self.gym.destroy_viewer(self.viewer)
+        self.gym.destroy_sim(self.sim)
+        print("Done")
+
+        prior_dict = {
+            "root_pos": root_pos_list,
+            "root_rot": root_rot_list,
+            "root_vel": root_vel_list,
+            "root_ang_vel": root_ang_vel_list,
+            "dof_pose": dof_pos_list,
+            "dof_vel": dof_vel_list,
+            "key_pose": key_body_pos_list}
+
+        print(prior_dict)
+
+        prior_array = np.array(list(prior_dict.items()))
+        output_path = "../data/motion_prior_walker/prior_array_09.npy"
+        np.save(output_path, prior_array)
+
+    # def generate_motion_prior(self, joint_state):
+    #
+    #     # initialize prior parameters
+    #     root_pose = []
+    #     root_rot = [0, 0, 0, 1]
+    #     dof_pose = []
+    #     root_vel = 0
+    #     root_ang_vel = 0
+    #     dof_vel = []
+    #     key_pose = []
+    #
+    #     # record the motion prior
+    #     joint_state = [joint_state[8:15], joint_state[21:28]]
+    #     dof_pose = dof_pose.append(joint_state[0])
+    #     dof_vel = dof_vel.append(joint_state[1])
+    #
+    #     prior_dict = {
+    #                 "root_pose": root_pose,
+    #                 "root_rot": root_rot,
+    #                 "dof_pose": dof_pose,
+    #                 "root_vel": root_vel,
+    #                 "root_ang_vel": root_ang_vel,
+    #                 "dof_vel": dof_vel,
+    #                 "key_pose": key_pose}
+    #
+    #     return prior_dict
+
+# if __name__ == '__main__':
+#
+#     traj_l = np.load('/home/zhuoli/Rofunc/examples/data/HOTO/mvnx/New Session-012/segment/14_LeftHand.npy')
+#     traj_r = np.load('/home/zhuoli/Rofunc/examples/data/HOTO/mvnx/New Session-012/segment/10_RightHand.npy')
+#
+#     # setup environment args
+#     args = gymutil.parse_arguments()
+#     args.use_gpu_pipeline = False
+#
+#     # run the trajectory
+#     Walkersim = WalkerSim(args, asset_root="/home/zhuoli/Rofunc/rofunc/simulator/assets", fix_base_link=True)
+#     Walkersim.init()
+#     # dof_info = Walkersim.get_dof_info()
+#     # print("dof_info:", dof_info)
+#     Walkersim.run_traj(traj=[traj_l, traj_r], update_freq=0.01)
