@@ -340,16 +340,27 @@ class Humanoid(VecTask):
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
         elif asset_body_num == 17:
-            # The following are: body_name (body_id/body's joint num to its parent/offset pair)
-            # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
-            # right_hand (5/3/10 13), spoon (6/0), left_upper_arm (7/3/13 16), left_lower_arm (8/1/16 17),
-            # left_hand (9/3/17 20), pan (10/0), right_thigh (11/3/20 23), right_shin (12/1/23 24),
-            # right_foot (13/3/24 27), left_thigh (14/3/27 30), left_shin (15/1/30 31), left_foot (16/3/31 34)
-            self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16]
-            self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
-            self._dof_obs_size = 84
-            self._num_actions = 34
-            self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
+            if asset_joint_num == 34:
+                # The following are: body_name (body_id/body's joint num to its parent/offset pair)
+                # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
+                # right_hand (5/3/10 13), spoon (6/0), left_upper_arm (7/3/13 16), left_lower_arm (8/1/16 17),
+                # left_hand (9/3/17 20), pan (10/0), right_thigh (11/3/20 23), right_shin (12/1/23 24),
+                # right_foot (13/3/24 27), left_thigh (14/3/27 30), left_shin (15/1/30 31), left_foot (16/3/31 34)
+                self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16]
+                self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
+                self._dof_obs_size = 84
+                self._num_actions = 34
+                self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
+            elif asset_joint_num == 38:
+                # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/3/9 12),
+                # right_hand (5/3/12 15), spoon (6/0), left_upper_arm (7/3/15 18), left_lower_arm (8/3/18 21),
+                # left_hand (9/3/21 24), pan (10/0), right_thigh (11/3/24 27), right_shin (12/1/27 28),
+                # right_foot (13/3/28 31), left_thigh (14/3/31 34), left_shin (15/1/34 35), left_foot (16/3/35 38)
+                self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16]
+                self._dof_offsets = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 28, 31, 34, 35, 38]
+                self._dof_obs_size = 84
+                self._num_actions = 38
+                self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
         else:
             print(f"Unsupported humanoid body num: {asset_body_num}")
             assert False
