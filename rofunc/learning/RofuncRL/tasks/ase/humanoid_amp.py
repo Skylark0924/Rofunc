@@ -220,6 +220,11 @@ class HumanoidAMP(Humanoid):
                 self._num_amp_obs_per_step = (
                         13 + self._dof_obs_size + 38 + 3 * num_key_bodies
                 )
+        elif asset_body_num == 19:
+            if asset_joint_num == 44:
+                self._num_amp_obs_per_step = (
+                        13 + self._dof_obs_size + 44 + 3 * num_key_bodies
+                )
         else:
             print(f"Unsupported humanoid body num: {asset_body_num}")
             assert False
