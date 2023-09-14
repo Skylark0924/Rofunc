@@ -1835,7 +1835,7 @@
   </joint>
   <link name="right_hand_root_link"/>
   <joint name="right_qbhand_flange_joint" type="fixed">
-    <origin rpy="0 0 -2.3562" xyz="0 0 0"/>
+    <origin rpy="0 0 -0.7855" xyz="0 0 0"/>
     <parent link="right_hand_root_link"/>
     <child link="flange90_r"/>
   </joint>
