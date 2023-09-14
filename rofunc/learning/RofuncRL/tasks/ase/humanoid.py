@@ -361,6 +361,19 @@ class Humanoid(VecTask):
                 self._dof_obs_size = 84
                 self._num_actions = 38
                 self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
+        elif asset_body_num == 19:
+            if asset_joint_num == 44:
+                # torso (1/3/0 3), head (2/3/3 6),
+                # right_shoulder(3/3/6 9), right_upper_arm (4/3/9 12), right_lower_arm (5/3/12 15),
+                # right_hand (6/3/15 18), spoon (7/0),
+                # left_shoulder(8/3/18 21), left_upper_arm (9/3/21 24), left_lower_arm (10/3/24 27),
+                # left_hand (11/3/27 30), pan (12/0), right_thigh (13/3/30 33), right_shin (14/1/33 34),
+                # right_foot (15/3/34 37), left_thigh (16/3/37 40), left_shin (17/1/40 41), left_foot (18/3/41 44)
+                self._dof_body_ids = [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18]
+                self._dof_offsets = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 34, 37, 40, 41, 44]
+                self._dof_obs_size = 96
+                self._num_actions = 44
+                self._num_obs = 1 + 19 * (3 + 6 + 3 + 3) - 3
         else:
             print(f"Unsupported humanoid body num: {asset_body_num}")
             assert False
