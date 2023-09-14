@@ -244,17 +244,7 @@ class Humanoid(VecTask):
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
 
-        elif asset_file == "mjcf/hotu_humanoid.xml":
-            # ['pelvis', 'torso', 'head', 'right_upper_arm', 'right_lower_arm', 'right_hand', 'sword', 'left_upper_arm',
-            # 'left_lower_arm', 'shield', 'left_hand', 'right_thigh', 'right_shin', 'right_foot', 'left_thigh',
-            # 'left_shin', 'left_foot']
-            self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 16]
-            self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
-            self._dof_obs_size = 84
-            self._num_actions = 34
-            self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3  # Check
-
-        elif asset_file in ["mjcf/hotu_humanoid2.xml", "mjcf/hotu_humanoid_spoon_pan.xml"]:
+        elif asset_file in ["mjcf/hotu_humanoid.xml", "mjcf/hotu_humanoid_spoon_pan.xml"]:
             # ['pelvis', 'torso', 'head', 'right_upper_arm', 'right_lower_arm', 'right_hand', 'left_upper_arm',
             # 'left_lower_arm', 'left_hand', 'right_thigh', 'right_shin', 'right_foot', 'left_thigh', 'left_shin',
             # 'left_foot']

@@ -11,7 +11,7 @@
       <joint type="hinge" damping="0.1" stiffness="5" armature=".007" limited="true" solimplimit="0 .99 .01"/>
       <site size=".04" group="3"/>
       <default class="force-torque">
-        <site type="box" size=".01 .01 .02" rgba="1 0 0 1" />
+        <site type="box" size=".01 .01 .02" rgba="1 0 0 1"/>
       </default>
       <default class="touch">
         <site type="capsule" rgba="0 0 1 .3"/>
@@ -66,7 +66,7 @@
             <body name="right_hand" pos="0 0 -0.258947">
               <joint name="right_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
               <joint name="right_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10" armature=".003"/>
-              <joint name="right_hand_z" axis="0 0 1"  range="-90 90" stiffness="100" damping="10" armature=".003"/>
+              <joint name="right_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10" armature=".003"/>
               <geom name="right_hand" type="sphere" size=".04" density="1865"/>
               <site name="right_hand" class="touch" type="sphere" size=".041"/>
             </body>
@@ -76,7 +76,7 @@
         <body name="left_upper_arm" pos="-0.02405 0.18311 0.24350">
           <joint name="left_shoulder_x" axis="1 0 0" range="-45 180" stiffness="200" damping="20" armature=".02"/>
           <joint name="left_shoulder_y" axis="0 1 0" range="-180 60" stiffness="200" damping="20" armature=".02"/>
-          <joint name="left_shoulder_z" axis="0 0 1"  range="-90 90" stiffness="200" damping="20" armature=".02"/>
+          <joint name="left_shoulder_z" axis="0 0 1" range="-90 90" stiffness="200" damping="20" armature=".02"/>
           <geom name="left_upper_arm" fromto="0 0 -0.05 0 0 -0.23" size="0.045" density="982"/>
           <site name="left_upper_arm" class="touch" pos="0 0 -0.14" size="0.046 0.1" zaxis="0 0 1"/>
 
@@ -88,7 +88,7 @@
             <body name="left_hand" pos="0 0 -0.258947">
               <joint name="left_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
               <joint name="left_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10" armature=".003"/>
-              <joint name="left_hand_z" axis="0 0 1"  range="-90 90" stiffness="100" damping="10" armature=".003"/>
+              <joint name="left_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10" armature=".003"/>
               <geom name="left_hand" type="sphere" size=".04" density="1865"/>
               <site name="left_hand" class="touch" type="sphere" size=".041"/>
             </body>
@@ -107,7 +107,7 @@
         <body name="right_shin" pos="0 0 -0.421546">
           <site name="right_knee" class="force-torque" pos="0 0 0"/>
           <joint name="right_knee" pos="0 0 0" axis="0 1 0" range="0 160" stiffness="300" damping="30" armature=".02"/>
-          <geom name="right_shin" fromto="0 0 -0.045 0 0 -0.355"  size=".05" density="1014"/>
+          <geom name="right_shin" fromto="0 0 -0.045 0 0 -0.355" size=".05" density="1014"/>
           <site name="right_shin" class="touch" pos="0 0 -0.2" size="0.051 0.156" zaxis="0 0 -1"/>
 
           <body name="right_foot" pos="0 0 -0.409870">
@@ -132,7 +132,7 @@
         <body name="left_shin" pos="0 0 -0.421546">
           <site name="left_knee" class="force-torque" pos="0 0 .02"/>
           <joint name="left_knee" pos="0 0 0" axis="0 1 0" range="0 160" stiffness="300" damping="30" armature=".02"/>
-          <geom name="left_shin" fromto="0 0 -0.045 0 0 -0.355"  size=".05" density="1014"/>
+          <geom name="left_shin" fromto="0 0 -0.045 0 0 -0.355" size=".05" density="1014"/>
           <site name="left_shin" class="touch" pos="0 0 -0.2" size="0.051 0.156" zaxis="0 0 -1"/>
 
           <body name="left_foot" pos="0 0 -0.409870">
@@ -159,10 +159,16 @@
     <motor name='right_shoulder_y' gear='70' joint='right_shoulder_y'/>
     <motor name='right_shoulder_z' gear='70' joint='right_shoulder_z'/>
     <motor name='right_elbow'     gear='60' joint='right_elbow'/>
-    <motor name='left_shoulder_x'  gear='70' joint='left_shoulder_x'/>
-    <motor name='left_shoulder_y'  gear='70' joint='left_shoulder_y'/>
-    <motor name='left_shoulder_z'  gear='70' joint='left_shoulder_z'/>
+    <motor name='right_hand_x'    gear='50' joint='right_hand_x'/>
+    <motor name='right_hand_y'    gear='50' joint='right_hand_y'/>
+    <motor name='right_hand_z'    gear='50' joint='right_hand_z'/>
+    <motor name='left_shoulder_x' gear='70' joint='left_shoulder_x'/>
+    <motor name='left_shoulder_y' gear='70' joint='left_shoulder_y'/>
+    <motor name='left_shoulder_z' gear='70' joint='left_shoulder_z'/>
     <motor name='left_elbow'      gear='60' joint='left_elbow'/>
+    <motor name='left_hand_x'     gear='50' joint='left_hand_x'/>
+    <motor name='left_hand_y'     gear='50' joint='left_hand_y'/>
+    <motor name='left_hand_z'     gear='50' joint='left_hand_z'/>
     <motor name='right_hip_x'     gear='125' joint='right_hip_x'/>
     <motor name='right_hip_z'     gear='125' joint='right_hip_z'/>
     <motor name='right_hip_y'     gear='125' joint='right_hip_y'/>
