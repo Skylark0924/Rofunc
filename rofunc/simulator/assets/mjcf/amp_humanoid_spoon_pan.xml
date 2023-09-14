@@ -90,93 +90,106 @@
           <camera name="egocentric" pos=".103 0 0.175" xyaxes="0 -1 0 .1 0 1" fovy="80"/>
         </body>
 
-        <body name="right_upper_arm" pos="-0.02405 -0.18311 0.24350">
+        <body name="right_shoulder" pos="-0.02405 -0.08311 0.24350">
           <joint name="right_shoulder_x" axis="1 0 0" range="-180 45" stiffness="400" damping="40" armature=".02"/>
           <joint name="right_shoulder_y" axis="0 1 0" range="-180 60" stiffness="400" damping="40" armature=".02"/>
           <joint name="right_shoulder_z" axis="0 0 1" range="-90 90" stiffness="400" damping="40" armature=".02"/>
-          <geom name="right_upper_arm" fromto="0 0 -0.05 0 0 -0.23" size=".045" density="982"/>
-          <site name="right_upper_arm" class="touch" pos="0 0 -0.14" size="0.046 0.1" zaxis="0 0 1"/>
 
-          <body name="right_lower_arm" pos="0 0 -0.274788">
-            <joint name="right_roll" axis="1 0 0" range="-90 90" stiffness="300" damping="30" armature=".01"/>
-            <joint name="right_elbow" axis="0 1 0" range="-160 0" stiffness="300" damping="30" armature=".01"/>
-            <joint name="right_yaw" axis="0 0 1" range="-90 90" stiffness="300" damping="30" armature=".01"/>
-            <geom name="right_lower_arm" fromto="0 0 -0.0525 0 0 -0.1875" size="0.04" density="1056"/>
-            <geom name="right_lower_arm_dummy" type="box" size="0.04 0.02 0.09" density="1056"/>
-            <site name="right_lower_arm" class="touch" pos="0 0 -0.12" size="0.041 0.0685" zaxis="0 1 0"/>
+          <body name="right_upper_arm" pos="0 -0.1 0">
+            <joint name="right_upper_arm_x" axis="1 0 0" range="-180 45" stiffness="400" damping="40" armature=".02"/>
+            <joint name="right_upper_arm_y" axis="0 1 0" range="-180 60" stiffness="400" damping="40" armature=".02"/>
+            <joint name="right_upper_arm_z" axis="0 0 1" range="-90 90" stiffness="400" damping="40" armature=".02"/>
+            <geom name="right_upper_arm" fromto="0 0 -0.05 0 0 -0.23" size=".045" density="982"/>
+            <site name="right_upper_arm" class="touch" pos="0 0 -0.14" size="0.046 0.1" zaxis="0 0 1"/>
 
-            <body name="right_hand" pos="0 0 -0.258947">
-              <joint name="right_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
-              <joint name="right_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
-              <joint name="right_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10" armature=".01"/>
-              <geom name="right_hand" type="box" size=".04 .015 .06" density="1865"/>
-              <site name="right_hand" class="touch" type="sphere" size=".041"/>
+            <body name="right_lower_arm" pos="0 0 -0.274788">
+              <joint name="right_roll" axis="1 0 0" range="-90 90" stiffness="300" damping="30" armature=".01"/>
+              <joint name="right_elbow" axis="0 1 0" range="-160 0" stiffness="300" damping="30" armature=".01"/>
+              <joint name="right_yaw" axis="0 0 1" range="-90 90" stiffness="300" damping="30" armature=".01"/>
+              <geom name="right_lower_arm" fromto="0 0 -0.0525 0 0 -0.1875" size="0.04" density="1056"/>
+              <geom name="right_lower_arm_dummy" type="box" size="0.04 0.02 0.09" density="1056"/>
+              <site name="right_lower_arm" class="touch" pos="0 0 -0.12" size="0.041 0.0685" zaxis="0 1 0"/>
 
-              <body name="spoon" pos="0.0 0 0">
-                <geom name="spoon_head" type="mesh" mesh="spoon_head_mesh" density="300"/>
-                <geom name="spoon_neck" type="mesh" mesh="spoon_neck_mesh" density="300"/>
-                <geom name="spoon_handle" type="mesh" mesh="spoon_handle_mesh" density="300"/>
+              <body name="right_hand" pos="0 0 -0.258947">
+                <joint name="right_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
+                <joint name="right_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
+                <joint name="right_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10" armature=".01"/>
+                <geom name="right_hand" type="box" size=".04 .015 .06" density="1865"/>
+                <site name="right_hand" class="touch" type="sphere" size=".041"/>
+
+                <body name="spoon" pos="0.0 0 0">
+                  <geom name="spoon_head" type="mesh" mesh="spoon_head_mesh" density="300"/>
+                  <geom name="spoon_neck" type="mesh" mesh="spoon_neck_mesh" density="300"/>
+                  <geom name="spoon_handle" type="mesh" mesh="spoon_handle_mesh" density="300"/>
+                </body>
               </body>
             </body>
           </body>
         </body>
 
-        <body name="left_upper_arm" pos="-0.02405 0.18311 0.24350">
-          <joint name="left_shoulder_x" axis="1 0 0" range="-45 180" stiffness="400" damping="40" armature=".02"/>
+        <body name="left_shoulder" pos="-0.02405 0.08311 0.24350">
+          <joint name="left_shoulder_x" axis="1 0 0" range="-180 45" stiffness="400" damping="40" armature=".02"/>
           <joint name="left_shoulder_y" axis="0 1 0" range="-180 60" stiffness="400" damping="40" armature=".02"/>
           <joint name="left_shoulder_z" axis="0 0 1" range="-90 90" stiffness="400" damping="40" armature=".02"/>
-          <geom name="left_upper_arm" fromto="0 0 -0.05 0 0 -0.23" size="0.045" density="982"/>
-          <site name="left_upper_arm" class="touch" pos="0 0 -0.14" size="0.046 0.1" zaxis="0 0 1"/>
 
-          <body name="left_lower_arm" pos="0 0 -0.274788">
-            <joint name="left_roll" axis="1 0 0" range="-90 90" stiffness="300" damping="30" armature=".01"/>
-            <joint name="left_elbow" axis="0 1 0" range="-160 0" stiffness="300" damping="30" armature=".01"/>
-            <joint name="left_yaw" axis="0 0 1" range="-90 90" stiffness="300" damping="30" armature=".01"/>
-            <geom name="left_lower_arm" fromto="0 0 -0.0525 0 0 -0.1875" size="0.04" density="1056"/>
-            <geom name="left_lower_arm_dummy" type="box" size="0.04 0.02 0.09" density="1056"/>
-            <site name="left_lower_arm" class="touch" pos="0 0 -0.1" size="0.041 0.0685" zaxis="0 0 1"/>
+          <body name="left_upper_arm" pos="0 0.1 0">
+            <joint name="left_upper_arm_x" axis="1 0 0" range="-45 180" stiffness="400" damping="40" armature=".02"/>
+            <joint name="left_upper_arm_y" axis="0 1 0" range="-180 60" stiffness="400" damping="40" armature=".02"/>
+            <joint name="left_upper_arm_z" axis="0 0 1" range="-90 90" stiffness="400" damping="40" armature=".02"/>
+            <geom name="left_upper_arm" fromto="0 0 -0.05 0 0 -0.23" size="0.045" density="982"/>
+            <site name="left_upper_arm" class="touch" pos="0 0 -0.14" size="0.046 0.1" zaxis="0 0 1"/>
 
-            <body name="left_hand" pos="0 0 -0.258947">
-              <joint name="left_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
-              <joint name="left_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
-              <joint name="left_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10" armature=".01"/>
-              <geom name="left_hand" type="box" size=".04 .015 .06" density="1865"/>
-              <site name="left_hand" class="touch" type="sphere" size=".041"/>
+            <body name="left_lower_arm" pos="0 0 -0.274788">
+              <joint name="left_roll" axis="1 0 0" range="-90 90" stiffness="300" damping="30" armature=".01"/>
+              <joint name="left_elbow" axis="0 1 0" range="-160 0" stiffness="300" damping="30" armature=".01"/>
+              <joint name="left_yaw" axis="0 0 1" range="-90 90" stiffness="300" damping="30" armature=".01"/>
+              <geom name="left_lower_arm" fromto="0 0 -0.0525 0 0 -0.1875" size="0.04" density="1056"/>
+              <geom name="left_lower_arm_dummy" type="box" size="0.04 0.02 0.09" density="1056"/>
+              <site name="left_lower_arm" class="touch" pos="0 0 -0.1" size="0.041 0.0685" zaxis="0 0 1"/>
 
-              <body name="pan" pos="0.0 0 0">
-                <geom name="handle_1" type="mesh" euler="0 0 0" mesh="handle_1_mesh" density="300"/>
-                <geom name="handle_2" type="mesh" euler="0 0 0" mesh="handle_2_mesh" density="300"/>
-                <geom name="knobs" type="mesh" euler="0 0 0" mesh="knobs_mesh" density="300"/>
-                <geom name="pan_bottom" type="mesh" euler="0 0 0" mesh="pan_bottom_mesh" density="300"/>
-                <geom name="pan_00" type="mesh" euler="0 0 0" mesh="pan_00_mesh" density="300"/>
-                <geom name="pan_01" type="mesh" euler="0 0 0" mesh="pan_01_mesh" density="300"/>
-                <geom name="pan_02" type="mesh" euler="0 0 0" mesh="pan_02_mesh" density="300"/>
-                <geom name="pan_03" type="mesh" euler="0 0 0" mesh="pan_03_mesh" density="300"/>
-                <geom name="pan_04" type="mesh" euler="0 0 0" mesh="pan_04_mesh" density="300"/>
-                <geom name="pan_05" type="mesh" euler="0 0 0" mesh="pan_05_mesh" density="300"/>
-                <geom name="pan_06" type="mesh" euler="0 0 0" mesh="pan_06_mesh" density="300"/>
-                <geom name="pan_07" type="mesh" euler="0 0 0" mesh="pan_07_mesh" density="300"/>
-                <geom name="pan_08" type="mesh" euler="0 0 0" mesh="pan_08_mesh" density="300"/>
-                <geom name="pan_09" type="mesh" euler="0 0 0" mesh="pan_09_mesh" density="300"/>
-                <geom name="pan_10" type="mesh" euler="0 0 0" mesh="pan_10_mesh" density="300"/>
-                <geom name="pan_11" type="mesh" euler="0 0 0" mesh="pan_11_mesh" density="300"/>
-                <geom name="pan_12" type="mesh" euler="0 0 0" mesh="pan_12_mesh" density="300"/>
-                <geom name="pan_13" type="mesh" euler="0 0 0" mesh="pan_13_mesh" density="300"/>
-                <geom name="pan_14" type="mesh" euler="0 0 0" mesh="pan_14_mesh" density="300"/>
-                <geom name="pan_15" type="mesh" euler="0 0 0" mesh="pan_15_mesh" density="300"/>
-                <geom name="pan_16" type="mesh" euler="0 0 0" mesh="pan_16_mesh" density="300"/>
-                <geom name="pan_17" type="mesh" euler="0 0 0" mesh="pan_17_mesh" density="300"/>
-                <geom name="pan_18" type="mesh" euler="0 0 0" mesh="pan_18_mesh" density="300"/>
-                <geom name="pan_19" type="mesh" euler="0 0 0" mesh="pan_19_mesh" density="300"/>
-                <geom name="pan_20" type="mesh" euler="0 0 0" mesh="pan_20_mesh" density="300"/>
-                <geom name="pan_21" type="mesh" euler="0 0 0" mesh="pan_21_mesh" density="300"/>
-                <geom name="pan_22" type="mesh" euler="0 0 0" mesh="pan_22_mesh" density="300"/>
-                <geom name="pan_23" type="mesh" euler="0 0 0" mesh="pan_23_mesh" density="300"/>
+              <body name="left_hand" pos="0 0 -0.258947">
+                <joint name="left_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
+                <joint name="left_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10" armature=".01"/>
+                <joint name="left_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10" armature=".01"/>
+                <geom name="left_hand" type="box" size=".04 .015 .06" density="1865"/>
+                <site name="left_hand" class="touch" type="sphere" size=".041"/>
+
+                <body name="pan" pos="0.0 0 0">
+                  <geom name="handle_1" type="mesh" euler="0 0 0" mesh="handle_1_mesh" density="300"/>
+                  <geom name="handle_2" type="mesh" euler="0 0 0" mesh="handle_2_mesh" density="300"/>
+                  <geom name="knobs" type="mesh" euler="0 0 0" mesh="knobs_mesh" density="300"/>
+                  <geom name="pan_bottom" type="mesh" euler="0 0 0" mesh="pan_bottom_mesh" density="300"/>
+                  <geom name="pan_00" type="mesh" euler="0 0 0" mesh="pan_00_mesh" density="300"/>
+                  <geom name="pan_01" type="mesh" euler="0 0 0" mesh="pan_01_mesh" density="300"/>
+                  <geom name="pan_02" type="mesh" euler="0 0 0" mesh="pan_02_mesh" density="300"/>
+                  <geom name="pan_03" type="mesh" euler="0 0 0" mesh="pan_03_mesh" density="300"/>
+                  <geom name="pan_04" type="mesh" euler="0 0 0" mesh="pan_04_mesh" density="300"/>
+                  <geom name="pan_05" type="mesh" euler="0 0 0" mesh="pan_05_mesh" density="300"/>
+                  <geom name="pan_06" type="mesh" euler="0 0 0" mesh="pan_06_mesh" density="300"/>
+                  <geom name="pan_07" type="mesh" euler="0 0 0" mesh="pan_07_mesh" density="300"/>
+                  <geom name="pan_08" type="mesh" euler="0 0 0" mesh="pan_08_mesh" density="300"/>
+                  <geom name="pan_09" type="mesh" euler="0 0 0" mesh="pan_09_mesh" density="300"/>
+                  <geom name="pan_10" type="mesh" euler="0 0 0" mesh="pan_10_mesh" density="300"/>
+                  <geom name="pan_11" type="mesh" euler="0 0 0" mesh="pan_11_mesh" density="300"/>
+                  <geom name="pan_12" type="mesh" euler="0 0 0" mesh="pan_12_mesh" density="300"/>
+                  <geom name="pan_13" type="mesh" euler="0 0 0" mesh="pan_13_mesh" density="300"/>
+                  <geom name="pan_14" type="mesh" euler="0 0 0" mesh="pan_14_mesh" density="300"/>
+                  <geom name="pan_15" type="mesh" euler="0 0 0" mesh="pan_15_mesh" density="300"/>
+                  <geom name="pan_16" type="mesh" euler="0 0 0" mesh="pan_16_mesh" density="300"/>
+                  <geom name="pan_17" type="mesh" euler="0 0 0" mesh="pan_17_mesh" density="300"/>
+                  <geom name="pan_18" type="mesh" euler="0 0 0" mesh="pan_18_mesh" density="300"/>
+                  <geom name="pan_19" type="mesh" euler="0 0 0" mesh="pan_19_mesh" density="300"/>
+                  <geom name="pan_20" type="mesh" euler="0 0 0" mesh="pan_20_mesh" density="300"/>
+                  <geom name="pan_21" type="mesh" euler="0 0 0" mesh="pan_21_mesh" density="300"/>
+                  <geom name="pan_22" type="mesh" euler="0 0 0" mesh="pan_22_mesh" density="300"/>
+                  <geom name="pan_23" type="mesh" euler="0 0 0" mesh="pan_23_mesh" density="300"/>
+                </body>
               </body>
             </body>
           </body>
         </body>
       </body>
+
 
       <body name="right_thigh" pos="0 -0.084887 0">
         <site name="right_hip" class="force-torque"/>
