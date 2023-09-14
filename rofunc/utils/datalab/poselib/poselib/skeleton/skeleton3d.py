@@ -1210,7 +1210,6 @@ class SkeletonMotion(SkeletonState):
                 ]
             )
 
-
     @classmethod
     def from_fbx(
         cls: Type["SkeletonMotion"],
