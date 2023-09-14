@@ -76,9 +76,9 @@
         <geom name="torso" type="sphere" pos="0 0 0.12" size="0.11" density="1794"/>
         <site name="torso" class="touch" type="sphere" pos="0 0 0.12" size="0.111"/>
 
-        <geom name="right_clavicle" fromto="-0.0060125 -0.0457775 0.2287955 -0.016835 -0.128177 0.2376182" size=".045"
+        <geom name="right_clavicle" fromto="-0.0060125 -0.0457775 0.1887955 -0.016835 -0.128177 0.2376182" size=".045"
               density="1100"/>
-        <geom name="left_clavicle" fromto="-0.0060125 0.0457775 0.2287955 -0.016835 0.128177 0.2376182" size=".045"
+        <geom name="left_clavicle" fromto="-0.0060125 0.0457775 0.1887955 -0.016835 0.128177 0.2376182" size=".045"
               density="1100"/>
 
         <body name="head" pos="0 0 0.223894">
@@ -90,7 +90,7 @@
           <camera name="egocentric" pos=".103 0 0.175" xyaxes="0 -1 0 .1 0 1" fovy="80"/>
         </body>
 
-        <body name="right_upper_arm" pos="-0.02405 -0.18311 0.24350">
+        <body name="right_upper_arm" pos="-0.02405 -0.14311 0.24350">
           <joint name="right_shoulder_x" axis="1 0 0" range="-180 45" stiffness="400" damping="40" armature=".02"/>
           <joint name="right_shoulder_y" axis="0 1 0" range="-180 60" stiffness="400" damping="40" armature=".02"/>
           <joint name="right_shoulder_z" axis="0 0 1" range="-90 90" stiffness="400" damping="40" armature=".02"/>
@@ -120,7 +120,7 @@
           </body>
         </body>
 
-        <body name="left_upper_arm" pos="-0.02405 0.18311 0.24350">
+        <body name="left_upper_arm" pos="-0.02405 0.14311 0.24350">
           <joint name="left_shoulder_x" axis="1 0 0" range="-45 180" stiffness="400" damping="40" armature=".02"/>
           <joint name="left_shoulder_y" axis="0 1 0" range="-180 60" stiffness="400" damping="40" armature=".02"/>
           <joint name="left_shoulder_z" axis="0 0 1" range="-90 90" stiffness="400" damping="40" armature=".02"/>
