@@ -155,9 +155,7 @@ class HumanoidAMP(Humanoid):
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 28 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
         elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 31 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
-        elif asset_file == "mjcf/hotu_humanoid.xml":
-            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-        elif asset_file in ["mjcf/hotu_humanoid2.xml", "mjcf/hotu_humanoid_spoon_pan.xml"]:
+        elif asset_file in ["mjcf/hotu_humanoid.xml", "mjcf/hotu_humanoid_spoon_pan.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
         else:
             print("Unsupported character config file: {s}".format(asset_file))
