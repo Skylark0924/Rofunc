@@ -463,11 +463,6 @@
         link="right_limb_l7"/>
     <axis
         xyz="0 0 1"/>
-    <limit
-        lower="-0.3508"
-        upper="0.3508"
-        effort="2.5"
-        velocity="3.1416"/>
   </joint>
   <link
       name="right_palm_link">
@@ -986,11 +981,6 @@
         link="left_limb_l7"/>
     <axis
         xyz="0 0 -1"/>
-    <limit
-        lower="-0.3508"
-        upper="0.3508"
-        effort="2.5"
-        velocity="3.1416"/>
   </joint>
   <link
       name="left_palm_link">

@@ -352,7 +352,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/torso_end_v2_yup.STL"/>
+        <mesh filename="../meshes/clover/collision/torso_end_v2_yup.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -715,7 +715,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/visual/flange90_yup.STL"/>
+        <mesh filename="../meshes/clover/collision/flange90_yup.STL"/>
       </geometry>
     </collision>
   </link>
@@ -1879,7 +1879,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/visual/flange90_yup.STL"/>
+        <mesh filename="../meshes/clover/collision/flange90_yup.STL"/>
       </geometry>
     </collision>
   </link>

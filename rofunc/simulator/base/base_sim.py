@@ -128,7 +128,7 @@ class PlaygroundSim:
 
 
 class RobotSim:
-    def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=False,
+    def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=None,
                  flip_visual_attachments=True, init_pose_vec=None, num_envs=1, device="cpu"):
         """
         Initialize the robot simulator
@@ -147,11 +147,11 @@ class RobotSim:
         self.num_envs = num_envs
         self.device = device
         if self.robot_name == "CURI":
-            self.asset_file = "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
+            self.asset_file = "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf" if asset_file is None else asset_file
             self.init_pose_vec = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         elif self.robot_name == "walker":
-            self.asset_file = "urdf/walker/urdf/walker_cartesio.urdf"
-            self.fix_base_link = True
+            self.asset_file = "urdf/walker/urdf/walker_cartesio.urdf" if asset_file is None else asset_file
+            self.fix_base_link = True if fix_base_link is None else fix_base_link
             self.flip_visual_attachments = False
             self.init_pose_vec = (0., 1.3, 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         elif self.robot_name == "CURI-mini":
@@ -185,7 +185,8 @@ class RobotSim:
             up_axis = self.args.up_axis.upper()
             if up_axis == "Z":
                 pos_z, pos_y = pos_y, pos_z
-        self.init_pose_vec = (0., pos_y, pos_z, -0.707107, 0., 0., 0.707107) if self.init_pose_vec is None else self.init_pose_vec
+        self.init_pose_vec = (
+        0., pos_y, pos_z, -0.707107, 0., 0., 0.707107) if self.init_pose_vec is None else self.init_pose_vec
 
         # Find the asset root folder
         if asset_root is None:
@@ -244,7 +245,14 @@ class RobotSim:
         self.envs = envs
         self.robot_handles = robot_handles
 
-    def _init_attractor(self, attracted_joint):
+    def _init_attractor(self, attracted_joint, verbose=True):
+        """
+        Initialize the attractor for tracking the trajectory using the embedded Isaac Gym PID controller
+
+        :param attracted_joint: the joint to be attracted
+        :param verbose: if True, visualize the attractor spheres
+        :return:
+        """
         from isaacgym import gymapi
         from isaacgym import gymutil
 
@@ -279,9 +287,10 @@ class RobotSim:
             attractor_properties.target.p.z = 0.1
             attractor_properties.rigid_handle = attracted_joint_handle
 
-            # Draw axes and sphere at attractor location
-            gymutil.draw_lines(axes_geom, self.gym, self.viewer, env, attractor_properties.target)
-            gymutil.draw_lines(sphere_geom, self.gym, self.viewer, env, attractor_properties.target)
+            if verbose:
+                # Draw axes and sphere at attractor location
+                gymutil.draw_lines(axes_geom, self.gym, self.viewer, env, attractor_properties.target)
+                gymutil.draw_lines(sphere_geom, self.gym, self.viewer, env, attractor_properties.target)
 
             attractor_handle = self.gym.create_rigid_body_attractor(env, attractor_properties)
             attractor_handles.append(attractor_handle)
@@ -290,14 +299,14 @@ class RobotSim:
     def setup_robot_dof_prop(self, **kwargs):
         raise NotImplementedError
 
-    def _setup_attractors(self, traj, attracted_joints):
+    def _setup_attractors(self, traj, attracted_joints, verbose=True):
         assert isinstance(attracted_joints, list), "The attracted joints should be a list"
         assert len(attracted_joints) > 0, "The length of the attracted joints should be greater than 0"
         assert len(attracted_joints) == len(traj), "The first dimension of trajectory should equal to attracted_joints"
 
         attractor_handles, axes_geoms, sphere_geoms = [], [], []
         for i in range(len(attracted_joints)):
-            attractor_handle, axes_geom, sphere_geom = self._init_attractor(attracted_joints[i])
+            attractor_handle, axes_geom, sphere_geom = self._init_attractor(attracted_joints[i], verbose=verbose)
             attractor_handles.append(attractor_handle)
             axes_geoms.append(axes_geom)
             sphere_geoms.append(sphere_geom)
@@ -482,13 +491,14 @@ class RobotSim:
         u = (j_eef_T @ torch.inverse(j_eef @ j_eef_T + lmbda) @ dpose).view(self.num_envs, 7)
         return u
 
-    def run_traj_multi_joints(self, traj: List, attracted_joints: List = None, update_freq=0.001):
+    def run_traj_multi_joints(self, traj: List, attracted_joints: List = None, update_freq=0.001, verbose=True):
         """
         Run the trajectory with multiple joints, the default is to run the trajectory with the left and right hand of
         bimanual robot.
         :param traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
         :param attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
         :param update_freq: the frequency of updating the robot pose
+        :param verbose: if True, visualize the attractor spheres
         :return:
         """
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
@@ -496,7 +506,8 @@ class RobotSim:
         beauty_print('Execute multi-joint trajectory with the CURI simulator')
 
         # Create the attractor
-        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attracted_joints)
+        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attracted_joints,
+                                                                                               verbose=verbose)
 
         # Time to wait in seconds before moving robot
         next_update_time = 1
@@ -507,7 +518,7 @@ class RobotSim:
             if t >= next_update_time:
                 self.gym.clear_lines(self.viewer)
                 for i in range(len(attracted_joints)):
-                    self.update_robot(traj[i], attractor_handles[i], axes_geoms[i], sphere_geoms[i], index)
+                    self.update_robot(traj[i], attractor_handles[i], axes_geoms[i], sphere_geoms[i], index, verbose)
                 next_update_time += update_freq
                 index += 1
                 if index >= len(traj[i]):
