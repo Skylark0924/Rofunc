@@ -89,7 +89,7 @@ class WalkerSim(RobotSim):
 
         super(WalkerSim, self).show(visual_obs_flag, camera_props, attached_body, local_transform)
 
-    def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index):
+    def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index, verbose=True):
         from isaacgym import gymutil
 
         for i in range(self.num_envs):
@@ -98,19 +98,20 @@ class WalkerSim(RobotSim):
             pose = attractor_properties.target
             # pose.p: (x, y, z), pose.r: (w, x, y, z)
             pose.p.x = traj[index, 0]
-            pose.p.y = traj[index, 2]
-            pose.p.z = traj[index, 1]
+            pose.p.y = traj[index, 1]
+            pose.p.z = traj[index, 2]
             pose.r.w = traj[index, 6]
             pose.r.x = traj[index, 3]
             pose.r.y = traj[index, 4]
             pose.r.z = traj[index, 5]
             self.gym.set_attractor_target(self.envs[i], attractor_handles[i], pose)
 
-            # Draw axes and sphere at attractor location
-            gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
-            gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
+            if verbose:
+                # Draw axes and sphere at attractor location
+                gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
+                gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
-    def run_traj(self, traj, attracted_joints=None, update_freq=0.001):
+    def run_traj(self, traj, attracted_joints=None, update_freq=0.001, verbose=True):
         if attracted_joints is None:
             attracted_joints = ["left_palm_link", "right_palm_link"]
-        self.run_traj_multi_joints(traj, attracted_joints, update_freq)
+        self.run_traj_multi_joints(traj, attracted_joints, update_freq, verbose=verbose)
