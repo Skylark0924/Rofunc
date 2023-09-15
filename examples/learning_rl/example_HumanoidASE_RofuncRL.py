@@ -25,6 +25,7 @@ def train(custom_args):
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
+    cfg.task.env.asset.assetFileName = custom_args.asset
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -62,6 +63,7 @@ def inference(custom_args):
                       "num_envs={}".format(16)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
+    cfg.task.env.asset.assetFileName = custom_args.asset
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -95,7 +97,7 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 2
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     # Available tasks and motion files:
@@ -105,16 +107,18 @@ if __name__ == '__main__':
     # HumanoidASEReachSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
     # HumanoidASELocationSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
     # HumanoidASEStrikeSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
-    parser.add_argument("--task", type=str, default="HumanoidASEGetupSwordShield")
+    # HumanoidViewMotion
+    parser.add_argument("--task", type=str, default="HumanoidViewMotion")
     parser.add_argument("--motion_file", type=str,
-                        default="reallusion_sword_shield/dataset_reallusion_sword_shield.yaml")
+                        default="/home/ubuntu/Github/HOTU/hotu/data/hotu/020_amp.npy")
+    parser.add_argument("--asset", type=str, default="mjcf/hotu_humanoid_spoon_pan.xml")
     parser.add_argument("--agent", type=str, default="ase")  # Available agent: ase
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
+    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
