@@ -19,6 +19,7 @@ import numpy as np
 from PIL import Image as Im
 from typing import List
 
+import rofunc as rf
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 '''TODO: Make this page configurable'''
@@ -153,7 +154,7 @@ class RobotSim:
             self.asset_file = "urdf/walker/urdf/walker_cartesio.urdf" if asset_file is None else asset_file
             self.fix_base_link = True if fix_base_link is None else fix_base_link
             self.flip_visual_attachments = False
-            self.init_pose_vec = (0., 1.3, 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+            self.init_pose_vec = (0., 1.1, 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
         elif self.robot_name == "CURI-mini":
             self.asset_file = "urdf/curi_mini/urdf/diablo_simulation.urdf"
             self.flip_visual_attachments = False
@@ -174,8 +175,8 @@ class RobotSim:
         elif self.robot_name == "human":
             self.asset_file = asset_file
             self.flip_visual_attachments = False
-            self.fix_base_link = False
-            pos_y, pos_z = 2., 0.
+            self.fix_base_link = False if fix_base_link is None else fix_base_link
+            pos_y, pos_z = 0.8, 0.
         else:
             raise ValueError(
                 "The robot {} is not supported. Please choose a robot in [CURI, walker, CURI-mini, baxter, sawyer]".format(
@@ -186,7 +187,7 @@ class RobotSim:
             if up_axis == "Z":
                 pos_z, pos_y = pos_y, pos_z
         self.init_pose_vec = (
-        0., pos_y, pos_z, -0.707107, 0., 0., 0.707107) if self.init_pose_vec is None else self.init_pose_vec
+            0., pos_y, pos_z, -0.707107, 0., 0., 0.707107) if self.init_pose_vec is None else self.init_pose_vec
 
         # Find the asset root folder
         if asset_root is None:
@@ -201,6 +202,8 @@ class RobotSim:
         self.asset_options.flip_visual_attachments = self.flip_visual_attachments
         self.asset_options.armature = 0.01
 
+        self.object_handles = None
+
     def init(self):
         # Initial gym, sim, viewer and env
         self.PlaygroundSim = PlaygroundSim(self.args)
@@ -211,6 +214,12 @@ class RobotSim:
 
         self.setup_robot_dof_prop()
         self.robot_dof = self.gym.get_actor_dof_count(self.envs[0], self.robot_handles[0])
+
+    def monitor_rigid_body_states(self):
+        from isaacgym import gymtorch
+        self.gym.prepare_sim(self.sim)
+        self.rigid_body_states_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)
+        self.rigid_body_states = gymtorch.wrap_tensor(self.rigid_body_states_tensor)
 
     def init_env(self, spacing=3.0):
         from isaacgym import gymapi
@@ -327,8 +336,9 @@ class RobotSim:
         """
         from isaacgym import gymapi
 
-        object_idxs = []
-        object_handles = []
+        self.object_idxs = []
+        self.object_handles = []
+        self.object_poses = []
         for i in range(self.num_envs):
             if isinstance(object_poses, list):
                 object_pose = object_poses[i]
@@ -337,15 +347,47 @@ class RobotSim:
 
             object_handle = self.gym.create_actor(self.envs[i], object_asset, object_pose, object_name, collision_group,
                                                   filter_mask, seg_id)
-            object_handles.append(object_handle)
+            self.object_handles.append(object_handle)
 
             if object_color is not None:
                 self.gym.set_rigid_body_color(self.envs[i], object_handle, 0, gymapi.MESH_VISUAL_AND_COLLISION,
                                               object_color)
 
             object_idx = self.gym.get_actor_rigid_body_index(self.envs[i], object_handle, 0, gymapi.DOMAIN_SIM)
-            object_idxs.append(object_idx)
-        return object_handles, object_idxs
+            self.object_idxs.append(object_idx)
+            self.object_poses.append([
+                object_pose.p.x,
+                object_pose.p.y,
+                object_pose.p.z,
+                object_pose.r.x,
+                object_pose.r.y,
+                object_pose.r.z,
+                object_pose.r.w,
+            ])
+            self.current_poses = self.object_poses
+        return self.object_handles, self.object_idxs
+
+    def add_marker(self, marker_pose):
+        from isaacgym import gymapi
+
+        asset_file = "mjcf/location_marker.urdf"
+
+        asset_options = gymapi.AssetOptions()
+        asset_options.angular_damping = 0.01
+        asset_options.linear_damping = 0.01
+        asset_options.max_angular_velocity = 100.0
+        asset_options.density = 1.0
+        asset_options.fix_base_link = True
+        asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
+
+        self._marker_asset = self.gym.load_asset(self.sim, self.asset_root, asset_file, asset_options)
+
+        self.marker_handles = []
+        for i in range(self.num_envs):
+            marker_handle = self.gym.create_actor(self.envs[i], self._marker_asset, marker_pose, "marker", i, 2, 0)
+            self.gym.set_rigid_body_color(self.envs[i], marker_handle, 0, gymapi.MESH_VISUAL,
+                                          gymapi.Vec3(0.8, 0.0, 0.0))
+            self.marker_handles.append(marker_handle)
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
@@ -478,6 +520,25 @@ class RobotSim:
     def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index):
         raise NotImplementedError
 
+    def update_object(self, object_handles, object_poses, state_type):
+        """
+        Update the object pose
+
+        :param object_handles:
+        :param object_poses:
+        :param state_type: gymapi.STATE_ALL, gymapi.STATE_POS, gymapi.STATE_VEL
+        :return:
+        """
+        from isaacgym import gymapi
+
+        for i in range(len(self.envs)):
+            state = self.gym.get_actor_rigid_body_states(self.envs[i], object_handles[i], gymapi.STATE_NONE)
+            state['pose']['p'].fill((object_poses[i][0], object_poses[i][1], object_poses[i][2]))
+            state['pose']['r'].fill((object_poses[i][3], object_poses[i][4], object_poses[i][5], object_poses[i][6]))
+            state['vel']['linear'].fill((0, 0, 0))
+            state['vel']['angular'].fill((0, 0, 0))
+            self.gym.set_actor_rigid_body_states(self.envs[i], object_handles[i], state, state_type)
+
     def ik_controller(self, joint_index, dpose, damping=0.05):
         jacobian = self.get_robot_jacobian()
 
@@ -491,16 +552,22 @@ class RobotSim:
         u = (j_eef_T @ torch.inverse(j_eef @ j_eef_T + lmbda) @ dpose).view(self.num_envs, 7)
         return u
 
-    def run_traj_multi_joints(self, traj: List, attracted_joints: List = None, update_freq=0.001, verbose=True):
+    def run_traj_multi_joints(self, traj: List, attracted_joints: List = None,
+                              object_start_pose: List = None, object_end_pose: List = None,
+                              object_related_joints: List = None,
+                              update_freq=0.001, verbose=True):
         """
         Run the trajectory with multiple joints, the default is to run the trajectory with the left and right hand of
         bimanual robot.
+
         :param traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
         :param attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
         :param update_freq: the frequency of updating the robot pose
         :param verbose: if True, visualize the attractor spheres
         :return:
         """
+        from isaacgym import gymapi
+
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
 
         beauty_print('Execute multi-joint trajectory with the CURI simulator')
@@ -515,10 +582,52 @@ class RobotSim:
         while not self.gym.query_viewer_has_closed(self.viewer):
             # Every 0.01 seconds the pose of the attractor is updated
             t = self.gym.get_sim_time(self.sim)
+            self.gym.refresh_rigid_body_state_tensor(self.sim)
+
             if t >= next_update_time:
                 self.gym.clear_lines(self.viewer)
                 for i in range(len(attracted_joints)):
                     self.update_robot(traj[i], attractor_handles[i], axes_geoms[i], sphere_geoms[i], index, verbose)
+
+                if self.object_handles is not None:
+                    if index <= 1:
+                        self.object_poses = object_start_pose
+                        self.update_object(self.object_handles, object_start_pose, gymapi.STATE_ALL)
+
+                    object_poses = self.object_poses
+                    # get global index of hand in rigid body state tensor
+                    left_hand_idx = self.gym.find_actor_rigid_body_index(self.envs[0], self.robot_handles[0],
+                                                                         object_related_joints[0], gymapi.DOMAIN_SIM)
+                    right_hand_idx = self.gym.find_actor_rigid_body_index(self.envs[0], self.robot_handles[0],
+                                                                          object_related_joints[1], gymapi.DOMAIN_SIM)
+                    left_hand_pos = self.rigid_body_states[left_hand_idx, :3]
+                    left_hand_rot = self.rigid_body_states[left_hand_idx, 3:7]
+                    left_hand_vel = self.rigid_body_states[left_hand_idx, 7:]
+                    right_hand_pos = self.rigid_body_states[right_hand_idx, :3]
+                    right_hand_rot = self.rigid_body_states[right_hand_idx, 3:7]
+                    right_hand_vel = self.rigid_body_states[right_hand_idx, 7:]
+
+                    center_pos = (left_hand_pos + right_hand_pos) / 2
+                    euclidean_dist = np.linalg.norm(np.array(center_pos) - self.current_poses[0][:3])
+                    # euclidean_dist = np.linalg.norm(left_hand_pos - right_hand_pos)
+                    if euclidean_dist < 0.1:
+                        left_hand_rot_euler = rf.robolab.euler_from_quaternion(left_hand_rot)
+                        right_hand_rot_euler = rf.robolab.euler_from_quaternion(right_hand_rot)
+                        tmp = (left_hand_rot_euler[1] + right_hand_rot_euler[1]) / 2
+                        object_rot = rf.robolab.quaternion_from_euler(np.pi / 2, tmp, 0)
+
+                        object_pos = (left_hand_pos + right_hand_pos) / 2
+                        object_poses = np.array([[*object_pos, *object_rot]])
+
+                        done_euclidean_dist = np.linalg.norm(
+                            np.array(self.current_poses[0][:3]) - object_end_pose[:3])
+                        if done_euclidean_dist < 0.05:
+                            object_poses = self.current_poses
+                            self.object_poses = object_poses
+
+                    self.current_poses = object_poses
+                    self.update_object(self.object_handles, object_poses, gymapi.STATE_ALL)
+
                 next_update_time += update_freq
                 index += 1
                 if index >= len(traj[i]):
