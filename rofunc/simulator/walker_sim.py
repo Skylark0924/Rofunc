@@ -111,7 +111,7 @@ class WalkerSim(RobotSim):
                 gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
                 gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
-    def run_traj(self, traj, attracted_joints=None, update_freq=0.001, verbose=True):
+    def run_traj(self, traj, attracted_joints=None, update_freq=0.001, verbose=True, **kwargs):
         if attracted_joints is None:
             attracted_joints = ["left_palm_link", "right_palm_link"]
-        self.run_traj_multi_joints(traj, attracted_joints, update_freq, verbose=verbose)
+        self.run_traj_multi_joints(traj, attracted_joints, update_freq=update_freq, verbose=verbose, **kwargs)

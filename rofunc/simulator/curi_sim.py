@@ -48,8 +48,8 @@ class CURISim(RobotSim):
         robot_dof_props["damping"][:4].fill(80.0)
         # Torso and arms
         robot_dof_props["driveMode"][4:].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][4:].fill(300.0)
-        robot_dof_props["damping"][4:].fill(80.0)
+        robot_dof_props["stiffness"][4:].fill(1000.0)
+        robot_dof_props["damping"][4:].fill(180.0)
         # grippers
         robot_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
         robot_dof_props["stiffness"][14:16].fill(800.0)
@@ -133,10 +133,10 @@ class CURISim(RobotSim):
                 gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
                 gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
-    def run_traj(self, traj, attracted_joints=None, update_freq=0.001, verbose=True):
+    def run_traj(self, traj, attracted_joints=None, update_freq=0.001, verbose=True, **kwargs):
         if attracted_joints is None:
             attracted_joints = ["panda_left_hand", "panda_right_hand"]
-        self.run_traj_multi_joints(traj, attracted_joints, update_freq, verbose=verbose)
+        self.run_traj_multi_joints(traj, attracted_joints, update_freq=update_freq, verbose=verbose, **kwargs)
 
     def run_traj_multi_joints_with_interference(self, traj: List, intf_index: List, intf_mode: str,
                                                 intf_forces=None, intf_torques=None, intf_joints: List = None,
