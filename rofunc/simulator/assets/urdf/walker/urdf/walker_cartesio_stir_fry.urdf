@@ -519,7 +519,7 @@
   </joint>
 
   <joint name="right_spoon_joint" type="fixed">
-    <origin rpy="-1.57 -1.57 -1.87" xyz="0.02 -0.05 0.04"/>
+    <origin rpy="1 -0.3 1.5" xyz="0 0 0"/>
     <parent link="right_palm_link"/>
     <child link="spoon_link"/>
     <axis xyz="0 0 1"/>
@@ -533,18 +533,18 @@
       <inertia ixx="3.5827953e-07" ixy="-2.0934657e-07" ixz="-6.8435459e-08" iyy="1.3882698e-06" iyz="-3.2001578e-08" izz="1.3570267e-06"/>
     </inertial>
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="1.3787 0.3490 0.3839" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../../objects/pan_spoon/spoon.obj" scale="1 1 1"/>
+        <mesh filename="../../objects/pan_spoon/spoon.obj" scale="-1 1 1"/>
       </geometry>
       <material name="qbhand/spoon">
         <color rgba="0.35 0.35 0.35 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="1.3787 0.3490 0.3839" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../../objects/pan_spoon/spoon.obj" scale="1 1 1"/>
+        <mesh filename="../../objects/pan_spoon/spoon.obj" scale="-1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1037,7 +1037,7 @@
   </joint>
 
   <joint name="left_pan_joint" type="fixed">
-    <origin rpy="-1.27 -1.57 1.57" xyz="-0.02 -0.06 0.017"/>
+    <origin rpy="0 -0.8 -1.9" xyz="0 0 0"/>
     <parent link="left_palm_link"/>
     <child link="pan_link"/>
     <axis xyz="0 0 1"/>
@@ -1053,7 +1053,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../../objects/pan_spoon/pan.obj" scale="1 1 1"/>
+        <mesh filename="../../objects/pan_spoon/pan.obj" scale="1 1 -1"/>
       </geometry>
       <material name="qbhand/pan">
         <color rgba="0.35 0.35 0.35 1.0"/>
@@ -1062,7 +1062,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../../objects/pan_spoon/pan.obj" scale="1 1 1"/>
+        <mesh filename="../../objects/pan_spoon/pan.obj" scale="1 1 -1"/>
       </geometry>
     </collision>
   </link>
