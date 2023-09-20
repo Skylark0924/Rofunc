@@ -1,0 +1,7 @@
+class_name: HumanoidViewMotion
+asset_name: "mjcf/amp_humanoid_sword_shield.xml"
+asset_body_num: 16
+asset_joint_num: 31
+
+keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot", "sword", "shield"]
+contactBodies: ["right_foot", "left_foot"]
