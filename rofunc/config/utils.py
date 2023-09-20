@@ -23,10 +23,66 @@ Config loading rules:
 """
 
 
-def get_config(config_path=None, config_name=None, args=None, debug=False, absl_config_path=None) -> DictConfig:
+def load_view_motion_config(config_name):
+    """Load the configs stored in config_name.yaml.
+
+    Args:
+        config_name (str): Name of the config file for viewing motion.
+
+    Returns:
+        (dict): A dict of configs.
+    """
+    config_file_path = os.path.join(
+        os.path.dirname(__file__), f"view_motion/{config_name}.yaml"
+    )
+    if not os.path.exists(config_file_path):
+        raise FileNotFoundError(f"{config_file_path} does not exist")
+
+    return OmegaConf.load(config_file_path)
+
+
+def load_agent_config(agent_name):
+    """Load the configs stored in agent_name.yaml.
+
+    Args:
+        agent_name (str): Name of the config file for the agent.
+
+    Returns:
+        (dict): A dict of configs.
+    """
+    agent_config_file_path = os.path.join(
+        os.path.dirname(__file__), f"agent/{agent_name}.yaml"
+    )
+    if not os.path.exists(agent_config_file_path):
+        raise FileNotFoundError(f"{agent_config_file_path} does not exist")
+
+    return OmegaConf.load(agent_config_file_path)
+
+
+def load_ikea_config(ikea_name):
+    """Load the configs stored in ikea_name.yaml.
+
+    Args:
+        ikea_name (str): Name of the config file under config/ikea for the ikea furniture.
+
+    Returns:
+        (dict): A dict of configs.
+    """
+    agent_config_file_path = os.path.join(
+        os.path.dirname(__file__), f"ikea/{ikea_name}.yaml"
+    )
+    if not os.path.exists(agent_config_file_path):
+        raise FileNotFoundError(f"{agent_config_file_path} does not exist")
+
+    return OmegaConf.load(agent_config_file_path)
+
+
+def get_config(
+    config_path=None, config_name=None, args=None, debug=False, absl_config_path=None
+) -> DictConfig:
     """
     Load config file and rewrite some params by args.
-    
+
     :param config_path: relative path to the config file (only for rofunc package)
     :param config_name: name of the config file (without .yaml)
     :param args: custom args to rewrite some params in the config file
@@ -37,9 +93,13 @@ def get_config(config_path=None, config_name=None, args=None, debug=False, absl_
     # reset current hydra config if already parsed (but not passed in here)
     if HydraConfig.initialized():
         hydra.core.global_hydra.GlobalHydra.instance().clear()
-    if (config_path is not None and config_name is not None) or \
-            (absl_config_path is not None and config_name is not None):
-        assert None in [config_path, absl_config_path], "config_path and absl_config_path cannot be set simultaneously"
+    if (config_path is not None and config_name is not None) or (
+        absl_config_path is not None and config_name is not None
+    ):
+        assert None in [
+            config_path,
+            absl_config_path,
+        ], "config_path and absl_config_path cannot be set simultaneously"
 
         if args is None:
             with initialize(config_path=config_path, version_base=None):
@@ -103,7 +163,7 @@ def dict_to_omegaconf(d: Dict, save_path: str = None) -> DictConfig:
     """
     conf = OmegaConf.create(d)
     if save_path is not None:
-        with open(save_path, 'w') as fp:
+        with open(save_path, "w") as fp:
             OmegaConf.save(config=conf, f=fp.name)
             loaded = OmegaConf.load(fp.name)
             assert conf == loaded
@@ -111,47 +171,40 @@ def dict_to_omegaconf(d: Dict, save_path: str = None) -> DictConfig:
         return conf
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     TD3_DEFAULT_CONFIG = {
         "gradient_steps": 1,  # gradient steps
         "batch_size": 64,  # training batch size
-
         "discount_factor": 0.99,  # discount factor (gamma)
         "polyak": 0.005,  # soft update hyperparameter (tau)
-
         "actor_learning_rate": 1e-3,  # actor learning rate
         "critic_learning_rate": 1e-3,  # critic learning rate
         "learning_rate_scheduler": None,  # learning rate scheduler class (see torch.optim.lr_scheduler)
         "learning_rate_scheduler_kwargs": {},  # learning rate scheduler's kwargs (e.g. {"step_size": 1e-3})
-
         "state_preprocessor": None,  # state preprocessor class (see skrl.resources.preprocessors)
         "state_preprocessor_kwargs": {},  # state preprocessor's kwargs (e.g. {"size": env.observation_space})
-
         "random_timesteps": 0,  # random exploration steps
         "learning_starts": 0,  # learning starts after this many steps
-
         "exploration": {
             "noise": None,  # exploration noise
             "initial_scale": 1.0,  # initial scale for noise
             "final_scale": 1e-3,  # final scale for noise
             "timesteps": None,  # timesteps for noise decay
         },
-
         "policy_delay": 2,  # policy delay update with respect to critic update
         "smooth_regularization_noise": None,  # smooth noise for regularization
         "smooth_regularization_clip": 0.5,  # clip for smooth regularization
-
         "rewards_shaper": None,  # rewards shaping function: Callable(reward, timestep, timesteps) -> reward
-
         "experiment": {
             "directory": "",  # experiment's parent directory
             "experiment_name": "",  # experiment name
             "write_interval": 250,  # TensorBoard writing interval (timesteps)
-
             "checkpoint_interval": 1000,  # interval for checkpoints (timesteps)
             "store_separately": False,  # whether to store checkpoints separately
-        }
+        },
     }
 
-    dict_to_omegaconf(TD3_DEFAULT_CONFIG,
-                      save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/td3_default_config_skrl.yaml")
+    dict_to_omegaconf(
+        TD3_DEFAULT_CONFIG,
+        save_path="/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/config/learning/rl/agent/td3_default_config_skrl.yaml",
+    )

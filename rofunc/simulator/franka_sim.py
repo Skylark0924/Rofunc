@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import numpy as np
 
 from rofunc.simulator.base.base_sim import RobotSim
 
@@ -19,6 +20,44 @@ class FrankaSim(RobotSim):
     def __init__(self, args, **kwargs):
         super().__init__(args, robot_name="franka", **kwargs)
 
+    def setup_robot_dof_prop(
+        self, gym=None, envs=None, robot_asset=None, robot_handles=None
+    ):
+        from isaacgym import gymapi
+
+        gym = self.gym if gym is None else gym
+        envs = self.envs if envs is None else envs
+        robot_asset = self.robot_asset if robot_asset is None else robot_asset
+        robot_handles = self.robot_handles if robot_handles is None else robot_handles
+
+        # configure robot dofs
+        robot_dof_props = gym.get_asset_dof_properties(robot_asset)
+        robot_lower_limits = robot_dof_props["lower"]
+        robot_upper_limits = robot_dof_props["upper"]
+        robot_ranges = robot_upper_limits - robot_lower_limits
+        robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
+
+        # default dof states and position targets
+        robot_num_dofs = gym.get_asset_dof_count(robot_asset)
+        default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
+        default_dof_pos = robot_mids
+
+        default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
+        default_dof_state["pos"] = default_dof_pos
+
+        # # send to torch
+        # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
+
+        for env, robot in zip(envs, robot_handles):
+            # set dof properties
+            gym.set_actor_dof_properties(env, robot, robot_dof_props)
+
+            # set initial dof states
+            gym.set_actor_dof_states(env, robot, default_dof_state, gymapi.STATE_ALL)
+
+            # set initial position targets
+            gym.set_actor_dof_position_targets(env, robot, default_dof_pos)
+
     def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index):
         # TODO: the traj is a little weird, need to be fixed
         from isaacgym import gymutil
@@ -26,7 +65,9 @@ class FrankaSim(RobotSim):
         self.gym.clear_lines(self.viewer)
         for i in range(self.num_envs):
             # Update attractor target from current franka state
-            attractor_properties = self.gym.get_attractor_properties(self.envs[i], attractor_handles[i])
+            attractor_properties = self.gym.get_attractor_properties(
+                self.envs[i], attractor_handles[i]
+            )
             pose = attractor_properties.target
             # pose.p: (x, y, z), pose.r: (w, x, y, z)
             pose.p.x = traj[index, 0] * 0.5

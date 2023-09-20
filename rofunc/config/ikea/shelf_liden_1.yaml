@@ -1,0 +1,27 @@
+name: "shelf_liden_0922"
+
+# Relevant to rofunc/simulator/assets
+description_file_path: "mjcf/ikea/shelf_liden_0922.xml"
+
+initial_base_pose: [0.7, 0.5, 0.0, 0.0, 0.7071067, 0.7071067, 0.0]
+
+fix_base_link: True
+
+flip_visual_attachments: False
+
+body_names: [
+    "0_part0",
+    "1_part1",
+    "2_part2",
+    "3_part3",
+    "4_part4",
+    "5_part5",
+    "6_part6",
+    "7_part7",
+    "8_part8",
+    "9_part9",
+    "10_part10",
+    "11_part11",
+]
+
+texture_file_name: "light-wood.png"

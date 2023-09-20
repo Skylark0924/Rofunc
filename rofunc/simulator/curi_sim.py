@@ -72,15 +72,15 @@ class CURISim(RobotSim):
         # # send to torch
         # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
 
-        for i in range(len(envs)):
+        for env, robot in zip(envs, robot_handles):
             # set dof properties
-            gym.set_actor_dof_properties(envs[i], robot_handles[i], robot_dof_props)
+            gym.set_actor_dof_properties(env, robot, robot_dof_props)
 
             # set initial dof states
-            gym.set_actor_dof_states(envs[i], robot_handles[i], default_dof_state, gymapi.STATE_ALL)
+            gym.set_actor_dof_states(env, robot, default_dof_state, gymapi.STATE_ALL)
 
             # set initial position targets
-            gym.set_actor_dof_position_targets(envs[i], robot_handles[i], default_dof_pos)
+            gym.set_actor_dof_position_targets(env, robot, default_dof_pos)
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
