@@ -31,11 +31,12 @@ import os
 import yaml
 
 from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
+from rofunc.utils.datalab.poselib.poselib.core import quat_mul_norm, quat_inverse, quat_angle_axis
 from rofunc.learning.RofuncRL.tasks.amp.humanoid_amp_base import DOF_BODY_IDS, DOF_OFFSETS
 from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
 
 
-class MotionLib():
+class MotionLib:
     def __init__(self, motion_file, num_dofs, key_body_ids, device):
         self._num_dof = num_dofs
         self._key_body_ids = key_body_ids

@@ -97,7 +97,7 @@ class ASEAgent(AMPAgent):
             state_tensor_size = (img_channel, img_size, img_size)
             kd = True
         else:
-            state_tensor_size = self.observation_space
+            state_tensor_size = observation_space
             kd = False
         self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
         self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
@@ -197,9 +197,9 @@ class ASEAgent(AMPAgent):
             enc_reward = torch.clamp_min(torch.sum(enc_output * ase_latents, dim=-1, keepdim=True), 0.0)
             enc_reward *= self._enc_reward_scale
 
-        combined_rewards = self._task_reward_weight * rewards + \
-                           self._style_reward_weight * style_rewards + \
-                           self._enc_reward_weight * enc_reward
+        combined_rewards = (self._task_reward_weight * rewards
+                            + self._style_reward_weight * style_rewards
+                            + self._enc_reward_weight * enc_reward)
 
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
@@ -333,7 +333,7 @@ class ASEAgent(AMPAgent):
                 if self.encoder is self.discriminator:
                     enc_output = self.encoder.get_enc(self._amp_state_preprocessor(sampled_amp_states))
                 else:
-                    enc_output = self.encoder(self._amp_state_preprocessor(sampled_amp_states_batch))
+                    enc_output = self.encoder(self._amp_state_preprocessor(sampled_amp_states))
                 enc_output = torch.nn.functional.normalize(enc_output, dim=-1)
                 enc_err = -torch.sum(enc_output * sampled_ase_latents, dim=-1, keepdim=True)
                 enc_loss = torch.mean(enc_err)

@@ -184,7 +184,7 @@ def _project_joints(motion):
     return new_motion
 
 
-def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=False):
+def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=True):
     # import fbx file - make sure to provide a valid joint name for root_joint
     motion = SkeletonMotion.from_fbx(
         fbx_file_path=fbx_file_path,
@@ -197,15 +197,12 @@ def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=False):
     return motion
 
 
-def get_tpose(motion, visualize=False):
-    tpose = SkeletonState.from_rotation_and_root_translation(motion.skeleton_tree, motion.rotation[0],
-                                                             motion.root_translation[0], is_local=True)
+def motion_retargeting(retarget_cfg, source_motion, visualize=False):
+    # load and visualize t-pose files
+    source_tpose = SkeletonState.from_file(retarget_cfg["source_tpose"])
     if visualize:
-        plot_skeleton_state(tpose)
-    return tpose
+        plot_skeleton_state(source_tpose)
 
-
-def motion_retargeting(retarget_cfg, source_motion, source_tpose, visualize=False):
     target_tpose = SkeletonState.from_file(retarget_cfg["target_tpose"])
     if visualize:
         plot_skeleton_state(target_tpose)
@@ -221,6 +218,8 @@ def motion_retargeting(retarget_cfg, source_motion, source_tpose, visualize=Fals
         rotation_to_target_skeleton=rotation_to_target_skeleton,
         scale_to_target_skeleton=retarget_cfg["scale"]
     )
+
+    # plot_skeleton_motion_interactive(target_motion)
 
     # keep frames between [trim_frame_beg, trim_frame_end - 1]
     frame_beg = retarget_cfg["trim_frame_beg"]
@@ -241,7 +240,7 @@ def motion_retargeting(retarget_cfg, source_motion, source_tpose, visualize=Fals
     target_motion = SkeletonMotion.from_skeleton_state(new_sk_state, fps=target_motion.fps)
 
     # need to convert some joints from 3D to 1D (e.g. elbows and knees)
-    target_motion = _project_joints(target_motion)
+    # target_motion = _project_joints(target_motion)
 
     # move the root so that the feet are on the ground
     local_rotation = target_motion.local_rotation
@@ -266,6 +265,7 @@ def motion_retargeting(retarget_cfg, source_motion, source_tpose, visualize=Fals
         plot_skeleton_motion_interactive(target_motion)
 
 
+
 def amp_npy_from_fbx(fbx_file):
     """
     This scripts shows how to retarget a motion clip from the source skeleton to a target skeleton.
@@ -280,41 +280,44 @@ def amp_npy_from_fbx(fbx_file):
     """
 
     config = {
-        "target_tpose": "data/amp_humanoid_tpose.npy",
+        "target_motion_path": "/home/ubuntu/data/fbx/xsense_amp.npy",
+        "source_tpose": "/home/ubuntu/poselib/data/clover_tpose.npy",
+        "target_tpose": "/home/ubuntu/Rofunc/rofunc/utils/datalab/poselib/data/amp_humanoid_tpose.npy",
         "joint_mapping": {
-            "pelvis": "pelvis",
-            "left_hip": "left_thigh",
-            "left_knee": "left_shin",
-            "left_foot": "left_foot",
-            "right_hip": "right_thigh",
-            "right_knee": "right_shin",
-            "right_foot": "right_foot",
-            "spine1": "torso",
-            "head": "head",
-            "left_shoulder": "left_upper_arm",
-            "left_elbow": "left_lower_arm",
-            "left_wrist": "left_hand",
-            "right_shoulder": "right_upper_arm",
-            "right_elbow": "right_lower_arm",
-            "right_wrist": "right_hand"
+         "Reference": "pelvis",
+         "LeftUpLeg": "left_thigh",
+         "LeftLeg": "left_shin",
+         "LeftFoot": "left_foot",
+         "RightUpLeg": "right_thigh",
+         "RightLeg": "right_shin",
+         "RightFoot": "right_foot",
+         "Spine": "torso",
+         "Head": "head",
+         "LeftArm": "left_upper_arm",
+         "LeftForeArm": "left_lower_arm",
+         "LeftHand": "left_hand",
+         "RightArm": "right_upper_arm",
+         "RightForeArm": "right_lower_arm",
+         "RightHand": "right_hand"
+         # "RightShoulder": "right_shoulder",
+         # "LeftShoulder": "left_shoulder"
         },
-        "rotation": [0.707, 0, 0, 0.707],  # xyzw
-        "scale": 1,
-        "root_height_offset": -0.1,
+        # "rotation": [0.707, 0, 0, 0.707], xyzw
+        "rotation": [0.5, 0.5, 0.5, 0.5],
+        "scale": 0.1,
+        "root_height_offset": 0.0,
         "trim_frame_beg": 0,
         "trim_frame_end": -1
     }
 
-    source_motion = motion_from_fbx(fbx_file, root_joint="pelvis", fps=60, visualize=False)
+    motion = motion_from_fbx(fbx_file, root_joint="Reference", fps=60, visualize=False)
     config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    source_tpose = get_tpose(source_motion, visualize=False)
-    motion_retargeting(config, source_motion, source_tpose, visualize=False)
+    motion_retargeting(config, motion, visualize=True)
 
 
 if __name__ == '__main__':
-    fbx_dir = "/home/ubuntu/Data/fbx"
+    fbx_dir = "/home/ubuntu/data/fbx"
     fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
 
     pool = multiprocessing.Pool()
     pool.map(amp_npy_from_fbx, fbx_files)
-    # amp_npy_from_fbx(fbx_files[0])
