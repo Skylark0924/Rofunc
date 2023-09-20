@@ -117,7 +117,7 @@
                 <geom name="right_hand" type="box" size=".04 .015 .06" density="1865"/>
                 <site name="right_hand" class="touch" type="sphere" size=".041"/>
 
-                <body name="spoon" pos="0.0 0 0">
+                <body name="spoon" pos="0.05 0 0" euler="0 30 0">
                   <geom name="spoon_head" type="mesh" mesh="spoon_head_mesh" density="300"/>
                   <geom name="spoon_neck" type="mesh" mesh="spoon_neck_mesh" density="300"/>
                   <geom name="spoon_handle" type="mesh" mesh="spoon_handle_mesh" density="300"/>
@@ -154,7 +154,7 @@
                 <geom name="left_hand" type="box" size=".04 .015 .06" density="1865"/>
                 <site name="left_hand" class="touch" type="sphere" size=".041"/>
 
-                <body name="pan" pos="0.0 0 0">
+                <body name="pan" pos="0.05 0 0" euler="0 20 0">
                   <geom name="handle_1" type="mesh" euler="0 0 0" mesh="handle_1_mesh" density="300"/>
                   <geom name="handle_2" type="mesh" euler="0 0 0" mesh="handle_2_mesh" density="300"/>
                   <geom name="knobs" type="mesh" euler="0 0 0" mesh="knobs_mesh" density="300"/>

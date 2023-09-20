@@ -1032,8 +1032,9 @@ class SkeletonState(Serializable):
 
 
 class SkeletonMotion(SkeletonState):
-    def __init__(self, tensor_backend, skeleton_tree, is_local, fps, *args, **kwargs):
+    def __init__(self, tensor_backend, skeleton_tree, is_local, fps, object_poses=None, *args, **kwargs):
         self._fps = fps
+        self._object_poses = object_poses
         super().__init__(tensor_backend, skeleton_tree, is_local, *args, **kwargs)
 
     def clone(self):
@@ -1084,6 +1085,10 @@ class SkeletonMotion(SkeletonState):
     def global_root_angular_velocity(self):
         """ global root angular velocity """
         return self.global_angular_velocity[..., 0, :]
+
+    @property
+    def object_poses(self):
+        return self._object_poses
 
     @classmethod
     def from_state_vector_and_velocity(
@@ -1156,7 +1161,7 @@ class SkeletonMotion(SkeletonState):
         )
 
     @staticmethod
-    def _to_state_vector(rot, rt, vel, avel):
+    def _to_state_vector(rot, rt, vel, avel, object_poses=None):
         state_shape = rot.shape[:-2]
         skeleton_state_v = SkeletonState._to_state_vector(rot, rt)
         v = vel.reshape(*(state_shape + (-1,)))
@@ -1174,6 +1179,13 @@ class SkeletonMotion(SkeletonState):
         avel = TensorUtils.from_dict(
             dict_repr["global_angular_velocity"], *args, **kwargs
         )
+        # FIXME dict_repr["object_poses"] size is [num_frame, 15, 7], but we expect [num_frame, 7]
+        if hasattr(dict_repr, "object_pose") and dict_repr["object_poses"] is not None:
+            object_poses = TensorUtils.from_dict(
+                dict_repr["object_poses"], *args, **kwargs
+            )
+        else:
+            object_poses = None
         return cls(
             SkeletonMotion._to_state_vector(rot, rt, vel, avel),
             skeleton_tree=SkeletonTree.from_dict(
@@ -1181,6 +1193,7 @@ class SkeletonMotion(SkeletonState):
             ),
             is_local=dict_repr["is_local"],
             fps=dict_repr["fps"],
+            object_poses=object_poses
         )
 
     def to_dict(self) -> OrderedDict:

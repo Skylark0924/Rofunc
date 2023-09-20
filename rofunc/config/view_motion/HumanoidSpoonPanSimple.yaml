@@ -1,0 +1,7 @@
+class_name: HumanoidViewMotion
+asset_name: "mjcf/amp_humanoid_spoon_pan_fixed.xml"
+asset_body_num: 15
+asset_joint_num: 34
+
+keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot"]
+contactBodies: ["right_foot", "left_foot"]

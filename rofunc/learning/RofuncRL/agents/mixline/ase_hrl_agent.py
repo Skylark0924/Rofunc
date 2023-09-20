@@ -174,6 +174,27 @@ class ASEHRLAgent(BaseAgent):
 
         self._set_up()
 
+    def _set_up(self):
+        assert hasattr(self, "policy"), "Policy is not defined."
+        assert hasattr(self, "value"), "Value is not defined."
+
+        # Set up optimizer and learning rate scheduler
+        if self.policy is self.value:
+            self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a)
+            if self._lr_scheduler is not None:
+                self.scheduler = self._lr_scheduler(self.optimizer, **self._lr_scheduler_kwargs)
+            self.checkpoint_modules["optimizer"] = self.optimizer
+        else:
+            self.optimizer_policy = torch.optim.Adam(self.policy.parameters(), lr=self._lr_a, eps=self._adam_eps)
+            self.optimizer_value = torch.optim.Adam(self.value.parameters(), lr=self._lr_c, eps=self._adam_eps)
+            if self._lr_scheduler is not None:
+                self.scheduler_policy = self._lr_scheduler(self.optimizer_policy, **self._lr_scheduler_kwargs)
+                self.scheduler_value = self._lr_scheduler(self.optimizer_value, **self._lr_scheduler_kwargs)
+            self.checkpoint_modules["optimizer_policy"] = self.optimizer_policy
+            self.checkpoint_modules["optimizer_value"] = self.optimizer_value
+
+        super()._set_up()
+
     def _build_llc(self):
         from .utils import ase_network_builder
         from .utils import ase_agent
