@@ -1,0 +1,176 @@
+<mujoco model="shelf_liden_0922">
+  <custom>
+    <numeric data="-0.186066 -0.007185 0.010397 0.706718 -0.022456 -0.706784 -0.022387" name="1_part1_initpos" />
+    <numeric data="-0.182452 0.080878 0.01039 0.005026 0.707055 -0.005944 0.707116" name="2_part2_initpos" />
+    <numeric data="0.624217 0.004899 0.00371 -1e-06 -0.999667 0.02582 5e-06" name="9_part9_initpos" />
+    <numeric data="0.053077 0.262683 0.003939 0.996964 0.000578 0.077362 -0.008806" name="3_part3_initpos" />
+    <numeric data="-0.332654 0.289039 0.003442 0.996687 0.001135 0.078127 -0.02258" name="6_part6_initpos" />
+    <numeric data="0.430053 -0.00076 0.00371 -1e-06 -0.999583 0.028859 5e-06" name="10_part10_initpos" />
+    <numeric data="-0.144528 0.172652 0.003873 0.997065 0.000584 0.076563 9.7e-05" name="4_part4_initpos" />
+    <numeric data="-0.150477 0.277806 0.003867 0.996908 0.001515 0.076463 -0.018015" name="7_part7_initpos" />
+    <numeric data="0.247723 0.01224 0.00371 -4e-06 -0.000838 -1.0 -2e-06" name="11_part11_initpos" />
+    <numeric data="0.039848 0.179431 0.003662 0.995991 -0.003311 0.077971 0.043726" name="8_part8_initpos" />
+    <numeric data="-0.345802 0.193156 0.003693 0.995213 0.005478 0.078346 -0.058171" name="5_part5_initpos" />
+  </custom>
+  <asset>
+    <mesh file="shelf_liden_0922/botshelf.stl" name="botshelf" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/leftbotbracket.stl" name="leftbotbracket" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/leftcolumn.stl" name="leftcolumn" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/leftmidbracket.stl" name="leftmidbracket" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/lefttopbracket.stl" name="lefttopbracket" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/midshelf.stl" name="midshelf" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/rightbotbracket.stl" name="rightbotbracket" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/rightcolumn.stl" name="rightcolumn" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/rightmidbracket.stl" name="rightmidbracket" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/righttopbracket.stl" name="righttopbracket" scale="0.0005 0.0005 0.0005" />
+    <mesh file="shelf_liden_0922/topshelf.stl" name="topshelf" scale="0.0005 0.0005 0.0005" />
+    <texture file="../textures/light-wood.png" name="tex-light-wood" type="2d" />
+    <material name="pencil-wood" reflectance="0.5" texrepeat="20 20" texture="tex-light-wood" texuniform="true" />
+  </asset>
+  <equality>
+    <weld active="false" body1="1_part1" body2="3_part3" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="1_part1" body2="4_part4" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="1_part1" body2="5_part5" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="2_part2" body2="6_part6" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="2_part2" body2="7_part7" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="2_part2" body2="8_part8" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="9_part9" body2="6_part6" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="9_part9" body2="3_part3" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="10_part10" body2="7_part7" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="10_part10" body2="4_part4" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="11_part11" body2="8_part8" solimp="1 1 0.5" solref="0.01 0.3" />
+    <weld active="false" body1="11_part11" body2="5_part5" solimp="1 1 0.5" solref="0.01 0.3" />
+  </equality>
+  <worldbody>
+    <body name="shelf_liden">
+    <body name="1_part1" pos="0 -0.29 0.4">
+      <geom density="100" material="pencil-wood" mesh="leftcolumn" name="1_part1_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="1_part1_top_site" pos="0 0 0.30" rgba="0 0 1 0" size="0.002" />
+      <site name="1_part1_bottom_site" pos="0 0 -0.30" rgba="0 0 1 0" size="0.002" />
+      <site name="1_part1_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.0150" />
+      <site name="leftcolumn-leftbotbracket,0,conn_site" pos="0.012 0 -0.1475" quat="0.707 0 0.707 0" rgba="1 0 0 0.3" size="0.010" />
+      <site name="leftcolumn-leftmidbracket,0,conn_site" pos="0.012 0 0.0350" quat="0.707 0 0.707 0" rgba="1 1 0 0.3" size="0.010" />
+      <site name="leftcolumn-lefttopbracket,0,conn_site" pos="0.012 0 0.21" quat="0.707 0 0.707 0" rgba="1 0 1 0.3" size="0.010" />
+      <site name="1_part1_corner_site1" pos="0 0 -0.3" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="1_part1_corner_site2" pos="0 0 0.3" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="2_part2" pos="0 0.29 0.4">
+      <geom density="100" material="pencil-wood" mesh="rightcolumn" name="2_part2_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="2_part2_top_site" pos="0 0 0.30" rgba="0 0 1 0" size="0.002" />
+      <site name="2_part2_bottom_site" pos="0 0 -0.30" rgba="0 0 1 0" size="0.002" />
+      <site name="2_part2_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.0150" />
+      <site name="rightcolumn-rightbotbracket,0,conn_site" pos="0.012 0 -0.1475" quat="0.707 0 0.707 0" rgba="0 0 0 0.3" size="0.010" />
+      <site name="rightcolumn-rightmidbracket,0,conn_site" pos="0.012 0 0.0350" quat="0.707 0 0.707 0" rgba="0 1 0 0.3" size="0.010" />
+      <site name="rightcolumn-righttopbracket,0,conn_site" pos="0.012 0 0.21" quat="0.707 0 0.707 0" rgba="0 1 1 0.3" size="0.010" />
+      <site name="2_part2_corner_site1" pos="0 0 -0.3" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="2_part2_corner_site2" pos="0 0 0.3" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="9_part9" pos="0.0715 0 0.27">
+      <geom density="100" material="pencil-wood" mesh="botshelf" name="9_part9_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="9_part9_top_site" pos="0 0.3 0" rgba="0 0 1 0" size="0.002" />
+      <site name="9_part9_bottom_site" pos="0 -0.3 0" rgba="0 0 1 0" size="0.002" />
+      <site name="9_part9_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.002" />
+      <site name="botshelf-leftbotbracket,0,conn_site" pos="0 -0.29 -0.01" rgba="1 1 1 0.3" size="0.010" />
+      <site name="botshelf-rightbotbracket,0,conn_site" pos="0 0.29 -0.01" rgba="0.3 0.3 0.3 0.3" size="0.010" />
+      <site name="9_part9_corner_site1" pos="-0.060 -0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="9_part9_corner_site2" pos="0.060 -0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="9_part9_corner_site3" pos="-0.060 0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="9_part9_corner_site4" pos="0.060 0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="3_part3" pos="0.0615 -0.29 0.2525">
+      <geom density="100" material="pencil-wood" mesh="leftbotbracket" name="3_part3_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="3_part3_top_site" pos="0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="3_part3_bottom_site" pos="-0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="3_part3_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0.3" size="0.0050" />
+      <site name="leftbotbracket-leftcolumn,0,conn_site" pos="-0.053 0 0" quat="0.707 0 0.707 0" rgba="1 0 0 0.3" size="0.010" />
+      <site name="leftbotbracket-botshelf,0,conn_site" pos="0.01 0 0.01" rgba="1 1 1 0.3" size="0.010" />
+      <site name="3_part3_corner_site1" pos="-0.05 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="3_part3_corner_site2" pos="0.05 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="3_part3_corner_site3" pos="-0.05 0 -0.0150" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="6_part6" pos="0.0615 0.29 0.2525">
+      <geom density="100" material="pencil-wood" mesh="rightbotbracket" name="6_part6_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="6_part6_top_site" pos="0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="6_part6_bottom_site" pos="-0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="6_part6_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.002" />
+      <site name="rightbotbracket-rightcolumn,0,conn_site" pos="-0.053 0 0" quat="0.707 0 0.707 0" rgba="0 0 0 0.3" size="0.010" />
+      <site name="rightbotbracket-botshelf,0,conn_site" pos="0.01 0 0.01" rgba="0.3 0.3 0.3 0.3" size="0.010" />
+      <site name="6_part6_corner_site1" pos="-0.05 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="6_part6_corner_site2" pos="0.050 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="6_part6_corner_site3" pos="-0.05 0 -0.0150" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="10_part10" pos="0.0715 0 0.451">
+      <geom density="100" material="pencil-wood" mesh="midshelf" name="10_part10_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="10_part10_top_site" pos="0 0.3 0" rgba="0 0 1 0" size="0.002" />
+      <site name="10_part10_bottom_site" pos="0 -0.3 0" rgba="0 0 1 0" size="0.002" />
+      <site name="10_part10_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.002" />
+      <site name="midshelf-leftmidbracket,0,conn_site" pos="0 -0.29 -0.01" rgba="0.5 0 0.5 0.3" size="0.010" />
+      <site name="midshelf-rightmidshelf,0,conn_site" pos="0 0.29 -0.01" rgba="0.5 1 0.5 0.3" size="0.010" />
+      <site name="10_part10_corner_site1" pos="-0.060 -0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="10_part10_corner_site2" pos="0.060 -0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="10_part10_corner_site3" pos="-0.060 0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="10_part10_corner_site4" pos="0.060 0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="4_part4" pos="0.0615 -0.29 0.4350">
+      <geom density="100" material="pencil-wood" mesh="leftmidbracket" name="4_part4_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="4_part4_top_site" pos="0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="4_part4_bottom_site" pos="-0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="4_part4_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.002" />
+      <site name="leftmidbracket-leftcolumn,0,conn_site" pos="-0.053 0 0" quat="0.707 0 0.707 0" rgba="1 1 0 0.3" size="0.010" />
+      <site name="leftmidbracket-midshelf,0,conn_site" pos="0.01 0 0.01" rgba="0.5 0 0.5 0.3" size="0.010" />
+      <site name="4_part4_corner_site1" pos="-0.05 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="4_part4_corner_site2" pos="0.050 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="4_part4_corner_site3" pos="-0.05 0 -0.0150" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="7_part7" pos="0.0615 0.29 0.4350">
+      <geom density="100" material="pencil-wood" mesh="rightmidbracket" name="7_part7_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="7_part7_top_site" pos="0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="7_part7_bottom_site" pos="-0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="7_part7_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.002" />
+      <site name="rightmidbracket-rightcolumn,0,conn_site" pos="-0.053 0 0" quat="0.707 0 0.707 0" rgba="0 1 0 0.3" size="0.010" />
+      <site name="rightmidbracket-midshelf,0,conn_site" pos="0.01 0 0.01" rgba="0.5 1 0.5 0.3" size="0.010" />
+      <site name="7_part7_corner_site1" pos="-0.05 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="7_part7_corner_site2" pos="0.050 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="7_part7_corner_site3" pos="-0.05 0 -0.0150" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="11_part11" pos="0.0715 0 0.627">
+      <geom density="100" material="pencil-wood" mesh="topshelf" name="11_part11_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="11_part11_top_site" pos="0 0.3 0" rgba="0 0 1 0" size="0.002" />
+      <site name="11_part11_bottom_site" pos="0 -0.3 0" rgba="0 0 1 0" size="0.002" />
+      <site name="11_part11_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.002" />
+      <site name="topshelf-lefttopbracket,0,conn_site" pos="0 -0.29 -0.01" rgba="1 0.5 0 0.3" size="0.010" />
+      <site name="topshelf-righttopbracket,0,conn_site" pos="0 0.29 -0.01" rgba="1 0 0.5 0.3" size="0.010" />
+      <site name="11_part11_corner_site1" pos="-0.060 -0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="11_part11_corner_site2" pos="0.060 -0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="11_part11_corner_site3" pos="-0.060 0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="11_part11_corner_site4" pos="0.060 0.295 0" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="8_part8" pos="0.0615 0.29 0.61">
+      <geom density="100" material="pencil-wood" mesh="righttopbracket" name="8_part8_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="8_part8_top_site" pos="0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="8_part8_bottom_site" pos="-0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="8_part8_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.002" />
+      <site name="righttopbracket-rightcolumn,0,conn_site" pos="-0.053 0 0" quat="0.707 0 0.707 0" rgba="0 1 1 0.3" size="0.010" />
+      <site name="righttopbracket-topshelf,0,conn_site" pos="0.01 0 0.01" rgba="1 0 0.5 0.3" size="0.010" />
+      <site name="8_part8_corner_site1" pos="-0.05 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="8_part8_corner_site2" pos="0.050 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="8_part8_corner_site3" pos="-0.05 0 -0.0150" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    <body name="5_part5" pos="0.0615 -0.29 0.61">
+      <geom density="100" material="pencil-wood" mesh="lefttopbracket" name="5_part5_geom" pos="0 0 0" rgba="0.82 0.71 0.55 1" solref="0.001 1" type="mesh" />
+      <site name="5_part5_top_site" pos="0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="5_part5_bottom_site" pos="-0.055 0 0.01" rgba="0 0 1 0" size="0.002" />
+      <site name="5_part5_horizontal_radius_site" pos="0 0 0" rgba="0 0 1 0" size="0.002" />
+      <site name="lefttopbracket-leftcolumn,0,conn_site" pos="-0.053 0 0" quat="0.707 0 0.707 0" rgba="1 0 1 0.3" size="0.010" />
+      <site name="lefttopbracket-topshelf,0,conn_site" pos="0.01 0 0.01" rgba="1 0.5 0 0.3" size="0.010" />
+      <site name="5_part5_corner_site1" pos="-0.05 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="5_part5_corner_site2" pos="0.050 0 0.01" rgba="0 0 1 0.3" size="0.0025" />
+      <site name="5_part5_corner_site3" pos="-0.05 0 -0.0150" rgba="0 0 1 0.3" size="0.0025" />
+    </body>
+    </body>
+  </worldbody>
+  <actuator />
+  <sensor />
+  <contact />
+  <default />
+</mujoco>
