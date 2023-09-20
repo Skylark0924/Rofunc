@@ -1,3 +1,10 @@
+"""
+Humanoid Motion View (RofuncRL)
+===========================
+
+Preview the motion of the digital humanoid
+"""
+
 import click
 
 from rofunc.config.utils import omegaconf_to_dict, get_config, load_view_motion_config
