@@ -33,18 +33,25 @@ import json
 from poselib.skeleton.skeleton3d import SkeletonTree, SkeletonState, SkeletonMotion
 from poselib.visualization.common import plot_skeleton_state, plot_skeleton_motion_interactive
 
+# import sys
+# fbx_path = "/home/ubuntu/anaconda3/envs/rofunc/lib/python3.8/site-packages/fbx"
+# sys.path.append(fbx_path)
+
 # source fbx file path
-fbx_file = "data/01_01_cmu.fbx"
+fbx_file = "data/clover/fbx/010-077.fbx"
+# fbx_file = "data/01_01_cmu.fbx"
 
 # import fbx file - make sure to provide a valid joint name for root_joint
 motion = SkeletonMotion.from_fbx(
     fbx_file_path=fbx_file,
+    is_local=False,
     root_joint="Hips",
     fps=60
 )
 
 # save motion in npy format
-motion.to_file("data/01_01_cmu.npy")
+motion.to_file("data/clover/npy/010-077.npy")
+# motion.to_file("data/01_01_cmu.npy")
 
 # visualize motion
 plot_skeleton_motion_interactive(motion)

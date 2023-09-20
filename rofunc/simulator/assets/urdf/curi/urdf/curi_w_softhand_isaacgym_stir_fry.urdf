@@ -715,7 +715,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/visual/flange90_yup.STL"/>
+        <mesh filename="../meshes/clover/collision/flange90_yup.STL"/>
       </geometry>
     </collision>
   </link>
@@ -770,6 +770,36 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/qbhand/palm_pinch_l_yupzfront1.STL" scale="1000 1000 1000"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_qbhand_pan_joint" type="fixed">
+    <origin rpy="-1.57 0 2.7" xyz="-0.02 -0.02 0.017"/>
+    <parent link="left_qbhand_palm_link"/>
+    <child link="pan_link"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.0" friction="0.0"/>
+    <limit effort="100" lower="0.0" upper="1.571" velocity="100"/>
+  </joint>
+  <link name="pan_link">
+    <inertial>
+      <mass value="0.01"/>
+      <origin rpy="0 0 0" xyz="1.3071561e-02 2.7346340e-03 6.4090487e-04"/>
+      <inertia ixx="3.5827953e-07" ixy="-2.0934657e-07" ixz="-6.8435459e-08" iyy="1.3882698e-06" iyz="-3.2001578e-08" izz="1.3570267e-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../../objects/pan_spoon/pan.obj" scale="1 1 1"/>
+      </geometry>
+      <material name="qbhand/pan">
+        <color rgba="0.35 0.35 0.35 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../../objects/pan_spoon/pan.obj" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -1849,7 +1879,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/visual/flange90_yup.stl"/>
+        <mesh filename="../meshes/clover/collision/flange90_yup.STL"/>
       </geometry>
     </collision>
   </link>
@@ -1900,6 +1930,37 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/qbhand/palm_pinch_r.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="right_qbhand_spoon_joint" type="fixed">
+    <origin rpy="-1.57 3.14 -0.3" xyz="-0.05 0.01 -0.02"/>
+    <parent link="right_qbhand_palm_link"/>
+    <child link="spoon_link"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.0" friction="0.0"/>
+    <limit effort="100" lower="0.0" upper="1.571" velocity="100"/>
+  </joint>
+  <link name="spoon_link">
+    <inertial>
+      <mass value="0.01"/>
+      <origin rpy="0 0 0" xyz="1.3071561e-02 2.7346340e-03 6.4090487e-04"/>
+      <inertia ixx="3.5827953e-07" ixy="-2.0934657e-07" ixz="-6.8435459e-08" iyy="1.3882698e-06" iyz="-3.2001578e-08" izz="1.3570267e-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../../objects/pan_spoon/spoon.obj" scale="1 1 1"/>
+      </geometry>
+      <material name="qbhand/spoon">
+        <color rgba="0.35 0.35 0.35 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../../objects/pan_spoon/spoon.obj" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -2709,4 +2770,3 @@
   </joint>
   <link name="right_qbhand_end_effector_link"/>
 </robot>
-
