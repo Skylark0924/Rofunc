@@ -149,7 +149,8 @@ class PlaygroundSim:
 
 class RobotSim:
     def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=None,
-                 flip_visual_attachments=True, init_pose_vec=None, num_envs=1, device="cpu"):        """
+                 flip_visual_attachments=True, init_pose_vec=None, num_envs=1, device="cpu"):
+        """
         Initialize the robot simulator
         :param args: arguments
         :param robot_name: name of the robot
