@@ -30,6 +30,8 @@ env:
 
   asset:
     assetFileName: "mjcf/amp_humanoid.xml"
+    assetBodyNum: 15
+    assetJointNum: 28
 
   plane:
     staticFriction: 1.0

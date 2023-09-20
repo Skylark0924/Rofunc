@@ -13,14 +13,14 @@ args = gymutil.parse_arguments()
 args.use_gpu_pipeline = False
 
 # CURI
-CURIsim = rf.sim.CURISim(args)
-CURIsim.init()
-CURIsim.show(visual_obs_flag=True)
+# CURIsim = rf.sim.CURISim(args, asset_root="/home/zhuoli/Rofunc/rofunc/simulator/assets")
+# CURIsim.init()
+# CURIsim.show(visual_obs_flag=True)
 
 # walker
-# walkersim = rf.sim.WalkerSim(args)
-# walkersim.init()
-# walkersim.show()
+walkersim = rf.sim.WalkerSim(args, asset_root="/home/zhuoli/Rofunc/rofunc/simulator/assets")
+walkersim.init()
+walkersim.show()
 
 # CURI-mini
 # CURIminisim = rf.sim.CURIminiSim(args)
