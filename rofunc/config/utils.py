@@ -41,18 +41,14 @@ def load_view_motion_config(config_name):
     return OmegaConf.load(config_file_path)
 
 
-def load_agent_config(agent_name):
-    """Load the configs stored in agent_name.yaml.
-
-    Args:
-        agent_name (str): Name of the config file for the agent.
-
-    Returns:
-        (dict): A dict of configs.
+def get_sim_config(sim_name: str):
     """
-    agent_config_file_path = os.path.join(
-        os.path.dirname(__file__), f"agent/{agent_name}.yaml"
-    )
+    Load the configs stored in agent_name.yaml.
+
+    :param sim_name: Name of the config file under config/simulator for the agent.
+    :return: A dict of configs.
+    """
+    agent_config_file_path = os.path.join(os.path.dirname(__file__), f"simulator/{sim_name}.yaml")
     if not os.path.exists(agent_config_file_path):
         raise FileNotFoundError(f"{agent_config_file_path} does not exist")
 

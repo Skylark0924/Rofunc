@@ -17,8 +17,13 @@ from rofunc.simulator.base_sim import RobotSim
 
 
 class FrankaSim(RobotSim):
-    def __init__(self, args, **kwargs):
-        super().__init__(args, robot_name="franka", **kwargs)
+    def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=None,
+                 flip_visual_attachments=True, init_pose_vec=None, num_envs=1, device="cpu"):
+        super().__init__(args, robot_name, asset_root, asset_file, fix_base_link, flip_visual_attachments,
+                         init_pose_vec, num_envs, device)
+        self.asset_file = "urdf/franka_description/robots/franka_panda.urdf"
+        self.fix_base_link = True
+        self.init_pose = (0., 0., 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
 
     def setup_robot_dof_prop(
         self, gym=None, envs=None, robot_asset=None, robot_handles=None

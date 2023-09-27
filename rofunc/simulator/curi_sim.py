@@ -19,8 +19,8 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 class CURISim(RobotSim):
-    def __init__(self, args, **kwargs):
-        super().__init__(args, robot_name="CURI", **kwargs)
+    def __init__(self, args):
+        super().__init__(args)
 
     def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
         from isaacgym import gymapi

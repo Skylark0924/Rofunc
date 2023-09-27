@@ -13,4 +13,4 @@ OmegaConf.register_new_resolver('contains', lambda x, y: x.lower() in y.lower())
 OmegaConf.register_new_resolver('if', lambda pred, a, b: a if pred else b)
 OmegaConf.register_new_resolver('resolve_default', lambda default, arg: default if arg == '' else arg)
 
-from .utils import get_config, print_config, omegaconf_to_dict, dict_to_omegaconf
+from .utils import get_config, print_config, omegaconf_to_dict, dict_to_omegaconf, get_sim_config
