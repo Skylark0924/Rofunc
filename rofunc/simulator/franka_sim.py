@@ -13,7 +13,7 @@
 # limitations under the License.
 import numpy as np
 
-from rofunc.simulator.base.base_sim import RobotSim
+from rofunc.simulator.base_sim import RobotSim
 
 
 class FrankaSim(RobotSim):

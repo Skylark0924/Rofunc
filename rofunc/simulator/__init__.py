@@ -1,4 +1,4 @@
-from .base import RobotSim
+from .base_sim import RobotSim
 from .baxter_sim import BaxterSim
 from .curimini_sim import CURIminiSim
 from .curi_sim import CURISim

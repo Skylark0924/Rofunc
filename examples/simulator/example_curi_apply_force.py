@@ -13,7 +13,7 @@ from isaacgym import gymtorch
 from isaacgym import gymutil
 import torch
 
-from rofunc.simulator.base.base_sim import init_sim, init_env
+from rofunc.simulator.base_sim import init_sim, init_env
 from rofunc.utils.oslab import get_rofunc_path
 
 # TODO: Reformat
