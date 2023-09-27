@@ -1,8 +1,0 @@
-# Relevant to rofunc/simulator/assets
-description_file_path: "urdf/franka_description/robots/franka_panda.urdf"
-
-initial_base_pose: [0., 0., 0., -0.707107, 0., 0., 0.707107]
-
-fix_base_link: True
-
-flip_visual_attachments: True

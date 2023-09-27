@@ -21,9 +21,14 @@ import numpy as np
 
 
 class HumanSim(RobotSim):
-    def __init__(self, args, **kwargs):
-        args.up_axis = 'Y'
-        super().__init__(args, robot_name="human", **kwargs)
+    def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=None,
+                 flip_visual_attachments=True, init_pose_vec=None, num_envs=1, device="cpu"):
+        super().__init__(args, robot_name, asset_root, asset_file, fix_base_link, flip_visual_attachments,
+                         init_pose_vec, num_envs, device)
+        self.asset_file = asset_file
+        self.flip_visual_attachments = False
+        self.fix_base_link = False if fix_base_link is None else fix_base_link
+        pos_y, pos_z = 0.8, 0.
 
     def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
         from isaacgym import gymapi

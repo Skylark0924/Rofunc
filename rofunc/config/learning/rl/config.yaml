@@ -21,10 +21,10 @@ physics_engine: 'physx'
 # whether to use cpu or gpu pipeline
 pipeline: 'gpu'
 # device for running physics simulation
-sim_device: 'cuda:1'
+sim_device: 'cuda:0'
 # device to run RL
-rl_device: 'cuda:1'
-graphics_device_id: 1
+rl_device: 'cuda:0'
+graphics_device_id: 0
 
 ## PhysX arguments
 num_threads: 4 # Number of worker threads per scene used by PhysX - for CPU PhysX only.
