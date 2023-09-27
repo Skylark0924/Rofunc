@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rofunc.simulator.base.base_sim import RobotSim
+from rofunc.simulator.base_sim import RobotSim
 
 
 class SawyerSim(RobotSim):
