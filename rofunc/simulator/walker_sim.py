@@ -12,19 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rofunc.simulator.base_sim import RobotSim
 import numpy as np
+
+from rofunc.simulator.base_sim import RobotSim
 
 
 class WalkerSim(RobotSim):
-    def __init__(self, args, robot_name, asset_root=None, asset_file=None, fix_base_link=None,
-                 flip_visual_attachments=True, init_pose_vec=None, num_envs=1, device="cpu"):
-        super().__init__(args, robot_name, asset_root, asset_file, fix_base_link, flip_visual_attachments,
-                         init_pose_vec, num_envs, device)
-        self.asset_file = "urdf/walker/urdf/walker_cartesio.urdf" if asset_file is None else asset_file
-        self.fix_base_link = True if fix_base_link is None else fix_base_link
-        self.flip_visual_attachments = False
-        self.init_pose = (0., 1.1, 0., -0.707107, 0., 0., 0.707107) if init_pose_vec is None else init_pose_vec
+    def __init__(self, args):
+        super().__init__(args)
 
     def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
         from isaacgym import gymapi
