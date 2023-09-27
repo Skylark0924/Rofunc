@@ -14,7 +14,7 @@
 
 from typing import List
 import numpy as np
-from rofunc.simulator.base.base_sim import RobotSim
+from rofunc.simulator.base_sim import RobotSim
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 

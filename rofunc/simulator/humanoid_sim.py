@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rofunc.simulator.base.base_sim import RobotSim
-from rofunc.learning.RofuncRL.tasks.amp.motion_lib import MotionLib
+from rofunc.simulator.base_sim import RobotSim
 from isaacgym.torch_utils import *
-import torch
 
 
 # class HumanoidSim(RobotSim):

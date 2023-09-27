@@ -19,7 +19,7 @@ from typing import Dict
 import matplotlib.pyplot as plt
 from PIL import Image as Im
 
-from rofunc.simulator.base.base_sim import PlaygroundSim
+from rofunc.simulator.base_sim import PlaygroundSim
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
