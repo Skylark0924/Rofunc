@@ -4,11 +4,10 @@ Tracking the trajectory with multiple joints by CURI
 
 This example runs a Tai Chi demo bimanual trajectory by using CURI.
 """
-import os
-import numpy as np
-from isaacgym import gymutil
-import rofunc as rf
 
+import numpy as np
+
+import rofunc as rf
 
 traj_l = np.load('../data/LQT_LQR/taichi_1l.npy')
 traj_r = np.load('../data/LQT_LQR/taichi_1r.npy')
