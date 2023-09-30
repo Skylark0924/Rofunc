@@ -13,7 +13,9 @@
 # limitations under the License.
 
 from typing import List
+
 import numpy as np
+
 from rofunc.simulator.base_sim import RobotSim
 from rofunc.utils.logger.beauty_logger import beauty_print
 
@@ -22,13 +24,13 @@ class CURISim(RobotSim):
     def __init__(self, args):
         super().__init__(args)
 
-    def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
+    def setup_robot_dof_prop(self):
         from isaacgym import gymapi
 
-        gym = self.gym if gym is None else gym
-        envs = self.envs if envs is None else envs
-        robot_asset = self.robot_asset if robot_asset is None else robot_asset
-        robot_handles = self.robot_handles if robot_handles is None else robot_handles
+        gym = self.gym
+        envs = self.envs
+        robot_asset = self.robot_asset
+        robot_handles = self.robot_handles
 
         # configure robot dofs
         robot_dof_props = gym.get_asset_dof_properties(robot_asset)
@@ -36,11 +38,6 @@ class CURISim(RobotSim):
         robot_upper_limits = robot_dof_props["upper"]
         robot_ranges = robot_upper_limits - robot_lower_limits
         robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
-
-        # override default stiffness and damping values
-        # TODO: make this configurable
-        # robot_dof_props['stiffness'].fill(100000.0)
-        # robot_dof_props['damping'].fill(100000.0)
 
         # Wheels
         robot_dof_props["driveMode"][:4].fill(gymapi.DOF_MODE_VEL)

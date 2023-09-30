@@ -4,17 +4,16 @@ CURI controllers
 
 This example shows how to use basic controllers of the CURI robot.
 """
-from isaacgym import gymapi
-from isaacgym import gymutil
-from isaacgym import gymtorch
-from isaacgym.torch_utils import *
-import rofunc as rf
+
+# TODO: Reformat
 
 import math
-import numpy as np
-import torch
-import random
-import time
+from isaacgym import gymapi
+from isaacgym import gymtorch
+from isaacgym import gymutil
+from isaacgym.torch_utils import *
+
+import rofunc as rf
 
 
 def quat_axis(q, axis=0):
@@ -49,6 +48,7 @@ def control_ik(dpose):
     lmbda = torch.eye(6, device=device) * (damping ** 2)
     u = (j_eef_T @ torch.inverse(j_eef @ j_eef_T + lmbda) @ dpose).view(CURIsim.num_envs, 7)
     return u
+
 
 damping = 0.05
 args = gymutil.parse_arguments()
@@ -216,6 +216,7 @@ while not CURIsim.gym.query_viewer_has_closed(CURIsim.viewer):
     orn_err = orientation_error(goal_rot, hand_rot)
     dpose = torch.cat([pos_err, orn_err], -1).unsqueeze(-1)
     import rofunc as rf
+
     rf.logger.beauty_print("pos_err: {}".format(pos_err), type="info")
 
     # Deploy control based on type

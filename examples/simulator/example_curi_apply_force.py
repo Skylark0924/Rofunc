@@ -5,6 +5,9 @@ Apply Forces and Torques On CURI
 This example shows how to apply rigid body forces and torques using the tensor API.
 """
 
+# TODO: Reformat
+
+
 import os
 
 import numpy as np
@@ -15,8 +18,6 @@ import torch
 
 from rofunc.simulator.base_sim import init_sim, init_env
 from rofunc.utils.oslab import get_rofunc_path
-
-# TODO: Reformat
 
 # parse arguments
 args = gymutil.parse_arguments(
@@ -50,7 +51,6 @@ frame_count = 0
 while not gym.query_viewer_has_closed(viewer):
 
     if (frame_count - 99) % 200 == 0:
-
         # gym.refresh_rigid_body_state_tensor(sim)
 
         # set forces and force positions for ant root bodies (first body in each env)
