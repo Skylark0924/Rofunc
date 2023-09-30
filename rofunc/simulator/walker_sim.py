@@ -21,13 +21,13 @@ class WalkerSim(RobotSim):
     def __init__(self, args):
         super().__init__(args)
 
-    def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
+    def setup_robot_dof_prop(self):
         from isaacgym import gymapi
 
-        gym = self.gym if gym is None else gym
-        envs = self.envs if envs is None else envs
-        robot_asset = self.robot_asset if robot_asset is None else robot_asset
-        robot_handles = self.robot_handles if robot_handles is None else robot_handles
+        gym = self.gym
+        envs = self.envs
+        robot_asset = self.robot_asset
+        robot_handles = self.robot_handles
 
         # configure robot dofs
         robot_dof_props = gym.get_asset_dof_properties(robot_asset)
@@ -51,19 +51,19 @@ class WalkerSim(RobotSim):
         # # send to torch
         # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
 
-        for i in range(len(envs)):
+        for env, robot_handle in zip(envs, robot_handles):
             # set dof properties
-            gym.set_actor_dof_properties(envs[i], robot_handles[i], robot_dof_props)
+            gym.set_actor_dof_properties(env, robot_handle, robot_dof_props)
 
             # set initial dof states
-            gym.set_actor_dof_states(envs[i], robot_handles[i], default_dof_state, gymapi.STATE_ALL)
+            gym.set_actor_dof_states(env, robot_handle, default_dof_state, gymapi.STATE_ALL)
 
             # set initial position targets
-            gym.set_actor_dof_position_targets(envs[i], robot_handles[i], default_dof_pos)
+            gym.set_actor_dof_position_targets(env, robot_handle, default_dof_pos)
 
     def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
         """
-        Visualize the CURI robot
+        Visualize the robot
         :param visual_obs_flag: if True, show visual observation
         :param camera_props: If visual_obs_flag is True, use this camera_props to config the camera
         :param attached_body: If visual_obs_flag is True, use this to refer the body the camera attached to

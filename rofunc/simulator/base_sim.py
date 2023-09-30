@@ -183,7 +183,45 @@ class RobotSim:
         self.envs = envs
         self.robot_handles = robot_handles
 
-    def monitor_rigid_body_states(self):
+    def setup_robot_dof_prop(self, **kwargs):
+        raise NotImplementedError
+
+    def add_object(self):
+        from isaacgym import gymapi
+
+        asset_root = self.args.env.object_asset.assetRoot or os.path.join(rf.oslab.get_rofunc_path(),
+                                                                          "simulator/assets")
+        asset_file = self.args.env.object_asset.assetFile
+
+        asset_options = gymapi.AssetOptions()
+        init_pose = self.args.env.object_asset.init_pose
+        object_name = self.args.env.object_asset.object_name
+
+        beauty_print("Loading object asset {} from {}".format(asset_file, asset_root), type="info")
+        self.object_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
+
+        self.object_idxs = []
+        self.object_handles = []
+        for i, env_ptr in enumerate(self.envs):
+            if isinstance(object_poses, list):
+                object_pose = init_pose[i]
+            else:
+                object_pose = init_pose
+
+            object_handle = self.gym.create_actor(env_ptr, self.object_asset, init_pose, object_name, collision_group,
+                                                  filter_mask, seg_id)
+            self.object_handles.append(object_handle)
+
+            if object_color is not None:
+                self.gym.set_rigid_body_color(env_ptr, object_handle, 0, gymapi.MESH_VISUAL_AND_COLLISION,
+                                              object_color)
+
+            object_idx = self.gym.get_actor_rigid_body_index(self.envs[i], object_handle, 0, gymapi.DOMAIN_SIM)
+            self.object_idxs.append(object_idx)
+            self.current_poses = self.object_poses
+        return self.object_handles, self.object_idxs
+
+    def _monitor_rigid_body_states(self):
         from isaacgym import gymtorch
         self.gym.prepare_sim(self.sim)
         self.rigid_body_states_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)
@@ -240,9 +278,6 @@ class RobotSim:
             attractor_handles.append(attractor_handle)
         return attractor_handles, axes_geom, sphere_geom
 
-    def setup_robot_dof_prop(self, **kwargs):
-        raise NotImplementedError
-
     def _setup_attractors(self, traj, attracted_joints, verbose=True):
         assert isinstance(attracted_joints, list), "The attracted joints should be a list"
         assert len(attracted_joints) > 0, "The length of the attracted joints should be greater than 0"
@@ -255,52 +290,6 @@ class RobotSim:
             axes_geoms.append(axes_geom)
             sphere_geoms.append(sphere_geom)
         return attracted_joints, attractor_handles, axes_geoms, sphere_geoms
-
-    def add_object(self, object_asset, object_poses, object_name, object_color=None, collision_group=0, filter_mask=-1,
-                   seg_id=0):
-        """
-
-        :param object_asset:
-        :param object_poses:
-        :param object_name:
-        :param object_color:
-        :param collision_group:
-        :param filter_mask:
-        :param seg_id:
-        :return:
-        """
-        from isaacgym import gymapi
-
-        self.object_idxs = []
-        self.object_handles = []
-        self.object_poses = []
-        for i in range(self.num_envs):
-            if isinstance(object_poses, list):
-                object_pose = object_poses[i]
-            else:
-                object_pose = object_poses
-
-            object_handle = self.gym.create_actor(self.envs[i], object_asset, object_pose, object_name, collision_group,
-                                                  filter_mask, seg_id)
-            self.object_handles.append(object_handle)
-
-            if object_color is not None:
-                self.gym.set_rigid_body_color(self.envs[i], object_handle, 0, gymapi.MESH_VISUAL_AND_COLLISION,
-                                              object_color)
-
-            object_idx = self.gym.get_actor_rigid_body_index(self.envs[i], object_handle, 0, gymapi.DOMAIN_SIM)
-            self.object_idxs.append(object_idx)
-            self.object_poses.append([
-                object_pose.p.x,
-                object_pose.p.y,
-                object_pose.p.z,
-                object_pose.r.w,
-                object_pose.r.x,
-                object_pose.r.y,
-                object_pose.r.z,
-            ])
-            self.current_poses = self.object_poses
-        return self.object_handles, self.object_idxs
 
     def add_marker(self, marker_pose):
         from isaacgym import gymapi
