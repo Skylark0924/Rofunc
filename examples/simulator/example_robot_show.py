@@ -5,47 +5,48 @@ Visualize robots and objects
 This example shows how to visualize robots and objects in the Isaac Gym simulator in an interactive viewer.
 """
 
-from isaacgym import gymutil
-
 import rofunc as rf
 
-args = gymutil.parse_arguments()
-args.use_gpu_pipeline = False
-
 # CURI
-# CURIsim = rf.sim.CURISim(args, asset_root="/home/zhuoli/Rofunc/rofunc/simulator/assets")
-# CURIsim.init()
+# args = rf.config.get_sim_config("CURI")
+# CURIsim = rf.sim.CURISim(args)
 # CURIsim.show(visual_obs_flag=True)
 
 # walker
-walkersim = rf.sim.WalkerSim(args, asset_root="/home/zhuoli/Rofunc/rofunc/simulator/assets")
-walkersim.init()
-walkersim.show()
+# args = rf.config.get_sim_config("Walker")
+# walkersim = rf.sim.WalkerSim(args)
+# walkersim.show()
 
 # CURI-mini
+# args = rf.config.get_sim_config("CURImini")
 # CURIminisim = rf.sim.CURIminiSim(args)
 # CURIminisim.show()
 
 # franka
-# frankasim = rf.sim.FrankaSim(args)
-# frankasim.show()
+args = rf.config.get_sim_config("Franka")
+frankasim = rf.sim.FrankaSim(args)
+frankasim.show()
 
 # baxter
+# args = rf.config.get_sim_config("Baxter")
 # baxtersim = rf.sim.BaxterSim(args)
 # baxtersim.show()
 
 # sawyer
+# args = rf.config.get_sim_config("Sawyer")
 # sawyersim = rf.sim.SawyerSim(args)
 # sawyersim.show()
 
 # gluon
-# Gluonsim = rf.sim.GluonSim(args, init_pose_vec=[1, 0, 0])
-# Gluonsim.show(visual_obs_flag=False)
+# args = rf.config.get_sim_config("Gluon")
+# Gluonsim = rf.sim.GluonSim(args)
+# Gluonsim.show()
 
 # Multi Robots
-# CURIsim = rf.sim.CURISim(args)
-# walkersim = rf.sim.WalkerSim(args, init_pose_vec=[2, 1.3, 0, 0., 0.707107, 0.707107, 0.])
+# curi_args = rf.config.get_sim_config("CURI")
+# CURIsim = rf.sim.CURISim(curi_args)
+# walker_args = rf.config.get_sim_config("Walker")
+# walkersim = rf.sim.WalkerSim(walker_args)
 #
 # MRsim = rf.sim.MultiRobotSim(args, robot_sims={"CURI": CURIsim, "walker": walkersim})
-# MRsim.init()
 # MRsim.show()
