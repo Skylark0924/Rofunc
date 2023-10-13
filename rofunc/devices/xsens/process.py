@@ -122,7 +122,7 @@ def export(mvnx_path, output_type='segment', output_dir=None):
         output_dir = mvnx_path.split('.mvnx')[0]
         output_dir = os.path.join(output_dir, output_type)
     rf.oslab.create_dir(output_dir)
-    rf.logger.beauty_print('Save .npys in {}'.format(output_dir), level=2)
+    rf.logger.beauty_print('Save .npys in {}'.format(output_dir), type="info")
 
     if output_type == 'segment':
         segment_count = mvnx_file.segment_count
