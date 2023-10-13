@@ -14,9 +14,19 @@
     "name": "FrankaCabinetPPO.pth",
     "md5": "6ec13ea27b8be8500d91208fdee3ead2"
   },
+  "FrankaCabinetRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=&export=download",
+    "name": "FrankaCabinetRofuncRLPPO.pth",
+    "md5": ""
+  },
   "CURICabinetRofuncRLPPO_left_arm.pth": {
     "url": "https://drive.google.com/uc?id=1k-XY089wUAg1XfWL_Vayh--pSot0esaw&export=download",
     "name": "CURICabinetRofuncRLPPO_left_arm.pth",
+    "md5": ""
+  },
+  "HumanoidRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=16wSqaJxkFlaLu-Qf8WnIiPSaXte1FxaH&export=download",
+    "name": "HumanoidRofuncRLPPO.pth",
     "md5": ""
   },
   "HumanoidAMP_backflip.pth": {
@@ -25,7 +35,7 @@
     "md5": ""
   },
   "HumanoidAMP_run.pth": {
-    "url": "https://drive.google.com/uc?id=1AAhWR9YmXZgcYkiQhnToDkFiGeEZrlOa&export=download",
+    "url": "https://drive.google.com/uc?id=1ai-8W9sOXdfyng8m-lXgZO2EfnZQfOiP&export=download",
     "name": "HumanoidAMP_run.pth",
     "md5": ""
   },

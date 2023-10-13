@@ -79,7 +79,7 @@ def inference(custom_args):
                                              env_name=custom_args.task)
     # load checkpoint
     if custom_args.ckpt_path is None:
-        custom_args.ckpt_path = model_zoo(name=f"{custom_args.task}.pth")  # TODO: Check
+        custom_args.ckpt_path = model_zoo(name="FrankaCabinetRofuncRLPPO.pth")
     trainer.agent.load_ckpt(custom_args.ckpt_path)
 
     # Start inference

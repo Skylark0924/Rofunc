@@ -107,18 +107,17 @@ if __name__ == '__main__':
     # HumanoidASEReachSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
     # HumanoidASELocationSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
     # HumanoidASEStrikeSwordShield -> reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy
-    # HumanoidViewMotion
-    parser.add_argument("--task", type=str, default="HumanoidViewMotion")
+    parser.add_argument("--task", type=str, default="HumanoidASEGetupSwordShield")
     parser.add_argument("--motion_file", type=str,
-                        default="/home/ubuntu/Github/HOTU/hotu/data/hotu/020_amp.npy")
-    parser.add_argument("--asset", type=str, default="mjcf/hotu_humanoid_spoon_pan.xml")
+                        default="reallusion_sword_shield/dataset_reallusion_sword_shield.yaml")
+    parser.add_argument("--asset", type=str, default="mjcf/amp_humanoid_sword_shield.xml")
     parser.add_argument("--agent", type=str, default="ase")  # Available agent: ase
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
+    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
