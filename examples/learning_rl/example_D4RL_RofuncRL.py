@@ -5,6 +5,14 @@ D4RL (RofuncRL)
 D4RL tasks with RofuncRL offline RL algorithms (BC, DTrans, CQL, etc.)
 """
 
+"""
+Note::
+
+    Please add following line to .bashrc (according to your own path):
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ubuntu/.mujoco/mujoco210/bin
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
+"""
+
 import argparse
 
 import gymnasium as gym
@@ -12,7 +20,6 @@ import gymnasium as gym
 from rofunc.config.utils import omegaconf_to_dict, get_config
 from rofunc.learning.RofuncRL.tasks import task_map
 from rofunc.learning.RofuncRL.trainers import trainer_map
-from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.download_datasets import download_d4rl_dataset
 from rofunc.learning.utils.utils import set_seed
 
@@ -74,7 +81,7 @@ def inference(custom_args):
                                              env_name=custom_args.task)
     # load checkpoint
     if custom_args.ckpt_path is None:
-        custom_args.ckpt_path = model_zoo(name="CURICabinetRofuncRLPPO_left_arm.pth")
+        raise ValueError("Please specify the checkpoint path for inference.")
     trainer.agent.load_ckpt(custom_args.ckpt_path)
 
     # Start inference
@@ -82,7 +89,7 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 3
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     # Available tasks: Hopper, HalfCheetah, Walker2d, Reacher2d

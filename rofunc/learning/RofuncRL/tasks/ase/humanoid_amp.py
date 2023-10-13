@@ -45,16 +45,7 @@ class HumanoidAMP(Humanoid):
         Random = 2
         Hybrid = 3
 
-    def __init__(
-        self,
-        cfg,
-        rl_device,
-        sim_device,
-        graphics_device_id,
-        headless,
-        virtual_screen_capture,
-        force_render,
-    ):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
 
         state_init = cfg["env"]["stateInit"]
@@ -66,15 +57,9 @@ class HumanoidAMP(Humanoid):
         self._reset_default_env_ids = []
         self._reset_ref_env_ids = []
 
-        super().__init__(
-            config=self.cfg,
-            rl_device=rl_device,
-            sim_device=sim_device,
-            graphics_device_id=graphics_device_id,
-            headless=headless,
-            virtual_screen_capture=virtual_screen_capture,
-            force_render=force_render,
-        )
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
+                         graphics_device_id=graphics_device_id, headless=headless,
+                         virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         motion_file = cfg["env"].get("motion_file", None)
         if rf.oslab.is_absl_path(motion_file):
@@ -86,15 +71,10 @@ class HumanoidAMP(Humanoid):
             )
         self._load_motion(motion_file_path)
 
-        self._amp_obs_space = spaces.Box(
-            np.ones(self.get_num_amp_obs()) * -np.Inf,
-            np.ones(self.get_num_amp_obs()) * np.Inf,
-        )
-        self._amp_obs_buf = torch.zeros(
-            (self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
-            device=self.device,
-            dtype=torch.float,
-        )
+        self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf,
+                                         np.ones(self.get_num_amp_obs()) * np.Inf)
+        self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
+                                        device=self.device, dtype=torch.float)
         self._curr_amp_obs_buf = self._amp_obs_buf[:, 0]
         self._hist_amp_obs_buf = self._amp_obs_buf[:, 1:]
 
@@ -131,9 +111,7 @@ class HumanoidAMP(Humanoid):
         # since negative times are added to these values in build_amp_obs_demo,
         # we shift them into the range [0 + truncate_time, end of clip]
         truncate_time = self.dt * (self._num_amp_obs_steps - 1)
-        motion_times0 = self._motion_lib.sample_time(
-            motion_ids, truncate_time=truncate_time
-        )
+        motion_times0 = self._motion_lib.sample_time(motion_ids, truncate_time=truncate_time)
         motion_times0 += truncate_time
 
         amp_obs_demo = self.build_amp_obs_demo(motion_ids, motion_times0)
@@ -152,36 +130,17 @@ class HumanoidAMP(Humanoid):
 
         motion_ids = motion_ids.view(-1)
         motion_times = motion_times.view(-1)
-        (
-            root_pos,
-            root_rot,
-            dof_pos,
-            root_vel,
-            root_ang_vel,
-            dof_vel,
-            key_pos,
-        ) = self._motion_lib.get_motion_state(motion_ids, motion_times)
-        amp_obs_demo = build_amp_observations(
-            root_pos,
-            root_rot,
-            root_vel,
-            root_ang_vel,
-            dof_pos,
-            dof_vel,
-            key_pos,
-            self._local_root_obs,
-            self._root_height_obs,
-            self._dof_obs_size,
-            self._dof_offsets,
-        )
+        root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
+            = self._motion_lib.get_motion_state(motion_ids, motion_times)
+        amp_obs_demo = build_amp_observations(root_pos, root_rot, root_vel, root_ang_vel,
+                                              dof_pos, dof_vel, key_pos,
+                                              self._local_root_obs, self._root_height_obs,
+                                              self._dof_obs_size, self._dof_offsets)
         return amp_obs_demo
 
     def _build_amp_obs_demo_buf(self, num_samples):
-        self._amp_obs_demo_buf = torch.zeros(
-            (num_samples, self._num_amp_obs_steps, self._num_amp_obs_per_step),
-            device=self.device,
-            dtype=torch.float32,
-        )
+        self._amp_obs_demo_buf = torch.zeros((num_samples, self._num_amp_obs_steps, self._num_amp_obs_per_step),
+                                             device=self.device, dtype=torch.float32)
         return
 
     def _setup_character_props(self, key_bodies):
@@ -191,42 +150,47 @@ class HumanoidAMP(Humanoid):
         When body num is 15, the humanoid holds no object; when it is 16, humanoid holds one object which takes
         as a body; when bn=17, the humanoid holds 2 objects
         """
-        asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
-        asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
+        # asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
+        # asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
+        asset_file = self.cfg["env"]["asset"]["assetFileName"]
         num_key_bodies = len(key_bodies)
 
         # 13 = root_h (1) + root_rot (6) + root_linear_vel (3) + root_angular_vel (3)},
         # dof_obs_size = dof_pos + dof_vel,
         # key_body_positions = 3 * num_key_bodies
-        if asset_body_num == 15:
-            if asset_joint_num == 28:
-                self._num_amp_obs_per_step = (
-                        13 + self._dof_obs_size + 28 + 3 * num_key_bodies
-                )
-            elif asset_joint_num == 34:
-                self._num_amp_obs_per_step = (
-                        13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-                )
-        elif asset_body_num == 16:
-            self._num_amp_obs_per_step = (
-                13 + self._dof_obs_size + 31 + 3 * num_key_bodies
-            )
-        elif asset_body_num == 17:
-            if asset_joint_num == 34:
-                self._num_amp_obs_per_step = (
-                    13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-                )
-            elif asset_joint_num == 38:
-                self._num_amp_obs_per_step = (
-                        13 + self._dof_obs_size + 38 + 3 * num_key_bodies
-                )
-        elif asset_body_num == 19:
-            if asset_joint_num == 44:
-                self._num_amp_obs_per_step = (
-                        13 + self._dof_obs_size + 44 + 3 * num_key_bodies
-                )
+        # if asset_body_num == 15:
+        #     if asset_joint_num == 28:
+        #         self._num_amp_obs_per_step = (
+        #                 13 + self._dof_obs_size + 28 + 3 * num_key_bodies
+        #         )
+        #     elif asset_joint_num == 34:
+        #         self._num_amp_obs_per_step = (
+        #                 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
+        #         )
+        # elif asset_body_num == 16:
+        #     self._num_amp_obs_per_step = (
+        #         13 + self._dof_obs_size + 31 + 3 * num_key_bodies
+        #     )
+        # elif asset_body_num == 17:
+        #     if asset_joint_num == 34:
+        #         self._num_amp_obs_per_step = (
+        #             13 + self._dof_obs_size + 34 + 3 * num_key_bodies
+        #         )
+        #     elif asset_joint_num == 38:
+        #         self._num_amp_obs_per_step = (
+        #                 13 + self._dof_obs_size + 38 + 3 * num_key_bodies
+        #         )
+        # elif asset_body_num == 19:
+        #     if asset_joint_num == 44:
+        #         self._num_amp_obs_per_step = (
+        #                 13 + self._dof_obs_size + 44 + 3 * num_key_bodies
+        #         )
+        if asset_file == "mjcf/amp_humanoid.xml":
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 28 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
+        elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 31 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, d
         else:
-            print(f"Unsupported humanoid body num: {asset_body_num}")
+            print(f"Unsupported humanoid body num: {asset_file}")
             assert False
 
         return
@@ -254,8 +218,8 @@ class HumanoidAMP(Humanoid):
         if self._state_init == HumanoidAMP.StateInit.Default:
             self._reset_default(env_ids)
         elif (
-            self._state_init == HumanoidAMP.StateInit.Start
-            or self._state_init == HumanoidAMP.StateInit.Random
+                self._state_init == HumanoidAMP.StateInit.Start
+                or self._state_init == HumanoidAMP.StateInit.Random
         ):
             self._reset_ref_state_init(env_ids)
         elif self._state_init == HumanoidAMP.StateInit.Hybrid:
@@ -280,8 +244,8 @@ class HumanoidAMP(Humanoid):
         motion_ids = self._motion_lib.sample_motions(num_envs)
 
         if (
-            self._state_init == HumanoidAMP.StateInit.Random
-            or self._state_init == HumanoidAMP.StateInit.Hybrid
+                self._state_init == HumanoidAMP.StateInit.Random
+                or self._state_init == HumanoidAMP.StateInit.Hybrid
         ):
             motion_times = self._motion_lib.sample_time(motion_ids)
         elif self._state_init == HumanoidAMP.StateInit.Start:
@@ -359,7 +323,7 @@ class HumanoidAMP(Humanoid):
         )
         motion_times = motion_times.unsqueeze(-1)
         time_steps = -dt * (
-            torch.arange(0, self._num_amp_obs_steps - 1, device=self.device) + 1
+                torch.arange(0, self._num_amp_obs_steps - 1, device=self.device) + 1
         )
         motion_times = motion_times + time_steps
 
@@ -393,7 +357,7 @@ class HumanoidAMP(Humanoid):
         return
 
     def _set_env_state(
-        self, env_ids, root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel
+            self, env_ids, root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel
     ):
         self._humanoid_root_states[env_ids, 0:3] = root_pos
         self._humanoid_root_states[env_ids, 3:7] = root_rot
@@ -448,17 +412,17 @@ class HumanoidAMP(Humanoid):
 
 @torch.jit.script
 def build_amp_observations(
-    root_pos,
-    root_rot,
-    root_vel,
-    root_ang_vel,
-    dof_pos,
-    dof_vel,
-    key_body_pos,
-    local_root_obs,
-    root_height_obs,
-    dof_obs_size,
-    dof_offsets,
+        root_pos,
+        root_rot,
+        root_vel,
+        root_ang_vel,
+        dof_pos,
+        dof_vel,
+        key_body_pos,
+        local_root_obs,
+        root_height_obs,
+        dof_obs_size,
+        dof_offsets,
 ):
     # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool, int, List[int]) -> Tensor
     root_h = root_pos[:, 2:3]
