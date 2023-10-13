@@ -14,9 +14,11 @@ from .ase.humanoid_location import HumanoidLocationTask
 from .ase.humanoid_reach import HumanoidReachTask
 from .ase.humanoid_strike import HumanoidStrikeTask
 from .ase.humanoid_view_motion import HumanoidViewMotionTask
+from .omniisaacgym.ant import AntOmniTask
 
 
 task_map = {
+    # Isaac Gym tasks
     "Ant": AntTask,
     "Cartpole": CartpoleTask,
     "FrankaCabinet": FrankaCabinetTask,
@@ -33,4 +35,6 @@ task_map = {
     "HumanoidASEReachSwordShield": HumanoidReachTask,
     "HumanoidASEStrikeSwordShield": HumanoidStrikeTask,
     "HumanoidViewMotion": HumanoidViewMotionTask,
+    # OmniIsaacGym tasks
+    "AntOmni": AntOmniTask,
 }
