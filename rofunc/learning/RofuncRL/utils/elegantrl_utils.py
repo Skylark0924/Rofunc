@@ -112,7 +112,7 @@ class ElegantRLIsaacGymEnvWrapper:
 def setup(custom_args, eval_mode=False):
     # get config
     sys.argv.append("task={}".format(custom_args.task))
-    beauty_print("Agent: {}{}ElegantRL".format(custom_args.task, custom_args.agent.upper()), 2)
+    beauty_print("Agent: {}{}ElegantRL".format(custom_args.task, custom_args.agent.upper()), type="info")
     sys.argv.append("sim_device={}".format(custom_args.sim_device))
     sys.argv.append("rl_device={}".format(custom_args.rl_device))
     sys.argv.append("graphics_device_id={}".format(custom_args.graphics_device_id))

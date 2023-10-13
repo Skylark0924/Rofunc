@@ -163,7 +163,7 @@ class GluonSim(RobotSim):
 
         with open('{}.npy'.format(save_name), 'wb') as f:
             np.save(f, np.array(states))
-        beauty_print('{}.npy saved'.format(save_name), 2)
+        beauty_print('{}.npy saved'.format(save_name), type="info")
 
         self.gym.destroy_viewer(self.viewer)
         self.gym.destroy_sim(self.sim)

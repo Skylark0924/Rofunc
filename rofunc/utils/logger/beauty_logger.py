@@ -91,7 +91,7 @@ class BeautyLogger:
         self._write_log(content, type="info")
 
 
-def beauty_print(content, level=None, type=None):
+def beauty_print(content, type=None):
     """
     Print the content with different colors.
 
@@ -101,23 +101,18 @@ def beauty_print(content, level=None, type=None):
         >>> rf.logger.beauty_print("This is a warning message.", type="warning")
 
     :param content: the content to be printed
-    :param level: support 0-3, 0 for error and warning, 1 for module, 2 for info
-    :param type: support "warning", "module", "info"
+    :param type: support "warning", "module", "info", "error"
     :return:
     """
-    if level is None and type is None:
-        level = 1
-    if level == 0 or type == "warning":
-        print("\033[1;31m[Rofunc:WARNING] {}\033[0m".format(content))  # For error and warning (red)
-    elif level == 1 or type == "module":
-        print("\033[1;33m[Rofunc:MODULE] {}\033[0m".format(content))  # start of a new module (light yellow)
-    elif level == 2 or type == "info":
-        print("\033[1;35m[Rofunc:INFO] {}\033[0m".format(content))  # start of a new function (light purple)
-    elif level == 3:
-        print("\033[1;36m{}\033[0m".format(content))  # For mentioning the start of a new class (light cyan)
-    elif level == 4:
-        print("\033[1;32m{}\033[0m".format(content))  # For mentioning the start of a new method (light green)
-    elif level == 5:
-        print("\033[1;34m{}\033[0m".format(content))  # For mentioning the start of a new line (light blue)
+    if type is None:
+        type = "info"
+    if type == "warning":
+        print("\033[1;37m[Rofunc:WARNING] {}\033[0m".format(content))  # For warning (gray)
+    elif type == "module":
+        print("\033[1;33m[Rofunc:MODULE] {}\033[0m".format(content))  # For a new module (light yellow)
+    elif type == "info":
+        print("\033[1;35m[Rofunc:INFO] {}\033[0m".format(content))  # For info (light purple)
+    elif type == "error":
+        print("\033[1;31m[Rofunc:ERROR] {}\033[0m".format(content))  # For error (red)
     else:
         raise ValueError("Invalid level")

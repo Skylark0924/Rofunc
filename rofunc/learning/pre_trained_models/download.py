@@ -20,7 +20,7 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def download_ckpt(url, name, md5):
-    beauty_print("Downloading pretrained model {}".format(name), level=2)
+    beauty_print("Downloading pretrained model {}".format(name), type="info")
     ckpt_path = os.path.join(get_rofunc_path(), 'learning/pre_trained_models/{}'.format(name))
     gdown.cached_download(url, ckpt_path, md5=md5)
     return ckpt_path
@@ -30,7 +30,7 @@ def model_zoo(name, zoo_path="config/learning/model_zoo.json"):
     zoo = json.load(open(os.path.join(get_rofunc_path(), zoo_path)))
     if name in zoo:
         if check_ckpt_exist(zoo[name]['name']):
-            beauty_print("Pretrained model {} already exists".format(name), level=2)
+            beauty_print("Pretrained model {} already exists".format(name), type="info")
             ckpt_path = os.path.join(get_rofunc_path(), "learning/pre_trained_models/{}".format(zoo[name]['name']))
         else:
             ckpt_path = download_ckpt(**zoo[name])
