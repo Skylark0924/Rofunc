@@ -63,6 +63,7 @@ Agent:
 Model:
   use_init: True
   use_action_clip: False               # If true, clip actions to the action space range.
+  use_same_model: False                # If true, use the same model for the actor and critic.
   use_action_out_tanh: True            # If true, apply tanh to the output of the actor.
   action_clip: 1.0                     # clipping coefficient for the norm of the actions
   action_scale: 1.0                    # scaling coefficient for the actions
