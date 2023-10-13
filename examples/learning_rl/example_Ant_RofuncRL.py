@@ -79,7 +79,7 @@ def inference(custom_args):
                                              env_name=custom_args.task)
     # load checkpoint
     if custom_args.ckpt_path is None:
-        custom_args.ckpt_path = model_zoo(name="AntRofuncRLPPO.pt")  # TODO: check
+        custom_args.ckpt_path = model_zoo(name="AntRofuncRLPPO.pth")
     trainer.agent.load_ckpt(custom_args.ckpt_path)
 
     # Start inference
@@ -87,11 +87,11 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Ant")
-    parser.add_argument("--agent", type=str, default="a2c")  # Available agents: ppo, sac, td3, a2c
+    parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
