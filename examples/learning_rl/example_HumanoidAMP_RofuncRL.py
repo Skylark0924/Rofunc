@@ -2,7 +2,7 @@
 HumanoidAMP (RofuncRL)
 ===========================
 
-Humanoid walking, trained by RofuncRL
+Humanoid backflip/walk/run/dance/hop, trained by RofuncRL
 """
 
 import argparse
