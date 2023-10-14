@@ -135,7 +135,7 @@ the [CLOVER Lab (Collaborative and Versatile Robots Laboratory)](https://feichen
 
 installation
 quickstart
-auto_examples/index
+examples/index
 ```
 
 ```{toctree}

@@ -22,17 +22,17 @@ processing, learning, and its deployment on robots.
 ![](doc/img/pipeline.png)
 
 - [Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation](#rofunc-the-full-process-python-package-for-robot-learning-from-demonstration-and-robot-manipulation)
-    - [Installation](#installation)
-        - [Install from PyPI (stable version)](#install-from-pypi-stable-version)
-        - [Install from Source (nightly version, recommended)](#install-from-source-nightly-version-recommended)
-    - [Documentation](#documentation)
-    - [Star History](#star-history)
-    - [Citation](#citation)
-    - [Related Papers](#related-papers)
-    - [The Team](#the-team)
-    - [Acknowledge](#acknowledge)
-        - [Learning from Demonstration](#learning-from-demonstration)
-        - [Planning and Control](#planning-and-control)
+  - [Installation](#installation)
+    - [Install from PyPI (stable version)](#install-from-pypi-stable-version)
+    - [Install from Source (nightly version, recommended)](#install-from-source-nightly-version-recommended)
+  - [Documentation](#documentation)
+  - [Star History](#star-history)
+  - [Citation](#citation)
+  - [Related Papers](#related-papers)
+  - [The Team](#the-team)
+  - [Acknowledge](#acknowledge)
+    - [Learning from Demonstration](#learning-from-demonstration)
+    - [Planning and Control](#planning-and-control)
 
 ## Installation
 
@@ -85,7 +85,7 @@ sh ./scripts/mac_install.sh
 ## Documentation
 
 [![Documentation](https://img.shields.io/badge/Documentation-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/)
-[![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/auto_examples/index.html)
+[![Example Gallery](https://img.shields.io/badge/Example%20Gallery-Access-brightgreen?style=for-the-badge)](https://rofunc.readthedocs.io/en/latest/examples/index.html)
 
 To give you a quick overview of the pipeline of `rofunc`, we provide an interesting example of learning to play Taichi
 from human demonstration. You can find it in the [Quick start](https://rofunc.readthedocs.io/en/latest/quickstart.html)
