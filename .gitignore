@@ -175,7 +175,7 @@ rofunc/.DS_Store
 .DS_Store
 others/
 
-doc/source/auto_examples
+doc/source/examples
 doc/source/apidocs
 .vscode/
 *.pth
