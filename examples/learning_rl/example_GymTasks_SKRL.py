@@ -1,8 +1,8 @@
 """
-Gym Tasks (SKRL)
+OpenAIGym Tasks (SKRL)
 ===========================
 
-Gym Tasks RL using SKRL
+OpenAIGym Tasks RL using SKRL
 """
 
 import argparse
