@@ -2,7 +2,7 @@
 HumanoidAMP (SKRL)
 ===========================
 
-Humanoid walking, trained by SKRL
+Humanoid backflip/walk/run/dance/hop, trained by SKRL
 """
 
 import argparse

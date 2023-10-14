@@ -1,8 +1,8 @@
 """
-Gym Tasks (RofuncRL)
+OpenAIGym Tasks (RofuncRL)
 ===========================
 
-Gym Tasks RL using RofuncRL
+OpenAIGym Tasks RL using RofuncRL
 """
 
 import argparse
