@@ -62,7 +62,7 @@ extensions = [
 
 sphinx_gallery_conf = {
     'examples_dirs': '../../examples',  # path to your example scripts
-    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+    'gallery_dirs': 'examples',  # path to where to save gallery generated output
     'ignore_pattern': r'__init__\.py',
     #  'thumbnail_size': (600, 600),
     #  'image_srcset': ["2x"],
