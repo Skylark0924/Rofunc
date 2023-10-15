@@ -77,8 +77,9 @@ class LQTCPDMP(LQTCP):
             M = np.hstack((np.dot(A, M), B))  # [0,nb_state_var-1]
         return Su, Sx, A, B
 
-    def get_u_x(self, mu: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray, Sx: np.ndarray, PSI: np.ndarray,
-                A: np.ndarray, B: np.ndarray, state_noise: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def get_u_x(self, mu: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray, Sx: np.ndarray,
+                PSI: np.ndarray = None, A: np.ndarray = None, B: np.ndarray = None,
+                state_noise: np.ndarray = None) -> Tuple[np.ndarray, np.ndarray]:
         # Least squares formulation of recursive LQR with an augmented state space and control primitives
         W = np.linalg.inv(PSI.T @ Su.T @ Q @ Su @ PSI + PSI.T @ R @ PSI) @ PSI.T @ Su.T @ Q @ Sx
         F = PSI @ W  # F with control primitives
@@ -100,12 +101,12 @@ class LQTCPDMP(LQTCP):
                 # Feedback control on augmented state (resulting in feedback and feedforward terms on state)
                 u = -Ka[t, :, :] @ x
                 x = A @ x + B @ u  # Update of state vector
-                if t == 24 and n == 1:
+                if t == 24 and n == 1 and state_noise is not None:
                     x = x + state_noise  # Simulated noise on the state
                 x_hat[n, :, t] = x.flatten()  # State
         return u_hat, x_hat
 
-    def solve(self, state_noise, for_test=False):
+    def solve(self, state_noise=None, for_test=False):
         beauty_print('Planning smooth trajectory via LQT (control primitive and DMP)', type='module')
 
         Q, R = self.get_matrices()
@@ -118,7 +119,7 @@ class LQTCPDMP(LQTCP):
         self.vis(x_hat, mu, for_test=for_test)
         return u_hat, x_hat
 
-    def vis(self, x_hat, Mu, for_test):
+    def vis(self, x_hat, Mu, for_test, **kwargs):
         plt.figure()
         plt.axis("off")
         plt.gca().set_aspect('equal', adjustable='box')
