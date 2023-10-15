@@ -151,7 +151,7 @@ class RobotSim:
         asset_options.armature = self.args.env.asset.armature
 
         init_pose = self.args.env.asset.init_pose
-        robot_name = self.args.env.asset.robot_name
+        self.robot_name = self.args.env.asset.robot_name
 
         beauty_print("Loading robot asset {} from {}".format(asset_file, asset_root), type="info")
         self.robot_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
@@ -176,17 +176,55 @@ class RobotSim:
             envs.append(env)
 
             # add robot
-            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, robot_name, i, 2)
+            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, self.robot_name, i, 2)
             self.gym.enable_actor_dof_force_sensors(env, robot_handle)
             robot_handles.append(robot_handle)
 
         self.envs = envs
         self.robot_handles = robot_handles
 
-    def setup_robot_dof_prop(self, **kwargs):
-        raise NotImplementedError
+    def setup_robot_dof_prop(self):
+        from isaacgym import gymapi
+
+        gym = self.gym
+        envs = self.envs
+        robot_asset = self.robot_asset
+        robot_handles = self.robot_handles
+
+        # configure robot dofs
+        robot_dof_props = gym.get_asset_dof_properties(robot_asset)
+        robot_lower_limits = robot_dof_props["lower"]
+        robot_upper_limits = robot_dof_props["upper"]
+        robot_ranges = robot_upper_limits - robot_lower_limits
+        robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
+
+        robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][:].fill(300.0)
+        robot_dof_props["damping"][:].fill(30.0)
+
+        # default dof states and position targets
+        robot_num_dofs = gym.get_asset_dof_count(robot_asset)
+        default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
+        default_dof_pos[:] = robot_mids[:]
+
+        default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
+        default_dof_state["pos"] = default_dof_pos
+
+        # # send to torch
+        # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
+
+        for env, robot_handle in zip(envs, robot_handles):
+            # set dof properties
+            gym.set_actor_dof_properties(env, robot_handle, robot_dof_props)
+
+            # set initial dof states
+            gym.set_actor_dof_states(env, robot_handle, default_dof_state, gymapi.STATE_ALL)
+
+            # set initial position targets
+            gym.set_actor_dof_position_targets(env, robot_handle, default_dof_pos)
 
     def add_object(self):
+        # TODO
         from isaacgym import gymapi
 
         asset_root = self.args.env.object_asset.assetRoot or os.path.join(rf.oslab.get_rofunc_path(),
@@ -323,7 +361,7 @@ class RobotSim:
         """
         from isaacgym import gymapi
 
-        beauty_print("Show the {} simulator in the interactive mode".format(self.robot_name), 1)
+        beauty_print("Show the {} simulator in the interactive mode".format(self.robot_name), type="module")
 
         if visual_obs_flag:
             fig = plt.figure("Visual observation", figsize=(8, 8))
