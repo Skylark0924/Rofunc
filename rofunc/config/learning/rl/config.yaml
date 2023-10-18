@@ -20,11 +20,14 @@ max_iterations: ''
 physics_engine: 'physx'
 # whether to use cpu or gpu pipeline
 pipeline: 'gpu'
-# device for running physics simulation
-sim_device: 'cuda:0'
+# whether to use cpu or gpu physx
+sim_device: 'gpu'
+# used for gpu simulation only - device id for running sim and task if pipeline=gpu
+device_id: 0
 # device to run RL
 rl_device: 'cuda:0'
-graphics_device_id: 0
+# multi-GPU training
+multi_gpu: False
 
 ## PhysX arguments
 num_threads: 4 # Number of worker threads per scene used by PhysX - for CPU PhysX only.
@@ -36,32 +39,28 @@ num_subscenes: 4 # Splits the simulation into N physics scenes and runs each one
 test: False
 # used to set checkpoint path
 checkpoint: ''
-# set to True to use multi-gpu horovod training
-multi_gpu: False
+
+# disables rendering
+headless: False
+# enables native livestream
+enable_livestream: False
+# timeout for MT script
+mt_timeout: 30
 
 wandb_activate: False
 wandb_group: ''
-wandb_name: ${train.params.config.name}
 wandb_entity: ''
-wandb_project: 'isaacgymenvs'
-capture_video: False
-capture_video_freq: 1464
-capture_video_len: 100
-force_render: True
-
-# disables rendering
-headless: True
+wandb_project: 'omniisaacgymenvs'
 
 # set default task and default training config based on task
 defaults:
-  - _self_
   - task: Ant
   - train: ${task}PPO
   - override hydra/job_logging: disabled
 
 # set the directory where the output files get saved
 hydra:
+  mode: RUN
   output_subdir: null
   run:
     dir: .
-

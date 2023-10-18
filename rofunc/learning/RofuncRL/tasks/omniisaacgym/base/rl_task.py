@@ -228,6 +228,7 @@ class RLTask(BaseTask):
         """ Flags all environments for reset.
         """
         self.reset_buf = torch.ones_like(self.reset_buf)
+        return torch.ones_like(self.reset_buf)
 
     def pre_physics_step(self, actions):
         """ Optionally implemented by individual task classes to process actions.

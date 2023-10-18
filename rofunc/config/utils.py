@@ -149,7 +149,10 @@ def omegaconf_to_dict(config: DictConfig) -> Dict:
     """
     d = {}
     for k, v in config.items():
-        d[k] = omegaconf_to_dict(v) if isinstance(v, DictConfig) else v
+        try:
+            d[k] = omegaconf_to_dict(v) if isinstance(v, DictConfig) else v
+        except:
+            pass
     return d
 
 
