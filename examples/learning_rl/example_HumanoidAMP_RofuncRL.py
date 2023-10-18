@@ -88,18 +88,18 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 3
 
     parser = argparse.ArgumentParser()
     # Available tasks: HumanoidAMP_backflip, HumanoidAMP_walk, HumanoidAMP_run, HumanoidAMP_dance, HumanoidAMP_hop
-    parser.add_argument("--task", type=str, default="HumanoidAMP_walk")
+    parser.add_argument("--task", type=str, default="HumanoidAMP_run")
     parser.add_argument("--agent", type=str, default="amp")  # Available agent: amp
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--rl_device", type=str, default="cuda:{}".format(gpu_id))
     parser.add_argument("--graphics_device_id", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
+    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
