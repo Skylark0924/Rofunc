@@ -36,13 +36,16 @@ def train(custom_args):
     # Instantiate the Isaac Gym environment
     from rofunc.learning.RofuncRL.tasks import task_map
     from omniisaacgymenvs.utils.config_utils.sim_config import SimConfig
+    sim_config = SimConfig(cfg_dict)
     env = task_map[custom_args.task](name=cfg.task_name,
-                                     sim_config=SimConfig(cfg_dict),
+                                     sim_config=sim_config,
                                      env=env_omni)
+    init_sim = True
+    env_omni.set_task(task=env, sim_params=sim_config.get_physics_params(), backend="torch", init_sim=init_sim)
 
     # Instantiate the RL trainer
     trainer = trainer_map[custom_args.agent](cfg=cfg.train,
-                                             env=env,
+                                             env=env_omni,
                                              device=cfg.rl_device,
                                              env_name=custom_args.task)
 
