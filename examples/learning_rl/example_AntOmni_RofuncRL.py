@@ -13,6 +13,8 @@ from rofunc.learning.utils.utils import set_seed
 from omniisaacgymenvs.envs.vec_env_rlgames import VecEnvRLGames
 
 
+
+
 def train(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
     custom_args.num_envs = 64 if custom_args.agent.upper() in ["SAC", "TD3"] else custom_args.num_envs
@@ -30,7 +32,7 @@ def train(custom_args):
 
     # Startup IsaacSim simulator
     enable_viewport = "enable_cameras" in cfg.task.sim and cfg.task.sim.enable_cameras
-    env_omni = VecEnvRLGames(headless=cfg.headless, sim_device=cfg.device_id, enable_livestream=cfg.enable_livestream, enable_viewport=enable_viewport)
+    env_omni = VecEnvRLGames(headless=cfg.headless, sim_device=cfg.device_id)
 
 
     # Instantiate the Isaac Gym environment

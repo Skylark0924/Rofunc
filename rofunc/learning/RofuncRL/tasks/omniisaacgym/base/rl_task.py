@@ -35,6 +35,8 @@ from omni.isaac.core.tasks import BaseTask
 from omni.isaac.core.utils.types import ArticulationAction
 from omni.isaac.core.utils.prims import define_prim
 from omni.isaac.cloner import GridCloner
+from omni.isaac.core.utils.extensions import enable_extension
+enable_extension("omni.replicator.isaac")
 from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.usd_utils import create_distant_light
 from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.domain_randomization.randomize import Randomizer
 import omni.kit
