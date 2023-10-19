@@ -60,7 +60,6 @@ defaults:
 
 # set the directory where the output files get saved
 hydra:
-  mode: RUN
   output_subdir: null
   run:
     dir: .
