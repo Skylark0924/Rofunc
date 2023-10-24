@@ -10,7 +10,7 @@ import argparse
 import gymnasium as gym
 
 from rofunc.config.utils import get_config
-from rofunc.learning.RofuncRL.trainers import trainer_map
+from rofunc.learning.RofuncRL.trainers import Trainers
 from rofunc.learning.utils.utils import set_seed
 
 
@@ -32,10 +32,10 @@ def train(custom_args):
         env = gym.vector.make(gym_task_name, render_mode=custom_args.render_mode, num_envs=10, asynchronous=False)
 
     # Instantiate the RL trainer
-    trainer = trainer_map[custom_args.agent](cfg=cfg.train,
-                                             env=env,
-                                             device=cfg.rl_device,
-                                             env_name=custom_args.task)
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+                                                        env=env,
+                                                        device=cfg.rl_device,
+                                                        env_name=custom_args.task)
 
     # Start training
     trainer.train()
