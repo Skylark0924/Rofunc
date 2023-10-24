@@ -52,8 +52,8 @@ class LQTCP(LQT):
             M = np.hstack((np.dot(A, M), B))  # [0,nb_state_var-1]
         return Su, Sx
 
-    def get_u_x(self, mu: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray, Sx: np.ndarray, PSI: np.ndarray) -> \
-            Tuple[np.ndarray, np.ndarray]:
+    def get_u_x(self, mu: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray, Sx: np.ndarray,
+                PSI: np.ndarray = None) -> Tuple[np.ndarray, np.ndarray]:
         x0 = self.start_point.reshape((self.cfg.nbVar, 1))
         w_hat = np.linalg.inv(PSI.T @ Su.T @ Q @ Su @ PSI + PSI.T @ R @ PSI) @ PSI.T @ Su.T @ Q @ (mu - Sx @ x0)
         u_hat = PSI @ w_hat

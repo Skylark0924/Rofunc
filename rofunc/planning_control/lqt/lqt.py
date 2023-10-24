@@ -76,7 +76,7 @@ class LQT:
             M = np.hstack((np.dot(A, M), B))  # [0,nb_state_var-1]
         return Su, Sx
 
-    def get_u_x(self, mu: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray, Sx: np.ndarray, *args, **kwargs) -> \
+    def get_u_x(self, mu: np.ndarray, Q: np.ndarray, R: np.ndarray, Su: np.ndarray, Sx: np.ndarray, **kwargs) -> \
             Tuple[np.ndarray, np.ndarray]:
         x0 = self.start_point.reshape((self.cfg.nbVar, 1))
         # Equ. 18
