@@ -13,19 +13,20 @@
 # limitations under the License.
 
 import collections
+import os
+from typing import Union, Tuple, Optional
+
 import gym
 import gymnasium
 import numpy as np
-import os
 import torch
 from omegaconf import DictConfig
-from typing import Union, Tuple, Optional
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.state_encoders import encoder_map, EmptyEncoder
-from rofunc.learning.RofuncRL.utils.device_utils import to_device
 from rofunc.learning.RofuncRL.utils.memory import Memory
+from rofunc.learning.utils.utils import to_device
 
 
 class BaseAgent:
