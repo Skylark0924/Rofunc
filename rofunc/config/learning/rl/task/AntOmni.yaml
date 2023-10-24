@@ -1,5 +1,5 @@
 # used to create the object
-name: Ant
+name: AntOmni
 
 physics_engine: ${..physics_engine}
 
