@@ -106,7 +106,7 @@ class BaseTrainer:
         self.eval_rew_mean = 0
 
         '''Environment'''
-        env.device = self.device
+        # env.device = self.device
         self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.Trainer.seed)
         self.eval_env = wrap_env(env, logger=self.rofunc_logger, seed=self.eval_env_seed) if self.eval_flag else None
         self.rofunc_logger.info(f"Environment:\n  "
