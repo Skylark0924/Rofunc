@@ -40,6 +40,8 @@ class Tasks:
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks
             from .omniisaacgym.ant import AntOmniTask
+            from .omniisaacgym.anymal import AnymalOmniTask
             self.task_map = {
                 "AntOmni": AntOmniTask,
+                "AnymalOmni": AnymalOmniTask,
             }

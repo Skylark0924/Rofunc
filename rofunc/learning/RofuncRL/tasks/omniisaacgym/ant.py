@@ -27,31 +27,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.ant import Ant
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.shared.locomotion import LocomotionTask
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
-
-from omni.isaac.core.utils.torch.rotations import compute_heading_and_up, compute_rot, quat_conjugate
-from omni.isaac.core.utils.torch.maths import torch_rand_float, tensor_clamp, unscale
+import torch
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.utils.prims import get_prim_at_path
 
-from pxr import PhysxSchema
-
-import numpy as np
-import torch
-import math
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.ant import Ant
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.shared.locomotion import LocomotionTask
 
 
 class AntOmniTask(LocomotionTask):
-    def __init__(
-        self,
-        name,
-        sim_config,
-        env,
-        offset=None
-    ) -> None:
-    
+    def __init__(self, name, sim_config, env, offset=None) -> None:
         self._sim_config = sim_config
         self._cfg = sim_config.config
         self._task_cfg = sim_config.task_config
@@ -60,18 +46,19 @@ class AntOmniTask(LocomotionTask):
         self._ant_positions = torch.tensor([0, 0, 0.5])
 
         LocomotionTask.__init__(self, name=name, env=env)
-        return
 
     def set_up_scene(self, scene) -> None:
         self.get_ant()
         RLTask.set_up_scene(self, scene)
-        self._ants = ArticulationView(prim_paths_expr="/World/envs/.*/Ant/torso", name="ant_view", reset_xform_properties=False)
+        self._ants = ArticulationView(prim_paths_expr="/World/envs/.*/Ant/torso", name="ant_view",
+                                      reset_xform_properties=False)
         scene.add(self._ants)
         return
 
     def get_ant(self):
         ant = Ant(prim_path=self.default_zero_env_path + "/Ant", name="Ant", translation=self._ant_positions)
-        self._sim_config.apply_articulation_settings("Ant", get_prim_at_path(ant.prim_path), self._sim_config.parse_actor_config("Ant"))
+        self._sim_config.apply_articulation_settings("Ant", get_prim_at_path(ant.prim_path),
+                                                     self._sim_config.parse_actor_config("Ant"))
 
     def get_robot(self):
         return self._ants
@@ -83,6 +70,11 @@ class AntOmniTask(LocomotionTask):
         self.dof_limits_upper = dof_limits[0, :, 1].to(self._device)
         self.motor_effort_ratio = torch.ones_like(self.joint_gears, device=self._device)
 
+        force_links = ["front_left_foot", "front_right_foot", "left_back_foot", "right_back_foot"]
+        self._sensor_indices = torch.tensor(
+            [self._ants._body_indices[j] for j in force_links], device=self._device, dtype=torch.long
+        )
+
         LocomotionTask.post_reset(self)
 
     def get_dof_at_limit_cost(self):
@@ -92,4 +84,4 @@ class AntOmniTask(LocomotionTask):
 @torch.jit.script
 def get_dof_at_limit_cost(obs_buf, num_dof):
     # type: (Tensor, int) -> Tensor
-    return torch.sum(obs_buf[:, 12:12+num_dof] > 0.99, dim=-1)
+    return torch.sum(obs_buf[:, 12 : 12 + num_dof] > 0.99, dim=-1)
