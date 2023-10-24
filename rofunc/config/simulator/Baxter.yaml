@@ -12,8 +12,8 @@ env:
     robot_name: "Baxter"
     assetRoot:
     assetFile: "urdf/baxter/robot.xml"
-    init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-    fix_base_link: True
+    init_pose: [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+    fix_base_link: False
     flip_visual_attachments: True
     armature: 0.01
 

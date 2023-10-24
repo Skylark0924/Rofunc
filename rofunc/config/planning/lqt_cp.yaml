@@ -7,5 +7,5 @@ nbVarX: ${add:${nbVar}, 1}              # Augmented state space
 dt: 1E-2                                # Time step duration
 rfactor: 5E-8                           # control cost in LQR
 nbFct: 20                                # Number of basis function
-basisName: "FOURIER"                    # can be PIECEWEISE, RBF, BERNSTEIN, FOURIER
+basisName: "RBF"                    # can be PIECEWEISE, RBF, BERNSTEIN, FOURIER
 nbPoints: 0                             # Number of via-points to track

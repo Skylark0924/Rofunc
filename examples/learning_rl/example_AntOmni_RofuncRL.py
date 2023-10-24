@@ -1,5 +1,5 @@
 """
-Ant (RofuncRL)
+AntOmni (RofuncRL)
 ===========================
 
 Ant RL using RofuncRL

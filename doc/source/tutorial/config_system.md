@@ -61,7 +61,7 @@ if __name__ == '__main__':
 ```
 
 :::{tip}
-More examples can be found in [Example/RofuncRL](https://rofunc.readthedocs.io/en/latest/auto_examples/learning_rl/index.html).
+More examples can be found in [Example/RofuncRL](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html).
 :::
 
 ## Customize configurations

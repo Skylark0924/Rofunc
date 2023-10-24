@@ -2,7 +2,7 @@
 HumanoidAMP (RofuncRL)
 ===========================
 
-Humanoid walking, trained by RofuncRL
+Humanoid backflip/walk/run/dance/hop, trained by RofuncRL
 """
 
 import argparse
@@ -88,11 +88,11 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 3
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     # Available tasks: HumanoidAMP_backflip, HumanoidAMP_walk, HumanoidAMP_run, HumanoidAMP_dance, HumanoidAMP_hop
-    parser.add_argument("--task", type=str, default="HumanoidAMP_run")
+    parser.add_argument("--task", type=str, default="HumanoidAMP_dance")
     parser.add_argument("--agent", type=str, default="amp")  # Available agent: amp
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=str, default="cuda:{}".format(gpu_id))

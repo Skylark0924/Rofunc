@@ -2,7 +2,7 @@
 HumanoidASE (RofuncRL)
 ===========================
 
-Humanoid soldier, trained by RofuncRL
+Humanoid soldier Getup/Perturb/Heading/Location/Reach/Strike, trained by RofuncRL
 """
 
 import argparse
