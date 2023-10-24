@@ -9,7 +9,6 @@
 
 from typing import Optional
 
-import numpy as np
 import torch
 from omni.isaac.core.robots.robot import Robot
 from omni.isaac.core.utils.nucleus import get_assets_root_path
@@ -18,12 +17,12 @@ from omni.isaac.core.utils.stage import add_reference_to_stage
 
 class Cabinet(Robot):
     def __init__(
-        self,
-        prim_path: str,
-        name: Optional[str] = "cabinet",
-        usd_path: Optional[str] = None,
-        translation: Optional[torch.tensor] = None,
-        orientation: Optional[torch.tensor] = None,
+            self,
+            prim_path: str,
+            name: Optional[str] = "cabinet",
+            usd_path: Optional[str] = None,
+            translation: Optional[torch.tensor] = None,
+            orientation: Optional[torch.tensor] = None,
     ) -> None:
         """[summary]"""
         self._usd_path = usd_path

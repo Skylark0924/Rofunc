@@ -44,9 +44,9 @@ from omni.kit.viewport.utility.camera_state import ViewportCameraState
 from omni.kit.viewport.utility import get_viewport_from_window_name
 from pxr import Gf
 
-class RLTask(BaseTask):
 
-    """ This class provides a PyTorch RL-specific interface for setting up RL tasks. 
+class RLTask(BaseTask):
+    """ This class provides a PyTorch RL-specific interface for setting up RL tasks.
         It includes utilities for setting up RL task related parameters,
         cloning environments, and data collection for RL algorithms.
     """
@@ -62,9 +62,6 @@ class RLTask(BaseTask):
         """
 
         super().__init__(name=name, offset=offset)
-
-        # optimization flags for pytorch JIT
-        torch._C._jit_set_nvfuser_enabled(False)
 
         self.test = self._cfg["test"]
         self._device = self._cfg["sim_device"]
@@ -93,7 +90,8 @@ class RLTask(BaseTask):
         if not hasattr(self, "action_space"):
             self.action_space = spaces.Box(np.ones(self.num_actions) * -1.0, np.ones(self.num_actions) * 1.0)
         if not hasattr(self, "observation_space"):
-            self.observation_space = spaces.Box(np.ones(self.num_observations) * -np.Inf, np.ones(self.num_observations) * np.Inf)
+            self.observation_space = spaces.Box(np.ones(self.num_observations) * -np.Inf,
+                                                np.ones(self.num_observations) * np.Inf)
         if not hasattr(self, "state_space"):
             self.state_space = spaces.Box(np.ones(self.num_states) * -np.Inf, np.ones(self.num_states) * np.Inf)
 
@@ -115,7 +113,7 @@ class RLTask(BaseTask):
         self.extras = {}
 
     def set_up_scene(self, scene, replicate_physics=True) -> None:
-        """ Clones environments based on value provided in task config and applies collision filters to mask 
+        """ Clones environments based on value provided in task config and applies collision filters to mask
             collisions across environments.
 
         Args:
@@ -131,14 +129,16 @@ class RLTask(BaseTask):
             collision_filter_global_paths.append(self._ground_plane_path)
             scene.add_default_ground_plane(prim_path=self._ground_plane_path)
         prim_paths = self._cloner.generate_paths("/World/envs/env", self._num_envs)
-        self._env_pos = self._cloner.clone(source_prim_path="/World/envs/env_0", prim_paths=prim_paths, replicate_physics=replicate_physics)
+        self._env_pos = self._cloner.clone(source_prim_path="/World/envs/env_0", prim_paths=prim_paths,
+                                           replicate_physics=replicate_physics)
         self._env_pos = torch.tensor(np.array(self._env_pos), device=self._device, dtype=torch.float)
         self._cloner.filter_collisions(
-            self._env._world.get_physics_context().prim_path, "/World/collisions", prim_paths, collision_filter_global_paths)
+            self._env._world.get_physics_context().prim_path, "/World/collisions", prim_paths,
+            collision_filter_global_paths)
         self.set_initial_camera_params(camera_position=[10, 10, 3], camera_target=[0, 0, 0])
         if self._sim_config.task_config["sim"].get("add_distant_light", True):
             create_distant_light()
-    
+
     def set_initial_camera_params(self, camera_position=[10, 10, 3], camera_target=[0, 0, 0]):
         if self._env._render:
             viewport_api_2 = get_viewport_from_window_name("Viewport")
@@ -229,9 +229,7 @@ class RLTask(BaseTask):
     def reset(self):
         """ Flags all environments for reset.
         """
-        actions = torch.zeros((self.num_envs, self.num_actions), device=self.rl_device)
         self.reset_buf = torch.ones_like(self.reset_buf)
-        return self.post_physics_step()[0]
 
     def pre_physics_step(self, actions):
         """ Optionally implemented by individual task classes to process actions.
