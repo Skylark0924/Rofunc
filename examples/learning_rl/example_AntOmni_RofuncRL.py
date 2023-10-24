@@ -12,7 +12,6 @@ from rofunc.learning.RofuncRL.trainers import Trainers
 from rofunc.learning.RofuncRL.tasks import Tasks
 from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
-from omniisaacgymenvs.envs.vec_env_rlgames import VecEnvRLGames
 
 
 def train(custom_args):
@@ -25,22 +24,19 @@ def train(custom_args):
                       "headless={}".format(custom_args.headless),
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
-    # cfg_dict = omegaconf_to_dict(cfg.task)
     cfg_dict = omegaconf_to_dict(cfg)
 
     set_seed(cfg.train.Trainer.seed)
 
     # Startup IsaacSim simulator
-    env_omni = VecEnvRLGames(headless=cfg.headless, sim_device=cfg.device_id)
+    from omni.isaac.gym.vec_env import VecEnvBase
+    env_omni = VecEnvBase(headless=cfg.headless, sim_device=cfg.device_id)
 
     # Instantiate the Isaac Gym environment
     from omniisaacgymenvs.utils.config_utils.sim_config import SimConfig
     sim_config = SimConfig(cfg_dict)
-    env = Tasks("omniisaacgym").task_map[custom_args.task](name=cfg.task_name,
-                                                           sim_config=sim_config,
-                                                           env=env_omni)
-    init_sim = True
-    env_omni.set_task(task=env, sim_params=sim_config.get_physics_params(), backend="torch", init_sim=init_sim)
+    env = Tasks("omniisaacgym").task_map[custom_args.task](name=cfg.task_name, sim_config=sim_config, env=env_omni)
+    env_omni.set_task(task=env, sim_params=sim_config.get_physics_params(), backend="torch", init_sim=True)
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
