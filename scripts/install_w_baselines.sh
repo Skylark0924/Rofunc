@@ -1,6 +1,6 @@
 # Define aliases for the conda environment
-alias pip3rf="$HOME/anaconda3/envs/rofunc/bin/pip"
-alias pyana3rf="$HOME/anaconda3/envs/rofunc/bin/python3.8"
+alias pip3rf="$HOME/envs/rofunc/bin/pip"
+alias py3rf="$HOME/envs/rofunc/bin/python3.8"
 
 # Box3d-py requires swig
 sudo apt-get install swig
