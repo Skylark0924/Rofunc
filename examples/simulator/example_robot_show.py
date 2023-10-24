@@ -10,7 +10,7 @@ import rofunc as rf
 # CURI
 # args = rf.config.get_sim_config("CURI")
 # CURIsim = rf.sim.CURISim(args)
-# CURIsim.show(visual_obs_flag=True)
+# CURIsim.show()
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -42,7 +42,7 @@ frankasim.show()
 # Gluonsim = rf.sim.GluonSim(args)
 # Gluonsim.show()
 
-# Multi Robots
+# TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")
 # CURIsim = rf.sim.CURISim(curi_args)
 # walker_args = rf.config.get_sim_config("Walker")
