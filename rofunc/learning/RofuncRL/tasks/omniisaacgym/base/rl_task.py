@@ -63,7 +63,7 @@ class RLTask(BaseTask):
 
         super().__init__(name=name, offset=offset)
 
-        self.test = self._cfg["test"]
+        self.inference = self._cfg["inference"]
         self._device = self._cfg["sim_device"]
         self._dr_randomizer = Randomizer(self._sim_config)
         print("Task Device:", self._device)

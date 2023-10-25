@@ -1,3 +1,6 @@
+import isaacgym
+
+
 class Tasks:
     def __init__(self, env_type="isaacgym"):
         if env_type == "isaacgym":
