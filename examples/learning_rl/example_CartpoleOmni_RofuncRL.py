@@ -1,13 +1,13 @@
 """
-AntOmni (RofuncRL)
+CartpoleOmni (RofuncRL)
 ===========================
 
-Ant RL using RofuncRL
+Cartpole RL using RofuncRL
 """
 
 import argparse
 
-from rofunc.config.utils import get_config, process_omni_config
+from rofunc.config.utils import omegaconf_to_dict, get_config
 from rofunc.learning.RofuncRL.trainers import Trainers
 from rofunc.learning.RofuncRL.tasks import Tasks
 from rofunc.learning.pre_trained_models.download import model_zoo
@@ -24,20 +24,23 @@ def train(custom_args):
                       "headless={}".format(custom_args.headless),
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
+    cfg_dict = omegaconf_to_dict(cfg)
+
     set_seed(cfg.train.Trainer.seed)
 
     # Startup IsaacSim simulator
     from omni.isaac.gym.vec_env import VecEnvBase
-    omni_env = VecEnvBase(headless=cfg.headless, sim_device=cfg.device_id)
+    env_omni = VecEnvBase(headless=cfg.headless, sim_device=cfg.device_id)
 
-    # Instantiate the OmniIsaacGym environment
-    omni_cfg = process_omni_config(cfg)
-    env = Tasks("omniisaacgym").task_map[custom_args.task](name=cfg.task_name, sim_config=omni_cfg, env=omni_env)
-    omni_env.set_task(task=env, sim_params=omni_cfg.get_physics_params(), backend="torch", init_sim=True)
+    # Instantiate the Isaac Gym environment
+    from omniisaacgymenvs.utils.config_utils.sim_config import SimConfig
+    sim_config = SimConfig(cfg_dict)
+    env = Tasks("omniisaacgym").task_map[custom_args.task](name=cfg.task_name, sim_config=sim_config, env=env_omni)
+    env_omni.set_task(task=env, sim_params=sim_config.get_physics_params(), backend="torch", init_sim=True)
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
-                                                        env=omni_env,
+                                                        env=env_omni,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
 
@@ -53,11 +56,11 @@ if __name__ == '__main__':
     gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="AntOmni")
+    parser.add_argument("--task", type=str, default="CartpoleOmni")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--device_id", type=str, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="True")
+    parser.add_argument("--headless", type=str, default="False")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()

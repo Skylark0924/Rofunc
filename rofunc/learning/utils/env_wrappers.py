@@ -247,6 +247,14 @@ class OmniverseIsaacGymWrapper(Wrapper):
         """
         self._env.run(trainer)
 
+    def _process_data(self):
+        self._obs = torch.clamp(self._obs, -self._env._task.clip_obs, self._env._task.clip_obs).to(self._env._task.rl_device).clone()
+        self._rew = self._rew.to(self._env._task.rl_device).clone()
+        self._states = torch.clamp(self._states, -self._env._task.clip_obs, self._env._task.clip_obs).to(
+            self._env._task.rl_device).clone()
+        self._resets = self._resets.to(self._env._task.rl_device).clone()
+        self._extras = self._extras.copy()
+
     def step(self, actions: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, Any]:
         """Perform a step in the environment
 
@@ -256,9 +264,33 @@ class OmniverseIsaacGymWrapper(Wrapper):
         :return: Observation, reward, terminated, truncated, info
         :rtype: tuple of torch.Tensor and any other info
         """
-        self._obs_dict, reward, terminated, info = self._env.step(actions)
-        truncated = torch.zeros_like(terminated)
-        return self._obs_dict["obs"], reward.view(-1, 1), terminated.view(-1, 1), truncated.view(-1, 1), info
+        if self._env._task.randomize_actions:
+            actions = self._env._task._dr_randomizer.apply_actions_randomization(actions=actions,
+                                                                                 reset_buf=self._env._task.reset_buf)
+
+        actions = torch.clamp(actions, -self._env._task.clip_actions, self._env._task.clip_actions).to(
+            self._env._task.device).clone()
+
+        self._env._task.pre_physics_step(actions)
+
+        for _ in range(self._env._task.control_frequency_inv):
+            self._env._world.step(render=self._env._render)
+            self._env.sim_frame_count += 1
+
+        self._obs, self._rew, self._resets, self._extras = self._task.post_physics_step()
+
+        if self._env._task.randomize_observations:
+            self._obs = self._env._task._dr_randomizer.apply_observations_randomization(
+                observations=self._obs.to(device=self._env._task.rl_device), reset_buf=self._env._task.reset_buf)
+
+        self._states = self._env._task.get_states()
+        self._process_data()
+
+        self._obs_dict = {"obs": self._obs, "states": self._states}
+
+        # self._obs_dict, reward, terminated, info = self._env.step(actions)
+        # truncated = torch.zeros_like(terminated)
+        return self._obs_dict["obs"], self._rew.view(-1, 1), self._resets.view(-1, 1), self._resets.view(-1, 1), self._extras
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -267,7 +299,10 @@ class OmniverseIsaacGymWrapper(Wrapper):
         :rtype: torch.Tensor and any other info
         """
         if self._reset_once:
-            self._obs_dict = self._env.reset()
+            # self._obs_dict = self._env.reset()
+            self._env._task.reset()
+            actions = torch.zeros((self.num_envs, self._env._task.num_actions), device=self._env._task.rl_device)
+            self.step(actions)
             self._reset_once = False
         return self._obs_dict["obs"], {}
 
@@ -504,7 +539,7 @@ class GymWrapper(Wrapper):
 
 
 class GymnasiumWrapper(Wrapper):
-    def __init__(self, env: Any, seed: int) -> None:
+    def __init__(self, env: Any, seed: int = None) -> None:
         """Gymnasium environment wrapper
 
         :param env: The environment to wrap
@@ -1001,7 +1036,9 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None,
     if wrapper == "auto":
         base_classes = [str(base) for base in env.__class__.__bases__]
         if "<class 'omni.isaac.gym.vec_env.vec_env_base.VecEnvBase'>" in base_classes or \
-                "<class 'omni.isaac.gym.vec_env.vec_env_mt.VecEnvMT'>" in base_classes:
+                "<class 'omni.isaac.gym.vec_env.vec_env_mt.VecEnvMT'>" in base_classes or \
+                "<class 'omni.isaac.gym.vec_env.vec_env_base.VecEnvBase'>" in [str(env.__class__)] or \
+                "<class 'omni.isaac.gym.vec_env.vec_env_mt.VecEnvMT'>" in [str(env.__class__)]:
             if verbose:
                 logger.info("Environment wrapper: Omniverse Isaac Gym")
             return OmniverseIsaacGymWrapper(env)

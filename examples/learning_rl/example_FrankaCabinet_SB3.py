@@ -5,23 +5,18 @@ FrankaCabinet (Stable Baseline 3)
 Open drawers with a Franka robot, trained by Stable Baseline 3
 """
 
-from autolab_core import YamlConfig
 import argparse
 import sys
-
-import isaacgym
-from rofunc.config.utils import get_config, omegaconf_to_dict
-from rofunc.learning.RofuncRL.utils.skrl_utils import set_cfg_ppo, set_models_ppo
-from rofunc.learning.RofuncRL.tasks import task_map
-from rofunc.learning.pre_trained_models import model_zoo
-from rofunc.utils.logger.beauty_logger import beauty_print
-from rofunc.learning.RofuncRL.utils.stb3_utils import StableBaseline3Wrapper
 
 from hydra._internal.utils import get_args_parser
 # from isaacgym_utils.draw import draw_transforms
 from stable_baselines3 import PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
+
+from rofunc.config.utils import get_config, omegaconf_to_dict
+from rofunc.learning.RofuncRL.utils.stb3_utils import StableBaseline3Wrapper
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 # def custom_draws(scene):
@@ -51,13 +46,13 @@ def setup(custom_args, eval_mode=False):
     # if eval_mode:
     cfg_task_dict['env']['numEnvs'] = 16
 
-    env = task_map["FrankaCabinet"](cfg=cfg_task_dict,
-                                    rl_device=cfg.rl_device,
-                                    sim_device=cfg.sim_device,
-                                    graphics_device_id=cfg.graphics_device_id,
-                                    headless=cfg.headless,
-                                    virtual_screen_capture=cfg.capture_video,
-                                    force_render=cfg.force_render)
+    env = Tasks().task_map["FrankaCabinet"](cfg=cfg_task_dict,
+                                            rl_device=cfg.rl_device,
+                                            sim_device=cfg.sim_device,
+                                            graphics_device_id=cfg.graphics_device_id,
+                                            headless=cfg.headless,
+                                            virtual_screen_capture=cfg.capture_video,
+                                            force_render=cfg.force_render)
     env = Monitor(StableBaseline3Wrapper(env))
 
     if eval_mode:

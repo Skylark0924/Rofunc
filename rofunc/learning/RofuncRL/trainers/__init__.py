@@ -1,14 +1,13 @@
-from .ppo_trainer import PPOTrainer
-from .sac_trainer import SACTrainer
-from .td3_trainer import TD3Trainer
-from .a2c_trainer import A2CTrainer
-from .amp_trainer import AMPTrainer
-from .ase_trainer import ASETrainer
-from .dtrans_trainer import DTransTrainer
-
-
 class Trainers:
     def __init__(self):
+        from .ppo_trainer import PPOTrainer
+        from .sac_trainer import SACTrainer
+        from .td3_trainer import TD3Trainer
+        from .a2c_trainer import A2CTrainer
+        from .amp_trainer import AMPTrainer
+        from .ase_trainer import ASETrainer
+        from .dtrans_trainer import DTransTrainer
+
         self.trainer_map = {
             "ppo": PPOTrainer,
             "sac": SACTrainer,

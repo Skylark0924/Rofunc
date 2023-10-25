@@ -34,9 +34,9 @@ num_threads: 4 # Number of worker threads per scene used by PhysX - for CPU Phys
 solver_type: 1 # 0: pgs, 1: tgs
 num_subscenes: 4 # Splits the simulation into N physics scenes and runs each one in a separate thread
 
-# RLGames Arguments
-# test - if set, run policy in inference mode (requires setting checkpoint to load)
-test: False
+# Rofunc Arguments
+# inference - if set, run policy in inference mode (requires setting checkpoint to load)
+inference: False
 # used to set checkpoint path
 checkpoint: ''
 
@@ -47,10 +47,14 @@ enable_livestream: False
 # timeout for MT script
 mt_timeout: 30
 
-wandb_activate: False
-wandb_group: ''
-wandb_entity: ''
-wandb_project: 'omniisaacgymenvs'
+#wandb_activate: False
+#wandb_group: ''
+#wandb_entity: ''
+#wandb_project: ''
+capture_video: False
+capture_video_freq: 1464
+capture_video_len: 100
+force_render: True
 
 # set default task and default training config based on task
 defaults:

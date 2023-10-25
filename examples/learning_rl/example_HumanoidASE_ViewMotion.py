@@ -8,8 +8,8 @@ Preview the motion of the digital humanoid
 import click
 
 from rofunc.config.utils import omegaconf_to_dict, get_config, load_view_motion_config
-from rofunc.learning.RofuncRL.tasks import task_map
-from rofunc.learning.RofuncRL.trainers import trainer_map
+from rofunc.learning.RofuncRL.tasks import Tasks
+from rofunc.learning.RofuncRL.trainers import Trainers
 
 
 def inference(config_name, motion_file):
@@ -35,25 +35,21 @@ def inference(config_name, motion_file):
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     # Instantiate the Isaac Gym environment
-    infer_env = task_map[task_name](
-        cfg=cfg_dict,
-        rl_device=cfg.rl_device,
-        sim_device=cfg.sim_device,
-        graphics_device_id=cfg.graphics_device_id,
-        headless=cfg.headless,
-        virtual_screen_capture=cfg.capture_video,  # TODO: check
-        force_render=cfg.force_render,
-    )
+    infer_env = Tasks().task_map[task_name](cfg=cfg_dict,
+                                            rl_device=cfg.rl_device,
+                                            sim_device=cfg.sim_device,
+                                            graphics_device_id=cfg.graphics_device_id,
+                                            headless=cfg.headless,
+                                            virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                            force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = trainer_map["ase"](
-        cfg=cfg.train,
-        env=infer_env,
-        device=cfg.rl_device,
-        env_name=task_name,
-        hrl=False,
-        inference=True,
-    )
+    trainer = Trainers().trainer_map["ase"](cfg=cfg.train,
+                                            env=infer_env,
+                                            device=cfg.rl_device,
+                                            env_name=task_name,
+                                            hrl=False,
+                                            inference=True)
 
     # Start inference
     trainer.inference()

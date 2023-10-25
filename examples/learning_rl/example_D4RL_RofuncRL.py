@@ -18,8 +18,8 @@ import argparse
 import gymnasium as gym
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
-from rofunc.learning.RofuncRL.tasks import task_map
-from rofunc.learning.RofuncRL.trainers import trainer_map
+from rofunc.learning.RofuncRL.tasks import Tasks
+from rofunc.learning.RofuncRL.trainers import Trainers
 from rofunc.learning.utils.download_datasets import download_d4rl_dataset
 from rofunc.learning.utils.utils import set_seed
 
@@ -42,10 +42,10 @@ def train(custom_args):
     env = gym.make(f'{custom_args.task}-v3')
 
     # Instantiate the RL trainer
-    trainer = trainer_map[custom_args.agent](cfg=cfg.train,
-                                             env=env,
-                                             device=cfg.rl_device,
-                                             env_name=custom_args.task)
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+                                                        env=env,
+                                                        device=cfg.rl_device,
+                                                        env_name=custom_args.task)
 
     # Start training
     trainer.train()
@@ -66,19 +66,19 @@ def inference(custom_args):
     set_seed(cfg.train.Trainer.seed)
 
     # Instantiate the Isaac Gym environment
-    infer_env = task_map[custom_args.task](cfg=cfg_dict,
-                                           rl_device=cfg.rl_device,
-                                           sim_device=cfg.sim_device,
-                                           graphics_device_id=cfg.graphics_device_id,
-                                           headless=cfg.headless,
-                                           virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                           force_render=cfg.force_render)
+    infer_env = Tasks().task_map[custom_args.task](cfg=cfg_dict,
+                                                   rl_device=cfg.rl_device,
+                                                   sim_device=cfg.sim_device,
+                                                   graphics_device_id=cfg.graphics_device_id,
+                                                   headless=cfg.headless,
+                                                   virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                                   force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = trainer_map[custom_args.agent](cfg=cfg.train,
-                                             env=infer_env,
-                                             device=cfg.rl_device,
-                                             env_name=custom_args.task)
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+                                                        env=infer_env,
+                                                        device=cfg.rl_device,
+                                                        env_name=custom_args.task)
     # load checkpoint
     if custom_args.ckpt_path is None:
         raise ValueError("Please specify the checkpoint path for inference.")
