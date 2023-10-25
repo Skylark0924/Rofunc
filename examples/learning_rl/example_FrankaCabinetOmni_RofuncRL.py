@@ -1,8 +1,8 @@
 """
-AntOmni (RofuncRL)
+FrankaCabinetOmni (RofuncRL)
 ===========================
 
-Ant RL using RofuncRL
+FrankaCabinet RL using RofuncRL
 """
 
 import argparse

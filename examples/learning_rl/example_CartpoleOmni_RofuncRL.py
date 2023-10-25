@@ -1,8 +1,8 @@
 """
-AntOmni (RofuncRL)
+CartpoleOmni (RofuncRL)
 ===========================
 
-Ant RL using RofuncRL
+Cartpole RL using RofuncRL
 """
 
 import argparse

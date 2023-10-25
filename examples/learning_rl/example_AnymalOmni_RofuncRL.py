@@ -2,7 +2,7 @@
 AnymalOmni (RofuncRL)
 ===========================
 
-Ant RL using RofuncRL
+Anymal RL using RofuncRL
 """
 
 import argparse
