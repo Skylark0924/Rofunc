@@ -1,3 +1,6 @@
+import isaacgym
+
+
 class Tasks:
     def __init__(self, env_type="isaacgym"):
         if env_type == "isaacgym":
@@ -40,6 +43,12 @@ class Tasks:
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks
             from .omniisaacgym.ant import AntOmniTask
+            from .omniisaacgym.anymal import AnymalOmniTask
+            from .omniisaacgym.cartpole import CartpoleOmniTask
+            from .omniisaacgym.franka_cabinet import FrankaCabinetOmniTask
             self.task_map = {
                 "AntOmni": AntOmniTask,
+                "AnymalOmni": AnymalOmniTask,
+                "CartpoleOmni": CartpoleOmniTask,
+                "FrankaCabinetOmni": FrankaCabinetOmniTask,
             }

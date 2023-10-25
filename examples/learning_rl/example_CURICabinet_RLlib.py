@@ -11,19 +11,15 @@ Open drawers with a humanoid CURI robot, trained by RLlib
 # If you use ray==2.2.0, you need to comment out line 23 in ray.rllib.agents.sac.__init__.py
 
 import argparse
-import sys
-
-import isaacgym
-
 import os
+import sys
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from rofunc.config.utils import get_config, omegaconf_to_dict
-from rofunc.learning.pre_trained_models import model_zoo
 from rofunc.utils.logger.beauty_logger import beauty_print
 from rofunc.learning.RofuncRL.utils.rllib_utils import RLlibIsaacGymVecEnvWrapper
-from rofunc.learning.RofuncRL.tasks import task_map
+from rofunc.learning.RofuncRL.tasks import Tasks
 
 from hydra._internal.utils import get_args_parser
 from tqdm.auto import tqdm
@@ -100,13 +96,14 @@ def test(custom_args, ckpt_path):
     beauty_print("Start testing")
 
     agent, env_config = setup(custom_args, eval_mode=True)
-    env = task_map[env_config["task_name"]](cfg=env_config["task_cfg_dict"],
-                                            rl_device=env_config["cfg"].rl_device,
-                                            sim_device=env_config["cfg"].sim_device,
-                                            graphics_device_id=env_config["cfg"].graphics_device_id,
-                                            headless=env_config["cfg"].headless,
-                                            virtual_screen_capture=env_config["cfg"].capture_video,  # TODO: check
-                                            force_render=env_config["cfg"].force_render)
+    env = Tasks().task_map[env_config["task_name"]](cfg=env_config["task_cfg_dict"],
+                                                    rl_device=env_config["cfg"].rl_device,
+                                                    sim_device=env_config["cfg"].sim_device,
+                                                    graphics_device_id=env_config["cfg"].graphics_device_id,
+                                                    headless=env_config["cfg"].headless,
+                                                    virtual_screen_capture=env_config["cfg"].capture_video,
+                                                    # TODO: check
+                                                    force_render=env_config["cfg"].force_render)
     agent.restore(ckpt_path)
 
     done = True
