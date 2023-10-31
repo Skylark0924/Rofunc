@@ -28,20 +28,28 @@
 
 import math
 
-import numpy as np
 import torch
 from omni.isaac.core.objects import DynamicSphere
 from omni.isaac.core.prims import RigidPrimView
 from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.torch.rotations import *
-from omniisaacgymenvs.tasks.base.rl_task import RLTask
-from omniisaacgymenvs.robots.articulations.quadcopter import Quadcopter
-from omniisaacgymenvs.robots.articulations.views.quadcopter_view import QuadcopterView
+
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.quadcopter import Quadcopter
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.quadcopter_view import QuadcopterView
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
 
 
-class QuadcopterTask(RLTask):
+class QuadcopterOmniTask(RLTask):
     def __init__(self, name, sim_config, env, offset=None) -> None:
-        self.update_config(sim_config)
+        self._sim_config = sim_config
+        self._cfg = sim_config.config
+        self._task_cfg = sim_config.task_config
+
+        self._num_envs = self._task_cfg["env"]["numEnvs"]
+        self._env_spacing = self._task_cfg["env"]["envSpacing"]
+        self._max_episode_length = self._task_cfg["env"]["maxEpisodeLength"]
+
+        self.dt = self._task_cfg["sim"]["dt"]
 
         self._num_observations = 21
         self._num_actions = 12
@@ -58,17 +66,6 @@ class QuadcopterTask(RLTask):
 
         return
 
-    def update_config(self, sim_config):
-        self._sim_config = sim_config
-        self._cfg = sim_config.config
-        self._task_cfg = sim_config.task_config
-
-        self._num_envs = self._task_cfg["env"]["numEnvs"]
-        self._env_spacing = self._task_cfg["env"]["envSpacing"]
-        self._max_episode_length = self._task_cfg["env"]["maxEpisodeLength"]
-
-        self.dt = self._task_cfg["sim"]["dt"]
-
     def set_up_scene(self, scene) -> None:
         self.get_copter()
         self.get_target()
@@ -77,27 +74,11 @@ class QuadcopterTask(RLTask):
         self._balls = RigidPrimView(
             prim_paths_expr="/World/envs/.*/ball", name="targets_view", reset_xform_properties=False
         )
-        self._balls._non_root_link = True # do not set states for kinematics
+        self._balls._non_root_link = True  # do not set states for kinematics
         scene.add(self._copters)
         scene.add(self._copters.rotors)
         scene.add(self._balls)
         return
-
-    def initialize_views(self, scene):
-        super().initialize_views(scene)
-        if scene.object_exists("quadcopter_view"):
-            scene.remove_object("quadcopter_view", registry_only=True)
-        if scene.object_exists("rotors_view"):
-            scene.remove_object("rotors_view", registry_only=True)
-        if scene.object_exists("targets_view"):
-            scene.remove_object("targets_view", registry_only=True)
-        self._copters = QuadcopterView(prim_paths_expr="/World/envs/.*/Quadcopter", name="quadcopter_view")
-        self._balls = RigidPrimView(
-            prim_paths_expr="/World/envs/.*/ball", name="targets_view", reset_xform_properties=False
-        )
-        scene.add(self._copters)
-        scene.add(self._copters.rotors)
-        scene.add(self._balls)
 
     def get_copter(self):
         copter = Quadcopter(
@@ -152,9 +133,8 @@ class QuadcopterTask(RLTask):
 
         dof_action_speed_scale = 8 * math.pi
         self.dof_position_targets += self.dt * dof_action_speed_scale * actions[:, 0:8]
-        self.dof_position_targets[:] = tensor_clamp(
-            self.dof_position_targets, self.dof_lower_limits, self.dof_upper_limits
-        )
+        self.dof_position_targets[:] = tensor_clamp(self.dof_position_targets, self.dof_lower_limits,
+                                                    self.dof_upper_limits)
 
         thrust_action_speed_scale = 100
         self.thrusts += self.dt * thrust_action_speed_scale * actions[:, 8:12]

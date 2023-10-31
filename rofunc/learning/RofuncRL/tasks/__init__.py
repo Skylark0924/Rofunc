@@ -1,6 +1,3 @@
-import isaacgym
-
-
 class Tasks:
     def __init__(self, env_type="isaacgym"):
         if env_type == "isaacgym":
@@ -42,13 +39,31 @@ class Tasks:
             }
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks
+            from .omniisaacgym.allegro_hand import AllegroHandOmniTask
             from .omniisaacgym.ant import AntOmniTask
             from .omniisaacgym.anymal import AnymalOmniTask
+            from .omniisaacgym.anymal_terrain import AnymalTerrainOmniTask
+            from .omniisaacgym.ball_balance import BallBalanceOmniTask
             from .omniisaacgym.cartpole import CartpoleOmniTask
+            from .omniisaacgym.crazyflie import CrazyflieOmniTask
             from .omniisaacgym.franka_cabinet import FrankaCabinetOmniTask
+            from .omniisaacgym.humanoid import HumanoidOmniTask
+            from .omniisaacgym.ingenuity import IngenuityOmniTask
+            from .omniisaacgym.quadcopter import QuadcopterOmniTask
+            from .omniisaacgym.shadow_hand import ShadowHandOmniTask
+            from .omniisaacgym.factory.factory_task_nut_bolt_pick import FactoryNutBoltPickOmniTask
             self.task_map = {
+                "AllegroHandOmni": AllegroHandOmniTask,
                 "AntOmni": AntOmniTask,
                 "AnymalOmni": AnymalOmniTask,
+                "AnymalTerrainOmni": AnymalTerrainOmniTask,
+                "BallBalanceOmni": BallBalanceOmniTask,
                 "CartpoleOmni": CartpoleOmniTask,
+                "CrazyflieOmni": CrazyflieOmniTask,
                 "FrankaCabinetOmni": FrankaCabinetOmniTask,
+                "HumanoidOmni": HumanoidOmniTask,
+                "IngenuityOmni": IngenuityOmniTask,
+                "QuadcopterOmni": QuadcopterOmniTask,
+                "ShadowHandOmni": ShadowHandOmniTask,
+                "FactoryNutBoltPickOmni": FactoryNutBoltPickOmniTask,
             }
