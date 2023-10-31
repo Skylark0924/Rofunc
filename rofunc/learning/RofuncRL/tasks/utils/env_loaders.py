@@ -284,8 +284,8 @@ def load_omniverse_isaacgym_env(task_name: str = "",
                       If not specified, the task name is taken from the command line argument (``task=TASK_NAME``).
                       Command line argument has priority over function parameter if both are specified
     :type task_name: str, optional
-    :param omniisaacgymenvs_path: The path to the ``omniisaacgymenvs`` directory (default: "").
-                              If empty, the path will obtained from omniisaacgymenvs package metadata
+    :param omniisaacgymenvs_path: The path to the ``rofunc.learning.RofuncRL.tasks.omniisaacgym`` directory (default: "").
+                              If empty, the path will obtained from rofunc.learning.RofuncRL.tasks.omniisaacgym package metadata
     :type omniisaacgymenvs_path: str, optional
     :param show_cfg: Whether to print the configuration (default: True)
     :type show_cfg: bool, optional
@@ -295,7 +295,7 @@ def load_omniverse_isaacgym_env(task_name: str = "",
     :type timeout: int, optional
 
     :raises ValueError: The task name has not been defined, neither by the function parameter nor by the command line arguments
-    :raises RuntimeError: The omniisaacgymenvs package is not installed or the path is wrong
+    :raises RuntimeError: The rofunc.learning.RofuncRL.tasks.omniisaacgym package is not installed or the path is wrong
 
     :return: Omniverse Isaac Gym environment
     :rtype: omni.isaac.gym.vec_env.vec_env_base.VecEnvBase or omni.isaac.gym.vec_env.vec_env_mt.VecEnvMT
@@ -310,7 +310,7 @@ def load_omniverse_isaacgym_env(task_name: str = "",
     from omni.isaac.gym.vec_env import VecEnvBase, VecEnvMT, TaskStopException
     from omni.isaac.gym.vec_env.vec_env_mt import TrainerMT
 
-    import omniisaacgymenvs
+    import rofunc.learning.RofuncRL.tasks.omniisaacgym
 
     # check task from command line arguments
     defined = False
@@ -330,11 +330,11 @@ def load_omniverse_isaacgym_env(task_name: str = "",
         else:
             raise ValueError("No task name defined. Set task_name parameter or use task=<task_name> as command line argument")
 
-    # get omniisaacgymenvs path from omniisaacgymenvs package metadata
+    # get rofunc.learning.RofuncRL.tasks.omniisaacgym path from rofunc.learning.RofuncRL.tasks.omniisaacgym package metadata
     if omniisaacgymenvs_path == "":
-        if not hasattr(omniisaacgymenvs, "__path__"):
-            raise RuntimeError("omniisaacgymenvs package is not installed")
-        omniisaacgymenvs_path = list(omniisaacgymenvs.__path__)[0]
+        if not hasattr(rofunc.learning.RofuncRL.tasks.omniisaacgym, "__path__"):
+            raise RuntimeError("rofunc.learning.RofuncRL.tasks.omniisaacgym package is not installed")
+        omniisaacgymenvs_path = list(rofunc.learning.RofuncRL.tasks.omniisaacgym.__path__)[0]
     config_path = os.path.join(omniisaacgymenvs_path, "cfg")
 
     # set omegaconf resolvers
