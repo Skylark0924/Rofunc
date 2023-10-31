@@ -27,29 +27,28 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from omniisaacgymenvs.robots.articulations.ingenuity import Ingenuity
-from omniisaacgymenvs.robots.articulations.views.ingenuity_view import IngenuityView
+import math
 
-from omni.isaac.core.utils.torch.rotations import *
+import torch
 from omni.isaac.core.objects import DynamicSphere
 from omni.isaac.core.prims import RigidPrimView
 from omni.isaac.core.utils.prims import get_prim_at_path
-from omniisaacgymenvs.tasks.base.rl_task import RLTask
+from omni.isaac.core.utils.torch.rotations import *
 
-import numpy as np
-import torch
-import math
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.ingenuity import Ingenuity
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.ingenuity_view import IngenuityView
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
 
 
-class IngenuityTask(RLTask):
+class IngenuityOmniTask(RLTask):
     def __init__(
-        self,
-        name,
-        sim_config,
-        env,
-        offset=None
+            self,
+            name,
+            sim_config,
+            env,
+            offset=None
     ) -> None:
-        
+
         self.update_config(sim_config)
 
         self.thrust_limit = 2000
@@ -80,8 +79,9 @@ class IngenuityTask(RLTask):
         self.get_target()
         RLTask.set_up_scene(self, scene)
         self._copters = IngenuityView(prim_paths_expr="/World/envs/.*/Ingenuity", name="ingenuity_view")
-        self._balls = RigidPrimView(prim_paths_expr="/World/envs/.*/ball", name="targets_view", reset_xform_properties=False)
-        self._balls._non_root_link = True # do not set states for kinematics
+        self._balls = RigidPrimView(prim_paths_expr="/World/envs/.*/ball", name="targets_view",
+                                    reset_xform_properties=False)
+        self._balls._non_root_link = True  # do not set states for kinematics
         scene.add(self._copters)
         scene.add(self._balls)
         for i in range(2):
@@ -101,7 +101,8 @@ class IngenuityTask(RLTask):
         if scene.object_exists("targets_view"):
             scene.remove_object("targets_view", registry_only=True)
         self._copters = IngenuityView(prim_paths_expr="/World/envs/.*/Ingenuity", name="ingenuity_view")
-        self._balls = RigidPrimView(prim_paths_expr="/World/envs/.*/ball", name="targets_view", reset_xform_properties=False)
+        self._balls = RigidPrimView(prim_paths_expr="/World/envs/.*/ball", name="targets_view",
+                                    reset_xform_properties=False)
         scene.add(self._copters)
         scene.add(self._balls)
         for i in range(2):
@@ -109,20 +110,23 @@ class IngenuityTask(RLTask):
             scene.add(self._copters.visual_rotors[i])
 
     def get_ingenuity(self):
-        copter = Ingenuity(prim_path=self.default_zero_env_path + "/Ingenuity", name="ingenuity", translation=self._ingenuity_position)
-        self._sim_config.apply_articulation_settings("ingenuity", get_prim_at_path(copter.prim_path), self._sim_config.parse_actor_config("ingenuity"))
+        copter = Ingenuity(prim_path=self.default_zero_env_path + "/Ingenuity", name="ingenuity",
+                           translation=self._ingenuity_position)
+        self._sim_config.apply_articulation_settings("ingenuity", get_prim_at_path(copter.prim_path),
+                                                     self._sim_config.parse_actor_config("ingenuity"))
 
     def get_target(self):
         radius = 0.1
         color = torch.tensor([1, 0, 0])
         ball = DynamicSphere(
-            prim_path=self.default_zero_env_path + "/ball", 
-            translation=self._ball_position, 
+            prim_path=self.default_zero_env_path + "/ball",
+            translation=self._ball_position,
             name="target_0",
             radius=radius,
             color=color,
         )
-        self._sim_config.apply_articulation_settings("ball", get_prim_at_path(ball.prim_path), self._sim_config.parse_actor_config("ball"))
+        self._sim_config.apply_articulation_settings("ball", get_prim_at_path(ball.prim_path),
+                                                     self._sim_config.parse_actor_config("ball"))
         ball.set_collision_enabled(False)
 
     def get_observations(self) -> dict:
@@ -258,10 +262,10 @@ class IngenuityTask(RLTask):
 
         # uprightness
         ups = quat_axis(root_quats, 2)
-        
+
         tiltage = torch.abs(1 - ups[..., 2])
         up_reward = 1.0 / (1.0 + 30 * tiltage * tiltage)
-  
+
         # spinning
         spinnage = torch.abs(root_angvels[..., 2])
         spinnage_reward = 1.0 / (1.0 + 10 * spinnage * spinnage)

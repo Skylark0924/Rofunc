@@ -27,26 +27,23 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import math
-
-import numpy as np
 import torch
 from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.torch import *
-from omniisaacgymenvs.tasks.base.rl_task import RLTask
-from omniisaacgymenvs.robots.articulations.shadow_hand import ShadowHand
-from omniisaacgymenvs.robots.articulations.views.shadow_hand_view import ShadowHandView
-from omniisaacgymenvs.tasks.shared.in_hand_manipulation import InHandManipulationTask
+
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.shadow_hand import ShadowHand
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.shadow_hand_view import ShadowHandView
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.shared.in_hand_manipulation import InHandManipulationTask
 
 
-class ShadowHandTask(InHandManipulationTask):
-    def __init__(self, name, sim_config, env, offset=None) -> None:
-
-        self.update_config(sim_config)
-        InHandManipulationTask.__init__(self, name=name, env=env)
-        return
-
-    def update_config(self, sim_config):
+class ShadowHandOmniTask(InHandManipulationTask):
+    def __init__(
+            self,
+            name,
+            sim_config,
+            env,
+            offset=None
+    ) -> None:
         self._sim_config = sim_config
         self._cfg = sim_config.config
         self._task_cfg = sim_config.task_config
@@ -57,8 +54,7 @@ class ShadowHandTask(InHandManipulationTask):
         self.obs_type = self._task_cfg["env"]["observationType"]
         if not (self.obs_type in ["openai", "full_no_vel", "full", "full_state"]):
             raise Exception(
-                "Unknown type of observations!\nobservationType should be one of: [openai, full_no_vel, full, full_state]"
-            )
+                "Unknown type of observations!\nobservationType should be one of: [openai, full_no_vel, full, full_state]")
         print("Obs type:", self.obs_type)
         self.num_obs_dict = {
             "openai": 42,
@@ -71,13 +67,8 @@ class ShadowHandTask(InHandManipulationTask):
         self.use_vel_obs = False
 
         self.fingertip_obs = True
-        self.fingertips = [
-            "robot0:ffdistal",
-            "robot0:mfdistal",
-            "robot0:rfdistal",
-            "robot0:lfdistal",
-            "robot0:thdistal",
-        ]
+        self.fingertips = ["robot0:ffdistal", "robot0:mfdistal", "robot0:rfdistal", "robot0:lfdistal",
+                           "robot0:thdistal"]
         self.num_fingertips = len(self.fingertips)
 
         self.object_scale = torch.tensor([1.0, 1.0, 1.0])
@@ -90,19 +81,19 @@ class ShadowHandTask(InHandManipulationTask):
         self._num_observations = self.num_obs_dict[self.obs_type]
         self._num_actions = 20
         self._num_states = num_states
-        InHandManipulationTask.update_config(self)
 
-    def get_starting_positions(self):
-        self.hand_start_translation = torch.tensor([0.0, 0.0, 0.5], device=self.device)
-        self.hand_start_orientation = torch.tensor([1.0, 0.0, 0.0, 0.0], device=self.device)
-        self.pose_dy, self.pose_dz = -0.39, 0.10
+        InHandManipulationTask.__init__(self, name=name, env=env)
+        return
 
     def get_hand(self):
+        hand_start_translation = torch.tensor([0.0, 0.0, 0.5], device=self.device)
+        hand_start_orientation = torch.tensor([0.0, 0.0, -0.70711, 0.70711], device=self.device)
+
         shadow_hand = ShadowHand(
             prim_path=self.default_zero_env_path + "/shadow_hand",
             name="shadow_hand",
-            translation=self.hand_start_translation,
-            orientation=self.hand_start_orientation,
+            translation=hand_start_translation,
+            orientation=hand_start_orientation,
         )
         self._sim_config.apply_articulation_settings(
             "shadow_hand",
@@ -111,6 +102,8 @@ class ShadowHandTask(InHandManipulationTask):
         )
         shadow_hand.set_shadow_hand_properties(stage=self._stage, shadow_hand_prim=shadow_hand.prim)
         shadow_hand.set_motor_control_mode(stage=self._stage, shadow_hand_path=shadow_hand.prim_path)
+        pose_dy, pose_dz = -0.39, 0.10
+        return hand_start_translation, pose_dy, pose_dz
 
     def get_hand_view(self, scene):
         hand_view = ShadowHandView(prim_paths_expr="/World/envs/.*/shadow_hand", name="shadow_hand_view")
@@ -122,17 +115,15 @@ class ShadowHandTask(InHandManipulationTask):
 
         self.fingertip_pos, self.fingertip_rot = self._hands._fingers.get_world_poses(clone=False)
         self.fingertip_pos -= self._env_pos.repeat((1, self.num_fingertips)).reshape(
-            self.num_envs * self.num_fingertips, 3
-        )
+            self.num_envs * self.num_fingertips, 3)
         self.fingertip_velocities = self._hands._fingers.get_velocities(clone=False)
 
         self.hand_dof_pos = self._hands.get_joint_positions(clone=False)
         self.hand_dof_vel = self._hands.get_joint_velocities(clone=False)
 
         if self.obs_type == "full_state" or self.asymmetric_obs:
-            self.vec_sensor_tensor = self._hands.get_measured_joint_forces(
-                joint_indices=self._hands._sensor_indices
-            ).view(self._num_envs, -1)
+            self.vec_sensor_tensor = self._hands._physics_view.get_force_sensor_forces().reshape(self.num_envs,
+                                                                                                 6 * self.num_fingertips)
 
         if self.obs_type == "openai":
             self.compute_fingertip_observations(True)
@@ -148,7 +139,11 @@ class ShadowHandTask(InHandManipulationTask):
         if self.asymmetric_obs:
             self.compute_full_state(True)
 
-        observations = {self._hands.name: {"obs_buf": self.obs_buf}}
+        observations = {
+            self._hands.name: {
+                "obs_buf": self.obs_buf
+            }
+        }
         return observations
 
     def compute_fingertip_observations(self, no_vel=False):
@@ -183,9 +178,8 @@ class ShadowHandTask(InHandManipulationTask):
 
     def compute_full_observations(self, no_vel=False):
         if no_vel:
-            self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
-                self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
-            )
+            self.obs_buf[:, 0:self.num_hand_dofs] = unscale(self.hand_dof_pos,
+                                                            self.hand_dof_lower_limits, self.hand_dof_upper_limits)
 
             self.obs_buf[:, 24:37] = self.object_pos
             self.obs_buf[:, 27:31] = self.object_rot
@@ -195,10 +189,9 @@ class ShadowHandTask(InHandManipulationTask):
             self.obs_buf[:, 42:57] = self.fingertip_pos.reshape(self.num_envs, 3 * self.num_fingertips)
             self.obs_buf[:, 57:77] = self.actions
         else:
-            self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
-                self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
-            )
-            self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
+            self.obs_buf[:, 0:self.num_hand_dofs] = unscale(self.hand_dof_pos,
+                                                            self.hand_dof_lower_limits, self.hand_dof_upper_limits)
+            self.obs_buf[:, self.num_hand_dofs:2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
 
             self.obs_buf[:, 48:51] = self.object_pos
             self.obs_buf[:, 51:55] = self.object_rot
@@ -218,89 +211,82 @@ class ShadowHandTask(InHandManipulationTask):
 
     def compute_full_state(self, asymm_obs=False):
         if asymm_obs:
-            self.states_buf[:, 0 : self.num_hand_dofs] = unscale(
-                self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
-            )
-            self.states_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
+            self.states_buf[:, 0:self.num_hand_dofs] = unscale(self.hand_dof_pos,
+                                                               self.hand_dof_lower_limits, self.hand_dof_upper_limits)
+            self.states_buf[:, self.num_hand_dofs:2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
             # self.states_buf[:, 2*self.num_hand_dofs:3*self.num_hand_dofs] = self.force_torque_obs_scale * self.dof_force_tensor
 
             obj_obs_start = 2 * self.num_hand_dofs  # 48
-            self.states_buf[:, obj_obs_start : obj_obs_start + 3] = self.object_pos
-            self.states_buf[:, obj_obs_start + 3 : obj_obs_start + 7] = self.object_rot
-            self.states_buf[:, obj_obs_start + 7 : obj_obs_start + 10] = self.object_linvel
-            self.states_buf[:, obj_obs_start + 10 : obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
+            self.states_buf[:, obj_obs_start:obj_obs_start + 3] = self.object_pos
+            self.states_buf[:, obj_obs_start + 3:obj_obs_start + 7] = self.object_rot
+            self.states_buf[:, obj_obs_start + 7:obj_obs_start + 10] = self.object_linvel
+            self.states_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
 
             goal_obs_start = obj_obs_start + 13  # 61
-            self.states_buf[:, goal_obs_start : goal_obs_start + 3] = self.goal_pos
-            self.states_buf[:, goal_obs_start + 3 : goal_obs_start + 7] = self.goal_rot
-            self.states_buf[:, goal_obs_start + 7 : goal_obs_start + 11] = quat_mul(
-                self.object_rot, quat_conjugate(self.goal_rot)
-            )
+            self.states_buf[:, goal_obs_start:goal_obs_start + 3] = self.goal_pos
+            self.states_buf[:, goal_obs_start + 3:goal_obs_start + 7] = self.goal_rot
+            self.states_buf[:, goal_obs_start + 7:goal_obs_start + 11] = quat_mul(self.object_rot,
+                                                                                  quat_conjugate(self.goal_rot))
 
             # fingertip observations, state(pose and vel) + force-torque sensors
             num_ft_states = 13 * self.num_fingertips  # 65
             num_ft_force_torques = 6 * self.num_fingertips  # 30
 
             fingertip_obs_start = goal_obs_start + 11  # 72
-            self.states_buf[
-                :, fingertip_obs_start : fingertip_obs_start + 3 * self.num_fingertips
-            ] = self.fingertip_pos.reshape(self.num_envs, 3 * self.num_fingertips)
-            self.states_buf[
-                :, fingertip_obs_start + 3 * self.num_fingertips : fingertip_obs_start + 7 * self.num_fingertips
-            ] = self.fingertip_rot.reshape(self.num_envs, 4 * self.num_fingertips)
-            self.states_buf[
-                :, fingertip_obs_start + 7 * self.num_fingertips : fingertip_obs_start + 13 * self.num_fingertips
-            ] = self.fingertip_velocities.reshape(self.num_envs, 6 * self.num_fingertips)
+            self.states_buf[:,
+            fingertip_obs_start:fingertip_obs_start + 3 * self.num_fingertips] = self.fingertip_pos.reshape(
+                self.num_envs, 3 * self.num_fingertips)
+            self.states_buf[:,
+            fingertip_obs_start + 3 * self.num_fingertips:fingertip_obs_start + 7 * self.num_fingertips] = self.fingertip_rot.reshape(
+                self.num_envs, 4 * self.num_fingertips)
+            self.states_buf[:,
+            fingertip_obs_start + 7 * self.num_fingertips:fingertip_obs_start + 13 * self.num_fingertips] = self.fingertip_velocities.reshape(
+                self.num_envs, 6 * self.num_fingertips)
 
-            self.states_buf[
-                :, fingertip_obs_start + num_ft_states : fingertip_obs_start + num_ft_states + num_ft_force_torques
-            ] = (self.force_torque_obs_scale * self.vec_sensor_tensor)
+            self.states_buf[:,
+            fingertip_obs_start + num_ft_states:fingertip_obs_start + num_ft_states + num_ft_force_torques] = self.force_torque_obs_scale * self.vec_sensor_tensor
 
             # obs_end = 72 + 65 + 30 = 167
             # obs_total = obs_end + num_actions = 187
             obs_end = fingertip_obs_start + num_ft_states + num_ft_force_torques
-            self.states_buf[:, obs_end : obs_end + self.num_actions] = self.actions
+            self.states_buf[:, obs_end:obs_end + self.num_actions] = self.actions
         else:
-            self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
-                self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
-            )
-            self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
-            self.obs_buf[:, 2 * self.num_hand_dofs : 3 * self.num_hand_dofs] = (
-                self.force_torque_obs_scale * self.dof_force_tensor
-            )
+            self.obs_buf[:, 0:self.num_hand_dofs] = unscale(self.hand_dof_pos,
+                                                            self.hand_dof_lower_limits, self.hand_dof_upper_limits)
+            self.obs_buf[:, self.num_hand_dofs:2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
+            self.obs_buf[:,
+            2 * self.num_hand_dofs:3 * self.num_hand_dofs] = self.force_torque_obs_scale * self.dof_force_tensor
 
             obj_obs_start = 3 * self.num_hand_dofs  # 48
-            self.obs_buf[:, obj_obs_start : obj_obs_start + 3] = self.object_pos
-            self.obs_buf[:, obj_obs_start + 3 : obj_obs_start + 7] = self.object_rot
-            self.obs_buf[:, obj_obs_start + 7 : obj_obs_start + 10] = self.object_linvel
-            self.obs_buf[:, obj_obs_start + 10 : obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
+            self.obs_buf[:, obj_obs_start:obj_obs_start + 3] = self.object_pos
+            self.obs_buf[:, obj_obs_start + 3:obj_obs_start + 7] = self.object_rot
+            self.obs_buf[:, obj_obs_start + 7:obj_obs_start + 10] = self.object_linvel
+            self.obs_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
 
             goal_obs_start = obj_obs_start + 13  # 61
-            self.obs_buf[:, goal_obs_start : goal_obs_start + 3] = self.goal_pos
-            self.obs_buf[:, goal_obs_start + 3 : goal_obs_start + 7] = self.goal_rot
-            self.obs_buf[:, goal_obs_start + 7 : goal_obs_start + 11] = quat_mul(
-                self.object_rot, quat_conjugate(self.goal_rot)
-            )
+            self.obs_buf[:, goal_obs_start:goal_obs_start + 3] = self.goal_pos
+            self.obs_buf[:, goal_obs_start + 3:goal_obs_start + 7] = self.goal_rot
+            self.obs_buf[:, goal_obs_start + 7:goal_obs_start + 11] = quat_mul(self.object_rot,
+                                                                               quat_conjugate(self.goal_rot))
 
             # fingertip observations, state(pose and vel) + force-torque sensors
             num_ft_states = 13 * self.num_fingertips  # 65
             num_ft_force_torques = 6 * self.num_fingertips  # 30
 
             fingertip_obs_start = goal_obs_start + 11  # 72
-            self.obs_buf[
-                :, fingertip_obs_start : fingertip_obs_start + 3 * self.num_fingertips
-            ] = self.fingertip_pos.reshape(self.num_envs, 3 * self.num_fingertips)
-            self.obs_buf[
-                :, fingertip_obs_start + 3 * self.num_fingertips : fingertip_obs_start + 7 * self.num_fingertips
-            ] = self.fingertip_rot.reshape(self.num_envs, 4 * self.num_fingertips)
-            self.obs_buf[
-                :, fingertip_obs_start + 7 * self.num_fingertips : fingertip_obs_start + 13 * self.num_fingertips
-            ] = self.fingertip_velocities.reshape(self.num_envs, 6 * self.num_fingertips)
-            self.obs_buf[
-                :, fingertip_obs_start + num_ft_states : fingertip_obs_start + num_ft_states + num_ft_force_torques
-            ] = (self.force_torque_obs_scale * self.vec_sensor_tensor)
+            self.obs_buf[:,
+            fingertip_obs_start:fingertip_obs_start + 3 * self.num_fingertips] = self.fingertip_pos.reshape(
+                self.num_envs, 3 * self.num_fingertips)
+            self.obs_buf[:,
+            fingertip_obs_start + 3 * self.num_fingertips:fingertip_obs_start + 7 * self.num_fingertips] = self.fingertip_rot.reshape(
+                self.num_envs, 4 * self.num_fingertips)
+            self.obs_buf[:,
+            fingertip_obs_start + 7 * self.num_fingertips:fingertip_obs_start + 13 * self.num_fingertips] = self.fingertip_velocities.reshape(
+                self.num_envs, 6 * self.num_fingertips)
+            self.obs_buf[:,
+            fingertip_obs_start + num_ft_states:fingertip_obs_start + num_ft_states + num_ft_force_torques] = self.force_torque_obs_scale * self.vec_sensor_tensor
 
             # obs_end = 96 + 65 + 30 = 167
             # obs_total = obs_end + num_actions = 187
             obs_end = fingertip_obs_start + num_ft_states + num_ft_force_torques
-            self.obs_buf[:, obs_end : obs_end + self.num_actions] = self.actions
+            self.obs_buf[:, obs_end:obs_end + self.num_actions] = self.actions

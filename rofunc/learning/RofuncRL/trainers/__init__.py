@@ -17,3 +17,6 @@ class Trainers:
             "ase": ASETrainer,
             "dtrans": DTransTrainer,
         }
+
+    def __call__(self, trainer_name):
+        return self.trainer_map[trainer_name]

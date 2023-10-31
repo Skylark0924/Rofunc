@@ -16,7 +16,7 @@ from omni.isaac.core.robots.robot import Robot
 from omni.isaac.core.utils.nucleus import get_assets_root_path
 from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.stage import add_reference_to_stage
-from omniisaacgymenvs.tasks.utils.usd_utils import set_drive
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.usd_utils import set_drive
 from pxr import PhysxSchema
 
 
