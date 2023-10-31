@@ -33,6 +33,7 @@ from isaacgym import gymtorch
 
 from rofunc.learning.RofuncRL.tasks.base.vec_task import VecTask
 from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
+from rofunc.utils.oslab.path import get_rofunc_path
 
 
 @torch.jit.script
@@ -46,6 +47,7 @@ def axisangle2quat(vec, eps=1e-6):
     Returns:
         tensor: (..., 4) tensor where final dim is (x,y,z,w) vec4 float quaternion
     """
+    # type: (Tensor, float) -> Tensor
     # store input shape and reshape
     input_shape = vec.shape[:-1]
     vec = vec.reshape(-1, 3)
@@ -69,7 +71,7 @@ def axisangle2quat(vec, eps=1e-6):
     return quat
 
 
-class FrankaCubeStack(VecTask):
+class FrankaCubeStackTask(VecTask):
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
@@ -184,12 +186,13 @@ class FrankaCubeStack(VecTask):
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
         upper = gymapi.Vec3(spacing, spacing, spacing)
 
-        asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../assets")
+        # get rofunc path from rofunc package metadata
+        rofunc_path = get_rofunc_path()
+        asset_root = os.path.join(rofunc_path, "simulator/assets")
+
         franka_asset_file = "urdf/franka_description/robots/franka_panda_gripper.urdf"
 
         if "asset" in self.cfg["env"]:
-            asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                      self.cfg["env"]["asset"].get("assetRoot", asset_root))
             franka_asset_file = self.cfg["env"]["asset"].get("assetFileNameFranka", franka_asset_file)
 
         # load franka asset
