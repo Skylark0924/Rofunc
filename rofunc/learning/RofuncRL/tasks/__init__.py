@@ -9,6 +9,7 @@ class Tasks:
             from .curi_cabinet_bimanual import CURICabinetBimanualTask
             from .curi_coffee_stirring import CURICoffeeStirringTask
             from .franka_cabinet import FrankaCabinetTask
+            from .franka_cube_stack import FrankaCubeStackTask
             from .humanoid import HumanoidTask
             from .humanoid_amp import HumanoidAMPTask
             from .ase.humanoid_amp_getup import HumanoidAMPGetupTask
@@ -23,6 +24,7 @@ class Tasks:
                 "Ant": AntTask,
                 "Cartpole": CartpoleTask,
                 "FrankaCabinet": FrankaCabinetTask,
+                "FrankaCubeStack": FrankaCubeStackTask,
                 "CURICabinet": CURICabinetTask,
                 "CURICabinetImage": CURICabinetImageTask,
                 "CURICabinetBimanual": CURICabinetBimanualTask,
