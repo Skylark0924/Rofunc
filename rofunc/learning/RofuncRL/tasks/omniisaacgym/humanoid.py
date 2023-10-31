@@ -27,24 +27,26 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import math
-
-import numpy as np
 import torch
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.utils.prims import get_prim_at_path
-from omni.isaac.core.utils.torch.maths import tensor_clamp, torch_rand_float, unscale
-from omni.isaac.core.utils.torch.rotations import compute_heading_and_up, compute_rot, quat_conjugate
-from omniisaacgymenvs.tasks.base.rl_task import RLTask
-from omniisaacgymenvs.robots.articulations.humanoid import Humanoid
-from omniisaacgymenvs.tasks.shared.locomotion import LocomotionTask
-from pxr import PhysxSchema
+
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.humanoid import Humanoid
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgym.shared.locomotion import LocomotionTask
 
 
-class HumanoidLocomotionTask(LocomotionTask):
-    def __init__(self, name, sim_config, env, offset=None) -> None:
-
-        self.update_config(sim_config)
+class HumanoidOmniTask(LocomotionTask):
+    def __init__(
+            self,
+            name,
+            sim_config,
+            env,
+            offset=None
+    ) -> None:
+        self._sim_config = sim_config
+        self._cfg = sim_config.config
+        self._task_cfg = sim_config.task_config
         self._num_observations = 87
         self._num_actions = 21
         self._humanoid_positions = torch.tensor([0, 0, 1.34])
@@ -52,37 +54,19 @@ class HumanoidLocomotionTask(LocomotionTask):
         LocomotionTask.__init__(self, name=name, env=env)
         return
 
-    def update_config(self, sim_config):
-        self._sim_config = sim_config
-        self._cfg = sim_config.config
-        self._task_cfg = sim_config.task_config
-        LocomotionTask.update_config(self)
-
     def set_up_scene(self, scene) -> None:
         self.get_humanoid()
         RLTask.set_up_scene(self, scene)
-        self._humanoids = ArticulationView(
-            prim_paths_expr="/World/envs/.*/Humanoid/torso", name="humanoid_view", reset_xform_properties=False
-        )
+        self._humanoids = ArticulationView(prim_paths_expr="/World/envs/.*/Humanoid/torso", name="humanoid_view",
+                                           reset_xform_properties=False)
         scene.add(self._humanoids)
         return
 
-    def initialize_views(self, scene):
-        RLTask.initialize_views(self, scene)
-        if scene.object_exists("humanoid_view"):
-            scene.remove_object("humanoid_view", registry_only=True)
-        self._humanoids = ArticulationView(
-            prim_paths_expr="/World/envs/.*/Humanoid/torso", name="humanoid_view", reset_xform_properties=False
-        )
-        scene.add(self._humanoids)
-
     def get_humanoid(self):
-        humanoid = Humanoid(
-            prim_path=self.default_zero_env_path + "/Humanoid", name="Humanoid", translation=self._humanoid_positions
-        )
-        self._sim_config.apply_articulation_settings(
-            "Humanoid", get_prim_at_path(humanoid.prim_path), self._sim_config.parse_actor_config("Humanoid")
-        )
+        humanoid = Humanoid(prim_path=self.default_zero_env_path + "/Humanoid", name="Humanoid",
+                            translation=self._humanoid_positions)
+        self._sim_config.apply_articulation_settings("Humanoid", get_prim_at_path(humanoid.prim_path),
+                                                     self._sim_config.parse_actor_config("Humanoid"))
 
     def get_robot(self):
         return self._humanoids
@@ -119,11 +103,6 @@ class HumanoidLocomotionTask(LocomotionTask):
         dof_limits = self._humanoids.get_dof_limits()
         self.dof_limits_lower = dof_limits[0, :, 0].to(self._device)
         self.dof_limits_upper = dof_limits[0, :, 1].to(self._device)
-
-        force_links = ["left_foot", "right_foot"]
-        self._sensor_indices = torch.tensor(
-            [self._humanoids._body_indices[j] for j in force_links], device=self._device, dtype=torch.long
-        )
 
         LocomotionTask.post_reset(self)
 
