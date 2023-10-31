@@ -18,9 +18,8 @@ def inference(config_name, motion_file):
     args_overrides = [
         f"task={task_name}",
         "train=HumanoidViewMotionASERofuncRL",
-        "sim_device=cuda:0",
+        "device_id=0",
         "rl_device=cuda:0",
-        "graphics_device_id=0",
         "headless={}".format(False),
         "num_envs={}".format(16),
     ]
@@ -37,8 +36,7 @@ def inference(config_name, motion_file):
     # Instantiate the Isaac Gym environment
     infer_env = Tasks().task_map[task_name](cfg=cfg_dict,
                                             rl_device=cfg.rl_device,
-                                            sim_device=cfg.sim_device,
-                                            graphics_device_id=cfg.graphics_device_id,
+                                            sim_device=f'cuda:{cfg.device_id}',
                                             headless=cfg.headless,
                                             virtual_screen_capture=cfg.capture_video,  # TODO: check
                                             force_render=cfg.force_render)
