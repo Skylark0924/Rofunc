@@ -26,26 +26,18 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
-import torch
-import click
-
 from poselib.core.rotation3d import *
 from poselib.skeleton.skeleton3d import SkeletonTree, SkeletonState
 from poselib.visualization.common import plot_skeleton_state
 
 
-@click.command()
-@click.argument("xml_path")
 def main(xml_path):
-    """This scripts imports a MJCF XML file and converts the skeleton into a SkeletonTree format.
+    """
+    This scripts imports a MJCF XML file and converts the skeleton into a SkeletonTree format.
     It then generates a zero rotation pose, and adjusts the pose into a T-Pose.
 
-    Args:
-        xml_path:
-
-    Returns:
-
+    :param xml_path: path to the MJCF XML file
+    :return:
     """
     skeleton = SkeletonTree.from_mjcf(xml_path)
 
@@ -66,9 +58,10 @@ def main(xml_path):
     translation += torch.tensor([0, 0, 0.9])
 
     # save and visualize T-pose
-    zero_pose.to_file("data/amp_humanoid_generated_new_tpose.npy")
+    zero_pose.to_file("data/hotu_humanoid_generated_tpose.npy")
     plot_skeleton_state(zero_pose)
 
 
 if __name__ == '__main__':
-    main()
+    xml_path = "../../../simulator/assets/mjcf/hotu_humanoid_spoon_pan_w_wrist.xml"
+    main(xml_path)
