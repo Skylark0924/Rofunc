@@ -5,15 +5,16 @@ Humanoid Motion View (RofuncRL)
 Preview the motion of the digital humanoid
 """
 
-import click
+import isaacgym
+import argparse
 
 from rofunc.config.utils import omegaconf_to_dict, get_config, load_view_motion_config
 from rofunc.learning.RofuncRL.tasks import Tasks
 from rofunc.learning.RofuncRL.trainers import Trainers
 
 
-def inference(config_name, motion_file):
-    view_motion_config = load_view_motion_config(config_name)
+def inference(custom_args):
+    view_motion_config = load_view_motion_config(custom_args.config_name)
     task_name = "HumanoidViewMotion"
     args_overrides = [
         f"task={task_name}",
@@ -24,7 +25,7 @@ def inference(config_name, motion_file):
         "num_envs={}".format(16),
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
-    cfg.task.env.motion_file = motion_file
+    cfg.task.env.motion_file = custom_args.motion_file
 
     # Overwrite
     cfg.task.env.asset.assetFileName = view_motion_config["asset_name"]
@@ -37,6 +38,7 @@ def inference(config_name, motion_file):
     infer_env = Tasks().task_map[task_name](cfg=cfg_dict,
                                             rl_device=cfg.rl_device,
                                             sim_device=f'cuda:{cfg.device_id}',
+                                            graphics_device_id=cfg.device_id,
                                             headless=cfg.headless,
                                             virtual_screen_capture=cfg.capture_video,  # TODO: check
                                             force_render=cfg.force_render)
@@ -53,12 +55,12 @@ def inference(config_name, motion_file):
     trainer.inference()
 
 
-@click.command()
-@click.argument("motion_file")
-@click.option("--config_name", default="HumanoidSpoonPanSimple")
-def main(config_name, motion_file):
-    inference(config_name, motion_file)
-
-
 if __name__ == "__main__":
-    main()
+    gpu_id = 0
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config_name", type=str, default="HumanoidSpoonPanSimple")
+    parser.add_argument("--motion_file", type=str, default="../hotu/024_amp.npy")
+    custom_args = parser.parse_args()
+
+    inference(custom_args)
