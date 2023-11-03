@@ -12,8 +12,7 @@
 
 > **Repository address: https://github.com/Skylark0924/Rofunc**
 
-Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (
-LfD)** for **(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including
+Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for **(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including
 _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an
 `IsaacGym` and `OmniIsaacGym` based robot simulator for evaluation. This package aims to advance the field by building a full-process
 toolkit and validation platform that simplifies and standardizes the process of demonstration data collection,
@@ -23,8 +22,6 @@ processing, learning, and its deployment on robots.
 
 - [Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation](#rofunc-the-full-process-python-package-for-robot-learning-from-demonstration-and-robot-manipulation)
   - [Installation](#installation)
-    - [Install from PyPI (stable version)](#install-from-pypi-stable-version)
-    - [Install from Source (nightly version, recommended)](#install-from-source-nightly-version-recommended)
   - [Documentation](#documentation)
   - [Star History](#star-history)
   - [Citation](#citation)
@@ -36,51 +33,7 @@ processing, learning, and its deployment on robots.
 
 ## Installation
 
-### Install from PyPI (stable version)
-
-The installation is very easy,
-
-```shell
-pip install rofunc
-
-# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3) and Envs (gymnasium[all], mujoco_py)
-pip install rofunc[baselines]
-```
-
-and as you'll find later, it's easy to use as well!
-
-```python
-import rofunc as rf
-```
-
-Thus, have fun in the robotics world!
-> **Note**
-> Several requirements need to be installed before using the package. Please refer to
-> the [installation guide](https://rofunc.readthedocs.io/en/latest/installation.html) for more details.
-
-### Install from Source (nightly version, recommended)
-
-```shell
-git clone https://github.com/Skylark0924/Rofunc.git
-cd Rofunc
-
-# Create a conda environment
-# Python 3.8 is strongly recommended
-conda create -n rofunc python=3.8
-
-# For Linux user
-sh ./scripts/install.sh
-# [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
-sh ./scripts/install_w_baselines.sh
-# [Option] For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
-sh ./scripts/mac_install.sh
-```
-
-> **Note**
-> If you want to use functions related to ZED camera, you need to
-> install [ZED SDK](https://www.stereolabs.com/developers/release/#downloads) manually. (We have tried to package it as
-> a `.whl` file to add it to `requirements.txt`, unfortunately, the ZED SDK is not very friendly and doesn't support
-> direct installation.)
+Please refer to the [installation guide](https://rofunc.readthedocs.io/en/latest/installation.html).
 
 ## Documentation
 
