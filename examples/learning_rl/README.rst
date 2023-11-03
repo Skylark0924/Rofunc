@@ -65,6 +65,14 @@ The following are examples of reinforcement learning methods for robot learning.
                     '''Inference with pre-trained model in model zoo'''
                     python examples/learning_rl/IsaacGym_RofuncRL/example_FrankaCabinet_RofuncRL.py --agent=ppo --inference
 
+            .. tab:: FrankaCubeStack
+
+                .. code-block:: shell
+
+                    '''Training'''
+                    python examples/learning_rl/IsaacGym_RofuncRL/example_FrankaCubeStack_RofuncRL.py --agent=ppo
+
+
             .. tab:: Humanoid
 
                 .. code-block:: shell
@@ -145,28 +153,28 @@ The following are examples of reinforcement learning methods for robot learning.
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_AllegroHandOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_AllegroHandOmni_RofuncRL.py --agent=ppo
 
             .. tab:: Ant
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_AntOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_AntOmni_RofuncRL.py --agent=ppo
 
             .. tab:: Anymal
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_AnymalOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_AnymalOmni_RofuncRL.py --agent=ppo
 
             .. tab:: AnymalTerrain
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_AnymalTerrainOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_AnymalTerrainOmni_RofuncRL.py --agent=ppo
 
 
             .. tab:: BallBalance
@@ -174,28 +182,28 @@ The following are examples of reinforcement learning methods for robot learning.
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_BallBalanceOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_BallBalanceOmni_RofuncRL.py --agent=ppo
 
             .. tab:: Cartpole
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_CartpoleOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_CartpoleOmni_RofuncRL.py --agent=ppo
 
             .. tab:: Crazyflie
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_CrazyflieOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_CrazyflieOmni_RofuncRL.py --agent=ppo
 
             .. tab:: FactoryNutBoltPick
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_FactoryNutBoltPickOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_FactoryNutBoltPickOmni_RofuncRL.py --agent=ppo
 
 
             .. tab:: FrankaCabinet
@@ -203,35 +211,35 @@ The following are examples of reinforcement learning methods for robot learning.
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_FrankaCabinetOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_FrankaCabinetOmni_RofuncRL.py --agent=ppo
 
             .. tab:: Humanoid
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_HumanoidOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_HumanoidOmni_RofuncRL.py --agent=ppo
 
             .. tab:: Ingenuity
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_IngenuityOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_IngenuityOmni_RofuncRL.py --agent=ppo
 
             .. tab:: Quadcopter
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_QuadcopterOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_QuadcopterOmni_RofuncRL.py --agent=ppo
 
             .. tab:: ShadowHand
 
                 .. code-block:: shell
 
                     '''Training'''
-                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_ShadowHandOmni_RofuncRL.py --agent=[ppo|a2c|td3|sac]
+                    python examples/learning_rl/OmniIsaacGym_RofuncRL/example_ShadowHandOmni_RofuncRL.py --agent=ppo
 
 
     .. tab:: D4RL
