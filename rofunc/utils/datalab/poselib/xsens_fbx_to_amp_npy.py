@@ -217,31 +217,9 @@ def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True, start_s
     motion_retargeting(config, motion, visualize=verbose, object_interaction_start_end=start_stop)
 
 
-@click.command()
-@click.option(
-    "--is_parallel",
-    default=False,
-    help="Whether using parallel conversion.",
-)
-@click.option(
-    "--verbose",
-    default=True,
-    help="Whether visualize the conversion.",
-)
-@click.option(
-    "--start",
-    default=None,
-)
-@click.option(
-    "--end",
-    default=None,
-)
-def main(is_parallel, verbose, start, end):
-    data_dir = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "../../../../data"
-    )
-    fbx_files = sorted(glob.glob(os.path.join(data_dir, "*.fbx")))
-    tpose_file = os.path.join(data_dir, "tpose.npy")
+def main(args):
+    fbx_files = sorted(glob.glob(os.path.join(args.data_dir, "*.fbx")))
+    tpose_file = os.path.join(args.data_dir, "tpose.npy")
 
     amp_humanoid_tpose_file = os.path.join(
         os.path.join(
@@ -249,18 +227,28 @@ def main(is_parallel, verbose, start, end):
         )
     )
 
-    if start and end:
-        start_end = [int(start), int(end)]
+    if args.start and args.end:
+        start_end = [int(args.start), int(args.end)]
     else:
         start_end = None
 
-    if is_parallel:
+    if args.is_parallel:
         pool = multiprocessing.Pool()
         pool.map(amp_npy_from_fbx, fbx_files)
     else:
         for fbx_file in fbx_files:
-            amp_npy_from_fbx(fbx_file, tpose_file, amp_humanoid_tpose_file, verbose, start_end)
+            amp_npy_from_fbx(fbx_file, tpose_file, amp_humanoid_tpose_file, args.verbose, start_end)
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_dir", default="/home/skylark/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/examples/data/hotu")
+    parser.add_argument("--is_parallel", action="store_false", help="Whether using parallel conversion.")
+    parser.add_argument("--verbose", action="store_true", help="Whether visualize the conversion.")
+    parser.add_argument("--start", default=None)
+    parser.add_argument("--end", default=None)
+    args = parser.parse_args()
+
+    main(args)

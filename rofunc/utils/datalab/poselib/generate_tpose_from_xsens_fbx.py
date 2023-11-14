@@ -18,7 +18,7 @@ from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonSta
 from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skeleton_state
 
 
-def get_tpose_from_fbx(fbx_file_path, save_path, verbose=False):
+def get_tpose_from_fbx(fbx_file_path, save_path, verbose=True):
     motion = SkeletonMotion.from_fbx(
         fbx_file_path=fbx_file_path,
         root_joint="Hips",
@@ -34,15 +34,16 @@ def get_tpose_from_fbx(fbx_file_path, save_path, verbose=False):
         plot_skeleton_state(source_tpose)
 
 
-def main(fbx_name):
-    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../examples/data/hotu")
-    os.makedirs(data_dir, exist_ok=True)
-    fbx_files = [os.path.join(data_dir, f"{fbx_name}.fbx")]
+def main():
+    import rofunc as rf
+
+    data_dir = "/home/skylark/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/examples/data/hotu"
+    fbx_files = rf.oslab.list_absl_path(data_dir, suffix='.fbx')
     for fbx in fbx_files:
+        fbx_name = os.path.basename(fbx).split('.')[0]
         save_path = os.path.join(data_dir, f"{fbx_name}_tpose.npy")
         get_tpose_from_fbx(fbx, save_path, verbose=True)
 
 
 if __name__ == '__main__':
-    fbx_name = "024"
-    main(fbx_name)
+    main()
