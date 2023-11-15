@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_name", type=str, default="HumanoidSpoonPanSimple")
-    parser.add_argument("--motion_file", type=str, default="../hotu/024_amp.npy")
+    parser.add_argument("--motion_file", type=str, default="../hotu/024_amp_3.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)
