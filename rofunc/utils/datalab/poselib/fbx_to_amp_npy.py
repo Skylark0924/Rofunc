@@ -234,6 +234,8 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     root_translation = target_motion.root_translation
     local_rotation = local_rotation[frame_beg:frame_end, ...]
     root_translation = root_translation[frame_beg:frame_end, ...]
+    avg_root_translation = root_translation.mean(axis=0)
+    root_translation[1:] -= avg_root_translation
 
     new_sk_state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, local_rotation,
                                                                     root_translation, is_local=True)
@@ -279,10 +281,10 @@ def amp_npy_from_fbx(fbx_file):
     """
 
     config = {
-        "target_motion_path": "/home/ubuntu/data/fbx/xsense_amp.npy",
-        "source_tpose": "/home/ubuntu/poselib/data/clover_tpose.npy",
-        "target_tpose": "/home/skylark/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/utils/datalab/poselib/data/amp_humanoid_tpose.npy",
-        "joint_mapping": {
+        "target_motion_path": "/home/ubuntu/Github/Rofunc/examples/data/hotu/024_amp_3.npy",
+        "source_tpose": "/home/ubuntu/Github/Rofunc/examples/data/hotu/024_tpose.npy",
+        "target_tpose": "/home/ubuntu/Github/Rofunc/rofunc/utils/datalab/poselib/data/amp_humanoid_tpose.npy",
+        "joint_mapping": {  # Left: Xsens, Right: MJCF
             "Hips": "pelvis",
             "LeftUpLeg": "left_thigh",
             "LeftLeg": "left_shin",
@@ -301,19 +303,23 @@ def amp_npy_from_fbx(fbx_file):
         },
         # "rotation": [0.707, 0, 0, 0.707], xyzw
         "rotation": [0.5, 0.5, 0.5, 0.5],
-        "scale": 0.1,
+        "scale": 0.001,
         "root_height_offset": 0.0,
         "trim_frame_beg": 0,
         "trim_frame_end": -1
     }
 
-    motion = motion_from_fbx(fbx_file, root_joint="Reference", fps=60, visualize=False)
-    config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, motion, visualize=True)
+    motion = motion_from_fbx(fbx_file, root_joint="Hips", fps=60, visualize=False)
+    # config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
+    motion_retargeting(config, motion, visualize=False)
 
 
 if __name__ == '__main__':
-    fbx_dir = "/home/skylark/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/examples/data/hotu"
+    from rofunc.utils.oslab.path import get_rofunc_path
+    import os
+
+    rofunc_path = get_rofunc_path()
+    fbx_dir = os.path.join(rofunc_path, "../examples/data/hotu")
     fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
 
     parallel = False
