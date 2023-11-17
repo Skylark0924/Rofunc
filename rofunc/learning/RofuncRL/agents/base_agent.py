@@ -193,3 +193,22 @@ class BaseAgent:
                     self.rofunc_logger.warning(
                         "Cannot load the {} module. The agent doesn't have such an instance".format(name))
         self.rofunc_logger.info("Loaded the checkpoint from {}".format(path))
+
+    def multi_gpu_transfer(self, *args):
+        """
+        Transfer the tensor data obtained from sim_device to rl_device.
+
+        :param args: Tensor data in different device to be transferred
+        """
+        rl_device = self.device
+        for arg in args:
+            if isinstance(arg, torch.Tensor):
+                if arg.device != rl_device:
+                    arg.data = arg.data.to(rl_device)
+            elif isinstance(arg, tuple) or isinstance(arg, list):
+                self.multi_gpu_transfer(*arg)
+            elif isinstance(arg, dict) or isinstance(arg, collections.OrderedDict):
+                self.multi_gpu_transfer(*arg.values())
+            else:
+                raise rf.logger.beauty_print("Unknown type: {}".format(type(arg)))
+        return args
