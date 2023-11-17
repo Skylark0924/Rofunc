@@ -62,7 +62,7 @@ class ASETrainer(BaseTrainer):
                                                                high=self._latent_steps_max)
 
     def _update_latents(self):
-        new_latent_envs = self._latent_reset_steps <= self.env.progress_buf
+        new_latent_envs = self._latent_reset_steps <= self.env.progress_buf.to(self.device)
 
         need_update = torch.any(new_latent_envs)
         if need_update:
