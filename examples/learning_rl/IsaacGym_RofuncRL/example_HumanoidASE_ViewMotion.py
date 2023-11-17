@@ -19,8 +19,8 @@ def inference(custom_args):
     args_overrides = [
         f"task={task_name}",
         "train=HumanoidViewMotionASERofuncRL",
-        "device_id=0",
-        "rl_device=cuda:0",
+        f"device_id=0",
+        f"rl_device=cuda:{gpu_id}",
         "headless={}".format(False),
         "num_envs={}".format(16),
     ]
@@ -56,7 +56,7 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_name", type=str, default="HumanoidSpoonPanSimple")

@@ -172,6 +172,9 @@ class BaseTrainer:
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.env.step(actions)
+                next_states, rewards, terminated, truncated, infos = self.agent.multi_gpu_transfer(next_states, rewards,
+                                                                                                   terminated,
+                                                                                                   truncated, infos)
 
                 with torch.no_grad():
                     # Store transition
