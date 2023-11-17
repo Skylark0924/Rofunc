@@ -86,6 +86,7 @@ class ASETrainer(BaseTrainer):
         elif not self.hrl:
             if self.collect_observation is not None:  # Reset failed envs
                 obs_dict, done_env_ids = self.env.reset_done()
+                obs_dict, done_env_ids = self.agent.multi_gpu_transfer(obs_dict, done_env_ids)
                 self.agent._current_states = obs_dict["obs"]
                 if len(done_env_ids) > 0:
                     self._reset_latents(done_env_ids)

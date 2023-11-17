@@ -32,6 +32,7 @@ from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
+import rofunc as rf
 from rofunc.utils.oslab.path import get_rofunc_path
 from rofunc.learning.RofuncRL.tasks.isaacgym.base.vec_task import VecTask
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
@@ -240,16 +241,12 @@ class Humanoid(VecTask):
         second part is the observations for all bodies. The body number is multiplied by (3 position values, 6
         orientation values, 3 linear velocity, and 3 angular velocity); finally, -3 stands for
 
-        Args:
-            key_bodies:
-
-        Returns:
-
+        :param key_bodies:
         """
         # asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
         # asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
-        num_key_bodies = len(key_bodies)
+        # num_key_bodies = len(key_bodies)
 
         # The following are: body_name (body_id/body's joint num to its parent/offset pair)
         # if asset_body_num == 15:
@@ -329,25 +326,20 @@ class Humanoid(VecTask):
             self._dof_obs_size = 72
             self._num_actions = 28
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
-
         elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
             self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 11, 12, 13, 14, 15, 16]
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 21, 24, 27, 28, 31]
             self._dof_obs_size = 78
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-
-        elif asset_file == "mjcf/amp_humanoid_spoon_pan_fixed.xml":
+        elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu_humanoid.xml"]:
             self._dof_body_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]  # len=14
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]  # len=14+1
             self._dof_obs_size = 84
             self._num_actions = 34
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
-
         else:
-            assert print(f"Unsupported character config file: {asset_file}")
-
-        return
+            raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
 
     def _build_termination_heights(self):
         head_term_height = 0.3
