@@ -23,9 +23,9 @@ import rofunc as rf
 # CURIminisim.show()
 
 # franka
-args = rf.config.get_sim_config("Franka")
-frankasim = rf.sim.FrankaSim(args)
-frankasim.show()
+# args = rf.config.get_sim_config("Franka")
+# frankasim = rf.sim.FrankaSim(args)
+# frankasim.show()
 
 # baxter
 # args = rf.config.get_sim_config("Baxter")
@@ -41,6 +41,16 @@ frankasim.show()
 # args = rf.config.get_sim_config("Gluon")
 # Gluonsim = rf.sim.GluonSim(args)
 # Gluonsim.show()
+
+# # qbsofthand
+# args = rf.config.get_sim_config("QbSoftHand")
+# QbSoftHandsim = rf.sim.QbSoftHandSim(args)
+# QbSoftHandsim.show()
+
+# Humanoid
+args = rf.config.get_sim_config("Humanoid")
+Humanoidsim = rf.sim.HumanoidSim(args)
+Humanoidsim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")

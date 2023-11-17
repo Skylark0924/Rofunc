@@ -40,7 +40,8 @@ def main():
 
     rofunc_path = rf.oslab.get_rofunc_path()
     data_dir = os.path.join(rofunc_path, "../examples/data/hotu")
-    fbx_files = rf.oslab.list_absl_path(data_dir, suffix='.fbx')
+    # fbx_files = rf.oslab.list_absl_path(data_dir, suffix='.fbx')
+    fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-010.fbx"]
     for fbx in fbx_files:
         fbx_name = os.path.basename(fbx).split('.')[0]
         save_path = os.path.join(data_dir, f"{fbx_name}_tpose.npy")

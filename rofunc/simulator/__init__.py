@@ -8,4 +8,6 @@ from .walker_sim import WalkerSim
 from .gluon_sim import GluonSim
 from .multirobot_sim import MultiRobotSim
 from .human_sim import HumanSim
+from .humanoid_sim import HumanoidSim
+from .qbsofthand_sim import QbSoftHandSim
 from .utils.xsens2urdf import xsens2urdf
