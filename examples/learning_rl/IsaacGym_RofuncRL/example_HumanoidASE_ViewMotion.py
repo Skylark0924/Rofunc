@@ -59,8 +59,8 @@ if __name__ == "__main__":
     gpu_id = 1
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_name", type=str, default="HumanoidSpoonPanSimple")
-    parser.add_argument("--motion_file", type=str, default="../hotu/024_amp_3.npy")
+    parser.add_argument("--config_name", type=str, default="HOTU_Humanoid")
+    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009_amp.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)
