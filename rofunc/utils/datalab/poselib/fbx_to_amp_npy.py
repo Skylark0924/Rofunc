@@ -266,7 +266,7 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         plot_skeleton_motion_interactive(target_motion)
 
 
-def amp_npy_from_fbx(fbx_file):
+def npy_from_fbx(fbx_file):
     """
     This scripts shows how to retarget a motion clip from the source skeleton to a target skeleton.
     Data required for retargeting are stored in a retarget config dictionary as a json file. This file contains:
@@ -281,8 +281,8 @@ def amp_npy_from_fbx(fbx_file):
     rofunc_path = rf.oslab.get_rofunc_path()
     config = {
         # "target_motion_path": "/home/ubuntu/Github/Rofunc/examples/data/hotu/024_amp_3.npy",
-        "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/xsens_source_tpose_w_gloves.npy"),
-        "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/hotu_target_humanoid_tpose.npy"),
+        "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_xsens_w_gloves_tpose.npy"),
+        "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_tpose.npy"),
         "joint_mapping": {  # Left: Xsens, Right: MJCF
             "Hips": "pelvis",
             "LeftUpLeg": "left_thigh",
@@ -320,10 +320,10 @@ if __name__ == '__main__':
     fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
     # fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
 
-    parallel = True
+    parallel = False
     if parallel:
         pool = multiprocessing.Pool()
-        pool.map(amp_npy_from_fbx, fbx_files)
+        pool.map(npy_from_fbx, fbx_files)
     else:
         for fbx_file in fbx_files:
-            amp_npy_from_fbx(fbx_file)
+            npy_from_fbx(fbx_file)

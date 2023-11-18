@@ -28,70 +28,79 @@
 
 import os
 
+import rofunc as rf
 from ..core import logger
 from .plt_plotter import Matplotlib3DPlotter
 from .skeleton_plotter_tasks import Draw3DSkeletonMotion, Draw3DSkeletonState
 
 
-def plot_skeleton_state(skeleton_state, task_name=""):
+def plot_skeleton_state(skeleton_state, task_name="", verbose=False):
     """
     Visualize a skeleton state
 
     :param skeleton_state:
     :param task_name:
+    :param verbose: turn True to plot joint names
     :type skeleton_state: SkeletonState
     :type task_name: string, optional
     """
-    logger.info("plotting {}".format(task_name))
+    rf.logger.beauty_print("Plotting {}".format(task_name), type='info')
     task = Draw3DSkeletonState(task_name=task_name, skeleton_state=skeleton_state)
-    plotter = Matplotlib3DPlotter(task)
+    plotter = Matplotlib3DPlotter(task, verbose=verbose)
+    plotter.set_label()
     plotter.show()
 
 
-def plot_skeleton_states(skeleton_state, skip_n=1, task_name=""):
+def plot_skeleton_states(skeleton_state, skip_n=1, task_name="", verbose=False):
     """
     Visualize a sequence of skeleton state. The dimension of the skeleton state must be 1
 
     :param skeleton_state:
+    :param skip_n:
     :param task_name:
+    :param verbose: turn True to plot joint names
     :type skeleton_state: SkeletonState
     :type task_name: string, optional
     """
-    logger.info("plotting {} motion".format(task_name))
+    rf.logger.beauty_print("Plotting {}".format(task_name), type='info')
     assert len(skeleton_state.shape) == 1, "the state must have only one dimension"
     task = Draw3DSkeletonState(task_name=task_name, skeleton_state=skeleton_state[0])
-    plotter = Matplotlib3DPlotter(task)
+    plotter = Matplotlib3DPlotter(task, verbose=verbose)
     for frame_id in range(skeleton_state.shape[0]):
         if frame_id % skip_n != 0:
             continue
         task.update(skeleton_state[frame_id])
         plotter.update()
+    plotter.set_label()
     plotter.show()
 
 
-def plot_skeleton_motion(skeleton_motion, skip_n=1, task_name=""):
+def plot_skeleton_motion(skeleton_motion, skip_n=1, task_name="", verbose=False):
     """
     Visualize a skeleton motion along its first dimension.
 
     :param skeleton_motion:
+    :param skip_n:
     :param task_name:
+    :param verbose: turn True to plot joint names
     :type skeleton_motion: SkeletonMotion
     :type task_name: string, optional
     """
-    logger.info("plotting {} motion".format(task_name))
+    rf.logger.beauty_print("Plotting {}".format(task_name), type='info')
     task = Draw3DSkeletonMotion(
         task_name=task_name, skeleton_motion=skeleton_motion, frame_index=0
     )
-    plotter = Matplotlib3DPlotter(task)
+    plotter = Matplotlib3DPlotter(task, verbose=verbose)
     for frame_id in range(len(skeleton_motion)):
         if frame_id % skip_n != 0:
             continue
         task.update(frame_id)
         plotter.update()
+    plotter.set_label()
     plotter.show()
 
 
-def plot_skeleton_motion_interactive_base(skeleton_motion, task_name=""):
+def plot_skeleton_motion_interactive_base(skeleton_motion, task_name="", verbose=False):
     class PlotParams:
         def __init__(self, total_num_frames):
             self.current_frame = 0
@@ -112,10 +121,11 @@ def plot_skeleton_motion_interactive_base(skeleton_motion, task_name=""):
     task = Draw3DSkeletonMotion(
         task_name=task_name, skeleton_motion=skeleton_motion, frame_index=0
     )
-    plotter = Matplotlib3DPlotter(task)
+    plotter = Matplotlib3DPlotter(task, verbose=verbose)
 
     plot_params = PlotParams(total_num_frames=len(skeleton_motion))
-    print("Entered interactive plot - press 'n' to quit, 'h' for a list of commands")
+    rf.logger.beauty_print("Entering interactive plot - press 'x' to play/pause, 'n' to quit, "
+                           "'h' for a list of commands", type="info")
 
     def press(event):
         if event.key == "x":
@@ -143,20 +153,20 @@ def plot_skeleton_motion_interactive_base(skeleton_motion, task_name=""):
         elif event.key == "h":
             rows, columns = os.popen("stty size", "r").read().split()
             columns = int(columns)
-            print("=" * columns)
-            print("x: play/pause")
-            print("z: previous frame")
-            print("c: next frame")
-            print("a: jump 10 frames back")
-            print("d: jump 10 frames forward")
-            print("w: looping/non-looping")
-            print("v: double speed (this can be applied multiple times)")
-            print("b: half speed (this can be applied multiple times)")
-            print("n: quit")
-            print("h: help")
-            print("=" * columns)
+            rf.logger.beauty_print("=" * columns)
+            rf.logger.beauty_print("x: play/pause")
+            rf.logger.beauty_print("z: previous frame")
+            rf.logger.beauty_print("c: next frame")
+            rf.logger.beauty_print("a: jump 10 frames back")
+            rf.logger.beauty_print("d: jump 10 frames forward")
+            rf.logger.beauty_print("w: looping/non-looping")
+            rf.logger.beauty_print("v: double speed (this can be applied multiple times)")
+            rf.logger.beauty_print("b: half speed (this can be applied multiple times)")
+            rf.logger.beauty_print("n: quit")
+            rf.logger.beauty_print("h: help")
+            rf.logger.beauty_print("=" * columns)
 
-        print(
+        rf.logger.beauty_print(
             'current frame index: {}/{} (press "n" to quit)'.format(
                 plot_params.current_frame, plot_params.total_num_frames - 1
             )
@@ -186,16 +196,17 @@ def plot_skeleton_motion_interactive_base(skeleton_motion, task_name=""):
         plotter.update()
 
 
-def plot_skeleton_motion_interactive(skeleton_motion, task_name=""):
+def plot_skeleton_motion_interactive(skeleton_motion, task_name="", verbose=False):
     """
     Visualize a skeleton motion along its first dimension interactively.
 
     :param skeleton_motion:
     :param task_name:
+    :param verbose: turn True to plot joint names
     :type skeleton_motion: SkeletonMotion
     :type task_name: string, optional
     """
-    for _ in plot_skeleton_motion_interactive_base(skeleton_motion, task_name):
+    for _ in plot_skeleton_motion_interactive_base(skeleton_motion, task_name, verbose=verbose):
         pass
 
 
@@ -205,6 +216,4 @@ def plot_skeleton_motion_interactive_multiple(*callables, sync=True):
             for p1, p2 in zip(_[:-1], _[1:]):
                 p2.sync(p1)
 
-
 # def plot_skeleton_motion_interactive_multiple_same(skeleton_motions, task_name=""):
-

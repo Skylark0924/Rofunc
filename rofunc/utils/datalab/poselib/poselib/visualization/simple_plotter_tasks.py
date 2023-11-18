@@ -103,6 +103,7 @@ class DrawXDLines(BasePlotterTask):
 
 class DrawXDDots(BasePlotterTask):
     _dots: np.ndarray
+    _dot_names: np.ndarray
     _color: str
     _marker_size: int
     _alpha: float
@@ -112,6 +113,7 @@ class DrawXDDots(BasePlotterTask):
         self,
         task_name: str,
         dots: np.ndarray,
+        dot_names: np.ndarray,
         color: str = "blue",
         marker_size: int = 10,
         alpha: float = 1.0,
@@ -122,10 +124,11 @@ class DrawXDDots(BasePlotterTask):
         self._marker_size = marker_size
         self._alpha = alpha
         self._influence_lim = influence_lim
-        self.update(dots)
+        self.update(dots, dot_names)
 
-    def update(self, dots):
+    def update(self, dots, dot_names):
         self._dots = np.array(dots)
+        self._dot_names = np.array(dot_names)
         shape = self._dots.shape
         assert shape[-1] == self.dim and len(shape) == 2
 

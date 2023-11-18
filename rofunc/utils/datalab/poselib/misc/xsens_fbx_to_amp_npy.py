@@ -223,7 +223,7 @@ def main(args):
 
     amp_humanoid_tpose_file = os.path.join(
         os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "data/amp_humanoid_tpose.npy"
+            os.path.dirname(os.path.abspath(__file__)), "../data/amp_humanoid_tpose.npy"
         )
     )
 

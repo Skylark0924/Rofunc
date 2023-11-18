@@ -11,7 +11,7 @@ env:
   asset:
     robot_name: "Humanoid"
     assetRoot:
-    assetFile: "mjcf/hotu_humanoid_w_hand.xml"
+    assetFile: "mjcf/hotu_humanoid_w_qbhand.xml"
     init_pose: [0.0, 0.0, 1.8, 0.0, 0.0, 0.0, 1]
     fix_base_link: True
     flip_visual_attachments: False
