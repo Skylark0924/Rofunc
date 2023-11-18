@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2022, NVIDIA Corporation
+# Copyright (c) 2018-2023, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from isaacgym.torch_utils import *
-import torch
+# from isaacgym.torch_utils import *
+# import torch
 import json
 import numpy as np
 
@@ -49,6 +49,7 @@ Data required for retargeting are stored in a retarget config dictionary as a js
 
 VISUALIZE = False
 
+
 def project_joints(motion):
     right_upper_arm_id = motion.skeleton_tree._node_indices["right_upper_arm"]
     right_lower_arm_id = motion.skeleton_tree._node_indices["right_lower_arm"]
@@ -56,14 +57,14 @@ def project_joints(motion):
     left_upper_arm_id = motion.skeleton_tree._node_indices["left_upper_arm"]
     left_lower_arm_id = motion.skeleton_tree._node_indices["left_lower_arm"]
     left_hand_id = motion.skeleton_tree._node_indices["left_hand"]
-    
+
     right_thigh_id = motion.skeleton_tree._node_indices["right_thigh"]
     right_shin_id = motion.skeleton_tree._node_indices["right_shin"]
     right_foot_id = motion.skeleton_tree._node_indices["right_foot"]
     left_thigh_id = motion.skeleton_tree._node_indices["left_thigh"]
     left_shin_id = motion.skeleton_tree._node_indices["left_shin"]
     left_foot_id = motion.skeleton_tree._node_indices["left_foot"]
-    
+
     device = motion.global_translation.device
 
     # right arm
@@ -72,7 +73,7 @@ def project_joints(motion):
     right_hand_pos = motion.global_translation[..., right_hand_id, :]
     right_shoulder_rot = motion.local_rotation[..., right_upper_arm_id, :]
     right_elbow_rot = motion.local_rotation[..., right_lower_arm_id, :]
-    
+
     right_arm_delta0 = right_upper_arm_pos - right_lower_arm_pos
     right_arm_delta1 = right_hand_pos - right_lower_arm_pos
     right_arm_delta0 = right_arm_delta0 / torch.norm(right_arm_delta0, dim=-1, keepdim=True)
@@ -80,9 +81,10 @@ def project_joints(motion):
     right_elbow_dot = torch.sum(-right_arm_delta0 * right_arm_delta1, dim=-1)
     right_elbow_dot = torch.clamp(right_elbow_dot, -1.0, 1.0)
     right_elbow_theta = torch.acos(right_elbow_dot)
-    right_elbow_q = quat_from_angle_axis(-torch.abs(right_elbow_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]), 
-                                            device=device, dtype=torch.float32))
-    
+    right_elbow_q = quat_from_angle_axis(-torch.abs(right_elbow_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]),
+                                                                                     device=device,
+                                                                                     dtype=torch.float32))
+
     right_elbow_local_dir = motion.skeleton_tree.local_translation[right_hand_id]
     right_elbow_local_dir = right_elbow_local_dir / torch.norm(right_elbow_local_dir)
     right_elbow_local_dir_tile = torch.tile(right_elbow_local_dir.unsqueeze(0), [right_elbow_rot.shape[0], 1])
@@ -94,14 +96,14 @@ def project_joints(motion):
     right_arm_theta = torch.where(right_elbow_local_dir0[..., 1] <= 0, right_arm_theta, -right_arm_theta)
     right_arm_q = quat_from_angle_axis(right_arm_theta, right_elbow_local_dir.unsqueeze(0))
     right_shoulder_rot = quat_mul(right_shoulder_rot, right_arm_q)
-    
+
     # left arm
     left_upper_arm_pos = motion.global_translation[..., left_upper_arm_id, :]
     left_lower_arm_pos = motion.global_translation[..., left_lower_arm_id, :]
     left_hand_pos = motion.global_translation[..., left_hand_id, :]
     left_shoulder_rot = motion.local_rotation[..., left_upper_arm_id, :]
     left_elbow_rot = motion.local_rotation[..., left_lower_arm_id, :]
-    
+
     left_arm_delta0 = left_upper_arm_pos - left_lower_arm_pos
     left_arm_delta1 = left_hand_pos - left_lower_arm_pos
     left_arm_delta0 = left_arm_delta0 / torch.norm(left_arm_delta0, dim=-1, keepdim=True)
@@ -109,8 +111,8 @@ def project_joints(motion):
     left_elbow_dot = torch.sum(-left_arm_delta0 * left_arm_delta1, dim=-1)
     left_elbow_dot = torch.clamp(left_elbow_dot, -1.0, 1.0)
     left_elbow_theta = torch.acos(left_elbow_dot)
-    left_elbow_q = quat_from_angle_axis(-torch.abs(left_elbow_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]), 
-                                        device=device, dtype=torch.float32))
+    left_elbow_q = quat_from_angle_axis(-torch.abs(left_elbow_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]),
+                                                                                   device=device, dtype=torch.float32))
 
     left_elbow_local_dir = motion.skeleton_tree.local_translation[left_hand_id]
     left_elbow_local_dir = left_elbow_local_dir / torch.norm(left_elbow_local_dir)
@@ -123,14 +125,14 @@ def project_joints(motion):
     left_arm_theta = torch.where(left_elbow_local_dir0[..., 1] <= 0, left_arm_theta, -left_arm_theta)
     left_arm_q = quat_from_angle_axis(left_arm_theta, left_elbow_local_dir.unsqueeze(0))
     left_shoulder_rot = quat_mul(left_shoulder_rot, left_arm_q)
-    
+
     # right leg
     right_thigh_pos = motion.global_translation[..., right_thigh_id, :]
     right_shin_pos = motion.global_translation[..., right_shin_id, :]
     right_foot_pos = motion.global_translation[..., right_foot_id, :]
     right_hip_rot = motion.local_rotation[..., right_thigh_id, :]
     right_knee_rot = motion.local_rotation[..., right_shin_id, :]
-    
+
     right_leg_delta0 = right_thigh_pos - right_shin_pos
     right_leg_delta1 = right_foot_pos - right_shin_pos
     right_leg_delta0 = right_leg_delta0 / torch.norm(right_leg_delta0, dim=-1, keepdim=True)
@@ -138,9 +140,9 @@ def project_joints(motion):
     right_knee_dot = torch.sum(-right_leg_delta0 * right_leg_delta1, dim=-1)
     right_knee_dot = torch.clamp(right_knee_dot, -1.0, 1.0)
     right_knee_theta = torch.acos(right_knee_dot)
-    right_knee_q = quat_from_angle_axis(torch.abs(right_knee_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]), 
-                                        device=device, dtype=torch.float32))
-    
+    right_knee_q = quat_from_angle_axis(torch.abs(right_knee_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]),
+                                                                                  device=device, dtype=torch.float32))
+
     right_knee_local_dir = motion.skeleton_tree.local_translation[right_foot_id]
     right_knee_local_dir = right_knee_local_dir / torch.norm(right_knee_local_dir)
     right_knee_local_dir_tile = torch.tile(right_knee_local_dir.unsqueeze(0), [right_knee_rot.shape[0], 1])
@@ -152,14 +154,14 @@ def project_joints(motion):
     right_leg_theta = torch.where(right_knee_local_dir0[..., 1] >= 0, right_leg_theta, -right_leg_theta)
     right_leg_q = quat_from_angle_axis(right_leg_theta, right_knee_local_dir.unsqueeze(0))
     right_hip_rot = quat_mul(right_hip_rot, right_leg_q)
-    
+
     # left leg
     left_thigh_pos = motion.global_translation[..., left_thigh_id, :]
     left_shin_pos = motion.global_translation[..., left_shin_id, :]
     left_foot_pos = motion.global_translation[..., left_foot_id, :]
     left_hip_rot = motion.local_rotation[..., left_thigh_id, :]
     left_knee_rot = motion.local_rotation[..., left_shin_id, :]
-    
+
     left_leg_delta0 = left_thigh_pos - left_shin_pos
     left_leg_delta1 = left_foot_pos - left_shin_pos
     left_leg_delta0 = left_leg_delta0 / torch.norm(left_leg_delta0, dim=-1, keepdim=True)
@@ -167,9 +169,9 @@ def project_joints(motion):
     left_knee_dot = torch.sum(-left_leg_delta0 * left_leg_delta1, dim=-1)
     left_knee_dot = torch.clamp(left_knee_dot, -1.0, 1.0)
     left_knee_theta = torch.acos(left_knee_dot)
-    left_knee_q = quat_from_angle_axis(torch.abs(left_knee_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]), 
-                                        device=device, dtype=torch.float32))
-    
+    left_knee_q = quat_from_angle_axis(torch.abs(left_knee_theta), torch.tensor(np.array([[0.0, 1.0, 0.0]]),
+                                                                                device=device, dtype=torch.float32))
+
     left_knee_local_dir = motion.skeleton_tree.local_translation[left_foot_id]
     left_knee_local_dir = left_knee_local_dir / torch.norm(left_knee_local_dir)
     left_knee_local_dir_tile = torch.tile(left_knee_local_dir.unsqueeze(0), [left_knee_rot.shape[0], 1])
@@ -181,32 +183,31 @@ def project_joints(motion):
     left_leg_theta = torch.where(left_knee_local_dir0[..., 1] >= 0, left_leg_theta, -left_leg_theta)
     left_leg_q = quat_from_angle_axis(left_leg_theta, left_knee_local_dir.unsqueeze(0))
     left_hip_rot = quat_mul(left_hip_rot, left_leg_q)
-    
 
     new_local_rotation = motion.local_rotation.clone()
     new_local_rotation[..., right_upper_arm_id, :] = right_shoulder_rot
     new_local_rotation[..., right_lower_arm_id, :] = right_elbow_q
     new_local_rotation[..., left_upper_arm_id, :] = left_shoulder_rot
     new_local_rotation[..., left_lower_arm_id, :] = left_elbow_q
-    
+
     new_local_rotation[..., right_thigh_id, :] = right_hip_rot
     new_local_rotation[..., right_shin_id, :] = right_knee_q
     new_local_rotation[..., left_thigh_id, :] = left_hip_rot
     new_local_rotation[..., left_shin_id, :] = left_knee_q
-    
+
     new_local_rotation[..., left_hand_id, :] = quat_identity([1])
     new_local_rotation[..., right_hand_id, :] = quat_identity([1])
 
-    new_sk_state = SkeletonState.from_rotation_and_root_translation(motion.skeleton_tree, new_local_rotation, motion.root_translation, is_local=True)
+    new_sk_state = SkeletonState.from_rotation_and_root_translation(motion.skeleton_tree, new_local_rotation,
+                                                                    motion.root_translation, is_local=True)
     new_motion = SkeletonMotion.from_skeleton_state(new_sk_state, fps=motion.fps)
-    
+
     return new_motion
 
 
-def main():
+def main(retarget_cfg_path):
     # load retarget config
-    retarget_data_path = "data/configs/retarget_cmu_to_amp.json"
-    with open(retarget_data_path) as f:
+    with open(retarget_cfg_path) as f:
         retarget_data = json.load(f)
 
     # load and visualize t-pose files
@@ -229,11 +230,11 @@ def main():
 
     # run retargeting
     target_motion = source_motion.retarget_to_by_tpose(
-      joint_mapping=retarget_data["joint_mapping"],
-      source_tpose=source_tpose,
-      target_tpose=target_tpose,
-      rotation_to_target_skeleton=rotation_to_target_skeleton,
-      scale_to_target_skeleton=retarget_data["scale"]
+        joint_mapping=retarget_data["joint_mapping"],
+        source_tpose=source_tpose,
+        target_tpose=target_tpose,
+        rotation_to_target_skeleton=rotation_to_target_skeleton,
+        scale_to_target_skeleton=retarget_data["scale"]
     )
 
     # keep frames between [trim_frame_beg, trim_frame_end - 1]
@@ -241,16 +242,17 @@ def main():
     frame_end = retarget_data["trim_frame_end"]
     if (frame_beg == -1):
         frame_beg = 0
-        
+
     if (frame_end == -1):
         frame_end = target_motion.local_rotation.shape[0]
-        
+
     local_rotation = target_motion.local_rotation
     root_translation = target_motion.root_translation
     local_rotation = local_rotation[frame_beg:frame_end, ...]
     root_translation = root_translation[frame_beg:frame_end, ...]
-      
-    new_sk_state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, local_rotation, root_translation, is_local=True)
+
+    new_sk_state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, local_rotation,
+                                                                    root_translation, is_local=True)
     target_motion = SkeletonMotion.from_skeleton_state(new_sk_state, fps=target_motion.fps)
 
     # need to convert some joints from 3D to 1D (e.g. elbows and knees)
@@ -262,12 +264,13 @@ def main():
     tar_global_pos = target_motion.global_translation
     min_h = torch.min(tar_global_pos[..., 2])
     root_translation[:, 2] += -min_h
-    
+
     # adjust the height of the root to avoid ground penetration
     root_height_offset = retarget_data["root_height_offset"]
     root_translation[:, 2] += root_height_offset
-    
-    new_sk_state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, local_rotation, root_translation, is_local=True)
+
+    new_sk_state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, local_rotation,
+                                                                    root_translation, is_local=True)
     target_motion = SkeletonMotion.from_skeleton_state(new_sk_state, fps=target_motion.fps)
 
     # save retargeted motion
@@ -275,8 +278,10 @@ def main():
 
     # visualize retargeted motion
     plot_skeleton_motion_interactive(target_motion)
-    
+
     return
 
+
 if __name__ == '__main__':
-    main()
+    retarget_cfg_path = "../data/configs/retarget_samp_to_amp.json"
+    main(retarget_cfg_path)

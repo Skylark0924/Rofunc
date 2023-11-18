@@ -108,10 +108,10 @@ class Matplotlib2DPlotter(BasePlotter):
 
     def _set_lim(self):
         if not (
-            self._curr_x_min is None
-            or self._curr_x_max is None
-            or self._curr_y_min is None
-            or self._curr_y_max is None
+                self._curr_x_min is None
+                or self._curr_x_max is None
+                or self._curr_y_min is None
+                or self._curr_y_max is None
         ):
             self._ax.set_xlim(self._curr_x_min, self._curr_x_max)
             self._ax.set_ylim(self._curr_y_min, self._curr_y_max)
@@ -123,7 +123,7 @@ class Matplotlib2DPlotter(BasePlotter):
 
     @staticmethod
     def _trail_extract_xy_impl(index, trail_task):
-        return (trail_task[index : index + 2, 0], trail_task[index : index + 2, 1])
+        return (trail_task[index: index + 2, 0], trail_task[index: index + 2, 1])
 
     def _lines_create_impl(self, lines_task):
         color = lines_task.color
@@ -235,10 +235,11 @@ class Matplotlib3DPlotter(BasePlotter):
     _create_impl_callables: Dict[str, Callable]
     _update_impl_callables: Dict[str, Callable]
 
-    def __init__(self, task: "BasePlotterTask") -> None:
+    def __init__(self, task: "BasePlotterTask", verbose=False) -> None:
         self._fig = plt.figure()
         self._ax = p3.Axes3D(self._fig)
         self._artist_cache = {}
+        self.verbose = verbose
 
         self._create_impl_callables = {
             "Draw3DLines": self._lines_create_impl,
@@ -260,6 +261,11 @@ class Matplotlib3DPlotter(BasePlotter):
     @property
     def fig(self):
         return self._fig
+
+    def set_label(self):
+        self.ax.set_xlabel("X")
+        self.ax.set_ylabel("Y")
+        self.ax.set_zlabel("Z")
 
     def show(self):
         plt.show()
@@ -296,12 +302,12 @@ class Matplotlib3DPlotter(BasePlotter):
 
     def _set_lim(self):
         if not (
-            self._curr_x_min is None
-            or self._curr_x_max is None
-            or self._curr_y_min is None
-            or self._curr_y_max is None
-            or self._curr_z_min is None
-            or self._curr_z_max is None
+                self._curr_x_min is None
+                or self._curr_x_max is None
+                or self._curr_y_min is None
+                or self._curr_y_max is None
+                or self._curr_z_min is None
+                or self._curr_z_max is None
         ):
             self._ax.set_xlim3d(self._curr_x_min, self._curr_x_max)
             self._ax.set_ylim3d(self._curr_y_min, self._curr_y_max)
@@ -315,9 +321,9 @@ class Matplotlib3DPlotter(BasePlotter):
     @staticmethod
     def _trail_extract_xyz_impl(index, trail_task):
         return (
-            trail_task[index : index + 2, 0],
-            trail_task[index : index + 2, 1],
-            trail_task[index : index + 2, 2],
+            trail_task[index: index + 2, 0],
+            trail_task[index: index + 2, 1],
+            trail_task[index: index + 2, 2],
         )
 
     def _lines_create_impl(self, lines_task):
@@ -354,6 +360,10 @@ class Matplotlib3DPlotter(BasePlotter):
             markersize=dots_task.marker_size,
             alpha=dots_task.alpha,
         )[0]
+
+        if self.verbose:
+            for i in range(len(dots_task._dot_names)):
+                self._ax.text(dots_task[i, 0], dots_task[i, 1], dots_task[i, 2], dots_task._dot_names[i])
 
     def _dots_update_impl(self, dots_task):
         dots_artist = self._artist_cache[dots_task.task_name]
@@ -417,6 +427,7 @@ class Matplotlib3DPlotter(BasePlotter):
         self._ax.set_zlim3d([zmean - plot_radius, zmean + plot_radius])
 
     def _draw(self):
+        self.set_label()
         self._set_lim()
         self._set_aspect_equal_3d()
         self._fig.canvas.draw()
