@@ -173,12 +173,12 @@ def amp_npy_from_fbx(fbx_file, tpose_file, amp_tpose_file, verbose=True):
 
 
 def main(is_parallel, verbose):
-    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../examples/data/hotu")
+    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../../examples/data/hotu")
     fbx_files = sorted(glob.glob(os.path.join(data_dir, '*.fbx')))
     tpose_file = os.path.join(data_dir, "xsens_fbx_tpose.npy")
 
     amp_humanoid_tpose_file = os.path.join(os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "data/hotu_humanoid_generated_tpose.npy"
+        os.path.dirname(os.path.abspath(__file__)), "../data/hotu_humanoid_generated_tpose.npy"
     ))
 
     if is_parallel:
