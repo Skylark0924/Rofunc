@@ -22,7 +22,7 @@ def inference(custom_args):
         f"device_id=0",
         f"rl_device=cuda:{gpu_id}",
         "headless={}".format(False),
-        "num_envs={}".format(16),
+        "num_envs={}".format(1),
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     gpu_id = 1
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_name", type=str, default="HOTU_Humanoid")
+    parser.add_argument("--config_name", type=str, default="HOTUHumanoidWQbhandNoVirtual")
     parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009_amp.npy")
     custom_args = parser.parse_args()
 

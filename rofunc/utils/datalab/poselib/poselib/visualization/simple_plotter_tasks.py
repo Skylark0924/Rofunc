@@ -113,7 +113,7 @@ class DrawXDDots(BasePlotterTask):
         self,
         task_name: str,
         dots: np.ndarray,
-        dot_names: np.ndarray,
+        dot_names: np.ndarray = None,
         color: str = "blue",
         marker_size: int = 10,
         alpha: float = 1.0,
@@ -126,7 +126,7 @@ class DrawXDDots(BasePlotterTask):
         self._influence_lim = influence_lim
         self.update(dots, dot_names)
 
-    def update(self, dots, dot_names):
+    def update(self, dots, dot_names=None):
         self._dots = np.array(dots)
         self._dot_names = np.array(dot_names)
         shape = self._dots.shape

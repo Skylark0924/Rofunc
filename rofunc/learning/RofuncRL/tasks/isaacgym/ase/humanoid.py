@@ -323,7 +323,7 @@ class Humanoid(VecTask):
             # left_foot (14/3/25 28)
             self._dof_body_ids = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]  # len=12
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]  # len=12+1
-            self._dof_obs_size = 72
+            self._dof_obs_size = 72  # 12 * 6 (joint_obs_size) = 72
             self._num_actions = 28
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
         elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
@@ -335,9 +335,25 @@ class Humanoid(VecTask):
         elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu_humanoid.xml"]:
             self._dof_body_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]  # len=14
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]  # len=14+1
-            self._dof_obs_size = 84
+            self._dof_obs_size = 84  # 14 * 6 (joint_obs_size) = 72
             self._num_actions = 34
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
+        elif asset_file in "mjcf/hotu_humanoid_w_qbhand.xml":
+            self._dof_body_ids = [*[i for i in range(1, 6)], 7, 9, 11, 14, 16, 18, 21, 23, 25, 28, 30, 32, 35, 37, 39,
+                                  *[i for i in range(40, 43)], 44, 46, 48, 51, 53, 55, 58, 60, 62, 65, 67, 69, 72, 74,
+                                  76, *[i for i in range(77, 83)]]  # len=44
+            self._dof_offsets = [0, 3, 6, 9, 10, *[i for i in range(13, 28)], 28, 31, 32, *[i for i in range(35, 50)],
+                                 50, 53, 54, 57, 60, 61, 64]  # len=44+1
+            self._dof_obs_size = 264  # 44 * 6 (joint_obs_size) = 264
+            self._num_actions = 64
+            self._num_obs = 1 + 83 * (3 + 6 + 3 + 3) - 3  # 1243
+        elif asset_file in "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml":
+            self._dof_body_ids = [*[i for i in range(1, 45)]]  # len=44
+            self._dof_offsets = [0, 3, 6, 9, 10, *[i for i in range(13, 28)], 28, 31, 32, *[i for i in range(35, 50)],
+                                 50, 53, 54, 57, 60, 61, 64]  # len=44+1
+            self._dof_obs_size = 264  # 44 * 6 (joint_obs_size) = 264
+            self._num_actions = 64
+            self._num_obs = 1 + 45 * (3 + 6 + 3 + 3) - 3  # 673
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
 
