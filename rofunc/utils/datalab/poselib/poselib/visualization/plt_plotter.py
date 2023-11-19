@@ -35,6 +35,7 @@ from typing import Any, Callable, Dict, List
 
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
+from matplotlib.artist import Artist
 
 import numpy as np
 
@@ -362,8 +363,10 @@ class Matplotlib3DPlotter(BasePlotter):
         )[0]
 
         if self.verbose:
+            self.text_list = []
             for i in range(len(dots_task._dot_names)):
-                self._ax.text(dots_task[i, 0], dots_task[i, 1], dots_task[i, 2], dots_task._dot_names[i])
+                f = self._ax.text(dots_task[i, 0], dots_task[i, 1], dots_task[i, 2], dots_task._dot_names[i])
+                self.text_list.append(f)
 
     def _dots_update_impl(self, dots_task):
         dots_artist = self._artist_cache[dots_task.task_name]
@@ -371,6 +374,22 @@ class Matplotlib3DPlotter(BasePlotter):
         dots_artist.set_3d_properties(dots_task[:, 2])
         if dots_task.influence_lim:
             self._update_lim(dots_task[:, 0], dots_task[:, 1], dots_task[:, 2])
+
+        if self.verbose:  # TODO: Update text
+            # for i in range(len(dots_task._dot_names)):
+            #     self._ax.text(dots_task[i, 0], dots_task[i, 1], dots_task[i, 2], dots_task._dot_names[i])
+
+            if len(self.text_list) > 0:
+                for i in range(len(self.text_list)):
+                    self.text_list[i].set_visible(False)
+                # .remove()/
+            for i in range(len(dots_task._dot_names)):
+                self._ax.text(dots_task[i, 0], dots_task[i, 1], dots_task[i, 2], dots_task._dot_names[i])
+            # for i in range(len(self.text_list)):
+            #     self.text_list[i].set_position((dots_task[i, 0], dots_task[i, 1], dots_task[i, 2]))
+            #     self.text_list[i].set_text(dots_task._dot_names[i])
+                # f = self._ax.text(dots_task[i, 0], dots_task[i, 1], dots_task[i, 2], dots_task._dot_names[i])
+                # self.text_list.append(f)
 
     def _trail_create_impl(self, trail_task):
         color = trail_task.color

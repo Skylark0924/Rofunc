@@ -175,6 +175,7 @@ class Draw3DSkeletonMotion(BasePlotterTask):
                 ),
                 axis=0,
             )
+        # dot_names = np.array(curr_skeleton_motion.skeleton_tree.node_names)
         self._skeleton_state_task.update(curr_skeleton_motion)
         self._com_trail_task.update(self._com_pos)
         self._update(*Draw3DSkeletonMotion._get_vel_and_avel(curr_skeleton_motion))
