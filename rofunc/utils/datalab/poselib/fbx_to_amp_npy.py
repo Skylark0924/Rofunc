@@ -192,6 +192,7 @@ def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=True):
     )
     # visualize motion
     if visualize:
+        rf.logger.beauty_print("Plot Xsens skeleton motion", type="module")
         plot_skeleton_motion_interactive(motion)
     return motion
 
@@ -200,11 +201,13 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     # load and visualize t-pose files
     source_tpose = SkeletonState.from_file(retarget_cfg["source_tpose"])
     if visualize:
+        rf.logger.beauty_print("Plot Xsens T-pose", type="module")
         plot_skeleton_state(source_tpose)
 
     target_tpose = SkeletonState.from_file(retarget_cfg["target_tpose"])
     if visualize:
-        plot_skeleton_state(target_tpose)
+        rf.logger.beauty_print("Plot HOTU T-pose", type="module")
+        plot_skeleton_state(target_tpose, verbose=True)
 
     # parse data from retarget config
     rotation_to_target_skeleton = torch.tensor(retarget_cfg["rotation"])
@@ -218,6 +221,9 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         scale_to_target_skeleton=retarget_cfg["scale"]
     )
 
+    # state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, target_motion.rotation[0],
+    #                                                          target_motion.root_translation[0], is_local=True)
+    # plot_skeleton_state(state, verbose=True)
     # plot_skeleton_motion_interactive(target_motion)
 
     # keep frames between [trim_frame_beg, trim_frame_end - 1]
@@ -263,7 +269,12 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
 
     if visualize:
         # visualize retargeted motion
-        plot_skeleton_motion_interactive(target_motion)
+        rf.logger.beauty_print("Plot HOTU skeleton motion", type="module")
+        plot_skeleton_motion_interactive(target_motion, verbose=False)
+
+        # state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, target_motion.rotation[0],
+        #                                                          target_motion.root_translation[0], is_local=True)
+        # plot_skeleton_state(state, verbose=True)
 
 
 def npy_from_fbx(fbx_file):
@@ -282,8 +293,9 @@ def npy_from_fbx(fbx_file):
     config = {
         # "target_motion_path": "/home/ubuntu/Github/Rofunc/examples/data/hotu/024_amp_3.npy",
         "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_xsens_w_gloves_tpose.npy"),
-        "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_tpose.npy"),
+        "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
         "joint_mapping": {  # Left: Xsens, Right: MJCF
+            # hotu_humanoid.xml
             "Hips": "pelvis",
             "LeftUpLeg": "left_thigh",
             "LeftLeg": "left_shin",
@@ -298,7 +310,38 @@ def npy_from_fbx(fbx_file):
             "LeftHand": "left_hand",
             "RightArm": "right_upper_arm",
             "RightForeArm": "right_lower_arm",
-            "RightHand": "right_hand"
+            "RightHand": "right_hand",
+            # hotu_humanoid_w_qbhand.xml
+            "LeftHandThumb1": "left_qbhand_thumb_knuckle_link",
+            "LeftHandThumb2": "left_qbhand_thumb_proximal_link",
+            "LeftHandThumb3": "left_qbhand_thumb_distal_link",
+            "LeftHandIndex1": "left_qbhand_index_proximal_link",
+            "LeftHandIndex2": "left_qbhand_index_middle_link",
+            "LeftHandIndex3": "left_qbhand_index_distal_link",
+            "LeftHandMiddle1": "left_qbhand_middle_proximal_link",
+            "LeftHandMiddle2": "left_qbhand_middle_middle_link",
+            "LeftHandMiddle3": "left_qbhand_middle_distal_link",
+            "LeftHandRing1": "left_qbhand_ring_proximal_link",
+            "LeftHandRing2": "left_qbhand_ring_middle_link",
+            "LeftHandRing3": "left_qbhand_ring_distal_link",
+            "LeftHandPinky1": "left_qbhand_little_proximal_link",
+            "LeftHandPinky2": "left_qbhand_little_middle_link",
+            "LeftHandPinky3": "left_qbhand_little_distal_link",
+            "RightHandThumb1": "right_qbhand_thumb_knuckle_link",
+            "RightHandThumb2": "right_qbhand_thumb_proximal_link",
+            "RightHandThumb3": "right_qbhand_thumb_distal_link",
+            "RightHandIndex1": "right_qbhand_index_proximal_link",
+            "RightHandIndex2": "right_qbhand_index_middle_link",
+            "RightHandIndex3": "right_qbhand_index_distal_link",
+            "RightHandMiddle1": "right_qbhand_middle_proximal_link",
+            "RightHandMiddle2": "right_qbhand_middle_middle_link",
+            "RightHandMiddle3": "right_qbhand_middle_distal_link",
+            "RightHandRing1": "right_qbhand_ring_proximal_link",
+            "RightHandRing2": "right_qbhand_ring_middle_link",
+            "RightHandRing3": "right_qbhand_ring_distal_link",
+            "RightHandPinky1": "right_qbhand_little_proximal_link",
+            "RightHandPinky2": "right_qbhand_little_middle_link",
+            "RightHandPinky3": "right_qbhand_little_distal_link",
         },
         # "rotation": [0.707, 0, 0, 0.707], xyzw
         "rotation": [0.5, 0.5, 0.5, 0.5],
@@ -310,15 +353,15 @@ def npy_from_fbx(fbx_file):
 
     source_motion = motion_from_fbx(fbx_file, root_joint="Hips", fps=60, visualize=False)
     config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, source_motion, visualize=False)
+    motion_retargeting(config, source_motion, visualize=True)
 
 
 if __name__ == '__main__':
     rofunc_path = rf.oslab.get_rofunc_path()
     # fbx_dir = os.path.join(rofunc_path, "../examples/data/hotu")
-    fbx_dir = "/home/ubuntu/Data/2023_11_15_HED/has_gloves"
-    fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
-    # fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
+    # fbx_dir = "/home/ubuntu/Data/2023_11_15_HED/has_gloves"
+    # fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
+    fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
 
     parallel = False
     if parallel:

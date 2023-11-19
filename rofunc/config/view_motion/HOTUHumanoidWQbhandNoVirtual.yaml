@@ -1,0 +1,8 @@
+class_name: HumanoidViewMotion
+asset_name: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
+asset_body_num: 83
+asset_joint_num: 102
+asset_dof_num: 100
+
+keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot"]
+contactBodies: ["right_foot", "left_foot"]
