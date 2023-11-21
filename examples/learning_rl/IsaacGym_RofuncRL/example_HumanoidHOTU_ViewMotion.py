@@ -15,10 +15,10 @@ from rofunc.learning.RofuncRL.trainers import Trainers
 
 def inference(custom_args):
     view_motion_config = load_view_motion_config(custom_args.config_name)
-    task_name = "HumanoidViewMotion"
+    task_name = "HumanoidHOTUViewMotion"
     args_overrides = [
         f"task={task_name}",
-        "train=HumanoidViewMotionASERofuncRL",
+        "train=HumanoidHOTUViewMotionRofuncRL",
         f"device_id=0",
         f"rl_device=cuda:{gpu_id}",
         "headless={}".format(False),
@@ -44,12 +44,12 @@ def inference(custom_args):
                                             force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map["ase"](cfg=cfg.train,
-                                            env=infer_env,
-                                            device=cfg.rl_device,
-                                            env_name=task_name,
-                                            hrl=False,
-                                            inference=True)
+    trainer = Trainers().trainer_map["hotu"](cfg=cfg.train,
+                                             env=infer_env,
+                                             device=cfg.rl_device,
+                                             env_name=task_name,
+                                             hrl=False,
+                                             inference=True)
 
     # Start inference
     trainer.inference()
@@ -64,7 +64,8 @@ if __name__ == "__main__":
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-010_amp.npy")
+    parser.add_argument("--motion_file", type=str,
+                        default="examples/data/hotu/test_data_02_hotu.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)

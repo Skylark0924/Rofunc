@@ -151,45 +151,9 @@ class HumanoidAMP(Humanoid):
     def _setup_character_props(self, key_bodies):
         super()._setup_character_props(key_bodies)
 
-        """
-        When body num is 15, the humanoid holds no object; when it is 16, humanoid holds one object which takes
-        as a body; when bn=17, the humanoid holds 2 objects
-        """
-        # asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
-        # asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         num_key_bodies = len(key_bodies)
 
-        # 13 = root_h (1) + root_rot (6) + root_linear_vel (3) + root_angular_vel (3)},
-        # dof_obs_size = dof_pos + dof_vel,
-        # key_body_positions = 3 * num_key_bodies
-        # if asset_body_num == 15:
-        #     if asset_joint_num == 28:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 28 + 3 * num_key_bodies
-        #         )
-        #     elif asset_joint_num == 34:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-        #         )
-        # elif asset_body_num == 16:
-        #     self._num_amp_obs_per_step = (
-        #         13 + self._dof_obs_size + 31 + 3 * num_key_bodies
-        #     )
-        # elif asset_body_num == 17:
-        #     if asset_joint_num == 34:
-        #         self._num_amp_obs_per_step = (
-        #             13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-        #         )
-        #     elif asset_joint_num == 38:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 38 + 3 * num_key_bodies
-        #         )
-        # elif asset_body_num == 19:
-        #     if asset_joint_num == 44:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 44 + 3 * num_key_bodies
-        #         )
         if asset_file == "mjcf/amp_humanoid.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 28 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
         elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
@@ -199,10 +163,7 @@ class HumanoidAMP(Humanoid):
         elif asset_file == "mjcf/hotu_humanoid_w_qbhand.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
         else:
-            print(f"Unsupported humanoid body num: {asset_file}")
-            assert False
-
-        return
+            raise ValueError(f"Unsupported humanoid body num: {asset_file}")
 
     def _load_motion(self, motion_file):
         assert self._dof_offsets[-1] == self.num_dof
