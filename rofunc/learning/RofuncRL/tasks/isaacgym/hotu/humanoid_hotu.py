@@ -1,45 +1,30 @@
-# Copyright (c) 2018-2022, NVIDIA Corporation
-# All rights reserved.
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
+#      https://www.apache.org/licenses/LICENSE-2.0
 #
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-#
-# 3. Neither the name of the copyright holder nor the names of its
-#    contributors may be used to endorse or promote products derived from
-#    this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
 from enum import Enum
 
-import torch
 from gym import spaces
 from isaacgym.torch_utils import *
 
 import rofunc as rf
-from rofunc.learning.RofuncRL.tasks.isaacgym.ase.motion_lib import MotionLib
-from rofunc.learning.RofuncRL.tasks.isaacgym.ase.humanoid import Humanoid, dof_to_obs
+from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.humanoid import Humanoid, dof_to_obs
+from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.motion_lib import MotionLib
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 
-class HumanoidAMP(Humanoid):
+class HumanoidHOTU(Humanoid):
     class StateInit(Enum):
         Default = 0
         Start = 1
@@ -50,7 +35,7 @@ class HumanoidAMP(Humanoid):
         self.cfg = cfg
 
         state_init = cfg["env"]["stateInit"]
-        self._state_init = HumanoidAMP.StateInit[state_init]
+        self._state_init = HumanoidHOTU.StateInit[state_init]
         self._hybrid_init_prob = cfg["env"]["hybridInitProb"]
         self._num_amp_obs_steps = cfg["env"]["numAMPObsSteps"]
         assert self._num_amp_obs_steps >= 2
@@ -199,7 +184,8 @@ class HumanoidAMP(Humanoid):
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
         elif asset_file == "mjcf/hotu_humanoid_w_qbhand.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
-        elif asset_file in ["mjcf/hotu_humanoid_w_qbhand_no_virtual.xml", "mjcf/hotu_humanoid_w_qbhand_no_virtual_no_quat.xml"]:
+        elif asset_file in ["mjcf/hotu_humanoid_w_qbhand_no_virtual.xml",
+                            "mjcf/hotu_humanoid_w_qbhand_no_virtual_no_quat.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
         else:
             print(f"Unsupported humanoid body num: {asset_file}")
@@ -227,14 +213,14 @@ class HumanoidAMP(Humanoid):
         return
 
     def _reset_actors(self, env_ids):
-        if self._state_init == HumanoidAMP.StateInit.Default:
+        if self._state_init == HumanoidHOTU.StateInit.Default:
             self._reset_default(env_ids)
         elif (
-                self._state_init == HumanoidAMP.StateInit.Start
-                or self._state_init == HumanoidAMP.StateInit.Random
+                self._state_init == HumanoidHOTU.StateInit.Start
+                or self._state_init == HumanoidHOTU.StateInit.Random
         ):
             self._reset_ref_state_init(env_ids)
-        elif self._state_init == HumanoidAMP.StateInit.Hybrid:
+        elif self._state_init == HumanoidHOTU.StateInit.Hybrid:
             self._reset_hybrid_state_init(env_ids)
         else:
             assert False, "Unsupported state initialization strategy: {:s}".format(
@@ -256,11 +242,11 @@ class HumanoidAMP(Humanoid):
         motion_ids = self._motion_lib.sample_motions(num_envs)
 
         if (
-                self._state_init == HumanoidAMP.StateInit.Random
-                or self._state_init == HumanoidAMP.StateInit.Hybrid
+                self._state_init == HumanoidHOTU.StateInit.Random
+                or self._state_init == HumanoidHOTU.StateInit.Hybrid
         ):
             motion_times = self._motion_lib.sample_time(motion_ids)
-        elif self._state_init == HumanoidAMP.StateInit.Start:
+        elif self._state_init == HumanoidHOTU.StateInit.Start:
             motion_times = torch.zeros(num_envs, device=self.device)
         else:
             assert (
