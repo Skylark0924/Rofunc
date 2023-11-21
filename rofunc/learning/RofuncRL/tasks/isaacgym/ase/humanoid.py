@@ -32,19 +32,15 @@ from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
-import rofunc as rf
-from rofunc.utils.oslab.path import get_rofunc_path
 from rofunc.learning.RofuncRL.tasks.isaacgym.base.vec_task import VecTask
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
+from rofunc.utils.oslab.path import get_rofunc_path
 
 
 class Humanoid(VecTask):
     def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture,
                  force_render):
-        # def __init__(self, config, sim_params, physics_engine, device_type, device_id, headless):
         self.cfg = config
-        # self.sim_params = sim_params
-        # self.physics_engine = physics_engine
 
         self._pd_control = self.cfg["env"]["pdControl"]
         self.power_scale = self.cfg["env"]["powerScale"]
@@ -140,8 +136,6 @@ class Humanoid(VecTask):
 
         if self.viewer is not None:
             self._init_camera()
-
-        return
 
     def get_obs_size(self):
         return self._num_obs
@@ -243,78 +237,8 @@ class Humanoid(VecTask):
 
         :param key_bodies:
         """
-        # asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
-        # asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
-        # num_key_bodies = len(key_bodies)
 
-        # The following are: body_name (body_id/body's joint num to its parent/offset pair)
-        # if asset_body_num == 15:
-        #     if asset_joint_num == 28:
-        #         # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
-        #         # right_hand (5/0, omitted as no joint to parent)
-        #         # left_upper_arm (6/3/10 13), left_lower_arm (7/1/13 14), left_hand (8/0), right_thigh (9/3/14 17),
-        #         # right_shin (10/1/17 18), right_foot (11/3/18 21), left_thigh (12/3/21 24), left_shin (13/1/24 25),
-        #         # left_foot (14/3/25 28)
-        #         self._dof_body_ids = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]  # len=12
-        #         self._dof_offsets = [0, 3, 6, 9, 10, 13, 14, 17, 18, 21, 24, 25, 28]  # len=12+1
-        #         self._dof_obs_size = 72
-        #         self._num_actions = 28
-        #         self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
-        #     elif asset_joint_num == 34:
-        #         # torso (1/3/0 3), head (2/3/3 6),
-        #         # right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10), right_hand (5/3/10 13)
-        #         # left_upper_arm (6/3/13 16), left_lower_arm (7/1/16 17), left_hand (8/3/17 20),
-        #         # right_thigh (9/3/20 23), right_shin (10/1/23 24), right_foot (11/3/24 27),
-        #         # left_thigh (12/3/27 30), left_shin (13/1/30 31), left_foot (14/3/31 34)
-        #         self._dof_body_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]  # len=14
-        #         self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]  # len=14+1
-        #         self._dof_obs_size = 84
-        #         self._num_actions = 34
-        #         self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
-        #     else:
-        #         raise NotImplementedError
-        # elif asset_body_num == 16:
-        #     self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 11, 12, 13, 14, 15, 16]
-        #     self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 21, 24, 27, 28, 31]
-        #     self._dof_obs_size = 78
-        #     self._num_actions = 31
-        #     self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-        # elif asset_body_num == 17:
-        #     if asset_joint_num == 34:
-        #         # The following are: body_name (body_id/body's joint num to its parent/offset pair)
-        #         # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
-        #         # right_hand (5/3/10 13), spoon (6/0), left_upper_arm (7/3/13 16), left_lower_arm (8/1/16 17),
-        #         # left_hand (9/3/17 20), pan (10/0), right_thigh (11/3/20 23), right_shin (12/1/23 24),
-        #         # right_foot (13/3/24 27), left_thigh (14/3/27 30), left_shin (15/1/30 31), left_foot (16/3/31 34)
-        #         self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16]
-        #         self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
-        #         self._dof_obs_size = 84
-        #         self._num_actions = 34
-        #         self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-        #     elif asset_joint_num == 38:
-        #         # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/3/9 12),
-        #         # right_hand (5/3/12 15), spoon (6/0), left_upper_arm (7/3/15 18), left_lower_arm (8/3/18 21),
-        #         # left_hand (9/3/21 24), pan (10/0), right_thigh (11/3/24 27), right_shin (12/1/27 28),
-        #         # right_foot (13/3/28 31), left_thigh (14/3/31 34), left_shin (15/1/34 35), left_foot (16/3/35 38)
-        #         self._dof_body_ids = [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16]
-        #         self._dof_offsets = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 28, 31, 34, 35, 38]
-        #         self._dof_obs_size = 84
-        #         self._num_actions = 38
-        #         self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-        # elif asset_body_num == 19:
-        #     if asset_joint_num == 44:
-        #         # torso (1/3/0 3), head (2/3/3 6),
-        #         # right_shoulder(3/3/6 9), right_upper_arm (4/3/9 12), right_lower_arm (5/3/12 15),
-        #         # right_hand (6/3/15 18), spoon (7/0),
-        #         # left_shoulder(8/3/18 21), left_upper_arm (9/3/21 24), left_lower_arm (10/3/24 27),
-        #         # left_hand (11/3/27 30), pan (12/0), right_thigh (13/3/30 33), right_shin (14/1/33 34),
-        #         # right_foot (15/3/34 37), left_thigh (16/3/37 40), left_shin (17/1/40 41), left_foot (18/3/41 44)
-        #         self._dof_body_ids = [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18]
-        #         self._dof_offsets = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 34, 37, 40, 41, 44]
-        #         self._dof_obs_size = 96
-        #         self._num_actions = 44
-        #         self._num_obs = 1 + 19 * (3 + 6 + 3 + 3) - 3
         if asset_file == "mjcf/amp_humanoid.xml":
             # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
             # right_hand (5/0, omitted as no joint to parent)
@@ -348,7 +272,7 @@ class Humanoid(VecTask):
             self._num_actions = 64
             self._num_obs = 1 + 83 * (3 + 6 + 3 + 3) - 3  # 1243
         else:
-            raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
+            raise ValueError(f"Unsupported character config file: {asset_file}")
 
     def _build_termination_heights(self):
         head_term_height = 0.3
@@ -377,7 +301,6 @@ class Humanoid(VecTask):
         self._termination_heights = to_torch(
             self._termination_heights, device=self.device
         )
-        return
 
     def _create_envs(self, num_envs, spacing, num_per_row):
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
@@ -569,7 +492,6 @@ class Humanoid(VecTask):
 
     def _compute_reward(self, actions):
         self.rew_buf[:] = compute_humanoid_reward(self.obs_buf)
-        return
 
     def _compute_reset(self):
         self.reset_buf[:], self._terminate_buf[:] = compute_humanoid_reset(
@@ -582,7 +504,6 @@ class Humanoid(VecTask):
             self._enable_early_termination,
             self._termination_heights,
         )
-        return
 
     def _refresh_sim_tensors(self):
         self.gym.refresh_dof_state_tensor(self.sim)
@@ -592,7 +513,6 @@ class Humanoid(VecTask):
         self.gym.refresh_force_sensor_tensor(self.sim)
         self.gym.refresh_dof_force_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim)
-        return
 
     def _compute_observations(self, env_ids=None):
         obs = self._compute_humanoid_obs(env_ids)
@@ -601,8 +521,6 @@ class Humanoid(VecTask):
             self.obs_buf[:] = obs
         else:
             self.obs_buf[env_ids] = obs
-
-        return
 
     def _compute_humanoid_obs(self, env_ids=None):
         if env_ids is None:
@@ -638,8 +556,6 @@ class Humanoid(VecTask):
             force_tensor = gymtorch.unwrap_tensor(forces)
             self.gym.set_dof_actuation_force_tensor(self.sim, force_tensor)
 
-        return
-
     def post_physics_step(self):
         self.progress_buf += 1
 
@@ -654,14 +570,11 @@ class Humanoid(VecTask):
         if self.viewer and self.debug_viz:
             self._update_debug_viz()
 
-        return
-
     def render(self, sync_frame_time=False):
         if self.viewer and self.camera_follow:
             self._update_camera()
 
         super().render(sync_frame_time)
-        return
 
     def _build_key_body_ids_tensor(self, key_body_names):
         env_ptr = self.envs[0]
@@ -719,7 +632,6 @@ class Humanoid(VecTask):
                 self._cam_prev_char_pos[1],
             )
         self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
-        return
 
     def _update_camera(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
@@ -745,11 +657,9 @@ class Humanoid(VecTask):
         self.gym.viewer_camera_look_at(self.viewer, None, new_cam_pos, new_cam_target)
 
         self._cam_prev_char_pos[:] = char_root_pos
-        return
 
     def _update_debug_viz(self):
         self.gym.clear_lines(self.viewer)
-        return
 
 
 #####################################################################
