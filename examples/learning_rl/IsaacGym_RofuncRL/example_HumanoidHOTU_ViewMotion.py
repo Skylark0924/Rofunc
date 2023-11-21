@@ -65,7 +65,7 @@ if __name__ == "__main__":
     #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
     #  2. custom motion file with absolute path
     parser.add_argument("--motion_file", type=str,
-                        default="examples/data/hotu/test_data_02_hotu.npy")
+                        default="examples/data/hotu/test_data_03_hotu.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)
