@@ -56,15 +56,15 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     # Find or define your own config in `rofunc/config/view_motion`
-    parser.add_argument("--config_name", type=str, default="HOTUHumanoid")
+    parser.add_argument("--config_name", type=str, default="HOTUHumanoidWQbhandNoVirtual")
     # Available types of motion file path:
-    #  1. test data provided by rofunc: `examples/data/amp/*.npy`
+    #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="examples/data/ase/ase_humanoid_walk.npy")
+    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-010_amp.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)

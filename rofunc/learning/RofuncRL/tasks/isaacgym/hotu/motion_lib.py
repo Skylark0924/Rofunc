@@ -28,12 +28,15 @@
 
 import os
 
+import torch
+
+import rofunc as rf
 import yaml
 from isaacgym.torch_utils import *
 
-from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
-from rofunc.utils.datalab.poselib.poselib.core.rotation3d import *
 from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
+from rofunc.utils.datalab.poselib.poselib.core.rotation3d import *
+from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 USE_CACHE = True
 print("MOVING MOTION DATA TO GPU, USING CACHE:", USE_CACHE)
@@ -130,6 +133,8 @@ class MotionLib:
             len(self._motions), dtype=torch.long, device=self._device
         )
 
+        self.init_local_rotation = torch.Tensor(
+            np.load(os.path.join(rf.oslab.get_rofunc_path(), "utils/datalab/poselib/local_orientation.npy"))).to(device)
         return
 
     def num_motions(self):
@@ -324,13 +329,13 @@ class MotionLib:
         self._motion_weights /= self._motion_weights.sum()
 
         self._motion_fps = torch.tensor(
-            np.array(self._motion_fps), device=self._device, dtype=torch.float32
+            self._motion_fps, device=self._device, dtype=torch.float32
         )
         self._motion_dt = torch.tensor(
-            np.array(self._motion_dt), device=self._device, dtype=torch.float32
+            self._motion_dt, device=self._device, dtype=torch.float32
         )
         self._motion_num_frames = torch.tensor(
-            np.array(self._motion_num_frames), device=self._device
+            self._motion_num_frames, device=self._device
         )
 
         num_motions = self.num_motions()
@@ -414,16 +419,63 @@ class MotionLib:
             joint_offset = dof_offsets[j]
             joint_size = dof_offsets[j + 1] - joint_offset
 
-            if joint_size == 3:
+            if joint_size == 3:  # TODO
                 joint_q = local_rot[:, body_id]
+                # init_joint_q = self.init_local_rotation[body_id]
+                # if body_id in [23, 5]:
+                #     init_joint_q = torch.tensor(rf.robolab.quaternion_multiply([init_joint_q[1].cpu(), init_joint_q[2].cpu(),
+                #                                                                 init_joint_q[3].cpu(), init_joint_q[0].cpu()],
+                #                                                                [0, 1, 0, 0])).to(self._device)
+                # else:
+                # init_joint_q = torch.tensor([init_joint_q[1], init_joint_q[2], init_joint_q[3], init_joint_q[0]]).to(
+                #     self._device)
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
+                if body_id is 5:
+                    # new_joint_q = torch.zeros_like(joint_q).to(self._device)
+                    # for i in range(len(joint_q)):
+                    #     new_joint_q[i] = torch.tensor(
+                    #         rf.robolab.quaternion_multiply_tensor(joint_q[i], [0, -1, 0, 0])).to(self._device)
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, -1, 0, 0], joint_q)
+                    joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
+                    # init_joint_q = torch.tensor([0, 0, 0, -1], dtype=torch.float).to(self._device)
+                    # init_joint_exp_map = torch_utils.quat_to_exp_map(init_joint_q)
+                    # joint_exp_map += init_joint_exp_map
+                    # joint_exp_map-= torch.tensor([0,  3.14, 0], dtype=torch.float).to(self._device)
+                    # joint_exp_map = torch.zeros_like(joint_exp_map).to(self._device)
+                elif body_id is 23:
+                    # new_joint_q = torch.zeros_like(joint_q).to(self._device)
+                    # for i in range(len(joint_q)):
+                    #     new_joint_q[i] = torch.tensor(
+                    #         rf.robolab.quaternion_multiply_tensor(joint_q[i], [1, 0, 0, 0])).to(self._device)
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([1, 0, 0, 0], joint_q)
+                    joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
+                    # init_joint_q = torch.tensor([0, 0, 1, 0], dtype=torch.float).to(self._device)
+                    # init_joint_exp_map = torch_utils.quat_to_exp_map(init_joint_q)
+                    # joint_exp_map += init_joint_exp_map
+                    # joint_exp_map -= torch.tensor([0, 3.14, 0], dtype=torch.float).to(self._device)
+                    # joint_exp_map = torch.zeros_like(joint_exp_map).to(self._device)
+
+                # init_joint_exp_map = torch_utils.quat_to_exp_map(init_joint_q)
                 dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
             elif joint_size == 1:
-                joint_q = local_rot[:, body_id]
-                joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                joint_theta = (
-                        joint_theta * joint_axis[..., 1]
-                )  # assume joint is always along y axis
+
+                if body_id in [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]:
+                    joint_q = local_rot[:, body_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = -(joint_theta * joint_axis[..., 2])  # assume joint is always along y axis
+                elif body_id is 27:
+                    joint_q = local_rot[:, body_id]
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0.707, 0, 0.707, 0], joint_q)
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(new_joint_q)
+                    joint_theta = -(joint_theta * joint_axis[..., 2])
+                elif body_id in [6, 24]:
+                    joint_q = local_rot[:, body_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = -(joint_theta * joint_axis[..., 0])  # assume joint is always along y axis
+                else:
+                    joint_q = local_rot[:, body_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
 
                 joint_theta = normalize_angle(joint_theta)
                 dof_pos[:, joint_offset] = joint_theta

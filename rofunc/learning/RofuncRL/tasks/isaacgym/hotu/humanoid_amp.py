@@ -29,12 +29,13 @@
 import os
 from enum import Enum
 
+import torch
 from gym import spaces
 from isaacgym.torch_utils import *
 
 import rofunc as rf
-from rofunc.learning.RofuncRL.tasks.isaacgym.ase.humanoid import Humanoid, dof_to_obs
 from rofunc.learning.RofuncRL.tasks.isaacgym.ase.motion_lib import MotionLib
+from rofunc.learning.RofuncRL.tasks.isaacgym.ase.humanoid import Humanoid, dof_to_obs
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 
@@ -197,6 +198,8 @@ class HumanoidAMP(Humanoid):
         elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu_humanoid.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
         elif asset_file == "mjcf/hotu_humanoid_w_qbhand.xml":
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
+        elif asset_file in ["mjcf/hotu_humanoid_w_qbhand_no_virtual.xml", "mjcf/hotu_humanoid_w_qbhand_no_virtual_no_quat.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
         else:
             print(f"Unsupported humanoid body num: {asset_file}")
@@ -373,7 +376,11 @@ class HumanoidAMP(Humanoid):
         self._humanoid_root_states[env_ids, 7:10] = root_vel
         self._humanoid_root_states[env_ids, 10:13] = root_ang_vel
 
+        # self._dof_pos[env_ids] = dof_pos + self.init_dof_pose.to('cuda:0')
+        # self._dof_pos[env_ids] = torch.zeros_like(dof_pos).to('cuda:0')
         self._dof_pos[env_ids] = dof_pos
+        # self._dof_pos[env_ids, 6] = -1
+        # self._dof_pos[env_ids, 28] = 1
         self._dof_vel[env_ids] = dof_vel
         return
 
