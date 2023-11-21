@@ -28,13 +28,12 @@
 
 import os
 
-import torch
 import yaml
 from isaacgym.torch_utils import *
 
-from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
-from rofunc.utils.datalab.poselib.poselib.core.rotation3d import *
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
+from rofunc.utils.datalab.poselib.poselib.core.rotation3d import *
+from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonMotion
 
 USE_CACHE = True
 print("MOVING MOTION DATA TO GPU, USING CACHE:", USE_CACHE)
@@ -42,12 +41,14 @@ print("MOVING MOTION DATA TO GPU, USING CACHE:", USE_CACHE)
 if not USE_CACHE:
     old_numpy = torch.Tensor.numpy
 
+
     class Patch:
         def numpy(self):
             if self.is_cuda:
                 return self.to("cpu").numpy()
             else:
                 return old_numpy(self)
+
 
     torch.Tensor.numpy = Patch.numpy
 
@@ -323,13 +324,13 @@ class MotionLib:
         self._motion_weights /= self._motion_weights.sum()
 
         self._motion_fps = torch.tensor(
-            self._motion_fps, device=self._device, dtype=torch.float32
+            np.array(self._motion_fps), device=self._device, dtype=torch.float32
         )
         self._motion_dt = torch.tensor(
-            self._motion_dt, device=self._device, dtype=torch.float32
+            np.array(self._motion_dt), device=self._device, dtype=torch.float32
         )
         self._motion_num_frames = torch.tensor(
-            self._motion_num_frames, device=self._device
+            np.array(self._motion_num_frames), device=self._device
         )
 
         num_motions = self.num_motions()
@@ -416,12 +417,12 @@ class MotionLib:
             if joint_size == 3:
                 joint_q = local_rot[:, body_id]
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
-                dof_pos[:, joint_offset : (joint_offset + joint_size)] = joint_exp_map
+                dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
             elif joint_size == 1:
                 joint_q = local_rot[:, body_id]
                 joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                 joint_theta = (
-                    joint_theta * joint_axis[..., 1]
+                        joint_theta * joint_axis[..., 1]
                 )  # assume joint is always along y axis
 
                 joint_theta = normalize_angle(joint_theta)
@@ -449,7 +450,7 @@ class MotionLib:
             joint_size = dof_offsets[j + 1] - joint_offset
             if joint_size == 3:
                 joint_vel = local_vel[body_id]
-                dof_vel[joint_offset : (joint_offset + joint_size)] = joint_vel
+                dof_vel[joint_offset: (joint_offset + joint_size)] = joint_vel
             elif joint_size == 1:
                 assert joint_size == 1
                 joint_vel = local_vel[body_id]

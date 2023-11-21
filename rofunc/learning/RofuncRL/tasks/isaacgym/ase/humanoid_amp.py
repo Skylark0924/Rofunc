@@ -33,8 +33,8 @@ from gym import spaces
 from isaacgym.torch_utils import *
 
 import rofunc as rf
-from rofunc.learning.RofuncRL.tasks.isaacgym.ase.motion_lib import MotionLib
 from rofunc.learning.RofuncRL.tasks.isaacgym.ase.humanoid import Humanoid, dof_to_obs
+from rofunc.learning.RofuncRL.tasks.isaacgym.ase.motion_lib import MotionLib
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 
@@ -64,6 +64,11 @@ class HumanoidAMP(Humanoid):
         motion_file = cfg["env"].get("motion_file", None)
         if rf.oslab.is_absl_path(motion_file):
             motion_file_path = motion_file
+        elif motion_file.split("/")[0] == "examples":
+            motion_file_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "../../../../../../" + motion_file,
+            )
         else:
             motion_file_path = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
@@ -192,8 +197,6 @@ class HumanoidAMP(Humanoid):
         elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu_humanoid.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
         elif asset_file == "mjcf/hotu_humanoid_w_qbhand.xml":
-            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
-        elif asset_file == "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
         else:
             print(f"Unsupported humanoid body num: {asset_file}")

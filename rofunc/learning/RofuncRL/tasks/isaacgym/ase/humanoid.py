@@ -347,13 +347,6 @@ class Humanoid(VecTask):
             self._dof_obs_size = 264  # 44 * 6 (joint_obs_size) = 264
             self._num_actions = 64
             self._num_obs = 1 + 83 * (3 + 6 + 3 + 3) - 3  # 1243
-        elif asset_file in "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml":
-            self._dof_body_ids = [*[i for i in range(1, 45)]]  # len=44
-            self._dof_offsets = [0, 3, 6, 9, 10, *[i for i in range(13, 28)], 28, 31, 32, *[i for i in range(35, 50)],
-                                 50, 53, 54, 57, 60, 61, 64]  # len=44+1
-            self._dof_obs_size = 264  # 44 * 6 (joint_obs_size) = 264
-            self._num_actions = 64
-            self._num_obs = 1 + 45 * (3 + 6 + 3 + 3) - 3  # 673
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
 

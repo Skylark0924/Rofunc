@@ -42,9 +42,11 @@ from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skele
 
 def get_hotu_tpose(xml_path, save_path, verbose=True):
     skeleton = SkeletonTree.from_mjcf(xml_path)
-
+    import numpy as np
+    np.save("local_orientation.npy", skeleton.local_orientation)
     # generate zero rotation pose
     zero_pose = SkeletonState.zero_pose_wo_qbhand(skeleton)
+    # plot_skeleton_state(zero_pose, verbose=False)
 
     # adjust pose into a T Pose
     local_rotation = zero_pose.local_rotation

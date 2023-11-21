@@ -361,7 +361,7 @@ if __name__ == '__main__':
     # fbx_dir = os.path.join(rofunc_path, "../examples/data/hotu")
     # fbx_dir = "/home/ubuntu/Data/2023_11_15_HED/has_gloves"
     # fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
-    fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
+    fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-010.fbx"]
 
     parallel = False
     if parallel:
