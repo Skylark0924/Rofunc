@@ -15,10 +15,10 @@ from rofunc.learning.RofuncRL.trainers import Trainers
 
 def inference(custom_args):
     view_motion_config = load_view_motion_config(custom_args.config_name)
-    task_name = "HumanoidViewMotion"
+    task_name = "HumanoidASEViewMotion"
     args_overrides = [
         f"task={task_name}",
-        "train=HumanoidViewMotionASERofuncRL",
+        "train=HumanoidASEViewMotionASERofuncRL",
         f"device_id=0",
         f"rl_device=cuda:{gpu_id}",
         "headless={}".format(False),
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/amp/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="examples/data/ase/ase_humanoid_walk.npy")
+    parser.add_argument("--motion_file", type=str, default="examples/data/amp/ase_humanoid_walk.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)

@@ -7,6 +7,7 @@ class Trainers:
         from .amp_trainer import AMPTrainer
         from .ase_trainer import ASETrainer
         from .dtrans_trainer import DTransTrainer
+        from .hotu_trainer import HOTUTrainer
 
         self.trainer_map = {
             "ppo": PPOTrainer,
@@ -16,6 +17,7 @@ class Trainers:
             "amp": AMPTrainer,
             "ase": ASETrainer,
             "dtrans": DTransTrainer,
+            "hotu": HOTUTrainer,
         }
 
     def __call__(self, trainer_name):
