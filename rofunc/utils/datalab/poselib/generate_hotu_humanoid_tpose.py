@@ -59,11 +59,7 @@ def get_hotu_tpose(xml_path, save_path, verbose=True):
         local_rotation[skeleton.index("right_upper_arm")]
     )
     # local_rotation[skeleton.index("right_hand")] = quat_mul(
-    #     quat_from_angle_axis(angle=torch.tensor([180.0]), axis=torch.tensor([1.0, 0.0, 0.0]), degree=True),
-    #     local_rotation[skeleton.index("right_hand")]
-    # )
-    # local_rotation[skeleton.index("right_hand")] = quat_mul(
-    #     quat_from_angle_axis(angle=torch.tensor([180.0]), axis=torch.tensor([0.0, 0.0, 1.0]), degree=True),
+    #     quat_from_angle_axis(angle=torch.tensor([180.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
     #     local_rotation[skeleton.index("right_hand")]
     # )
     # local_rotation[skeleton.index("left_hand")] = quat_mul(
