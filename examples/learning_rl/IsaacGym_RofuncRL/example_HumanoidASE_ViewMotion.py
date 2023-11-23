@@ -56,7 +56,7 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     # Find or define your own config in `rofunc/config/view_motion`
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/amp/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="examples/data/amp/ase_humanoid_walk.npy")
+    parser.add_argument("--motion_file", type=str, default="examples/data/amp/ase_humanoid_jog.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)
