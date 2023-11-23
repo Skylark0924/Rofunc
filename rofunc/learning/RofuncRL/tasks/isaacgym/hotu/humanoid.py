@@ -420,15 +420,11 @@ class Humanoid(VecTask):
         self.dof_limits_lower = []
         self.dof_limits_upper = []
 
-        object_asset_options = gymapi.AssetOptions()
-        object_asset = self.gym.create_box(self.sim, 0.38, 0.28, 0.01, object_asset_options)
-
         for i in range(self.num_envs):
             # create env instance
             env_ptr = self.gym.create_env(self.sim, lower, upper, num_per_row)
             self._build_env(i, env_ptr, humanoid_asset)
             # TODO if object is not needed, comment this out
-            self._add_object(i, env_ptr, object_asset)
             self.envs.append(env_ptr)
 
         dof_prop = self.gym.get_actor_dof_properties(
