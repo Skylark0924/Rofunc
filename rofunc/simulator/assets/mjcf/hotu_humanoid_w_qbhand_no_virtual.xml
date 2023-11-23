@@ -90,12 +90,12 @@
                               contype="0" conaffinity="1"/>
                         <site name="right_lower_arm" class="touch" pos="0 0 -0.12" size="0.041 0.0685" zaxis="0 1 0"/>
 
-                        <body name="right_hand" pos="0 0 -0.288947">
-                            <joint name="right_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10"
+                        <body name="right_hand" pos="0 0 -0.288947" quat="0 0 1 0">
+                            <joint name="right_hand_x" axis="1 0 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".01"/>
-                            <joint name="right_hand_y" axis="0 1 0" range="180 360" stiffness="100" damping="10"
+                            <joint name="right_hand_y" axis="0 1 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".003"/>
-                            <joint name="right_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10"
+                            <joint name="right_hand_z" axis="0 0 1" range="-360 360" stiffness="100" damping="10"
                                    armature=".003"/>
                             <geom name="right_hand" type="sphere" size=".04" density="1865"/>
                             <site name="right_hand" class="touch" type="sphere" size=".041"/>
@@ -517,12 +517,12 @@
                               contype="0" conaffinity="1"/>
                         <site name="left_lower_arm" class="touch" pos="0 0 -0.1" size="0.041 0.0685" zaxis="0 0 1"/>
 
-                        <body name="left_hand" pos="0 0 -0.288947">
-                            <joint name="left_hand_x" axis="1 0 0" range="180 360" stiffness="100" damping="10"
+                        <body name="left_hand" pos="0 0 -0.288947" quat="0 1 0  0">
+                            <joint name="left_hand_x" axis="1 0 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".01"/>
-                            <joint name="left_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10"
+                            <joint name="left_hand_y" axis="0 1 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".003"/>
-                            <joint name="left_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10"
+                            <joint name="left_hand_z" axis="0 0 1" range="-360 360" stiffness="100" damping="10"
                                    armature=".003"/>
                             <geom name="left_hand" type="sphere" size=".04" density="1865"/>
                             <site name="left_hand" class="touch" type="sphere" size=".041"/>

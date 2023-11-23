@@ -419,8 +419,8 @@ class MotionLib:
                     # for i in range(len(joint_q)):
                     #     new_joint_q[i] = torch.tensor(
                     #         rf.robolab.quaternion_multiply_tensor(joint_q[i], [0, -1, 0, 0])).to(self._device)
-                    # new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, -1, 0, 0], joint_q)
-                    joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, 1, 0, 0], joint_q)
+                    joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
                     # init_joint_q = torch.tensor([0, 0, 0, -1], dtype=torch.float).to(self._device)
                     # init_joint_exp_map = torch_utils.quat_to_exp_map(init_joint_q)
                     # joint_exp_map += init_joint_exp_map
@@ -431,8 +431,8 @@ class MotionLib:
                     # for i in range(len(joint_q)):
                     #     new_joint_q[i] = torch.tensor(
                     #         rf.robolab.quaternion_multiply_tensor(joint_q[i], [1, 0, 0, 0])).to(self._device)
-                    # new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([1, 0, 0, 0], joint_q)
-                    joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([1, 0, 0, 0], joint_q)
+                    joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
                     # init_joint_q = torch.tensor([0, 0, 1, 0], dtype=torch.float).to(self._device)
                     # init_joint_exp_map = torch_utils.quat_to_exp_map(init_joint_q)
                     # joint_exp_map += init_joint_exp_map
