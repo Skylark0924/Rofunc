@@ -18,7 +18,7 @@ from isaacgym import gymtorch
 from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.humanoid_hotu import HumanoidHOTU
 
 
-class HumanoidViewMotionTask(HumanoidHOTU):
+class HumanoidHOTUViewMotionTask(HumanoidHOTU):
     def __init__(
             self,
             cfg,
