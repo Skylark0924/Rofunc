@@ -47,6 +47,7 @@ class HumanoidHOTU(Humanoid):
                          graphics_device_id=graphics_device_id, headless=headless,
                          virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
+        # Load motion file
         motion_file = cfg["env"].get("motion_file", None)
         if rf.oslab.is_absl_path(motion_file):
             motion_file_path = motion_file
@@ -62,6 +63,21 @@ class HumanoidHOTU(Humanoid):
             )
         self._load_motion(motion_file_path)
 
+        # Load object motion file
+        object_motion_file = cfg["env"].get("object_motion_file", None)
+        if object_motion_file is not None:
+            if rf.oslab.is_absl_path(object_motion_file):
+                object_motion_file_path = object_motion_file
+            elif object_motion_file.split("/")[0] == "examples":
+                object_motion_file_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    "../../../../../../" + object_motion_file,
+                )
+            else:
+                raise ValueError("Unsupported object motion file path")
+            self._load_object_motion(object_motion_file_path)
+
+        # Set up the observation space for AMP
         self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf,
                                          np.ones(self.get_num_amp_obs()) * np.Inf)
         self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
@@ -121,7 +137,7 @@ class HumanoidHOTU(Humanoid):
 
         motion_ids = motion_ids.view(-1)
         motion_times = motion_times.view(-1)
-        root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
+        root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos, _, _ \
             = self._motion_lib.get_motion_state(motion_ids, motion_times)
         amp_obs_demo = build_amp_observations(root_pos, root_rot, root_vel, root_ang_vel,
                                               dof_pos, dof_vel, key_pos,
@@ -202,7 +218,29 @@ class HumanoidHOTU(Humanoid):
             key_body_ids=self._key_body_ids.cpu().numpy(),
             device=self.device,
         )
-        return
+
+    def _load_object_motion(self, object_motion_file):
+        objs_list, meta_list = rf.optitrack.get_objects(object_motion_file)
+
+        # data is a numpy array of shape (n_samples, n_features)
+        # labels is a list of strings corresponding to the name of the features
+        data, labels = rf.optitrack.data_clean(object_motion_file, legacy=False, objs=objs_list[0])[0]
+
+        # Accessing the position and attitude of an object over all samples:
+        # Coordinates names and order: ['x', 'y', 'z', 'qx', 'qy', 'qz', 'qw']
+        self.object_poses = {}
+        for object_name in self.cfg["env"]["object_asset"]["assetName"]:
+            data_ptr = labels.index(f'{object_name}.pose.x')
+            assert data_ptr + 6 == labels.index(f'{object_name}.pose.qw')
+            pose = data[:, data_ptr:data_ptr + 7]
+            pose[:, :3] *= 0.01  # convert to meter
+            # y-up in the optitrack to z-up in IsaacGym
+            tmp = pose[:, 1].copy()
+            pose[:, 1] = pose[:, 2]
+            pose[:, 2] = tmp
+            pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor(
+                rf.robolab.quaternion_from_euler(np.pi / 2, 0, 0)), torch.tensor(pose[:, 3:]), )
+            self.object_poses[object_name] = pose
 
     def reset_idx(self, env_ids):
         self._reset_default_env_ids = []
