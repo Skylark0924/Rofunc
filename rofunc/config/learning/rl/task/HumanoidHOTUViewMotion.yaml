@@ -29,9 +29,13 @@ env:
   motion_file: None
 
   asset:
-    assetFileName: "mjcf/amp_humanoid.xml"
+    assetFileName: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
     assetBodyNum: 15
     assetJointNum: 28
+
+  object_asset:
+    assetFileName: ["mjcf/objects/lab_box.xml"]
+    assetName: ["box"]
 
   plane:
     staticFriction: 1.0

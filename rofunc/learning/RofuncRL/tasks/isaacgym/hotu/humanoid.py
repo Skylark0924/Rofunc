@@ -380,34 +380,38 @@ class Humanoid(VecTask):
         # get rofunc path from rofunc package metadata
         rofunc_path = get_rofunc_path()
         asset_root = os.path.join(rofunc_path, "simulator/assets")
-        asset_file = self.cfg["env"]["asset"]["assetFileName"]
 
+        asset_file = self.cfg["env"]["asset"]["assetFileName"]
         asset_options = gymapi.AssetOptions()
         asset_options.angular_damping = 0.01
         asset_options.max_angular_velocity = 100.0
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
         # asset_options.fix_base_link = True
-        humanoid_asset = self.gym.load_asset(
-            self.sim, asset_root, asset_file, asset_options
-        )
-
+        humanoid_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
         actuator_props = self.gym.get_asset_actuator_properties(humanoid_asset)
         motor_efforts = [prop.motor_effort for prop in actuator_props]
 
         # create force sensors at the feet
-        right_foot_idx = self.gym.find_asset_rigid_body_index(
-            humanoid_asset, "right_foot"
-        )
-        left_foot_idx = self.gym.find_asset_rigid_body_index(
-            humanoid_asset, "left_foot"
-        )
+        right_foot_idx = self.gym.find_asset_rigid_body_index(humanoid_asset, "right_foot")
+        left_foot_idx = self.gym.find_asset_rigid_body_index(humanoid_asset, "left_foot")
         sensor_pose = gymapi.Transform()
-
         self.gym.create_asset_force_sensor(humanoid_asset, right_foot_idx, sensor_pose)
         self.gym.create_asset_force_sensor(humanoid_asset, left_foot_idx, sensor_pose)
-
         self.max_motor_effort = max(motor_efforts)
         self.motor_efforts = to_torch(motor_efforts, device=self.device)
+
+        # Load object assets
+        object_asset_files = self.cfg["env"]["object_asset"]["assetFileName"]
+        self.object_names = self.cfg["env"]["object_asset"]["assetName"]
+        object_assets = {}
+        for i in range(len(object_asset_files)):
+            asset_options = gymapi.AssetOptions()
+            asset_options.angular_damping = 0.01
+            asset_options.max_angular_velocity = 100.0
+            asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
+            # asset_options.fix_base_link = True
+            object_asset = self.gym.load_asset(self.sim, asset_root, object_asset_files[i], asset_options)
+            object_assets[self.object_names[i]] = object_asset
 
         self.torso_index = 0
         self.num_bodies = self.gym.get_asset_rigid_body_count(humanoid_asset)
@@ -415,7 +419,7 @@ class Humanoid(VecTask):
         self.num_joints = self.gym.get_asset_joint_count(humanoid_asset)
 
         self.humanoid_handles = []
-        self.object_handles = []
+        self.object_handles = {}
         self.envs = []
         self.dof_limits_lower = []
         self.dof_limits_upper = []
@@ -423,13 +427,11 @@ class Humanoid(VecTask):
         for i in range(self.num_envs):
             # create env instance
             env_ptr = self.gym.create_env(self.sim, lower, upper, num_per_row)
-            self._build_env(i, env_ptr, humanoid_asset)
-            # TODO if object is not needed, comment this out
+            self._build_env(i, env_ptr, humanoid_asset, object_assets)
             self.envs.append(env_ptr)
 
-        dof_prop = self.gym.get_actor_dof_properties(
-            self.envs[0], self.humanoid_handles[0]
-        )
+        # Set humanoid dof
+        dof_prop = self.gym.get_actor_dof_properties(self.envs[0], self.humanoid_handles[0])
         for j in range(self.num_dof):
             if dof_prop["lower"][j] > dof_prop["upper"][j]:
                 self.dof_limits_lower.append(dof_prop["upper"][j])
@@ -444,7 +446,7 @@ class Humanoid(VecTask):
         if self._pd_control:
             self._build_pd_action_offset_scale()
 
-    def _build_env(self, env_id, env_ptr, humanoid_asset):
+    def _build_env(self, env_id, env_ptr, humanoid_asset, object_assets=None):
         col_group = env_id
         col_filter = self._get_humanoid_collision_filter()
         segmentation_id = 0
@@ -483,7 +485,11 @@ class Humanoid(VecTask):
 
         self.humanoid_handles.append(humanoid_handle)
 
-    def _add_object(self, env_id, env_ptr, object_asset):
+        if object_assets is not None:
+            for object_name, object_asset in object_assets.items():
+                self._add_object(env_id, env_ptr, object_name, object_asset)
+
+    def _add_object(self, env_id, env_ptr, object_name, object_asset):
         start_pose = gymapi.Transform()
         char_h = 0.5
 
@@ -494,12 +500,14 @@ class Humanoid(VecTask):
             env_ptr,
             object_asset,
             start_pose,
-            "object",
+            object_name,
             env_id,
             1,
             0,
         )
-        self.object_handles.append(object_handle)
+        if object_name not in self.object_handles:
+            self.object_handles[object_name] = []
+        self.object_handles[object_name].append(object_handle)
         self.gym.set_rigid_body_color(
             env_ptr,
             object_handle,
