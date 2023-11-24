@@ -93,7 +93,12 @@ class Humanoid(VecTask):
         self._initial_humanoid_root_states = self._humanoid_root_states.clone()
         self._initial_humanoid_root_states[:, 7:13] = 0
 
+        # TODO: check
         self._humanoid_actor_ids = num_actors * torch.arange(self.num_envs, device=self.device, dtype=torch.int32)
+        self._object_actor_ids = {
+            object_name: torch.tensor(
+                [self.gym.get_actor_index(self.envs[i], self.object_handles[object_name][i], gymapi.DOMAIN_SIM) for i in
+                 range(self.num_envs)], dtype=torch.int32, device=self.device) for object_name in self.object_names}
 
         # create some wrapper tensors for different slices
         self._dof_state = gymtorch.wrap_tensor(dof_state_tensor)
