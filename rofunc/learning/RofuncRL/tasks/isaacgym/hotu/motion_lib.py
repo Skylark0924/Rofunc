@@ -119,7 +119,6 @@ class MotionLib:
 
         self.init_local_rotation = torch.Tensor(
             np.load(os.path.join(rf.oslab.get_rofunc_path(), "utils/datalab/poselib/local_orientation.npy"))).to(device)
-        return
 
     def num_motions(self):
         return len(self._motions)
@@ -501,4 +500,84 @@ class MotionLib:
         return dof_vel
 
 
-# class ObjectMotionLib:
+class ObjectMotionLib:
+    def __init__(self, object_motion_file, object_names, device):
+        self.object_motion_file = object_motion_file
+        self.object_names = object_names
+        self.object_poses_w_time = []
+        self.device = device
+
+        if isinstance(self.object_motion_file, list):  # Multiple files
+            self.num_motions = len(self.object_motion_file)
+        elif isinstance(self.object_motion_file, str):  # Single file
+            self.num_motions = 1
+        else:
+            raise NotImplementedError
+
+        self._load_motions()
+
+    def _load_motions(self):
+        objs_list, meta_list = rf.optitrack.get_objects(self.object_motion_file)
+        self.scales = self._get_scale(meta_list)
+        self.dts = self._get_dt(meta_list)
+
+        for i in range(self.num_motions):
+            # data is a numpy array of shape (n_samples, n_features)
+            # labels is a list of strings corresponding to the name of the features
+            data, labels = rf.optitrack.data_clean(self.object_motion_file, legacy=False, objs=objs_list[i])[i]
+
+            # Accessing the position and attitude of an object over all samples:
+            # Coordinates names and order: ['x', 'y', 'z', 'qx', 'qy', 'qz', 'qw']
+            object_poses_dict = {}
+            for object_name in self.object_names:
+                data_ptr = labels.index(f'{object_name}.pose.x')
+                assert data_ptr + 6 == labels.index(f'{object_name}.pose.qw')
+                pose = data[:, data_ptr:data_ptr + 7]
+                pose[:, :3] *= self.scales[i]  # convert to meter
+                pose = self._motion_transform(torch.tensor(pose, dtype=torch.float))
+
+                pose_w_time = torch.hstack((torch.tensor(data[:, 1], dtype=torch.float).unsqueeze(-1), pose))
+                object_poses_dict[object_name] = pose_w_time.to(self.device)
+            self.object_poses_w_time.append(object_poses_dict)  # [num_motions, num_objects, num_samples, 7]
+
+    def _get_scale(self, meta_list):
+        scales = []
+        for i in range(len(meta_list)):
+            if meta_list[i]["Length Units"] == "Centimeters":
+                scales.append(0.01)
+            elif meta_list[i]["Length Units"] == "Meters":
+                scales.append(1.0)
+            elif meta_list[i]["Length Units"] == "Millimeters":
+                scales.append(0.001)
+            else:
+                raise NotImplementedError
+        return scales
+
+    def _get_dt(self, meta_list):
+        dts = []
+        for i in range(len(meta_list)):
+            dts.append(1.0 / float(meta_list[i]["Export Frame Rate"]))
+        return dts
+
+    def _motion_transform(self, pose):
+        # y-up in the optitrack to z-up in IsaacGym
+        tmp = pose[:, 1].clone()
+        pose[:, 1] = pose[:, 2]
+        pose[:, 2] = tmp
+        pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor(
+            rf.robolab.quaternion_from_euler(np.pi / 2, 0, 0)), torch.tensor(pose[:, 3:]), )
+        return pose
+
+    def get_motion_state(self, motion_ids, motion_times):
+        """
+
+        :param motion_ids:
+        :param motion_times:
+        :return:
+        """
+
+        approx_index = torch.round(motion_times / self.dts[motion_ids])[0].long()
+        object_poses = {}
+        for object_name in self.object_poses_w_time[motion_ids].keys():
+            object_poses[object_name] = self.object_poses_w_time[motion_ids][object_name][approx_index][1:]
+        return object_poses

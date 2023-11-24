@@ -48,9 +48,7 @@ class HumanoidViewMotionTask(HumanoidHOTU):
         self._motion_dt = control_freq_inv * self.sim_params.dt
 
         num_motions = self._motion_lib.num_motions()
-        self._motion_ids = torch.arange(
-            self.num_envs, device=self.device, dtype=torch.long
-        )
+        self._motion_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.long)
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
 
     def pre_physics_step(self, actions):
@@ -61,12 +59,10 @@ class HumanoidViewMotionTask(HumanoidHOTU):
         forces = torch.zeros_like(self.actions)
         force_tensor = gymtorch.unwrap_tensor(forces)
         self.gym.set_dof_actuation_force_tensor(self.sim, force_tensor)
-        return
 
     def post_physics_step(self):
         super().post_physics_step()
         self._motion_sync()  # Read the real action from the motion data and actuate the robot
-        return
 
     def _get_humanoid_collision_filter(self):
         return 1  # disable self collisions
@@ -116,14 +112,10 @@ class HumanoidViewMotionTask(HumanoidHOTU):
             len(env_ids_int32),
         )
 
-        from isaacgym import gymapi
-
-        # frame_id = int(self.progress_buf.to("cpu").numpy()[0])
-        for object_name, object_pose in self.object_poses.items():
+        object_poses = self._object_motion_lib.get_motion_state(motion_ids, motion_times)
+        for object_name, object_pose in object_poses.items():
             # 13-dim for the actor root state: [x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz]
-            self._root_states[self._object_actor_ids[object_name][0], 0:7] = torch.tensor(object_pose[f1l, 0:7],
-                                                                                       dtype=torch.float32,
-                                                                                       device=self.device)
+            self._root_states[self._object_actor_ids[object_name][0], 0:7] = object_pose
             self.gym.set_actor_root_state_tensor_indexed(
                 self.sim,
                 gymtorch.unwrap_tensor(self._root_states),
