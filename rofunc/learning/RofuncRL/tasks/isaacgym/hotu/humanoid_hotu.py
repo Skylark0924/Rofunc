@@ -20,7 +20,7 @@ from isaacgym.torch_utils import *
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.humanoid import Humanoid, dof_to_obs
-from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.motion_lib import MotionLib
+from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.motion_lib import MotionLib, ObjectMotionLib
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 
@@ -148,50 +148,13 @@ class HumanoidHOTU(Humanoid):
     def _build_amp_obs_demo_buf(self, num_samples):
         self._amp_obs_demo_buf = torch.zeros((num_samples, self._num_amp_obs_steps, self._num_amp_obs_per_step),
                                              device=self.device, dtype=torch.float32)
-        return
 
     def _setup_character_props(self, key_bodies):
         super()._setup_character_props(key_bodies)
 
-        """
-        When body num is 15, the humanoid holds no object; when it is 16, humanoid holds one object which takes
-        as a body; when bn=17, the humanoid holds 2 objects
-        """
-        # asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
-        # asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         num_key_bodies = len(key_bodies)
 
-        # 13 = root_h (1) + root_rot (6) + root_linear_vel (3) + root_angular_vel (3)},
-        # dof_obs_size = dof_pos + dof_vel,
-        # key_body_positions = 3 * num_key_bodies
-        # if asset_body_num == 15:
-        #     if asset_joint_num == 28:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 28 + 3 * num_key_bodies
-        #         )
-        #     elif asset_joint_num == 34:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-        #         )
-        # elif asset_body_num == 16:
-        #     self._num_amp_obs_per_step = (
-        #         13 + self._dof_obs_size + 31 + 3 * num_key_bodies
-        #     )
-        # elif asset_body_num == 17:
-        #     if asset_joint_num == 34:
-        #         self._num_amp_obs_per_step = (
-        #             13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-        #         )
-        #     elif asset_joint_num == 38:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 38 + 3 * num_key_bodies
-        #         )
-        # elif asset_body_num == 19:
-        #     if asset_joint_num == 44:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 44 + 3 * num_key_bodies
-        #         )
         if asset_file == "mjcf/amp_humanoid.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 28 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
         elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
@@ -207,8 +170,6 @@ class HumanoidHOTU(Humanoid):
             print(f"Unsupported humanoid body num: {asset_file}")
             assert False
 
-        return
-
     def _load_motion(self, motion_file):
         assert self._dof_offsets[-1] == self.num_dof
         self._motion_lib = MotionLib(
@@ -220,27 +181,11 @@ class HumanoidHOTU(Humanoid):
         )
 
     def _load_object_motion(self, object_motion_file):
-        objs_list, meta_list = rf.optitrack.get_objects(object_motion_file)
-
-        # data is a numpy array of shape (n_samples, n_features)
-        # labels is a list of strings corresponding to the name of the features
-        data, labels = rf.optitrack.data_clean(object_motion_file, legacy=False, objs=objs_list[0])[0]
-
-        # Accessing the position and attitude of an object over all samples:
-        # Coordinates names and order: ['x', 'y', 'z', 'qx', 'qy', 'qz', 'qw']
-        self.object_poses = {}
-        for object_name in self.cfg["env"]["object_asset"]["assetName"]:
-            data_ptr = labels.index(f'{object_name}.pose.x')
-            assert data_ptr + 6 == labels.index(f'{object_name}.pose.qw')
-            pose = data[:, data_ptr:data_ptr + 7]
-            pose[:, :3] *= 0.01  # convert to meter
-            # y-up in the optitrack to z-up in IsaacGym
-            tmp = pose[:, 1].copy()
-            pose[:, 1] = pose[:, 2]
-            pose[:, 2] = tmp
-            pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor(
-                rf.robolab.quaternion_from_euler(np.pi / 2, 0, 0)), torch.tensor(pose[:, 3:]), )
-            self.object_poses[object_name] = pose
+        self._object_motion_lib = ObjectMotionLib(
+            object_motion_file=object_motion_file,
+            object_names=self.cfg["env"]["object_asset"]["assetName"],
+            device=self.device,
+        )
 
     def reset_idx(self, env_ids):
         self._reset_default_env_ids = []
