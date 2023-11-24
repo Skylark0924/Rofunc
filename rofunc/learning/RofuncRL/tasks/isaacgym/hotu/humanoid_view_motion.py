@@ -84,6 +84,7 @@ class HumanoidViewMotionTask(HumanoidHOTU):
             root_ang_vel,
             dof_vel,
             key_pos,
+            f0l, f1l
         ) = self._motion_lib.get_motion_state(motion_ids, motion_times)
 
         root_vel = torch.zeros_like(root_vel)
@@ -115,11 +116,20 @@ class HumanoidViewMotionTask(HumanoidHOTU):
             len(env_ids_int32),
         )
 
-        # TODO use the object pose to let the object move
-        frame_id = motion_ids.to("cpu").numpy()[0]
-        object_pose = self._motion_lib.get_object_pose(frame_id)
+        from isaacgym import gymapi
 
-        return
+        # frame_id = int(self.progress_buf.to("cpu").numpy()[0])
+        for object_name, object_pose in self.object_poses.items():
+            # 13-dim for the actor root state: [x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz]
+            self._root_states[self._object_actor_ids[object_name][0], 0:7] = torch.tensor(object_pose[f1l, 0:7],
+                                                                                       dtype=torch.float32,
+                                                                                       device=self.device)
+            self.gym.set_actor_root_state_tensor_indexed(
+                self.sim,
+                gymtorch.unwrap_tensor(self._root_states),
+                gymtorch.unwrap_tensor(self._object_actor_ids[object_name]),
+                len(self._object_actor_ids[object_name]),
+            )
 
     def _compute_reset(self):
         motion_lengths = self._motion_lib.get_motion_length(self._motion_ids)

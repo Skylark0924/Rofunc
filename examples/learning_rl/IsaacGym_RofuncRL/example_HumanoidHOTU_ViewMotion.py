@@ -24,6 +24,7 @@ def inference(custom_args):
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
+    cfg.task.env.object_motion_file = custom_args.object_motion_file
 
     cfg_dict = omegaconf_to_dict(cfg.task)
 
@@ -58,7 +59,9 @@ if __name__ == "__main__":
     #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
     #  2. custom motion file with absolute path
     parser.add_argument("--motion_file", type=str,
-                        default="examples/data/hotu/test_data_04_hotu.npy")
+                        default="examples/data/hotu/test_data_02_hotu.npy")
+    parser.add_argument("--object_motion_file", type=str,
+                        default="examples/data/hotu/test_data_02_optitrack.csv")
     custom_args = parser.parse_args()
 
     inference(custom_args)

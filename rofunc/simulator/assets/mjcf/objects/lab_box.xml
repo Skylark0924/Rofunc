@@ -16,7 +16,7 @@
         </default>
     </default>
         <asset>
-        <mesh name="box" file="lab_box.stl" scale="1 1 1"/>
+        <mesh name="box" file="lab_box.obj" scale="1 1 1"/>
     </asset>
     <worldbody>
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
