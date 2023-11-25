@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import time
 
 import yaml
 from isaacgym.torch_utils import *
@@ -501,11 +502,15 @@ class MotionLib:
 
 
 class ObjectMotionLib:
-    def __init__(self, object_motion_file, object_names, device):
+    def __init__(self, object_motion_file, object_names, device, humanoid_start_time=None, height_offset=0.0):
         self.object_motion_file = object_motion_file
         self.object_names = object_names
         self.object_poses_w_time = []
         self.device = device
+        self.humanoid_start_time = humanoid_start_time  # in second, for the motion sync
+        if self.humanoid_start_time is not None:
+            assert len(self.humanoid_start_time) == len(self.object_motion_file)
+        self.height_offset = height_offset
 
         if isinstance(self.object_motion_file, list):  # Multiple files
             self.num_motions = len(self.object_motion_file)
@@ -520,6 +525,10 @@ class ObjectMotionLib:
         objs_list, meta_list = rf.optitrack.get_objects(self.object_motion_file)
         self.scales = self._get_scale(meta_list)
         self.dts = self._get_dt(meta_list)
+        if self.humanoid_start_time is not None:
+            self.tds = self._get_time_difference(meta_list)
+        else:
+            self.tds = [0] * self.num_motions
 
         for i in range(self.num_motions):
             # data is a numpy array of shape (n_samples, n_features)
@@ -559,11 +568,24 @@ class ObjectMotionLib:
             dts.append(1.0 / float(meta_list[i]["Export Frame Rate"]))
         return dts
 
+    def _get_time_difference(self, meta_list):
+        time_diffs = []
+        for i in range(len(meta_list)):
+            object_start_time = meta_list[i]["Capture Start Time"]
+            y, t = object_start_time.split(' ')[0], object_start_time.split(' ')[1]
+            if meta_list[i]["Take Name"].split(" ")[-1] == "PM":
+                t = t.split(".")
+                t[0] = str(int(t[0]) + 12)
+                t = ":".join(t[:3])
+            timestamp = time.mktime(time.strptime(y + " " + t, "%Y-%m-%d %H:%M:%S"))
+            time_diffs.append(float(timestamp - self.humanoid_start_time[i]))
+        return time_diffs
+
     def _motion_transform(self, pose):
         # y-up in the optitrack to z-up in IsaacGym
         tmp = pose[:, 1].clone()
-        pose[:, 1] = pose[:, 2]
-        pose[:, 2] = tmp
+        pose[:, 1] = -pose[:, 2]
+        pose[:, 2] = tmp - self.height_offset
         pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor(
             rf.robolab.quaternion_from_euler(np.pi / 2, 0, 0)), torch.tensor(pose[:, 3:]), )
         return pose
@@ -576,7 +598,11 @@ class ObjectMotionLib:
         :return:
         """
 
-        approx_index = torch.round(motion_times / self.dts[motion_ids])[0].long()
+        approx_index = torch.round(motion_times[motion_ids] / self.dts[motion_ids] + self.tds[motion_ids])[0].long()
+        if approx_index < 0:
+            approx_index = 0
+        elif approx_index >= self.object_poses_w_time[motion_ids][self.object_names[0]].shape[0]:
+            approx_index = self.object_poses_w_time[motion_ids][self.object_names[0]].shape[0] - 1
         object_poses = {}
         for object_name in self.object_poses_w_time[motion_ids].keys():
             object_poses[object_name] = self.object_poses_w_time[motion_ids][object_name][approx_index][1:]

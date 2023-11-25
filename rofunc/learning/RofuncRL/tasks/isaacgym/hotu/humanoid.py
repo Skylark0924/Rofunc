@@ -95,10 +95,12 @@ class Humanoid(VecTask):
 
         # TODO: check
         self._humanoid_actor_ids = num_actors * torch.arange(self.num_envs, device=self.device, dtype=torch.int32)
-        self._object_actor_ids = {
-            object_name: torch.tensor(
-                [self.gym.get_actor_index(self.envs[i], self.object_handles[object_name][i], gymapi.DOMAIN_SIM) for i in
-                 range(self.num_envs)], dtype=torch.int32, device=self.device) for object_name in self.object_names}
+        if self.object_names is not None:
+            self._object_actor_ids = {
+                object_name: torch.tensor(
+                    [self.gym.get_actor_index(self.envs[i], self.object_handles[object_name][i], gymapi.DOMAIN_SIM) for
+                     i in range(self.num_envs)], dtype=torch.int32, device=self.device) for object_name in
+                self.object_names}
 
         # create some wrapper tensors for different slices
         self._dof_state = gymtorch.wrap_tensor(dof_state_tensor)
@@ -408,15 +410,18 @@ class Humanoid(VecTask):
         # Load object assets
         object_asset_files = self.cfg["env"]["object_asset"]["assetFileName"]
         self.object_names = self.cfg["env"]["object_asset"]["assetName"]
-        object_assets = {}
-        for i in range(len(object_asset_files)):
-            asset_options = gymapi.AssetOptions()
-            asset_options.angular_damping = 0.01
-            asset_options.max_angular_velocity = 100.0
-            asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
-            # asset_options.fix_base_link = True
-            object_asset = self.gym.load_asset(self.sim, asset_root, object_asset_files[i], asset_options)
-            object_assets[self.object_names[i]] = object_asset
+        if object_asset_files is not None:
+            object_assets = {}
+            for i in range(len(object_asset_files)):
+                asset_options = gymapi.AssetOptions()
+                asset_options.angular_damping = 0.01
+                asset_options.max_angular_velocity = 100.0
+                asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
+                # asset_options.fix_base_link = True
+                object_asset = self.gym.load_asset(self.sim, asset_root, object_asset_files[i], asset_options)
+                object_assets[self.object_names[i]] = object_asset
+        else:
+            object_assets = None
 
         self.torso_index = 0
         self.num_bodies = self.gym.get_asset_rigid_body_count(humanoid_asset)
@@ -501,12 +506,14 @@ class Humanoid(VecTask):
         start_pose.p = gymapi.Vec3(*get_axis_params(char_h, self.up_axis_idx))
         start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
+        col_group = 100000 if object_name is 'base' else env_id
+
         object_handle = self.gym.create_actor(
             env_ptr,
             object_asset,
             start_pose,
             object_name,
-            env_id,
+            col_group,
             1,
             0,
         )

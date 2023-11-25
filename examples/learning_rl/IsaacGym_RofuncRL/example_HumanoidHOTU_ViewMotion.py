@@ -61,7 +61,7 @@ if __name__ == "__main__":
     parser.add_argument("--motion_file", type=str,
                         default="examples/data/hotu/test_data_02_hotu.npy")
     parser.add_argument("--object_motion_file", type=str,
-                        default="examples/data/hotu/test_data_02_optitrack.csv")
+                        default=None)
     custom_args = parser.parse_args()
 
     inference(custom_args)

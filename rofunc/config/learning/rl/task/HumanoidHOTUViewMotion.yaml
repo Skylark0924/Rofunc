@@ -35,8 +35,8 @@ env:
     assetJointNum: 28
 
   object_asset:
-    assetFileName: ["mjcf/objects/lab_box.xml"]
-    assetName: ["box"]
+    assetFileName:
+    assetName:
 
   plane:
     staticFriction: 1.0
