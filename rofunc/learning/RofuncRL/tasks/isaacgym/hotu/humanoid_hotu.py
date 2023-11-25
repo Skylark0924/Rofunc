@@ -185,6 +185,7 @@ class HumanoidHOTU(Humanoid):
             object_motion_file=object_motion_file,
             object_names=self.cfg["env"]["object_asset"]["assetName"],
             device=self.device,
+            height_offset=0.3
         )
 
     def reset_idx(self, env_ids):

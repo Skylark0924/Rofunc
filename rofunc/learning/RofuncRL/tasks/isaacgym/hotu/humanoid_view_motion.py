@@ -15,6 +15,7 @@
 import torch
 from isaacgym import gymtorch
 
+import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.humanoid_hotu import HumanoidHOTU
 
 
@@ -87,6 +88,26 @@ class HumanoidViewMotionTask(HumanoidHOTU):
         root_ang_vel = torch.zeros_like(root_ang_vel)
         dof_vel = torch.zeros_like(dof_vel)
 
+        if self.object_names is not None:
+            object_poses = self._object_motion_lib.get_motion_state(motion_ids, motion_times)
+            for object_name, object_pose in object_poses.items():
+                # 13-dim for the actor root state: [x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz]
+                self._root_states[self._object_actor_ids[object_name][0], 0:7] = object_pose
+                self.gym.set_actor_root_state_tensor_indexed(
+                    self.sim,
+                    gymtorch.unwrap_tensor(self._root_states),
+                    gymtorch.unwrap_tensor(self._object_actor_ids[object_name]),
+                    len(self._object_actor_ids[object_name]),
+                )
+
+            if "base" in self.object_names:
+                base_pose = object_poses["base"]
+                root_pos = base_pose[0:3].unsqueeze(0)
+                # opti_base_ori = rf.robolab.euler_from_quaternion(base_pose[3:7].cpu().numpy())
+                # origin_ori = rf.robolab.euler_from_quaternion(self._root_states[0, 3:7].cpu().numpy())
+                # ori = torch.tensor([origin_ori[0], origin_ori[1], opti_base_ori[2]]).to(self.device)
+                # root_rot = ori.unsqueeze(0)
+
         env_ids = torch.arange(self.num_envs, dtype=torch.long, device=self.device)
         self._set_env_state(
             env_ids=env_ids,
@@ -111,17 +132,6 @@ class HumanoidViewMotionTask(HumanoidHOTU):
             gymtorch.unwrap_tensor(env_ids_int32),
             len(env_ids_int32),
         )
-
-        object_poses = self._object_motion_lib.get_motion_state(motion_ids, motion_times)
-        for object_name, object_pose in object_poses.items():
-            # 13-dim for the actor root state: [x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz]
-            self._root_states[self._object_actor_ids[object_name][0], 0:7] = object_pose
-            self.gym.set_actor_root_state_tensor_indexed(
-                self.sim,
-                gymtorch.unwrap_tensor(self._root_states),
-                gymtorch.unwrap_tensor(self._object_actor_ids[object_name]),
-                len(self._object_actor_ids[object_name]),
-            )
 
     def _compute_reset(self):
         motion_lengths = self._motion_lib.get_motion_length(self._motion_ids)
