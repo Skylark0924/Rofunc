@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from isaacgym.torch_utils import *
+import numpy as np
 
 from rofunc.simulator.base_sim import RobotSim
 
