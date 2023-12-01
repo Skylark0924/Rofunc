@@ -14,6 +14,7 @@
 
 import math
 import os.path
+import numpy as np
 
 from rofunc.simulator.base_sim import PlaygroundSim
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -61,12 +62,12 @@ class ObjectSim:
         self.envs = envs
 
         if isinstance(self.asset_file, list):
-            for asset_file in self.asset_file:
-                self.create_env_single(asset_file)
+            for i, asset_file in enumerate(self.asset_file):
+                self.create_env_single(asset_file, i)
         elif isinstance(self.asset_file, str):
             self.create_env_single(self.asset_file)
 
-    def create_env_single(self, asset_file):
+    def create_env_single(self, asset_file, index=1):
         from isaacgym import gymapi
 
         # Load object asset
@@ -81,8 +82,9 @@ class ObjectSim:
 
         object_handles = []
         init_pose = self.args.env.asset.init_pose
+        init_position = np.array(init_pose[:3]) + np.array([0, 0, 0.3]) * index
         pose = gymapi.Transform()
-        pose.p = gymapi.Vec3(*init_pose[:3])
+        pose.p = gymapi.Vec3(*init_position)
         pose.r = gymapi.Quat(*init_pose[3:7])
 
         for i in range(self.num_envs):
