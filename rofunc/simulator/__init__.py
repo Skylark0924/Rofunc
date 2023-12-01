@@ -10,4 +10,5 @@ from .multirobot_sim import MultiRobotSim
 from .human_sim import HumanSim
 from .humanoid_sim import HumanoidSim
 from .qbsofthand_sim import QbSoftHandSim
+from .object_sim import ObjectSim
 from .utils.xsens2urdf import xsens2urdf
