@@ -396,7 +396,7 @@ class RobotSim:
             self.gym.draw_viewer(self.viewer, self.sim, False)
             self.gym.sync_frame_time(self.sim)
 
-        print("Done")
+        beauty_print("Done")
         self.gym.destroy_viewer(self.viewer)
         self.gym.destroy_sim(self.sim)
 

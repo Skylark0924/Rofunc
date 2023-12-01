@@ -1,7 +1,8 @@
 import rofunc as rf
 
 rofunc_path = rf.oslab.get_rofunc_path()
-if not os.path.exists(os.path.join(rofunc_path, "simulator/assets/urdf/ycb/")):
+if not os.path.exists(os.path.join(rofunc_path, "simulator/assets/urdf/ycb/001_chips_can")):
+    ...
 
 
 args = gymutil.parse_arguments()
