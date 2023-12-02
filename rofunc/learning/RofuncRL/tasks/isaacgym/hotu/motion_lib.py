@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import time
 
 import yaml
 from isaacgym.torch_utils import *
@@ -119,7 +120,6 @@ class MotionLib:
 
         self.init_local_rotation = torch.Tensor(
             np.load(os.path.join(rf.oslab.get_rofunc_path(), "utils/datalab/poselib/local_orientation.npy"))).to(device)
-        return
 
     def num_motions(self):
         return len(self._motions)
@@ -239,7 +239,7 @@ class MotionLib:
         )
         dof_pos = self._local_rotation_to_dof(local_rot)
 
-        return root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos
+        return root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos, f0l, f1l
 
     def _load_motions(self, motion_file):
         self._motions = []
@@ -403,56 +403,22 @@ class MotionLib:
             joint_offset = dof_offsets[j]
             joint_size = dof_offsets[j + 1] - joint_offset
 
-            if joint_size == 3:  # TODO
+            if joint_size == 3:
                 joint_q = local_rot[:, body_id]
-                # init_joint_q = self.init_local_rotation[body_id]
-                # if body_id in [23, 5]:
-                #     init_joint_q = torch.tensor(rf.robolab.quaternion_multiply([init_joint_q[1].cpu(), init_joint_q[2].cpu(),
-                #                                                                 init_joint_q[3].cpu(), init_joint_q[0].cpu()],
-                #                                                                [0, 1, 0, 0])).to(self._device)
-                # else:
-                # init_joint_q = torch.tensor([init_joint_q[1], init_joint_q[2], init_joint_q[3], init_joint_q[0]]).to(
-                #     self._device)
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
-                if body_id is 5:
-                    # new_joint_q = torch.zeros_like(joint_q).to(self._device)
-                    # for i in range(len(joint_q)):
-                    #     new_joint_q[i] = torch.tensor(
-                    #         rf.robolab.quaternion_multiply_tensor(joint_q[i], [0, -1, 0, 0])).to(self._device)
-                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, -1, 0, 0], joint_q)
+                if body_id is 5:  # Right hand
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, 1, 0, 0], joint_q)
                     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
-                    # init_joint_q = torch.tensor([0, 0, 0, -1], dtype=torch.float).to(self._device)
-                    # init_joint_exp_map = torch_utils.quat_to_exp_map(init_joint_q)
-                    # joint_exp_map += init_joint_exp_map
-                    # joint_exp_map-= torch.tensor([0,  3.14, 0], dtype=torch.float).to(self._device)
-                    # joint_exp_map = torch.zeros_like(joint_exp_map).to(self._device)
-                elif body_id is 23:
-                    # new_joint_q = torch.zeros_like(joint_q).to(self._device)
-                    # for i in range(len(joint_q)):
-                    #     new_joint_q[i] = torch.tensor(
-                    #         rf.robolab.quaternion_multiply_tensor(joint_q[i], [1, 0, 0, 0])).to(self._device)
+                elif body_id is 23:  # Left hand
                     new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([1, 0, 0, 0], joint_q)
                     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
-                    # init_joint_q = torch.tensor([0, 0, 1, 0], dtype=torch.float).to(self._device)
-                    # init_joint_exp_map = torch_utils.quat_to_exp_map(init_joint_q)
-                    # joint_exp_map += init_joint_exp_map
-                    # joint_exp_map -= torch.tensor([0, 3.14, 0], dtype=torch.float).to(self._device)
-                    # joint_exp_map = torch.zeros_like(joint_exp_map).to(self._device)
-
-                # init_joint_exp_map = torch_utils.quat_to_exp_map(init_joint_q)
                 dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
-            elif joint_size == 1:
-
-                if body_id in [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]:
+            elif joint_size == 1:  # TODO: check this
+                if body_id in [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]:  # Right and left fingers except thumbs
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 2])  # assume joint is always along y axis
-                elif body_id is 27:
-                    joint_q = local_rot[:, body_id]
-                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0.707, 0, 0.707, 0], joint_q)
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(new_joint_q)
-                    joint_theta = -(joint_theta * joint_axis[..., 2])
-                elif body_id in [6, 24]:
+                elif body_id in [6, 24]:  # right and left thumbs knuckles link
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 0])  # assume joint is always along y axis
@@ -499,3 +465,144 @@ class MotionLib:
                 assert False
 
         return dof_vel
+
+
+class ObjectMotionLib:
+    def __init__(self, object_motion_file, object_names, device, humanoid_start_time=None, height_offset=0.0):
+        """
+        Object motion library for the IsaacGym humanoid series environments and process the motion data from Optitrack.
+
+        :param object_motion_file: optitrack motion file path, should be .csv files, can be a list of files or a single file
+        :param object_names: list of object names you want to load
+        :param device: device same as the env/task device
+        :param humanoid_start_time: start time of the humanoid motion, for the temporal synchronization
+        :param height_offset: height offset of the object, for the spatial alignment
+        """
+        self.object_motion_file = object_motion_file
+        self.object_names = object_names
+        self.object_poses_w_time = []
+        self.device = device
+        self.humanoid_start_time = humanoid_start_time  # in second, for the motion sync
+        if self.humanoid_start_time is not None:
+            assert len(self.humanoid_start_time) == len(self.object_motion_file)
+        self.height_offset = height_offset
+
+        if isinstance(self.object_motion_file, list):  # Multiple files
+            self.num_motions = len(self.object_motion_file)
+        elif isinstance(self.object_motion_file, str):  # Single file
+            self.num_motions = 1
+        else:
+            raise NotImplementedError
+
+        self._load_motions()
+
+    def _load_motions(self):
+        objs_list, meta_list = rf.optitrack.get_objects(self.object_motion_file)
+        self.scales = self._get_scale(meta_list)
+        self.dts = self._get_dt(meta_list)
+        if self.humanoid_start_time is not None:
+            self.tds = self._get_time_difference(meta_list)
+        else:
+            self.tds = [0] * self.num_motions
+
+        for i in range(self.num_motions):
+            # data is a numpy array of shape (n_samples, n_features)
+            # labels is a list of strings corresponding to the name of the features
+            data, labels = rf.optitrack.data_clean(self.object_motion_file, legacy=False, objs=objs_list[i])[i]
+
+            # Accessing the position and attitude of an object over all samples:
+            # Coordinates names and order: ['x', 'y', 'z', 'qx', 'qy', 'qz', 'qw']
+            object_poses_dict = {}
+            for object_name in self.object_names:
+                data_ptr = labels.index(f'{object_name}.pose.x')
+                assert data_ptr + 6 == labels.index(f'{object_name}.pose.qw')
+                pose = data[:, data_ptr:data_ptr + 7]
+                pose[:, :3] *= self.scales[i]  # convert to meter
+                pose = self._motion_transform(torch.tensor(pose, dtype=torch.float))
+
+                pose_w_time = torch.hstack((torch.tensor(data[:, 1], dtype=torch.float).unsqueeze(-1), pose))
+                object_poses_dict[object_name] = pose_w_time.to(self.device)
+            self.object_poses_w_time.append(object_poses_dict)  # [num_motions, num_objects, num_samples, 7]
+
+    def _get_scale(self, meta_list):
+        """
+        Get the scale of the motion data, convert to meter
+
+        :param meta_list: list of meta data obtained from motion files
+        :return: list of scale for each motion file
+        """
+        scales = []
+        for i in range(len(meta_list)):
+            if meta_list[i]["Length Units"] == "Centimeters":
+                scales.append(0.01)
+            elif meta_list[i]["Length Units"] == "Meters":
+                scales.append(1.0)
+            elif meta_list[i]["Length Units"] == "Millimeters":
+                scales.append(0.001)
+            else:
+                raise NotImplementedError
+        return scales
+
+    def _get_dt(self, meta_list):
+        """
+        Get the time interval of the motion data, convert to second
+
+        :param meta_list: list of meta data obtained from motion files
+        :return: list of dt for each motion file
+        """
+        dts = []
+        for i in range(len(meta_list)):
+            dts.append(1.0 / float(meta_list[i]["Export Frame Rate"]))
+        return dts
+
+    def _get_time_difference(self, meta_list):
+        """
+        Get the time difference between the motion data and the humanoid motion by comparing their start time, convert to second
+
+        :param meta_list: list of meta data obtained from motion files
+        :return: list of time difference for each motion file
+        """
+        time_diffs = []
+        for i in range(len(meta_list)):
+            object_start_time = meta_list[i]["Capture Start Time"]
+            y, t = object_start_time.split(' ')[0], object_start_time.split(' ')[1]
+            if meta_list[i]["Take Name"].split(" ")[-1] == "PM":
+                t = t.split(".")
+                t[0] = str(int(t[0]) + 12)
+                t = ":".join(t[:3])
+            timestamp = time.mktime(time.strptime(y + " " + t, "%Y-%m-%d %H:%M:%S"))
+            time_diffs.append(float(timestamp - self.humanoid_start_time[i]))
+        return time_diffs
+
+    def _motion_transform(self, pose):
+        """
+        Coordinate transformation from optitrack to IsaacGym
+
+        :param pose: [num_samples, 7]
+        :return: pose: [num_samples, 7]
+        """
+        # y-up in the optitrack to z-up in IsaacGym
+        tmp = pose[:, 1].clone()
+        pose[:, 1] = -pose[:, 2]
+        pose[:, 2] = tmp - self.height_offset
+        pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor(
+            rf.robolab.quaternion_from_euler(np.pi / 2, 0, 0)), torch.tensor(pose[:, 3:]), )
+        return pose
+
+    def get_motion_state(self, motion_ids, motion_times):
+        """
+        Get the object pose at the given time
+
+        :param motion_ids: the id indicating which motion file to use
+        :param motion_times: the time to get the object pose
+        :return:
+        """
+        approx_index = torch.round(motion_times[motion_ids] / self.dts[motion_ids] + self.tds[motion_ids])[0].long()
+        if approx_index < 0:
+            approx_index = 0
+        elif approx_index >= self.object_poses_w_time[motion_ids][self.object_names[0]].shape[0]:
+            approx_index = self.object_poses_w_time[motion_ids][self.object_names[0]].shape[0] - 1
+        object_poses = {}
+        for object_name in self.object_poses_w_time[motion_ids].keys():
+            object_poses[object_name] = self.object_poses_w_time[motion_ids][object_name][approx_index][1:]
+        return object_poses

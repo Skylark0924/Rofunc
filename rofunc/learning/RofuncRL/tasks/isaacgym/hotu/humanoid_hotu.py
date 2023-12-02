@@ -20,7 +20,7 @@ from isaacgym.torch_utils import *
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.humanoid import Humanoid, dof_to_obs
-from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.motion_lib import MotionLib
+from rofunc.learning.RofuncRL.tasks.isaacgym.hotu.motion_lib import MotionLib, ObjectMotionLib
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 
@@ -47,6 +47,7 @@ class HumanoidHOTU(Humanoid):
                          graphics_device_id=graphics_device_id, headless=headless,
                          virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
+        # Load motion file
         motion_file = cfg["env"].get("motion_file", None)
         if rf.oslab.is_absl_path(motion_file):
             motion_file_path = motion_file
@@ -62,6 +63,21 @@ class HumanoidHOTU(Humanoid):
             )
         self._load_motion(motion_file_path)
 
+        # Load object motion file
+        object_motion_file = cfg["env"].get("object_motion_file", None)
+        if object_motion_file is not None:
+            if rf.oslab.is_absl_path(object_motion_file):
+                object_motion_file_path = object_motion_file
+            elif object_motion_file.split("/")[0] == "examples":
+                object_motion_file_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    "../../../../../../" + object_motion_file,
+                )
+            else:
+                raise ValueError("Unsupported object motion file path")
+            self._load_object_motion(object_motion_file_path)
+
+        # Set up the observation space for AMP
         self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf,
                                          np.ones(self.get_num_amp_obs()) * np.Inf)
         self._amp_obs_buf = torch.zeros((self.num_envs, self._num_amp_obs_steps, self._num_amp_obs_per_step),
@@ -121,7 +137,7 @@ class HumanoidHOTU(Humanoid):
 
         motion_ids = motion_ids.view(-1)
         motion_times = motion_times.view(-1)
-        root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
+        root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos, _, _ \
             = self._motion_lib.get_motion_state(motion_ids, motion_times)
         amp_obs_demo = build_amp_observations(root_pos, root_rot, root_vel, root_ang_vel,
                                               dof_pos, dof_vel, key_pos,
@@ -132,50 +148,13 @@ class HumanoidHOTU(Humanoid):
     def _build_amp_obs_demo_buf(self, num_samples):
         self._amp_obs_demo_buf = torch.zeros((num_samples, self._num_amp_obs_steps, self._num_amp_obs_per_step),
                                              device=self.device, dtype=torch.float32)
-        return
 
     def _setup_character_props(self, key_bodies):
         super()._setup_character_props(key_bodies)
 
-        """
-        When body num is 15, the humanoid holds no object; when it is 16, humanoid holds one object which takes
-        as a body; when bn=17, the humanoid holds 2 objects
-        """
-        # asset_body_num = self.cfg["env"]["asset"]["assetBodyNum"]
-        # asset_joint_num = self.cfg["env"]["asset"]["assetJointNum"]
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         num_key_bodies = len(key_bodies)
 
-        # 13 = root_h (1) + root_rot (6) + root_linear_vel (3) + root_angular_vel (3)},
-        # dof_obs_size = dof_pos + dof_vel,
-        # key_body_positions = 3 * num_key_bodies
-        # if asset_body_num == 15:
-        #     if asset_joint_num == 28:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 28 + 3 * num_key_bodies
-        #         )
-        #     elif asset_joint_num == 34:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-        #         )
-        # elif asset_body_num == 16:
-        #     self._num_amp_obs_per_step = (
-        #         13 + self._dof_obs_size + 31 + 3 * num_key_bodies
-        #     )
-        # elif asset_body_num == 17:
-        #     if asset_joint_num == 34:
-        #         self._num_amp_obs_per_step = (
-        #             13 + self._dof_obs_size + 34 + 3 * num_key_bodies
-        #         )
-        #     elif asset_joint_num == 38:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 38 + 3 * num_key_bodies
-        #         )
-        # elif asset_body_num == 19:
-        #     if asset_joint_num == 44:
-        #         self._num_amp_obs_per_step = (
-        #                 13 + self._dof_obs_size + 44 + 3 * num_key_bodies
-        #         )
         if asset_file == "mjcf/amp_humanoid.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 28 + 3 * num_key_bodies  # [root_h, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel, key_body_pos]
         elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
@@ -191,8 +170,6 @@ class HumanoidHOTU(Humanoid):
             print(f"Unsupported humanoid body num: {asset_file}")
             assert False
 
-        return
-
     def _load_motion(self, motion_file):
         assert self._dof_offsets[-1] == self.num_dof
         self._motion_lib = MotionLib(
@@ -202,7 +179,14 @@ class HumanoidHOTU(Humanoid):
             key_body_ids=self._key_body_ids.cpu().numpy(),
             device=self.device,
         )
-        return
+
+    def _load_object_motion(self, object_motion_file):
+        self._object_motion_lib = ObjectMotionLib(
+            object_motion_file=object_motion_file,
+            object_names=self.cfg["env"]["object_asset"]["assetName"],
+            device=self.device,
+            height_offset=0.3
+        )
 
     def reset_idx(self, env_ids):
         self._reset_default_env_ids = []
