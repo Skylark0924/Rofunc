@@ -21,25 +21,10 @@ env:
     use_mesh_materials: True  # Whether to use mesh materials. Default False.
     vhacd_enabled: True  # Whether convex decomposition is enabled. Used only with PhysX. Provided by a third part library (V-HACD). Default False.
     vhacd_params:  # Convex decomposition parameters. Used only with PhysX. If not specified, all triangle meshes will be approximated using a single convex hull.
-      max_convex_hulls: 256  # Maximum number of convex hulls to generate. Default 256.
-      max_num_vertices_per_hull: 64  # Maximum number of vertices per convex hull. Default 64.
-      min_volume_per_hull: 0.0001  # Minimum volume for convex hulls. Default 0.0001.
-      convex_hull_approximation: True  # Whether to use convex hull approximation. Default True.
-      convex_hull_downsampling: 16  # Convex hull downsampling. Default 16.
-      convex_hull_max_vertices: 64  # Maximum number of vertices for convex hulls. Default 64.
-      convex_hull_pca: True  # Whether to use PCA for convex hulls. Default True.
-      convex_hull_plane_downsampling: 4  # Convex hull plane downsampling. Default 4.
-      convex_hull_plane_normalization: True  # Whether to normalize convex hull planes. Default True.
-      convex_hull_scale: 1.0  # Convex hull scale. Default 1.0.
-      convex_hull_tolerance: 0.0  # Convex hull tolerance. Default 0.0.
-      max_hull_vertices: 64  # Maximum number of vertices for convex hulls. Default 64.
-      max_hulls: 256  # Maximum number of convex hulls. Default 256.
-      min_hull_volume: 0.0001  # Minimum volume for convex hulls. Default 0.0001.
-      pca: True  # Whether to use PCA for convex hulls. Default True.
-      plane_downsampling: 4  # Convex hull plane downsampling. Default 4.
-      plane_normalization: True  # Whether to normalize convex hull planes. Default True.
-      scale: 1.0  # Convex hull scale. Default 1.0.
-      tolerance: 0.0  # Convex hull tolerance. Default 0.0.
+      resolution: 100000  # Maximum number of voxels generated during the voxelization stage. Default 100000.
+      max_convex_hulls: 10  # Maximum number of convex hulls to generate. Default 10.
+      max_num_vertices_per_ch: 64  # Maximum number of vertices per convex hull. Default 64.
+
 
 sim:
   dt: 0.0166 # 1/60
