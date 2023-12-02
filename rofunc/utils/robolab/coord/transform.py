@@ -1286,6 +1286,7 @@ def euler_from_quaternion(quaternion, axes='sxyz'):
     return euler_from_homo_matrix(homo_matrix_from_quaternion(quaternion), axes)
 
 
+
 def quaternion_from_euler(ai, aj, ak, axes='sxyz'):
     """
     Return quaternion from Euler angles and axis sequence.

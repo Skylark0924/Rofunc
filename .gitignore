@@ -179,3 +179,4 @@ doc/source/examples
 doc/source/apidocs
 .vscode/
 *.pth
+rofunc/simulator/assets/urdf/ycb/*
