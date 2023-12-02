@@ -227,7 +227,7 @@ def export_urdf(mesh,
             mass = np.maximum(YCB_MASS[piece_name], minimum_mass)
             et.SubElement(inertial, 'inertia', ixx='0.0001', ixy='0.0', ixz='0.0',
                           iyy='0.0001', iyz='0.0', izz='0.0001')
-        et.SubElement(inertial, 'mass', value='{:.2E}'.format(mass))
+        et.SubElement(inertial, 'mass', value='{}'.format(mass))
 
         # Visual Information
         visual = et.SubElement(link, 'visual')

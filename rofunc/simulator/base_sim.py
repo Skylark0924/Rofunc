@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import os
 from typing import List
 
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image as Im
