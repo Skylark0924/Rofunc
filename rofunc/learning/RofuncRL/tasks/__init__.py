@@ -18,8 +18,8 @@ class Tasks:
             from .isaacgym.ase.humanoid_location import HumanoidLocationTask
             from .isaacgym.ase.humanoid_reach import HumanoidReachTask
             from .isaacgym.ase.humanoid_strike import HumanoidStrikeTask
-            from .isaacgym.ase.humanoid_view_motion import HumanoidViewMotionTask
-            from .isaacgym.hotu.humanoid_view_motion import HumanoidViewMotionTask
+            from .isaacgym.ase.humanoid_view_motion import HumanoidASEViewMotionTask
+            from .isaacgym.hotu.humanoid_view_motion import HumanoidHOTUViewMotionTask
 
             self.task_map = {
                 "Ant": AntTask,
@@ -38,8 +38,8 @@ class Tasks:
                 "HumanoidASELocationSwordShield": HumanoidLocationTask,
                 "HumanoidASEReachSwordShield": HumanoidReachTask,
                 "HumanoidASEStrikeSwordShield": HumanoidStrikeTask,
-                "HumanoidASEViewMotion": HumanoidViewMotionTask,
-                "HumanoidHOTUViewMotion": HumanoidViewMotionTask,
+                "HumanoidASEViewMotion": HumanoidASEViewMotionTask,
+                "HumanoidHOTUViewMotion": HumanoidHOTUViewMotionTask,
             }
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks
