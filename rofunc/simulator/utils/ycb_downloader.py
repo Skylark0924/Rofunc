@@ -15,18 +15,14 @@
 import json
 import multiprocessing
 import os
-import sys
-import urllib
 from functools import partial
 from urllib.request import Request, urlopen
-
-from tqdm import tqdm
 
 import rofunc as rf
 from rofunc.utils.oslab.path import get_rofunc_path
 
 
-def download_ycb_objects(objects_to_download="all", files_to_download=["google_16k"],
+def download_ycb_objects(objects_to_download="all", files_to_download=['google_16k'],
                          extract=True, core_num=20):
     """
     Download YCB objects from the official website

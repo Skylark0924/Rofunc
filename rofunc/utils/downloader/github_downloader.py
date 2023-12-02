@@ -64,7 +64,7 @@ def get_args() -> Namespace:
 if __name__ == "__main__":
     args = get_args()
     args.repo = "NVIDIA-Omniverse/IsaacGymEnvs"
-    args.path = "assets/urdf/ycb/011_banana"
+    args.path = "assets/urdf/ycb/025_mug"
     g = Github()
     repo = g.get_repo(args.repo)
     if args.file:

@@ -19,6 +19,10 @@ asset_files = ["urdf/ycb/002_master_chef_can/002_master_chef_can.urdf",
                 "urdf/ycb/010_potted_meat_can/010_potted_meat_can.urdf",
                 "urdf/ycb/011_banana/011_banana.urdf",
                ]
-# asset_files = "urdf/ycb/002_master_chef_can/002_master_chef_can.urdf"
+# asset_files = "urdf/ycb/010/011_banana.urdf"
+# asset_files = "urdf/ycb/011_banana/011_banana.urdf"
+# asset_files = ["urdf/ycb/010/010_potted_meat_can.urdf", "urdf/ycb/010_potted_meat_can/010_potted_meat_can.urdf"]
+# asset_files = "urdf/ycb/013_apple/013_apple.urdf"
+# asset_files = ["urdf/ycb/025_mug/025_mug.urdf", "urdf/ycb/025_mug/025_mug.urdf"]
 object_sim = rf.sim.ObjectSim(args, asset_file=asset_files)
 object_sim.show()
