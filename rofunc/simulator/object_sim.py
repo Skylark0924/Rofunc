@@ -128,7 +128,7 @@ class ObjectSim:
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_R, "reset")
 
         if self.visual_obs_flag:
-            fig = plt.figure("RGB", figsize=(16, 8))
+            fig = plt.figure(mode.upper(), figsize=(16, 8))
 
         while not self.gym.query_viewer_has_closed(self.viewer):
             # Get input actions from the viewer and handle them appropriately
