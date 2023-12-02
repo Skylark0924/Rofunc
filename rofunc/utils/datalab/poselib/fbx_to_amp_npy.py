@@ -291,7 +291,7 @@ def npy_from_fbx(fbx_file):
     """
     rofunc_path = rf.oslab.get_rofunc_path()
     config = {
-        # "target_motion_path": "/home/ubuntu/Github/Rofunc/examples/data/hotu/024_amp_3.npy",
+        "target_motion_path": "/home/ubuntu/Github/Rofunc/examples/data/hotu/test_data_04_hotu.npy",
         "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_xsens_w_gloves_tpose.npy"),
         "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
         "joint_mapping": {  # Left: Xsens, Right: MJCF
@@ -352,7 +352,7 @@ def npy_from_fbx(fbx_file):
     }
 
     source_motion = motion_from_fbx(fbx_file, root_joint="Hips", fps=60, visualize=False)
-    config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
+    # config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
     motion_retargeting(config, source_motion, visualize=True)
 
 
@@ -361,7 +361,7 @@ if __name__ == '__main__':
     # fbx_dir = os.path.join(rofunc_path, "../examples/data/hotu")
     # fbx_dir = "/home/ubuntu/Data/2023_11_15_HED/has_gloves"
     # fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
-    fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-010.fbx"]
+    fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
 
     parallel = False
     if parallel:

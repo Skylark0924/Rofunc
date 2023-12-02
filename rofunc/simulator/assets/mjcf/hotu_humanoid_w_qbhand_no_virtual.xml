@@ -87,25 +87,25 @@
                         <joint name="right_elbow" axis="0 1 0" range="-160 0" stiffness="150" damping="15"
                                armature=".015"/>
                         <geom name="right_lower_arm" fromto="0 0 -0.0525 0 0 -0.1875" size="0.04" density="1056"
-                              contype="0" conaffinity="0"/>
+                              contype="0" conaffinity="1"/>
                         <site name="right_lower_arm" class="touch" pos="0 0 -0.12" size="0.041 0.0685" zaxis="0 1 0"/>
 
-                        <body name="right_hand" pos="0 0 -0.288947" quat="0 0 -1 0">
-                            <joint name="right_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10"
+                        <body name="right_hand" pos="0 0 -0.288947" quat="0 0 1 0">
+                            <joint name="right_hand_x" axis="1 0 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".01"/>
-                            <joint name="right_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10"
+                            <joint name="right_hand_y" axis="0 1 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".003"/>
-                            <joint name="right_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10"
+                            <joint name="right_hand_z" axis="0 0 1" range="-360 360" stiffness="100" damping="10"
                                    armature=".003"/>
                             <geom name="right_hand" type="sphere" size=".04" density="1865"/>
                             <site name="right_hand" class="touch" type="sphere" size=".041"/>
 
                             <!--                            <body name="right_qbhand_root_link" pos="0.0 0.0 0.0" quat="0 0 1 0">-->
-                            <!--                            <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04"/>-->
-                            <!--                            <geom pos="-0.0045 0.0145 0.144" quat="0.707388 0.706825 0 0" type="mesh"-->
-                            <!--                                  rgba="0.35 0.35 0.35 1" mesh="palm_pinch_r"/>-->
+                            <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04"/>
+                            <geom pos="-0.0045 0.0145 0.144" quat="0.707388 0.706825 0 0" type="mesh"
+                                  rgba="0.35 0.35 0.35 1" mesh="palm_pinch_r"/>
 
-                            <geom pos="0 0 0.07" type="sphere" size=".04" density="1865"/>
+                            <!--                            <geom pos="0 0 0.07" type="sphere" size=".04" density="1865"/>-->
 
                             <body name="right_qbhand_thumb_knuckle_link" pos="-0.0485 0.016463 0.0974984"
                                   quat="0.000796327 0 0.000796326 0.999999">
@@ -123,7 +123,7 @@
                                 <!--                                          quat="0.841496 -0.540263 0 0">-->
                                 <!--                                    <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="right_qbhand_thumb_proximal_link" pos="0.043 -0.0038 -0.00012"
+                                <body name="right_qbhand_thumb_proximal_link" pos="0.038 -0.0038 -0.00012"
                                       quat="0.841496 -0.540263 0 0">
                                     <joint name="right_qbhand_thumb_proximal_joint" pos="0 0 0"
                                            axis="0 0 -1" limited="true" range="0 45"/>
@@ -141,7 +141,7 @@
                                     <!--                                        <body name="right_qbhand_thumb_distal_virtual_link" pos="0.009 0 0">-->
                                     <!--                                            <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="right_qbhand_thumb_distal_link" pos="0.028 0 0">
+                                    <body name="right_qbhand_thumb_distal_link" pos="0.023 0 0">
                                         <joint name="right_qbhand_thumb_distal_joint" pos="0 0 0" axis="0 0 -1"
                                                limited="true" range="0 45"/>
                                         <inertial pos="0.00880255 -0.00172193 0"
@@ -176,7 +176,7 @@
                             <!--                                &lt;!&ndash;                                    <body name="right_qbhand_index_proximal_virtual_link" pos="0.009 0 0"&ndash;&gt;-->
                             <!--                                &lt;!&ndash;                                          quat="0.707388 0.706825 0 0">&ndash;&gt;-->
                             <!--                                &lt;!&ndash;                                        <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>&ndash;&gt;-->
-                            <body name="right_qbhand_index_proximal_link" pos="-0.0345 0.00049443 0.137011"
+                            <body name="right_qbhand_index_proximal_link" pos="-0.0245 0.00049443 0.137011"
                                   quat="-1.8365000e-07 -7.0682496e-01  5.6281635e-04 -7.0738804e-01">
                                 <joint name="right_qbhand_index_proximal_joint" pos="0 0 0" axis="0 0 -1"
                                        limited="true" range="0 45"/>
@@ -196,7 +196,7 @@
                                 <!--                                            <body name="right_qbhand_index_middle_virtual_link" pos="0.017 0 0">-->
                                 <!--                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="right_qbhand_index_middle_link" pos="0.035 0 0">
+                                <body name="right_qbhand_index_middle_link" pos="0.030 0 0">
                                     <joint name="right_qbhand_index_middle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
                                            range="0 45"/>
@@ -217,7 +217,7 @@
                                     <!--                                                <inertial pos="0 0 0" mass="0.0001"-->
                                     <!--                                                          diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="right_qbhand_index_distal_link" pos="0.027 0 0">
+                                    <body name="right_qbhand_index_distal_link" pos="0.022 0 0">
                                         <joint name="right_qbhand_index_distal_joint" pos="0 0 0"
                                                axis="0 0 -1" limited="true"
                                                range="0 45"/>
@@ -279,7 +279,7 @@
                                 <!--                                            <body name="right_qbhand_middle_middle_virtual_link" pos="0.017 0 0">-->
                                 <!--                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="right_qbhand_middle_middle_link" pos="0.035 0 0">
+                                <body name="right_qbhand_middle_middle_link" pos="0.030 0 0">
                                     <joint name="right_qbhand_middle_middle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
                                            range="0 45"/>
@@ -302,7 +302,7 @@
                                     <!--                                                        <inertial pos="0 0 0" mass="0.0001"-->
                                     <!--                                                                  diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="right_qbhand_middle_distal_link" pos="0.027 0 0">
+                                    <body name="right_qbhand_middle_distal_link" pos="0.022 0 0">
                                         <joint name="right_qbhand_middle_distal_joint" pos="0 0 0"
                                                axis="0 0 -1" limited="true"
                                                range="0 45"/>
@@ -363,7 +363,7 @@
                                 <!--                                        <body name="right_qbhand_ring_middle_virtual_link" pos="0.017 0 0">-->
                                 <!--                                            <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="right_qbhand_ring_middle_link" pos="0.035 0 0">
+                                <body name="right_qbhand_ring_middle_link" pos="0.030 0 0">
                                     <joint name="right_qbhand_ring_middle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
                                            range="0 45"/>
@@ -385,7 +385,7 @@
                                     <!--                                                <inertial pos="0 0 0" mass="0.0001"-->
                                     <!--                                                          diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="right_qbhand_ring_distal_link" pos="0.027 0 0">
+                                    <body name="right_qbhand_ring_distal_link" pos="0.022 0 0">
                                         <joint name="right_qbhand_ring_distal_joint" pos="0 0 0"
                                                axis="0 0 -1"
                                                limited="true"
@@ -448,7 +448,7 @@
                                 <!--                                            <body name="right_qbhand_little_middle_virtual_link" pos="0.009 0 0">-->
                                 <!--                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="right_qbhand_little_middle_link" pos="0.027 0 0">
+                                <body name="right_qbhand_little_middle_link" pos="0.022 0 0">
                                     <joint name="right_qbhand_little_middle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
                                            range="0 45"/>
@@ -470,7 +470,7 @@
                                     <!--                                                          pos="0.009 0 0">-->
                                     <!--                                                        <inertial pos="0 0 0" mass="0.0001"-->
                                     <!--                                                                  diaginertia="1e-09 1e-09 1e-09"/>-->
-                                    <body name="right_qbhand_little_distal_link" pos="0.027 0 0">
+                                    <body name="right_qbhand_little_distal_link" pos="0.022 0 0">
                                         <joint name="right_qbhand_little_distal_joint" pos="0 0 0"
                                                axis="0 0 -1" limited="true"
                                                range="0 45"/>
@@ -514,25 +514,25 @@
                         <joint name="left_elbow" axis="0 1 0" range="-160 0" stiffness="150" damping="15"
                                armature=".015"/>
                         <geom name="left_lower_arm" fromto="0 0 -0.0525 0 0 -0.1875" size="0.04" density="1056"
-                              contype="0" conaffinity="0"/>
+                              contype="0" conaffinity="1"/>
                         <site name="left_lower_arm" class="touch" pos="0 0 -0.1" size="0.041 0.0685" zaxis="0 0 1"/>
 
                         <body name="left_hand" pos="0 0 -0.288947" quat="0 1 0  0">
-                            <joint name="left_hand_x" axis="1 0 0" range="-90 90" stiffness="100" damping="10"
+                            <joint name="left_hand_x" axis="1 0 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".01"/>
-                            <joint name="left_hand_y" axis="0 1 0" range="-90 90" stiffness="100" damping="10"
+                            <joint name="left_hand_y" axis="0 1 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".003"/>
-                            <joint name="left_hand_z" axis="0 0 1" range="-90 90" stiffness="100" damping="10"
+                            <joint name="left_hand_z" axis="0 0 1" range="-360 360" stiffness="100" damping="10"
                                    armature=".003"/>
                             <geom name="left_hand" type="sphere" size=".04" density="1865"/>
                             <site name="left_hand" class="touch" type="sphere" size=".041"/>
 
                             <!--                        <body name="left_qbhand_root_link" pos="0.0 0.0 0.0" >-->
-                            <!--                            <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04"/>-->
-                            <!--                            <geom pos="0.0045 0.0145 0.144" quat="0.000563312 0.000562864 0.706825 0.707388"-->
-                            <!--                                  type="mesh"-->
-                            <!--                                  rgba="0.35 0.35 0.35 1" mesh="palm_pinch_l"/>-->
-                            <geom pos="0 0 0.07" type="sphere" size=".04" density="1865"/>
+                            <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04"/>
+                            <geom pos="0.0045 0.0145 0.144" quat="0.000563312 0.000562864 0.706825 0.707388"
+                                  type="mesh"
+                                  rgba="0.35 0.35 0.35 1" mesh="palm_pinch_l"/>
+                            <!--                            <geom pos="0 0 0.07" type="sphere" size=".04" density="1865"/>-->
                             <body name="left_qbhand_thumb_knuckle_link" pos="0.0485032 0.0164669 0.0975016"
                                   quat="-0.999998 -0.000796326 6.34136e-07 0.00159265">
                                 <inertial pos="0.0130716 0.00273463 0.000640905"
@@ -548,7 +548,7 @@
                                 <!--                                          quat="0.540302 -0.841471 0 0">-->
                                 <!--                                        <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="left_qbhand_thumb_proximal_link" pos="0.043 0.0038 -0.00012"
+                                <body name="left_qbhand_thumb_proximal_link" pos="0.038 0.0038 -0.00012"
                                       quat="0.540302 -0.841471 0 0">
                                     <joint name="left_qbhand_thumb_proximal_joint" pos="0 0 0"
                                            axis="0 0 -1"
@@ -565,7 +565,7 @@
                                     <!--                                            <body name="left_qbhand_thumb_distal_virtual_link" pos="0.009 0 0">-->
                                     <!--                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="left_qbhand_thumb_distal_link" pos="0.028 0 0">
+                                    <body name="left_qbhand_thumb_distal_link" pos="0.023 0 0">
                                         <joint name="left_qbhand_thumb_distal_joint" pos="0 0 0" axis="0 0 -1"
                                                limited="true" range="0 45"/>
                                         <inertial pos="0.00880255 -0.00172193 0"
@@ -599,7 +599,7 @@
                             <!--                                &lt;!&ndash;                                          quat="0.707388 0.706825 0 0">&ndash;&gt;-->
                             <!--                                &lt;!&ndash;                                        <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>&ndash;&gt;-->
 
-                            <body name="left_qbhand_index_proximal_link" pos="0.0345 0.000473743 0.136989"
+                            <body name="left_qbhand_index_proximal_link" pos="0.0244777 0.000473743 0.136989"
                                   quat="5.63039861e-04 7.06824925e-01 1.12646136e-03 7.07386402e-01">
                                 <joint name="left_qbhand_index_proximal_joint" pos="0 0 0" axis="0 0 -1"
                                        limited="true" range="0 45"/>
@@ -617,7 +617,7 @@
                                 <!--                                            <body name="left_qbhand_index_middle_virtual_link" pos="0.017 0 0">-->
                                 <!--                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="left_qbhand_index_middle_link" pos="0.035 0 0">
+                                <body name="left_qbhand_index_middle_link" pos="0.03 0 0">
                                     <joint name="left_qbhand_index_middle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
                                            range="0 45"/>
@@ -637,7 +637,7 @@
                                     <!--                                                        <inertial pos="0 0 0" mass="0.0001"-->
                                     <!--                                                                  diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="left_qbhand_index_distal_link" pos="0.027 0 0">
+                                    <body name="left_qbhand_index_distal_link" pos="0.022 0 0">
                                         <joint name="left_qbhand_index_distal_joint" pos="0 0 0"
                                                axis="0 0 -1" limited="true"
                                                range="0 45"/>
@@ -695,7 +695,7 @@
                                 <!--                                            <body name="left_qbhand_middle_middle_virtual_link" pos="0.017 0 0">-->
                                 <!--                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="left_qbhand_middle_middle_link" pos="0.035 0 0">
+                                <body name="left_qbhand_middle_middle_link" pos="0.03 0 0">
                                     <joint name="left_qbhand_middle_middle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
                                            range="0 45"/>
@@ -715,7 +715,7 @@
                                     <!--                                                        <inertial pos="0 0 0" mass="0.0001"-->
                                     <!--                                                                  diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="left_qbhand_middle_distal_link" pos="0.027 0 0">
+                                    <body name="left_qbhand_middle_distal_link" pos="0.022 0 0">
                                         <joint name="left_qbhand_middle_distal_joint" pos="0 0 0"
                                                axis="0 0 -1" limited="true"
                                                range="0 45"/>
@@ -772,7 +772,7 @@
                                 <!--                                            <body name="left_qbhand_ring_middle_virtual_link" pos="0.017 0 0">-->
                                 <!--                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="left_qbhand_ring_middle_link" pos="0.035 0 0">
+                                <body name="left_qbhand_ring_middle_link" pos="0.03 0 0">
                                     <joint name="left_qbhand_ring_middle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
                                            range="0 45"/>
@@ -792,7 +792,7 @@
                                     <!--                                                        <inertial pos="0 0 0" mass="0.0001"-->
                                     <!--                                                                  diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="left_qbhand_ring_distal_link" pos="0.027 0 0">
+                                    <body name="left_qbhand_ring_distal_link" pos="0.022 0 0">
                                         <joint name="left_qbhand_ring_distal_joint" pos="0 0 0"
                                                axis="0 0 -1"
                                                limited="true"
@@ -851,7 +851,7 @@
                                 <!--                                            <body name="left_qbhand_little_middle_virtual_link" pos="0.009 0 0">-->
                                 <!--                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                <body name="left_qbhand_little_middle_link" pos="0.027 0 0">
+                                <body name="left_qbhand_little_middle_link" pos="0.022 0 0">
                                     <joint name="left_qbhand_little_middle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
                                            range="0 45"/>
@@ -871,7 +871,7 @@
                                     <!--                                                        <inertial pos="0 0 0" mass="0.0001"-->
                                     <!--                                                                  diaginertia="1e-09 1e-09 1e-09"/>-->
 
-                                    <body name="left_qbhand_little_distal_link" pos="0.027 0 0">
+                                    <body name="left_qbhand_little_distal_link" pos="0.022 0 0">
                                         <joint name="left_qbhand_little_distal_joint" pos="0 0 0"
                                                axis="0 0 -1" limited="true"
                                                range="0 45"/>

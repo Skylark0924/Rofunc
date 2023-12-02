@@ -8,9 +8,9 @@ This example shows how to visualize robots and objects in the Isaac Gym simulato
 import rofunc as rf
 
 # CURI
-# args = rf.config.get_sim_config("CURI")
-# CURIsim = rf.sim.CURISim(args)
-# CURIsim.show()
+args = rf.config.get_sim_config("CURI")
+CURIsim = rf.sim.CURISim(args)
+CURIsim.show()
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -47,10 +47,10 @@ import rofunc as rf
 # QbSoftHandsim = rf.sim.QbSoftHandSim(args)
 # QbSoftHandsim.show()
 
-# Humanoid
-args = rf.config.get_sim_config("Humanoid")
-Humanoidsim = rf.sim.HumanoidSim(args)
-Humanoidsim.show()
+# # Humanoid
+# args = rf.config.get_sim_config("Humanoid")
+# Humanoidsim = rf.sim.HumanoidSim(args)
+# Humanoidsim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")

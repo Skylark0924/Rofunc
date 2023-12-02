@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import os
 from typing import List
 
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image as Im
@@ -49,22 +49,12 @@ class PlaygroundSim:
 
         if self.args.physics_engine == "flex":
             self.physics_engine = gymapi.SIM_FLEX
-            self.sim_params.flex.solver_type = self.args.get("sim_flex_solver_type", 5)
-            self.sim_params.flex.num_outer_iterations = self.args.get("sim_flex_num_outer_iterations", 4)
-            self.sim_params.flex.num_inner_iterations = self.args.get("sim_flex_num_inner_iterations", 15)
-            self.sim_params.flex.relaxation = self.args.get("sim_flex_relaxation", 0.75)
-            self.sim_params.flex.warm_start = self.args.get("sim_flex_warm_start", 0.8)
+            for flex_param in self.args.sim.flex:
+                setattr(self.args.sim.flex, flex_param, self.args.sim.flex[flex_param])
         elif self.args.physics_engine == "physx":
             self.physics_engine = gymapi.SIM_PHYSX
-            self.sim_params.physx.solver_type = self.args.sim.physx.solver_type
-            self.sim_params.physx.num_position_iterations = self.args.sim.physx.num_position_iterations
-            self.sim_params.physx.num_velocity_iterations = self.args.sim.physx.num_velocity_iterations
-            self.sim_params.physx.rest_offset = self.args.sim.physx.rest_offset
-            self.sim_params.physx.contact_offset = self.args.sim.physx.contact_offset
-            self.sim_params.physx.friction_offset_threshold = self.args.sim.physx.friction_offset_threshold
-            self.sim_params.physx.friction_correlation_distance = self.args.sim.physx.friction_correlation_distance
-            self.sim_params.physx.num_threads = self.args.sim.physx.num_threads
-            self.sim_params.physx.use_gpu = self.args.sim.physx.use_gpu
+            for physx_param in self.args.sim.physx:
+                setattr(self.args.sim.physx, physx_param, self.args.sim.physx[physx_param])
         else:
             raise ValueError("The physics engine should be in [flex, physx]")
 
@@ -396,7 +386,7 @@ class RobotSim:
             self.gym.draw_viewer(self.viewer, self.sim, False)
             self.gym.sync_frame_time(self.sim)
 
-        print("Done")
+        beauty_print("Done")
         self.gym.destroy_viewer(self.viewer)
         self.gym.destroy_sim(self.sim)
 

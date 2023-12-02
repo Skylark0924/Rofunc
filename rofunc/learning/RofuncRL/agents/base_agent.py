@@ -210,5 +210,5 @@ class BaseAgent:
             elif isinstance(arg, dict) or isinstance(arg, collections.OrderedDict):
                 self.multi_gpu_transfer(*arg.values())
             else:
-                raise rf.logger.beauty_print("Unknown type: {}".format(type(arg)))
+                raise ValueError("Unknown type: {}".format(type(arg)))
         return args

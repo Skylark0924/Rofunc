@@ -344,20 +344,14 @@ class Humanoid(VecTask):
         self.num_joints = self.gym.get_asset_joint_count(humanoid_asset)
 
         self.humanoid_handles = []
-        self.object_handles = []
         self.envs = []
         self.dof_limits_lower = []
         self.dof_limits_upper = []
-
-        object_asset_options = gymapi.AssetOptions()
-        object_asset = self.gym.create_box(self.sim, 0.38, 0.28, 0.01, object_asset_options)
 
         for i in range(self.num_envs):
             # create env instance
             env_ptr = self.gym.create_env(self.sim, lower, upper, num_per_row)
             self._build_env(i, env_ptr, humanoid_asset)
-            # TODO if object is not needed, comment this out
-            self._add_object(i, env_ptr, object_asset)
             self.envs.append(env_ptr)
 
         dof_prop = self.gym.get_actor_dof_properties(
@@ -415,31 +409,6 @@ class Humanoid(VecTask):
             self.gym.set_actor_dof_properties(env_ptr, humanoid_handle, dof_prop)
 
         self.humanoid_handles.append(humanoid_handle)
-
-    def _add_object(self, env_id, env_ptr, object_asset):
-        start_pose = gymapi.Transform()
-        char_h = 0.5
-
-        start_pose.p = gymapi.Vec3(*get_axis_params(char_h, self.up_axis_idx))
-        start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
-
-        object_handle = self.gym.create_actor(
-            env_ptr,
-            object_asset,
-            start_pose,
-            "object",
-            env_id,
-            1,
-            0,
-        )
-        self.object_handles.append(object_handle)
-        self.gym.set_rigid_body_color(
-            env_ptr,
-            object_handle,
-            0,
-            gymapi.MESH_VISUAL,
-            gymapi.Vec3(0.5, 0.2, 0.0),
-        )
 
     def _build_pd_action_offset_scale(self):
         num_joints = len(self._dof_offsets) - 1
