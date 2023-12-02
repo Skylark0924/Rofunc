@@ -72,10 +72,12 @@ class ObjectSim:
 
         # Load object asset
         asset_options = gymapi.AssetOptions()
-        asset_options.fix_base_link = False
+        asset_options.fix_base_link = self.args.env.asset.fix_base_link
         asset_options.flip_visual_attachments = self.args.env.asset.flip_visual_attachments
+        asset_options.disable_gravity = self.args.env.asset.disable_gravity
+        asset_options.use_mesh_materials = self.args.env.asset.use_mesh_materials
         asset_options.armature = self.args.env.asset.armature
-        asset_options.vhacd_enabled = True
+        asset_options.vhacd_enabled = self.args.env.asset.vhacd_enabled
         beauty_print("Loading robot asset {} from {}".format(asset_file, self.asset_root), type="info")
         object_asset = self.gym.load_asset(self.sim, self.asset_root, asset_file, asset_options)
         object_name = os.path.basename(asset_file).split(".")[0]
