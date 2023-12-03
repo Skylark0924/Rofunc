@@ -45,11 +45,10 @@ setup(
                       'tensorboard',
                       'networkx',
                       'dgl',
-                      'vhacdx==0.0.4',
-                      'trimesh==4.0.5',
-                      'pybullet==3.2.6'],
+                      'trimesh==4.0.5'],
     python_requires=">=3.7,<3.9",
-    keywords=['robotics', 'learning from demonstration', 'reinforcement learning', 'robot manipulation'],
+    keywords=['robotics', 'robot learning', 'learning from demonstration', 'reinforcement learning',
+              'robot manipulation'],
     license='MIT',
     entry_points={
         'console_scripts': [
