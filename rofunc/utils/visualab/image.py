@@ -1,4 +1,5 @@
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 
 color_lst = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (72, 209, 204), (238, 130, 238), (221, 160, 221), (139, 69, 19),
@@ -8,6 +9,7 @@ color_lst = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (72, 209, 204), (238, 130, 2
 
 def overlay_seg_w_img(image_rgb, image_seg, alpha=0.5):
     """
+    Combines image and its segmentation mask into a single image.
 
     :param image_rgb: WxHx3, np.ndarray
     :param image_seg: WxH, np.ndarray
@@ -54,3 +56,44 @@ def overlay_seg_w_img(image_rgb, image_seg, alpha=0.5):
         mask = np.where(image_seg == mask_i, 1, 0)
         image_with_masks = overlay(image_with_masks, mask, color=color_lst[mask_i], alpha=alpha)
     return image_with_masks
+
+
+def show_anns(anns):
+    if len(anns) == 0:
+        return
+    sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
+    ax = plt.gca()
+    ax.set_autoscale_on(False)
+
+    img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
+    img[:, :, 3] = 0
+    for ann in sorted_anns:
+        m = ann['segmentation']
+        color_mask = np.concatenate([np.random.random(3), [0.35]])
+        img[m] = color_mask
+    ax.imshow(img)
+
+
+def show_mask(mask, ax, random_color=False):
+    if random_color:
+        color = np.concatenate([np.random.random(3), np.array([0.6])], axis=0)
+    else:
+        color = np.array([30 / 255, 144 / 255, 255 / 255, 0.6])
+    h, w = mask.shape[-2:]
+    mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
+    ax.imshow(mask_image)
+
+
+def show_star_points_w_labels(coords, labels, ax, marker_size=375):
+    pos_points = coords[labels == 1]
+    neg_points = coords[labels == 0]
+    ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white',
+               linewidth=1.25)
+    ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white',
+               linewidth=1.25)
+
+
+def show_box(box, ax):
+    x0, y0 = box[0], box[1]
+    w, h = box[2] - box[0], box[3] - box[1]
+    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0, 0, 0, 0), lw=2))
