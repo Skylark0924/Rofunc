@@ -120,26 +120,3 @@ def sam_predict(image,
             show_star_points_w_labels(input_point, input_label, plt.gca())
         plt.axis('off')
         plt.show()
-
-
-if __name__ == '__main__':
-    # image_path = "/home/ubuntu/Documents/tmp/images/dog.jpg"
-    # image = cv2.imread(image_path)
-    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    # plt.figure(figsize=(10, 10))
-    # plt.imshow(image)
-    # plt.axis('off')
-    # plt.show()
-    # sam_generate(image)
-
-    image_path = "/home/ubuntu/Documents/tmp/images/truck.jpg"
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    plt.figure(figsize=(10, 10))
-    plt.imshow(image)
-    plt.axis('off')
-    plt.show()
-    sam_predict(image,
-                use_point=True,
-                use_box=False,
-                choose_best_mask=True)
