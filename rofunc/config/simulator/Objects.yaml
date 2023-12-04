@@ -11,7 +11,7 @@ env:
   asset:
     assetFile:
     assetRoot:
-    init_pose: [0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 1.0]
+    init_pose: [0.0, 0.0, 1.1, 0.0, 0.0, 0.0, 1.0]
     armature: 0.01   # The value added to the diagonal elements of inertia tensors for all of the asset’s rigid bodies/links. Could improve simulation stability
     collapse_fixed_joints: # Merge links that are connected by fixed joints.
     convex_decomposition_from_submeshes: False  # Whether to treat submeshes in the mesh as the convex decomposition of the mesh. Default False.
