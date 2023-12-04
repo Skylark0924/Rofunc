@@ -12,9 +12,9 @@ import cv2
 import rofunc as rf
 
 # obtain rgb and depth image of the grasping scene
-image_path = os.path.join(rf.oslab.get_rofunc_path(), "../examples/data/visualab/walker_rgb_image.png")
+image_path = os.path.join(rf.oslab.get_rofunc_path(), "../examples/data/visualab/p2.png")
 image = cv2.imread(image_path)
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-text_prompt = "bottle cap"
+text_prompt = "bottle "
 affordance_masks = rf.visualab.vlpart_sam_predict(image, text_prompt)
