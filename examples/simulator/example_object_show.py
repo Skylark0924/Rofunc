@@ -21,7 +21,8 @@ asset_files = [
     # "urdf/ycb/010_potted_meat_can/010_potted_meat_can.urdf",
     # "urdf/ycb/011_banana/011_banana.urdf",
     # "urdf/ycb/048_hammer/048_hammer.urdf",
-    "urdf/ycb/019_pitcher_base/019_pitcher_base.urdf",
+    # "urdf/ycb/019_pitcher_base/019_pitcher_base.urdf",
+    "urdf/ycb/032_knife/032_knife.urdf",
 ]
 object_sim = rf.sim.ObjectSim(args, asset_file=asset_files)
 object_sim.create_track_cameras()
