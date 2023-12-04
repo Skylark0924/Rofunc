@@ -203,12 +203,12 @@ class ObjectSim:
         for env_idx in range(self.num_envs):
             env_ptr = self.envs[env_idx]
             camera_handle0 = self.gym.create_camera_sensor(env_ptr, camera_props)
-            self.gym.set_camera_location(camera_handle0, env_ptr, gymapi.Vec3(0.5, -0.8, 1.5), gymapi.Vec3(0, 0, 0))
+            self.gym.set_camera_location(camera_handle0, env_ptr, gymapi.Vec3(0.5, -0.5, 1.3), gymapi.Vec3(0, 0, 0))
 
         for env_idx in range(self.num_envs):
             env_ptr = self.envs[env_idx]
             camera_handle1 = self.gym.create_camera_sensor(env_ptr, camera_props)
-            self.gym.set_camera_location(camera_handle1, env_ptr, gymapi.Vec3(0.5, 0.8, 1.5), gymapi.Vec3(0, 0, 0))
+            self.gym.set_camera_location(camera_handle1, env_ptr, gymapi.Vec3(0.5, 0.5, 1.3), gymapi.Vec3(0, 0, 0))
 
         self.gym.render_all_camera_sensors(self.sim)
         self.visual_obs_flag = True
