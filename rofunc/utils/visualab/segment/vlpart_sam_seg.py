@@ -1,6 +1,5 @@
 import os
 
-import cv2
 import detectron2.data.transforms as T
 import matplotlib.pyplot as plt
 import numpy as np
