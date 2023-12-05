@@ -1,6 +1,6 @@
 scikit-learn
 myst-parser
-sphinx!=5.2.0.post0
+sphinx==7.1.2
 sphinx_markdown_tables
 sphinx_gallery
 sphinx-book-theme
@@ -8,7 +8,7 @@ sphinxext-rediraffe
 sphinxext-opengraph
 sphinx_copybutton 
 sphinx_design 
-sphinx-autodoc2   
+sphinx-autodoc2==0.4.2
 sphinx_pyscript
 sphinx_tippy
 sphinx_togglebutton
