@@ -5,19 +5,15 @@ from typing import Dict, List
 
 import torch
 import torch.nn.functional as F
-from detectron2.config import get_cfg
-from detectron2.layers import move_device_like
-from detectron2.modeling.backbone import Backbone
-from detectron2.modeling.proposal_generator import build_proposal_generator
-from detectron2.structures import ImageList, Instances, ROIMasks
 from torch import nn
-
-from .swintransformer import build_swinbase_fpn_backbone
-from .text_encoder import build_text_encoder
-from .vlpart_roi_heads import build_vlpart_roi_heads
 
 
 def build_vlpart(checkpoint=None):
+    from .vlpart_roi_heads import build_vlpart_roi_heads
+    from detectron2.config import get_cfg
+    from detectron2.modeling.proposal_generator import build_proposal_generator
+    from .swintransformer import build_swinbase_fpn_backbone
+
     cfg = get_cfg()
     cfg.merge_from_list(['MODEL.RPN.IN_FEATURES', ["p2", "p3", "p4", "p5", "p6"],
                          'MODEL.ROI_HEADS.IN_FEATURES', ["p2", "p3", "p4", "p5"],
@@ -47,10 +43,12 @@ def build_vlpart(checkpoint=None):
 class VLPart(nn.Module):
     def __init__(
             self,
-            backbone: Backbone,
+            backbone,
             proposal_generator: nn.Module,
             roi_heads: nn.Module,
     ):
+        from .text_encoder import build_text_encoder
+
         super().__init__()
 
         self.backbone = backbone
@@ -68,6 +66,7 @@ class VLPart(nn.Module):
         return self.pixel_mean.device
 
     def _move_to_current_device(self, x):
+        from detectron2.layers import move_device_like
         return move_device_like(x, self.pixel_mean)
 
     def get_text_embeddings(self, vocabulary, prefix_prompt='a '):
@@ -102,6 +101,7 @@ class VLPart(nn.Module):
         """
         Normalize, pad and batch the input images.
         """
+        from detectron2.structures import ImageList
         original_images = [self._move_to_current_device(x["image"]) for x in batched_inputs]
         images = [(x - self.pixel_mean) / self.pixel_std for x in original_images]
         images = ImageList.from_tensors(
@@ -129,12 +129,13 @@ class VLPart(nn.Module):
 
 
 def custom_detector_postprocess(
-        results: Instances, output_height: int, output_width: int,
+        results, output_height: int, output_width: int,
         max_shape, mask_threshold: float = 0.5
 ):
     """
     detector_postprocess with support on global_masks
     """
+    from detectron2.structures import Instances, ROIMasks
     if isinstance(output_width, torch.Tensor):
         # This shape might (but not necessarily) be tensors during tracing.
         # Converts integer tensors to float temporaries to ensure true

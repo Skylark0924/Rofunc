@@ -1,4 +1,12 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
+import pip
+
+try:
+    import clip
+except ImportError:
+    print("clip is not installed. Install it automatically...")
+    pip.main(['install', 'git+https://github.com/openai/CLIP.git'])
+
 from collections import OrderedDict
 from typing import Union, List
 
