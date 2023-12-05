@@ -1,9 +1,8 @@
 import os
 
-import cv2
 import numpy as np
+import pip
 from matplotlib import pyplot as plt
-from segment_anything import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
 
 from rofunc.learning.pre_trained_models.download import download_ckpt
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -15,6 +14,13 @@ from rofunc.utils.visualab.interact import mouse_click_coords, mouse_select_rec_
 def sam_generate(image,
                  sam_checkpoint="sam_vit_h_4b8939.pth",
                  model_type="vit_h"):
+    try:
+        import segment_anything
+    except ImportError:
+        print("segment-anything is not installed. Install it automatically...")
+        pip.main(['install', 'git+https://github.com/facebookresearch/segment-anything.git'])
+    from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
+
     ckpt_path = os.path.join(get_rofunc_path(), "learning/pre_trained_models", sam_checkpoint)
     if not os.path.exists(ckpt_path):
         download_ckpt(f"https://dl.fbaipublicfiles.com/segment_anything/{sam_checkpoint}", sam_checkpoint)
@@ -54,6 +60,13 @@ def sam_predict(image,
     :param model_type: sam model type
     :return:
     """
+    try:
+        import segment_anything
+    except ImportError:
+        print("segment-anything is not installed. Install it automatically...")
+        pip.main(['install', 'git+https://github.com/facebookresearch/segment-anything.git'])
+    from segment_anything import SamPredictor, sam_model_registry
+
     assert use_point != use_box, "Either use_point or use_box should be True"
     ckpt_path = os.path.join(get_rofunc_path(), "learning/pre_trained_models", sam_checkpoint)
     if not os.path.exists(ckpt_path):

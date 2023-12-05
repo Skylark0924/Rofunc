@@ -1,11 +1,8 @@
 import os
 
-import detectron2.data.transforms as T
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from segment_anything import build_sam, SamPredictor
-from segment_anything.utils.amg import remove_small_regions
 
 from rofunc.learning.pre_trained_models.download import download_ckpt
 from rofunc.utils.oslab import get_rofunc_path
@@ -20,6 +17,10 @@ def vlpart_sam_predict(image,
                        text_threshold=0.25,
                        device="cuda"
                        ):
+    import detectron2.data.transforms as T
+    from segment_anything import build_sam, SamPredictor
+    from segment_anything.utils.amg import remove_small_regions
+
     vlpart_ckpt_path = os.path.join(get_rofunc_path(), "learning/pre_trained_models", vlpart_checkpoint)
     sam_ckpt_path = os.path.join(get_rofunc_path(), "learning/pre_trained_models", sam_checkpoint)
     if not os.path.exists(vlpart_ckpt_path):

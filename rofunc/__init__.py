@@ -1,5 +1,7 @@
 import os
 import warnings
+
+import pip
 import shutup
 
 shutup.please()
@@ -7,6 +9,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.filterwarnings('ignore')
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter('ignore', DeprecationWarning)
+
+try:
+    import pbdlib
+except ImportError:
+    print("pbdlib is not installed. Install it automatically...")
+    pip.main(
+        ['install', 'https://github.com/Skylark0924/Rofunc/releases/download/v0.0.2.3/pbdlib-0.1-py3-none-any.whl'])
 
 from .devices import zed, xsens, optitrack, mmodal, emg
 from . import simulator as sim

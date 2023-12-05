@@ -7,6 +7,20 @@
 # Written by Ze Liu, Yutong Lin, Yixuan Wei
 # --------------------------------------------------------
 
+import pip
+
+try:
+    import detectron2
+except:
+    print("detectron2 is not installed. Install it automatically...")
+    pip.main(['install', 'git+https://github.com/facebookresearch/detectron2.git'])
+
+try:
+    import timm
+except:
+    print("timm is not installed. Install it automatically...")
+    pip.main(['install', 'timm==0.6.13'])
+
 import fvcore.nn.weight_init as weight_init
 import numpy as np
 import torch
