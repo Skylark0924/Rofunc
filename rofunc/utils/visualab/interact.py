@@ -15,7 +15,7 @@ def mouse_click_coords(fig, ax, point_style=""):
     """
     coords = []
 
-    beauty_print(f"Click on the figure to get {point_style} coordinates.", type="module")
+    beauty_print(f"Click on the figure to get {point_style} coordinates. Press ESC to exit.", type="module")
 
     # beauty_print("How many coordinates do you want to get?\n"
     #              "Input a number: ")
