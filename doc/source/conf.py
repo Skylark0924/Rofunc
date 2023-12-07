@@ -72,6 +72,7 @@ sphinx_gallery_conf = {
                                        '../../examples/learning_rl',
                                        '../../examples/planning_control',
                                        '../../examples/robolab',
+                                       '../../examples/visualab',
                                        '../../examples/simulator']),
     'within_subsection_order': ExampleTitleSortKey,
     'image_scrapers': ('matplotlib',),
