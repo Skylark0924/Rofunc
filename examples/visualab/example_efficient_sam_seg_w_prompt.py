@@ -22,4 +22,5 @@ plt.axis('off')
 plt.show()
 rf.visualab.efficient_sam_predict(image,
                                   use_point=False,
-                                  use_box=True)
+                                  use_box=True,
+                                  efficient_sam_checkpoint="efficientsam_s_gpu.jit")

@@ -35,6 +35,7 @@ def train(custom_args):
                                  rl_device=cfg.rl_device,
                                  sim_device=f'cuda:{cfg.device_id}',
                                  graphics_device_id=cfg.device_id,
+
                                  headless=cfg.headless,
                                  virtual_screen_capture=cfg.capture_video,  # TODO: check
                                  force_render=cfg.force_render)
