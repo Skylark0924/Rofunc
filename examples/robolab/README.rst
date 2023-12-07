@@ -1,4 +1,4 @@
 Robolab
 -----------------------------
 
-The following are examples of kinematics and dynamics APIs in RoboLab.
+The following examples show the use of the Robolab API.
