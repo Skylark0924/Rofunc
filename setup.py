@@ -24,7 +24,7 @@ setup(
     include_package_data=True,
     extras_require=extras,
     install_requires=['cython==3.0.0a10',  # for mujoco_py
-                      'setuptools==63.2.0',
+                      'setuptools==59.8.0',
                       'pandas',
                       'tqdm==4.65.0',
                       'pillow==9.5.0',

@@ -12,6 +12,7 @@ from .interact import *
 from .segment import *
 from .segment.sam_seg import *
 from .segment.vlpart_sam_seg import *
+from .segment.efficient_sam_seg import *
 
 # Detect package
 
