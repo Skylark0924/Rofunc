@@ -2,7 +2,7 @@
   "AntRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1eYEfh3HaR1uK6nbO-O64nC3I72740qvF&export=download",
     "name": "AntRofuncRLPPO.pth",
-    "md5":""
+    "md5": ""
   },
   "CURICabinetPPO_right_arm.pth": {
     "url": "https://drive.google.com/uc?id=1lKPYiJK3N-2uE9C5oekmLs1QiwTmFpJL&export=download",
@@ -82,6 +82,16 @@
   "HumanoidASEHeadingSwordShield.pth": {
     "url": "https://drive.google.com/uc?id=1VVXm1aZknEw3tTgRKfQoA0vaSDvublIF&export=download",
     "name": "HumanoidASEHeadingSwordShield.pth",
+    "md5": ""
+  },
+  "efficientsam_s_gpu.jit": {
+    "url": "https://drive.google.com/uc?id=1lMCUFOLeQOlIpuaIA00MB174lL7ZiuoS&export=download",
+    "name": "efficientsam_s_gpu.jit",
+    "md5": ""
+  },
+  "efficientsam_ti_gpu.jit": {
+    "url": "https://drive.google.com/uc?id=1DLtOwFfrKhfR8sBw1zutJo1IH0GXoqD1&export=download",
+    "name": "efficientsam_ti_gpu.jit",
     "md5": ""
   }
 }
