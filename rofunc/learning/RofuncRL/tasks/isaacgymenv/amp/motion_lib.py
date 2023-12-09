@@ -101,6 +101,8 @@ class MotionLib:
         dt = self._motion_dt[motion_ids]
 
         frame_idx0, frame_idx1, blend = self._calc_frame_blend(motion_times, motion_len, num_frames, dt)
+        # frame_idx0 = [850 848 427 425 776 774 760 758 287 285 ...
+        # frame_idx1 = [851 849 428 426 777 775 761 759 288 286 ...
 
         unique_ids = np.unique(motion_ids)
         for uid in unique_ids:
@@ -144,7 +146,7 @@ class MotionLib:
 
         root_rot = slerp(root_rot0, root_rot1, blend)
 
-        blend_exp = blend.unsqueeze(-1)
+        blend_exp = blend.unsqueeze(-1)  # [2048, 1, 1]
         key_pos = (1.0 - blend_exp) * key_pos0 + blend_exp * key_pos1
 
         local_rot = slerp(local_rot0, local_rot1, torch.unsqueeze(blend, axis=-1))

@@ -107,29 +107,29 @@ class HumanoidAMPTask(HumanoidAMPBase):
 
     def fetch_amp_obs_demo(self, num_samples):
         dt = self.dt
-        motion_ids = self._motion_lib.sample_motions(num_samples)
+        motion_ids = self._motion_lib.sample_motions(num_samples)  # [1024] all 0
 
-        if self._amp_obs_demo_buf is None:
+        if self._amp_obs_demo_buf is None:  # [1024, 2, 105]
             self._build_amp_obs_demo_buf(num_samples)
         else:
             assert (self._amp_obs_demo_buf.shape[0] == num_samples)
 
-        motion_times0 = self._motion_lib.sample_time(motion_ids)
-        motion_ids = np.tile(np.expand_dims(motion_ids, axis=-1), [1, self._num_amp_obs_steps])
-        motion_times = np.expand_dims(motion_times0, axis=-1)
-        time_steps = -dt * np.arange(0, self._num_amp_obs_steps)
-        motion_times = motion_times + time_steps
+        motion_times0 = self._motion_lib.sample_time(motion_ids)  # [1024] all float time
+        motion_ids = np.tile(np.expand_dims(motion_ids, axis=-1), [1, self._num_amp_obs_steps])  # [1024, 2]
+        motion_times = np.expand_dims(motion_times0, axis=-1)  # [1024, 1]
+        time_steps = -dt * np.arange(0, self._num_amp_obs_steps)  # [_num_amp_obs_steps]  _num_amp_obs_steps=2  [-0. -0.0332]
+        motion_times = motion_times + time_steps  # [1024, 2]  [14.17973511 14.14653511  7.12111682  7.08791682 ...
 
-        motion_ids = motion_ids.flatten()
-        motion_times = motion_times.flatten()
+        motion_ids = motion_ids.flatten()  # [2048]
+        motion_times = motion_times.flatten()  # [2048]
         root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos \
             = self._motion_lib.get_motion_state(motion_ids, motion_times)
         root_states = torch.cat([root_pos, root_rot, root_vel, root_ang_vel], dim=-1)
         amp_obs_demo = build_amp_observations(root_states, dof_pos, dof_vel, key_pos,
-                                              self._local_root_obs)
-        self._amp_obs_demo_buf[:] = amp_obs_demo.view(self._amp_obs_demo_buf.shape)
+                                              self._local_root_obs)  # [2048, 105]
+        self._amp_obs_demo_buf[:] = amp_obs_demo.view(self._amp_obs_demo_buf.shape) # [1024, 2, 105]
 
-        amp_obs_demo_flat = self._amp_obs_demo_buf.view(-1, self.get_num_amp_obs())
+        amp_obs_demo_flat = self._amp_obs_demo_buf.view(-1, self.get_num_amp_obs())  # [1024, 210]
         return amp_obs_demo_flat
 
     def _build_amp_obs_demo_buf(self, num_samples):
