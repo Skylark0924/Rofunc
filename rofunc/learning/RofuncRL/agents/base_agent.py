@@ -209,6 +209,12 @@ class BaseAgent:
                 self.multi_gpu_transfer(*arg)
             elif isinstance(arg, dict) or isinstance(arg, collections.OrderedDict):
                 self.multi_gpu_transfer(*arg.values())
+            elif isinstance(arg, float):
+                pass
+            elif isinstance(arg, int):
+                pass
+            elif isinstance(arg, np.ndarray):
+                arg = torch.tensor(arg).to(rl_device)
             else:
                 raise ValueError("Unknown type: {}".format(type(arg)))
         return args
