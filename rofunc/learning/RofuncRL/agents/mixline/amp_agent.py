@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
+from typing import Callable, Union, Tuple, Optional, List
+
 import gym
 import gymnasium
-import math
+import rofunc as rf
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
-from typing import Callable, Union, Tuple, Optional, List
-
-import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorAMP
 from rofunc.learning.RofuncRL.models.critic_models import Critic
