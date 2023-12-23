@@ -26,6 +26,7 @@ def train(custom_args):
                       "headless={}".format(custom_args.headless),
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
+    cfg.train.Trainer.maximum_steps = 100000000
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
