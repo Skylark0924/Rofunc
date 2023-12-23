@@ -20,6 +20,7 @@ class Tasks:
             from .isaacgymenv.ase.humanoid_strike import HumanoidStrikeTask
             from .isaacgymenv.ase.humanoid_view_motion import HumanoidASEViewMotionTask
             from .isaacgymenv.hotu.humanoid_view_motion import HumanoidHOTUViewMotionTask
+            from .isaacgymenv.hands.shadow_hand_over import ShadowHandOverTask
 
             self.task_map = {
                 "Ant": AntTask,
@@ -40,6 +41,7 @@ class Tasks:
                 "HumanoidASEStrikeSwordShield": HumanoidStrikeTask,
                 "HumanoidASEViewMotion": HumanoidASEViewMotionTask,
                 "HumanoidHOTUViewMotion": HumanoidHOTUViewMotionTask,
+                "ShadowHandOver": ShadowHandOverTask,
             }
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks

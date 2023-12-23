@@ -26,12 +26,20 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import abc
+import operator
+import random
+import sys
+from abc import ABC
+from copy import deepcopy
 from typing import Dict, Any, Tuple
 
 import gym
+import numpy as np
+import torch
 from gym import spaces
-
 from isaacgym import gymapi
+
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.dr_utils import (
     get_property_setter_map,
     get_property_getter_map,
@@ -40,15 +48,6 @@ from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.dr_utils import (
     check_buckets,
     generate_random_samples,
 )
-
-import torch
-import numpy as np
-import operator, random
-from copy import deepcopy
-import sys
-
-import abc
-from abc import ABC
 
 EXISTING_SIM = None
 SCREEN_CAPTURE_RESOLUTION = (1027, 768)
@@ -65,12 +64,12 @@ def _create_sim_once(gym, *args, **kwargs):
 
 class Env(ABC):
     def __init__(
-        self,
-        config: Dict[str, Any],
-        rl_device: str,
-        sim_device: str,
-        graphics_device_id: int,
-        headless: bool,
+            self,
+            config: Dict[str, Any],
+            rl_device: str,
+            sim_device: str,
+            graphics_device_id: int,
+            headless: bool,
     ):
         """Initialise the env.
 
@@ -139,7 +138,7 @@ class Env(ABC):
 
     @abc.abstractmethod
     def step(
-        self, actions: torch.Tensor
+            self, actions: torch.Tensor
     ) -> Tuple[Dict[str, torch.Tensor], torch.Tensor, torch.Tensor, Dict[str, Any]]:
         """Step the physics of the environment.
 
@@ -194,14 +193,14 @@ class VecTask(Env):
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 24}
 
     def __init__(
-        self,
-        config,
-        rl_device,
-        sim_device,
-        graphics_device_id,
-        headless,
-        virtual_screen_capture: bool = False,
-        force_render: bool = False,
+            self,
+            config,
+            rl_device,
+            sim_device,
+            graphics_device_id,
+            headless,
+            virtual_screen_capture: bool = False,
+            force_render: bool = False,
     ):
         """Initialise the `VecTask`.
 
@@ -336,11 +335,11 @@ class VecTask(Env):
         return 1
 
     def create_sim(
-        self,
-        compute_device: int,
-        graphics_device: int,
-        physics_engine,
-        sim_params: gymapi.SimParams,
+            self,
+            compute_device: int,
+            graphics_device: int,
+            physics_engine,
+            sim_params: gymapi.SimParams,
     ):
         """Create an Isaac Gym sim object.
 
@@ -380,7 +379,7 @@ class VecTask(Env):
         """Compute reward and observations, reset any environments that require it."""
 
     def step(
-        self, actions: torch.Tensor
+            self, actions: torch.Tensor
     ) -> Tuple[Dict[str, torch.Tensor], torch.Tensor, torch.Tensor, Dict[str, Any]]:
         """Step the physics of the environment.
 
@@ -422,7 +421,7 @@ class VecTask(Env):
         # fill time out buffer: set to 1 if we reached the max episode length AND the reset buffer is 1.
         # Timeout == 1 makes sense only if the reset buffer is 1.
         self.timeout_buf = (self.progress_buf >= self.max_episode_length - 1) & (
-            self.reset_buf != 0
+                self.reset_buf != 0
         )
 
         # randomize observations
@@ -543,7 +542,7 @@ class VecTask(Env):
                 return np.array(img)
 
     def __parse_sim_params(
-        self, physics_engine: str, config_sim: Dict[str, Any]
+            self, physics_engine: str, config_sim: Dict[str, Any]
     ) -> gymapi.SimParams:
         """Parse the config dictionary for physics stepping settings.
 
@@ -723,12 +722,12 @@ class VecTask(Env):
                     elif op_type == "scaling":
                         var = var * sched_scaling  # scale up var over time
                         mu = mu * sched_scaling + 1.0 * (
-                            1.0 - sched_scaling
+                                1.0 - sched_scaling
                         )  # linearly interpolate
 
                         var_corr = var_corr * sched_scaling  # scale up var over time
                         mu_corr = mu_corr * sched_scaling + 1.0 * (
-                            1.0 - sched_scaling
+                                1.0 - sched_scaling
                         )  # linearly interpolate
 
                     def noise_lambda(tensor, param_name=nonphysical_param):
@@ -777,8 +776,8 @@ class VecTask(Env):
                             corr = torch.randn_like(tensor)
                             params["corr"] = corr
                         corr = (
-                            corr * (params["hi_corr"] - params["lo_corr"])
-                            + params["lo_corr"]
+                                corr * (params["hi_corr"] - params["lo_corr"])
+                                + params["lo_corr"]
                         )
                         return op(
                             tensor,
@@ -891,7 +890,7 @@ class VecTask(Env):
                                     "setup_only", False
                                 )
                                 if (
-                                    setup_only and not self.sim_initialized
+                                        setup_only and not self.sim_initialized
                                 ) or not setup_only:
                                     smpl = None
                                     if self.actor_params_generator is not None:
@@ -922,7 +921,7 @@ class VecTask(Env):
                                 "setup_only", False
                             )
                             if (
-                                setup_only and not self.sim_initialized
+                                    setup_only and not self.sim_initialized
                             ) or not setup_only:
                                 smpl = None
                                 if self.actor_params_generator is not None:
@@ -967,3 +966,14 @@ class VecTask(Env):
                         raise Exception("Invalid extern_sample size")
 
         self.first_randomization = False
+
+
+def get_attr_val_from_sample(sample, offset, prop, attr):
+    """Retrieves param value for the given prop and attr from the sample."""
+    if sample is None:
+        return None, 0
+    if isinstance(prop, np.ndarray):
+        smpl = sample[offset:offset + prop[attr].shape[0]]
+        return smpl, offset + prop[attr].shape[0]
+    else:
+        return sample[offset], offset + 1
