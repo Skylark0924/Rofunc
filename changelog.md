@@ -11,6 +11,7 @@
 > - 🎉 for event celebrations
 
 ## Update News 🎉🎉🎉
+- [2023-12-24] 🚀 [Dexterous hand (Shadow Hand, Allegro Hand, qbSofthand) tasks](https://github.com/Skylark0924/Rofunc/blob/main/examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py) are supported to be trained by `RofuncRL`.
 - [2023-12-07] 🖼️ [EfficientSAM](https://yformer.github.io/efficient-sam/) is supported for high-speed segmentation on edge devices like Nvidia Jetson, check the [example](https://github.com/Skylark0924/Rofunc/blob/main/examples/visualab/example_efficient_sam_seg_w_prompt.py) in Visualab.
 - [2023-12-04] 🖼️ [VLPart-SAM](https://github.com/Cheems-Seminar/grounded-segment-any-parts) is supported for part-level segmentation with text prompt, check the [example](https://github.com/Skylark0924/Rofunc/blob/main/examples/visualab/example_vlpart_sam_seg_w_prompt.py).
 - [2023-12-03] 🖼️ [Segment-Anything (SAM)](https://segment-anything.com/) is supported in an interactive mode, check the examples in Visualab ([segment anything](https://github.com/Skylark0924/Rofunc/blob/main/examples/visualab/example_sam_seg.py), [segment with prompt](https://github.com/Skylark0924/Rofunc/blob/main/examples/visualab/example_sam_seg_w_prompt.py)).
