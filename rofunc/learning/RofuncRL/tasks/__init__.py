@@ -20,7 +20,26 @@ class Tasks:
             from .isaacgymenv.ase.humanoid_strike import HumanoidStrikeTask
             from .isaacgymenv.ase.humanoid_view_motion import HumanoidASEViewMotionTask
             from .isaacgymenv.hotu.humanoid_view_motion import HumanoidHOTUViewMotionTask
+            from .isaacgymenv.hands.shadow_hand_block_stack import ShadowHandBlockStackTask
+            from .isaacgymenv.hands.shadow_hand_bottle_cap import ShadowHandBottleCapTask
+            from .isaacgymenv.hands.shadow_hand_catch_abreast import ShadowHandCatchAbreastTask
+            from .isaacgymenv.hands.shadow_hand_catch_over2underarm import ShadowHandCatchOver2UnderarmTask
+            from .isaacgymenv.hands.shadow_hand_catch_underarm import ShadowHandCatchUnderarmTask
+            from .isaacgymenv.hands.shadow_hand_door_open_inward import ShadowHandDoorOpenInwardTask
+            from .isaacgymenv.hands.shadow_hand_door_open_outward import ShadowHandDoorOpenOutwardTask
+            from .isaacgymenv.hands.shadow_hand_door_close_inward import ShadowHandDoorCloseInwardTask
+            from .isaacgymenv.hands.shadow_hand_door_close_outward import ShadowHandDoorCloseOutwardTask
+            from .isaacgymenv.hands.shadow_hand_grasp_and_place import ShadowHandGraspAndPlaceTask
+            from .isaacgymenv.hands.shadow_hand_lift_underarm import ShadowHandLiftUnderarmTask
             from .isaacgymenv.hands.shadow_hand_over import ShadowHandOverTask
+            from .isaacgymenv.hands.shadow_hand_pen import ShadowHandPenTask
+            from .isaacgymenv.hands.shadow_hand_point_cloud import ShadowHandPointCloudTask
+            from .isaacgymenv.hands.shadow_hand_push_block import ShadowHandPushBlockTask
+            from .isaacgymenv.hands.shadow_hand_re_orientation import ShadowHandReOrientationTask
+            from .isaacgymenv.hands.shadow_hand_scissors import ShadowHandScissorsTask
+            from .isaacgymenv.hands.shadow_hand_swing_cup import ShadowHandSwingCupTask
+            from .isaacgymenv.hands.shadow_hand_switch import ShadowHandSwitchTask
+            from .isaacgymenv.hands.shadow_hand_two_catch_underarm import ShadowHandTwoCatchUnderarmTask
 
             self.task_map = {
                 "Ant": AntTask,
@@ -41,7 +60,26 @@ class Tasks:
                 "HumanoidASEStrikeSwordShield": HumanoidStrikeTask,
                 "HumanoidASEViewMotion": HumanoidASEViewMotionTask,
                 "HumanoidHOTUViewMotion": HumanoidHOTUViewMotionTask,
-                "ShadowHandOver": ShadowHandOverTask,
+                "BiShadowHandOver": ShadowHandOverTask,
+                "BiShadowHandBlockStack": ShadowHandBlockStackTask,
+                "BiShadowHandBottleCap": ShadowHandBottleCapTask,
+                "BiShadowHandCatchAbreast": ShadowHandCatchAbreastTask,
+                "BiShadowHandCatchOver2Underarm": ShadowHandCatchOver2UnderarmTask,
+                "BiShadowHandCatchUnderarm": ShadowHandCatchUnderarmTask,
+                "BiShadowHandDoorOpenInward": ShadowHandDoorOpenInwardTask,
+                "BiShadowHandDoorOpenOutward": ShadowHandDoorOpenOutwardTask,
+                "BiShadowHandDoorCloseInward": ShadowHandDoorCloseInwardTask,
+                "BiShadowHandDoorCloseOutward": ShadowHandDoorCloseOutwardTask,
+                "BiShadowHandGraspAndPlace": ShadowHandGraspAndPlaceTask,
+                "BiShadowHandLiftUnderarm": ShadowHandLiftUnderarmTask,
+                "BiShadowHandPen": ShadowHandPenTask,
+                "BiShadowHandPointCloud": ShadowHandPointCloudTask,
+                "BiShadowHandPushBlock": ShadowHandPushBlockTask,
+                "BiShadowHandReOrientation": ShadowHandReOrientationTask,
+                "BiShadowHandScissors": ShadowHandScissorsTask,
+                "BiShadowHandSwingCup": ShadowHandSwingCupTask,
+                "BiShadowHandSwitch": ShadowHandSwitchTask,
+                "BiShadowHandTwoCatchUnderarm": ShadowHandTwoCatchUnderarmTask,
             }
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks

@@ -4,8 +4,9 @@ import os
 import random
 import torch
 
-from bidexhands.utils.torch_jit_utils import *
-from bidexhands.tasks.hand_base.base_task import BaseTask
+from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
+from rofunc.utils.oslab import get_rofunc_path
 
 from isaacgym import gymtorch
 from isaacgym import gymapi

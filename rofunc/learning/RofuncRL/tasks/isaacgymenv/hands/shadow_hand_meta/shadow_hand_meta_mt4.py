@@ -11,18 +11,18 @@ import os
 import random
 import torch
 
-from bidexhands.utils.torch_jit_utils import *
-from bidexhands.tasks.hand_base.base_task import BaseTask
+from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.vec_task import VecTask
+from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
+from rofunc.utils.oslab import get_rofunc_path
 from isaacgym import gymtorch
 from isaacgym import gymapi
 
 from .shadow_hand_meta_mt4_task_info import obtain_task_info, compute_hand_reward
 
 class ShadowHandMetaMT4(BaseTask):
-    def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless, agent_index=[[[0, 1, 2, 3, 4, 5]], [[0, 1, 2, 3, 4, 5]]], is_multi_agent=False):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture,
+                 force_render, agent_index=[[[0, 1, 2, 3, 4, 5]], [[0, 1, 2, 3, 4, 5]]], is_multi_agent=False):
         self.cfg = cfg
-        self.sim_params = sim_params
-        self.physics_engine = physics_engine
         self.agent_index = agent_index
 
         self.is_multi_agent = is_multi_agent
@@ -125,9 +125,7 @@ class ShadowHandMetaMT4(BaseTask):
             self.num_agents = 1
             self.cfg["env"]["numActions"] = 52
 
-        self.cfg["device_type"] = device_type
-        self.cfg["device_id"] = device_id
-        self.cfg["headless"] = headless
+        super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
 
         super().__init__(cfg=self.cfg, is_meta=True, task_num=self.num_tasks)
 
@@ -228,11 +226,12 @@ class ShadowHandMetaMT4(BaseTask):
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
         upper = gymapi.Vec3(spacing, spacing, spacing)
 
-        asset_root = "../../assets"
+        # get rofunc path from rofunc package metadata
+        rofunc_path = get_rofunc_path()
+        asset_root = os.path.join(rofunc_path, "simulator/assets")
         shadow_hand_asset_file = "mjcf/open_ai_assets/hand/shadow_hand.xml"
         shadow_hand_another_asset_file = "mjcf/open_ai_assets/hand/shadow_hand1.xml"
-        table_texture_files = "../assets/textures/texture_stone_stone_texture_0.jpg"
-        table_texture_handle = self.gym.create_texture_from_file(self.sim, table_texture_files)
+        table_texture_files = os.path.join(asset_root, "textures/texture_stone_stone_texture_0.jpg")        table_texture_handle = self.gym.create_texture_from_file(self.sim, table_texture_files)
 
         if "asset" in self.cfg["env"]:
             asset_root = self.cfg["env"]["asset"].get("assetRoot", asset_root)

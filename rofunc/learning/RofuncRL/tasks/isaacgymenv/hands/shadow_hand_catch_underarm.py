@@ -17,46 +17,45 @@ from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
 from rofunc.utils.oslab import get_rofunc_path
 
 
-class ShadowHandOverTask(VecTask):
+class ShadowHandCatchUnderarmTask(VecTask):
     """
-    This class corresponds to the HandOver task. This environment consists of two shadow hands with 
-    palms facing up, opposite each other, and an object that needs to be passed. In the beginning, 
-    the object will fall randomly in the area of the shadow hand on the right side. Then the hand 
-    holds the object and passes the object to the other hand. Note that the base of the hand is 
-    fixed. More importantly, the hand which holds the object initially can not directly touch the 
-    target, nor can it directly roll the object to the other hand, so the object must be thrown up 
-    and stays in the air in the process
+    This class corresponds to the Catch Underarm task. In this task, two shadow hands with palms
+    facing upwards are controlled to pass an object from one palm to the other. What makes it more difficult 
+    than the Hand over task is that the hands' translation and rotation degrees of freedom are no longer 
+    frozen but are added into the action space
     """
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture,
                  force_render, agent_index=[[[0, 1, 2, 3, 4, 5]], [[0, 1, 2, 3, 4, 5]]], is_multi_agent=False):
         """
-        
-        :param cfg: 
-        :param rl_device: 
-        :param sim_device: 
-        :param graphics_device_id: 
-        :param headless: 
-        :param virtual_screen_capture: 
-        :param force_render: 
-        :param agent_index: Specifies how to divide the agents of the hands, useful only when using a 
-            multi-agent algorithm. It contains two lists, representing the left hand and the right hand. 
-            Each list has six numbers from 0 to 5, representing the palm, middle finger, ring finger, 
-            tail finger, index finger, and thumb. Each part can be combined arbitrarily, and if placed 
+
+        :param cfg:
+        :param rl_device:
+        :param sim_device:
+        :param graphics_device_id:
+        :param headless:
+        :param virtual_screen_capture:
+        :param force_render:
+        :param agent_index: Specifies how to divide the agents of the hands, useful only when using a
+            multi-agent algorithm. It contains two lists, representing the left hand and the right hand.
+            Each list has six numbers from 0 to 5, representing the palm, middle finger, ring finger,
+            tail finger, index finger, and thumb. Each part can be combined arbitrarily, and if placed
             in the same list, it means that it is divided into the same agent. The default setting is
-            [[[0, 1, 2, 3, 4, 5]], [[0, 1, 2, 3, 4, 5]]], which means that the two whole hands are 
+            [[[0, 1, 2, 3, 4, 5]], [[0, 1, 2, 3, 4, 5]]], which means that the two whole hands are
             regarded as one agent respectively.
-        :param is_meta: Specifies whether it is a multi-agent environment
+        :param is_multi_agent: Specifies whether it is a multi-agent environment
         """
+
         self.cfg = cfg
         self.agent_index = agent_index
 
         self.is_multi_agent = is_multi_agent
-
+        # Domain randomization configuration
         self.randomize = self.cfg["task"]["randomize"]
         self.randomization_params = self.cfg["task"]["randomization_params"]
         self.aggregate_mode = self.cfg["env"]["aggregateMode"]
 
+        # Reward configuration
         self.dist_reward_scale = self.cfg["env"]["distRewardScale"]
         self.rot_reward_scale = self.cfg["env"]["rotRewardScale"]
         self.action_penalty_scale = self.cfg["env"]["actionPenaltyScale"]
@@ -66,20 +65,26 @@ class ShadowHandOverTask(VecTask):
         self.fall_penalty = self.cfg["env"]["fallPenalty"]
         self.rot_eps = self.cfg["env"]["rotEps"]
 
-        self.vel_obs_scale = 0.2  # scale factor of velocity based observations
-        self.force_torque_obs_scale = 10.0  # scale factor of velocity based observations
+        # Scale factor of velocity based observations
+        self.vel_obs_scale = 0.2
+        # Scale factor of velocity based observations
+        self.force_torque_obs_scale = 10.0
 
+        # The noise of the initial state each time the environment is reset
         self.reset_position_noise = self.cfg["env"]["resetPositionNoise"]
         self.reset_rotation_noise = self.cfg["env"]["resetRotationNoise"]
         self.reset_dof_pos_noise = self.cfg["env"]["resetDofPosRandomInterval"]
         self.reset_dof_vel_noise = self.cfg["env"]["resetDofVelRandomInterval"]
 
+        # The configuration of how to control the ShadowHand (Action in RL)
         self.shadow_hand_dof_speed_scale = self.cfg["env"]["dofSpeedScale"]
         self.use_relative_control = self.cfg["env"]["useRelativeControl"]
         self.act_moving_average = self.cfg["env"]["actionsMovingAverage"]
 
+        # Whether to enable debug mode during visualization
         self.debug_viz = self.cfg["env"]["enableDebugVis"]
 
+        # Success and goal configuration
         self.max_episode_length = self.cfg["env"]["episodeLength"]
         self.reset_time = self.cfg["env"].get("resetTime", -1.0)
         self.print_success_stat = self.cfg["env"]["printNumSuccesses"]
@@ -87,26 +92,37 @@ class ShadowHandOverTask(VecTask):
         self.av_factor = self.cfg["env"].get("averFactor", 0.01)
         print("Averaging factor: ", self.av_factor)
 
+        # Scale factor of transition and orientation when the base of Shadowhand is not fixed
+        self.transition_scale = self.cfg["env"]["transition_scale"]
+        self.orientation_scale = self.cfg["env"]["orientation_scale"]
+
+        # The inverser number of the control frequency
         control_freq_inv = self.cfg["env"].get("controlFrequencyInv", 1)
         if self.reset_time > 0.0:
             self.max_episode_length = int(round(self.reset_time / (control_freq_inv * self.sim_params.dt)))
             print("Reset time: ", self.reset_time)
             print("New episode length: ", self.max_episode_length)
 
+        # Specifies the object to be manipulated, which can be an object in the sapien dataset. 
+        # Only useful in certain environments
         self.object_type = self.cfg["env"]["objectType"]
-        assert self.object_type in ["block", "egg", "pen", "ycb/banana", "ycb/can", "ycb/mug", "ycb/brick"]
 
         self.ignore_z = (self.object_type == "pen")
 
+        # Specify the path of the asset
         self.asset_files_dict = {
             "block": "urdf/objects/cube_multicolor.urdf",
             "egg": "mjcf/open_ai_assets/hand/egg.xml",
-            "pen": "mjcf/open_ai_assets/hand/pen.xml",
-            "ycb/banana": "urdf/ycb/011_banana/011_banana.urdf",
-            "ycb/can": "urdf/ycb/010_potted_meat_can/010_potted_meat_can.urdf",
-            "ycb/mug": "urdf/ycb/025_mug/025_mug.urdf",
-            "ycb/brick": "urdf/ycb/061_foam_brick/061_foam_brick.urdf"
+            "pen": "mjcf/open_ai_assets/hand/pen.xml"
         }
+
+        if "asset" in self.cfg["env"]:
+            self.asset_files_dict["block"] = self.cfg["env"]["asset"].get("assetFileNameBlock",
+                                                                          self.asset_files_dict["block"])
+            self.asset_files_dict["egg"] = self.cfg["env"]["asset"].get("assetFileNameEgg",
+                                                                        self.asset_files_dict["egg"])
+            self.asset_files_dict["pen"] = self.cfg["env"]["asset"].get("assetFileNamePen",
+                                                                        self.asset_files_dict["pen"])
 
         # can be "openai", "full_no_vel", "full", "full_state"
         self.obs_type = self.cfg["env"]["observationType"]
@@ -117,23 +133,22 @@ class ShadowHandOverTask(VecTask):
 
         print("Obs type:", self.obs_type)
 
+        # Specify the number of action and observation in the environment
         self.num_point_cloud_feature_dim = 768
         self.num_obs_dict = {
-            "point_cloud": 398 + self.num_point_cloud_feature_dim * 3,
-            "point_cloud_for_distill": 398 + self.num_point_cloud_feature_dim * 3,
-            "full_state": 398
+            "point_cloud": 422 + self.num_point_cloud_feature_dim * 3,
+            "point_cloud_for_distill": 422 + self.num_point_cloud_feature_dim * 3,
+            "full_state": 422
         }
 
-        self.num_hand_obs = 72 + 95 + 20
+        self.num_hand_obs = 72 + 95 + 26 + 6
         self.up_axis = 'z'
 
+        # The names of the five fingertips of Shadowhand, which are used to obtain force information later
         self.fingertips = ["robot0:ffdistal", "robot0:mfdistal", "robot0:rfdistal", "robot0:lfdistal",
                            "robot0:thdistal"]
         self.a_fingertips = ["robot1:ffdistal", "robot1:mfdistal", "robot1:rfdistal", "robot1:lfdistal",
                              "robot1:thdistal"]
-
-        self.hand_center = ["robot1:palm"]
-
         self.num_fingertips = len(self.fingertips) * 2
 
         self.use_vel_obs = False
@@ -148,26 +163,24 @@ class ShadowHandOverTask(VecTask):
         self.cfg["env"]["numStates"] = num_states
         if self.is_multi_agent:
             self.num_agents = 2
-            self.cfg["env"]["numActions"] = 20
+            self.cfg["env"]["numActions"] = 26
+
         else:
             self.num_agents = 1
-            self.cfg["env"]["numActions"] = 40
+            self.cfg["env"]["numActions"] = 52
 
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
-
-        if self.obs_type in ["point_cloud"]:
-            from PIL import Image as Im
-            # from pointnet2_ops import pointnet2_utils
 
         self.camera_debug = self.cfg["env"].get("cameraDebug", False)
         self.point_cloud_debug = self.cfg["env"].get("pointCloudDebug", False)
 
+        # Viewer settings, including the camera's initial position and viewing direction
         if self.viewer != None:
             cam_pos = gymapi.Vec3(10.0, 5.0, 1.0)
             cam_target = gymapi.Vec3(6.0, 5.0, 0.0)
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
 
-        # get gym GPU state tensors
+        # Get gym GPU state tensors
         actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
         rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)
@@ -183,7 +196,7 @@ class ShadowHandOverTask(VecTask):
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
 
-        # create some wrapper tensors for different slices
+        # Create dof state wrapper tensors for different slices
         self.shadow_hand_default_dof_pos = torch.zeros(self.num_shadow_hand_dofs, dtype=torch.float, device=self.device)
         self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)
         self.shadow_hand_dof_state = self.dof_state.view(self.num_envs, -1, 2)[:, :self.num_shadow_hand_dofs]
@@ -195,27 +208,44 @@ class ShadowHandOverTask(VecTask):
         self.shadow_hand_another_dof_pos = self.shadow_hand_another_dof_state[..., 0]
         self.shadow_hand_another_dof_vel = self.shadow_hand_another_dof_state[..., 1]
 
+        # Create rigid body state wrapper tensors for different slices
         self.rigid_body_states = gymtorch.wrap_tensor(rigid_body_tensor).view(self.num_envs, -1, 13)
         self.num_bodies = self.rigid_body_states.shape[1]
 
         self.root_state_tensor = gymtorch.wrap_tensor(actor_root_state_tensor).view(-1, 13)
+        self.hand_positions = self.root_state_tensor[:, 0:3]
+        self.hand_orientations = self.root_state_tensor[:, 3:7]
+        self.hand_linvels = self.root_state_tensor[:, 7:10]
+        self.hand_angvels = self.root_state_tensor[:, 10:13]
+        self.saved_root_tensor = self.root_state_tensor.clone()
 
+        # The total number of dofs in the environment
         self.num_dofs = self.gym.get_sim_dof_count(self.sim) // self.num_envs
+
+        # Tensor used to control dof value in the environment
         self.prev_targets = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
         self.cur_targets = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
 
+        # The total number of actors in the environment
         self.global_indices = torch.arange(self.num_envs * 3, dtype=torch.int32, device=self.device).view(self.num_envs,
                                                                                                           -1)
+
+        # Unit tensor in x, y, z axis
         self.x_unit_tensor = to_torch([1, 0, 0], dtype=torch.float, device=self.device).repeat((self.num_envs, 1))
         self.y_unit_tensor = to_torch([0, 1, 0], dtype=torch.float, device=self.device).repeat((self.num_envs, 1))
         self.z_unit_tensor = to_torch([0, 0, 1], dtype=torch.float, device=self.device).repeat((self.num_envs, 1))
 
+        # Reset and success buffer
         self.reset_goal_buf = self.reset_buf.clone()
         self.successes = torch.zeros(self.num_envs, dtype=torch.float, device=self.device)
-        self.consecutive_successes = torch.zeros(1, dtype=torch.float, device=self.device)
-
+        self.consecutive_successes = torch.zeros(self.num_envs, dtype=torch.float, device=self.device)
         self.av_factor = to_torch(self.av_factor, dtype=torch.float, device=self.device)
 
+        # Forces and torque applied to the Shadowhand's base
+        self.apply_forces = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
+        self.apply_torque = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
+
+        # Total success and reset count
         self.total_successes = 0
         self.total_resets = 0
 
@@ -223,6 +253,7 @@ class ShadowHandOverTask(VecTask):
         """
         Allocates which device will simulate and which device will render the scene. Defines the simulation type to be used
         """
+
         self.dt = self.sim_params.dt
         self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, self.up_axis)
 
@@ -234,6 +265,7 @@ class ShadowHandOverTask(VecTask):
         """
         Adds ground plane to simulation
         """
+
         plane_params = gymapi.PlaneParams()
         plane_params.normal = gymapi.Vec3(0.0, 0.0, 1.0)
         self.gym.add_ground(self.sim, plane_params)
@@ -249,6 +281,7 @@ class ShadowHandOverTask(VecTask):
 
             num_per_row (int): Specify how many environments in a row
         """
+
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
         upper = gymapi.Vec3(spacing, spacing, spacing)
 
@@ -264,14 +297,22 @@ class ShadowHandOverTask(VecTask):
 
         object_asset_file = self.asset_files_dict[self.object_type]
 
-        # load shadow hand_ asset
+        # Load Shadowhand asset
         asset_options = gymapi.AssetOptions()
+        # Switch Meshes from Z-up left-handed system to Y-up Right-handed coordinate system
         asset_options.flip_visual_attachments = False
-        asset_options.fix_base_link = True
+        # Set Asset base to a fixed placement upon import
+        asset_options.fix_base_link = False
+        # Merge links that are connected by fixed joints
         asset_options.collapse_fixed_joints = True
+        # Disables gravity for asset
         asset_options.disable_gravity = True
+        # Thickness of the collision shapes. Sets how far objects should come to rest from the surface of this body
         asset_options.thickness = 0.001
-        asset_options.angular_damping = 0.01
+        # Angular velocity damping for rigid bodies
+        asset_options.angular_damping = 100
+        # Linear velocity damping for rigid bodies
+        asset_options.linear_damping = 100
 
         if self.physics_engine == gymapi.SIM_PHYSX:
             asset_options.use_physx_armature = True
@@ -281,6 +322,7 @@ class ShadowHandOverTask(VecTask):
         shadow_hand_another_asset = self.gym.load_asset(self.sim, asset_root, shadow_hand_another_asset_file,
                                                         asset_options)
 
+        # The count of Shadowhand's attributes
         self.num_shadow_hand_bodies = self.gym.get_asset_rigid_body_count(shadow_hand_asset)
         self.num_shadow_hand_shapes = self.gym.get_asset_rigid_shape_count(shadow_hand_asset)
         self.num_shadow_hand_dofs = self.gym.get_asset_dof_count(shadow_hand_asset)
@@ -293,7 +335,7 @@ class ShadowHandOverTask(VecTask):
         print("self.num_shadow_hand_actuators: ", self.num_shadow_hand_actuators)
         print("self.num_shadow_hand_tendons: ", self.num_shadow_hand_tendons)
 
-        # tendon set up
+        # Tendon set up
         limit_stiffness = 30
         t_damping = 0.1
         relevant_tendons = ["robot0:T_FFJ1c", "robot0:T_MFJ1c", "robot0:T_RFJ1c", "robot0:T_LFJ1c"]
@@ -313,12 +355,13 @@ class ShadowHandOverTask(VecTask):
         self.gym.set_asset_tendon_properties(shadow_hand_asset, tendon_props)
         self.gym.set_asset_tendon_properties(shadow_hand_another_asset, a_tendon_props)
 
+        # Specifies the index of the actuated dof
         actuated_dof_names = [self.gym.get_asset_actuator_joint_name(shadow_hand_asset, i) for i in
                               range(self.num_shadow_hand_actuators)]
         self.actuated_dof_indices = [self.gym.find_asset_dof_index(shadow_hand_asset, name) for name in
                                      actuated_dof_names]
 
-        # set shadow_hand dof properties
+        # Set Shadowhand dof properties
         shadow_hand_dof_props = self.gym.get_asset_dof_properties(shadow_hand_asset)
         shadow_hand_another_dof_props = self.gym.get_asset_dof_properties(shadow_hand_another_asset)
 
@@ -341,7 +384,7 @@ class ShadowHandOverTask(VecTask):
         self.shadow_hand_dof_default_pos = to_torch(self.shadow_hand_dof_default_pos, device=self.device)
         self.shadow_hand_dof_default_vel = to_torch(self.shadow_hand_dof_default_vel, device=self.device)
 
-        # load manipulated object and goal assets
+        # Load manipulated object and goal assets and their initial state
         object_asset_options = gymapi.AssetOptions()
         object_asset_options.density = 500
         object_asset = self.gym.load_asset(self.sim, asset_root, object_asset_file, object_asset_options)
@@ -353,7 +396,7 @@ class ShadowHandOverTask(VecTask):
         shadow_hand_start_pose.p = gymapi.Vec3(*get_axis_params(0.5, self.up_axis_idx))
 
         shadow_another_hand_start_pose = gymapi.Transform()
-        shadow_another_hand_start_pose.p = gymapi.Vec3(0, -1, 0.5)
+        shadow_another_hand_start_pose.p = gymapi.Vec3(0, -1.15, 0.5)
         shadow_another_hand_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, 3.1415)
 
         object_start_pose = gymapi.Transform()
@@ -370,12 +413,13 @@ class ShadowHandOverTask(VecTask):
         self.goal_displacement = gymapi.Vec3(-0., 0.0, 0.)
         self.goal_displacement_tensor = to_torch(
             [self.goal_displacement.x, self.goal_displacement.y, self.goal_displacement.z], device=self.device)
+
         goal_start_pose = gymapi.Transform()
-        goal_start_pose.p = object_start_pose.p + self.goal_displacement
+        goal_start_pose.p = object_start_pose.p
 
         goal_start_pose.p.z -= 0.0
 
-        # compute aggregate size
+        # Compute aggregate size
         max_agg_bodies = self.num_shadow_hand_bodies * 2 + 2
         max_agg_shapes = self.num_shadow_hand_shapes * 2 + 2
 
@@ -396,7 +440,7 @@ class ShadowHandOverTask(VecTask):
         self.fingertip_another_handles = [self.gym.find_asset_rigid_body_index(shadow_hand_another_asset, name) for name
                                           in self.a_fingertips]
 
-        # create fingertip force sensors, if needed
+        # Create fingertip force sensors, if needed
         sensor_pose = gymapi.Transform()
         for ft_handle in self.fingertip_handles:
             self.gym.create_asset_force_sensor(shadow_hand_asset, ft_handle, sensor_pose)
@@ -431,7 +475,7 @@ class ShadowHandOverTask(VecTask):
                 self.pointCloudVisualizer = None
 
         for i in range(self.num_envs):
-            # create env instance
+            # Create env instance
             env_ptr = self.gym.create_env(
                 self.sim, lower, upper, num_per_row
             )
@@ -439,9 +483,10 @@ class ShadowHandOverTask(VecTask):
             if self.aggregate_mode >= 1:
                 self.gym.begin_aggregate(env_ptr, max_agg_bodies, max_agg_shapes, True)
 
-            # add hand - collision filter = -1 to use asset collision filters set in mjcf loader
+            # Add hand - collision filter = -1 to use asset collision filters set in mjcf loader
             shadow_hand_actor = self.gym.create_actor(env_ptr, shadow_hand_asset, shadow_hand_start_pose, "hand", i, -1,
                                                       0)
+
             shadow_hand_another_actor = self.gym.create_actor(env_ptr, shadow_hand_another_asset,
                                                               shadow_another_hand_start_pose, "another_hand", i, -1, 0)
 
@@ -459,7 +504,7 @@ class ShadowHandOverTask(VecTask):
             another_hand_idx = self.gym.get_actor_index(env_ptr, shadow_hand_another_actor, gymapi.DOMAIN_SIM)
             self.another_hand_indices.append(another_hand_idx)
 
-            # randomize colors and textures for rigid body
+            # Randomize colors and textures for rigid body
             num_bodies = self.gym.get_actor_rigid_body_count(env_ptr, shadow_hand_actor)
             hand_rigid_body_index = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15], [16, 17, 18, 19, 20],
                                      [21, 22, 23, 24, 25]]
@@ -480,14 +525,12 @@ class ShadowHandOverTask(VecTask):
                     for o in hand_rigid_body_index[m]:
                         self.gym.set_rigid_body_color(env_ptr, shadow_hand_another_actor, o, gymapi.MESH_VISUAL,
                                                       gymapi.Vec3(colorx, colory, colorz))
-                # gym.set_rigid_body_texture(env, actor_handles[-1], n, gymapi.MESH_VISUAL,
-                #                            loaded_texture_handle_list[random.randint(0, len(loaded_texture_handle_list)-1)])
 
-            # create fingertip force-torque sensors
+            # Create fingertip force-torque sensors
             self.gym.enable_actor_dof_force_sensors(env_ptr, shadow_hand_actor)
             self.gym.enable_actor_dof_force_sensors(env_ptr, shadow_hand_another_actor)
 
-            # add object
+            # Add object
             object_handle = self.gym.create_actor(env_ptr, object_asset, object_start_pose, "object", i, 0, 0)
             self.object_init_state.append([object_start_pose.p.x, object_start_pose.p.y, object_start_pose.p.z,
                                            object_start_pose.r.x, object_start_pose.r.y, object_start_pose.r.z,
@@ -496,7 +539,7 @@ class ShadowHandOverTask(VecTask):
             object_idx = self.gym.get_actor_index(env_ptr, object_handle, gymapi.DOMAIN_SIM)
             self.object_indices.append(object_idx)
 
-            # add goal object
+            # Add goal object
             goal_handle = self.gym.create_actor(env_ptr, goal_asset, goal_start_pose, "goal_object", i + self.num_envs,
                                                 0, 0)
             goal_object_idx = self.gym.get_actor_index(env_ptr, goal_handle, gymapi.DOMAIN_SIM)
@@ -510,8 +553,8 @@ class ShadowHandOverTask(VecTask):
 
             if self.obs_type in ["point_cloud"]:
                 camera_handle = self.gym.create_camera_sensor(env_ptr, self.camera_props)
-                self.gym.set_camera_location(camera_handle, env_ptr, gymapi.Vec3(0.25, -0.5, 0.75),
-                                             gymapi.Vec3(-0.24, -0.5, 0))
+                self.gym.set_camera_location(camera_handle, env_ptr, gymapi.Vec3(0.25, -0.57, 0.85),
+                                             gymapi.Vec3(-0.24, -0.57, 0))
                 camera_tensor = self.gym.get_camera_image_gpu_tensor(self.sim, env_ptr, camera_handle,
                                                                      gymapi.IMAGE_DEPTH)
                 torch_cam_tensor = gymtorch.wrap_tensor(camera_tensor)
@@ -535,13 +578,10 @@ class ShadowHandOverTask(VecTask):
             self.envs.append(env_ptr)
             self.shadow_hands.append(shadow_hand_actor)
 
+        # Convert each tensor to a pytorch type
         self.object_init_state = to_torch(self.object_init_state, device=self.device, dtype=torch.float).view(
             self.num_envs, 13)
         self.goal_states = self.object_init_state.clone()
-        self.goal_pose = self.goal_states[:, 0:7]
-        self.goal_pos = self.goal_states[:, 0:3]
-        self.goal_rot = self.goal_states[:, 3:7]
-        # self.goal_states[:, self.up_axis_idx] -= 0.04
         self.goal_init_state = self.goal_states.clone()
         self.hand_start_states = to_torch(self.hand_start_states, device=self.device).view(self.num_envs, 13)
 
@@ -568,6 +608,7 @@ class ShadowHandOverTask(VecTask):
         Args:
             actions (tensor): Actions of agents in the all environment 
         """
+
         self.rew_buf[:], self.reset_buf[:], self.reset_goal_buf[:], self.progress_buf[:], self.successes[
                                                                                           :], self.consecutive_successes[
                                                                                               :] = compute_hand_reward(
@@ -582,6 +623,7 @@ class ShadowHandOverTask(VecTask):
         self.extras['successes'] = self.successes
         self.extras['consecutive_successes'] = self.consecutive_successes
 
+        # Whether to print out success information
         if self.print_success_stat:
             self.total_resets = self.total_resets + self.reset_buf.sum()
             direct_average_successes = self.total_successes + self.successes.sum()
@@ -601,6 +643,8 @@ class ShadowHandOverTask(VecTask):
         which we will introduce in detail there
 
         """
+
+        # Refreash gym GPU state tensors and specify the state we need
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
@@ -665,9 +709,10 @@ class ShadowHandOverTask(VecTask):
         411 - 417	goal pose
         418 - 421	goal rot - object rot
         """
-        # fingertip observations, state(pose and vel) + force-torque sensors
-        num_ft_states = 13 * int(self.num_fingertips / 2)  # 65
-        num_ft_force_torques = 6 * int(self.num_fingertips / 2)  # 30
+
+        # Fingertip observations, state(pose and vel) + force-torque sensors
+        num_ft_states = 13 * int(self.num_fingertips / 2)
+        num_ft_force_torques = 6 * int(self.num_fingertips / 2)
 
         self.obs_buf[:, 0:self.num_shadow_hand_dofs] = unscale(self.shadow_hand_dof_pos,
                                                                self.shadow_hand_dof_lower_limits,
@@ -678,7 +723,7 @@ class ShadowHandOverTask(VecTask):
         2 * self.num_shadow_hand_dofs:3 * self.num_shadow_hand_dofs] = self.force_torque_obs_scale * self.dof_force_tensor[
                                                                                                      :, :24]
 
-        fingertip_obs_start = 72  # 168 = 157 + 11
+        fingertip_obs_start = 72
         self.obs_buf[:, fingertip_obs_start:fingertip_obs_start + num_ft_states] = self.fingertip_state.reshape(
             self.num_envs, num_ft_states)
         self.obs_buf[:, fingertip_obs_start + num_ft_states:fingertip_obs_start + num_ft_states +
@@ -686,11 +731,19 @@ class ShadowHandOverTask(VecTask):
                                                                                                                   :,
                                                                                                                   :30]
 
-        action_obs_start = fingertip_obs_start + 95
-        self.obs_buf[:, action_obs_start:action_obs_start + 20] = self.actions[:, :20]
+        hand_pose_start = fingertip_obs_start + 95
+        self.obs_buf[:, hand_pose_start:hand_pose_start + 3] = self.hand_positions[self.hand_indices, :]
+        self.obs_buf[:, hand_pose_start + 3:hand_pose_start + 4] = \
+            get_euler_xyz(self.hand_orientations[self.hand_indices, :])[0].unsqueeze(-1)
+        self.obs_buf[:, hand_pose_start + 4:hand_pose_start + 5] = \
+            get_euler_xyz(self.hand_orientations[self.hand_indices, :])[1].unsqueeze(-1)
+        self.obs_buf[:, hand_pose_start + 5:hand_pose_start + 6] = \
+            get_euler_xyz(self.hand_orientations[self.hand_indices, :])[2].unsqueeze(-1)
 
-        # another_hand
-        another_hand_start = action_obs_start + 20
+        action_obs_start = hand_pose_start + 6
+        self.obs_buf[:, action_obs_start:action_obs_start + 26] = self.actions[:, :26]
+
+        another_hand_start = action_obs_start + 26
         self.obs_buf[:, another_hand_start:self.num_shadow_hand_dofs + another_hand_start] = unscale(
             self.shadow_hand_another_dof_pos,
             self.shadow_hand_dof_lower_limits, self.shadow_hand_dof_upper_limits)
@@ -710,15 +763,25 @@ class ShadowHandOverTask(VecTask):
                                                                                                                           :,
                                                                                                                           30:]
 
-        action_another_obs_start = fingertip_another_obs_start + 95
-        self.obs_buf[:, action_another_obs_start:action_another_obs_start + 20] = self.actions[:, 20:]
+        hand_another_pose_start = fingertip_another_obs_start + 95
+        self.obs_buf[:, hand_another_pose_start:hand_another_pose_start + 3] = self.hand_positions[
+                                                                               self.another_hand_indices, :]
+        self.obs_buf[:, hand_another_pose_start + 3:hand_another_pose_start + 4] = \
+            get_euler_xyz(self.hand_orientations[self.another_hand_indices, :])[0].unsqueeze(-1)
+        self.obs_buf[:, hand_another_pose_start + 4:hand_another_pose_start + 5] = \
+            get_euler_xyz(self.hand_orientations[self.another_hand_indices, :])[1].unsqueeze(-1)
+        self.obs_buf[:, hand_another_pose_start + 5:hand_another_pose_start + 6] = \
+            get_euler_xyz(self.hand_orientations[self.another_hand_indices, :])[2].unsqueeze(-1)
 
-        obj_obs_start = action_another_obs_start + 20  # 144
+        action_another_obs_start = hand_another_pose_start + 6
+        self.obs_buf[:, action_another_obs_start:action_another_obs_start + 26] = self.actions[:, 26:]
+
+        obj_obs_start = action_another_obs_start + 26
         self.obs_buf[:, obj_obs_start:obj_obs_start + 7] = self.object_pose
         self.obs_buf[:, obj_obs_start + 7:obj_obs_start + 10] = self.object_linvel
         self.obs_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
 
-        goal_obs_start = obj_obs_start + 13  # 157 = 144 + 13
+        goal_obs_start = obj_obs_start + 13
         self.obs_buf[:, goal_obs_start:goal_obs_start + 7] = self.goal_pose
         self.obs_buf[:, goal_obs_start + 7:goal_obs_start + 11] = quat_mul(self.object_rot,
                                                                            quat_conjugate(self.goal_rot))
@@ -754,8 +817,10 @@ class ShadowHandOverTask(VecTask):
         411 - 417	goal pose
         418 - 421	goal rot - object rot
         """
-        num_ft_states = 13 * int(self.num_fingertips / 2)  # 65
-        num_ft_force_torques = 6 * int(self.num_fingertips / 2)  # 30
+
+        # Fingertip observations, state(pose and vel) + force-torque sensors
+        num_ft_states = 13 * int(self.num_fingertips / 2)
+        num_ft_force_torques = 6 * int(self.num_fingertips / 2)
 
         self.obs_buf[:, 0:self.num_shadow_hand_dofs] = unscale(self.shadow_hand_dof_pos,
                                                                self.shadow_hand_dof_lower_limits,
@@ -766,7 +831,7 @@ class ShadowHandOverTask(VecTask):
         2 * self.num_shadow_hand_dofs:3 * self.num_shadow_hand_dofs] = self.force_torque_obs_scale * self.dof_force_tensor[
                                                                                                      :, :24]
 
-        fingertip_obs_start = 72  # 168 = 157 + 11
+        fingertip_obs_start = 72
         self.obs_buf[:, fingertip_obs_start:fingertip_obs_start + num_ft_states] = self.fingertip_state.reshape(
             self.num_envs, num_ft_states)
         self.obs_buf[:, fingertip_obs_start + num_ft_states:fingertip_obs_start + num_ft_states +
@@ -774,11 +839,19 @@ class ShadowHandOverTask(VecTask):
                                                                                                                   :,
                                                                                                                   :30]
 
-        action_obs_start = fingertip_obs_start + 95
-        self.obs_buf[:, action_obs_start:action_obs_start + 20] = self.actions[:, :20]
+        hand_pose_start = fingertip_obs_start + 95
+        self.obs_buf[:, hand_pose_start:hand_pose_start + 3] = self.hand_positions[self.hand_indices, :]
+        self.obs_buf[:, hand_pose_start + 3:hand_pose_start + 4] = \
+            get_euler_xyz(self.hand_orientations[self.hand_indices, :])[0].unsqueeze(-1)
+        self.obs_buf[:, hand_pose_start + 4:hand_pose_start + 5] = \
+            get_euler_xyz(self.hand_orientations[self.hand_indices, :])[1].unsqueeze(-1)
+        self.obs_buf[:, hand_pose_start + 5:hand_pose_start + 6] = \
+            get_euler_xyz(self.hand_orientations[self.hand_indices, :])[2].unsqueeze(-1)
 
-        # another_hand
-        another_hand_start = action_obs_start + 20
+        action_obs_start = hand_pose_start + 6
+        self.obs_buf[:, action_obs_start:action_obs_start + 26] = self.actions[:, :26]
+
+        another_hand_start = action_obs_start + 26
         self.obs_buf[:, another_hand_start:self.num_shadow_hand_dofs + another_hand_start] = unscale(
             self.shadow_hand_another_dof_pos,
             self.shadow_hand_dof_lower_limits, self.shadow_hand_dof_upper_limits)
@@ -798,16 +871,25 @@ class ShadowHandOverTask(VecTask):
                                                                                                                           :,
                                                                                                                           30:]
 
-        action_another_obs_start = fingertip_another_obs_start + 95
-        self.obs_buf[:, action_another_obs_start:action_another_obs_start + 20] = self.actions[:, 20:]
+        hand_another_pose_start = fingertip_another_obs_start + 95
+        self.obs_buf[:, hand_another_pose_start:hand_another_pose_start + 3] = self.hand_positions[
+                                                                               self.another_hand_indices, :]
+        self.obs_buf[:, hand_another_pose_start + 3:hand_another_pose_start + 4] = \
+            get_euler_xyz(self.hand_orientations[self.another_hand_indices, :])[0].unsqueeze(-1)
+        self.obs_buf[:, hand_another_pose_start + 4:hand_another_pose_start + 5] = \
+            get_euler_xyz(self.hand_orientations[self.another_hand_indices, :])[1].unsqueeze(-1)
+        self.obs_buf[:, hand_another_pose_start + 5:hand_another_pose_start + 6] = \
+            get_euler_xyz(self.hand_orientations[self.another_hand_indices, :])[2].unsqueeze(-1)
 
-        obj_obs_start = action_another_obs_start + 20  # 144
-        if collect_demonstration:
-            self.obs_buf[:, obj_obs_start:obj_obs_start + 7] = self.object_pose
-            self.obs_buf[:, obj_obs_start + 7:obj_obs_start + 10] = self.object_linvel
-            self.obs_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
+        action_another_obs_start = hand_another_pose_start + 6
+        self.obs_buf[:, action_another_obs_start:action_another_obs_start + 26] = self.actions[:, 26:]
 
-        goal_obs_start = obj_obs_start + 13  # 157 = 144 + 13
+        obj_obs_start = action_another_obs_start + 26
+        self.obs_buf[:, obj_obs_start:obj_obs_start + 7] = self.object_pose
+        self.obs_buf[:, obj_obs_start + 7:obj_obs_start + 10] = self.object_linvel
+        self.obs_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
+
+        goal_obs_start = obj_obs_start + 13
         self.obs_buf[:, goal_obs_start:goal_obs_start + 7] = self.goal_pose
         self.obs_buf[:, goal_obs_start + 7:goal_obs_start + 11] = quat_mul(self.object_rot,
                                                                            quat_conjugate(self.goal_rot))
@@ -871,7 +953,7 @@ class ShadowHandOverTask(VecTask):
                                      self.y_unit_tensor[env_ids])
 
         self.goal_states[env_ids, 0:3] = self.goal_init_state[env_ids, 0:3]
-        self.goal_states[env_ids, 1] -= 0.25
+        self.goal_states[env_ids, 1] -= 0.4
         self.goal_states[env_ids, 3:7] = new_rot
         self.root_state_tensor[self.goal_object_indices[env_ids], 0:3] = self.goal_states[env_ids,
                                                                          0:3] + self.goal_displacement_tensor
@@ -881,12 +963,14 @@ class ShadowHandOverTask(VecTask):
 
         if apply_reset:
             goal_object_indices = self.goal_object_indices[env_ids].to(torch.int32)
+            # Sets actor root state buffer to values provided for given actor indices. Full actor root states buffer should 
+            # be provided for all actors.
             self.gym.set_actor_root_state_tensor_indexed(self.sim,
                                                          gymtorch.unwrap_tensor(self.root_state_tensor),
                                                          gymtorch.unwrap_tensor(goal_object_indices), len(env_ids))
         self.reset_goal_buf[env_ids] = 0
 
-    def reset_idx(self, env_ids, goal_env_ids):
+    def reset(self, env_ids, goal_env_ids):
         """
         Reset and randomize the environment
 
@@ -896,17 +980,18 @@ class ShadowHandOverTask(VecTask):
             goal_env_ids (tensor): The index of the environment that only goals need reset
 
         """
-        # randomization can happen only at reset time, since it can reset actor positions on GPU
+
+        # Randomization can happen only at reset time, since it can reset actor positions on GPU
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
 
-        # generate random values
+        # Generate random values
         rand_floats = torch_rand_float(-1.0, 1.0, (len(env_ids), self.num_shadow_hand_dofs * 2 + 5), device=self.device)
 
-        # randomize start object poses
+        # Reset and randomize start object poses
         self.reset_target_pose(env_ids)
 
-        # reset object
+        # Reset object and goal
         self.root_state_tensor[self.object_indices[env_ids]] = self.object_init_state[env_ids].clone()
         self.root_state_tensor[self.object_indices[env_ids], 0:2] = self.object_init_state[env_ids, 0:2] + \
                                                                     self.reset_position_noise * rand_floats[:, 0:2]
@@ -931,11 +1016,8 @@ class ShadowHandOverTask(VecTask):
         object_indices = torch.unique(torch.cat([self.object_indices[env_ids],
                                                  self.goal_object_indices[env_ids],
                                                  self.goal_object_indices[goal_env_ids]]).to(torch.int32))
-        # self.gym.set_actor_root_state_tensor_indexed(self.sim,
-        #                                              gymtorch.unwrap_tensor(self.root_state_tensor),
-        #                                              gymtorch.unwrap_tensor(object_indices), len(object_indices))
 
-        # reset shadow hand
+        # Reset shadow hand
         delta_max = self.shadow_hand_dof_upper_limits - self.shadow_hand_dof_default_pos
         delta_min = self.shadow_hand_dof_lower_limits - self.shadow_hand_dof_default_pos
         rand_delta = delta_min + (delta_max - delta_min) * rand_floats[:, 5:5 + self.num_shadow_hand_dofs]
@@ -964,17 +1046,29 @@ class ShadowHandOverTask(VecTask):
         all_hand_indices = torch.unique(torch.cat([hand_indices,
                                                    another_hand_indices]).to(torch.int32))
 
+        # Sets DOF position targets to values provided for given actor indices. Full DOF position targets buffer should 
+        # be provided for all actors. For presimatic DOF, target is in meters. For revolute DOF, target is in radians.
         self.gym.set_dof_position_target_tensor_indexed(self.sim,
                                                         gymtorch.unwrap_tensor(self.prev_targets),
                                                         gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
 
+        # Reset all position and velocity value in the environment
+        self.hand_positions[all_hand_indices.to(torch.long), :] = self.saved_root_tensor[
+                                                                  all_hand_indices.to(torch.long), 0:3]
+        self.hand_orientations[all_hand_indices.to(torch.long), :] = self.saved_root_tensor[
+                                                                     all_hand_indices.to(torch.long), 3:7]
         all_indices = torch.unique(torch.cat([all_hand_indices,
                                               object_indices]).to(torch.int32))
 
+        # Sets DOF state buffer to values provided for given actor indices. Full DOF state buffer should be provided for 
+        # all actors. DOF state includes position in meters for prismatic DOF, or radians for revolute DOF, and velocity 
+        # in m/s for prismatic DOF and rad/s for revolute DOF.
         self.gym.set_dof_state_tensor_indexed(self.sim,
                                               gymtorch.unwrap_tensor(self.dof_state),
                                               gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
 
+        # Sets actor root state buffer to values provided for given actor indices. Full actor root states buffer should 
+        # be provided for all actors.
         self.gym.set_actor_root_state_tensor_indexed(self.sim,
                                                      gymtorch.unwrap_tensor(self.root_state_tensor),
                                                      gymtorch.unwrap_tensor(all_indices), len(all_indices))
@@ -985,12 +1079,16 @@ class ShadowHandOverTask(VecTask):
     def pre_physics_step(self, actions):
         """
         The pre-processing of the physics step. Determine whether the reset environment is needed, 
-        and calculate the next movement of Shadowhand through the given action. The 40-dimensional 
+        and calculate the next movement of Shadowhand through the given action. The 52-dimensional 
         action space as shown in below:
         
         Index   Description
         0 - 19 	right shadow hand actuated joint
-        20 - 39	left shadow hand actuated joint
+        20 - 22	right shadow hand base translation
+        23 - 25	right shadow hand base rotation
+        26 - 45	left shadow hand actuated joint
+        46 - 48	left shadow hand base translation
+        49 - 51	left shadow hand base rotatio
 
         Args:
             actions (tensor): Actions of agents in the all environment 
@@ -998,16 +1096,17 @@ class ShadowHandOverTask(VecTask):
         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         goal_env_ids = self.reset_goal_buf.nonzero(as_tuple=False).squeeze(-1)
 
-        # if only goals need reset, then call set API
+        # If only goals need reset, then call set API
         if len(goal_env_ids) > 0 and len(env_ids) == 0:
             self.reset_target_pose(goal_env_ids, apply_reset=True)
-        # if goals need reset in addition to other envs, call set API in reset()
+        # If goals need reset in addition to other envs, call set API in reset()
         elif len(goal_env_ids) > 0:
             self.reset_target_pose(goal_env_ids)
 
         if len(env_ids) > 0:
-            self.reset_idx(env_ids, goal_env_ids)
+            self.reset(env_ids, goal_env_ids)
 
+        # Calculate the next movement of Shadowhand
         self.actions = actions.clone().to(self.device)
         if self.use_relative_control:
             targets = self.prev_targets[:,
@@ -1018,7 +1117,7 @@ class ShadowHandOverTask(VecTask):
                                                                           self.shadow_hand_dof_upper_limits[
                                                                               self.actuated_dof_indices])
         else:
-            self.cur_targets[:, self.actuated_dof_indices] = scale(self.actions[:, :20],
+            self.cur_targets[:, self.actuated_dof_indices] = scale(self.actions[:, 6:26],
                                                                    self.shadow_hand_dof_lower_limits[
                                                                        self.actuated_dof_indices],
                                                                    self.shadow_hand_dof_upper_limits[
@@ -1033,7 +1132,7 @@ class ShadowHandOverTask(VecTask):
                 self.shadow_hand_dof_lower_limits[self.actuated_dof_indices],
                 self.shadow_hand_dof_upper_limits[self.actuated_dof_indices])
 
-            self.cur_targets[:, self.actuated_dof_indices + 24] = scale(self.actions[:, 20:40],
+            self.cur_targets[:, self.actuated_dof_indices + 24] = scale(self.actions[:, 32:52],
                                                                         self.shadow_hand_dof_lower_limits[
                                                                             self.actuated_dof_indices],
                                                                         self.shadow_hand_dof_upper_limits[
@@ -1048,12 +1147,20 @@ class ShadowHandOverTask(VecTask):
                 self.shadow_hand_dof_lower_limits[self.actuated_dof_indices],
                 self.shadow_hand_dof_upper_limits[self.actuated_dof_indices])
 
-            # self.root_state_tensor[self.goal_object_indices, :3] = self.rigid_body_states[:,  3 + 27, 0:3] + self.z_unit_tensor * 0.055 + self.y_unit_tensor * -0.04
-            # self.goal_states[:, 0:3] = self.root_state_tensor[self.goal_object_indices, :3]
-            # self.gym.set_actor_root_state_tensor(self.sim,  gymtorch.unwrap_tensor(self.root_state_tensor))
+            self.apply_forces[:, 1, :] = self.actions[:, 0:3] * self.dt * self.transition_scale * 100000
+            self.apply_forces[:, 1 + 26, :] = self.actions[:, 26:29] * self.dt * self.transition_scale * 100000
+            self.apply_torque[:, 1, :] = self.actions[:, 3:6] * self.dt * self.orientation_scale * 1000
+            self.apply_torque[:, 1 + 26, :] = self.actions[:, 29:32] * self.dt * self.orientation_scale * 1000
+
+            # Applies forces and torques to Shadowhand's base for the immediate timestep, in Newtons
+            self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(self.apply_forces),
+                                                    gymtorch.unwrap_tensor(self.apply_torque), gymapi.ENV_SPACE)
 
         self.prev_targets[:, self.actuated_dof_indices] = self.cur_targets[:, self.actuated_dof_indices]
         self.prev_targets[:, self.actuated_dof_indices + 24] = self.cur_targets[:, self.actuated_dof_indices + 24]
+
+        # Sets DOF position targets to values provided for all DOFs in simulation. For presimatic DOF, 
+        # target is in meters. For revolute DOF, target is in radians.
         self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(self.cur_targets))
 
     def post_physics_step(self):
@@ -1068,8 +1175,8 @@ class ShadowHandOverTask(VecTask):
         self.compute_observations()
         self.compute_reward(self.actions)
 
+        # Draw axes on target object
         if self.viewer and self.debug_viz:
-            # draw axes on target object
             self.gym.clear_lines(self.viewer)
             self.gym.refresh_rigid_body_state_tensor(self.sim)
 
@@ -1242,8 +1349,10 @@ def compute_hand_reward(
         ignore_z_rot (bool): Is it necessary to ignore the rot of the z-axis, which is usually used 
             for some specific objects (e.g. pen)
     """
+
     # Distance from the hand to the object
     goal_dist = torch.norm(target_pos - object_pos, p=2, dim=-1)
+
     if ignore_z_rot:
         success_tolerance = 2.0 * success_tolerance
 
@@ -1252,7 +1361,6 @@ def compute_hand_reward(
     rot_dist = 2.0 * torch.asin(torch.clamp(torch.norm(quat_diff[:, 0:3], p=2, dim=-1), max=1.0))
 
     dist_rew = goal_dist
-    # rot_rew = 1.0/(torch.abs(rot_dist) + rot_eps) * rot_reward_scale
 
     action_penalty = torch.sum(actions ** 2, dim=-1)
 
@@ -1264,14 +1372,11 @@ def compute_hand_reward(
     successes = torch.where(successes == 0,
                             torch.where(goal_dist < 0.03, torch.ones_like(successes), successes), successes)
 
-    # Success bonus: orientation is within `success_tolerance` of goal orientation
-    reward = torch.where(goal_resets == 1, reward + reach_goal_bonus, reward)
-
     # Fall penalty: distance to the goal is larger than a threashold
-    reward = torch.where(object_pos[:, 2] <= 0.2, reward + fall_penalty, reward)
+    reward = torch.where(object_pos[:, 2] <= 0.1, reward + fall_penalty, reward)
 
     # Check env termination conditions, including maximum success number
-    resets = torch.where(object_pos[:, 2] <= 0.2, torch.ones_like(reset_buf), reset_buf)
+    resets = torch.where(object_pos[:, 2] <= 0.1, torch.ones_like(reset_buf), reset_buf)
     if max_consecutive_successes > 0:
         # Reset progress buffer on goal envs if max_consecutive_successes > 0
         progress_buf = torch.where(torch.abs(rot_dist) <= success_tolerance, torch.zeros_like(progress_buf),
@@ -1286,7 +1391,7 @@ def compute_hand_reward(
     num_resets = torch.sum(resets)
     finished_cons_successes = torch.sum(successes * resets.float())
 
-    cons_successes = torch.where(resets > 0, successes * resets, consecutive_successes).mean()
+    cons_successes = torch.where(resets > 0, successes * resets, consecutive_successes)
 
     return reward, resets, goal_resets, progress_buf, successes, cons_successes
 
