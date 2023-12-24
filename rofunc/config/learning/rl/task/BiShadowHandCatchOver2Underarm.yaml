@@ -1,11 +1,11 @@
-name: ShadowHandCatchOver2Underarm
+name: BiShadowHandCatchOver2Underarm
 
 physics_engine: ${..physics_engine}
 
 # if given, will override the device setting in gym.
 env: 
   env_name: "shadow_hand_catch_over2underarm"
-  numEnvs: 256
+  numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 1
   episodeLength: 75
   enableDebugVis: False
