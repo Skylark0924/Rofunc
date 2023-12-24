@@ -1,11 +1,11 @@
-name: ShadowHandCatchAbreast
+name: BiShadowHandCatchAbreast
 
 physics_engine: ${..physics_engine}
 
 # if given, will override the device setting in gym.
 env: 
   env_name: "shadow_hand_catch_abreast"
-  numEnvs: 256
+  numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 0.75
   episodeLength: 150
   enableDebugVis: False

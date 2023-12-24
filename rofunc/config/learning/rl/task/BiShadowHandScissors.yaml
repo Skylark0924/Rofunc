@@ -1,11 +1,11 @@
-name: ShadowHandScissors
+name: BiShadowHandScissors
 
 physics_engine: ${..physics_engine}
 
 # if given, will override the device setting in gym.
 env: 
   env_name: "shadow_hand_scissors"
-  numEnvs: 128
+  numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 1.5
   episodeLength: 150
   enableDebugVis: False

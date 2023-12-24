@@ -1,11 +1,11 @@
-name: ShadowHandDoorOpenInward
+name: BiShadowHandDoorOpenInward
 
 physics_engine: ${..physics_engine}
 
 # if given, will override the device setting in gym.
 env: 
   env_name: "shadow_hand_door_open_inward"
-  numEnvs: 128
+  numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 1.5
   episodeLength: 250
   enableDebugVis: False
