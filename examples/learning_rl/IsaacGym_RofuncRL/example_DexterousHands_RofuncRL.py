@@ -26,7 +26,7 @@ def train(custom_args):
                       "headless={}".format(custom_args.headless),
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
-    cfg.train.Trainer.maximum_steps = 10000000
+    cfg.train.Trainer.maximum_steps = 1000000
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -90,8 +90,13 @@ if __name__ == '__main__':
     gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    # Available tasks: BiShadowHandOver
-    parser.add_argument("--task", type=str, default="BiShadowHandOver")
+    # Available tasks: BiShadowHandOver, BiShadowHandBlockStack, BiShadowHandBottleCap, BiShadowHandCatchAbreast,
+    #                  BiShadowHandCatchOver2Underarm, BiShadowHandCatchUnderarm, BiShadowHandDoorOpenInward,
+    #                  BiShadowHandDoorOpenOutward, BiShadowHandDoorCloseInward, BiShadowHandDoorCloseOutward,
+    #                  BiShadowHandGraspAndPlace, BiShadowHandLiftUnderarm, BiShadowHandPen, BiShadowHandPointCloud,
+    #                  BiShadowHandPushBlock, BiShadowHandReOrientation, BiShadowHandScissors, BiShadowHandSwingCup,
+    #                  BiShadowHandSwitch, BiShadowHandTwoCatchUnderarm
+    parser.add_argument("--task", type=str, default="BiShadowHandCatchAbreast")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=int, default=0)
