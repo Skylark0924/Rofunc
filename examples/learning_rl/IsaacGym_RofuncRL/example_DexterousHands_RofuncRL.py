@@ -2,7 +2,7 @@
 Dexterous Hands (RofuncRL)
 ===========================
 
-Examples of learning hand (Shadow Hand, Allegro Hand, qbSoftand) tasks by RofuncRL
+Examples of learning hand (Shadow Hand, Allegro Hand, qbSofthand) tasks by RofuncRL
 """
 
 import isaacgym
@@ -26,7 +26,7 @@ def train(custom_args):
                       "headless={}".format(custom_args.headless),
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
-    cfg.train.Trainer.maximum_steps = 100000000
+    cfg.train.Trainer.maximum_steps = 10000000
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -90,8 +90,8 @@ if __name__ == '__main__':
     gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    # Available tasks: ShadowHandOver
-    parser.add_argument("--task", type=str, default="ShadowHandOver")
+    # Available tasks: BiShadowHandOver
+    parser.add_argument("--task", type=str, default="BiShadowHandOver")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=int, default=0)
