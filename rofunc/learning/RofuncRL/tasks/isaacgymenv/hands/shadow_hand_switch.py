@@ -1099,7 +1099,7 @@ class ShadowHandSwitchTask(VecTask):
                                                          gymtorch.unwrap_tensor(goal_object_indices), len(env_ids))
         self.reset_goal_buf[env_ids] = 0
 
-    def reset(self, env_ids, goal_env_ids):
+    def reset_idx(self, env_ids, goal_env_ids):
         """
         Reset and randomize the environment
 
@@ -1230,7 +1230,7 @@ class ShadowHandSwitchTask(VecTask):
             self.reset_target_pose(goal_env_ids)
 
         if len(env_ids) > 0:
-            self.reset(env_ids, goal_env_ids)
+            self.reset_idx(env_ids, goal_env_ids)
 
         self.actions = actions.clone().to(self.device)
         if self.use_relative_control:
