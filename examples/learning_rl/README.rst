@@ -150,7 +150,7 @@ The following are examples of reinforcement learning methods for robot learning.
              - 
              -
            * - `CURICabinetBimanual <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_bimanual.py>`_
-             - .. image:: ../../../img/CURICabinet.gif
+             - 
              - 
              -
            * - `Humanoid <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid.py>`_
