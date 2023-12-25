@@ -10,7 +10,8 @@
 [![Documentation Status](https://readthedocs.org/projects/rofunc/badge/?version=latest)](https://rofunc.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
-> **Repository address: https://github.com/Skylark0924/Rofunc**
+> **Repository address: https://github.com/Skylark0924/Rofunc** <br>
+> **Documentation: https://rofunc.readthedocs.io/**
 
 Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for **(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including
 _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an
