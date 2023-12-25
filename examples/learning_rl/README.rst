@@ -124,11 +124,11 @@ The following are examples of reinforcement learning methods for robot learning.
            * - Tasks
              - Animation
              - Performance
-             - ModelZoo
+             - `ModelZoo <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json>`_
            * - `Ant <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ant.py>`_
              - 
              - 
-             -
+             - ✅
            * - `Cartpole <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/cartpole.py>`_
              - 
              -
@@ -136,71 +136,71 @@ The following are examples of reinforcement learning methods for robot learning.
            * - `FrankaCabinet <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cabinet.py>`_
              - 
              - 
-             -
+             - ✅
            * - `FrankaCubeStack <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cube_stack.py>`_
              - 
              - 
              -
            * - `CURICabinet <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet.py>`_
-             - .. image:: ../../doc/img/CURICabinet.gif
+             - .. image:: ../../../img/CURICabinet.gif
              - 
-             -
+             - ✅
            * - `CURICabinetImage <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_image.py>`_
-             - .. image:: ../../doc/img/CURICabinet.gif
+             - .. image:: ../../../img/CURICabinet.gif
              - 
              -
            * - `CURICabinetBimanual <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_bimanual.py>`_
-             - .. image:: ../../doc/img/CURICabinet.gif
+             - .. image:: ../../../img/CURICabinet.gif
              - 
              -
            * - `Humanoid <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid.py>`_
              - 
              -
-             - 
+             - ✅
            * - `HumanoidAMP_backflip <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - .. image:: ../../doc/img/RofuncAMP_HumanoidFlip.gif
+             - .. image:: ../../../img/RofuncAMP_HumanoidFlip.gif
              - 
-             -
+             - ✅
            * - `HumanoidAMP_walk <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
              - 
              -
-             - 
+             - ✅
            * - `HumanoidAMP_run <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - .. image:: ../../doc/img/RofuncAMP_HumanoidRun.gif
+             - .. image:: ../../../img/RofuncAMP_HumanoidRun.gif
              - 
-             -
+             - ✅
            * - `HumanoidAMP_dance <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - .. image:: ../../doc/img/RofuncAMP_HumanoidDance.gif
+             - .. image:: ../../../img/RofuncAMP_HumanoidDance.gif
              -
-             -
+             - ✅
            * - `HumanoidAMP_hop <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - .. image:: ../../doc/img/RofuncAMP_HumanoidHop.gif
+             - .. image:: ../../../img/RofuncAMP_HumanoidHop.gif
              -
-             -
+             - ✅
            * - `HumanoidASEGetupSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_amp_getup.py>`_
-             - .. image:: ../../doc/img/ASE3.gif
+             - .. image:: ../../../img/ASE3.gif
              -
-             -
+             - ✅
            * - `HumanoidASEPerturbSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_perturb.py>`_
-             - .. image:: ../../doc/img/ASE1.gif
+             - .. image:: ../../../img/ASE1.gif
              -
-             -
+             - ✅
            * - `HumanoidASEHeadingSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_heading.py>`_
-             - .. image:: ../../doc/img/ASE5.gif
+             - .. image:: ../../../img/ASE5.gif
              -
-             -
+             - ✅
            * - `HumanoidASELocationSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_location.py>`_
              - 
              -
-             -
+             - ✅
            * - `HumanoidASEReachSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_reach.py>`_
              - 
              -
-             -
+             - ✅
            * - `HumanoidASEStrikeSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_strike.py>`_
-             - .. image:: ../../doc/img/ASE4.gif
+             - .. image:: ../../../img/ASE4.gif
              - 
-             -
+             - ✅
            * - `BiShadowHandBlockStack <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_block_stack.py>`_
              - 
              - 
