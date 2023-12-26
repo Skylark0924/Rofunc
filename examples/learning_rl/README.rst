@@ -206,7 +206,7 @@ The following are examples of reinforcement learning methods for robot learning.
              -
              - ✅
            * - `HumanoidASELocationSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_location.py>`_
-             - 
+             - .. image:: ../../../img/HumanoidASELocationSwordShieldRofuncRLPPO.gif
              -
              - ✅
            * - `HumanoidASEReachSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_reach.py>`_
