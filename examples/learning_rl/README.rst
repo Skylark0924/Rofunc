@@ -142,15 +142,15 @@ The following are examples of reinforcement learning methods for robot learning.
              - Performance
              - `ModelZoo <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json>`_
            * - `Ant <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ant.py>`_
-             - 
+             - .. image:: ../../../img/AntRofuncRLPPO.gif
              - 
              - ✅
            * - `Cartpole <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/cartpole.py>`_
-             - 
+             -
              -
              - 
            * - `FrankaCabinet <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cabinet.py>`_
-             - 
+             - .. image:: ../../../img/FrankaCabinetRofuncRLPPO.gif
              - 
              - ✅
            * - `FrankaCubeStack <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cube_stack.py>`_
@@ -170,7 +170,7 @@ The following are examples of reinforcement learning methods for robot learning.
              - 
              -
            * - `Humanoid <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid.py>`_
-             - 
+             - .. image:: ../../../img/HumanoidRofuncRLPPO.gif
              -
              - ✅
            * - `HumanoidAMP_backflip <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
