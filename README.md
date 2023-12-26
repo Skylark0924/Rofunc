@@ -98,46 +98,46 @@ The available functions and plans can be found as follows.
 > For more details, please check [**the documentation for RofuncRL**](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html).
 
 | Tasks                          | Animation                                | Performance | [ModelZoo](https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json) |
-| ------------------------------ | ---------------------------------------- | ----------- | ------------------------------------------------------------ |
-| Ant                            |                                          |             | ✅                                                            |
-| Cartpole                       |                                          |             |                                                              |
-| FrankaCabinet                  |                                          |             | ✅                                                            |
-| FrankaCubeStack                |                                          |             |                                                              |
-| CURICabinet                    | ![](doc/img/CURICabinet.gif)             |             | ✅                                                            |
-| CURICabinetImage               | ![](doc/img/CURICabinet.gif)             |             |                                                              |
-| CURICabinetBimanual            |                                          |             |                                                              |
-| Humanoid                       |                                          |             | ✅                                                            |
-| HumanoidAMP_backflip           | ![](doc/img/RofuncAMP_HumanoidFlip.gif)  |             | ✅                                                            |
-| HumanoidAMP_walk               |                                          |             | ✅                                                            |
-| HumanoidAMP_run                | ![](doc/img/RofuncAMP_HumanoidRun.gif)   |             | ✅                                                            |
-| HumanoidAMP_dance              | ![](doc/img/RofuncAMP_HumanoidDance.gif) |             | ✅                                                            |
-| HumanoidAMP_hop                | ![](doc/img/RofuncAMP_HumanoidHop.gif)   |             | ✅                                                            |
-| HumanoidASEGetupSwordShield    | ![](doc/img/ASE3.gif)                    |             | ✅                                                            |
-| HumanoidASEPerturbSwordShield  | ![](doc/img/ASE1.gif)                    |             | ✅                                                            |
-| HumanoidASEHeadingSwordShield  | ![](doc/img/ASE5.gif)                    |             | ✅                                                            |
-| HumanoidASELocationSwordShield |                                          |             | ✅                                                            |
-| HumanoidASEReachSwordShield    |                                          |             | ✅                                                            |
-| HumanoidASEStrikeSwordShield   | ![](doc/img/ASE4.gif)                    |             | ✅                                                            |
-| BiShadowHandBlockStack         |                                          |             |                                                              |
-| BiShadowHandBottleCap          |                                          |             |                                                              |
-| BiShadowHandCatchAbreast       |                                          |             |                                                              |
-| BiShadowHandCatchOver2Underarm |                                          |             |                                                              |
-| BiShadowHandCatchUnderarm      |                                          |             |                                                              |
-| BiShadowHandDoorOpenInward     |                                          |             |                                                              |
-| BiShadowHandDoorOpenOutward    |                                          |             |                                                              |
-| BiShadowHandDoorCloseInward    |                                          |             |                                                              |
-| BiShadowHandDoorCloseOutward   |                                          |             |                                                              |
-| BiShadowHandGraspAndPlace      |                                          |             |                                                              |
-| BiShadowHandLiftUnderarm       |                                          |             |                                                              |
-| BiShadowHandOver               |                                          |             |                                                              |
-| BiShadowHandPen                |                                          |             |                                                              |
-| BiShadowHandPointCloud         |                                          |             |                                                              |
-| BiShadowHandPushBlock          |                                          |             |                                                              |
-| BiShadowHandReOrientation      |                                          |             |                                                              |
-| BiShadowHandScissors           |                                          |             |                                                              |
-| BiShadowHandSwingCup           |                                          |             |                                                              |
-| BiShadowHandSwitch             |                                          |             |                                                              |
-| BiShadowHandTwoCatchUnderarm   |                                          |             |                                                              |
+| ------------------------------ | ---------------------------------------- | ----------- |---------------------------------------------------------------------------------------------------|
+| Ant                            |                                          |             | ✅                                                                                                 |
+| Cartpole                       |                                          |             |                                                                                                   |
+| FrankaCabinet                  |                                          |             | ✅                                                                                                 |
+| FrankaCubeStack                |                                          |             |                                                                                                   |
+| CURICabinet                    | ![](doc/img/CURICabinet.gif)             |             | ✅                                                                                                 |
+| CURICabinetImage               | ![](doc/img/CURICabinet.gif)             |             |                                                                                                   |
+| CURICabinetBimanual            |                                          |             |                                                                                                   |
+| Humanoid                       |                                          |             | ✅                                                                                                 |
+| HumanoidAMP_backflip           | ![](doc/img/RofuncAMP_HumanoidFlip.gif)  |             | ✅                                                                                                 |
+| HumanoidAMP_walk               |                                          |             | ✅                                                                                                 |
+| HumanoidAMP_run                | ![](doc/img/RofuncAMP_HumanoidRun.gif)   |             | ✅                                                                                                 |
+| HumanoidAMP_dance              | ![](doc/img/RofuncAMP_HumanoidDance.gif) |             | ✅                                                                                                 |
+| HumanoidAMP_hop                | ![](doc/img/RofuncAMP_HumanoidHop.gif)   |             | ✅                                                                                                 |
+| HumanoidASEGetupSwordShield    | ![](doc/img/ASE3.gif)                    |             | ✅                                                                                                 |
+| HumanoidASEPerturbSwordShield  | ![](doc/img/ASE1.gif)                    |             | ✅                                                                                                 |
+| HumanoidASEHeadingSwordShield  | ![](doc/img/ASE5.gif)                    |             | ✅                                                                                                 |
+| HumanoidASELocationSwordShield |                                          |             | ✅                                                                                                 |
+| HumanoidASEReachSwordShield    |                                          |             | ✅                                                                                                 |
+| HumanoidASEStrikeSwordShield   | ![](doc/img/ASE4.gif)                    |             | ✅                                                                                                 |
+| BiShadowHandBlockStack         |                                          |             |                                                                                                   |
+| BiShadowHandBottleCap          |                                          |             | ✅                                                                                                 |
+| BiShadowHandCatchAbreast       |                                          |             | ✅                                                                                                 |
+| BiShadowHandCatchOver2Underarm |                                          |             | ✅                                                                                                 |
+| BiShadowHandCatchUnderarm      |                                          |             | ✅                                                                                                 |
+| BiShadowHandDoorOpenInward     |                                          |             | ✅                                                                                                 |
+| BiShadowHandDoorOpenOutward    |                                          |             | ✅                                                                                                 |
+| BiShadowHandDoorCloseInward    |                                          |             |                                                                                                   |
+| BiShadowHandDoorCloseOutward   |                                          |             |                                                                                                   |
+| BiShadowHandGraspAndPlace      |                                          |             |                                                                                                   |
+| BiShadowHandLiftUnderarm       |                                          |             |                                                                                                   |
+| BiShadowHandOver               |                                          |             | ✅                                                                                                 |
+| BiShadowHandPen                |                                          |             | ✅                                                                                                 |
+| BiShadowHandPointCloud         |                                          |             |                                                                                                   |
+| BiShadowHandPushBlock          |                                          |             |                                                                                                   |
+| BiShadowHandReOrientation      |                                          |             |                                                                                                   |
+| BiShadowHandScissors           |                                          |             |                                                                                                   |
+| BiShadowHandSwingCup           |                                          |             | ✅                                                                                                 |
+| BiShadowHandSwitch             |                                          |             |                                                                                                   |
+| BiShadowHandTwoCatchUnderarm   |                                          |             |                                                                                                   |
 
 
 

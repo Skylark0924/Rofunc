@@ -97,13 +97,13 @@ if __name__ == '__main__':
     #                  BiShadowHandGraspAndPlace, BiShadowHandLiftUnderarm, BiShadowHandPen, BiShadowHandPointCloud,
     #                  BiShadowHandPushBlock, BiShadowHandReOrientation, BiShadowHandScissors, BiShadowHandSwingCup,
     #                  BiShadowHandSwitch, BiShadowHandTwoCatchUnderarm
-    parser.add_argument("--task", type=str, default="BiShadowHandCatchUnderarm")
+    parser.add_argument("--task", type=str, default="BiShadowHandSwingCup")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=256)
     parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
+    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
