@@ -124,9 +124,19 @@
     "name": "BiShadowHandPenRofuncRLPPO.pth",
     "md5": ""
   },
+  "BiShadowHandScissorsRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=182LjDYXJNAcPgtux9J0wfL19JhWyYgZp&export=download",
+    "name": "BiShadowHandScissorsRofuncRLPPO.pth",
+    "md5": ""
+  },
   "BiShadowHandSwingCupRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1qKA0mQRVe_sqoRFNOFh2k6FMzoHdBDax&export=download",
     "name": "BiShadowHandSwingCupRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandSwitchRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1I0Pzo59lMoeqdSC6BtarH5qe2hX10L4U&export=download",
+    "name": "BiShadowHandSwitchRofuncRLPPO.pth",
     "md5": ""
   },
   "efficientsam_s_gpu.jit": {
