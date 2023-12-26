@@ -84,6 +84,26 @@
     "name": "HumanoidASEHeadingSwordShield.pth",
     "md5": ""
   },
+  "BiShadowHandCatchOver2UnderarmRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1vQqeiJAuFv_bghLJZnevYfHjlrc-z0bq&export=download",
+    "name": "BiShadowHandCatchOver2UnderarmRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandCatchUnderarmRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=12_XEZNJNUs-XjNZriFaj2Jqx0ytGvSVh&export=download",
+    "name": "BiShadowHandCatchUnderarmRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandDoorOpenInwardRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=16Okt9cIAvTb8yVSheftbEozC6ZL4_oZA&export=download",
+    "name": "BiShadowHandDoorOpenInwardRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandDoorOpenOutwardRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1o5PLZfkCo8PZbzBwBoPcBFxF78s4mi0v&export=download",
+    "name": "BiShadowHandDoorOpenOutwardRofuncRLPPO.pth",
+    "md5": ""
+  },
   "efficientsam_s_gpu.jit": {
     "url": "https://drive.google.com/uc?id=1lMCUFOLeQOlIpuaIA00MB174lL7ZiuoS&export=download",
     "name": "efficientsam_s_gpu.jit",
