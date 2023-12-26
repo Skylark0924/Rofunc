@@ -10,7 +10,8 @@
 [![Documentation Status](https://readthedocs.org/projects/rofunc/badge/?version=latest)](https://rofunc.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSkylark0924%2FRofunc%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/Skylark0924/Rofunc/goto?ref=main)
 
-> **Repository address: https://github.com/Skylark0924/Rofunc**
+> **Repository address: https://github.com/Skylark0924/Rofunc** <br>
+> **Documentation: https://rofunc.readthedocs.io/**
 
 Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for **(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including
 _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an
@@ -24,6 +25,7 @@ processing, learning, and its deployment on robots.
   - [Update News 🎉🎉🎉](#update-news-)
   - [Installation](#installation)
   - [Documentation](#documentation)
+  - [RofuncRL](#rofuncrl)
   - [Star History](#star-history)
   - [Citation](#citation)
   - [Related Papers](#related-papers)
@@ -88,6 +90,56 @@ The available functions and plans can be found as follows.
 |                                                                                                         |   |            [`AMP(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |            [`ASE(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |                                          `ODTrans(RofuncRL)`                                           | ⛔  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
+
+## RofuncRL
+
+`RofuncRL` is one of the most important sub-packages of `Rofunc`. It is a modular easy-to-use Reinforcement Learning sub-package designed for Robot Learning tasks. It has been tested with simulators like `OpenAIGym`, `IsaacGym`, `OmniIsaacGym` (see [example gallery](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html)), and also differentiable simulators like `PlasticineLab` and `DiffCloth`. Here is a list of robot tasks trained by `RofuncRL`:
+
+> For more details, please check [**the documentation for RofuncRL**](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html).
+
+| Tasks                          | Animation                                | Performance | [ModelZoo](https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json) |
+| ------------------------------ | ---------------------------------------- | ----------- | ------------------------------------------------------------ |
+| Ant                            |                                          |             | ✅                                                            |
+| Cartpole                       |                                          |             |                                                              |
+| FrankaCabinet                  |                                          |             | ✅                                                            |
+| FrankaCubeStack                |                                          |             |                                                              |
+| CURICabinet                    | ![](doc/img/CURICabinet.gif)             |             | ✅                                                            |
+| CURICabinetImage               | ![](doc/img/CURICabinet.gif)             |             |                                                              |
+| CURICabinetBimanual            |                                          |             |                                                              |
+| Humanoid                       |                                          |             | ✅                                                            |
+| HumanoidAMP_backflip           | ![](doc/img/RofuncAMP_HumanoidFlip.gif)  |             | ✅                                                            |
+| HumanoidAMP_walk               |                                          |             | ✅                                                            |
+| HumanoidAMP_run                | ![](doc/img/RofuncAMP_HumanoidRun.gif)   |             | ✅                                                            |
+| HumanoidAMP_dance              | ![](doc/img/RofuncAMP_HumanoidDance.gif) |             | ✅                                                            |
+| HumanoidAMP_hop                | ![](doc/img/RofuncAMP_HumanoidHop.gif)   |             | ✅                                                            |
+| HumanoidASEGetupSwordShield    | ![](doc/img/ASE3.gif)                    |             | ✅                                                            |
+| HumanoidASEPerturbSwordShield  | ![](doc/img/ASE1.gif)                    |             | ✅                                                            |
+| HumanoidASEHeadingSwordShield  | ![](doc/img/ASE5.gif)                    |             | ✅                                                            |
+| HumanoidASELocationSwordShield |                                          |             | ✅                                                            |
+| HumanoidASEReachSwordShield    |                                          |             | ✅                                                            |
+| HumanoidASEStrikeSwordShield   | ![](doc/img/ASE4.gif)                    |             | ✅                                                            |
+| BiShadowHandBlockStack         |                                          |             |                                                              |
+| BiShadowHandBottleCap          |                                          |             |                                                              |
+| BiShadowHandCatchAbreast       |                                          |             |                                                              |
+| BiShadowHandCatchOver2Underarm |                                          |             |                                                              |
+| BiShadowHandCatchUnderarm      |                                          |             |                                                              |
+| BiShadowHandDoorOpenInward     |                                          |             |                                                              |
+| BiShadowHandDoorOpenOutward    |                                          |             |                                                              |
+| BiShadowHandDoorCloseInward    |                                          |             |                                                              |
+| BiShadowHandDoorCloseOutward   |                                          |             |                                                              |
+| BiShadowHandGraspAndPlace      |                                          |             |                                                              |
+| BiShadowHandLiftUnderarm       |                                          |             |                                                              |
+| BiShadowHandOver               |                                          |             |                                                              |
+| BiShadowHandPen                |                                          |             |                                                              |
+| BiShadowHandPointCloud         |                                          |             |                                                              |
+| BiShadowHandPushBlock          |                                          |             |                                                              |
+| BiShadowHandReOrientation      |                                          |             |                                                              |
+| BiShadowHandScissors           |                                          |             |                                                              |
+| BiShadowHandSwingCup           |                                          |             |                                                              |
+| BiShadowHandSwitch             |                                          |             |                                                              |
+| BiShadowHandTwoCatchUnderarm   |                                          |             |                                                              |
+
+
 
 ## Star History
 
