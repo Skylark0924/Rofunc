@@ -84,6 +84,16 @@
     "name": "HumanoidASEHeadingSwordShield.pth",
     "md5": ""
   },
+  "BiShadowHandBottleCapRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1lsr2-AImyZ3vN8KeTTDQWfGIC5Kmp3lj&export=download",
+    "name": "BiShadowHandBottleCapRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandCatchAbreastRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1lEMLP-TaZv0Jgj9Ok-X01Wjr3Licq4Qv&export=download",
+    "name": "BiShadowHandCatchAbreastRofuncRLPPO.pth",
+    "md5": ""
+  },
   "BiShadowHandCatchOver2UnderarmRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1vQqeiJAuFv_bghLJZnevYfHjlrc-z0bq&export=download",
     "name": "BiShadowHandCatchOver2UnderarmRofuncRLPPO.pth",
@@ -102,6 +112,21 @@
   "BiShadowHandDoorOpenOutwardRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1o5PLZfkCo8PZbzBwBoPcBFxF78s4mi0v&export=download",
     "name": "BiShadowHandDoorOpenOutwardRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandOverRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1BNAuedAtojTIbM9h4NguAL_vz1HVzl0I&export=download",
+    "name": "BiShadowHandOverRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandPenRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1x_ZXXQFRkIIExVrUB48SzNwbvXeMfV0i&export=download",
+    "name": "BiShadowHandPenRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandSwingCupRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1qKA0mQRVe_sqoRFNOFh2k6FMzoHdBDax&export=download",
+    "name": "BiShadowHandSwingCupRofuncRLPPO.pth",
     "md5": ""
   },
   "efficientsam_s_gpu.jit": {
