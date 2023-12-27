@@ -84,6 +84,11 @@
     "name": "HumanoidASEHeadingSwordShield.pth",
     "md5": ""
   },
+  "BiShadowHandBlockStackRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=10Xn3t84Z8aNIw6qoIwP5W2fr3e18agGr&export=download",
+    "name": "BiShadowHandBlockStackRofuncRLPPO.pth",
+    "md5": ""
+  },
   "BiShadowHandBottleCapRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1lsr2-AImyZ3vN8KeTTDQWfGIC5Kmp3lj&export=download",
     "name": "BiShadowHandBottleCapRofuncRLPPO.pth",
@@ -114,6 +119,16 @@
     "name": "BiShadowHandDoorOpenOutwardRofuncRLPPO.pth",
     "md5": ""
   },
+  "BiShadowHandDoorCloseInwardRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1I2_hbBs_PZh7cUcDxb21rBWZvGJ8WCSC&export=download",
+    "name": "BiShadowHandDoorCloseInwardRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandDoorCloseOutwardRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1z0DjM7h2CikaldaC5Sm4p2MG4wYDrRc_&export=download",
+    "name": "BiShadowHandDoorCloseOutwardRofuncRLPPO.pth",
+    "md5": ""
+  },
   "BiShadowHandOverRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1BNAuedAtojTIbM9h4NguAL_vz1HVzl0I&export=download",
     "name": "BiShadowHandOverRofuncRLPPO.pth",
@@ -122,6 +137,16 @@
   "BiShadowHandPenRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1x_ZXXQFRkIIExVrUB48SzNwbvXeMfV0i&export=download",
     "name": "BiShadowHandPenRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandPushBlockRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=10Zoz60FVikKZ8cE5o7A2Hk326Yqg_e1f&export=download",
+    "name": "BiShadowHandPushBlockRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandReOrientationRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1icfMsTDvVkRjqdXoNIia2L7x2C9Tekrq&export=download",
+    "name": "BiShadowHandReOrientationRofuncRLPPO.pth",
     "md5": ""
   },
   "BiShadowHandScissorsRofuncRLPPO.pth": {
