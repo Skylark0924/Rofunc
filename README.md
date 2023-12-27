@@ -98,7 +98,7 @@ The available functions and plans can be found as follows.
 > For more details, please check [**the documentation for RofuncRL**](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html).
 
 | Tasks                          | Animation                                                  | Performance | [ModelZoo](https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json) |
-| ------------------------------ |------------------------------------------------------------| ----------- |---------------------------------------------------------------------------------------------------|
+| ------------------------------ |------------------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------|
 | Ant                            | ![](doc/img/AntRofuncRLPPO.gif)                            |             | ✅                                                                                                 |
 | Cartpole                       |                                                            |             |                                                                                                   |
 | FrankaCabinet                  | ![](doc/img/FrankaCabinetRofuncRLPPO.gif)                  |             | ✅                                                                                                 |
@@ -118,25 +118,25 @@ The available functions and plans can be found as follows.
 | HumanoidASELocationSwordShield | ![](doc/img/HumanoidASELocationSwordShieldRofuncRLPPO.gif) |             | ✅                                                                                                 |
 | HumanoidASEReachSwordShield    |                                                            |             | ✅                                                                                                 |
 | HumanoidASEStrikeSwordShield   | ![](doc/img/ASE4.gif)                                      |             | ✅                                                                                                 |
-| BiShadowHandBlockStack         |                                                            |             |                                                                                                   |
+| BiShadowHandBlockStack         |                                                            |            | ✅                                                                                                 |
 | BiShadowHandBottleCap          | ![](doc/img/BiShadowHandBottleCapRofuncRLPPO.gif)          |             | ✅                                                                                                 |
 | BiShadowHandCatchAbreast       | ![](doc/img/BiShadowHandCatchAbreastRofuncRLPPO.gif)       |             | ✅                                                                                                 |
 | BiShadowHandCatchOver2Underarm | ![](doc/img/BiShadowHandCatchOver2UnderarmRofuncRLPPO.gif) |             | ✅                                                                                                 |
 | BiShadowHandCatchUnderarm      | ![](doc/img/BiShadowHandCatchUnderarmRofuncRLPPO.gif)      |             | ✅                                                                                                 |
 | BiShadowHandDoorOpenInward     |                                                            |             | ✅                                                                                                 |
 | BiShadowHandDoorOpenOutward    | ![](doc/img/BiShadowHandDoorOpenOutwardRofuncRLPPO.gif)    |             | ✅                                                                                                 |
-| BiShadowHandDoorCloseInward    |                                                            |             |                                                                                                   |
+| BiShadowHandDoorCloseInward    |                                                            |            | ✅                                                                                                  |
 | BiShadowHandDoorCloseOutward   |                                                            |             |                                                                                                   |
 | BiShadowHandGraspAndPlace      |                                                            |             |                                                                                                   |
 | BiShadowHandLiftUnderarm       |                                                            |             |                                                                                                   |
 | BiShadowHandOver               | ![](doc/img/BiShadowHandOverRofuncRLPPO.gif)               |             | ✅                                                                                                 |
 | BiShadowHandPen                | ![](doc/img/BiShadowHandPenRofuncRLPPO.gif)                |             | ✅                                                                                                 |
 | BiShadowHandPointCloud         |                                                            |             |                                                                                                   |
-| BiShadowHandPushBlock          |                                                            |             |                                                                                                   |
-| BiShadowHandReOrientation      |                                                            |             |                                                                                                   |
-| BiShadowHandScissors           | ![](doc/img/BiShadowHandScissorsRofuncRLPPO.gif)           |             | ✅                                                                                                  |
+| BiShadowHandPushBlock          |                                                            |            | ✅                                                                                                  |
+| BiShadowHandReOrientation      |                                                            |            | ✅                                                                                                  |
+| BiShadowHandScissors           | ![](doc/img/BiShadowHandScissorsRofuncRLPPO.gif)           |             | ✅                                                                                                 |
 | BiShadowHandSwingCup           | ![](doc/img/BiShadowHandSwingCupRofuncRLPPO.gif)           |             | ✅                                                                                                 |
-| BiShadowHandSwitch             | ![](doc/img/BiShadowHandSwitchRofuncRLPPO.gif)           |             | ✅                                                                                                  |
+| BiShadowHandSwitch             | ![](doc/img/BiShadowHandSwitchRofuncRLPPO.gif)           |             | ✅                                                                                                 |
 | BiShadowHandTwoCatchUnderarm   |                                                            |             |                                                                                                   |
 
 
