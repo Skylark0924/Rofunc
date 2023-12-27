@@ -129,6 +129,16 @@
     "name": "BiShadowHandDoorCloseOutwardRofuncRLPPO.pth",
     "md5": ""
   },
+  "BiShadowHandGraspAndPlaceRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1d_gcI42JZNQP_CKRucD6rC0GvGVyzU0-&export=download",
+    "name": "BiShadowHandGraspAndPlaceRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandLiftUnderarmRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1nUnjsBZRDFc7681Wko8agyDOGgKTQuBu&export=download",
+    "name": "BiShadowHandLiftUnderarmRofuncRLPPO.pth",
+    "md5": ""
+  },
   "BiShadowHandOverRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1BNAuedAtojTIbM9h4NguAL_vz1HVzl0I&export=download",
     "name": "BiShadowHandOverRofuncRLPPO.pth",
