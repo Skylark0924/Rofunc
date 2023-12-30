@@ -238,7 +238,7 @@ The following are examples of reinforcement learning methods for robot learning.
              -
              - ✅
            * - `BiShadowHandDoorOpenInward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_inward.py>`_
-             - 
+             - .. image:: ../../../img/BiShadowHandDoorOpenInwardRofuncRLPPO.gif
              -
              - ✅
            * - `BiShadowHandDoorOpenOutward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_outward.py>`_
@@ -250,7 +250,7 @@ The following are examples of reinforcement learning methods for robot learning.
              - 
              - ✅
            * - `BiShadowHandDoorCloseOutward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_outward.py>`_
-             - 
+             - .. image:: ../../../img/BiShadowHandDoorCloseOutwardRofuncRLPPO.gif
              -
              - ✅
            * - `BiShadowHandGraspAndPlace <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_grasp_and_place.py>`_
@@ -294,9 +294,9 @@ The following are examples of reinforcement learning methods for robot learning.
              -
              - ✅
            * - `BiShadowHandTwoCatchUnderarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_two_catch_underarm.py>`_
-             - 
+             - .. image:: ../../../img/BiShadowHandTwoCatchUnderarmRofuncRLPPO.gif
              -
-             -
+             - ✅
 
 
 
