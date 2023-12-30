@@ -110,7 +110,7 @@
     "md5": ""
   },
   "BiShadowHandDoorOpenInwardRofuncRLPPO.pth": {
-    "url": "https://drive.google.com/uc?id=16Okt9cIAvTb8yVSheftbEozC6ZL4_oZA&export=download",
+    "url": "https://drive.google.com/uc?id=1fTguenc0p1PbUsM7ojhip1ZcFbytpQy_&export=download",
     "name": "BiShadowHandDoorOpenInwardRofuncRLPPO.pth",
     "md5": ""
   },
@@ -125,7 +125,7 @@
     "md5": ""
   },
   "BiShadowHandDoorCloseOutwardRofuncRLPPO.pth": {
-    "url": "https://drive.google.com/uc?id=1z0DjM7h2CikaldaC5Sm4p2MG4wYDrRc_&export=download",
+    "url": "https://drive.google.com/uc?id=10EU-kEgapbedoWiuH9UVGOjxGFO0T93u&export=download",
     "name": "BiShadowHandDoorCloseOutwardRofuncRLPPO.pth",
     "md5": ""
   },
@@ -172,6 +172,11 @@
   "BiShadowHandSwitchRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1I0Pzo59lMoeqdSC6BtarH5qe2hX10L4U&export=download",
     "name": "BiShadowHandSwitchRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandTwoCatchUnderarmRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1TWXp60AKV-P48_JXvA64-Qi2oijriNAn&export=download",
+    "name": "BiShadowHandTwoCatchUnderarmRofuncRLPPO.pth",
     "md5": ""
   },
   "efficientsam_s_gpu.jit": {
