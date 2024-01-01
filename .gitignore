@@ -184,3 +184,4 @@ rofunc/simulator/assets/urdf/ycb/*
 /rofunc/learning/pre_trained_models/efficientsam_ti_gpu.jit
 
 examples/learning_rl/saved_runs/
+saved_runs/
