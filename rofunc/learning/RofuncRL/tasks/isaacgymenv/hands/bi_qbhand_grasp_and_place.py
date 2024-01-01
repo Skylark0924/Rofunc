@@ -98,11 +98,11 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
 
         self.num_point_cloud_feature_dim = 768
         self.num_obs_dict = {
-            "point_cloud": 425 + self.num_point_cloud_feature_dim * 3,
-            "point_cloud_for_distill": 425 + self.num_point_cloud_feature_dim * 3,
-            "full_state": 425
+            "point_cloud": 361 + self.num_point_cloud_feature_dim * 3,
+            "point_cloud_for_distill": 361 + self.num_point_cloud_feature_dim * 3,
+            "full_state": 361
         }
-        self.num_hand_obs = 72 + 95 + 26 + 6
+        self.num_hand_obs = 45 + 95 + 21 + 6
         self.up_axis = 'z'
 
         self.right_fingertips = ["right_qbhand_thumb_distal_link", "right_qbhand_index_distal_link",
@@ -149,7 +149,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         # get gym GPU state tensors
         actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
-        rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)
+        rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)  # 38 = 16 * 2 + 2 + 1 + 2 + 1
 
         sensor_tensor = self.gym.acquire_force_sensor_tensor(self.sim)
         self.vec_sensor_tensor = gymtorch.wrap_tensor(sensor_tensor).view(self.num_envs, self.num_fingertips * 6)
@@ -174,8 +174,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.right_hand_dof_pos = self.right_hand_dof_state[..., 0]
         self.right_hand_dof_vel = self.right_hand_dof_state[..., 1]
 
-        self.left_hand_dof_state = self.dof_state.view(self.num_envs, -1, 2)[:,
-                                   self.num_hand_dofs:self.num_hand_dofs * 2]
+        self.left_hand_dof_state = self.dof_state.view(self.num_envs, -1, 2)[:, self.num_hand_dofs:self.num_hand_dofs * 2]
         self.left_hand_dof_pos = self.left_hand_dof_state[..., 0]
         self.left_hand_dof_vel = self.left_hand_dof_state[..., 1]
 
@@ -368,11 +367,11 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         # <editor-fold desc="set initial poses">
         right_hand_start_pose = gymapi.Transform()
         right_hand_start_pose.p = gymapi.Vec3(0.55, 0.2, 0.8)
-        right_hand_start_pose.r = gymapi.Quat().from_euler_zyx(3.14159, 0, 1.57)
+        right_hand_start_pose.r = gymapi.Quat().from_euler_zyx(-1.57, 0, -1.57)
 
         left_hand_start_pose = gymapi.Transform()
         left_hand_start_pose.p = gymapi.Vec3(0.55, -0.2, 0.8)
-        left_hand_start_pose.r = gymapi.Quat().from_euler_zyx(3.14159, 0, 1.57)
+        left_hand_start_pose.r = gymapi.Quat().from_euler_zyx(-1.57, 0, 1.57)
 
         object_start_pose = gymapi.Transform()
         object_start_pose.p = gymapi.Vec3(0.0, 0.2, 0.6)
@@ -420,16 +419,16 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.table_indices = []
         self.block_indices = []
 
-        self.fingertip_handles = [self.gym.find_asset_rigid_body_index(right_hand_asset, name) for name in
+        self.right_fingertip_handles = [self.gym.find_asset_rigid_body_index(right_hand_asset, name) for name in
                                   self.right_fingertips]
-        self.fingertip_left_handles = [self.gym.find_asset_rigid_body_index(left_hand_asset, name) for name
+        self.left_fingertip_handles = [self.gym.find_asset_rigid_body_index(left_hand_asset, name) for name
                                        in self.left_fingertips]
 
         # create fingertip force sensors, if needed
         sensor_pose = gymapi.Transform()
-        for ft_handle in self.fingertip_handles:
+        for ft_handle in self.right_fingertip_handles:
             self.gym.create_asset_force_sensor(right_hand_asset, ft_handle, sensor_pose)
-        for ft_a_handle in self.fingertip_left_handles:
+        for ft_a_handle in self.left_fingertip_handles:
             self.gym.create_asset_force_sensor(left_hand_asset, ft_a_handle, sensor_pose)
 
         if self.obs_type in ["point_cloud"]:
@@ -586,8 +585,8 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.goal_init_state = self.goal_states.clone()
         self.hand_start_states = to_torch(self.hand_start_states, device=self.device).view(self.num_envs, 13)
 
-        self.fingertip_handles = to_torch(self.fingertip_handles, dtype=torch.long, device=self.device)
-        self.fingertip_left_handles = to_torch(self.fingertip_left_handles, dtype=torch.long, device=self.device)
+        self.right_fingertip_handles = to_torch(self.right_fingertip_handles, dtype=torch.long, device=self.device)
+        self.left_fingertip_handles = to_torch(self.left_fingertip_handles, dtype=torch.long, device=self.device)
 
         self.right_hand_indices = to_torch(self.right_hand_indices, dtype=torch.long, device=self.device)
         self.left_hand_indices = to_torch(self.left_hand_indices, dtype=torch.long, device=self.device)
@@ -776,10 +775,10 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.goal_pos = to_torch([-0.3, 0, 0.6], dtype=torch.float, device=self.device).repeat((self.num_envs, 1))
         self.goal_rot = self.goal_states[:, 3:7]
 
-        self.right_fingertip_state = self.rigid_body_states[:, self.fingertip_handles][:, :, 0:13]
-        self.right_fingertip_pos = self.rigid_body_states[:, self.fingertip_handles][:, :, 0:3]
-        self.left_fingertip_state = self.rigid_body_states[:, self.fingertip_left_handles][:, :, 0:13]
-        self.left_fingertip_pos = self.rigid_body_states[:, self.fingertip_left_handles][:, :, 0:3]
+        self.right_fingertip_state = self.rigid_body_states[:, self.right_fingertip_handles][:, :, 0:13]
+        self.right_fingertip_pos = self.rigid_body_states[:, self.right_fingertip_handles][:, :, 0:3]
+        self.left_fingertip_state = self.rigid_body_states[:, self.left_fingertip_handles][:, :, 0:13]
+        self.left_fingertip_pos = self.rigid_body_states[:, self.left_fingertip_handles][:, :, 0:3]
 
         if self.obs_type == "full_state":
             self.compute_full_state()
@@ -794,7 +793,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         Compute the observations of all environment. The observation is composed of three parts: 
         the state values of the left and right hands, and the information of objects and target. 
         The state values of the left and right hands were the same for each task, including hand 
-        joint and finger positions, velocity, and force information. The detail 425-dimensional 
+        joint and finger positions, velocity, and force information. The detail 361-dimensional 
         observational space as shown in below:
 
         Index       Description
@@ -805,43 +804,49 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         110 - 139	right shadow hand fingertip force, torque (5 x 6)
         140 - 142	right shadow hand base position
         143 - 145	right shadow hand base rotation
-        146 - 171	right shadow hand actions
-        172 - 1	left shadow hand dof position
-        223 - 246	left shadow hand dof velocity
-        247 - 270	left shadow hand dof force
-        271 - 335	left shadow hand fingertip pose, linear velocity, angle velocity (5 x 13)
-        336 - 365	left shadow hand fingertip force, torque (5 x 6)
-        366 - 368	left shadow hand base position
-        369 - 371	left shadow hand base rotation
-        372 - 397	left shadow hand actions
-        398 - 404	object pose
-        405 - 407	object linear velocity
-        408 - 410	object angle velocity
-        411 - 413	block right handle position
-        414 - 417	block right handle rotation
-        418 - 420	block left handle position
-        421 - 424	block left handle rotation
+        146 - 166	right shadow hand actions
+        167 - 181	left shadow hand dof position
+        182 - 196	left shadow hand dof velocity
+        197 - 211	left shadow hand dof force
+        212 - 276	left shadow hand fingertip pose, linear velocity, angle velocity (5 x 13)
+        277 - 306	left shadow hand fingertip force, torque (5 x 6)
+        307 - 309	left shadow hand base position
+        310 - 312	left shadow hand base rotation
+        313 - 333	left shadow hand actions
+        334 - 340	object pose
+        341 - 343	object linear velocity
+        344 - 346	object angle velocity
+        347 - 349	block right handle position
+        350 - 353   block right handle rotation
+        354 - 356	block left handle position
+        357 - 360	block left handle rotation
         """
-        num_ft_states = 13 * int(self.num_fingertips / 2)  # 65
+        num_ft_states = 13 * int(self.num_fingertips / 2)  # 65 = 13 * (10 / 2)
         num_ft_force_torques = 6 * int(self.num_fingertips / 2)  # 30
 
+        # 0 -14 right hand dof position
         self.obs_buf[:, 0:self.num_hand_dofs] = unscale(self.right_hand_dof_pos,
                                                         self.shadow_hand_dof_lower_limits,
                                                         self.shadow_hand_dof_upper_limits)
+        # 15 - 29 right hand dof velocity
         self.obs_buf[:, self.num_hand_dofs:2 * self.num_hand_dofs] = self.vel_obs_scale * self.right_hand_dof_vel
+        # 30 - 44 right hand dof force
         self.obs_buf[:, 2 * self.num_hand_dofs:3 * self.num_hand_dofs] \
-            = self.force_torque_obs_scale * self.dof_force_tensor[:, :24]
+            = self.force_torque_obs_scale * self.dof_force_tensor[:, :15]
 
-        fingertip_obs_start = 72  # 168 = 157 + 11
+        fingertip_obs_start = 45
+        # 45 - 109 right hand fingertip pose, linear velocity, angle velocity (5 x 13)
         self.obs_buf[:, fingertip_obs_start:fingertip_obs_start + num_ft_states] = self.right_fingertip_state.reshape(
             self.num_envs, num_ft_states)
+        # 110 - 139 right hand fingertip force, torque (5 x 6)
         self.obs_buf[:, fingertip_obs_start + num_ft_states:fingertip_obs_start + num_ft_states +
                                                             num_ft_force_torques] = self.force_torque_obs_scale * self.vec_sensor_tensor[
                                                                                                                   :,
                                                                                                                   :30]
-
-        right_hand_pose_start = fingertip_obs_start + 95
+        # 140 - 142 right hand base position
+        right_hand_pose_start = fingertip_obs_start + 95  # 140 = 45 + 95
         self.obs_buf[:, right_hand_pose_start:right_hand_pose_start + 3] = self.right_hand_pos
+        # 143 - 145 right hand base rotation
         self.obs_buf[:, right_hand_pose_start + 3:right_hand_pose_start + 4] = \
             get_euler_xyz(self.hand_orientations[self.right_hand_indices, :])[0].unsqueeze(-1)
         self.obs_buf[:, right_hand_pose_start + 4:right_hand_pose_start + 5] = \
@@ -849,32 +854,40 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.obs_buf[:, right_hand_pose_start + 5:right_hand_pose_start + 6] = \
             get_euler_xyz(self.hand_orientations[self.right_hand_indices, :])[2].unsqueeze(-1)
 
-        right_action_obs_start = right_hand_pose_start + 6
-        self.obs_buf[:, right_action_obs_start:right_action_obs_start + 26] = self.actions[:, :26]
+        # 146 - 167 right hand actions
+        right_action_obs_start = right_hand_pose_start + 6  # 146 = 140 + 6
+        self.obs_buf[:, right_action_obs_start:right_action_obs_start + 21] = self.actions[:, :21]
 
         # left_hand
-        left_hand_start = right_action_obs_start + 26
+        # 167 - 181 left hand dof position
+        left_hand_start = right_action_obs_start + 21  # 167 = 146 + 21
         self.obs_buf[:, left_hand_start:self.num_hand_dofs + left_hand_start] = unscale(
             self.left_hand_dof_pos,
             self.shadow_hand_dof_lower_limits, self.shadow_hand_dof_upper_limits)
+        # 182 - 196 left hand dof velocity
         self.obs_buf[:,
         self.num_hand_dofs + left_hand_start:2 * self.num_hand_dofs + left_hand_start] = self.vel_obs_scale * self.left_hand_dof_vel
+        # 197 - 211 left hand dof force
         self.obs_buf[:,
         2 * self.num_hand_dofs + left_hand_start:3 * self.num_hand_dofs + left_hand_start] = self.force_torque_obs_scale * self.dof_force_tensor[
                                                                                                                            :,
-                                                                                                                           24:48]
+                                                                                                                           15:30]
 
-        left_fingertip_obs_start = left_hand_start + 72
+        left_fingertip_obs_start = left_hand_start + 45  # 212 = 167 + 45
+        # 212 - 276 left hand fingertip pose, linear velocity, angle velocity (5 x 13)
         self.obs_buf[:,
         left_fingertip_obs_start:left_fingertip_obs_start + num_ft_states] = self.left_fingertip_state.reshape(
             self.num_envs, num_ft_states)
+        # 277 - 306 left hand fingertip force, torque (5 x 6)
         self.obs_buf[:, left_fingertip_obs_start + num_ft_states:left_fingertip_obs_start + num_ft_states +
                                                                  num_ft_force_torques] = self.force_torque_obs_scale * self.vec_sensor_tensor[
                                                                                                                        :,
                                                                                                                        30:]
 
-        left_hand_pose_start = left_fingertip_obs_start + 95
+        left_hand_pose_start = left_fingertip_obs_start + 95 # 307 = 212 + 95
+        # 307 - 309 left hand base position
         self.obs_buf[:, left_hand_pose_start:left_hand_pose_start + 3] = self.left_hand_pos
+        # 310 - 312 left hand base rotation
         self.obs_buf[:, left_hand_pose_start + 3:left_hand_pose_start + 4] = \
             get_euler_xyz(self.hand_orientations[self.left_hand_indices, :])[0].unsqueeze(-1)
         self.obs_buf[:, left_hand_pose_start + 4:left_hand_pose_start + 5] = \
@@ -883,170 +896,178 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
             get_euler_xyz(self.hand_orientations[self.left_hand_indices, :])[2].unsqueeze(-1)
 
         left_right_action_obs_start = left_hand_pose_start + 6
-        self.obs_buf[:, left_right_action_obs_start:left_right_action_obs_start + 26] = self.actions[:, 26:]
+        # 313 - 333 left hand actions
+        self.obs_buf[:, left_right_action_obs_start:left_right_action_obs_start + 21] = self.actions[:, 21:]
 
-        obj_obs_start = left_right_action_obs_start + 26  # 144
+        obj_obs_start = left_right_action_obs_start + 21  # 334
+        # 334 - 340 object pose
         self.obs_buf[:, obj_obs_start:obj_obs_start + 7] = self.object_pose
+        # 341 - 343 object linear velocity
         self.obs_buf[:, obj_obs_start + 7:obj_obs_start + 10] = self.object_linvel
+        # 344 - 346 object angle velocity
         self.obs_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
+        # 347 - 349 block right handle position
         self.obs_buf[:, obj_obs_start + 13:obj_obs_start + 16] = self.block_right_handle_pos
+        # 350 - 353 block right handle rotation
         self.obs_buf[:, obj_obs_start + 16:obj_obs_start + 20] = self.block_right_handle_rot
+        # 354 - 356 block left handle position
         self.obs_buf[:, obj_obs_start + 20:obj_obs_start + 23] = self.block_left_handle_pos
+        # 357 - 360 block left handle rotation
         self.obs_buf[:, obj_obs_start + 23:obj_obs_start + 27] = self.block_left_handle_rot
         # goal_obs_start = obj_obs_start + 13  # 157 = 144 + 13
         # self.obs_buf[:, goal_obs_start:goal_obs_start + 7] = self.goal_pose
         # self.obs_buf[:, goal_obs_start + 7:goal_obs_start + 11] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
 
-    def compute_point_cloud_observation(self, collect_demonstration=False):
-        """
-        Compute the observations of all environment. The observation is composed of three parts: 
-        the state values of the left and right hands, and the information of objects and target. 
-        The state values of the left and right hands were the same for each task, including hand 
-        joint and finger positions, velocity, and force information. The detail 425-dimensional 
-        observational space as shown in below:
-
-        Index       Description
-        0 - 23	    right shadow hand dof position
-        24 - 47	    right shadow hand dof velocity
-        48 - 71	    right shadow hand dof force
-        72 - 136	right shadow hand fingertip pose, linear velocity, angle velocity (5 x 13)
-        137 - 166	right shadow hand fingertip force, torque (5 x 6)
-        167 - 169	right shadow hand base position
-        170 - 172	right shadow hand base rotation
-        173 - 198	right shadow hand actions
-        199 - 222	left shadow hand dof position
-        223 - 246	left shadow hand dof velocity
-        247 - 270	left shadow hand dof force
-        271 - 335	left shadow hand fingertip pose, linear velocity, angle velocity (5 x 13)
-        336 - 365	left shadow hand fingertip force, torque (5 x 6)
-        366 - 368	left shadow hand base position
-        369 - 371	left shadow hand base rotation
-        372 - 397	left shadow hand actions
-        398 - 404	object pose
-        405 - 407	object linear velocity
-        408 - 410	object angle velocity
-        411 - 413	block right handle position
-        414 - 417	block right handle rotation
-        418 - 420	block left handle position
-        421 - 424	block left handle rotation
-        """
-        num_ft_states = 13 * int(self.num_fingertips / 2)  # 65
-        num_ft_force_torques = 6 * int(self.num_fingertips / 2)  # 30
-
-        self.obs_buf[:, 0:self.num_hand_dofs] = unscale(self.right_hand_dof_pos,
-                                                        self.shadow_hand_dof_lower_limits,
-                                                        self.shadow_hand_dof_upper_limits)
-        self.obs_buf[:,
-        self.num_hand_dofs:2 * self.num_hand_dofs] = self.vel_obs_scale * self.right_hand_dof_vel
-        self.obs_buf[:,
-        2 * self.num_hand_dofs:3 * self.num_hand_dofs] = self.force_torque_obs_scale * self.dof_force_tensor[
-                                                                                       :, :24]
-
-        fingertip_obs_start = 72  # 168 = 157 + 11
-        self.obs_buf[:, fingertip_obs_start:fingertip_obs_start + num_ft_states] = self.right_fingertip_state.reshape(
-            self.num_envs, num_ft_states)
-        self.obs_buf[:, fingertip_obs_start + num_ft_states:fingertip_obs_start + num_ft_states +
-                                                            num_ft_force_torques] = self.force_torque_obs_scale * self.vec_sensor_tensor[
-                                                                                                                  :,
-                                                                                                                  :30]
-
-        right_hand_pose_start = fingertip_obs_start + 95
-        self.obs_buf[:, right_hand_pose_start:right_hand_pose_start + 3] = self.right_hand_pos
-        self.obs_buf[:, right_hand_pose_start + 3:right_hand_pose_start + 4] = \
-            get_euler_xyz(self.hand_orientations[self.right_hand_indices, :])[0].unsqueeze(-1)
-        self.obs_buf[:, right_hand_pose_start + 4:right_hand_pose_start + 5] = \
-            get_euler_xyz(self.hand_orientations[self.right_hand_indices, :])[1].unsqueeze(-1)
-        self.obs_buf[:, right_hand_pose_start + 5:right_hand_pose_start + 6] = \
-            get_euler_xyz(self.hand_orientations[self.right_hand_indices, :])[2].unsqueeze(-1)
-
-        right_action_obs_start = right_hand_pose_start + 6
-        self.obs_buf[:, right_action_obs_start:right_action_obs_start + 26] = self.actions[:, :26]
-
-        # left_hand
-        left_hand_start = right_action_obs_start + 26
-        self.obs_buf[:, left_hand_start:self.num_hand_dofs + left_hand_start] = unscale(
-            self.left_hand_dof_pos,
-            self.shadow_hand_dof_lower_limits, self.shadow_hand_dof_upper_limits)
-        self.obs_buf[:,
-        self.num_hand_dofs + left_hand_start:2 * self.num_hand_dofs + left_hand_start] = self.vel_obs_scale * self.left_hand_dof_vel
-        self.obs_buf[:,
-        2 * self.num_hand_dofs + left_hand_start:3 * self.num_hand_dofs + left_hand_start] = self.force_torque_obs_scale * self.dof_force_tensor[
-                                                                                                                           :,
-                                                                                                                           24:48]
-
-        left_fingertip_obs_start = left_hand_start + 72
-        self.obs_buf[:,
-        left_fingertip_obs_start:left_fingertip_obs_start + num_ft_states] = self.left_fingertip_state.reshape(
-            self.num_envs, num_ft_states)
-        self.obs_buf[:, left_fingertip_obs_start + num_ft_states:left_fingertip_obs_start + num_ft_states +
-                                                                 num_ft_force_torques] = self.force_torque_obs_scale * self.vec_sensor_tensor[
-                                                                                                                       :,
-                                                                                                                       30:]
-
-        left_hand_pose_start = left_fingertip_obs_start + 95
-        self.obs_buf[:, left_hand_pose_start:left_hand_pose_start + 3] = self.left_hand_pos
-        self.obs_buf[:, left_hand_pose_start + 3:left_hand_pose_start + 4] = \
-            get_euler_xyz(self.hand_orientations[self.left_hand_indices, :])[0].unsqueeze(-1)
-        self.obs_buf[:, left_hand_pose_start + 4:left_hand_pose_start + 5] = \
-            get_euler_xyz(self.hand_orientations[self.left_hand_indices, :])[1].unsqueeze(-1)
-        self.obs_buf[:, left_hand_pose_start + 5:left_hand_pose_start + 6] = \
-            get_euler_xyz(self.hand_orientations[self.left_hand_indices, :])[2].unsqueeze(-1)
-
-        left_right_action_obs_start = left_hand_pose_start + 6
-        self.obs_buf[:, left_right_action_obs_start:left_right_action_obs_start + 26] = self.actions[:, 26:]
-
-        obj_obs_start = left_right_action_obs_start + 26  # 144
-        self.obs_buf[:, obj_obs_start:obj_obs_start + 7] = self.object_pose
-        self.obs_buf[:, obj_obs_start + 7:obj_obs_start + 10] = self.object_linvel
-        self.obs_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
-        self.obs_buf[:, obj_obs_start + 13:obj_obs_start + 16] = self.block_right_handle_pos
-        self.obs_buf[:, obj_obs_start + 16:obj_obs_start + 20] = self.block_right_handle_rot
-        self.obs_buf[:, obj_obs_start + 20:obj_obs_start + 23] = self.block_left_handle_pos
-        self.obs_buf[:, obj_obs_start + 23:obj_obs_start + 27] = self.block_left_handle_rot
-        # goal_obs_start = obj_obs_start + 13  # 157 = 144 + 13
-        # self.obs_buf[:, goal_obs_start:goal_obs_start + 7] = self.goal_pose
-        # self.obs_buf[:, goal_obs_start + 7:goal_obs_start + 11] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
-        point_clouds = torch.zeros((self.num_envs, self.pointCloudDownsampleNum, 3), device=self.device)
-
-        if self.camera_debug:
-            import matplotlib.pyplot as plt
-            self.camera_rgba_debug_fig = plt.figure("CAMERA_RGBD_DEBUG")
-            camera_rgba_image = self.camera_visulization(is_depth_image=False)
-            plt.imshow(camera_rgba_image)
-            plt.pause(1e-9)
-
-        for i in range(self.num_envs):
-            # Here is an example. In practice, it's better not to convert tensor from GPU to CPU
-            points = depth_image_to_point_cloud_GPU(self.camera_tensors[i], self.camera_view_matrixs[i],
-                                                    self.camera_proj_matrixs[i], self.camera_u2, self.camera_v2,
-                                                    self.camera_props.width, self.camera_props.height, 10, self.device)
-
-            if points.shape[0] > 0:
-                selected_points = self.sample_points(points, sample_num=self.pointCloudDownsampleNum,
-                                                     sample_mathed='random')
-            else:
-                selected_points = torch.zeros((self.num_envs, self.pointCloudDownsampleNum, 3), device=self.device)
-
-            point_clouds[i] = selected_points
-
-        if self.pointCloudVisualizer != None:
-            import open3d as o3d
-            points = point_clouds[0, :, :3].cpu().numpy()
-            # colors = plt.get_cmap()(point_clouds[0, :, 3].cpu().numpy())
-            self.o3d_pc.points = o3d.utility.Vector3dVector(points)
-            # self.o3d_pc.colors = o3d.utility.Vector3dVector(colors[..., :3])
-
-            if self.pointCloudVisualizerInitialized == False:
-                self.pointCloudVisualizer.add_geometry(self.o3d_pc)
-                self.pointCloudVisualizerInitialized = True
-            else:
-                self.pointCloudVisualizer.update(self.o3d_pc)
-
-        self.gym.end_access_image_tensors(self.sim)
-        point_clouds -= self.env_origin.view(self.num_envs, 1, 3)
-
-        point_clouds_start = obj_obs_start + 27
-        self.obs_buf[:, point_clouds_start:].copy_(point_clouds.view(self.num_envs, self.pointCloudDownsampleNum * 3))
+    # def compute_point_cloud_observation(self, collect_demonstration=False):
+    #     """
+    #     Compute the observations of all environment. The observation is composed of three parts:
+    #     the state values of the left and right hands, and the information of objects and target.
+    #     The state values of the left and right hands were the same for each task, including hand
+    #     joint and finger positions, velocity, and force information. The detail 361-dimensional
+    #     observational space as shown in below:
+    #
+    #     Index       Description
+    #     0 - 23	    right shadow hand dof position
+    #     24 - 47	    right shadow hand dof velocity
+    #     48 - 71	    right shadow hand dof force
+    #     72 - 136	right shadow hand fingertip pose, linear velocity, angle velocity (5 x 13)
+    #     137 - 166	right shadow hand fingertip force, torque (5 x 6)
+    #     167 - 169	right shadow hand base position
+    #     170 - 172	right shadow hand base rotation
+    #     173 - 198	right shadow hand actions
+    #     199 - 222	left shadow hand dof position
+    #     223 - 246	left shadow hand dof velocity
+    #     247 - 270	left shadow hand dof force
+    #     271 - 335	left shadow hand fingertip pose, linear velocity, angle velocity (5 x 13)
+    #     336 - 365	left shadow hand fingertip force, torque (5 x 6)
+    #     366 - 368	left shadow hand base position
+    #     369 - 371	left shadow hand base rotation
+    #     372 - 397	left shadow hand actions
+    #     398 - 404	object pose
+    #     405 - 407	object linear velocity
+    #     408 - 410	object angle velocity
+    #     411 - 413	block right handle position
+    #     414 - 417	block right handle rotation
+    #     418 - 420	block left handle position
+    #     421 - 424	block left handle rotation
+    #     """
+    #     num_ft_states = 13 * int(self.num_fingertips / 2)  # 65
+    #     num_ft_force_torques = 6 * int(self.num_fingertips / 2)  # 30
+    #
+    #     self.obs_buf[:, 0:self.num_hand_dofs] = unscale(self.right_hand_dof_pos,
+    #                                                     self.shadow_hand_dof_lower_limits,
+    #                                                     self.shadow_hand_dof_upper_limits)
+    #     self.obs_buf[:,
+    #     self.num_hand_dofs:2 * self.num_hand_dofs] = self.vel_obs_scale * self.right_hand_dof_vel
+    #     self.obs_buf[:,
+    #     2 * self.num_hand_dofs:3 * self.num_hand_dofs] = self.force_torque_obs_scale * self.dof_force_tensor[
+    #                                                                                    :, :24]
+    #
+    #     fingertip_obs_start = 72  # 168 = 157 + 11
+    #     self.obs_buf[:, fingertip_obs_start:fingertip_obs_start + num_ft_states] = self.right_fingertip_state.reshape(
+    #         self.num_envs, num_ft_states)
+    #     self.obs_buf[:, fingertip_obs_start + num_ft_states:fingertip_obs_start + num_ft_states +
+    #                                                         num_ft_force_torques] = self.force_torque_obs_scale * self.vec_sensor_tensor[
+    #                                                                                                               :,
+    #                                                                                                               :30]
+    #
+    #     right_hand_pose_start = fingertip_obs_start + 95
+    #     self.obs_buf[:, right_hand_pose_start:right_hand_pose_start + 3] = self.right_hand_pos
+    #     self.obs_buf[:, right_hand_pose_start + 3:right_hand_pose_start + 4] = \
+    #         get_euler_xyz(self.hand_orientations[self.right_hand_indices, :])[0].unsqueeze(-1)
+    #     self.obs_buf[:, right_hand_pose_start + 4:right_hand_pose_start + 5] = \
+    #         get_euler_xyz(self.hand_orientations[self.right_hand_indices, :])[1].unsqueeze(-1)
+    #     self.obs_buf[:, right_hand_pose_start + 5:right_hand_pose_start + 6] = \
+    #         get_euler_xyz(self.hand_orientations[self.right_hand_indices, :])[2].unsqueeze(-1)
+    #
+    #     right_action_obs_start = right_hand_pose_start + 6
+    #     self.obs_buf[:, right_action_obs_start:right_action_obs_start + 26] = self.actions[:, :26]
+    #
+    #     # left_hand
+    #     left_hand_start = right_action_obs_start + 26
+    #     self.obs_buf[:, left_hand_start:self.num_hand_dofs + left_hand_start] = unscale(
+    #         self.left_hand_dof_pos,
+    #         self.shadow_hand_dof_lower_limits, self.shadow_hand_dof_upper_limits)
+    #     self.obs_buf[:,
+    #     self.num_hand_dofs + left_hand_start:2 * self.num_hand_dofs + left_hand_start] = self.vel_obs_scale * self.left_hand_dof_vel
+    #     self.obs_buf[:,
+    #     2 * self.num_hand_dofs + left_hand_start:3 * self.num_hand_dofs + left_hand_start] = self.force_torque_obs_scale * self.dof_force_tensor[
+    #                                                                                                                        :,
+    #                                                                                                                        24:48]
+    #
+    #     left_fingertip_obs_start = left_hand_start + 72
+    #     self.obs_buf[:,
+    #     left_fingertip_obs_start:left_fingertip_obs_start + num_ft_states] = self.left_fingertip_state.reshape(
+    #         self.num_envs, num_ft_states)
+    #     self.obs_buf[:, left_fingertip_obs_start + num_ft_states:left_fingertip_obs_start + num_ft_states +
+    #                                                              num_ft_force_torques] = self.force_torque_obs_scale * self.vec_sensor_tensor[
+    #                                                                                                                    :,
+    #                                                                                                                    30:]
+    #
+    #     left_hand_pose_start = left_fingertip_obs_start + 95
+    #     self.obs_buf[:, left_hand_pose_start:left_hand_pose_start + 3] = self.left_hand_pos
+    #     self.obs_buf[:, left_hand_pose_start + 3:left_hand_pose_start + 4] = \
+    #         get_euler_xyz(self.hand_orientations[self.left_hand_indices, :])[0].unsqueeze(-1)
+    #     self.obs_buf[:, left_hand_pose_start + 4:left_hand_pose_start + 5] = \
+    #         get_euler_xyz(self.hand_orientations[self.left_hand_indices, :])[1].unsqueeze(-1)
+    #     self.obs_buf[:, left_hand_pose_start + 5:left_hand_pose_start + 6] = \
+    #         get_euler_xyz(self.hand_orientations[self.left_hand_indices, :])[2].unsqueeze(-1)
+    #
+    #     left_right_action_obs_start = left_hand_pose_start + 6
+    #     self.obs_buf[:, left_right_action_obs_start:left_right_action_obs_start + 26] = self.actions[:, 26:]
+    #
+    #     obj_obs_start = left_right_action_obs_start + 26  # 144
+    #     self.obs_buf[:, obj_obs_start:obj_obs_start + 7] = self.object_pose
+    #     self.obs_buf[:, obj_obs_start + 7:obj_obs_start + 10] = self.object_linvel
+    #     self.obs_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
+    #     self.obs_buf[:, obj_obs_start + 13:obj_obs_start + 16] = self.block_right_handle_pos
+    #     self.obs_buf[:, obj_obs_start + 16:obj_obs_start + 20] = self.block_right_handle_rot
+    #     self.obs_buf[:, obj_obs_start + 20:obj_obs_start + 23] = self.block_left_handle_pos
+    #     self.obs_buf[:, obj_obs_start + 23:obj_obs_start + 27] = self.block_left_handle_rot
+    #     # goal_obs_start = obj_obs_start + 13  # 157 = 144 + 13
+    #     # self.obs_buf[:, goal_obs_start:goal_obs_start + 7] = self.goal_pose
+    #     # self.obs_buf[:, goal_obs_start + 7:goal_obs_start + 11] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
+    #     point_clouds = torch.zeros((self.num_envs, self.pointCloudDownsampleNum, 3), device=self.device)
+    #
+    #     if self.camera_debug:
+    #         import matplotlib.pyplot as plt
+    #         self.camera_rgba_debug_fig = plt.figure("CAMERA_RGBD_DEBUG")
+    #         camera_rgba_image = self.camera_visulization(is_depth_image=False)
+    #         plt.imshow(camera_rgba_image)
+    #         plt.pause(1e-9)
+    #
+    #     for i in range(self.num_envs):
+    #         # Here is an example. In practice, it's better not to convert tensor from GPU to CPU
+    #         points = depth_image_to_point_cloud_GPU(self.camera_tensors[i], self.camera_view_matrixs[i],
+    #                                                 self.camera_proj_matrixs[i], self.camera_u2, self.camera_v2,
+    #                                                 self.camera_props.width, self.camera_props.height, 10, self.device)
+    #
+    #         if points.shape[0] > 0:
+    #             selected_points = self.sample_points(points, sample_num=self.pointCloudDownsampleNum,
+    #                                                  sample_mathed='random')
+    #         else:
+    #             selected_points = torch.zeros((self.num_envs, self.pointCloudDownsampleNum, 3), device=self.device)
+    #
+    #         point_clouds[i] = selected_points
+    #
+    #     if self.pointCloudVisualizer != None:
+    #         import open3d as o3d
+    #         points = point_clouds[0, :, :3].cpu().numpy()
+    #         # colors = plt.get_cmap()(point_clouds[0, :, 3].cpu().numpy())
+    #         self.o3d_pc.points = o3d.utility.Vector3dVector(points)
+    #         # self.o3d_pc.colors = o3d.utility.Vector3dVector(colors[..., :3])
+    #
+    #         if self.pointCloudVisualizerInitialized == False:
+    #             self.pointCloudVisualizer.add_geometry(self.o3d_pc)
+    #             self.pointCloudVisualizerInitialized = True
+    #         else:
+    #             self.pointCloudVisualizer.update(self.o3d_pc)
+    #
+    #     self.gym.end_access_image_tensors(self.sim)
+    #     point_clouds -= self.env_origin.view(self.num_envs, 1, 3)
+    #
+    #     point_clouds_start = obj_obs_start + 27
+    #     self.obs_buf[:, point_clouds_start:].copy_(point_clouds.view(self.num_envs, self.pointCloudDownsampleNum * 3))
 
     def reset_target_pose(self, env_ids, apply_reset=False):
         """
@@ -1238,7 +1259,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
                                                                         self.shadow_hand_dof_upper_limits[
                                                                             self.actuated_dof_indices])
             self.cur_targets[:, self.actuated_dof_indices + 15] = self.act_moving_average * self.cur_targets[:,
-                                                                                            self.actuated_dof_indices + 24] + (
+                                                                                            self.actuated_dof_indices + 15] + (
                                                                           1.0 - self.act_moving_average) * self.prev_targets[
                                                                                                            :,
                                                                                                            self.actuated_dof_indices]
@@ -1250,10 +1271,11 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
             #                                 self.object_dof_lower_limits[1], self.object_dof_upper_limits[1])
             # angle_offsets = self.actions[:, 26:32] * self.dt * self.orientation_scale
 
-            self.apply_forces[:, 1, :] = actions[:, 0:3] * self.dt * self.transition_scale * 100000
-            self.apply_forces[:, 1 + 21, :] = actions[:, 21:24] * self.dt * self.transition_scale * 100000
-            self.apply_torque[:, 1, :] = self.actions[:, 3:6] * self.dt * self.orientation_scale * 1000
-            self.apply_torque[:, 1 + 21, :] = self.actions[:, 24:27] * self.dt * self.orientation_scale * 1000
+
+            self.apply_forces[:, 0, :] = actions[:, 0:3] * self.dt * self.transition_scale * 100000
+            self.apply_forces[:, 0 + 16, :] = actions[:, 21:24] * self.dt * self.transition_scale * 100000
+            self.apply_torque[:, 0, :] = self.actions[:, 3:6] * self.dt * self.orientation_scale * 1000
+            self.apply_torque[:, 0 + 16, :] = self.actions[:, 24:27] * self.dt * self.orientation_scale * 1000
 
             self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(self.apply_forces),
                                                     gymtorch.unwrap_tensor(self.apply_torque), gymapi.ENV_SPACE)
