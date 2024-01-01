@@ -97,7 +97,7 @@ if __name__ == '__main__':
     #                  BiShadowHandGraspAndPlace, BiShadowHandLiftUnderarm, BiShadowHandPen, BiShadowHandPointCloud,
     #                  BiShadowHandPushBlock, BiShadowHandReOrientation, BiShadowHandScissors, BiShadowHandSwingCup,
     #                  BiShadowHandSwitch, BiShadowHandTwoCatchUnderarm
-    #                  QbSoftHandGrasp
+    #                  QbSoftHandGrasp, BiQbSoftHandGraspAndPlace
     parser.add_argument("--task", type=str, default="BiQbSoftHandGraspAndPlace")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=256)
