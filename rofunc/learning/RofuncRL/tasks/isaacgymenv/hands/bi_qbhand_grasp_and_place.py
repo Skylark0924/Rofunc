@@ -7,6 +7,7 @@ from isaacgym import gymtorch
 
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.vec_task import VecTask
 from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
+from rofunc.utils.logger.beauty_logger import beauty_print
 from rofunc.utils.oslab import get_rofunc_path
 
 
@@ -174,7 +175,8 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.right_hand_dof_pos = self.right_hand_dof_state[..., 0]
         self.right_hand_dof_vel = self.right_hand_dof_state[..., 1]
 
-        self.left_hand_dof_state = self.dof_state.view(self.num_envs, -1, 2)[:, self.num_hand_dofs:self.num_hand_dofs * 2]
+        self.left_hand_dof_state = self.dof_state.view(self.num_envs, -1, 2)[:,
+                                   self.num_hand_dofs:self.num_hand_dofs * 2]
         self.left_hand_dof_pos = self.left_hand_dof_state[..., 0]
         self.left_hand_dof_vel = self.left_hand_dof_state[..., 1]
 
@@ -366,11 +368,11 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
 
         # <editor-fold desc="set initial poses">
         right_hand_start_pose = gymapi.Transform()
-        right_hand_start_pose.p = gymapi.Vec3(0.55, 0.2, 0.8)
+        right_hand_start_pose.p = gymapi.Vec3(0.25, 0.2, 0.8)
         right_hand_start_pose.r = gymapi.Quat().from_euler_zyx(-1.57, 0, -1.57)
 
         left_hand_start_pose = gymapi.Transform()
-        left_hand_start_pose.p = gymapi.Vec3(0.55, -0.2, 0.8)
+        left_hand_start_pose.p = gymapi.Vec3(0.25, -0.2, 0.8)
         left_hand_start_pose.r = gymapi.Quat().from_euler_zyx(-1.57, 0, 1.57)
 
         object_start_pose = gymapi.Transform()
@@ -420,7 +422,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.block_indices = []
 
         self.right_fingertip_handles = [self.gym.find_asset_rigid_body_index(right_hand_asset, name) for name in
-                                  self.right_fingertips]
+                                        self.right_fingertips]
         self.left_fingertip_handles = [self.gym.find_asset_rigid_body_index(left_hand_asset, name) for name
                                        in self.left_fingertips]
 
@@ -884,7 +886,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
                                                                                                                        :,
                                                                                                                        30:]
 
-        left_hand_pose_start = left_fingertip_obs_start + 95 # 307 = 212 + 95
+        left_hand_pose_start = left_fingertip_obs_start + 95  # 307 = 212 + 95
         # 307 - 309 left hand base position
         self.obs_buf[:, left_hand_pose_start:left_hand_pose_start + 3] = self.left_hand_pos
         # 310 - 312 left hand base rotation
@@ -1270,7 +1272,6 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
             # self.cur_targets[:, 49] = scale(self.actions[:, 0],
             #                                 self.object_dof_lower_limits[1], self.object_dof_upper_limits[1])
             # angle_offsets = self.actions[:, 26:32] * self.dt * self.orientation_scale
-
 
             self.apply_forces[:, 0, :] = actions[:, 0:3] * self.dt * self.transition_scale * 100000
             self.apply_forces[:, 0 + 16, :] = actions[:, 21:24] * self.dt * self.transition_scale * 100000
