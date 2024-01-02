@@ -1118,6 +1118,7 @@ class ShadowHandGraspAndPlaceTask(VecTask):
             goal_env_ids (tensor): The index of the environment that only goals need reset
 
         """
+        print("reset_idx")
         # randomization can happen only at reset time, since it can reset actor positions on GPU
         if self.randomize:
             self.apply_randomizations(self.randomization_params)

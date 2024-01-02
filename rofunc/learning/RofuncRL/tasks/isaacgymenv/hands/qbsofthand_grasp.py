@@ -7,8 +7,8 @@ from isaacgym import gymtorch
 
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.vec_task import VecTask
 from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
-from rofunc.utils.oslab import get_rofunc_path
 from rofunc.utils.logger.beauty_logger import beauty_print
+from rofunc.utils.oslab import get_rofunc_path
 
 
 class QbSoftHandGraspTask(VecTask):
@@ -103,7 +103,7 @@ class QbSoftHandGraspTask(VecTask):
             "point_cloud_for_distill": 157 + self.num_point_cloud_feature_dim * 3,
             "full_state": 157
         }
-        self.num_hand_obs = 45 + 65 + 21 + 6  # TODO
+        self.num_hand_obs = 45 + 95 + 21 + 6  # TODO
         self.up_axis = 'z'
 
         self.fingertips = ["right_qbhand_thumb_distal_link", "right_qbhand_index_distal_link",
@@ -218,12 +218,10 @@ class QbSoftHandGraspTask(VecTask):
         """
         Create multiple parallel isaacgym environments
 
-        Args:
-            num_envs (int): The total number of environment 
-
-            spacing (float): Specifies half the side length of the square area occupied by each environment
-
-            num_per_row (int): Specify how many environments in a row
+        :param num_envs: The total number of environment
+        :param spacing: Specifies half the side length of the square area occupied by each environment
+        :param num_per_row: Specify how many environments in a row
+        :return:
         """
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
         upper = gymapi.Vec3(spacing, spacing, spacing)
@@ -237,7 +235,6 @@ class QbSoftHandGraspTask(VecTask):
 
         if "asset" in self.cfg["env"]:
             asset_root = self.cfg["env"]["asset"].get("assetRoot", asset_root)
-            qbsofthand_asset_file = self.cfg["env"]["asset"].get("assetFileName", qbsofthand_asset_file)
 
         object_asset_file = self.asset_files_dict[self.object_type]
 
@@ -346,7 +343,7 @@ class QbSoftHandGraspTask(VecTask):
 
         qbsofthand_start_pose = gymapi.Transform()
         qbsofthand_start_pose.p = gymapi.Vec3(0.55, 0.2, 0.8)
-        qbsofthand_start_pose.r = gymapi.Quat().from_euler_zyx(1.57, 0, 1.57)
+        qbsofthand_start_pose.r = gymapi.Quat().from_euler_zyx(-1.57, 0, -1.57)
 
         object_start_pose = gymapi.Transform()
         object_start_pose.p = gymapi.Vec3(0.0, 0.2, 0.6)
@@ -617,7 +614,6 @@ class QbSoftHandGraspTask(VecTask):
                                                                                         device=self.device).repeat(
                                                                                    self.num_envs, 1) * 0.0)
 
-
         self.right_hand_pos = self.rigid_body_states[:, 0, 0:3]
         self.right_hand_rot = self.rigid_body_states[:, 0, 3:7]
         self.right_hand_pos = self.right_hand_pos + quat_apply(self.right_hand_rot,
@@ -693,13 +689,13 @@ class QbSoftHandGraspTask(VecTask):
         num_ft_states = 13 * int(self.num_fingertips)  # 65
 
         self.obs_buf[:, 0:self.num_qbsofthand_dofs] = unscale(self.qbsofthand_dof_pos,
-                                                               self.qbsofthand_dof_lower_limits,
-                                                               self.qbsofthand_dof_upper_limits)
+                                                              self.qbsofthand_dof_lower_limits,
+                                                              self.qbsofthand_dof_upper_limits)
         self.obs_buf[:,
         self.num_qbsofthand_dofs:2 * self.num_qbsofthand_dofs] = self.vel_obs_scale * self.qbsofthand_dof_vel
         self.obs_buf[:,
         2 * self.num_qbsofthand_dofs:3 * self.num_qbsofthand_dofs] = self.force_torque_obs_scale * self.dof_force_tensor[
-                                                                                                     :, :15]
+                                                                                                   :, :15]
 
         fingertip_obs_start = 45
         self.obs_buf[:, fingertip_obs_start:fingertip_obs_start + num_ft_states] = self.fingertip_state.reshape(
@@ -723,7 +719,7 @@ class QbSoftHandGraspTask(VecTask):
         self.obs_buf[:, obj_obs_start + 10:obj_obs_start + 13] = self.vel_obs_scale * self.object_angvel
         self.obs_buf[:, obj_obs_start + 13:obj_obs_start + 16] = self.block_right_handle_pos
         self.obs_buf[:, obj_obs_start + 16:obj_obs_start + 20] = self.block_right_handle_rot
-        
+
     def compute_point_cloud_observation(self, collect_demonstration=False):
         """
         Compute the observations of all environment. The observation is composed of three parts: 
@@ -761,13 +757,13 @@ class QbSoftHandGraspTask(VecTask):
         num_ft_force_torques = 6 * int(self.num_fingertips / 2)  # 30
 
         self.obs_buf[:, 0:self.num_qbsofthand_dofs] = unscale(self.qbsofthand_dof_pos,
-                                                               self.qbsofthand_dof_lower_limits,
-                                                               self.qbsofthand_dof_upper_limits)
+                                                              self.qbsofthand_dof_lower_limits,
+                                                              self.qbsofthand_dof_upper_limits)
         self.obs_buf[:,
         self.num_qbsofthand_dofs:2 * self.num_qbsofthand_dofs] = self.vel_obs_scale * self.qbsofthand_dof_vel
         self.obs_buf[:,
         2 * self.num_qbsofthand_dofs:3 * self.num_qbsofthand_dofs] = self.force_torque_obs_scale * self.dof_force_tensor[
-                                                                                                     :, :24]
+                                                                                                   :, :24]
 
         fingertip_obs_start = 72  # 168 = 157 + 11
         self.obs_buf[:, fingertip_obs_start:fingertip_obs_start + num_ft_states] = self.fingertip_state.reshape(
@@ -917,8 +913,8 @@ class QbSoftHandGraspTask(VecTask):
         self.qbsofthand_dof_pos[env_ids, :] = pos
 
         self.qbsofthand_dof_vel[env_ids, :] = self.qbsofthand_dof_default_vel + \
-                                               self.reset_dof_vel_noise * rand_floats[:,
-                                                                          5 + self.num_qbsofthand_dofs:5 + self.num_qbsofthand_dofs * 2]
+                                              self.reset_dof_vel_noise * rand_floats[:,
+                                                                         5 + self.num_qbsofthand_dofs:5 + self.num_qbsofthand_dofs * 2]
 
         self.prev_targets[env_ids, :self.num_qbsofthand_dofs] = pos
         self.cur_targets[env_ids, :self.num_qbsofthand_dofs] = pos

@@ -45,7 +45,8 @@
             <geom pos="0.0045 0.0145 0.144" quat="0.000563312 0.000562864 0.706825 0.707388"
                   type="mesh"
                   rgba="0.35 0.35 0.35 1" mesh="palm_pinch_l"/>
-            <!--                            <geom pos="0 0 0.07" type="sphere" size=".04" density="1865"/>-->
+            <inertial pos="0.001 -0.002 0.29" quat="0.982 -0.016 0 -0.188" mass="4"
+                      diaginertia="0.01 0.01 0.0075"/>
             <body name="left_qbhand_thumb_knuckle_link" pos="0.0485032 0.0164669 0.0975016"
                   quat="-0.999998 -0.000796326 6.34136e-07 0.00159265">
                 <inertial pos="0.0130716 0.00273463 0.000640905"
