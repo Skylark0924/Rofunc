@@ -5,12 +5,13 @@ Visualize robots and objects
 This example shows how to visualize robots and objects in the Isaac Gym simulator in an interactive viewer.
 """
 
+import isaacgym
 import rofunc as rf
 
 # CURI
-args = rf.config.get_sim_config("CURI")
-CURIsim = rf.sim.CURISim(args)
-CURIsim.show()
+# args = rf.config.get_sim_config("CURI")
+# CURIsim = rf.sim.CURISim(args)
+# CURIsim.show()
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -43,9 +44,9 @@ CURIsim.show()
 # Gluonsim.show()
 
 # # qbsofthand
-# args = rf.config.get_sim_config("QbSoftHand")
-# QbSoftHandsim = rf.sim.QbSoftHandSim(args)
-# QbSoftHandsim.show()
+args = rf.config.get_sim_config("QbSoftHand")
+QbSoftHandsim = rf.sim.QbSoftHandSim(args)
+QbSoftHandsim.show()
 
 # # Humanoid
 # args = rf.config.get_sim_config("Humanoid")
