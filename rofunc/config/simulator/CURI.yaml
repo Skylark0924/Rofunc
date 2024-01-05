@@ -11,7 +11,8 @@ env:
   asset:
     robot_name: "CURI"
     assetRoot:
-    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
+#    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
+    assetFile: "urdf/curi/urdf/curi_w_softhand_isaacgym.urdf"
     init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
     fix_base_link: True
     flip_visual_attachments: True

@@ -1,6 +1,7 @@
 import os
 import random
 
+import torch
 from PIL import Image as Im
 from isaacgym import gymapi
 from isaacgym import gymtorch
@@ -97,21 +98,32 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
 
         print("Obs type:", self.obs_type)
 
+        # <editor-fold desc="obs space">
         self.num_point_cloud_feature_dim = 768
-        self.num_obs_dict = {
-            "point_cloud": 361 + self.num_point_cloud_feature_dim * 3,
-            "point_cloud_for_distill": 361 + self.num_point_cloud_feature_dim * 3,
-            "full_state": 361
-        }
-        self.num_hand_obs = 45 + 95 + 21 + 6
-        self.up_axis = 'z'
 
-        self.right_fingertips = ["right_qbhand_thumb_distal_link", "right_qbhand_index_distal_link",
-                                 "right_qbhand_middle_distal_link", "right_qbhand_ring_distal_link",
-                                 "right_qbhand_little_distal_link"]
-        self.left_fingertips = ["left_qbhand_thumb_distal_link", "left_qbhand_index_distal_link",
-                                "left_qbhand_middle_distal_link", "left_qbhand_ring_distal_link",
-                                "left_qbhand_little_distal_link"]
+        self.num_hand_obs = 33 * 3 + 95 + 21 + 6
+        num = 27 + self.num_hand_obs * 2
+        self.num_obs_dict = {
+            "point_cloud": num + self.num_point_cloud_feature_dim * 3,
+            "point_cloud_for_distill": num + self.num_point_cloud_feature_dim * 3,
+            "full_state": num
+        }
+        self.up_axis = 'z'
+        # </editor-fold>
+
+        self.right_fingertips = ["qbhand_thumb_distal_link", "qbhand_index_distal_link",
+                                 "qbhand_middle_distal_link", "qbhand_ring_distal_link",
+                                 "qbhand_little_distal_link"]
+        self.left_fingertips = ["qbhand_thumb_distal_link", "qbhand_index_distal_link",
+                                "qbhand_middle_distal_link", "qbhand_ring_distal_link",
+                                "qbhand_little_distal_link"]
+        # self.right_fingertips = ["right_qbhand_thumb_distal_link", "right_qbhand_index_distal_link",
+        #                          "right_qbhand_middle_distal_link", "right_qbhand_ring_distal_link",
+        #                          "right_qbhand_little_distal_link"]
+        # self.left_fingertips = ["left_qbhand_thumb_distal_link", "left_qbhand_index_distal_link",
+        #                         "left_qbhand_middle_distal_link", "left_qbhand_ring_distal_link",
+        #                         "left_qbhand_little_distal_link"]
+
 
         self.num_fingertips = len(self.right_fingertips) * 2
 
@@ -135,6 +147,24 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
 
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
 
+        # <editor-fold desc="dof reduction">
+        actor_joint_dict = self.gym.get_actor_joint_dict(self.envs[0], 0)
+        self.right_useful_joint_index = sorted(
+            [value for key, value in actor_joint_dict.items() if
+             ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
+             ("ring_knuckle" not in key) and ("little_knuckle" not in key)])
+        self.left_useful_joint_index = [i + self.num_hand_dofs for i in self.right_useful_joint_index]
+        self.right_real_virtual_joint_index_map_dict = {value: actor_joint_dict[key.replace("_virtual", "")] for
+                                                        key, value in actor_joint_dict.items() if "virtual" in key}
+        self.left_real_virtual_joint_index_map_dict = {key + self.num_hand_dofs: value + self.num_hand_dofs for
+                                                       key, value in
+                                                       self.right_real_virtual_joint_index_map_dict.items()}
+        # </editor-fold>
+        actor_rigid_body_dict = self.gym.get_actor_rigid_body_dict(self.envs[0], 0)
+        self.right_fingertips_index = sorted([actor_rigid_body_dict[fingertip] for fingertip in self.right_fingertips])
+        self.left_fingertips_index = sorted(
+            [actor_rigid_body_dict[fingertip] + self.num_hand_dofs for fingertip in self.right_fingertips])
+
         if self.obs_type in ["point_cloud"]:
             from PIL import Image as Im
             # from pointnet2_ops import pointnet2_utils
@@ -150,7 +180,8 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         # get gym GPU state tensors
         actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
-        rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)  # 38 = 16 * 2 + 2 + 1 + 2 + 1
+        rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(
+            self.sim)  # 38 = self.num_hand_bodies * 2 + 2 + 1 + 2 + 1
 
         sensor_tensor = self.gym.acquire_force_sensor_tensor(self.sim)
         self.vec_sensor_tensor = gymtorch.wrap_tensor(sensor_tensor).view(self.num_envs, self.num_fingertips * 6)
@@ -158,7 +189,6 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         dof_force_tensor = self.gym.acquire_dof_force_tensor(self.sim)
         self.dof_force_tensor = gymtorch.wrap_tensor(dof_force_tensor).view(self.num_envs,
                                                                             self.num_hand_dofs * 2 + self.num_object_dofs * 2)
-        self.dof_force_tensor = self.dof_force_tensor[:, :48]
 
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_dof_state_tensor(self.sim)
@@ -249,8 +279,14 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         # get rofunc path from rofunc package metadata
         rofunc_path = get_rofunc_path()
         asset_root = os.path.join(rofunc_path, "simulator/assets")
-        right_hand_asset_file = "mjcf/qbhand_no_virtual_right.xml"
-        left_hand_asset_file = "mjcf/qbhand_no_virtual_left.xml"
+        # right_hand_asset_file = "mjcf/qbhand_no_virtual_right.xml"
+        # left_hand_asset_file = "mjcf/qbhand_no_virtual_left.xml"
+        right_hand_asset_file = "mjcf/qbhand_full_right.xml"
+        left_hand_asset_file = "mjcf/qbhand_full_left.xml"
+        # right_hand_asset_file = "mjcf/qbhand_free_joint_right.xml"
+        # left_hand_asset_file = "mjcf/qbhand_free_joint_left.xml"
+        # right_hand_asset_file = "urdf/curi/urdf/qbhand_right.urdf"
+        # left_hand_asset_file = "urdf/curi/urdf/qbhand_left.urdf"
         table_texture_files = os.path.join(asset_root, "textures/texture_stone_stone_texture_0.jpg")
         table_texture_handle = self.gym.create_texture_from_file(self.sim, table_texture_files)
 
@@ -275,16 +311,16 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         left_hand_asset = self.gym.load_asset(self.sim, asset_root, left_hand_asset_file, asset_options)
 
         # print asset info
-        self.num_shadow_hand_bodies = self.gym.get_asset_rigid_body_count(right_hand_asset)
+        self.num_hand_bodies = self.gym.get_asset_rigid_body_count(right_hand_asset)
         self.num_shadow_hand_shapes = self.gym.get_asset_rigid_shape_count(right_hand_asset)
         self.num_hand_dofs = self.gym.get_asset_dof_count(right_hand_asset)
         self.num_shadow_hand_actuators = self.gym.get_asset_actuator_count(right_hand_asset)
         self.num_shadow_hand_tendons = self.gym.get_asset_tendon_count(right_hand_asset)
-        print("self.num_shadow_hand_bodies: ", self.num_shadow_hand_bodies)
-        print("self.num_shadow_hand_shapes: ", self.num_shadow_hand_shapes)
-        print("self.num_hand_dofs: ", self.num_hand_dofs)
-        print("self.num_shadow_hand_actuators: ", self.num_shadow_hand_actuators)
-        print("self.num_shadow_hand_tendons: ", self.num_shadow_hand_tendons)
+        beauty_print(f"self.num_hand_bodies: {self.num_hand_bodies}")
+        beauty_print(f"self.num_shadow_hand_shapes: {self.num_shadow_hand_shapes}")
+        beauty_print(f"self.num_hand_dofs: {self.num_hand_dofs}")
+        beauty_print(f"self.num_shadow_hand_actuators: {self.num_shadow_hand_actuators}")
+        beauty_print(f"self.num_shadow_hand_tendons: {self.num_shadow_hand_tendons}")
 
         actuated_dof_names = [self.gym.get_asset_actuator_joint_name(right_hand_asset, i) for i in
                               range(self.num_shadow_hand_actuators)]
@@ -404,7 +440,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         # </editor-fold>
 
         # compute aggregate size
-        max_agg_bodies = self.num_shadow_hand_bodies * 2 + 3 * self.num_object_bodies + 1
+        max_agg_bodies = self.num_hand_bodies * 2 + 3 * self.num_object_bodies + 1
         max_agg_shapes = self.num_shadow_hand_shapes * 2 + 3 * self.num_object_shapes + 1
 
         self.hands = []
@@ -471,9 +507,9 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
 
             # add hand - collision filter = -1 to use asset collision filters set in mjcf loader
             right_hand_actor = self.gym.create_actor(env_ptr, right_hand_asset, right_hand_start_pose, "right_hand", i,
-                                                     -1, 0)
+                                                     1, 0)
             left_hand_actor = self.gym.create_actor(env_ptr, left_hand_asset,
-                                                    left_hand_start_pose, "left_hand", i, -1, 0)
+                                                    left_hand_start_pose, "left_hand", i, 1, 0)
 
             self.hand_start_states.append(
                 [right_hand_start_pose.p.x, right_hand_start_pose.p.y, right_hand_start_pose.p.z,
@@ -490,8 +526,8 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
 
             # <editor-fold desc="randomize colors and textures for rigid body">
             num_bodies = self.gym.get_actor_rigid_body_count(env_ptr, right_hand_actor)
-            hand_rigid_body_index = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15], [16, 17, 18, 19, 20],
-                                     [21, 22, 23, 24, 25]]
+            hand_rigid_body_index = [[0], [i for i in range(1, 6)], [i for i in range(6, 13)], [i for i in range(13, 20)],
+                                     [i for i in range(20, 27)], [i for i in range(27, 34)]]
 
             for n in self.agent_index[0]:
                 colorx = random.uniform(0, 1)
@@ -668,38 +704,39 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.object_linvel = self.root_state_tensor[self.object_indices, 7:10]
         self.object_angvel = self.root_state_tensor[self.object_indices, 10:13]
 
-        self.block_right_handle_pos = self.rigid_body_states[:, 16 * 2 + 1, 0:3]  # (256, ?, 13)
-        self.block_right_handle_rot = self.rigid_body_states[:, 16 * 2 + 1, 3:7]
-        self.block_right_handle_pos = self.block_right_handle_pos + quat_apply(self.block_right_handle_rot,
-                                                                               to_torch([0, 1, 0],
-                                                                                        device=self.device).repeat(
-                                                                                   self.num_envs, 1) * 0.)
-        self.block_right_handle_pos = self.block_right_handle_pos + quat_apply(self.block_right_handle_rot,
-                                                                               to_torch([1, 0, 0],
-                                                                                        device=self.device).repeat(
-                                                                                   self.num_envs, 1) * 0.0)
-        self.block_right_handle_pos = self.block_right_handle_pos + quat_apply(self.block_right_handle_rot,
-                                                                               to_torch([0, 0, 1],
-                                                                                        device=self.device).repeat(
-                                                                                   self.num_envs, 1) * 0.0)
+        self.block_right_handle_pos = self.rigid_body_states[:, self.num_hand_bodies * 2 + 1, 0:3]  # (256, ?, 13)
+        self.block_right_handle_rot = self.rigid_body_states[:, self.num_hand_bodies * 2 + 1, 3:7]
+        self.block_right_handle_pos = (self.block_right_handle_pos
+                                       + quat_apply(self.block_right_handle_rot,
+                                                    to_torch([0, 1, 0], device=self.device).repeat(self.num_envs,
+                                                                                                   1) * 0.))
+        self.block_right_handle_pos = (self.block_right_handle_pos
+                                       + quat_apply(self.block_right_handle_rot,
+                                                    to_torch([1, 0, 0], device=self.device).repeat(self.num_envs,
+                                                                                                   1) * 0.0))
+        self.block_right_handle_pos = (self.block_right_handle_pos
+                                       + quat_apply(self.block_right_handle_rot,
+                                                    to_torch([0, 0, 1], device=self.device).repeat(self.num_envs,
+                                                                                                   1) * 0.0))
 
-        self.block_left_handle_pos = self.rigid_body_states[:, 16 * 2 + 2, 0:3]
-        self.block_left_handle_rot = self.rigid_body_states[:, 16 * 2 + 2, 3:7]
-        self.block_left_handle_pos = self.block_left_handle_pos + quat_apply(self.block_left_handle_rot,
-                                                                             to_torch([0, 1, 0],
-                                                                                      device=self.device).repeat(
-                                                                                 self.num_envs, 1) * 0.0)
-        self.block_left_handle_pos = self.block_left_handle_pos + quat_apply(self.block_left_handle_rot,
-                                                                             to_torch([1, 0, 0],
-                                                                                      device=self.device).repeat(
-                                                                                 self.num_envs, 1) * 0.0)
-        self.block_left_handle_pos = self.block_left_handle_pos + quat_apply(self.block_left_handle_rot,
-                                                                             to_torch([0, 0, 1],
-                                                                                      device=self.device).repeat(
-                                                                                 self.num_envs, 1) * 0.0)
+        self.block_left_handle_pos = self.rigid_body_states[:, self.num_hand_bodies * 2 + 2, 0:3]
+        self.block_left_handle_rot = self.rigid_body_states[:, self.num_hand_bodies * 2 + 2, 3:7]
+        self.block_left_handle_pos = (self.block_left_handle_pos
+                                      + quat_apply(self.block_left_handle_rot,
+                                                   to_torch([0, 1, 0], device=self.device).repeat(self.num_envs,
+                                                                                                  1) * 0.0))
+        self.block_left_handle_pos = (self.block_left_handle_pos
+                                      + quat_apply(self.block_left_handle_rot,
+                                                   to_torch([1, 0, 0], device=self.device).repeat(self.num_envs,
+                                                                                                  1) * 0.0))
+        self.block_left_handle_pos = (self.block_left_handle_pos
+                                      + quat_apply(self.block_left_handle_rot,
+                                                   to_torch([0, 0, 1], device=self.device).repeat(self.num_envs,
+                                                                                                  1) * 0.0))
 
-        self.left_hand_pos = self.rigid_body_states[:, 3 + 16, 0:3]
-        self.left_hand_rot = self.rigid_body_states[:, 3 + 16, 3:7]
+        # <editor-fold desc="hand poses">
+        self.left_hand_pos = self.rigid_body_states[:, 0 + self.num_hand_bodies, 0:3]
+        self.left_hand_rot = self.rigid_body_states[:, 0 + self.num_hand_bodies, 3:7]
         self.left_hand_pos = self.left_hand_pos + quat_apply(self.left_hand_rot,
                                                              to_torch([0, 0, 1], device=self.device).repeat(
                                                                  self.num_envs, 1) * 0.08)
@@ -707,38 +744,39 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
                                                              to_torch([0, 1, 0], device=self.device).repeat(
                                                                  self.num_envs, 1) * -0.02)
 
-        self.right_hand_pos = self.rigid_body_states[:, 3, 0:3]
-        self.right_hand_rot = self.rigid_body_states[:, 3, 3:7]
+        self.right_hand_pos = self.rigid_body_states[:, 0, 0:3]
+        self.right_hand_rot = self.rigid_body_states[:, 0, 3:7]
         self.right_hand_pos = self.right_hand_pos + quat_apply(self.right_hand_rot,
                                                                to_torch([0, 0, 1], device=self.device).repeat(
                                                                    self.num_envs, 1) * 0.08)
         self.right_hand_pos = self.right_hand_pos + quat_apply(self.right_hand_rot,
                                                                to_torch([0, 1, 0], device=self.device).repeat(
                                                                    self.num_envs, 1) * -0.02)
+        # </editor-fold>
 
         # <editor-fold desc="right hand finger">
-        self.right_hand_th_pos = self.rigid_body_states[:, 3, 0:3]
-        self.right_hand_th_rot = self.rigid_body_states[:, 3, 3:7]
+        self.right_hand_th_pos = self.rigid_body_states[:, self.right_fingertips_index[0], 0:3]
+        self.right_hand_th_rot = self.rigid_body_states[:, self.right_fingertips_index[0], 3:7]
         self.right_hand_th_pos = self.right_hand_th_pos + quat_apply(self.right_hand_th_rot,
                                                                      to_torch([0, 0, 1], device=self.device).repeat(
                                                                          self.num_envs, 1) * 0.02)
-        self.right_hand_ff_pos = self.rigid_body_states[:, 6, 0:3]
-        self.right_hand_ff_rot = self.rigid_body_states[:, 6, 3:7]
+        self.right_hand_ff_pos = self.rigid_body_states[:, self.right_fingertips_index[1], 0:3]
+        self.right_hand_ff_rot = self.rigid_body_states[:, self.right_fingertips_index[1], 3:7]
         self.right_hand_ff_pos = self.right_hand_ff_pos + quat_apply(self.right_hand_ff_rot,
                                                                      to_torch([0, 0, 1], device=self.device).repeat(
                                                                          self.num_envs, 1) * 0.02)
-        self.right_hand_mf_pos = self.rigid_body_states[:, 9, 0:3]
-        self.right_hand_mf_rot = self.rigid_body_states[:, 9, 3:7]
+        self.right_hand_mf_pos = self.rigid_body_states[:, self.right_fingertips_index[2], 0:3]
+        self.right_hand_mf_rot = self.rigid_body_states[:, self.right_fingertips_index[2], 3:7]
         self.right_hand_mf_pos = self.right_hand_mf_pos + quat_apply(self.right_hand_mf_rot,
                                                                      to_torch([0, 0, 1], device=self.device).repeat(
                                                                          self.num_envs, 1) * 0.02)
-        self.right_hand_rf_pos = self.rigid_body_states[:, 12, 0:3]
-        self.right_hand_rf_rot = self.rigid_body_states[:, 12, 3:7]
+        self.right_hand_rf_pos = self.rigid_body_states[:, self.right_fingertips_index[3], 0:3]
+        self.right_hand_rf_rot = self.rigid_body_states[:, self.right_fingertips_index[3], 3:7]
         self.right_hand_rf_pos = self.right_hand_rf_pos + quat_apply(self.right_hand_rf_rot,
                                                                      to_torch([0, 0, 1], device=self.device).repeat(
                                                                          self.num_envs, 1) * 0.02)
-        self.right_hand_lf_pos = self.rigid_body_states[:, 15, 0:3]
-        self.right_hand_lf_rot = self.rigid_body_states[:, 15, 3:7]
+        self.right_hand_lf_pos = self.rigid_body_states[:, self.right_fingertips_index[4], 0:3]
+        self.right_hand_lf_rot = self.rigid_body_states[:, self.right_fingertips_index[4], 3:7]
         self.right_hand_lf_pos = self.right_hand_lf_pos + quat_apply(self.right_hand_lf_rot,
                                                                      to_torch([0, 0, 1], device=self.device).repeat(
                                                                          self.num_envs, 1) * 0.02)
@@ -746,28 +784,28 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         # </editor-fold>
 
         # <editor-fold desc="left hand finger">
-        self.left_hand_th_pos = self.rigid_body_states[:, 3 + 16, 0:3]
-        self.left_hand_th_rot = self.rigid_body_states[:, 3 + 16, 3:7]
+        self.left_hand_th_pos = self.rigid_body_states[:, self.left_fingertips_index[0], 0:3]
+        self.left_hand_th_rot = self.rigid_body_states[:, self.left_fingertips_index[0], 3:7]
         self.left_hand_th_pos = self.left_hand_th_pos + quat_apply(self.left_hand_th_rot,
                                                                    to_torch([0, 0, 1], device=self.device).repeat(
                                                                        self.num_envs, 1) * 0.02)
-        self.left_hand_ff_pos = self.rigid_body_states[:, 6 + 16, 0:3]
-        self.left_hand_ff_rot = self.rigid_body_states[:, 6 + 16, 3:7]
+        self.left_hand_ff_pos = self.rigid_body_states[:, self.left_fingertips_index[1], 0:3]
+        self.left_hand_ff_rot = self.rigid_body_states[:, self.left_fingertips_index[1], 3:7]
         self.left_hand_ff_pos = self.left_hand_ff_pos + quat_apply(self.left_hand_ff_rot,
                                                                    to_torch([0, 0, 1], device=self.device).repeat(
                                                                        self.num_envs, 1) * 0.02)
-        self.left_hand_mf_pos = self.rigid_body_states[:, 9 + 16, 0:3]
-        self.left_hand_mf_rot = self.rigid_body_states[:, 9 + 16, 3:7]
+        self.left_hand_mf_pos = self.rigid_body_states[:, self.left_fingertips_index[2], 0:3]
+        self.left_hand_mf_rot = self.rigid_body_states[:, self.left_fingertips_index[2], 3:7]
         self.left_hand_mf_pos = self.left_hand_mf_pos + quat_apply(self.left_hand_mf_rot,
                                                                    to_torch([0, 0, 1], device=self.device).repeat(
                                                                        self.num_envs, 1) * 0.02)
-        self.left_hand_rf_pos = self.rigid_body_states[:, 12 + 16, 0:3]
-        self.left_hand_rf_rot = self.rigid_body_states[:, 12 + 16, 3:7]
+        self.left_hand_rf_pos = self.rigid_body_states[:, self.left_fingertips_index[3], 0:3]
+        self.left_hand_rf_rot = self.rigid_body_states[:, self.left_fingertips_index[3], 3:7]
         self.left_hand_rf_pos = self.left_hand_rf_pos + quat_apply(self.left_hand_rf_rot,
                                                                    to_torch([0, 0, 1], device=self.device).repeat(
                                                                        self.num_envs, 1) * 0.02)
-        self.left_hand_lf_pos = self.rigid_body_states[:, 15 + 16, 0:3]
-        self.left_hand_lf_rot = self.rigid_body_states[:, 15 + 16, 3:7]
+        self.left_hand_lf_pos = self.rigid_body_states[:, self.left_fingertips_index[4], 0:3]
+        self.left_hand_lf_rot = self.rigid_body_states[:, self.left_fingertips_index[4], 3:7]
         self.left_hand_lf_pos = self.left_hand_lf_pos + quat_apply(self.left_hand_lf_rot,
                                                                    to_torch([0, 0, 1], device=self.device).repeat(
                                                                        self.num_envs, 1) * 0.02)
@@ -792,10 +830,10 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
 
     def compute_full_state(self, asymm_obs=False):
         """
-        Compute the observations of all environment. The observation is composed of three parts: 
-        the state values of the left and right hands, and the information of objects and target. 
-        The state values of the left and right hands were the same for each task, including hand 
-        joint and finger positions, velocity, and force information. The detail 361-dimensional 
+        Compute the observations of all environment. The observation is composed of three parts:
+        the state values of the left and right hands, and the information of objects and target.
+        The state values of the left and right hands were the same for each task, including hand
+        joint and finger positions, velocity, and force information. The detail 361-dimensional
         observational space as shown in below:
 
         Index       Description
@@ -834,9 +872,9 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.obs_buf[:, self.num_hand_dofs:2 * self.num_hand_dofs] = self.vel_obs_scale * self.right_hand_dof_vel
         # 30 - 44 right hand dof force
         self.obs_buf[:, 2 * self.num_hand_dofs:3 * self.num_hand_dofs] \
-            = self.force_torque_obs_scale * self.dof_force_tensor[:, :15]
+            = self.force_torque_obs_scale * self.dof_force_tensor[:, :self.num_hand_dofs]
 
-        fingertip_obs_start = 45
+        fingertip_obs_start = 3 * self.num_hand_dofs
         # 45 - 109 right hand fingertip pose, linear velocity, angle velocity (5 x 13)
         self.obs_buf[:, fingertip_obs_start:fingertip_obs_start + num_ft_states] = self.right_fingertip_state.reshape(
             self.num_envs, num_ft_states)
@@ -871,11 +909,10 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.num_hand_dofs + left_hand_start:2 * self.num_hand_dofs + left_hand_start] = self.vel_obs_scale * self.left_hand_dof_vel
         # 197 - 211 left hand dof force
         self.obs_buf[:,
-        2 * self.num_hand_dofs + left_hand_start:3 * self.num_hand_dofs + left_hand_start] = self.force_torque_obs_scale * self.dof_force_tensor[
-                                                                                                                           :,
-                                                                                                                           15:30]
+        2 * self.num_hand_dofs + left_hand_start:3 * self.num_hand_dofs + left_hand_start] = (
+                self.force_torque_obs_scale * self.dof_force_tensor[:, self.num_hand_dofs:2 * self.num_hand_dofs])
 
-        left_fingertip_obs_start = left_hand_start + 45  # 212 = 167 + 45
+        left_fingertip_obs_start = left_hand_start + 3 * self.num_hand_dofs  # 212 = 167 + 45
         # 212 - 276 left hand fingertip pose, linear velocity, angle velocity (5 x 13)
         self.obs_buf[:,
         left_fingertip_obs_start:left_fingertip_obs_start + num_ft_states] = self.left_fingertip_state.reshape(
@@ -1078,7 +1115,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         Args:
             env_ids (tensor): The index of the environment that needs to reset goal pose
 
-            apply_reset (bool): Whether to reset the goal directly here, usually used 
+            apply_reset (bool): Whether to reset the goal directly here, usually used
             when the same task wants to complete multiple goals
 
         """
@@ -1120,7 +1157,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
             self.apply_randomizations(self.randomization_params)
 
         # generate random values
-        rand_floats = torch_rand_float(-1.0, 1.0, (len(env_ids), self.num_hand_dofs * 2 + 5), device=self.device)
+        rand_floats = torch_rand_float(0, 0, (len(env_ids), self.num_hand_dofs * 2 + 5), device=self.device)
 
         # randomize start object poses
         self.reset_target_pose(env_ids)
@@ -1202,10 +1239,10 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
 
     def pre_physics_step(self, actions):
         """
-        The pre-processing of the physics step. Determine whether the reset environment is needed, 
-        and calculate the next movement of Shadowhand through the given action. The 52-dimensional 
+        The pre-processing of the physics step. Determine whether the reset environment is needed,
+        and calculate the next movement of Shadowhand through the given action. The 52-dimensional
         action space as shown in below:
-        
+
         Index   Description
         0 - 2	right shadow hand base translation
         3 - 5	right shadow hand base rotation
@@ -1215,7 +1252,7 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         27 - 41 left shadow hand actuated joint
 
         Args:
-            actions (tensor): Actions of agents in the all environment 
+            actions (tensor): Actions of agents in the all environment
         """
         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         goal_env_ids = self.reset_goal_buf.nonzero(as_tuple=False).squeeze(-1)
@@ -1240,49 +1277,62 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
                                                                           self.shadow_hand_dof_upper_limits[
                                                                               self.actuated_dof_indices])
         else:
-            self.cur_targets[:, self.actuated_dof_indices] = scale(self.actions[:, 6:21],
-                                                                   self.shadow_hand_dof_lower_limits[
-                                                                       self.actuated_dof_indices],
-                                                                   self.shadow_hand_dof_upper_limits[
-                                                                       self.actuated_dof_indices])
-            self.cur_targets[:, self.actuated_dof_indices] = self.act_moving_average * self.cur_targets[:,
-                                                                                       self.actuated_dof_indices] + (
-                                                                     1.0 - self.act_moving_average) * self.prev_targets[
-                                                                                                      :,
-                                                                                                      self.actuated_dof_indices]
-            self.cur_targets[:, self.actuated_dof_indices] = tensor_clamp(
-                self.cur_targets[:, self.actuated_dof_indices],
-                self.shadow_hand_dof_lower_limits[self.actuated_dof_indices],
-                self.shadow_hand_dof_upper_limits[self.actuated_dof_indices])
+            # assert list(self.actuated_dof_indices) == self.right_useful_joint_index
+            self.cur_targets[:, self.right_useful_joint_index] = scale(self.actions[:, 6:21],
+                                                                       self.shadow_hand_dof_lower_limits[
+                                                                           self.right_useful_joint_index],
+                                                                       self.shadow_hand_dof_upper_limits[
+                                                                           self.right_useful_joint_index])
+            self.cur_targets[:, self.right_useful_joint_index] = self.act_moving_average * self.cur_targets[:,
+                                                                                           self.right_useful_joint_index] + (
+                                                                         1.0 - self.act_moving_average) * self.prev_targets[
+                                                                                                          :,
+                                                                                                          self.right_useful_joint_index]
+            self.cur_targets[:, self.right_useful_joint_index] = tensor_clamp(
+                self.cur_targets[:, self.right_useful_joint_index],
+                self.shadow_hand_dof_lower_limits[self.right_useful_joint_index],
+                self.shadow_hand_dof_upper_limits[self.right_useful_joint_index])
+            for key, value in self.right_real_virtual_joint_index_map_dict.items():
+                self.cur_targets[:, key] = self.cur_targets[:, value]
 
-            self.cur_targets[:, self.actuated_dof_indices + 15] = scale(self.actions[:, 27:42],
-                                                                        self.shadow_hand_dof_lower_limits[
-                                                                            self.actuated_dof_indices],
-                                                                        self.shadow_hand_dof_upper_limits[
-                                                                            self.actuated_dof_indices])
-            self.cur_targets[:, self.actuated_dof_indices + 15] = self.act_moving_average * self.cur_targets[:,
-                                                                                            self.actuated_dof_indices + 15] + (
-                                                                          1.0 - self.act_moving_average) * self.prev_targets[
-                                                                                                           :,
-                                                                                                           self.actuated_dof_indices]
-            self.cur_targets[:, self.actuated_dof_indices + 15] = tensor_clamp(
-                self.cur_targets[:, self.actuated_dof_indices + 15],
-                self.shadow_hand_dof_lower_limits[self.actuated_dof_indices],
-                self.shadow_hand_dof_upper_limits[self.actuated_dof_indices])
+            self.cur_targets[:, self.left_useful_joint_index] = scale(self.actions[:, 27:42],
+                                                                      self.shadow_hand_dof_lower_limits[
+                                                                          self.right_useful_joint_index],
+                                                                      self.shadow_hand_dof_upper_limits[
+                                                                          self.right_useful_joint_index])
+            self.cur_targets[:,
+            self.left_useful_joint_index] = (self.act_moving_average
+                                             * self.cur_targets[:,
+                                               self.left_useful_joint_index] + (
+                                                     1.0 - self.act_moving_average)
+                                             * self.prev_targets[:, self.left_useful_joint_index])
+            self.cur_targets[:, self.left_useful_joint_index] = tensor_clamp(
+                self.cur_targets[:, self.left_useful_joint_index],
+                self.shadow_hand_dof_lower_limits[self.right_useful_joint_index],
+                self.shadow_hand_dof_upper_limits[self.right_useful_joint_index])
+            for key, value in self.left_real_virtual_joint_index_map_dict.items():
+                self.cur_targets[:, key] = self.cur_targets[:, value]
             # self.cur_targets[:, 49] = scale(self.actions[:, 0],
             #                                 self.object_dof_lower_limits[1], self.object_dof_upper_limits[1])
             # angle_offsets = self.actions[:, 26:32] * self.dt * self.orientation_scale
 
             self.apply_forces[:, 0, :] = actions[:, 0:3] * self.dt * self.transition_scale * 100000
-            self.apply_forces[:, 0 + 16, :] = actions[:, 21:24] * self.dt * self.transition_scale * 100000
+            self.apply_forces[:, 0 + self.num_hand_bodies, :] = actions[:,
+                                                                21:24] * self.dt * self.transition_scale * 100000
             self.apply_torque[:, 0, :] = self.actions[:, 3:6] * self.dt * self.orientation_scale * 1000
-            self.apply_torque[:, 0 + 16, :] = self.actions[:, 24:27] * self.dt * self.orientation_scale * 1000
+            self.apply_torque[:, 0 + self.num_hand_bodies, :] = self.actions[:,
+                                                                24:27] * self.dt * self.orientation_scale * 1000
 
+            # self.apply_forces = torch.zeros_like(self.apply_forces)
+            # self.apply_torque = torch.zeros_like(self.apply_torque)
             self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(self.apply_forces),
                                                     gymtorch.unwrap_tensor(self.apply_torque), gymapi.ENV_SPACE)
 
         self.prev_targets[:, self.actuated_dof_indices] = self.cur_targets[:, self.actuated_dof_indices]
-        self.prev_targets[:, self.actuated_dof_indices + 15] = self.cur_targets[:, self.actuated_dof_indices + 15]
+        self.prev_targets[:, self.actuated_dof_indices + self.num_hand_dofs] = self.cur_targets[:,
+                                                                               self.actuated_dof_indices + self.num_hand_dofs]
+
+        # self.prev_targets = torch.zeros_like(self.prev_targets)
 
         # self.prev_targets[:, 49] = self.cur_targets[:, 49]
         # self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(self.cur_targets))
@@ -1291,12 +1341,17 @@ class BiQbSoftHandGraspAndPlaceTask(VecTask):
         self.gym.set_dof_position_target_tensor_indexed(self.sim,
                                                         gymtorch.unwrap_tensor(self.prev_targets),
                                                         gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
+        # self.prev_targets_vel = torch.zeros_like(self.prev_targets)
+        # dof_state = torch.cat([self.prev_targets, self.prev_targets_vel], dim=-1)
+        # self.gym.set_dof_state_tensor_indexed(self.sim,
+        #                                       gymtorch.unwrap_tensor(dof_state),
+        #                                       gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
 
     def post_physics_step(self):
         """
-        The post-processing of the physics step. Compute the observation and reward, and visualize auxiliary 
+        The post-processing of the physics step. Compute the observation and reward, and visualize auxiliary
         lines for debug when needed
-        
+
         """
         self.progress_buf += 1
         self.randomize_buf += 1
