@@ -42,5 +42,5 @@ class FrankaSim(RobotSim):
                 gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
                 gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
-    def run_traj(self, traj, attracted_joint="panda_hand"):
-        self.run_traj_multi_joints([traj], [attracted_joint])
+    def run_traj(self, traj, attracted_rigid_body="panda_hand"):
+        self.run_traj_multi_rigid_bodies([traj], [attracted_rigid_body])
