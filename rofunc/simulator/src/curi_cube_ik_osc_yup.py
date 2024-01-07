@@ -24,7 +24,14 @@ import torch
 import random
 import time
 
-DOF = 25
+DOF = 18
+
+
+# curi_isaacgym_dual_arm.urdf
+# ['panda_left_joint1', 'panda_left_joint2', 'panda_left_joint3', 'panda_left_joint4', 'panda_left_joint5', 
+# 'panda_left_joint6', 'panda_left_joint7', 'panda_left_finger_joint1', 'panda_left_finger_joint2', 
+# 'panda_right_joint1',  'panda_right_joint2', 'panda_right_joint3', 'panda_right_joint4', 'panda_right_joint5', 
+# 'panda_right_joint6',  'panda_right_joint7', 'panda_right_finger_joint1', 'panda_right_finger_joint2']
 
 
 def quat_axis(q, axis=0):
@@ -42,12 +49,12 @@ def orientation_error(desired, current):
 def cube_grasping_yaw(q, corners):
     """ returns horizontal rotation required to grasp cube """
     rc = quat_rotate(q, corners)
-    yaw = (torch.atan2(rc[:, 2], rc[:, 0]) - 0.25 * math.pi) % (0.5 * math.pi)
+    yaw = (torch.atan2(rc[:, 1], rc[:, 0]) - 0.25 * math.pi) % (0.5 * math.pi)
     theta = 0.5 * yaw
     w = theta.cos()
     x = torch.zeros_like(w)
-    z = torch.zeros_like(w)
-    y = theta.sin()
+    y = torch.zeros_like(w)
+    z = theta.sin()
     yaw_quats = torch.stack([x, y, z, w], dim=-1)
     return yaw_quats
 
@@ -75,7 +82,7 @@ def control_osc(dpose):
     j_eef_inv = m_eef @ j_eef @ mm_inv
     u_null = kd_null * -dof_vel + kp_null * (
             (default_dof_pos_tensor.view(1, -1, 1) - dof_pos + np.pi) % (2 * np.pi) - np.pi)
-    u_null = u_null[:, 7:14]
+    u_null = u_null[:, :7]
     u_null = mm @ u_null
     u += (torch.eye(7, device=device).unsqueeze(0) - torch.transpose(j_eef, 1, 2) @ j_eef_inv) @ u_null
     return u.squeeze(-1)
@@ -111,8 +118,8 @@ device = args.sim_device if args.use_gpu_pipeline else 'cpu'
 
 # configure sim
 sim_params = gymapi.SimParams()
-sim_params.up_axis = gymapi.UP_AXIS_Y
-sim_params.gravity = gymapi.Vec3(0.0, -9.8, 0.0)
+sim_params.up_axis = gymapi.UP_AXIS_Z
+sim_params.gravity = gymapi.Vec3(0.0, 0.0, -9.8)
 sim_params.dt = 1.0 / 60.0
 sim_params.substeps = 2
 sim_params.use_gpu_pipeline = args.use_gpu_pipeline
@@ -125,7 +132,7 @@ if args.physics_engine == gymapi.SIM_PHYSX:
     sim_params.physx.friction_offset_threshold = 0.001
     sim_params.physx.friction_correlation_distance = 0.0005
     sim_params.physx.num_threads = args.num_threads
-    sim_params.physx.use_gpu = args.use_gpu
+    sim_params.physx.use_gpu = True
 else:
     raise Exception("This example can only be used with PhysX")
 
@@ -152,7 +159,7 @@ if viewer is None:
 asset_root = "../assets"
 
 # create table asset
-table_dims = gymapi.Vec3(0.6, 0.5, 2.5)
+table_dims = gymapi.Vec3(0.6, 2.5, 0.5)
 asset_options = gymapi.AssetOptions()
 asset_options.fix_base_link = True
 table_asset = gym.create_box(sim, table_dims.x, table_dims.y, table_dims.z, asset_options)
@@ -163,7 +170,7 @@ asset_options = gymapi.AssetOptions()
 box_asset = gym.create_box(sim, box_size, box_size, box_size, asset_options)
 
 # load curi asset
-curi_asset_file = "urdf/curi/urdf/curi_isaacgym.urdf"
+curi_asset_file = "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
 asset_options = gymapi.AssetOptions()
 asset_options.armature = 0.01
 asset_options.fix_base_link = True
@@ -180,28 +187,28 @@ curi_mids = 0.3 * (curi_upper_limits + curi_lower_limits)
 
 # use position drive for all dofs
 if controller == "ik":
-    curi_dof_props["driveMode"][7:].fill(gymapi.DOF_MODE_POS)
-    curi_dof_props["stiffness"][7:].fill(300.0)
-    curi_dof_props["damping"][7:].fill(80.0)
+    curi_dof_props["driveMode"][:7].fill(gymapi.DOF_MODE_POS)
+    curi_dof_props["stiffness"][:7].fill(400.0)
+    curi_dof_props["damping"][:7].fill(40.0)
 else:  # osc
-    curi_dof_props["driveMode"][7:].fill(gymapi.DOF_MODE_EFFORT)
-    curi_dof_props["stiffness"][7:].fill(0.0)
-    curi_dof_props["damping"][7:].fill(0.0)
-# grippers
-curi_dof_props["driveMode"][14:16].fill(gymapi.DOF_MODE_POS)
-curi_dof_props["stiffness"][14:16].fill(800.0)
-curi_dof_props["damping"][14:16].fill(40.0)
-curi_dof_props["driveMode"][23:25].fill(gymapi.DOF_MODE_POS)
-curi_dof_props["stiffness"][23:25].fill(800.0)
-curi_dof_props["damping"][23:25].fill(40.0)
+    curi_dof_props["driveMode"][:7].fill(gymapi.DOF_MODE_EFFORT)
+    curi_dof_props["stiffness"][:7].fill(0.0)
+    curi_dof_props["damping"][:7].fill(0.0)
+# # grippers
+curi_dof_props["driveMode"][7:9].fill(gymapi.DOF_MODE_POS)
+curi_dof_props["stiffness"][7:9].fill(800.0)
+curi_dof_props["damping"][7:9].fill(40.0)
+curi_dof_props["driveMode"][16:18].fill(gymapi.DOF_MODE_POS)
+curi_dof_props["stiffness"][16:18].fill(800.0)
+curi_dof_props["damping"][16:18].fill(40.0)
 
 # default dof states and position targets
 curi_num_dofs = gym.get_asset_dof_count(curi_asset)
 default_dof_pos = np.zeros(curi_num_dofs, dtype=np.float32)
-default_dof_pos[7:] = curi_mids[7:]
+default_dof_pos[:] = curi_mids[:]
 # grippers open
-default_dof_pos[14:16] = curi_upper_limits[14:16]
-default_dof_pos[23:25] = curi_upper_limits[23:25]
+default_dof_pos[7:9] = curi_upper_limits[7:9]
+default_dof_pos[16:18] = curi_upper_limits[16:18]
 
 default_dof_state = np.zeros(curi_num_dofs, gymapi.DofState.dtype)
 default_dof_state["pos"] = default_dof_pos
@@ -217,16 +224,15 @@ curi_hand_index = curi_link_dict["panda_left_hand"]
 num_envs = args.num_envs
 num_per_row = int(math.sqrt(num_envs))
 spacing = 1.0
-env_lower = gymapi.Vec3(-spacing, 0.0, -spacing)
+env_lower = gymapi.Vec3(-spacing, -spacing, 0.0)
 env_upper = gymapi.Vec3(spacing, spacing, spacing)
 print("Creating %d environments" % num_envs)
 
 curi_pose = gymapi.Transform()
 curi_pose.p = gymapi.Vec3(0, 0, 0)
-curi_pose.r = gymapi.Quat(-0.707, 0, 0, 0.707)
 
 table_pose = gymapi.Transform()
-table_pose.p = gymapi.Vec3(1, 0.5 * table_dims.y, 0.0)
+table_pose.p = gymapi.Vec3(1, 0.0, 0.6 * table_dims.z)
 
 box_pose = gymapi.Transform()
 
@@ -238,7 +244,7 @@ init_rot_list = []
 
 # add ground plane
 plane_params = gymapi.PlaneParams()
-plane_params.normal = gymapi.Vec3(0, 1, 0)
+plane_params.normal = gymapi.Vec3(0, 0, 1)
 gym.add_ground(sim, plane_params)
 
 for i in range(num_envs):
@@ -251,9 +257,9 @@ for i in range(num_envs):
 
     # add box
     box_pose.p.x = table_pose.p.x + np.random.uniform(-0.2, 0.1)
-    box_pose.p.z = table_pose.p.z + np.random.uniform(-0.3, -0.3)
-    box_pose.p.y = table_dims.y + 0.5 * box_size
-    box_pose.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.random.uniform(-math.pi, math.pi))
+    box_pose.p.y = table_pose.p.y + np.random.uniform(0.3, 0.3)
+    box_pose.p.z = table_dims.z + 0.5 * box_size
+    box_pose.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 0, 1), np.random.uniform(-math.pi, math.pi))
     box_handle = gym.create_actor(env, box_asset, box_pose, "box", i, 0)
     color = gymapi.Vec3(np.random.uniform(0, 1), np.random.uniform(0, 1), np.random.uniform(0, 1))
     gym.set_rigid_body_color(env, box_handle, 0, gymapi.MESH_VISUAL_AND_COLLISION, color)
@@ -299,7 +305,7 @@ init_pos = torch.Tensor(init_pos_list).view(num_envs, 3).to(device)
 init_rot = torch.Tensor(init_rot_list).view(num_envs, 4).to(device)
 
 # hand orientation for grasping
-down_q = torch.stack(num_envs * [torch.tensor([0.707, 0, 0, 0.707])]).to(device).view((num_envs, 4))
+down_q = torch.stack(num_envs * [torch.tensor([1.0, 0.0, 0.0, 0.0])]).to(device).view((num_envs, 4))
 
 # box corner coords, used to determine grasping yaw
 box_half_size = 0.5 * box_size
@@ -307,7 +313,7 @@ corner_coord = torch.Tensor([box_half_size, box_half_size, box_half_size])
 corners = torch.stack(num_envs * [corner_coord]).to(device)
 
 # downard axis
-down_dir = torch.Tensor([0, -1, 0]).to(device).view(1, 3)
+down_dir = torch.Tensor([0, 0, -1]).to(device).view(1, 3)
 
 # get jacobian tensor
 # for fixed-base curi, tensor has shape (num envs, 10, 6, 9)
@@ -315,12 +321,12 @@ _jacobian = gym.acquire_jacobian_tensor(sim, "curi")
 jacobian = gymtorch.wrap_tensor(_jacobian)
 
 # jacobian entries corresponding to curi hand
-j_eef = jacobian[:, curi_hand_index - 1, :, 7:14]
+j_eef = jacobian[:, curi_hand_index - 1, :, :7]
 
 # get mass matrix tensor
 _massmatrix = gym.acquire_mass_matrix_tensor(sim, "curi")
 mm = gymtorch.wrap_tensor(_massmatrix)
-mm = mm[:, 7:14, 7:14]  # only need elements corresponding to the curi arm
+mm = mm[:, :7, :7]  # only need elements corresponding to the curi arm
 
 # get rigid body state tensor
 _rb_states = gym.acquire_rigid_body_state_tensor(sim)
@@ -368,7 +374,7 @@ while not gym.query_viewer_has_closed(viewer):
     grasp_offset = 0.11 if controller == "ik" else 0.10
 
     # determine if we're holding the box (grippers are closed and box is near)
-    gripper_sep = dof_pos[:, 14] + dof_pos[:, 15]
+    gripper_sep = dof_pos[:, 7] + dof_pos[:, 8]
     gripped = (gripper_sep < 0.045) & (box_dist < grasp_offset + 0.5 * box_size)
 
     yaw_q = cube_grasping_yaw(box_rot, corners)
@@ -381,12 +387,29 @@ while not gym.query_viewer_has_closed(viewer):
     init_dist = torch.norm(to_init, dim=-1)
     hand_restart = (hand_restart & (init_dist > 0.02)).squeeze(-1)
     return_to_start = (hand_restart | gripped.squeeze(-1)).unsqueeze(-1)
+    # if hand_restart:
+    #     # actor_root_state_tensor = gym.acquire_actor_root_state_tensor(sim)
+    #     # root_state_tensor = gymtorch.wrap_tensor(actor_root_state_tensor).view(-1, 13)
+    #     # root_state_tensor[box_idxs[0], :3] = torch.tensor([[1, 0.3, 0.6]]).to(device)
+    #     # rb_states[box_idxs, :3] = torch.tensor([[1, 0.3, 0.6]]).to(device)
+    #     # gym.set_rigid_body_state_tensor(sim, gymtorch.unwrap_tensor(rb_states))
+    #     state = gym.get_actor_rigid_body_states(envs[0], box_handle, gymapi.STATE_NONE)
+    #     state['pose']['p'].fill((1, 0.3, 0.6))
+    #     state['pose']['r'].fill((0, 0, 0., 1))
+    #     state['vel']['linear'].fill((0, 0, 0))
+    #     state['vel']['angular'].fill((0, 0, 0))
+    #     gym.set_actor_rigid_body_states(envs[0], box_handle, state, gymapi.STATE_ALL)
+    #     # gym.set_actor_root_state_tensor_indexed(sim,
+    #     #                                         gymtorch.unwrap_tensor(root_state_tensor),
+    #     #                                         gymtorch.unwrap_tensor(to_torch(box_idxs,
+    #     #                                             dtype=torch.long, device=device).to(
+    #     #                                             torch.int32)), 1)
 
     # if hand is above box, descend to grasp offset
     # otherwise, seek a position above the box
     above_box = ((box_dot >= 0.99) & (yaw_dot >= 0.95) & (box_dist < grasp_offset * 3)).squeeze(-1)
     grasp_pos = box_pos.clone()
-    grasp_pos[:, 1] = torch.where(above_box, box_pos[:, 1] + grasp_offset, box_pos[:, 1] + grasp_offset * 2.5)
+    grasp_pos[:, 2] = torch.where(above_box, box_pos[:, 2] + grasp_offset, box_pos[:, 2] + grasp_offset * 2.5)
 
     # compute goal position and orientation
     goal_pos = torch.where(return_to_start, init_pos, grasp_pos)
@@ -397,24 +420,35 @@ while not gym.query_viewer_has_closed(viewer):
     orn_err = orientation_error(goal_rot, hand_rot)
     dpose = torch.cat([pos_err, orn_err], -1).unsqueeze(-1)
     import rofunc as rf
+
     rf.logger.beauty_print("pos_err: {}".format(pos_err), type="info")
     rf.logger.beauty_print("orn_err: {}".format(orn_err), type="info")
 
     # Deploy control based on type
     if controller == "ik":
-        pos_action[:, 7:14] = dof_pos.squeeze(-1)[:, 7:14] + control_ik(dpose)
+        pos_action[:, :7] = dof_pos.squeeze(-1)[:, :7] + control_ik(dpose)
     else:  # osc
-        effort_action[:, 7:14] = control_osc(dpose)
+        effort_action[:, :7] = control_osc(dpose)
 
     # gripper actions depend on distance between hand and box
     close_gripper = (box_dist < grasp_offset + 0.02) | gripped
     # always open the gripper above a certain height, dropping the box and restarting from the beginning
-    hand_restart = hand_restart | (box_pos[:, 1] > 0.6)
+    hand_restart = hand_restart | (box_pos[:, 2] > 0.58)
     keep_going = torch.logical_not(hand_restart)
     close_gripper = close_gripper & keep_going.unsqueeze(-1)
     grip_acts = torch.where(close_gripper, torch.Tensor([[0., 0.]] * num_envs).to(device),
                             torch.Tensor([[0.04, 0.04]] * num_envs).to(device))
-    pos_action[:, 14:16] = grip_acts
+    pos_action[:, 7:9] = grip_acts
+    # if not close_gripper:
+        # actor_root_state_tensor = gym.acquire_actor_root_state_tensor(sim)
+        # root_state_tensor = gymtorch.wrap_tensor(actor_root_state_tensor).view(-1, 13)
+        # root_state_tensor[box_idxs[0], :3] = torch.tensor([[0, 0, 0]]).to(device)
+        # gym.set_actor_root_state_tensor_indexed(sim,
+        #                                             gymtorch.unwrap_tensor(root_state_tensor),
+        #                                             gymtorch.unwrap_tensor(to_torch(box_idxs,
+        #                                                 dtype=torch.long, device=device).to(
+        #                                                 torch.int32)), 1)
+
 
     # Deploy actions
     gym.set_dof_position_target_tensor(sim, gymtorch.unwrap_tensor(pos_action))

@@ -9,9 +9,9 @@ import isaacgym
 import rofunc as rf
 
 # CURI
-# args = rf.config.get_sim_config("CURI")
-# CURIsim = rf.sim.CURISim(args)
-# CURIsim.show()
+args = rf.config.get_sim_config("CURI")
+CURIsim = rf.sim.CURISim(args)
+CURIsim.show(visual_obs_flag=True)
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -21,7 +21,7 @@ import rofunc as rf
 # CURI-mini
 # args = rf.config.get_sim_config("CURImini")
 # CURIminisim = rf.sim.CURIminiSim(args)
-# CURIminisim.show()
+# CURIminisim.show(visual_obs_flag=True)
 
 # franka
 # args = rf.config.get_sim_config("Franka")
@@ -44,9 +44,9 @@ import rofunc as rf
 # Gluonsim.show()
 
 # # qbsofthand
-args = rf.config.get_sim_config("QbSoftHand")
-QbSoftHandsim = rf.sim.QbSoftHandSim(args)
-QbSoftHandsim.show()
+# args = rf.config.get_sim_config("QbSoftHand")
+# QbSoftHandsim = rf.sim.QbSoftHandSim(args)
+# QbSoftHandsim.show()
 
 # # Humanoid
 # args = rf.config.get_sim_config("Humanoid")
