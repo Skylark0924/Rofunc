@@ -1,5 +1,5 @@
 """
-Tracking the trajectory with multiple joints by Walker
+Tracking the trajectory with multiple rigid bodies by Walker
 ============================================================
 
 This example runs a Tai Chi demo bimanual trajectory by using Walker.
