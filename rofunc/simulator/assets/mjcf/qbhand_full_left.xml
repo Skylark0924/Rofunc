@@ -1,5 +1,5 @@
 <mujoco model="qbhand_left">
-    <compiler angle="degree" meshdir="../urdf/curi/meshes/qbhand/"/>
+    <compiler angle="degree" autolimits="true" meshdir="../urdf/curi/meshes/qbhand/"/>
     <statistic extent="2" center="0 0 1"/>
     <option timestep="0.00555"/>
     <default>
@@ -299,38 +299,38 @@
     </worldbody>
 
     <actuator>
-        <motor name='qbhand_thumb_knuckle_joint' gear='50' joint='qbhand_thumb_knuckle_joint'/>
-        <motor name='qbhand_thumb_proximal_joint' gear='50' joint='qbhand_thumb_proximal_joint'/>
-        <motor name='qbhand_thumb_proximal_virtual_joint' gear='50' joint='qbhand_thumb_proximal_virtual_joint'/>
-        <motor name='qbhand_thumb_distal_joint' gear='50' joint='qbhand_thumb_distal_joint'/>
-        <motor name='qbhand_thumb_distal_virtual_joint' gear='50' joint='qbhand_thumb_distal_virtual_joint'/>
-        <motor name='qbhand_index_knuckle_joint' gear='50' joint='qbhand_index_knuckle_joint'/>
-        <motor name='qbhand_index_proximal_joint' gear='50' joint='qbhand_index_proximal_joint'/>
-        <motor name='qbhand_index_proximal_virtual_joint' gear='50' joint='qbhand_index_proximal_virtual_joint'/>
-        <motor name='qbhand_index_middle_joint' gear='50' joint='qbhand_index_middle_joint'/>
-        <motor name='qbhand_index_middle_virtual_joint' gear='50' joint='qbhand_index_middle_virtual_joint'/>
-        <motor name='qbhand_index_distal_joint' gear='50' joint='qbhand_index_distal_joint'/>
-        <motor name='qbhand_index_distal_virtual_joint' gear='50' joint='qbhand_index_distal_virtual_joint'/>
-        <motor name='qbhand_middle_knuckle_joint' gear='50' joint='qbhand_middle_knuckle_joint'/>
-        <motor name='qbhand_middle_proximal_joint' gear='50' joint='qbhand_middle_proximal_joint'/>
-        <motor name='qbhand_middle_proximal_virtual_joint' gear='50' joint='qbhand_middle_proximal_virtual_joint'/>
-        <motor name='qbhand_middle_middle_joint' gear='50' joint='qbhand_middle_middle_joint'/>
-        <motor name='qbhand_middle_middle_virtual_joint' gear='50' joint='qbhand_middle_middle_virtual_joint'/>
-        <motor name='qbhand_middle_distal_joint' gear='50' joint='qbhand_middle_distal_joint'/>
-        <motor name='qbhand_middle_distal_virtual_joint' gear='50' joint='qbhand_middle_distal_virtual_joint'/>
-        <motor name='qbhand_ring_knuckle_joint' gear='50' joint='qbhand_ring_knuckle_joint'/>
-        <motor name='qbhand_ring_proximal_joint' gear='50' joint='qbhand_ring_proximal_joint'/>
-        <motor name='qbhand_ring_proximal_virtual_joint' gear='50' joint='qbhand_ring_proximal_virtual_joint'/>
-        <motor name='qbhand_ring_middle_joint' gear='50' joint='qbhand_ring_middle_joint'/>
-        <motor name='qbhand_ring_middle_virtual_joint' gear='50' joint='qbhand_ring_middle_virtual_joint'/>
-        <motor name='qbhand_ring_distal_joint' gear='50' joint='qbhand_ring_distal_joint'/>
-        <motor name='qbhand_ring_distal_virtual_joint' gear='50' joint='qbhand_ring_distal_virtual_joint'/>
-        <motor name='qbhand_little_knuckle_joint' gear='50' joint='qbhand_little_knuckle_joint'/>
-        <motor name='qbhand_little_proximal_joint' gear='50' joint='qbhand_little_proximal_joint'/>
-        <motor name='qbhand_little_proximal_virtual_joint' gear='50' joint='qbhand_little_proximal_virtual_joint'/>
-        <motor name='qbhand_little_middle_joint' gear='50' joint='qbhand_little_middle_joint'/>
-        <motor name='qbhand_little_middle_virtual_joint' gear='50' joint='qbhand_little_middle_virtual_joint'/>
-        <motor name='qbhand_little_distal_joint' gear='50' joint='qbhand_little_distal_joint'/>
-        <motor name='qbhand_little_distal_virtual_joint' gear='50' joint='qbhand_little_distal_virtual_joint'/>
+        <position name='qbhand_thumb_knuckle_joint' gear='50' joint='qbhand_thumb_knuckle_joint'/>
+        <position name='qbhand_thumb_proximal_joint' gear='50' joint='qbhand_thumb_proximal_joint'/>
+        <position name='qbhand_thumb_proximal_virtual_joint' gear='50' joint='qbhand_thumb_proximal_virtual_joint'/>
+        <position name='qbhand_thumb_distal_joint' gear='50' joint='qbhand_thumb_distal_joint'/>
+        <position name='qbhand_thumb_distal_virtual_joint' gear='50' joint='qbhand_thumb_distal_virtual_joint'/>
+        <position name='qbhand_index_knuckle_joint' gear='50' joint='qbhand_index_knuckle_joint'/>
+        <position name='qbhand_index_proximal_joint' gear='50' joint='qbhand_index_proximal_joint'/>
+        <position name='qbhand_index_proximal_virtual_joint' gear='50' joint='qbhand_index_proximal_virtual_joint'/>
+        <position name='qbhand_index_middle_joint' gear='50' joint='qbhand_index_middle_joint'/>
+        <position name='qbhand_index_middle_virtual_joint' gear='50' joint='qbhand_index_middle_virtual_joint'/>
+        <position name='qbhand_index_distal_joint' gear='50' joint='qbhand_index_distal_joint'/>
+        <position name='qbhand_index_distal_virtual_joint' gear='50' joint='qbhand_index_distal_virtual_joint'/>
+        <position name='qbhand_middle_knuckle_joint' gear='50' joint='qbhand_middle_knuckle_joint'/>
+        <position name='qbhand_middle_proximal_joint' gear='50' joint='qbhand_middle_proximal_joint'/>
+        <position name='qbhand_middle_proximal_virtual_joint' gear='50' joint='qbhand_middle_proximal_virtual_joint'/>
+        <position name='qbhand_middle_middle_joint' gear='50' joint='qbhand_middle_middle_joint'/>
+        <position name='qbhand_middle_middle_virtual_joint' gear='50' joint='qbhand_middle_middle_virtual_joint'/>
+        <position name='qbhand_middle_distal_joint' gear='50' joint='qbhand_middle_distal_joint'/>
+        <position name='qbhand_middle_distal_virtual_joint' gear='50' joint='qbhand_middle_distal_virtual_joint'/>
+        <position name='qbhand_ring_knuckle_joint' gear='50' joint='qbhand_ring_knuckle_joint'/>
+        <position name='qbhand_ring_proximal_joint' gear='50' joint='qbhand_ring_proximal_joint'/>
+        <position name='qbhand_ring_proximal_virtual_joint' gear='50' joint='qbhand_ring_proximal_virtual_joint'/>
+        <position name='qbhand_ring_middle_joint' gear='50' joint='qbhand_ring_middle_joint'/>
+        <position name='qbhand_ring_middle_virtual_joint' gear='50' joint='qbhand_ring_middle_virtual_joint'/>
+        <position name='qbhand_ring_distal_joint' gear='50' joint='qbhand_ring_distal_joint'/>
+        <position name='qbhand_ring_distal_virtual_joint' gear='50' joint='qbhand_ring_distal_virtual_joint'/>
+        <position name='qbhand_little_knuckle_joint' gear='50' joint='qbhand_little_knuckle_joint'/>
+        <position name='qbhand_little_proximal_joint' gear='50' joint='qbhand_little_proximal_joint'/>
+        <position name='qbhand_little_proximal_virtual_joint' gear='50' joint='qbhand_little_proximal_virtual_joint'/>
+        <position name='qbhand_little_middle_joint' gear='50' joint='qbhand_little_middle_joint'/>
+        <position name='qbhand_little_middle_virtual_joint' gear='50' joint='qbhand_little_middle_virtual_joint'/>
+        <position name='qbhand_little_distal_joint' gear='50' joint='qbhand_little_distal_joint'/>
+        <position name='qbhand_little_distal_virtual_joint' gear='50' joint='qbhand_little_distal_virtual_joint'/>
     </actuator>
 </mujoco>

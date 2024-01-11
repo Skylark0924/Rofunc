@@ -505,7 +505,7 @@
     <parent link="panda_left_link0"/>
     <child link="panda_left_link1"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="15" effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+    <limit acceleration="15" effort="500" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_left_link2">
@@ -533,7 +533,7 @@
     <parent link="panda_left_link1"/>
     <child link="panda_left_link2"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="7.5" effort="87" lower="-1.7628" upper="1.7628" velocity="2.1750"/>
+    <limit acceleration="7.5" effort="500" lower="-1.7628" upper="1.7628" velocity="2.1750"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_left_link3">
@@ -561,7 +561,7 @@
     <parent link="panda_left_link2"/>
     <child link="panda_left_link3"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="12.5" effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+    <limit acceleration="12.5" effort="500" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_left_link4">
@@ -589,7 +589,7 @@
     <parent link="panda_left_link3"/>
     <child link="panda_left_link4"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="12.5" effort="87" lower="-3.0718" upper="-0.0698" velocity="2.1750"/>
+    <limit acceleration="12.5" effort="500" lower="-3.0718" upper="-0.0698" velocity="2.1750"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_left_link5">
@@ -617,7 +617,7 @@
     <parent link="panda_left_link4"/>
     <child link="panda_left_link5"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="15" effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    <limit acceleration="15" effort="500" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_left_link6">
@@ -645,7 +645,7 @@
     <parent link="panda_left_link5"/>
     <child link="panda_left_link6"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="20" effort="12" lower="-0.0175" upper="3.7525" velocity="2.6100"/>
+    <limit acceleration="20" effort="500" lower="-0.0175" upper="3.7525" velocity="2.6100"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_left_link7">
@@ -673,7 +673,7 @@
     <parent link="panda_left_link6"/>
     <child link="panda_left_link7"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="20" effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    <limit acceleration="20" effort="500" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <joint name="panda_right_joint_torso_end" type="fixed">
@@ -726,7 +726,7 @@
     <parent link="panda_right_link0"/>
     <child link="panda_right_link1"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="15" effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+    <limit acceleration="15" effort="500" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_right_link2">
@@ -754,7 +754,7 @@
     <parent link="panda_right_link1"/>
     <child link="panda_right_link2"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="7.5" effort="87" lower="-1.7628" upper="1.7628" velocity="2.1750"/>
+    <limit acceleration="7.5" effort="500" lower="-1.7628" upper="1.7628" velocity="2.1750"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_right_link3">
@@ -782,7 +782,7 @@
     <parent link="panda_right_link2"/>
     <child link="panda_right_link3"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="12.5" effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+    <limit acceleration="12.5" effort="500" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_right_link4">
@@ -810,7 +810,7 @@
     <parent link="panda_right_link3"/>
     <child link="panda_right_link4"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="12.5" effort="87" lower="-3.0718" upper="-0.0698" velocity="2.1750"/>
+    <limit acceleration="12.5" effort="500" lower="-3.0718" upper="-0.0698" velocity="2.1750"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_right_link5">
@@ -838,7 +838,7 @@
     <parent link="panda_right_link4"/>
     <child link="panda_right_link5"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="15" effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    <limit acceleration="15" effort="500" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_right_link6">
@@ -866,7 +866,7 @@
     <parent link="panda_right_link5"/>
     <child link="panda_right_link6"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="20" effort="12" lower="-0.0175" upper="3.7525" velocity="2.6100"/>
+    <limit acceleration="20" effort="500" lower="-0.0175" upper="3.7525" velocity="2.6100"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="panda_right_link7">
@@ -894,7 +894,7 @@
     <parent link="panda_right_link6"/>
     <child link="panda_right_link7"/>
     <axis xyz="0 0 1"/>
-    <limit acceleration="20" effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    <limit acceleration="20" effort="500" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <joint name="panda_left_hand_joint" type="fixed">
