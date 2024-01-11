@@ -42,6 +42,9 @@ class Tasks:
             from .isaacgymenv.hands.shadow_hand_two_catch_underarm import ShadowHandTwoCatchUnderarmTask
             from .isaacgymenv.hands.qbsofthand_grasp import QbSoftHandGraspTask
             from .isaacgymenv.hands.bi_qbhand_grasp_and_place import BiQbSoftHandGraspAndPlaceTask
+            from .isaacgymenv.hands.bi_qbhand_synergy_grasp import BiQbSoftHandSynergyGraspTask
+            from .isaacgymenv.hands.qbhand_synergy_grasp import QbSoftHandSynergyGraspTask
+            from .isaacgymenv.hands.shadow_hand_grasp import ShadowHandGraspTask
 
             self.task_map = {
                 "Ant": AntTask,
@@ -84,6 +87,9 @@ class Tasks:
                 "BiShadowHandTwoCatchUnderarm": ShadowHandTwoCatchUnderarmTask,
                 "QbSoftHandGrasp": QbSoftHandGraspTask,
                 "BiQbSoftHandGraspAndPlace": BiQbSoftHandGraspAndPlaceTask,
+                "BiQbSoftHandSynergyGrasp": BiQbSoftHandSynergyGraspTask,
+                "QbSoftHandSynergyGrasp": QbSoftHandSynergyGraspTask,
+                "ShadowHandGrasp": ShadowHandGraspTask,
             }
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks
