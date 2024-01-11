@@ -187,8 +187,8 @@ class CURISim(RobotSim):
         u = (j_eef_T @ torch.inverse(self.j_eef @ j_eef_T + lmbda) @ dpose).view(self.num_envs, 7)
         return u
 
-    def control_osc(self, dpose, hand_vel, massmatrix, dof_vel, default_dof_pos_tensor, dof_indices):
-        kp = 150.
+    def control_osc(self, dpose, hand_vel, massmatrix, dof_indices):
+        kp = 1500.
         kd = 2.0 * np.sqrt(kp)
         kp_null = 10.
         kd_null = 2.0 * np.sqrt(kp_null)
@@ -203,8 +203,8 @@ class CURISim(RobotSim):
         # They are added into the nullspace of OSC so that the end effector orientation remains constant
         # roboticsproceedings.org/rss07/p31.pdf
         j_eef_inv = m_eef @ self.j_eef @ mm_inv
-        u_null = kd_null * -dof_vel + kp_null * (
-                (default_dof_pos_tensor.view(1, -1, 1) - self.dof_pos + np.pi) % (2 * np.pi) - np.pi)
+        u_null = kd_null * -self.dof_vel + kp_null * (
+                (self.default_dof_pos_tensor.view(1, -1, 1) - self.dof_pos + np.pi) % (2 * np.pi) - np.pi)
         u_null = u_null[:, dof_indices]
         u_null = massmatrix @ u_null
         u += (torch.eye(7).unsqueeze(0) -
@@ -467,7 +467,8 @@ class CURISim(RobotSim):
                      "   R: reset\n"
                      "   Q: quit\n", type="info")
 
-        pos_action = torch.tensor(self.default_dof_pos).reshape(self.dof_pos.shape).squeeze(-1)
+        self.default_dof_pos_tensor = to_torch(self.default_dof_pos, device="cpu")
+        pos_action = self.default_dof_pos_tensor.reshape(self.dof_pos.shape).squeeze(-1)
         effort_action = torch.zeros_like(pos_action)
         attracted_link_index = None
         visual_obs_flag = False
@@ -631,18 +632,14 @@ class CURISim(RobotSim):
                     if curi_link_dict["panda_left_hand"] == attracted_link_index:
                         massmatrix = self.massmatrix[:, self.left_arm_dof_indices][:, :, self.left_arm_dof_indices]
                         effort_action[:, self.left_arm_dof_indices] = self.control_osc(dpose, hand_vel, massmatrix,
-                                                                                       self.dof_vel,
-                                                                                       self.dof_pos,
                                                                                        self.left_arm_dof_indices)
                     elif curi_link_dict["panda_right_hand"] == attracted_link_index:
-                        massmatrix = self.massmatrix[:, self.left_arm_dof_indices][:, :, self.left_arm_dof_indices]
+                        massmatrix = self.massmatrix[:, self.right_arm_dof_indices][:, :, self.right_arm_dof_indices]
                         effort_action[:, self.right_arm_dof_indices] = self.control_osc(dpose, hand_vel, massmatrix,
-                                                                                        self.dof_vel,
-                                                                                        self.dof_pos,
                                                                                         self.right_arm_dof_indices)
 
                 if homing_flag:
-                    default_dof_pos_tensor = torch.tensor(self.default_dof_pos).reshape(self.dof_pos.shape).squeeze(-1)
+                    default_dof_pos_tensor = self.default_dof_pos_tensor.reshape(self.dof_pos.shape).squeeze(-1)
                     pos_action[:, self.left_arm_dof_indices] = default_dof_pos_tensor[:, self.left_arm_dof_indices]
                     pos_action[:, self.right_arm_dof_indices] = default_dof_pos_tensor[:, self.right_arm_dof_indices]
                 elif keep_arm_dof_flag:

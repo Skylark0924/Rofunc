@@ -97,10 +97,11 @@ if __name__ == '__main__':
     #                  BiShadowHandGraspAndPlace, BiShadowHandLiftUnderarm, BiShadowHandPen, BiShadowHandPointCloud,
     #                  BiShadowHandPushBlock, BiShadowHandReOrientation, BiShadowHandScissors, BiShadowHandSwingCup,
     #                  BiShadowHandSwitch, BiShadowHandTwoCatchUnderarm
-    #                  QbSoftHandGrasp, BiQbSoftHandGraspAndPlace
-    parser.add_argument("--task", type=str, default="BiQbSoftHandGraspAndPlace")
+    #                  QbSoftHandGrasp, BiQbSoftHandGraspAndPlace, BiQbSoftHandSynergyGrasp, QbSoftHandSynergyGrasp
+    #                  ShadowHandGrasp
+    parser.add_argument("--task", type=str, default="ShadowHandGrasp")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
-    parser.add_argument("--num_envs", type=int, default=256)
+    parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="False")
