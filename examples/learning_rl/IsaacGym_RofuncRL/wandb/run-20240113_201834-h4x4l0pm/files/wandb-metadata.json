@@ -1,0 +1,152 @@
+{
+    "os": "Linux-5.4.0-169-generic-x86_64-with-glibc2.17",
+    "python": "3.8.18",
+    "heartbeatAt": "2024-01-13T12:18:35.099641",
+    "startedAt": "2024-01-13T12:18:34.361971",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/ubuntu/Github/Rofunc/examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py",
+    "codePathLocal": "example_DexterousHands_RofuncRL.py",
+    "codePath": "examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py",
+    "git": {
+        "remote": "https://github.com/Skylark0924/Rofunc.git",
+        "commit": "aadd08806226fc7a76e72500211e8a4f4fcaf455"
+    },
+    "email": "l.syj@163.com",
+    "root": "/home/ubuntu/Github/Rofunc",
+    "host": "rofunc",
+    "username": "ubuntu",
+    "executable": "/home/ubuntu/anaconda3/envs/rofunc/bin/python",
+    "cpu_count": 10,
+    "cpu_count_logical": 20,
+    "cpu_freq": {
+        "current": 4672.302249999999,
+        "min": 800.0,
+        "max": 5200.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 4737.668,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4767.195,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4697.996,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4776.192,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4785.09,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4764.585,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4786.945,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4771.721,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4665.171,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4621.172,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4735.222,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4696.725,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4612.317,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4654.757,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4780.764,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4660.589,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4779.536,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4789.529,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4700.278,
+            "min": 800.0,
+            "max": 5200.0
+        },
+        {
+            "current": 4655.375,
+            "min": 800.0,
+            "max": 5200.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 372.6539306640625,
+            "used": 291.88134765625
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "gpu_count": 2,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 3090",
+            "memory_total": 25769803776
+        },
+        {
+            "name": "NVIDIA GeForce RTX 3090",
+            "memory_total": 25769803776
+        }
+    ],
+    "memory": {
+        "total": 62.69269943237305
+    }
+}

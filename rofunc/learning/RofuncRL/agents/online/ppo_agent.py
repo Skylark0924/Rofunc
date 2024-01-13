@@ -46,7 +46,7 @@ class PPOAgent(BaseAgent):
                  experiment_dir: Optional[str] = None,
                  rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
-        :param cfg: Configurations
+        :param cfg: All configurations (task + train)
         :param observation_space: Observation space
         :param action_space: Action space
         :param memory: Memory for storing transitions

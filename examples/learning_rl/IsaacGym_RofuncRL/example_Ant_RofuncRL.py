@@ -40,7 +40,7 @@ def train(custom_args):
                                              force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
@@ -72,10 +72,11 @@ def inference(custom_args):
                                                    force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=infer_env,
                                                         device=cfg.rl_device,
-                                                        env_name=custom_args.task)
+                                                        env_name=custom_args.task,
+                                                        inference=True)
     # load checkpoint
     if custom_args.ckpt_path is None:
         custom_args.ckpt_path = model_zoo(name="AntRofuncRLPPO.pth")
@@ -86,7 +87,7 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="Ant")

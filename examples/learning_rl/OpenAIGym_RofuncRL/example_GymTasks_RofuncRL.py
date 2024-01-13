@@ -32,7 +32,7 @@ def train(custom_args):
         env = gym.vector.make(gym_task_name, render_mode=custom_args.render_mode, num_envs=10, asynchronous=False)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)

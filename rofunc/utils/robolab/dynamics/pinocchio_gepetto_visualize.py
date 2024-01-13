@@ -8,11 +8,11 @@ from pinocchio.visualize import GepettoVisualizer
 
 # Load the URDF model.
 # Conversion with str seems to be necessary when executing this file with ipython
-pinocchio_model_dir = join(dirname(dirname(str(abspath(__file__)))), "franka_description")
+pinocchio_model_dir = join("/home/ubuntu/Github/Rofunc/rofunc/simulator/assets/urdf", "franka_description")
 
 model_path = pinocchio_model_dir
 mesh_dir = join(pinocchio_model_dir, "meshes")
-urdf_filename = "franka_panda.urdf"
+urdf_filename = "franka_panda_no_gripper.urdf"
 urdf_model_path = join(join(model_path, "robots"), urdf_filename)
 
 model, collision_model, visual_model = pin.buildModelsFromUrdf(urdf_model_path, mesh_dir, pin.JointModelFreeFlyer())
