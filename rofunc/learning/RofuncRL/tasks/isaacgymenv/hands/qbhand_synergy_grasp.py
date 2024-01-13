@@ -297,9 +297,9 @@ class QbSoftHandSynergyGraspTask(VecTask):
 
         # set shadow_hand dof properties
         hand_dof_props = self.gym.get_asset_dof_properties(hand_asset)
-        hand_dof_props['driveMode'] = gymapi.DOF_MODE_POS
-        hand_dof_props['stiffness'] = 1000000.0
-        hand_dof_props['damping'] = 1000.0
+        # hand_dof_props['driveMode'] = gymapi.DOF_MODE_POS
+        # hand_dof_props['stiffness'] = 1000000.0
+        # hand_dof_props['damping'] = 1000.0
 
         self.hand_dof_lower_limits = []
         self.hand_dof_upper_limits = []
@@ -322,24 +322,30 @@ class QbSoftHandSynergyGraspTask(VecTask):
 
         # <editor-fold desc="load manipulated object and goal assets">
         object_asset_options = gymapi.AssetOptions()
-        object_asset_options.density = 100
+        object_asset_options.density = 10
         object_asset_options.fix_base_link = False
         # object_asset_options.collapse_fixed_joints = True
-        # object_asset_options.disable_gravity = True
         object_asset_options.use_mesh_materials = True
         object_asset_options.mesh_normal_mode = gymapi.COMPUTE_PER_VERTEX
         object_asset_options.override_com = True
         object_asset_options.override_inertia = True
         object_asset_options.vhacd_enabled = True
+        object_asset_options.disable_gravity = False
         object_asset_options.vhacd_params = gymapi.VhacdParams()
         object_asset_options.vhacd_params.resolution = 100000
         object_asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
+        # object_asset_options.override_com = True
+        # object_asset_options.override_inertia = True
+        # # Enable convex decomposition
+        # object_asset_options.vhacd_enabled = True
+        # object_asset_options.vhacd_params = gymapi.VhacdParams()
+        # object_asset_options.vhacd_params.resolution = 1000000
 
         object_asset = self.gym.load_asset(self.sim, asset_root, object_asset_file, object_asset_options)
         # block_asset_file = "urdf/objects/cube_multicolor1.urdf"
         # block_asset = self.gym.load_asset(self.sim, asset_root, block_asset_file, object_asset_options)
 
-        object_asset_options.disable_gravity = True
+        # object_asset_options.disable_gravity = True
 
         self.num_object_bodies = self.gym.get_asset_rigid_body_count(object_asset)
         self.num_object_shapes = self.gym.get_asset_rigid_shape_count(object_asset)
@@ -373,12 +379,12 @@ class QbSoftHandSynergyGraspTask(VecTask):
 
         # <editor-fold desc="set initial poses">
         hand_start_pose = gymapi.Transform()
-        hand_start_pose.p = gymapi.Vec3(0.2, -0.1, 0.7)
+        hand_start_pose.p = gymapi.Vec3(0.1, -0.04, 0.65)
         hand_start_pose.r = gymapi.Quat().from_euler_zyx(-1.57, -1.57, 1.57)
 
         object_start_pose = gymapi.Transform()
-        object_start_pose.p = gymapi.Vec3(0.0, 0, 0.6)
-        object_start_pose.r = gymapi.Quat().from_euler_zyx(1.57, 0, 0)
+        object_start_pose.p = gymapi.Vec3(0.0, 0, 0.7)
+        object_start_pose.r = gymapi.Quat().from_euler_zyx(1.57, 0, -1.57)
 
         if self.object_type == "pen":
             object_start_pose.p.z = hand_start_pose.p.z + 0.02
@@ -446,9 +452,15 @@ class QbSoftHandSynergyGraspTask(VecTask):
                  hand_start_pose.r.w,
                  0, 0, 0, 0, 0, 0])
 
+            hand_dof_props = self.gym.get_actor_dof_properties(env_ptr, hand_actor)
+            hand_dof_props["driveMode"].fill(gymapi.DOF_MODE_POS)
+            hand_dof_props["stiffness"].fill(10000.0)
+            hand_dof_props["damping"].fill(20.0)
             self.gym.set_actor_dof_properties(env_ptr, hand_actor, hand_dof_props)
             hand_idx = self.gym.get_actor_index(env_ptr, hand_actor, gymapi.DOMAIN_SIM)
             self.hand_indices.append(hand_idx)
+            self.gym.set_actor_scale(env_ptr, hand_actor, 1)
+
 
             # <editor-fold desc="randomize colors and textures for rigid body">
             num_bodies = self.gym.get_actor_rigid_body_count(env_ptr, hand_actor)
@@ -482,9 +494,9 @@ class QbSoftHandSynergyGraspTask(VecTask):
             table_idx = self.gym.get_actor_index(env_ptr, table_handle, gymapi.DOMAIN_SIM)
             self.table_indices.append(table_idx)
 
-            if self.object_type != "block":
-                self.gym.set_rigid_body_color(
-                    env_ptr, object_handle, 0, gymapi.MESH_VISUAL, gymapi.Vec3(0.6, 0.72, 0.98))
+            # if self.object_type != "block":
+            #     self.gym.set_rigid_body_color(
+            #         env_ptr, object_handle, 0, gymapi.MESH_VISUAL, gymapi.Vec3(0.6, 0.72, 0.98))
 
             if self.obs_type in ["point_cloud"]:
                 camera_handle = self.gym.create_camera_sensor(env_ptr, self.camera_props)
@@ -543,11 +555,11 @@ class QbSoftHandSynergyGraspTask(VecTask):
             self.rew_buf, self.reset_buf, self.reset_goal_buf, self.progress_buf, self.successes,
             self.consecutive_successes,
             self.max_episode_length, self.object_pos, self.object_rot,
-            self.hand_pos, self.hand_ff_pos, self.hand_mf_pos,
+            self.rigid_body_states[:, 1, 0:3], self.hand_ff_pos, self.hand_mf_pos,
             self.hand_rf_pos, self.hand_lf_pos, self.hand_th_pos,
             self.dist_reward_scale, self.rot_reward_scale, self.rot_eps, self.actions, self.action_penalty_scale,
             self.success_tolerance, self.reach_goal_bonus, self.fall_dist, self.fall_penalty,
-            self.max_consecutive_successes, self.av_factor, (self.object_type == "pen")
+            self.max_consecutive_successes, self.av_factor, (self.object_type == "pen"), self.prev_synergy_actions
         )
 
         self.extras['successes'] = self.successes
@@ -1009,8 +1021,12 @@ class QbSoftHandSynergyGraspTask(VecTask):
         else:
             # assert list(self.actuated_dof_indices) == self.right_useful_joint_index
             synergy_action = self.actions[:, 6:8]
-            synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
+            # synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
             synergy_action = self.prev_synergy_actions * 0.9 + 0.1 * synergy_action
+            synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
+            # synergy_action = torch.zeros_like(self.actions[:, 6:8]).to(self.device)
+            # synergy_action[:, 0] = torch.ones_like(self.actions[:, 6]).to(self.device)
+            # synergy_action[:, 0] = self.actions[:, 6]
             self.prev_synergy_actions = synergy_action
             synergy_action_matrix = torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                                   [2, 2, 2, 1, 1, 1, 0, 0, 0, -1, -1, -1, -2, -2, -2]],
@@ -1043,7 +1059,23 @@ class QbSoftHandSynergyGraspTask(VecTask):
             #                                 self.object_dof_lower_limits[1], self.object_dof_upper_limits[1])
             # angle_offsets = self.actions[:, 26:32] * self.dt * self.orientation_scale
 
-            self.apply_forces[:, 0, :] = self.actions[:, 0:3] * self.dt * self.transition_scale * 100000
+            self.object_pos = self.root_state_tensor[self.object_indices, 0:3]
+            hand_pos = self.rigid_body_states[:, 1, 0:3]
+
+            hand_dist = torch.norm(self.object_pos - hand_pos, p=2, dim=-1)
+            # self.apply_forces[:, 0, :] = self.actions[:, 0:3] * self.dt * self.transition_scale * 100000
+            # self.apply_torque[:, 0, :] = self.actions[:, 3:6] * self.dt * self.orientation_scale * 1000
+
+            # self.apply_forces[:, 0, :] = torch.zeros_like(self.actions[:, 0:3])
+            # self.apply_torque[:, 0, :] = torch.zeros_like(self.actions[:, 3:6])
+
+            self.apply_forces[:, 0, :] = torch.where(hand_dist.unsqueeze(-1) < 0.05,
+                                                     torch.zeros_like(self.actions[:, 0:3]) + torch.tensor(
+                                                         [0., 0., 1000]).to(self.device),
+                                                     self.actions[:, 0:3] * self.dt * self.transition_scale * 100000)
+            # self.apply_torque[:, 0, :] = torch.where(hand_dist.unsqueeze(-1) < 0.2,
+            #                                          torch.zeros_like(self.actions[:, 3:6]),
+            #                                          self.actions[:, 3:6] * self.dt * self.orientation_scale * 1000)
             self.apply_torque[:, 0, :] = self.actions[:, 3:6] * self.dt * self.orientation_scale * 1000
 
             self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(self.apply_forces),
@@ -1194,8 +1226,8 @@ def compute_hand_reward(
         dist_reward_scale: float, rot_reward_scale: float, rot_eps: float,
         actions, action_penalty_scale: float,
         success_tolerance: float, reach_goal_bonus: float, fall_dist: float,
-        fall_penalty: float, max_consecutive_successes: int, av_factor: float, ignore_z_rot: bool
-):
+        fall_penalty: float, max_consecutive_successes: int, av_factor: float, ignore_z_rot: bool,
+        prev_synergy_actions):
     """
     Compute the reward of all environment.
 
@@ -1269,6 +1301,10 @@ def compute_hand_reward(
 
     action_penalty = torch.sum(actions ** 2, dim=-1)
 
+    synergy = prev_synergy_actions
+    synergy_target = torch.tensor([1, 0]).to(synergy.device)
+    synergy_dist = torch.norm(synergy - synergy_target, p=2, dim=-1)
+
     # # Total reward is: position distance + orientation alignment + action regularization + success bonus + fall penalty
     # # reward = torch.exp(-0.05*(up_rew * dist_reward_scale)) + torch.exp(-0.05*(right_hand_dist_rew * dist_reward_scale)) + torch.exp(-0.05*(left_hand_dist_rew * dist_reward_scale))
     # # up_rew = torch.zeros_like(right_hand_dist_rew)
@@ -1280,14 +1316,18 @@ def compute_hand_reward(
     #
     # # reward = torch.exp(-0.1*(right_hand_dist_rew * dist_reward_scale)) + torch.exp(-0.1*(left_hand_dist_rew * dist_reward_scale))
 
-    up_rew = object_pos[:, 2] - 0.6
+    up_rew = object_pos[:, 2] - 0.7
+    up_rew = torch.where(up_rew > 0, up_rew, torch.zeros_like(up_rew))* 100
     # print("Max height: {}, Avg height: {}".format(torch.max(object_pos[:, 2]), torch.mean(object_pos[:, 2])))
-    reward = up_rew * 10
+    reward = up_rew  - synergy_dist - hand_dist
+    print("up_rew: {}, synergy_rew: {}, hand_dist: {}".format(float(torch.mean(up_rew).cpu()),
+                                                              float(torch.mean(synergy_dist).cpu()),
+                                                              float(torch.mean(hand_dist).cpu())))
 
     # resets = torch.where(hand_dist_rew <= 0, torch.ones_like(reset_buf), reset_buf)
     # resets = torch.where(object_rot[:, 3] > 0.9, torch.ones_like(resets), resets)
     # resets = torch.where(right_hand_finger_dist >= 1.5, torch.ones_like(resets), resets)
-    resets = torch.where(hand_finger_dist >= 1.5, torch.ones_like(reset_buf), reset_buf)
+    resets = torch.where(hand_dist >= 0.2, torch.ones_like(reset_buf), reset_buf)
 
     # Find out which envs hit the goal and update successes count
     successes = torch.where(successes == 0, torch.where(object_pos[:, 2] > 1.0,

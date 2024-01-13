@@ -33,12 +33,9 @@ def train(custom_args):
 
     # Instantiate the Isaac Gym environment
     env = Tasks().task_map[custom_args.task](cfg=cfg_dict,
-                                             rl_device=cfg.rl_device,
                                              sim_device=f'cuda:{cfg.device_id}',
                                              graphics_device_id=cfg.device_id,
-                                             headless=cfg.headless,
-                                             virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                             force_render=cfg.force_render)
+                                             headless=cfg.headless)
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
@@ -88,23 +85,16 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
-    # Available tasks: BiShadowHandOver, BiShadowHandBlockStack, BiShadowHandBottleCap, BiShadowHandCatchAbreast,
-    #                  BiShadowHandCatchOver2Underarm, BiShadowHandCatchUnderarm, BiShadowHandDoorOpenInward,
-    #                  BiShadowHandDoorOpenOutward, BiShadowHandDoorCloseInward, BiShadowHandDoorCloseOutward,
-    #                  BiShadowHandGraspAndPlace, BiShadowHandLiftUnderarm, BiShadowHandPen, BiShadowHandPointCloud,
-    #                  BiShadowHandPushBlock, BiShadowHandReOrientation, BiShadowHandScissors, BiShadowHandSwingCup,
-    #                  BiShadowHandSwitch, BiShadowHandTwoCatchUnderarm
-    #                  QbSoftHandGrasp, BiQbSoftHandGraspAndPlace, BiQbSoftHandSynergyGrasp, QbSoftHandSynergyGrasp
-    #                  ShadowHandGrasp
-    parser.add_argument("--task", type=str, default="QbSoftHandSynergyGrasp")
+    # Available tasks: LiftObject
+    parser.add_argument("--task", type=str, default="LiftObject")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
-    parser.add_argument("--num_envs", type=int, default=4096)
-    parser.add_argument("--sim_device", type=int, default=0)
+    parser.add_argument("--num_envs", type=int, default=256)
+    parser.add_argument("--sim_device", type=int, default=1)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="False")
+    parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()

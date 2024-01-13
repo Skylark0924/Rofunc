@@ -60,7 +60,7 @@ Agent:
 # ========= Model parameters ==========
 Model:
   use_init: True
-  use_action_clip: False               # If true, clip actions to the action space range.
+  use_action_clip: True               # If true, clip actions to the action space range.
   use_same_model: False                # If true, use the same model for the actor and critic.
   use_action_out_tanh: True            # If true, use tanh to scale the action outputs to the action space range.
   action_clip: 1.0                     # clipping coefficient for the norm of the actions
