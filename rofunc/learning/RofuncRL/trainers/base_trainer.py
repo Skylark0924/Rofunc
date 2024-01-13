@@ -29,6 +29,7 @@ from tensorboard import program
 from torch.utils.tensorboard import SummaryWriter
 
 import rofunc as rf
+from rofunc.config.utils import omegaconf_to_dict
 from rofunc.learning.RofuncRL.processors.normalizers import Normalization
 from rofunc.learning.utils.env_wrappers import wrap_env
 from rofunc.utils.logger.beauty_logger import BeautyLogger
@@ -43,14 +44,16 @@ class BaseTrainer:
                  env_name: Optional[str] = None,
                  inference: bool = False):
         self.cfg = cfg
+        self.cfg_trainer = cfg.train.Trainer
         self.agent = None
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu") if device is None else torch.device(device)
         self.env_name = env_name
+        self.inference_flag = inference
 
         '''Experiment log directory'''
-        directory = self.cfg.Trainer.experiment_directory
-        exp_name = self.cfg.Trainer.experiment_name
+        directory = self.cfg.train.Trainer.experiment_directory
+        exp_name = self.cfg.train.Trainer.experiment_name
         directory = os.path.join(os.getcwd(), "runs") if not directory else directory
         exp_name = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S-%f") if not exp_name else exp_name
         if not inference:
@@ -61,12 +64,15 @@ class BaseTrainer:
         rf.oslab.create_dir(self.exp_dir, local_verbose=True)
 
         '''Rofunc logger'''
-        self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.Trainer.rofunc_logger_kwargs.verbose)
-        self.rofunc_logger.info(f"Trainer configurations:\n{OmegaConf.to_yaml(self.cfg)}")
+        self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.train.Trainer.rofunc_logger_kwargs.verbose)
+        self.rofunc_logger.info(f"Trainer configurations:\n{OmegaConf.to_yaml(self.cfg.train)}")
+
+        '''Setup Weights & Biases'''
+        self.setup_wandb()
 
         '''TensorBoard'''
         # main entry to log data for consumption and visualization by TensorBoard
-        self.write_interval = self.cfg.Trainer.write_interval
+        self.write_interval = self.cfg.train.Trainer.write_interval
         self.writer = SummaryWriter(log_dir=self.exp_dir)
         tb = program.TensorBoard()
         # Find a free port
@@ -81,33 +87,31 @@ class BaseTrainer:
         self.rofunc_logger.info(f"Tensorboard listening on {url}")
 
         '''Misc variables'''
-        self.maximum_steps = self.cfg.Trainer.maximum_steps
-        self.start_learning_steps = self.cfg.Trainer.start_learning_steps
-        self.random_steps = self.cfg.Trainer.random_steps
-        self.rollouts = self.cfg.Trainer.rollouts
-        self.max_episode_steps = self.cfg.Trainer.max_episode_steps
+        self.maximum_steps = self.cfg.train.Trainer.get("maximum_steps", int(1e6))
+        self.start_learning_steps = self.cfg.train.Trainer.get("start_learning_steps", 0)
+        self.random_steps = self.cfg.train.Trainer.get("random_steps", 0)
+        self.rollouts = self.cfg.train.Trainer.get("rollouts", 16)
+        self.max_episode_steps = self.cfg.train.Trainer.get("max_episode_steps", 250)
         self._step = 0
         self._rollout = 0
         self._update_times = 0
         self.start_time = None
 
         '''Evaluation and inference configurations'''
-        self.eval_flag = self.cfg.Trainer.eval_flag if hasattr(self.cfg.Trainer, "eval_flag") else False
-        self.eval_freq = self.cfg.Trainer.eval_freq if hasattr(self.cfg.Trainer, "eval_freq") else 0
-        self.eval_steps = self.cfg.Trainer.eval_steps if hasattr(self.cfg.Trainer, "eval_steps") else 0
-        self.eval_env_seed = self.cfg.Trainer.eval_env_seed if hasattr(self.cfg.Trainer,
-                                                                       "eval_env_seed") else random.randint(0, 10000)
-        self.use_eval_thread = self.cfg.Trainer.use_eval_thread if hasattr(self.cfg.Trainer,
-                                                                           "use_eval_thread") else False
+        self.eval_flag = self.cfg.train.Trainer.get("eval_flag", False)
+        self.eval_freq = self.cfg.train.Trainer.get("eval_freq", 5 * self.max_episode_steps)
+        self.eval_steps = self.cfg.train.Trainer.get("eval_steps", 1000)
+        self.eval_env_seed = self.cfg.train.Trainer.get("eval_env_seed", random.randint(0, 10000))
+        self.use_eval_thread = self.cfg.train.Trainer.get("use_eval_thread", False)
         assert self.eval_steps % self.max_episode_steps == 0, \
             f"eval_steps ({self.eval_steps}) must be a multiple of max_episode_steps ({self.max_episode_steps})."
-        self.inference_steps = self.cfg.Trainer.inference_steps if hasattr(self.cfg.Trainer, "inference_steps") else 0
+        self.inference_steps = self.cfg.train.Trainer.get("inference_steps", 1000)
         self.total_rew_mean = -1e4
         self.eval_rew_mean = 0
 
         '''Environment'''
         # env.device = self.device  # TODO: check whether this is necessary
-        self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.Trainer.seed)
+        self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.train.Trainer.seed)
         self.eval_env = wrap_env(env, logger=self.rofunc_logger, seed=self.eval_env_seed) if self.eval_flag else None
         self.rofunc_logger.info(f"Environment:\n  "
                                 f"  action_space: {self.env.action_space.shape}\n  "
@@ -122,24 +126,20 @@ class BaseTrainer:
 
     def setup_wandb(self):
         # setup Weights & Biases
-        if self.cfg.get("Trainer", {}).get("wandb", False):
-            # save experiment config
-            trainer_cfg = None  # TODO: check
-            trainer_cfg = trainer_cfg if trainer_cfg is not None else {}
-            try:
-                models_cfg = {k: v.net._modules for (k, v) in self.agent.models.items()}
-            except AttributeError:
-                models_cfg = {k: v._modules for (k, v) in self.agent.models.items()}
-            config = {**self.cfg, **trainer_cfg, **models_cfg}
-            # set default values
-            wandb_kwargs = copy.deepcopy(self.cfg.get("Trainer", {}).get("wandb_kwargs", {}))
-            wandb_kwargs.setdefault("name", os.path.split(self.exp_dir)[-1])
-            wandb_kwargs.setdefault("sync_tensorboard", True)
-            wandb_kwargs.setdefault("config", {})
-            wandb_kwargs["config"].update(config)
-            # init Weights & Biases
+        if self.cfg.train.get("Trainer", {}).get("wandb", False) and self.inference_flag is False:
             import wandb
-            wandb.init(**wandb_kwargs)
+
+            # set default values
+            wandb_kwargs = copy.deepcopy(self.cfg.train.get("Trainer", {}).get("wandb_kwargs", {}))
+            wandb_kwargs.name = self.exp_dir.split("/")[-1] if wandb_kwargs.get("name",
+                                                                                None) is None else wandb_kwargs.name
+            cfg_copy = self.cfg.copy()
+            del cfg_copy.hydra
+            config = OmegaConf.to_container(cfg_copy, resolve=True, throw_on_missing=True)
+            wandb.tensorboard.patch(root_logdir=self.exp_dir, pytorch=True)
+            # init Weights & Biases
+            wandb.init(config=config, project=wandb_kwargs.get("project", "RofuncRL"), name=wandb_kwargs.name,
+                       sync_tensorboard=True)
 
     def get_action(self, states):
         if self._step < self.random_steps:
@@ -230,9 +230,10 @@ class BaseTrainer:
             self.rofunc_logger.info(f"Step: {self._step}, {post_str}", local_verbose=False)
 
         # Save checkpoints
-        if not (self._step + 1) % self.agent.checkpoint_interval and \
-                self.agent.checkpoint_interval > 0 and self._step > 1:
-            self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))
+        if self.agent.checkpoint_interval is not None:
+            if not (self._step + 1) % self.agent.checkpoint_interval and \
+                    self.agent.checkpoint_interval > 0 and self._step > 1:
+                self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))
 
         # Evaluate per self.eval_freq steps
         if self.eval_flag:

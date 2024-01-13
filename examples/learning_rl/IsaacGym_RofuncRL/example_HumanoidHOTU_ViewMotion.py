@@ -38,7 +38,7 @@ def inference(custom_args):
                                                    force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map["hotu"](cfg=cfg.train,
+    trainer = Trainers().trainer_map["hotu"](cfg=cfg,
                                              env=infer_env,
                                              device=cfg.rl_device,
                                              env_name=custom_args.task,

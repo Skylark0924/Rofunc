@@ -1320,9 +1320,9 @@ def compute_hand_reward(
     up_rew = torch.where(up_rew > 0, up_rew, torch.zeros_like(up_rew))* 100
     # print("Max height: {}, Avg height: {}".format(torch.max(object_pos[:, 2]), torch.mean(object_pos[:, 2])))
     reward = up_rew  - synergy_dist - hand_dist
-    print("up_rew: {}, synergy_rew: {}, hand_dist: {}".format(float(torch.mean(up_rew).cpu()),
-                                                              float(torch.mean(synergy_dist).cpu()),
-                                                              float(torch.mean(hand_dist).cpu())))
+    # print("up_rew: {}, synergy_rew: {}, hand_dist: {}".format(float(torch.mean(up_rew).cpu()),
+    #                                                           float(torch.mean(synergy_dist).cpu()),
+    #                                                           float(torch.mean(hand_dist).cpu())))
 
     # resets = torch.where(hand_dist_rew <= 0, torch.ones_like(reset_buf), reset_buf)
     # resets = torch.where(object_rot[:, 3] > 0.9, torch.ones_like(resets), resets)

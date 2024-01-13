@@ -61,10 +61,8 @@ class BaseAgent:
         '''Checkpoint'''
         self.checkpoint_modules = {}
         self.checkpoint_interval = self.cfg.Trainer.checkpoint_interval
-        if self.checkpoint_interval > 0:
-            self.checkpoint_dir = os.path.join(self.exp_dir, "checkpoints")
-            rf.oslab.create_dir(self.checkpoint_dir)
-        # self.checkpoint_store_separately = self.cfg.get("Trainer", {}).get("store_separately", False)
+        self.checkpoint_dir = os.path.join(self.exp_dir, "checkpoints")
+        rf.oslab.create_dir(self.checkpoint_dir)
         self.checkpoint_best_modules = {"timestep": 0, "reward": -2 ** 31, "saved": False, "modules": {}}
 
         '''Logging'''

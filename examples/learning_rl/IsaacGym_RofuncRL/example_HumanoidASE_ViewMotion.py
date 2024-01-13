@@ -44,7 +44,7 @@ def inference(custom_args):
                                             force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map["ase"](cfg=cfg.train,
+    trainer = Trainers().trainer_map["ase"](cfg=cfg,
                                             env=infer_env,
                                             device=cfg.rl_device,
                                             env_name=task_name,
