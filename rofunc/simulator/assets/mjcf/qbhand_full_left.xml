@@ -1,19 +1,25 @@
 <mujoco model="qbhand_left">
-    <compiler angle="degree" autolimits="true" meshdir="../urdf/curi/meshes/qbhand/"/>
+    <compiler angle="degree" meshdir="../urdf/curi/meshes/qbhand/"/>
     <statistic extent="2" center="0 0 1"/>
     <option timestep="0.00555"/>
     <default>
-        <motor ctrlrange="-1 1" ctrllimited="true"/>
-        <default class="body">
-            <geom type="capsule" condim="1" friction="1.0 0.05 0.05" solimp=".9 .99 .003" solref=".015 1"/>
-            <joint type="hinge" damping="0.1" stiffness="5" armature=".007" limited="true" solimplimit="0 .99 .01"/>
-            <site size=".04" group="3"/>
-            <default class="force-torque">
-                <site type="box" size=".01 .01 .02" rgba="1 0 0 1"/>
-            </default>
-            <default class="touch">
-                <site type="capsule" rgba="0 0 1 .3"/>
-            </default>
+        <!--        <motor ctrlrange="-1 1" ctrllimited="true"/>-->
+        <!--        <default class="hand_joint">-->
+        <!--            <geom friction="10 0.05 0.01" condim="3" margin="0.0005" contype="1" conaffinity="1"/>-->
+        <!--            <joint limited="true" damping="100" armature="0.001" margin="0.01" frictionloss="0.001"/>-->
+        <!--            <site size=".04" group="3"/>-->
+        <!--        </default>-->
+        <default class="hand_joint">
+            <geom friction="1 0.005 0.001" condim="3" margin="0.0005" contype="1" conaffinity="1"/>
+            <joint limited="true" damping="0.1" armature="0.001" margin="0.01" frictionloss="0.001"/>
+            <site size="0.005" rgba="0.4 0.9 0.4 1"/>
+            <general ctrllimited="true" forcelimited="true"/>
+        </default>
+        <default class="force-torque">
+            <site type="box" size=".01 .01 .02" rgba="1 0 0 1"/>
+        </default>
+        <default class="touch">
+            <site type="capsule" rgba="0 0 1 .3"/>
         </default>
     </default>
     <asset>
@@ -299,38 +305,71 @@
     </worldbody>
 
     <actuator>
-        <position name='qbhand_thumb_knuckle_joint' gear='50' joint='qbhand_thumb_knuckle_joint'/>
-        <position name='qbhand_thumb_proximal_joint' gear='50' joint='qbhand_thumb_proximal_joint'/>
-        <position name='qbhand_thumb_proximal_virtual_joint' gear='50' joint='qbhand_thumb_proximal_virtual_joint'/>
-        <position name='qbhand_thumb_distal_joint' gear='50' joint='qbhand_thumb_distal_joint'/>
-        <position name='qbhand_thumb_distal_virtual_joint' gear='50' joint='qbhand_thumb_distal_virtual_joint'/>
-        <position name='qbhand_index_knuckle_joint' gear='50' joint='qbhand_index_knuckle_joint'/>
-        <position name='qbhand_index_proximal_joint' gear='50' joint='qbhand_index_proximal_joint'/>
-        <position name='qbhand_index_proximal_virtual_joint' gear='50' joint='qbhand_index_proximal_virtual_joint'/>
-        <position name='qbhand_index_middle_joint' gear='50' joint='qbhand_index_middle_joint'/>
-        <position name='qbhand_index_middle_virtual_joint' gear='50' joint='qbhand_index_middle_virtual_joint'/>
-        <position name='qbhand_index_distal_joint' gear='50' joint='qbhand_index_distal_joint'/>
-        <position name='qbhand_index_distal_virtual_joint' gear='50' joint='qbhand_index_distal_virtual_joint'/>
-        <position name='qbhand_middle_knuckle_joint' gear='50' joint='qbhand_middle_knuckle_joint'/>
-        <position name='qbhand_middle_proximal_joint' gear='50' joint='qbhand_middle_proximal_joint'/>
-        <position name='qbhand_middle_proximal_virtual_joint' gear='50' joint='qbhand_middle_proximal_virtual_joint'/>
-        <position name='qbhand_middle_middle_joint' gear='50' joint='qbhand_middle_middle_joint'/>
-        <position name='qbhand_middle_middle_virtual_joint' gear='50' joint='qbhand_middle_middle_virtual_joint'/>
-        <position name='qbhand_middle_distal_joint' gear='50' joint='qbhand_middle_distal_joint'/>
-        <position name='qbhand_middle_distal_virtual_joint' gear='50' joint='qbhand_middle_distal_virtual_joint'/>
-        <position name='qbhand_ring_knuckle_joint' gear='50' joint='qbhand_ring_knuckle_joint'/>
-        <position name='qbhand_ring_proximal_joint' gear='50' joint='qbhand_ring_proximal_joint'/>
-        <position name='qbhand_ring_proximal_virtual_joint' gear='50' joint='qbhand_ring_proximal_virtual_joint'/>
-        <position name='qbhand_ring_middle_joint' gear='50' joint='qbhand_ring_middle_joint'/>
-        <position name='qbhand_ring_middle_virtual_joint' gear='50' joint='qbhand_ring_middle_virtual_joint'/>
-        <position name='qbhand_ring_distal_joint' gear='50' joint='qbhand_ring_distal_joint'/>
-        <position name='qbhand_ring_distal_virtual_joint' gear='50' joint='qbhand_ring_distal_virtual_joint'/>
-        <position name='qbhand_little_knuckle_joint' gear='50' joint='qbhand_little_knuckle_joint'/>
-        <position name='qbhand_little_proximal_joint' gear='50' joint='qbhand_little_proximal_joint'/>
-        <position name='qbhand_little_proximal_virtual_joint' gear='50' joint='qbhand_little_proximal_virtual_joint'/>
-        <position name='qbhand_little_middle_joint' gear='50' joint='qbhand_little_middle_joint'/>
-        <position name='qbhand_little_middle_virtual_joint' gear='50' joint='qbhand_little_middle_virtual_joint'/>
-        <position name='qbhand_little_distal_joint' gear='50' joint='qbhand_little_distal_joint'/>
-        <position name='qbhand_little_distal_virtual_joint' gear='50' joint='qbhand_little_distal_virtual_joint'/>
+        <position name='qbhand_thumb_knuckle_joint' joint='qbhand_thumb_knuckle_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_thumb_proximal_joint' joint='qbhand_thumb_proximal_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_thumb_proximal_virtual_joint' joint='qbhand_thumb_proximal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_thumb_distal_joint' joint='qbhand_thumb_distal_joint' class="hand_joint"
+        />
+        <position name='qbhand_thumb_distal_virtual_joint' joint='qbhand_thumb_distal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_index_knuckle_joint' joint='qbhand_index_knuckle_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_index_proximal_joint' joint='qbhand_index_proximal_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_index_proximal_virtual_joint' joint='qbhand_index_proximal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_index_middle_joint' joint='qbhand_index_middle_joint' class="hand_joint"
+        />
+        <position name='qbhand_index_middle_virtual_joint' joint='qbhand_index_middle_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_index_distal_joint' joint='qbhand_index_distal_joint' class="hand_joint"
+        />
+        <position name='qbhand_index_distal_virtual_joint' joint='qbhand_index_distal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_middle_knuckle_joint' joint='qbhand_middle_knuckle_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_middle_proximal_joint' joint='qbhand_middle_proximal_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_middle_proximal_virtual_joint' joint='qbhand_middle_proximal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_middle_middle_joint' joint='qbhand_middle_middle_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_middle_middle_virtual_joint' joint='qbhand_middle_middle_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_middle_distal_joint' joint='qbhand_middle_distal_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_middle_distal_virtual_joint' joint='qbhand_middle_distal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_ring_knuckle_joint' joint='qbhand_ring_knuckle_joint' class="hand_joint"
+        />
+        <position name='qbhand_ring_proximal_joint' joint='qbhand_ring_proximal_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_ring_proximal_virtual_joint' joint='qbhand_ring_proximal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_ring_middle_joint' joint='qbhand_ring_middle_joint' class="hand_joint"
+        />
+        <position name='qbhand_ring_middle_virtual_joint' joint='qbhand_ring_middle_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_ring_distal_joint' joint='qbhand_ring_distal_joint' class="hand_joint"
+        />
+        <position name='qbhand_ring_distal_virtual_joint' joint='qbhand_ring_distal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_little_knuckle_joint' joint='qbhand_little_knuckle_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_little_proximal_joint' joint='qbhand_little_proximal_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_little_proximal_virtual_joint' joint='qbhand_little_proximal_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_little_middle_joint' joint='qbhand_little_middle_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_little_middle_virtual_joint' joint='qbhand_little_middle_virtual_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_little_distal_joint' joint='qbhand_little_distal_joint'
+                  class="hand_joint"/>
+        <position name='qbhand_little_distal_virtual_joint' joint='qbhand_little_distal_virtual_joint'
+                  class="hand_joint"/>
     </actuator>
 </mujoco>

@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<robot name="table">
+  <link name="base_link">
+    <inertial>
+      <mass value="0.25" />
+      <origin xyz="0 0 0" />
+      <inertia  ixx="0.0002" ixy="0.0"  ixz="0.0"  iyy="0.0002"  iyz="0.0"
+      izz="0.0002" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/table.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+        <origin xyz="0.2 0 0.775" />
+      <geometry>
+        <box size="1.2 1.0 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="robot_stand">
+    <inertial>
+      <mass value="0.25" />
+      <origin xyz="0 0 0" />
+      <inertia  ixx="0.0002" ixy="0.0"  ixz="0.0"  iyy="0.0002"  iyz="0.0"
+      izz="0.0002" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/robot_stand.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+        <origin xyz="-0.65 0 1.075" />
+      <geometry>
+        <box size="0.25 0.25 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="a_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="robot_stand"/>
+ </joint>
+</robot>
