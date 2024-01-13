@@ -37,7 +37,7 @@ def train(custom_args):
     omni_env.set_task(task=env, sim_params=omni_cfg.get_physics_params(), backend="torch", init_sim=True)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=omni_env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
@@ -67,7 +67,7 @@ def inference(custom_args):
     omni_env.set_task(task=env, sim_params=omni_cfg.get_physics_params(), backend="torch", init_sim=True)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=omni_env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)

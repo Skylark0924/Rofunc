@@ -18,12 +18,11 @@ from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 
 
 class A2CTrainer(BaseTrainer):
-    def __init__(self, cfg, env, device, env_name):
-        super().__init__(cfg, env, device, env_name)
-        self.memory = RandomMemory(memory_size=cfg.Trainer.rollouts, num_envs=self.env.num_envs, device=device)
-        self.agent = A2CAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
+    def __init__(self, cfg, env, device, env_name, **kwargs):
+        super().__init__(cfg, env, device, env_name, **kwargs)
+        self.memory = RandomMemory(memory_size=cfg.train.Trainer.rollouts, num_envs=self.env.num_envs, device=device)
+        self.agent = A2CAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
                               device, self.exp_dir, self.rofunc_logger)
-        self.setup_wandb()
 
     def post_interaction(self):
         self._rollout += 1

@@ -60,7 +60,7 @@ def train(custom_args):
     cfg = get_config(absl_config_path=..., config_name=..., args=args_overrides)
 
     env = MyEnv(cfg.task)
-    trainer = trainer_map[custom_args.agent](cfg=cfg.train, env=env, 
+    trainer = trainer_map[custom_args.agent](cfg=cfg, env=env, 
                                              device=custom_args.device, env_name=custom_args.task)
 
     # Start training
@@ -74,7 +74,7 @@ def inference(custom_args):
 
 
     env = make_env(custom_args, cfg.task)
-    trainer = trainer_map[custom_args.agent](cfg=cfg.train, env=env, 
+    trainer = trainer_map[custom_args.agent](cfg=cfg, env=env, 
                                              device=custom_args.device, env_name=custom_args.task)
 
     trainer.agent.load_ckpt(custom_args.ckpt_path)
