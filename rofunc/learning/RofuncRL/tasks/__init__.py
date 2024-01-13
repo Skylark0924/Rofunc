@@ -45,6 +45,7 @@ class Tasks:
             from .isaacgymenv.hands.bi_qbhand_synergy_grasp import BiQbSoftHandSynergyGraspTask
             from .isaacgymenv.hands.qbhand_synergy_grasp import QbSoftHandSynergyGraspTask
             from .isaacgymenv.hands.shadow_hand_grasp import ShadowHandGraspTask
+            from .isaacgymenv.grasp.lift_object import LiftObjectTask
 
             self.task_map = {
                 "Ant": AntTask,
@@ -90,6 +91,7 @@ class Tasks:
                 "BiQbSoftHandSynergyGrasp": BiQbSoftHandSynergyGraspTask,
                 "QbSoftHandSynergyGrasp": QbSoftHandSynergyGraspTask,
                 "ShadowHandGrasp": ShadowHandGraspTask,
+                "LiftObject": LiftObjectTask,
             }
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks
