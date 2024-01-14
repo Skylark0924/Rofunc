@@ -98,8 +98,8 @@ if __name__ == '__main__':
     #                  BiShadowHandPushBlock, BiShadowHandReOrientation, BiShadowHandScissors, BiShadowHandSwingCup,
     #                  BiShadowHandSwitch, BiShadowHandTwoCatchUnderarm
     #                  QbSoftHandGrasp, BiQbSoftHandGraspAndPlace, BiQbSoftHandSynergyGrasp, QbSoftHandSynergyGrasp
-    #                  ShadowHandGrasp
-    parser.add_argument("--task", type=str, default="QbSoftHandSynergyGrasp")
+    #                  ShadowHandGrasp, CURIQbSoftHandSynergyGrasp
+    parser.add_argument("--task", type=str, default="CURIQbSoftHandSynergyGrasp")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=int, default=0)
