@@ -70,7 +70,8 @@ def inference(custom_args):
     trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=omni_env,
                                                         device=cfg.rl_device,
-                                                        env_name=custom_args.task)
+                                                        env_name=custom_args.task,
+                                                        inference=True)
     # load checkpoint
     if custom_args.ckpt_path is None:
         raise ValueError("Please specify the checkpoint path for inference.")
