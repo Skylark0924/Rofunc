@@ -212,7 +212,14 @@ class BaseAgent:
             elif isinstance(arg, int):
                 pass
             elif isinstance(arg, np.ndarray):
-                arg = torch.tensor(arg).to(rl_device)
+                try:
+                    arg = torch.from_numpy(arg).to(rl_device)
+                except:
+                    for i in range(len(arg)):
+                        self.multi_gpu_transfer(*arg[i])
+            elif isinstance(arg, np.float32) or isinstance(arg, np.float64) or isinstance(arg, np.int32) or isinstance(
+                    arg, np.int64):
+                pass
             else:
                 raise ValueError("Unknown type: {}".format(type(arg)))
         return args
