@@ -102,7 +102,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         # <editor-fold desc="obs space">
         self.num_point_cloud_feature_dim = 768
 
-        self.num_hand_obs = 91*3 + 6 + 8
+        self.num_hand_obs = 95 * 3 + 6 + 8
         num = 13 + self.num_hand_obs
         self.num_obs_dict = {
             "point_cloud": num + self.num_point_cloud_feature_dim * 3,
@@ -115,6 +115,9 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.fingertips = ["left_qbhand_thumb_distal_link", "left_qbhand_index_distal_link",
                            "left_qbhand_middle_distal_link", "left_qbhand_ring_distal_link",
                            "left_qbhand_little_distal_link"]
+        # self.fingertips = ["qbhand_thumb_distal_link", "qbhand_index_distal_link",
+        #                    "qbhand_middle_distal_link", "qbhand_ring_distal_link",
+        #                    "qbhand_little_distal_link"]
 
         self.num_fingertips = len(self.fingertips)
 
@@ -164,8 +167,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         # get gym GPU state tensors
         actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
-        rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(
-            self.sim)  # 38 = self.num_hand_bodies * 2 + 2 + 1 + 2 + 1
+        rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)  # 93 = 91 + 1 + 1
 
         dof_force_tensor = self.gym.acquire_dof_force_tensor(self.sim)
         self.dof_force_tensor = gymtorch.wrap_tensor(dof_force_tensor).view(self.num_envs,
@@ -256,7 +258,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         # get rofunc path from rofunc package metadata
         rofunc_path = get_rofunc_path()
         asset_root = os.path.join(rofunc_path, "simulator/assets")
-        hand_asset_file = "urdf/curi/urdf/curi_w_softhand_isaacgym.urdf"
+        hand_asset_file = "urdf/curi/urdf/curi_isaacgym_dual_arm_w_softhand.urdf"
         table_texture_files = os.path.join(asset_root, "textures/dark-wood.png")
         table_texture_handle = self.gym.create_texture_from_file(self.sim, table_texture_files)
 
@@ -267,7 +269,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
 
         # <editor-fold desc="load hand asset and set hand dof properties">
         asset_options = gymapi.AssetOptions()
-        asset_options.flip_visual_attachments = False
+        asset_options.flip_visual_attachments = True
         asset_options.fix_base_link = False
         asset_options.collapse_fixed_joints = True
         asset_options.disable_gravity = True
@@ -381,7 +383,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         # <editor-fold desc="set initial poses">
         hand_start_pose = gymapi.Transform()
         hand_start_pose.p = gymapi.Vec3(-1.5, 0.0, 0.0)
-        hand_start_pose.r = gymapi.Quat().from_euler_zyx(3.14, 0, 0)
+        hand_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, 3.14)
 
         object_start_pose = gymapi.Transform()
         object_start_pose.p = gymapi.Vec3(0.0, 0, 0.7)
@@ -462,21 +464,20 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
             self.hand_indices.append(hand_idx)
             self.gym.set_actor_scale(env_ptr, hand_actor, 1)
 
-
             # <editor-fold desc="randomize colors and textures for rigid body">
             num_bodies = self.gym.get_actor_rigid_body_count(env_ptr, hand_actor)
             hand_rigid_body_index = [[0], [i for i in range(1, 6)], [i for i in range(6, 13)],
                                      [i for i in range(13, 20)],
                                      [i for i in range(20, 27)], [i for i in range(27, 34)]]
 
-            for n in self.agent_index[0]:
-                colorx = random.uniform(0, 1)
-                colory = random.uniform(0, 1)
-                colorz = random.uniform(0, 1)
-                for m in n:
-                    for o in hand_rigid_body_index[m]:
-                        self.gym.set_rigid_body_color(env_ptr, hand_actor, o, gymapi.MESH_VISUAL,
-                                                      gymapi.Vec3(colorx, colory, colorz))
+            # for n in self.agent_index[0]:
+            #     colorx = random.uniform(0, 1)
+            #     colory = random.uniform(0, 1)
+            #     colorz = random.uniform(0, 1)
+            #     for m in n:
+            #         for o in hand_rigid_body_index[m]:
+            #             self.gym.set_rigid_body_color(env_ptr, hand_actor, o, gymapi.MESH_VISUAL,
+            #                                           gymapi.Vec3(colorx, colory, colorz))
             # </editor-fold>
 
             # add object
@@ -601,8 +602,8 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.object_angvel = self.root_state_tensor[self.object_indices, 10:13]
 
         # <editor-fold desc="hand poses">
-        self.hand_pos = self.rigid_body_states[:, 0, 0:3]
-        self.hand_rot = self.rigid_body_states[:, 0, 3:7]
+        self.hand_pos = self.rigid_body_states[:, 15, 0:3]
+        self.hand_rot = self.rigid_body_states[:, 15, 3:7]
         self.hand_pos = self.hand_pos + quat_apply(self.hand_rot,
                                                    to_torch([0, 0, 1], device=self.device).repeat(
                                                        self.num_envs, 1) * 0.08)
@@ -1318,9 +1319,9 @@ def compute_hand_reward(
     # # reward = torch.exp(-0.1*(right_hand_dist_rew * dist_reward_scale)) + torch.exp(-0.1*(left_hand_dist_rew * dist_reward_scale))
 
     up_rew = object_pos[:, 2] - 0.7
-    up_rew = torch.where(up_rew > 0, up_rew, torch.zeros_like(up_rew))* 100
+    up_rew = torch.where(up_rew > 0, up_rew, torch.zeros_like(up_rew)) * 100
     # print("Max height: {}, Avg height: {}".format(torch.max(object_pos[:, 2]), torch.mean(object_pos[:, 2])))
-    reward = up_rew  - synergy_dist - hand_dist
+    reward = up_rew - synergy_dist - hand_dist
     # print("up_rew: {}, synergy_rew: {}, hand_dist: {}".format(float(torch.mean(up_rew).cpu()),
     #                                                           float(torch.mean(synergy_dist).cpu()),
     #                                                           float(torch.mean(hand_dist).cpu())))
