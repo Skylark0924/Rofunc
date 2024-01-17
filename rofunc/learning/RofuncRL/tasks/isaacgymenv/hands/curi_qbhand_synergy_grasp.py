@@ -80,6 +80,14 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
             # "pot": "mjcf/pot.xml",
             "pot": "mjcf/bucket/100454/mobility.urdf",
             "power_drill": "urdf/ycb/035_power_drill/035_power_drill.urdf",
+            "hammer": "urdf/ycb/048_hammer/048_hammer.urdf",
+            "large_clamp": "urdf/ycb/051_large_clamp/051_large_clamp.urdf",
+            "spatula": "urdf/ycb/033_spatula/033_spatula.urdf",
+            "wine_glass": "urdf/ycb/023_wine_glass/023_wine_glass.urdf",
+            "mug": "urdf/ycb/025_mug/025_mug.urdf",
+            "knife": "urdf/ycb/032_knife/032_knife.urdf",
+            "scissors": "urdf/ycb/037_scissors/037_scissors.urdf",
+            "phillips_screw_driver": "urdf/ycb/043_phillips_screwdriver/043_phillips_screwdriver.urdf",
         }
 
         if "asset" in self.cfg["env"]:
@@ -357,7 +365,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         object_asset_options.vhacd_enabled = True
         object_asset_options.disable_gravity = False
         object_asset_options.vhacd_params = gymapi.VhacdParams()
-        object_asset_options.vhacd_params.resolution = 100000
+        object_asset_options.vhacd_params.resolution = 100
         object_asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
         # object_asset_options.override_com = True
         # object_asset_options.override_inertia = True
