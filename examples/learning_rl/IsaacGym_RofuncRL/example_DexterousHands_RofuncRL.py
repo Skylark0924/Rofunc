@@ -101,7 +101,7 @@ if __name__ == '__main__':
     #                  ShadowHandGrasp, CURIQbSoftHandSynergyGrasp
     parser.add_argument("--task", type=str, default="CURIQbSoftHandSynergyGrasp")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
-    parser.add_argument("--num_envs", type=int, default=256)
+    parser.add_argument("--num_envs", type=int, default=1024)
     parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="False")

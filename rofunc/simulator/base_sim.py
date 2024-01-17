@@ -291,34 +291,43 @@ class RobotSim:
 
         asset_root = self.args.env.object_asset.assetRoot or os.path.join(rf.oslab.get_rofunc_path(),
                                                                           "simulator/assets")
-        asset_file = self.args.env.object_asset.assetFile
+        asset_files = self.args.env.object_asset.assetFiles
 
         asset_options = gymapi.AssetOptions()
-        init_pose = self.args.env.object_asset.init_pose
-        object_name = self.args.env.object_asset.object_name
+        asset_options.fix_base_link = self.args.env.object_asset.fix_base_link
+        asset_options.use_mesh_materials = True
+        asset_options.mesh_normal_mode = gymapi.COMPUTE_PER_VERTEX
+        asset_options.override_com = True
+        asset_options.override_inertia = True
+        asset_options.vhacd_enabled = True
+        asset_options.disable_gravity = False
+        asset_options.vhacd_params = gymapi.VhacdParams()
+        asset_options.vhacd_params.resolution = 100000
+        asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
 
-        beauty_print("Loading object asset {} from {}".format(asset_file, asset_root), type="info")
-        self.object_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
+        init_poses = self.args.env.object_asset.init_poses
+        object_names = self.args.env.object_asset.object_names
+
+        self.object_assets = []
+        for asset_file in asset_files:
+            beauty_print("Loading object asset {} from {}".format(asset_file, asset_root), type="info")
+            self.object_assets.append(self.gym.load_asset(self.sim, asset_root, asset_file, asset_options))
 
         self.object_idxs = []
         self.object_handles = []
-        for i, env_ptr in enumerate(self.envs):
-            if isinstance(object_poses, list):
-                object_pose = init_pose[i]
-            else:
-                object_pose = init_pose
+        for j in range(len(self.object_assets)):
+            self.object_idxs.append([])
+            self.object_handles.append([])
+            for i, env_ptr in enumerate(self.envs):
+                object_start_pose = gymapi.Transform()
+                object_start_pose.p = gymapi.Vec3(*init_poses[j][:3])
+                object_start_pose.r = gymapi.Quat(*init_poses[j][3:7])
 
-            object_handle = self.gym.create_actor(env_ptr, self.object_asset, init_pose, object_name, collision_group,
-                                                  filter_mask, seg_id)
-            self.object_handles.append(object_handle)
-
-            if object_color is not None:
-                self.gym.set_rigid_body_color(env_ptr, object_handle, 0, gymapi.MESH_VISUAL_AND_COLLISION,
-                                              object_color)
-
-            object_idx = self.gym.get_actor_rigid_body_index(self.envs[i], object_handle, 0, gymapi.DOMAIN_SIM)
-            self.object_idxs.append(object_idx)
-            self.current_poses = self.object_poses
+                object_handle = self.gym.create_actor(env_ptr, self.object_assets[j], object_start_pose,
+                                                      object_names[j], i, 2, 0)
+                self.object_handles[j].append(object_handle)
+                object_idx = self.gym.get_actor_rigid_body_index(env_ptr, object_handle, 0, gymapi.DOMAIN_SIM)
+                self.object_idxs[j].append(object_idx)
         return self.object_handles, self.object_idxs
 
     def add_tracking_target_sphere_axes(self):
