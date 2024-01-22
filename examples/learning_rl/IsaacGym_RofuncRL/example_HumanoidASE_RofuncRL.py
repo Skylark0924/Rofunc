@@ -42,7 +42,7 @@ def train(custom_args):
     # Instantiate the RL trainer
     hrl = False if custom_args.task in ['HumanoidASEGetupSwordShield', 'HumanoidASEPerturbSwordShield',
                                         'HumanoidViewMotion'] else True
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task,
@@ -79,7 +79,7 @@ def inference(custom_args):
     # Instantiate the RL trainer
     hrl = False if custom_args.task in ['HumanoidASEGetupSwordShield', 'HumanoidASEPerturbSwordShield',
                                         'HumanoidViewMotion'] else True
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=infer_env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task,

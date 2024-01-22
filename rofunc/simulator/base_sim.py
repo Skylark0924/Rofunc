@@ -122,6 +122,9 @@ class RobotSim:
         self.sim = self.PlaygroundSim.sim
         self.viewer = self.PlaygroundSim.viewer
 
+        self.robot_controller = self.args.env.controller_type
+        self.self_collision_flag = self.args.env.selfCollisionFlag
+
         self.create_env()
         self.setup_robot_dof_prop()
 
@@ -137,8 +140,10 @@ class RobotSim:
 
         asset_options = gymapi.AssetOptions()
         asset_options.fix_base_link = self.args.env.asset.fix_base_link
+        asset_options.disable_gravity = self.args.env.asset.disable_gravity
         asset_options.flip_visual_attachments = self.args.env.asset.flip_visual_attachments
         asset_options.armature = self.args.env.asset.armature
+        asset_options.slices_per_cylinder = self.args.env.asset.slices_per_cylinder
 
         init_pose = self.args.env.asset.init_pose
         self.robot_name = self.args.env.asset.robot_name
@@ -165,8 +170,9 @@ class RobotSim:
             env = self.gym.create_env(self.sim, env_lower, env_upper, num_per_row)
             envs.append(env)
 
-            # add robot
-            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, self.robot_name, i, 2)
+            # add robot, -1 refers to open self-collision detection
+            robot_handle = self.gym.create_actor(env, self.robot_asset, pose, self.robot_name, i,
+                                                 -1 if self.self_collision_flag else 2)
             self.gym.enable_actor_dof_force_sensors(env, robot_handle)
             robot_handles.append(robot_handle)
 
@@ -213,53 +219,11 @@ class RobotSim:
             # set initial position targets
             gym.set_actor_dof_position_targets(env, robot_handle, default_dof_pos)
 
-    def add_object(self):
-        # TODO
-        from isaacgym import gymapi
-
-        asset_root = self.args.env.object_asset.assetRoot or os.path.join(rf.oslab.get_rofunc_path(),
-                                                                          "simulator/assets")
-        asset_file = self.args.env.object_asset.assetFile
-
-        asset_options = gymapi.AssetOptions()
-        init_pose = self.args.env.object_asset.init_pose
-        object_name = self.args.env.object_asset.object_name
-
-        beauty_print("Loading object asset {} from {}".format(asset_file, asset_root), type="info")
-        self.object_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
-
-        self.object_idxs = []
-        self.object_handles = []
-        for i, env_ptr in enumerate(self.envs):
-            if isinstance(object_poses, list):
-                object_pose = init_pose[i]
-            else:
-                object_pose = init_pose
-
-            object_handle = self.gym.create_actor(env_ptr, self.object_asset, init_pose, object_name, collision_group,
-                                                  filter_mask, seg_id)
-            self.object_handles.append(object_handle)
-
-            if object_color is not None:
-                self.gym.set_rigid_body_color(env_ptr, object_handle, 0, gymapi.MESH_VISUAL_AND_COLLISION,
-                                              object_color)
-
-            object_idx = self.gym.get_actor_rigid_body_index(self.envs[i], object_handle, 0, gymapi.DOMAIN_SIM)
-            self.object_idxs.append(object_idx)
-            self.current_poses = self.object_poses
-        return self.object_handles, self.object_idxs
-
-    def _monitor_rigid_body_states(self):
-        from isaacgym import gymtorch
-        self.gym.prepare_sim(self.sim)
-        self.rigid_body_states_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)
-        self.rigid_body_states = gymtorch.wrap_tensor(self.rigid_body_states_tensor)
-
-    def _init_attractor(self, attracted_joint, verbose=True):
+    def _init_attractor(self, attracted_rigid_body, verbose=True):
         """
         Initialize the attractor for tracking the trajectory using the embedded Isaac Gym PID controller
 
-        :param attracted_joint: the joint to be attracted
+        :param attracted_rigid_body: the joint to be attracted
         :param verbose: if True, visualize the attractor spheres
         :return:
         """
@@ -288,14 +252,15 @@ class RobotSim:
             handle = self.robot_handles[i]
 
             body_dict = self.gym.get_actor_rigid_body_dict(env, handle)
+            beauty_print(f"get_actor_rigid_body_dict: {body_dict}")
             props = self.gym.get_actor_rigid_body_states(env, handle, gymapi.STATE_POS)
-            attracted_joint_handle = body = self.gym.find_actor_rigid_body_handle(env, handle, attracted_joint)
+            attracted_rigid_body_handle = self.gym.find_actor_rigid_body_handle(env, handle, attracted_rigid_body)
 
             # Initialize the attractor
-            attractor_properties.target = props['pose'][:][body_dict[attracted_joint]]
+            attractor_properties.target = props['pose'][:][body_dict[attracted_rigid_body]]
             attractor_properties.target.p.y -= 0.1
             attractor_properties.target.p.z = 0.1
-            attractor_properties.rigid_handle = attracted_joint_handle
+            attractor_properties.rigid_handle = attracted_rigid_body_handle
 
             if verbose:
                 # Draw axes and sphere at attractor location
@@ -306,18 +271,77 @@ class RobotSim:
             attractor_handles.append(attractor_handle)
         return attractor_handles, axes_geom, sphere_geom
 
-    def _setup_attractors(self, traj, attracted_joints, verbose=True):
-        assert isinstance(attracted_joints, list), "The attracted joints should be a list"
-        assert len(attracted_joints) > 0, "The length of the attracted joints should be greater than 0"
-        assert len(attracted_joints) == len(traj), "The first dimension of trajectory should equal to attracted_joints"
+    def _setup_attractors(self, traj, attracted_rigid_bodies, verbose=True):
+        assert isinstance(attracted_rigid_bodies, list), "The attracted joints should be a list"
+        assert len(attracted_rigid_bodies) > 0, "The length of the attracted joints should be greater than 0"
+        assert len(attracted_rigid_bodies) == len(
+            traj), "The first dimension of trajectory should equal to attracted_rigid_bodies"
 
         attractor_handles, axes_geoms, sphere_geoms = [], [], []
-        for i in range(len(attracted_joints)):
-            attractor_handle, axes_geom, sphere_geom = self._init_attractor(attracted_joints[i], verbose=verbose)
+        for i in range(len(attracted_rigid_bodies)):
+            attractor_handle, axes_geom, sphere_geom = self._init_attractor(attracted_rigid_bodies[i], verbose=verbose)
             attractor_handles.append(attractor_handle)
             axes_geoms.append(axes_geom)
             sphere_geoms.append(sphere_geom)
-        return attracted_joints, attractor_handles, axes_geoms, sphere_geoms
+        return attracted_rigid_bodies, attractor_handles, axes_geoms, sphere_geoms
+
+    def add_object(self):
+        # TODO
+        from isaacgym import gymapi
+
+        asset_root = self.args.env.object_asset.assetRoot or os.path.join(rf.oslab.get_rofunc_path(),
+                                                                          "simulator/assets")
+        asset_files = self.args.env.object_asset.assetFiles
+
+        asset_options = gymapi.AssetOptions()
+        asset_options.fix_base_link = self.args.env.object_asset.fix_base_link
+        asset_options.use_mesh_materials = True
+        asset_options.mesh_normal_mode = gymapi.COMPUTE_PER_VERTEX
+        asset_options.override_com = True
+        asset_options.override_inertia = True
+        asset_options.vhacd_enabled = True
+        asset_options.disable_gravity = False
+        asset_options.vhacd_params = gymapi.VhacdParams()
+        asset_options.vhacd_params.resolution = 100000
+        asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
+
+        init_poses = self.args.env.object_asset.init_poses
+        object_names = self.args.env.object_asset.object_names
+
+        self.object_assets = []
+        for asset_file in asset_files:
+            beauty_print("Loading object asset {} from {}".format(asset_file, asset_root), type="info")
+            self.object_assets.append(self.gym.load_asset(self.sim, asset_root, asset_file, asset_options))
+
+        self.object_idxs = []
+        self.object_handles = []
+        for j in range(len(self.object_assets)):
+            self.object_idxs.append([])
+            self.object_handles.append([])
+            for i, env_ptr in enumerate(self.envs):
+                object_start_pose = gymapi.Transform()
+                object_start_pose.p = gymapi.Vec3(*init_poses[j][:3])
+                object_start_pose.r = gymapi.Quat(*init_poses[j][3:7])
+
+                object_handle = self.gym.create_actor(env_ptr, self.object_assets[j], object_start_pose,
+                                                      object_names[j], i, 2, 0)
+                self.object_handles[j].append(object_handle)
+                object_idx = self.gym.get_actor_rigid_body_index(env_ptr, object_handle, 0, gymapi.DOMAIN_SIM)
+                self.object_idxs[j].append(object_idx)
+        return self.object_handles, self.object_idxs
+
+    def add_tracking_target_sphere_axes(self):
+        """
+        Visualize the tracking target as a sphere with axes
+        """
+        from isaacgym import gymapi, gymutil
+        # Create helper geometry used for visualization
+        # Create a wireframe axis
+        self.axes_geom = gymutil.AxesGeometry(0.1)
+        # Create a wireframe sphere
+        sphere_rot = gymapi.Quat.from_euler_zyx(0.5 * math.pi, 0, 0)
+        sphere_pose = gymapi.Transform(r=sphere_rot)
+        self.sphere_geom = gymutil.WireframeSphereGeometry(0.03, 12, 12, sphere_pose, color=(1, 0, 0))
 
     def add_marker(self, marker_pose):
         from isaacgym import gymapi
@@ -341,13 +365,41 @@ class RobotSim:
                                           gymapi.Vec3(0.8, 0.0, 0.0))
             self.marker_handles.append(marker_handle)
 
-    def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
+    def add_body_attached_camera(self, camera_props=None, attached_body=None, local_transform=None):
+        from isaacgym import gymapi
+        self.camera_handle = self.gym.create_camera_sensor(self.envs[0], camera_props)
+        body_handle = self.gym.find_actor_rigid_body_handle(self.envs[0], self.robot_handles[0], attached_body)
+        self.gym.attach_camera_to_body(self.camera_handle, self.envs[0], body_handle, local_transform,
+                                       gymapi.FOLLOW_TRANSFORM)
+
+    def monitor_rigid_body_states(self):
+        from isaacgym import gymtorch
+        self._rb_states = self.gym.acquire_rigid_body_state_tensor(self.sim)
+        self.rb_states = gymtorch.wrap_tensor(self._rb_states)
+
+    def monitor_dof_states(self):
+        from isaacgym import gymtorch
+        self._dof_states = self.gym.acquire_dof_state_tensor(self.sim)
+        self.dof_states = gymtorch.wrap_tensor(self._dof_states)
+
+    def monitor_robot_jacobian(self, robot_name=None):
+        if robot_name is None:
+            robot_name = self.robot_name
+        from isaacgym import gymtorch
+        self._jacobian = self.gym.acquire_jacobian_tensor(self.sim, robot_name)
+        self.jacobian = gymtorch.wrap_tensor(self._jacobian)
+
+    def monitor_robot_mass_matrix(self, robot_name=None):
+        if robot_name is None:
+            robot_name = self.robot_name
+        from isaacgym import gymtorch
+        self._massmatrix = self.gym.acquire_mass_matrix_tensor(self.sim, robot_name)
+        self.massmatrix = gymtorch.wrap_tensor(self._massmatrix)
+
+    def show(self, visual_obs_flag=False):
         """
         Visualize the robot in an interactive viewer
         :param visual_obs_flag: If True, show the visual observation
-        :param camera_props: If visual_obs_flag is True, use this camera_props to config the camera
-        :param attached_body: If visual_obs_flag is True, use this to refer the body the camera attached to
-        :param local_transform: If visual_obs_flag is True, use this local transform to adjust the camera pose
         """
         from isaacgym import gymapi
 
@@ -355,10 +407,6 @@ class RobotSim:
 
         if visual_obs_flag:
             fig = plt.figure("Visual observation", figsize=(8, 8))
-            camera_handle = self.gym.create_camera_sensor(self.envs[0], camera_props)
-            body_handle = self.gym.find_actor_rigid_body_handle(self.envs[0], self.robot_handles[0], attached_body)
-            self.gym.attach_camera_to_body(camera_handle, self.envs[0], body_handle, local_transform,
-                                           gymapi.FOLLOW_TRANSFORM)
 
         while not self.gym.query_viewer_has_closed(self.viewer):
             # Step the physics
@@ -373,7 +421,8 @@ class RobotSim:
                 self.gym.render_all_camera_sensors(self.sim)
                 self.gym.start_access_image_tensors(self.sim)
 
-                cam_img = self.gym.get_camera_image(self.sim, self.envs[0], camera_handle, gymapi.IMAGE_COLOR).reshape(
+                cam_img = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handle,
+                                                    gymapi.IMAGE_COLOR).reshape(
                     1280, 1280, 4)
                 cam_img = Im.fromarray(cam_img)
                 plt.imshow(cam_img)
@@ -397,6 +446,10 @@ class RobotSim:
         num_bodies = self.gym.get_asset_rigid_body_count(robot_asset)
         beauty_print("The number of bodies in the robot asset is {}".format(num_bodies), 2)
         return num_bodies
+
+    def get_actor_rigid_body_info(self, actor_handle):
+        rigid_body_dict = self.gym.get_actor_rigid_body_dict(self.envs[0], actor_handle)
+        return rigid_body_dict
 
     def get_dof_info(self):
         # Gets number of Degree of Freedom for an actor
@@ -462,13 +515,6 @@ class RobotSim:
         else:
             raise ValueError("The mode {} is not supported".format(mode))
 
-    def get_robot_jacobian(self):
-        from isaacgym import gymtorch
-
-        _jacobian = self.gym.acquire_jacobian_tensor(self.sim, "robot")
-        jacobian = gymtorch.wrap_tensor(_jacobian)
-        return jacobian
-
     def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index):
         raise NotImplementedError
 
@@ -491,40 +537,28 @@ class RobotSim:
             state['vel']['angular'].fill((0, 0, 0))
             self.gym.set_actor_rigid_body_states(self.envs[i], object_handles[i], state, state_type)
 
-    def ik_controller(self, joint_index, dpose, damping=0.05):
-        jacobian = self.get_robot_jacobian()
-
-        # jacobian entries corresponding to curi hand
-        j_eef = jacobian[:, joint_index - 1, :, 7:14]
-
-        import torch
-
-        j_eef_T = torch.transpose(j_eef, 1, 2)
-        lmbda = torch.eye(6, device=self.device) * (damping ** 2)
-        u = (j_eef_T @ torch.inverse(j_eef @ j_eef_T + lmbda) @ dpose).view(self.num_envs, 7)
-        return u
-
-    def run_traj_multi_joints(self, traj: List, attracted_joints: List = None,
-                              object_start_pose: List = None, object_end_pose: List = None,
-                              object_related_joints: List = None,
-                              update_freq=0.001, verbose=True):
+    def run_traj_multi_rigid_bodies(self, traj: List, attracted_rigid_bodies: List = None,
+                                    object_start_pose: List = None, object_end_pose: List = None,
+                                    object_related_joints: List = None,
+                                    update_freq=0.001, verbose=True):
         """
-        Run the trajectory with multiple joints, the default is to run the trajectory with the left and right hand of
+        Run the trajectory with multiple rigid bodies, the default is to run the trajectory with the left and right hand of
         bimanual robot.
 
         :param traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
-        :param attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
+        :param attracted_rigid_bodies: [list], e.g. ["panda_left_hand", "panda_right_hand"]
         :param update_freq: the frequency of updating the robot pose
         :param verbose: if True, visualize the attractor spheres
         :return:
         """
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
 
-        beauty_print('Execute multi-joint trajectory with the CURI simulator')
+        beauty_print('Execute multi rigid bodies trajectory')
 
         # Create the attractor
-        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attracted_joints,
-                                                                                               verbose=verbose)
+        attracted_rigid_bodies, attractor_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj,
+                                                                                                     attracted_rigid_bodies,
+                                                                                                     verbose=verbose)
 
         # Time to wait in seconds before moving robot
         next_update_time = 1
@@ -536,7 +570,7 @@ class RobotSim:
 
             if t >= next_update_time:
                 self.gym.clear_lines(self.viewer)
-                for i in range(len(attracted_joints)):
+                for i in range(len(attracted_rigid_bodies)):
                     self.update_robot(traj[i], attractor_handles[i], axes_geoms[i], sphere_geoms[i], index, verbose)
 
                 # if self.object_handles is not None:

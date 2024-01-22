@@ -40,7 +40,7 @@ def train(custom_args):
                                  force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
@@ -72,10 +72,11 @@ def inference(custom_args):
                                        force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=infer_env,
                                                         device=cfg.rl_device,
-                                                        env_name=custom_args.task)
+                                                        env_name=custom_args.task,
+                                                        inference=True)
 
     # load checkpoint
     if custom_args.ckpt_path is None:
@@ -91,7 +92,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     # Available tasks: HumanoidAMP_backflip, HumanoidAMP_walk, HumanoidAMP_run, HumanoidAMP_dance, HumanoidAMP_hop
-    parser.add_argument("--task", type=str, default="HumanoidAMP_dance")
+    parser.add_argument("--task", type=str, default="HumanoidAMP_hop")
     parser.add_argument("--agent", type=str, default="amp")  # Available agent: amp
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=int, default=0)
