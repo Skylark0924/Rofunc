@@ -105,8 +105,8 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="False")
-    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
-    parser.add_argument("--ckpt_path", type=str, default="/home/ubuntu/Github/Rofunc/examples/learning_rl/IsaacGym_RofuncRL/runs/RofuncRL_PPOTrainer_CURIQbSoftHandSynergyGrasp_24-01-16_18-07-26-242566/checkpoints/best_ckpt.pth")
+    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
+    parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
     if not custom_args.inference:
