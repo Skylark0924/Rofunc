@@ -1243,8 +1243,8 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
                 pose.r.y = goal_rot[i, 1]
                 pose.r.z = goal_rot[i, 2]
                 pose.r.w = goal_rot[i, 3]
-                gymutil.draw_lines(self.axes_geom, self.gym, self.viewer, self.envs[i], pose)
-                gymutil.draw_lines(self.sphere_geom, self.gym, self.viewer, self.envs[i], pose)
+                # gymutil.draw_lines(self.axes_geom, self.gym, self.viewer, self.envs[i], pose)
+                # gymutil.draw_lines(self.sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
             # hand_dist = torch.norm(self.object_pos - hand_pos, p=2, dim=-1)
             # self.apply_forces[:, 0, :] = self.actions[:, 0:3] * self.dt * self.transition_scale * 100000
