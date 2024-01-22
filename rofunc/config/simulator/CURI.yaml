@@ -7,15 +7,21 @@ sim_device: 'cuda:0'
 env:
   numEnvs: 1
   envSpacing: 3.
+  controller_type: "ik" # "ik" or "osc"
+  selfCollisionFlag: False
 
   asset:
     robot_name: "CURI"
     assetRoot:
-    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
+#    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
+    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm_w_softhand.urdf"
+#    assetFile: "urdf/curi/urdf/curi_w_softhand_isaacgym.urdf"
     init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-    fix_base_link: True
+    fix_base_link: False
+    disable_gravity: False
     flip_visual_attachments: True
     armature: 0.01
+    slices_per_cylinder: 1000
 
   object_asset:
 

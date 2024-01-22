@@ -43,7 +43,7 @@ class QbSoftHandSim(RobotSim):
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)
         default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
-        default_dof_pos[:] = robot_mids[:]
+        # default_dof_pos[:] = robot_mids[:]
 
         default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
         default_dof_state["pos"] = default_dof_pos
@@ -113,7 +113,7 @@ class QbSoftHandSim(RobotSim):
                 gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
                 gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
-    def run_traj(self, traj, attracted_joints=None, update_freq=0.001, verbose=True, **kwargs):
-        if attracted_joints is None:
-            attracted_joints = ["left_hand", "right_hand"]
-        self.run_traj_multi_joints(traj, attracted_joints, update_freq=update_freq, verbose=verbose, **kwargs)
+    def run_traj(self, traj, attracted_rigid_bodies=None, update_freq=0.001, verbose=True, **kwargs):
+        if attracted_rigid_bodies is None:
+            attracted_rigid_bodies = ["left_hand", "right_hand"]
+        self.run_traj_multi_rigid_bodies(traj, attracted_rigid_bodies, update_freq=update_freq, verbose=verbose, **kwargs)

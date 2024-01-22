@@ -86,7 +86,7 @@ def train(custom_args):
     cfg = get_config(absl_config_path=[path], config_name='config', args=args_overrides)
 
     env = MyEnv(cfg.task)
-    trainer = trainer_map[custom_args.agent](cfg=cfg.train, env=env, 
+    trainer = trainer_map[custom_args.agent](cfg=cfg, env=env, 
                                              device=custom_args.device, env_name=custom_args.task)
 
     # Start training
