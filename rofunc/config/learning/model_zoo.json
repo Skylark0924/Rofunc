@@ -179,6 +179,11 @@
     "name": "BiShadowHandTwoCatchUnderarmRofuncRLPPO.pth",
     "md5": ""
   },
+  "CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1VxFNboUOclQSzm0nAeA7kMjtNRQAk5-V&export=download",
+    "name": "CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.pth",
+    "md5": ""
+  },
   "efficientsam_s_gpu.jit": {
     "url": "https://drive.google.com/uc?id=1lMCUFOLeQOlIpuaIA00MB174lL7ZiuoS&export=download",
     "name": "efficientsam_s_gpu.jit",
