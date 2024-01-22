@@ -21,9 +21,8 @@ class PPOTrainer(BaseTrainer):
     def __init__(self, cfg, env, device, env_name, inference=False):
         super().__init__(cfg, env, device, env_name, inference=inference)
         self.memory = RandomMemory(memory_size=self.rollouts, num_envs=self.env.num_envs, device=device)
-        self.agent = PPOAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
+        self.agent = PPOAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
                               device, self.exp_dir, self.rofunc_logger)
-        self.setup_wandb()
 
     def post_interaction(self):
         self._rollout += 1

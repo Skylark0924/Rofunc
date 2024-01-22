@@ -41,7 +41,7 @@ def train(custom_args):
                                              force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
@@ -73,7 +73,7 @@ def inference(custom_args):
                                                    force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=infer_env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task,
@@ -97,14 +97,16 @@ if __name__ == '__main__':
     #                  BiShadowHandGraspAndPlace, BiShadowHandLiftUnderarm, BiShadowHandPen, BiShadowHandPointCloud,
     #                  BiShadowHandPushBlock, BiShadowHandReOrientation, BiShadowHandScissors, BiShadowHandSwingCup,
     #                  BiShadowHandSwitch, BiShadowHandTwoCatchUnderarm
-    parser.add_argument("--task", type=str, default="BiShadowHandSwitch")
+    #                  QbSoftHandGrasp, BiQbSoftHandGraspAndPlace, BiQbSoftHandSynergyGrasp, QbSoftHandSynergyGrasp
+    #                  ShadowHandGrasp, CURIQbSoftHandSynergyGrasp
+    parser.add_argument("--task", type=str, default="CURIQbSoftHandSynergyGrasp")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
-    parser.add_argument("--num_envs", type=int, default=256)
+    parser.add_argument("--num_envs", type=int, default=1024)
     parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
-    parser.add_argument("--ckpt_path", type=str, default=None)
+    parser.add_argument("--headless", type=str, default="False")
+    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
+    parser.add_argument("--ckpt_path", type=str, default="/home/ubuntu/Github/Rofunc/examples/learning_rl/IsaacGym_RofuncRL/runs/RofuncRL_PPOTrainer_CURIQbSoftHandSynergyGrasp_24-01-16_18-07-26-242566/checkpoints/best_ckpt.pth")
     custom_args = parser.parse_args()
 
     if not custom_args.inference:

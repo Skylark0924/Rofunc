@@ -28,7 +28,7 @@ class ASETrainer(BaseTrainer):
         self.collect_observation = lambda: self.env.reset_done()[0]["obs"]
         self.hrl = hrl
         if self.hrl:
-            self.agent = ASEHRLAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
+            self.agent = ASEHRLAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
                                      device, self.exp_dir, self.rofunc_logger,
                                      amp_observation_space=self.env.amp_observation_space,
                                      motion_dataset=self.motion_dataset,
@@ -37,19 +37,18 @@ class ASETrainer(BaseTrainer):
                                          num_samples),
                                      task_related_state_size=self.env.get_task_obs_size())
         else:
-            self.agent = ASEAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
+            self.agent = ASEAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
                                   device, self.exp_dir, self.rofunc_logger,
                                   amp_observation_space=self.env.amp_observation_space,
                                   motion_dataset=self.motion_dataset,
                                   replay_buffer=self.replay_buffer,
                                   collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
                                       num_samples))
-        self.setup_wandb()
 
         '''Misc variables'''
         self._latent_reset_steps = torch.zeros(self.env.num_envs, dtype=torch.int32).to(self.device)
-        self._latent_steps_min = self.cfg.Agent.ase_latent_steps_min
-        self._latent_steps_max = self.cfg.Agent.ase_latent_steps_max
+        self._latent_steps_min = self.cfg.train.Agent.ase_latent_steps_min
+        self._latent_steps_max = self.cfg.train.Agent.ase_latent_steps_max
 
     def _reset_latents(self, env_ids):
         # Equ. 11, provide the model with a latent space
@@ -94,7 +93,7 @@ class ASETrainer(BaseTrainer):
             self._update_latents()
 
     def post_interaction(self):
-        # if self.agent._llc_step == self.cfg.Agent.llc_steps_per_high_action:
+        # if self.agent._llc_step == self.cfg.train.Agent.llc_steps_per_high_action:
         self._rollout += 1
         # self.agent._llc_step = 0
 
