@@ -169,6 +169,10 @@ The following are examples of reinforcement learning methods for robot learning.
              - 
              - 
              -
+           * - `CURIQbSoftHandSynergyGrasp <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/grasp/curi_qbhand_synergy_grasp.py>`_
+             - .. image:: ../../../img/CURIQbSoftHandSynergyGraspHammer.gif .. image:: ../../../img/CURIQbSoftHandSynergyGraspSpatula.gif .. image:: ../../../img/CURIQbSoftHandSynergyGraspPower_drill.gif .. image:: ../../../img/CURIQbSoftHandSynergyGraspPhillips_Screw_Driver.gif .. image:: ../../../img/CURIQbSoftHandSynergyGraspLarge_clamp.gif .. image:: ../../../img/CURIQbSoftHandSynergyGraspKnife.gif
+             -
+             - ✅
            * - `Humanoid <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid.py>`_
              - .. image:: ../../../img/HumanoidRofuncRLPPO.gif
              -
@@ -297,11 +301,6 @@ The following are examples of reinforcement learning methods for robot learning.
              - .. image:: ../../../img/BiShadowHandTwoCatchUnderarmRofuncRLPPO.gif
              -
              - ✅
-
-
-
-
-
 
 
     .. tab:: OmniIsaacGym

@@ -355,6 +355,9 @@
       <geometry>
         <mesh filename="../meshes/clover/visual/Shell_v2_Share_yup.dae"/>
       </geometry>
+    <material name="shell">
+        <color rgba="1 1 1. 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
