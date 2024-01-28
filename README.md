@@ -13,7 +13,7 @@
 > **Repository address: https://github.com/Skylark0924/Rofunc** <br>
 > **Documentation: https://rofunc.readthedocs.io/**
 
-<img src="doc/img/CURIQbSoftHandSynergyGraspSpatula.gif" style="zoom:40.2%;" /><img src="doc/img/CURIQbSoftHandSynergyGraspPower_drill.gif" style="zoom:45%;" /><img src="doc/img/CURIQbSoftHandSynergyGraspPhillips_Screw_Driver.gif" style="zoom:40.2%;" /><img src="doc/img/CURIQbSoftHandSynergyGraspLarge_clamp.gif" style="zoom:40.2%;" /><img src="doc/img/RofuncAMP_HumanoidFlip.gif" style="zoom: 18.5%;" /><img src="doc/img/RofuncAMP_HumanoidDance.gif" style="zoom: 18.5%;" /><img src="doc/img/RofuncAMP_HumanoidRun.gif" style="zoom:27.7%;" /><img src="doc/img/ASE4.gif" style="zoom:36%;" /><img src="doc/img/HumanoidASELocationSwordShieldRofuncRLPPO.gif" style="zoom:27%;" /><img src="doc/img/BiShadowHandLiftUnderarmRofuncRLPPO.gif" style="zoom: 25.8%;" />
+![](doc/img/face.gif)
 
 Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for **(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including
 _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an
