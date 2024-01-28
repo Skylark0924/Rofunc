@@ -10,7 +10,7 @@
 
 ### Pre-trained latent space model
 
-![](../../../img/task_gifs/HumanoidASEGetupSwordShieldRofuncRLASE.gif)
+![](../../../img/task_gif/HumanoidASEGetupSwordShieldRofuncRLASE.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEGetupSwordShield --motion_file reallusion_sword_shield/dataset_reallusion_sword_shield.yaml --inference
@@ -23,7 +23,7 @@ boxes to the humanoid robot). It will use **the same pre-trained latent space mo
 the `reset` function to reset by the maximum length of the episode, rather than resetting immediately when robots fall
 on the ground.
 
-![](../../../img/task_gifs/HumanoidASEPerturbSwordShieldRofuncRLASE.gif)
+![](../../../img/task_gif/HumanoidASEPerturbSwordShieldRofuncRLASE.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEPerturbSwordShield --motion_file reallusion_sword_shield/dataset_reallusion_sword_shield.yaml --inference
@@ -37,7 +37,7 @@ python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --
 
 `HumanoidASEHeadingSwordShield` task: the humanoid robot should face to the blue line and walk towards the red line.
 
-![](../../../img/task_gifs/HumanoidASEHeadingSwordShieldRofuncRLASE.gif)
+![](../../../img/task_gif/HumanoidASEHeadingSwordShieldRofuncRLASE.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEHeadingSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
@@ -48,7 +48,7 @@ python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --
 `HumanoidASELocationSwordShield` task: the humanoid robot should walk to the red location.
 
 
-![](../../../img/task_gifs/HumanoidASELocationSwordShieldRofuncRLASE.gif)
+![](../../../img/task_gif/HumanoidASELocationSwordShieldRofuncRLASE.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASELocationSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
@@ -66,7 +66,7 @@ python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --
 
 `HumanoidASEStrikeSwordShield` task: the humanoid robot should strike the sword to the block.
 
-![](../../../img/task_gifs/HumanoidASEStrikeSwordShieldRofuncRLASE.gif)
+![](../../../img/task_gif/HumanoidASEStrikeSwordShieldRofuncRLASE.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEStrikeSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference

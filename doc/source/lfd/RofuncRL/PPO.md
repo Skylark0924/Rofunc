@@ -37,7 +37,7 @@ $$
 
 ### CURICabinet
 
-![CURICabinet](../../../img/task_gifs/CURICabinetRofuncRLPPO.gif)
+![CURICabinet](../../../img/task_gif/CURICabinetRofuncRLPPO.gif)
 
 ```shell
 python examples/learning_rl/example_CURICabinet_RofuncRL.py --inference
