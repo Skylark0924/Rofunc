@@ -29,6 +29,18 @@ The following are examples of reinforcement learning methods for robot learning.
                     '''Inference with pre-trained model in model zoo'''
                     python examples/learning_rl/IsaacGym_RofuncRL/example_CURICabinet_RofuncRL.py --agent=ppo --inference
 
+            .. tab:: CURIQbSoftHandSynergyGrasp
+
+                .. code-block:: shell
+
+                    # Available objects: Hammer, Spatula, Large_Clamp, Mug, Power_Drill, Knife, Scissors, Large_Marker, Phillips_Screw_Driver
+
+                    '''Training'''
+                    python examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py --task=CURIQbSoftHandSynergyGrasp --agent=ppo --objects=Hammer
+
+                    '''Inference with pre-trained model in model zoo'''
+                    python examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py --task=CURIQbSoftHandSynergyGrasp --agent=ppo --inference --objects=Hammer
+
             .. tab:: FrankaCabinet
 
                 .. code-block:: shell
@@ -158,11 +170,11 @@ The following are examples of reinforcement learning methods for robot learning.
              - 
              -
            * - `CURICabinet <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet.py>`_
-             - .. image:: ../../../img/CURICabinet.gif
+             - .. image:: ../../../img/CURICabinetRofuncRLPPO.gif
              - 
              - ✅
            * - `CURICabinetImage <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_image.py>`_
-             - .. image:: ../../../img/CURICabinet.gif
+             - .. image:: ../../../img/CURICabinetRofuncRLPPO.gif
              - 
              -
            * - `CURICabinetBimanual <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_bimanual.py>`_
