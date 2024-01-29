@@ -36,7 +36,7 @@ with torch.no_grad():
 
 ### Humanoid Run
 
-![HumanoidAMPRun Inference](../../../img/task_gifs/HumanoidRunRofuncRLAMP.gif)
+![HumanoidAMPRun Inference](../../../img/task_gif/HumanoidRunRofuncRLAMP.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidAMP_RofuncRL.py --task HumanoidAMP_run --inference
@@ -44,7 +44,7 @@ python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidAMP_RofuncRL.py --
 
 ### Humanoid BackFlip
 
-![HumanoidAMPFlip Inference](../../../img/task_gifs/HumanoidFlipRofuncRLAMP.gif)
+![HumanoidAMPFlip Inference](../../../img/task_gif/HumanoidFlipRofuncRLAMP.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidAMP_RofuncRL.py --task HumanoidAMP_backflip --inference
@@ -52,14 +52,14 @@ python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidAMP_RofuncRL.py --
 
 ### Humanoid Dance
 
-![HumanoidAMPDance Inference](../../../img/task_gifs/HumanoidDanceRofuncRLAMP.gif)
+![HumanoidAMPDance Inference](../../../img/task_gif/HumanoidDanceRofuncRLAMP.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidAMP_RofuncRL.py --task HumanoidAMP_dance --inference
 ```
 
 ### Humanoid Hop
-![HumanoidAMPHop Inference](../../../img/task_gifs/HumanoidHopRofuncRLAMP.gif)
+![HumanoidAMPHop Inference](../../../img/task_gif/HumanoidHopRofuncRLAMP.gif)
 
 ```shell
 python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidAMP_RofuncRL.py --task HumanoidAMP_hop --inference
