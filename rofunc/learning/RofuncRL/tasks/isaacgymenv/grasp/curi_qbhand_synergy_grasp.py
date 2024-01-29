@@ -109,7 +109,10 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         # <editor-fold desc="obs space">
         self.num_point_cloud_feature_dim = 768
 
-        self.num_hand_obs = 95 * 3 + 6 + 8
+        if self.cfg["env"]["useSynergy"]:
+            self.num_hand_obs = 95 * 3 + 6 + 8
+        else:
+            self.num_hand_obs = 95 * 3 + 6 + 21
         num = 13 + self.num_hand_obs
         self.num_obs_dict = {
             "point_cloud": num + self.num_point_cloud_feature_dim * 3,
@@ -140,7 +143,10 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.cfg["env"]["numStates"] = num_states
 
         self.num_agents = 1
-        self.cfg["env"]["numActions"] = 2 + 7  # 2-dim synergy for controlling each hand
+        if self.cfg["env"]["useSynergy"]:
+            self.cfg["env"]["numActions"] = 2 + 6  # 2-dim synergy for controlling each hand
+        else:
+            self.cfg["env"]["numActions"] = 15 + 6  # 15-dim dof for controlling each hand
         self.num_action = self.cfg["env"]["numActions"]
 
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
@@ -1136,23 +1142,39 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         else:
             self.gym.clear_lines(self.viewer)
 
-            synergy_action = self.actions[:, 6:8]
-            # synergy_action = torch.ones_like(self.actions[:, 6:8]).to(self.device)
-            # synergy_action[:, 0] = 0.44 * synergy_action[:, 0]
+            if self.cfg["env"]["useSynergy"]:
+                synergy_action = self.actions[:, 6:8]
+                # synergy_action = torch.ones_like(self.actions[:, 6:8]).to(self.device)
+                # synergy_action[:, 0] = 0.44 * synergy_action[:, 0]
 
-            synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
-            synergy_action = self.prev_synergy_actions * 0.9 + 0.1 * synergy_action
-            synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
-            # synergy_action = torch.zeros_like(self.actions[:, 6:8]).to(self.device)
-            # synergy_action[:, 0] = torch.ones_like(self.actions[:, 6]).to(self.device)
-            # synergy_action[:, 0] = self.actions[:, 6]
-            self.prev_synergy_actions = synergy_action
-            synergy_action_matrix = torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                                  [2, 2, 2, 1, 1, 1, 0, 0, 0, -1, -1, -1, -2, -2, -2]],
-                                                 device=self.device, dtype=torch.float32)
-            dof_action = torch.matmul(synergy_action, synergy_action_matrix)
-            dof_action = torch.clamp(dof_action, 0, 1.0)
-            dof_action = dof_action * 2 - 1
+                synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
+                synergy_action = self.prev_synergy_actions * 0.9 + 0.1 * synergy_action
+                synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
+                # synergy_action = torch.zeros_like(self.actions[:, 6:8]).to(self.device)
+                # synergy_action[:, 0] = torch.ones_like(self.actions[:, 6]).to(self.device)
+                # synergy_action[:, 0] = self.actions[:, 6]
+                self.prev_synergy_actions = synergy_action
+                synergy_action_matrix = torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                                      [2, 2, 2, 1, 1, 1, 0, 0, 0, -1, -1, -1, -2, -2, -2]],
+                                                     device=self.device, dtype=torch.float32)
+                dof_action = torch.matmul(synergy_action, synergy_action_matrix)
+                dof_action = torch.clamp(dof_action, 0, 1.0)
+                dof_action = dof_action * 2 - 1
+
+                tmp = torch.zeros_like(dof_action)
+                # Thumb
+                tmp[:, 12:] = dof_action[:, :3]
+                # Index
+                tmp[:, 0:3] = dof_action[:, 3:6]
+                # Middle
+                tmp[:, 6:9] = dof_action[:, 6:9]
+                # Ring
+                tmp[:, 9:12] = dof_action[:, 9:12]
+                # Little
+                tmp[:, 3:6] = dof_action[:, 12:15]
+                dof_action = tmp
+            else:
+                dof_action = self.actions[:, 6:21]
 
             self.object_pos = self.root_state_tensor[self.object_indices, 0:3]
             thumb_pos = self.rigid_body_states[:, 36, 0:3]
@@ -1163,18 +1185,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
 
             # dof_action = torch.where(hand_dist.unsqueeze(-1) > 0.06, -torch.ones_like(dof_action), dof_action)
 
-            tmp = torch.zeros_like(dof_action)
-            # Thumb
-            tmp[:, 12:] = dof_action[:, :3]
-            # Index
-            tmp[:, 0:3] = dof_action[:, 3:6]
-            # Middle
-            tmp[:, 6:9] = dof_action[:, 6:9]
-            # Ring
-            tmp[:, 9:12] = dof_action[:, 9:12]
-            # Little
-            tmp[:, 3:6] = dof_action[:, 12:15]
-            dof_action = tmp
+
 
             self.cur_targets[:, self.useful_joint_index] = scale(dof_action,
                                                                  self.hand_dof_lower_limits[

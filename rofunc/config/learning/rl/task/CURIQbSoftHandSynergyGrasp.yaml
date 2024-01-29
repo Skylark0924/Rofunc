@@ -45,6 +45,7 @@ env:
   successTolerance: 0.1
   printNumSuccesses: False
   maxConsecutiveSuccesses: 0
+  useSynergy: True
 
   asset:
     assetFileNameBlock: "urdf/objects/cube_multicolor.urdf"
