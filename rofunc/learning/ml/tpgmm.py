@@ -567,13 +567,14 @@ class TPGMM_RPRepr(TPGMMBi):
             plt.show()
         return ctraj_l, ctraj_r, prod_l, prod_r
 
-    def iterative_generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, nb_iter=1) -> \
+    def iterative_generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, nb_iter=1) -> \
             Tuple[ndarray, ndarray, GMM, GMM]:
         beauty_print('generate trajectories from learned representation with new task parameters iteratively',
                      type='info')
 
-        vanilla_repr = TPGMMBi(self.demos_left_x, self.demos_right_x, nb_states=self.nb_states, plot=self.plot,
-                               save=self.save, save_params=self.save_params)
+        vanilla_repr = TPGMMBi(self.demos_left_x, self.demos_right_x, task_params=self.task_params,
+                               nb_states=self.nb_states, plot=self.plot, save=self.save, save_params=self.save_params)
+        vanilla_repr.task_params = self.task_params
         vanilla_model_l, vanilla_model_r = vanilla_repr.fit()
 
         vanilla_traj_l, vanilla_traj_r, _, _ = vanilla_repr.generate([vanilla_model_l, vanilla_model_r],
@@ -601,12 +602,10 @@ class TPGMM_RPRepr(TPGMMBi):
         traj_l, traj_r = vanilla_traj_l, vanilla_traj_r
         for i in range(nb_iter):
 
-            task_params['left']['traj'] = traj_l[:, :self.nb_dim]
-            _, ctraj_r, _, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
-                                                              leader='left')
-            task_params['right']['traj'] = traj_r[:, :self.nb_dim]
-            _, ctraj_l, _, prod_l = self.conditional_generate(model_l, model_r, ref_demo_idx, task_params,
-                                                              leader='right')
+            self.task_params['left']['traj'] = traj_l[:, :self.nb_dim]
+            _, ctraj_r, _, prod_r = self.conditional_generate(model_l, model_r, ref_demo_idx, leader='left')
+            self.task_params['right']['traj'] = traj_r[:, :self.nb_dim]
+            _, ctraj_l, _, prod_l = self.conditional_generate(model_l, model_r, ref_demo_idx, leader='right')
 
             traj_l, traj_r = ctraj_l, ctraj_r
 
@@ -620,10 +619,10 @@ class TPGMM_RPRepr(TPGMMBi):
 
         return ctraj_l, ctraj_r, prod_l, prod_r
 
-    def conditional_generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, leader: str) -> \
+    def conditional_generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, leader: str) -> \
             Tuple[ndarray, ndarray, None, GMM]:
         follower = 'left' if leader == 'right' else 'right'
-        leader_traj = task_params[leader]['traj']
+        leader_traj = self.task_params[leader]['traj']
         models = {'left': model_l, 'right': model_r}
         reprs = {'left': self.repr_l, 'right': self.repr_r}
 
@@ -631,13 +630,13 @@ class TPGMM_RPRepr(TPGMMBi):
             follower, leader), type='info')
 
         A, b, index_list = self._get_dyna_A_b(models[follower], reprs[follower], ref_demo_idx,
-                                              task_params=task_params[follower])
+                                              task_params=self.task_params[follower])
         b[:, 2, :self.nb_dim] = leader_traj[index_list, :self.nb_dim]
 
         follower_prod = self._uni_poe(models[follower], reprs[follower], ref_demo_idx, task_params={'A': A, 'b': b})
 
         follower_traj = reprs[follower]._reproduce(models[follower], follower_prod, ref_demo_idx,
-                                                   task_params[follower]['start_xdx'])
+                                                   self.task_params[follower]['start_xdx'])
 
         data_lst = [leader_traj[:, :self.nb_dim], follower_traj[:, :self.nb_dim]]
         fig = rf.visualab.traj_plot(data_lst, title='Generated bimanual trajectories in leader-follower manner')
@@ -647,11 +646,12 @@ class TPGMM_RPRepr(TPGMMBi):
             plt.show()
         return leader_traj, follower_traj, None, follower_prod
 
-    def generate(self, model_l: HMM, model_r: HMM, ref_demo_idx: int, task_params: dict, leader: str = None):
+    def generate(self, models: List, ref_demo_idx: int, leader: str = None):
+        model_l, model_r = models
         if leader is None:
-            return self.iterative_generate(model_l, model_r, ref_demo_idx, task_params)
+            return self.iterative_generate(model_l, model_r, ref_demo_idx)
         else:
-            return self.conditional_generate(model_l, model_r, ref_demo_idx, task_params, leader)
+            return self.conditional_generate(model_l, model_r, ref_demo_idx, leader)
 
 
 class TPGMM_RPAll(TPGMM_RPRepr, TPGMM_RPCtrl):
