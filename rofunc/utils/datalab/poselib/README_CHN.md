@@ -33,13 +33,18 @@ Then you can install the `fbx sdk` in the Python 3.7 env:
 4. Copy the these three files to the `site-packages` folder of the Python 3.7 env you created
    ![img.png](img/img3.png)
 
-This process can refer to this [blog](https://zhuanlan.zhihu.com/p/585738703).
+You can also refer to this [blog](https://zhuanlan.zhihu.com/p/585738703) for the installation of `fbx sdk`.
 
 ### Motion Retargeting
 
 After installation, you can run the script with the following command:
 
 ```bash
-python xsens_fbx_to_hotu_npy.py --input_fbx_path <path_to_input_fbx> --output_npy_path <path_to_output_npy>
+python xsens_fbx_to_hotu_npy.py --fbx_file <path_to_fbx_file>
 ```
 
+Or you can run the script with the following command to convert all the `fbx` files in a folder:
+
+```bash
+python xsens_fbx_to_hotu_npy.py --fbx_folder <path_to_fbx_folder>
+```
