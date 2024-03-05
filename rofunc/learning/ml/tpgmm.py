@@ -158,8 +158,9 @@ class TPGMM:
 
         # get transformation for given demonstration.
         # We use the transformation of the first timestep as they are constant
-        if len(self.task_params['frame_origins'][0]) == 1:
-            A, b = self.demos_A_xdx[0][0], self.demos_b_xdx[0][0]
+        if len(self.task_params['frame_origins'][0]) == 1:  # For new task parameters generation
+            A, b = self.demo_A_xdx[0][0], self.demo_b_xdx[0][0]  # Attention: here we use self.demo_A_xdx not
+            # self.demos_A_xdx cause we just called get_A_b not get_related_matrix
         else:
             A, b = self.demos_A_xdx[show_demo_idx][0], self.demos_b_xdx[show_demo_idx][0]
 
