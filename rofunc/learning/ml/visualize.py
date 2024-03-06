@@ -40,11 +40,11 @@ def poe_plot(nb_dim, mod_list, prod, demos_x, show_demo_idx, task_params=None):
     return fig
 
 
-def gen_plot(nb_dim, xi, prod, demos_x, show_demo_idx):
+def gen_plot(nb_dim, xi, prod, demos_x, show_demo_idx, title='Trajectory reproduction', label='reproduced line'):
     if nb_dim == 2:
-        fig = generate_plot_2d(xi, prod, demos_x, show_demo_idx)
+        fig = generate_plot_2d(xi, prod, demos_x, show_demo_idx, title=title, label=label)
     elif nb_dim > 2:
-        fig = generate_plot_3d(xi, prod, demos_x, show_demo_idx)
+        fig = generate_plot_3d(xi, prod, demos_x, show_demo_idx, title=title, label=label)
     else:
         raise Exception('Dimension is less than 2, cannot plot')
     return fig
@@ -149,27 +149,28 @@ def poe_plot_3d(mod_list, prod, demos_x, demo_idx, task_params=None):
     return fig
 
 
-def generate_plot_2d(xi, prod, demos_x, demo_idx):
+def generate_plot_2d(xi, prod, demos_x, demo_idx, title='Trajectory reproduction', label='reproduced line'):
     fig = plt.figure()
 
-    plt.title('Trajectory reproduction')
+    plt.title(title)
     rf.visualab.gmm_plot(prod.mu, prod.sigma, swap=True, dim=[0, 1], color='gold', alpha=0.5)
     plt.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], 'k--', lw=2, label='demo line')
-    plt.plot(xi[:, 0], xi[:, 1], color='r', lw=2, label='generated line')
+    plt.plot(xi[:, 0], xi[:, 1], color='r', lw=2, label=label)
     plt.axis('equal')
     plt.legend()
     return fig
 
 
-def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, plot_ori=True):
+def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, plot_ori=True,
+                     title='Trajectory reproduction', label='reproduced line'):
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111, projection='3d', fc='white')
 
-    ax.set_title('Trajectory reproduction')
+    ax.set_title(title)
     if plot_gmm:
         rf.visualab.gmm_plot(prod.mu, prod.sigma, dim=[0, 1, 2], color='gold', scale=0.01, ax=ax)
     ax.plot(demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2], 'k--', lw=2, label='demo line')
-    ax.plot(xi[:, 0], xi[:, 1], xi[:, 2], color='r', lw=2, label='generated line')
+    ax.plot(xi[:, 0], xi[:, 1], xi[:, 2], color='r', lw=2, label=label)
     rf.visualab.set_axis(ax, data=[demos_x[demo_idx][:, 0], demos_x[demo_idx][:, 1], demos_x[demo_idx][:, 2]])
     plt.legend()
 
@@ -178,21 +179,21 @@ def generate_plot_3d(xi, prod, demos_x, demo_idx, scale=0.01, plot_gmm=False, pl
         plt.figure()
         plt.subplot(2, 2, 1)
         plt.plot(np.arange(len(demos_x[demo_idx][:, 3])), demos_x[demo_idx][:, 3], 'k--', lw=2, label='demo line')
-        plt.plot(t, xi[:, 3], color='r', lw=2, label='generated line')
+        plt.plot(t, xi[:, 3], color='r', lw=2, label=label)
         plt.title('w-t')
 
         plt.subplot(2, 2, 2)
         plt.plot(np.arange(len(demos_x[demo_idx][:, 4])), demos_x[demo_idx][:, 4], 'k--', lw=2, label='demo line')
-        plt.plot(t, xi[:, 4], color='r', lw=2, label='generated line')
+        plt.plot(t, xi[:, 4], color='r', lw=2, label=label)
         plt.title('x-t')
 
         plt.subplot(2, 2, 3)
         plt.plot(np.arange(len(demos_x[demo_idx][:, 5])), demos_x[demo_idx][:, 5], 'k--', lw=2, label='demo line')
-        plt.plot(t, xi[:, 5], color='r', lw=2, label='generated line')
+        plt.plot(t, xi[:, 5], color='r', lw=2, label=label)
         plt.title('y-t')
 
         plt.subplot(2, 2, 4)
         plt.plot(np.arange(len(demos_x[demo_idx][:, 6])), demos_x[demo_idx][:, 6], 'k--', lw=2, label='demo line')
-        plt.plot(t, xi[:, 6], color='r', lw=2, label='generated line')
+        plt.plot(t, xi[:, 6], color='r', lw=2, label=label)
         plt.title('z-t')
     return fig
