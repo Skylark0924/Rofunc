@@ -452,8 +452,8 @@ class TPGMM_RPCtrl(TPGMMBi):
                                               # start_xdx_lst=[self.repr_l.task_params['frame_origins'][0][0],
                                               #                self.repr_r.task_params['frame_origins'][0][0],
                                               #                self.repr_c.task_params['frame_origins'][0][0]])
-                                                             start_xdx_lst=[self.repr_l.demos_xdx[ref_demo_idx][0],
-                                                                            self.repr_r.demos_xdx[ref_demo_idx][0],
+                                              start_xdx_lst=[self.repr_l.demos_xdx[ref_demo_idx][0],
+                                                             self.repr_r.demos_xdx[ref_demo_idx][0],
                                                              self.repr_c.demos_xdx[ref_demo_idx][0]])
 
         data_lst = [ctraj_l[:, :self.repr_l.nb_dim], ctraj_r[:, :self.repr_r.nb_dim]]
