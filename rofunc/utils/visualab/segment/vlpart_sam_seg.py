@@ -25,8 +25,8 @@ def vlpart_sam_predict(image,
     sam_ckpt_path = os.path.join(get_rofunc_path(), "learning/pre_trained_models", sam_checkpoint)
     if not os.path.exists(vlpart_ckpt_path):
         download_ckpt(
-            f"https://github.com/Cheems-Seminar/grounded-segment-any-parts/releases/download/v1.0/{vlpart_ckpt_path}",
-            vlpart_ckpt_path)
+            f"https://github.com/Cheems-Seminar/grounded-segment-any-parts/releases/download/v1.0/{vlpart_checkpoint}",
+            vlpart_checkpoint)
     if not os.path.exists(sam_ckpt_path):
         download_ckpt(f"https://dl.fbaipublicfiles.com/segment_anything/{sam_checkpoint}", sam_checkpoint)
 

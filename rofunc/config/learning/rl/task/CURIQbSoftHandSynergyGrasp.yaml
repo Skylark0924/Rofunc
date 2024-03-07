@@ -38,13 +38,14 @@ env:
   fallDistance: 0.4
   fallPenalty: 0.0
 
-  objectType: "knife" # can be power_drill, hammer, large_clamp, spatula, screw_driver, wine_glass, mug, knife, scissors, phillips_screw_driver
+  objectType: "hammer" # can be power_drill, hammer, large_clamp, spatula, wine_glass, mug, knife, scissors, phillips_screw_driver
   observationType: "full_state" # point_cloud or full_state
   handAgentIndex: "[[0, 1, 2, 3, 4, 5]]"
   asymmetric_observations: False
   successTolerance: 0.1
   printNumSuccesses: False
   maxConsecutiveSuccesses: 0
+  useSynergy: True
 
   asset:
     assetFileNameBlock: "urdf/objects/cube_multicolor.urdf"

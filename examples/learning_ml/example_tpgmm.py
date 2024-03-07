@@ -25,7 +25,7 @@ traj, _ = Repr.reproduce(model, show_demo_idx=2)
 
 # Reproductions for new situations: set the endpoint as the start point to make a cycled motion
 ref_demo_idx = 2
-start_xdx = [Repr.demos_xdx[ref_demo_idx][0]]
-end_xdx = [Repr.demos_xdx[ref_demo_idx][0]]
+start_xdx = [Repr.demos_xdx[ref_demo_idx][9]]
+end_xdx = [Repr.demos_xdx[ref_demo_idx][9]]
 Repr.task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
 traj, _ = Repr.generate(model, ref_demo_idx)
