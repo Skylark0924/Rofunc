@@ -1,7 +1,5 @@
 import os
-import random
 
-import torch
 from PIL import Image as Im
 from isaacgym import gymapi
 from isaacgym import gymtorch
@@ -88,6 +86,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
             "knife": "urdf/ycb/032_knife/032_knife.urdf",
             "scissors": "urdf/ycb/037_scissors/037_scissors.urdf",
             "phillips_screw_driver": "urdf/ycb/043_phillips_screwdriver/043_phillips_screwdriver.urdf",
+            "large_marker": "urdf/ycb/040_large_marker/040_large_marker.urdf"
         }
 
         if "asset" in self.cfg["env"]:
@@ -110,7 +109,10 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         # <editor-fold desc="obs space">
         self.num_point_cloud_feature_dim = 768
 
-        self.num_hand_obs = 95 * 3 + 6 + 8
+        if self.cfg["env"]["useSynergy"]:
+            self.num_hand_obs = 95 * 3 + 6 + 8
+        else:
+            self.num_hand_obs = 95 * 3 + 6 + 21
         num = 13 + self.num_hand_obs
         self.num_obs_dict = {
             "point_cloud": num + self.num_point_cloud_feature_dim * 3,
@@ -141,7 +143,10 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.cfg["env"]["numStates"] = num_states
 
         self.num_agents = 1
-        self.cfg["env"]["numActions"] = 2 + 7  # 2-dim synergy for controlling each hand
+        if self.cfg["env"]["useSynergy"]:
+            self.cfg["env"]["numActions"] = 2 + 6  # 2-dim synergy for controlling each hand
+        else:
+            self.cfg["env"]["numActions"] = 15 + 6  # 15-dim dof for controlling each hand
         self.num_action = self.cfg["env"]["numActions"]
 
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
@@ -193,8 +198,14 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.hand_default_dof_pos = torch.zeros(self.num_hand_dofs, dtype=torch.float, device=self.device)
         # self.hand_default_dof_pos[:7] = to_torch(self.hand_dof_lower_limits[:7] + self.hand_dof_upper_limits[:7],
         #                                          dtype=torch.float, device=self.device) / 2.0
-        self.hand_default_dof_pos[:7] = torch.tensor([0.0905, 0.5326, 0.0486, -1.5469, -0.9613, 2.2102, 1.5221]).to(
-            self.device)
+
+        if self.object_type in ["power_drill", "mug", "large_marker"]:
+            self.hand_default_dof_pos[:7] = torch.tensor([0.0905, 0.5326, 0.0486, -1.5469, -0.9613, 2.2102, 1.5221]).to(
+                self.device)
+        elif self.object_type in ["hammer", "large_clamp", "spatula", "phillips_screw_driver", "scissors", "knife"]:
+            self.hand_default_dof_pos[:7] = torch.tensor(
+                [-0.6654, 0.5872, 0.9190, -1.4767, -2.4621, 3.2423, 2.8480]).to(
+                self.device)
         self.hand_default_dof_pos[33 + 7:33 + 14] = to_torch(self.hand_dof_lower_limits[33 + 7:33 + 14]
                                                              + self.hand_dof_upper_limits[33 + 7:33 + 14],
                                                              dtype=torch.float, device=self.device) / 2.0
@@ -264,6 +275,11 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
         self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
+
+        l_color = gymapi.Vec3(1, 1, 1)
+        l_ambient = gymapi.Vec3(0.3, 0.3, 0.3)
+        l_direction = gymapi.Vec3(-1, 0, 1)
+        self.gym.set_light_parameters(self.sim, 0, l_color, l_ambient, l_direction)
 
     def _create_ground_plane(self):
         """
@@ -400,6 +416,8 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
 
         # <editor-fold desc="create table asset">
         table_dims = gymapi.Vec3(1.0, 1.0, 0.6)
+        if self.object_type in ["mug", "large_marker"]:
+            table_dims = gymapi.Vec3(1.0, 1.0, 0.65)
         asset_options = gymapi.AssetOptions()
         asset_options.fix_base_link = True
         asset_options.flip_visual_attachments = True
@@ -410,14 +428,43 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         table_asset = self.gym.create_box(self.sim, table_dims.x, table_dims.y, table_dims.z, gymapi.AssetOptions())
         # </editor-fold>
 
+        # block_asset = self.gym.create_box(self.sim, table_dims.x / 10, table_dims.y / 10, 0.05, gymapi.AssetOptions())
+
         # <editor-fold desc="set initial poses">
         hand_start_pose = gymapi.Transform()
         hand_start_pose.p = gymapi.Vec3(1.25, 0.0, 0.0)
         hand_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, 3.14)  # xyzw (0.0, 0.0, 1.0, 0.0)
 
         object_start_pose = gymapi.Transform()
-        object_start_pose.p = gymapi.Vec3(0.1, -0.05, 0.7)
-        object_start_pose.r = gymapi.Quat().from_euler_zyx(1.57, 0, -1.57)  # xyzw (0.5, -0.5, -0.5, 0.5)
+        if self.object_type in ["power_drill"]:
+            object_start_pose.p = gymapi.Vec3(0.1, -0.05, 0.7)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(1.57, 0, -1.57)  # xyzw (0.5, -0.5, -0.5, 0.5)
+        elif self.object_type in ["hammer"]:
+            object_start_pose.p = gymapi.Vec3(0., -0.15, 0.6)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, 0)  # xyzw (0.5, -0.5, -0.5, 0.5)
+        elif self.object_type in ["large_clamp"]:
+            object_start_pose.p = gymapi.Vec3(0.05, -0.2, 0.6)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, 3.14)
+        elif self.object_type in ["spatula"]:
+            object_start_pose.p = gymapi.Vec3(0.15, -0.15, 0.65)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(3.14, 0, 1.57)
+        elif self.object_type in ["phillips_screw_driver"]:
+            object_start_pose.p = gymapi.Vec3(0., -0.20, 0.6)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, -1.57)
+        elif self.object_type in ["scissors"]:
+            object_start_pose.p = gymapi.Vec3(0.05, -0.18, 0.6)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, 0)
+        elif self.object_type in ["knife"]:
+            # object_start_pose.p = gymapi.Vec3(-0.05, -0.17, 0.6)
+            # object_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, 1.57)
+            object_start_pose.p = gymapi.Vec3(0.05, -0.17, 0.6)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, -1.57)
+        elif self.object_type in ["mug"]:
+            object_start_pose.p = gymapi.Vec3(0.07, 0.03, 0.65)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(0, 0, -1.57)
+        elif self.object_type in ["large_marker"]:
+            object_start_pose.p = gymapi.Vec3(0.14, -0.03, 0.65)
+            object_start_pose.r = gymapi.Quat().from_euler_zyx(1.57, 0, 0)
 
         if self.object_type == "pen":
             object_start_pose.p.z = hand_start_pose.p.z + 0.02
@@ -516,13 +563,25 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
                                            0, 0, 0, 0, 0, 0])
             object_idx = self.gym.get_actor_index(env_ptr, object_handle, gymapi.DOMAIN_SIM)
             self.object_indices.append(object_idx)
-            self.gym.set_actor_scale(env_ptr, object_handle, 1.2)
+            if self.object_type in ["mug"]:
+                self.gym.set_actor_scale(env_ptr, object_handle, 1.5)
+            elif self.object_type in ["power_drill", "hammer", "spatula", "phillips_screw_driver", "knife", "scissors",
+                                      "large_marker"]:
+                self.gym.set_actor_scale(env_ptr, object_handle, 1.2)
+            elif self.object_type in ["large_clamp"]:
+                self.gym.set_actor_scale(env_ptr, object_handle, 1)
 
             # add table
             table_handle = self.gym.create_actor(env_ptr, table_asset, table_pose, "table", i, -1, 0)
-            self.gym.set_rigid_body_texture(env_ptr, table_handle, 0, gymapi.MESH_VISUAL, table_texture_handle)
+            # self.gym.set_rigid_body_texture(env_ptr, table_handle, 0, gymapi.MESH_VISUAL, table_texture_handle)
             table_idx = self.gym.get_actor_index(env_ptr, table_handle, gymapi.DOMAIN_SIM)
             self.table_indices.append(table_idx)
+
+            # block_pose = gymapi.Transform()
+            # block_pose.p = gymapi.Vec3(-0.1, 0.0, 0.6)
+            # block_pose.r = gymapi.Quat().from_euler_zyx(0., 0., 0.)
+            # block_handle = self.gym.create_actor(env_ptr, block_asset, block_pose, "block", i, -1, 0)
+            # block_idx = self.gym.get_actor_index(env_ptr, block_handle, gymapi.DOMAIN_SIM)
 
             # if self.object_type != "block":
             #     self.gym.set_rigid_body_color(
@@ -563,58 +622,6 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.object_indices = to_torch(self.object_indices, dtype=torch.long, device=self.device)
         self.table_indices = to_torch(self.table_indices, dtype=torch.long, device=self.device)
 
-    # def _create_attractor(self, attracted_rigid_body, verbose=True):
-    #     """
-    #     Initialize the attractor for tracking the trajectory using the embedded Isaac Gym PID controller
-    #
-    #     :param attracted_rigid_body: the link to be attracted
-    #     :param verbose: if True, visualize the attractor spheres
-    #     :return:
-    #     """
-    #     from isaacgym import gymapi
-    #     from isaacgym import gymutil
-    #     import math
-    #
-    #     # Attractor setup
-    #     attractor_handles = []
-    #     attractor_properties = gymapi.AttractorProperties()
-    #     attractor_properties.stiffness = 5e5
-    #     attractor_properties.damping = 5e3
-    #
-    #     # Make attractor in all axes
-    #     attractor_properties.axes = gymapi.AXIS_ALL
-    #
-    #     # Create helper geometry used for visualization
-    #     # Create a wireframe axis
-    #     axes_geom = gymutil.AxesGeometry(0.1)
-    #     # Create a wireframe sphere
-    #     sphere_rot = gymapi.Quat.from_euler_zyx(0.5 * math.pi, 0, 0)
-    #     sphere_pose = gymapi.Transform(r=sphere_rot)
-    #     sphere_geom = gymutil.WireframeSphereGeometry(0.03, 12, 12, sphere_pose, color=(1, 0, 0))
-    #
-    #     body_dict = self.gym.get_actor_rigid_body_dict(self.envs[0], self.hands[0])
-    #     attracted_rigid_body_handle = self.gym.find_actor_rigid_body_handle(self.envs[0], self.hands[0],
-    #                                                                         attracted_rigid_body)
-    #
-    #     for i in range(len(self.envs)):
-    #         env = self.envs[i]
-    #
-    #         # Initialize the attractor
-    #         attractor_properties.target = gymapi.Transform()
-    #         pose = self.rigid_body_states[i, body_dict[attracted_rigid_body]]
-    #         attractor_properties.target.p = gymapi.Vec3(*pose[0:3])
-    #         attractor_properties.target.r = gymapi.Quat(*pose[3:7])
-    #         attractor_properties.rigid_handle = attracted_rigid_body_handle
-    #
-    #         if verbose:
-    #             # Draw axes and sphere at attractor location
-    #             gymutil.draw_lines(axes_geom, self.gym, self.viewer, env, attractor_properties.target)
-    #             gymutil.draw_lines(sphere_geom, self.gym, self.viewer, env, attractor_properties.target)
-    #
-    #         attractor_handle = self.gym.create_rigid_body_attractor(env, attractor_properties)
-    #         attractor_handles.append(attractor_handle)
-    #     return attractor_handles, axes_geom, sphere_geom
-
     def compute_reward(self, actions):
         """
         Compute the reward of all environment. The core function is compute_hand_reward(
@@ -631,6 +638,11 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         Args:
             actions (tensor): Actions of agents in the all environment 
         """
+        if self.object_type in ["power_drill", "hammer", "spatula", "phillips_screw_driver", "knife"]:
+            synergy_target = torch.tensor([1, 0]).to(self.device)
+        elif self.object_type in ["large_clamp", "scissors", "pen", "mug", "large_marker"]:
+            synergy_target = torch.tensor([0.44, 1]).to(self.device)
+
         self.rew_buf[:], self.reset_buf[:], self.reset_goal_buf[:], self.progress_buf[:], self.successes[
                                                                                           :], self.consecutive_successes[
                                                                                               :] = compute_hand_reward(
@@ -641,7 +653,8 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
             self.hand_rf_pos, self.hand_lf_pos, self.hand_th_pos,
             self.dist_reward_scale, self.rot_reward_scale, self.rot_eps, self.actions, self.action_penalty_scale,
             self.success_tolerance, self.reach_goal_bonus, self.fall_dist, self.fall_penalty,
-            self.max_consecutive_successes, self.av_factor, (self.object_type == "pen"), self.prev_synergy_actions
+            self.max_consecutive_successes, self.av_factor, (self.object_type == "pen"), self.prev_synergy_actions,
+            synergy_target
         )
 
         self.extras['successes'] = self.successes
@@ -1035,13 +1048,29 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.prev_targets[env_ids, :self.num_hand_dofs] = pos
         self.cur_targets[env_ids, :self.num_hand_dofs] = pos
         self.prev_synergy_actions[env_ids, :] = torch.tensor([0.0, 0.0], device=self.device)
-        # self.prev_goal_pose[env_ids, :3] = torch.tensor([0.30, -0.15, 0.68]).to(self.device)
-        self.prev_goal_pose[env_ids, :3] = torch.tensor([0.2616, -0.2173, 0.7121]).to(self.device)
-        self.prev_goal_pose[env_ids, 3:7] = torch.tensor([0, 0.707, 0.707, 0]).to(self.device)
+
         # self.prev_dof_action[env_ids, :] = -torch.ones((self.num_envs, 15)).to(self.device)
 
-        self.prev_targets[env_ids, :7] = torch.tensor([0.0905, 0.5326, 0.0486, -1.5469, -0.9613, 2.2102, 1.5221]).to(
-            self.device)
+        if self.object_type in ["power_drill"]:
+            self.prev_targets[env_ids, :7] = torch.tensor(
+                [0.0905, 0.5326, 0.0486, -1.5469, -0.9613, 2.2102, 1.5221]).to(
+                self.device)
+            # self.prev_goal_pose[env_ids, :3] = torch.tensor([0.30, -0.15, 0.68]).to(self.device)
+            self.prev_goal_pose[env_ids, :3] = torch.tensor([0.2616, -0.2173, 0.7121]).to(self.device)
+            self.prev_goal_pose[env_ids, 3:7] = torch.tensor([0, 0.707, 0.707, 0]).to(self.device)
+        elif self.object_type in ["mug", "large_marker"]:
+            self.prev_targets[env_ids, :7] = torch.tensor(
+                [0.0905, 0.5326, 0.0486, -1.5469, -0.9613, 2.2102, 1.5221]).to(
+                self.device)
+            # self.prev_goal_pose[env_ids, :3] = torch.tensor([0.30, -0.15, 0.68]).to(self.device)
+            self.prev_goal_pose[env_ids, :3] = torch.tensor([0.2616, -0.2173, 0.6321]).to(self.device)
+            self.prev_goal_pose[env_ids, 3:7] = torch.tensor([0, 0.707, 0.707, 0]).to(self.device)
+        elif self.object_type in ["hammer", "large_clamp", "spatula", "phillips_screw_driver", "scissors", "knife"]:
+            self.prev_targets[env_ids, :7] = torch.tensor(
+                [-0.6654, 0.5872, 0.9190, -1.4767, -2.4621, 3.2423, 2.8480]).to(
+                self.device)
+            self.prev_goal_pose[env_ids, :3] = torch.tensor([0.2616, -0.2173, 0.8]).to(self.device)
+            self.prev_goal_pose[env_ids, 3:7] = torch.tensor([0, 1., 0., 0]).to(self.device)
         self.cur_targets[env_ids, :7] = self.prev_targets[env_ids, :7]
 
         hand_indices = self.hand_indices[env_ids].to(torch.int32)
@@ -1087,7 +1116,6 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         Args:
             actions (tensor): Actions of agents in the all environment
         """
-        from isaacgym import gymutil
 
         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         goal_env_ids = self.reset_goal_buf.nonzero(as_tuple=False).squeeze(-1)
@@ -1114,22 +1142,39 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         else:
             self.gym.clear_lines(self.viewer)
 
-            synergy_action = self.actions[:, 6:8]
-            # synergy_action = torch.zeros_like(self.actions[:, 6:8]).to(self.device)
-            # synergy_action[:, 0] = torch.ones_like(self.actions[:, 6]).to(self.device)
-            synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
-            synergy_action = self.prev_synergy_actions * 0.9 + 0.1 * synergy_action
-            synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
-            # synergy_action = torch.zeros_like(self.actions[:, 6:8]).to(self.device)
-            # synergy_action[:, 0] = torch.ones_like(self.actions[:, 6]).to(self.device)
-            # synergy_action[:, 0] = self.actions[:, 6]
-            self.prev_synergy_actions = synergy_action
-            synergy_action_matrix = torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                                  [2, 2, 2, 1, 1, 1, 0, 0, 0, -1, -1, -1, -2, -2, -2]],
-                                                 device=self.device, dtype=torch.float32)
-            dof_action = torch.matmul(synergy_action, synergy_action_matrix)
-            dof_action = torch.clamp(dof_action, 0, 1.0)
-            dof_action = dof_action * 2 - 1
+            if self.cfg["env"]["useSynergy"]:
+                synergy_action = self.actions[:, 6:8]
+                # synergy_action = torch.ones_like(self.actions[:, 6:8]).to(self.device)
+                # synergy_action[:, 0] = 0.44 * synergy_action[:, 0]
+
+                synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
+                synergy_action = self.prev_synergy_actions * 0.9 + 0.1 * synergy_action
+                synergy_action[:, 0] = torch.abs(synergy_action[:, 0])
+                # synergy_action = torch.zeros_like(self.actions[:, 6:8]).to(self.device)
+                # synergy_action[:, 0] = torch.ones_like(self.actions[:, 6]).to(self.device)
+                # synergy_action[:, 0] = self.actions[:, 6]
+                self.prev_synergy_actions = synergy_action
+                synergy_action_matrix = torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                                      [2, 2, 2, 1, 1, 1, 0, 0, 0, -1, -1, -1, -2, -2, -2]],
+                                                     device=self.device, dtype=torch.float32)
+                dof_action = torch.matmul(synergy_action, synergy_action_matrix)
+                dof_action = torch.clamp(dof_action, 0, 1.0)
+                dof_action = dof_action * 2 - 1
+
+                tmp = torch.zeros_like(dof_action)
+                # Thumb
+                tmp[:, 12:] = dof_action[:, :3]
+                # Index
+                tmp[:, 0:3] = dof_action[:, 3:6]
+                # Middle
+                tmp[:, 6:9] = dof_action[:, 6:9]
+                # Ring
+                tmp[:, 9:12] = dof_action[:, 9:12]
+                # Little
+                tmp[:, 3:6] = dof_action[:, 12:15]
+                dof_action = tmp
+            else:
+                dof_action = self.actions[:, 6:21]
 
             self.object_pos = self.root_state_tensor[self.object_indices, 0:3]
             thumb_pos = self.rigid_body_states[:, 36, 0:3]
@@ -1140,10 +1185,7 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
 
             # dof_action = torch.where(hand_dist.unsqueeze(-1) > 0.06, -torch.ones_like(dof_action), dof_action)
 
-            tmp = torch.zeros_like(dof_action)
-            tmp[:, :12] = dof_action[:, 3:15]
-            tmp[:, 12:] = dof_action[:, :3]
-            dof_action = tmp
+
 
             self.cur_targets[:, self.useful_joint_index] = scale(dof_action,
                                                                  self.hand_dof_lower_limits[
@@ -1171,7 +1213,18 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
             goal_rot = self.prev_goal_pose[:, 3:7]
 
             # goal_pos[:, 2] = torch.where(goal_pos[:, 2] < 0.65, torch.tensor([0.65]).to(self.device), goal_pos[:, 2])
-            goal_pos[:, 2] = torch.where(hand_dist < 0.05, goal_pos[:, 2] + 0.01, goal_pos[:, 2])
+            if self.object_type in ["power_drill"]:
+                goal_pos[:, 2] = torch.where(hand_dist < 0.05, goal_pos[:, 2] + 0.01, goal_pos[:, 2])
+            elif self.object_type in ["mug", "large_marker"]:
+                goal_pos[:, 2] = torch.where(hand_dist < 0.1, goal_pos[:, 2] + 0.01, goal_pos[:, 2])
+            # elif self.object_type in ["mug"]:
+            #     goal_pos[:, 2] = torch.where(hand_dist < 0.15, goal_pos[:, 2] + 0.01, goal_pos[:, 2])
+            elif self.object_type in ["large_clamp", "spatula", "knife", "hammer"]:
+                goal_pos[:, 2] = torch.where((thumb_pos[:, 2] - self.object_pos[:, 2]) < 0.05, goal_pos[:, 2] + 0.01,
+                                             goal_pos[:, 2])
+            elif self.object_type in ["scissors", "phillips_screw_driver"]:
+                goal_pos[:, 2] = torch.where((thumb_pos[:, 2] - self.object_pos[:, 2]) < 0.02, goal_pos[:, 2] + 0.01,
+                                             goal_pos[:, 2])
 
             self.prev_goal_pose[:, :3] = goal_pos
             self.prev_goal_pose[:, 3:7] = goal_rot
@@ -1195,8 +1248,8 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
                 pose.r.y = goal_rot[i, 1]
                 pose.r.z = goal_rot[i, 2]
                 pose.r.w = goal_rot[i, 3]
-                gymutil.draw_lines(self.axes_geom, self.gym, self.viewer, self.envs[i], pose)
-                gymutil.draw_lines(self.sphere_geom, self.gym, self.viewer, self.envs[i], pose)
+                # gymutil.draw_lines(self.axes_geom, self.gym, self.viewer, self.envs[i], pose)
+                # gymutil.draw_lines(self.sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
             # hand_dist = torch.norm(self.object_pos - hand_pos, p=2, dim=-1)
             # self.apply_forces[:, 0, :] = self.actions[:, 0:3] * self.dt * self.transition_scale * 100000
@@ -1390,7 +1443,7 @@ def compute_hand_reward(
         actions, action_penalty_scale: float,
         success_tolerance: float, reach_goal_bonus: float, fall_dist: float,
         fall_penalty: float, max_consecutive_successes: int, av_factor: float, ignore_z_rot: bool,
-        prev_synergy_actions):
+        prev_synergy_actions, synergy_target):
     """
     Compute the reward of all environment.
 
@@ -1465,8 +1518,8 @@ def compute_hand_reward(
     action_penalty = torch.sum(actions ** 2, dim=-1)
 
     synergy = prev_synergy_actions
-    synergy_target = torch.tensor([1, 0]).to(synergy.device)
-    synergy_dist = torch.norm(synergy - synergy_target, p=2, dim=-1)
+    # synergy_target = torch.tensor([1, 0]).to(synergy.device)
+    synergy_dist = torch.norm(synergy - synergy_target, p=2, dim=-1) * 10
 
     # # Total reward is: position distance + orientation alignment + action regularization + success bonus + fall penalty
     # # reward = torch.exp(-0.05*(up_rew * dist_reward_scale)) + torch.exp(-0.05*(right_hand_dist_rew * dist_reward_scale)) + torch.exp(-0.05*(left_hand_dist_rew * dist_reward_scale))
@@ -1490,7 +1543,7 @@ def compute_hand_reward(
     # resets = torch.where(hand_dist_rew <= 0, torch.ones_like(reset_buf), reset_buf)
     # resets = torch.where(object_rot[:, 3] > 0.9, torch.ones_like(resets), resets)
     # resets = torch.where(right_hand_finger_dist >= 1.5, torch.ones_like(resets), resets)
-    resets = torch.where(hand_dist >= 0.2, torch.ones_like(reset_buf), reset_buf)
+    resets = torch.where(hand_dist >= 0.3, torch.ones_like(reset_buf), reset_buf)
 
     # Find out which envs hit the goal and update successes count
     successes = torch.where(successes == 0, torch.where(object_pos[:, 2] > 1.0,

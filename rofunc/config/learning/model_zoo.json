@@ -179,6 +179,56 @@
     "name": "BiShadowHandTwoCatchUnderarmRofuncRLPPO.pth",
     "md5": ""
   },
+  "CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1VxFNboUOclQSzm0nAeA7kMjtNRQAk5-V&export=download",
+    "name": "CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "_CURIQbSoftHandSynergyGraspLarge_Clamp2RofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1--hfNU1_o5x6tl2nb-lRJEzsEkcFD6_k&export=download",
+    "name": "CURIQbSoftHandSynergyGraspLarge_Clamp2RofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspLarge_ClampRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1Se-ghKuTfYgPFK1rNXhyaNqejkCuwlZ6&export=download",
+    "name": "CURIQbSoftHandSynergyGraspLarge_ClampRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1eM5m3qbhXIc9fZgI2AcFepwlcg7PAUEx&export=download",
+    "name": "CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspLarge_MarkerRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1EeTB-8wQTizjB-17YUdpa1dpH6uw0cyQ&export=download",
+    "name": "CURIQbSoftHandSynergyGraspLarge_MarkerRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspMugRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=147e-RAAfGq0EWcTzOyMRpJ-W__PovFOx&export=download",
+    "name": "CURIQbSoftHandSynergyGraspMugRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspPower_DrillRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1mxtw5GVEX_hDeGFTuXodeb5xBG2J5fBB&export=download",
+    "name": "CURIQbSoftHandSynergyGraspPower_DrillRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1Nihlp3PaJtUzhQMsDl871z_0imhurY4M&export=download",
+    "name": "CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=15HdnTp_etpZFtp_b45cYoUFl8XLzsIbm&export=download",
+    "name": "CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspScissorsRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1otUypqNP6g4wGPTNNdxnIDozCLxv3ije&export=download",
+    "name": "CURIQbSoftHandSynergyGraspScissorsRofuncRLPPO.pth",
+    "md5": ""
+  },
   "efficientsam_s_gpu.jit": {
     "url": "https://drive.google.com/uc?id=1lMCUFOLeQOlIpuaIA00MB174lL7ZiuoS&export=download",
     "name": "efficientsam_s_gpu.jit",

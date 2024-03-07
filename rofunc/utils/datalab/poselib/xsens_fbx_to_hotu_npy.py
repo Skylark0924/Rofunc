@@ -291,7 +291,7 @@ def npy_from_fbx(fbx_file):
     """
     rofunc_path = rf.oslab.get_rofunc_path()
     config = {
-        "target_motion_path": "/home/ubuntu/Github/Rofunc/examples/data/hotu/test_data_04_hotu.npy",
+        "target_motion_path": fbx_file.replace('_xsens.fbx', '_xsens2hotu.npy'),
         "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_xsens_w_gloves_tpose.npy"),
         "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
         "joint_mapping": {  # Left: Xsens, Right: MJCF
@@ -311,7 +311,7 @@ def npy_from_fbx(fbx_file):
             "RightArm": "right_upper_arm",
             "RightForeArm": "right_lower_arm",
             "RightHand": "right_hand",
-            # hotu_humanoid_w_qbhand.xml
+            # extra mapping for hotu_humanoid_w_qbhand.xml
             "LeftHandThumb1": "left_qbhand_thumb_knuckle_link",
             "LeftHandThumb2": "left_qbhand_thumb_proximal_link",
             "LeftHandThumb3": "left_qbhand_thumb_distal_link",
@@ -357,14 +357,30 @@ def npy_from_fbx(fbx_file):
 
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fbx_dir", type=str, default=None)
+    parser.add_argument("--fbx_file", type=str, default=None)
+    parser.add_argument("--parallel", action="store_true")
+    args = parser.parse_args()
+
     rofunc_path = rf.oslab.get_rofunc_path()
+
+    if args.fbx_dir is not None:
+        fbx_dir = args.fbx_dir
+        fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
+    elif args.fbx_file is not None:
+        fbx_files = [args.fbx_file]
+    else:
+        raise ValueError("Please provide a valid fbx_dir or fbx_file.")
     # fbx_dir = os.path.join(rofunc_path, "../examples/data/hotu")
     # fbx_dir = "/home/ubuntu/Data/2023_11_15_HED/has_gloves"
     # fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
-    fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
+    # fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
+    # fbx_files = [os.path.join(rofunc_path, "../examples/data/hotu/test_data_01_xsens.fbx")]
 
-    parallel = False
-    if parallel:
+    if args.parallel:
         pool = multiprocessing.Pool()
         pool.map(npy_from_fbx, fbx_files)
     else:
