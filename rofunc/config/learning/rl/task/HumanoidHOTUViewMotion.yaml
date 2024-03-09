@@ -20,8 +20,8 @@ env:
   numAMPObsSteps: 2
 
   localRootObs: False
-  keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot"]
-  contactBodies: ["right_foot", "left_foot"]
+  keyBodies: [ "right_hand", "left_hand", "right_foot", "left_foot" ]
+  contactBodies: [ "right_foot", "left_foot" ]
   terminationHeight: 0.15
   enableEarlyTermination: True
 
@@ -35,8 +35,9 @@ env:
     assetJointNum: 28
 
   object_asset:
-    assetFileName:
-    assetName:
+    assetName:         # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+    assetFileName:     # List of object asset file path
+    assetSize:         # List of object size, used for scaling the object and creating the box objects
 
   plane:
     staticFriction: 1.0
