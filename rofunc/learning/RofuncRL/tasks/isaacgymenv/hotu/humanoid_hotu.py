@@ -57,10 +57,7 @@ class HumanoidHOTU(Humanoid):
                 "../../../../../../" + motion_file,
             )
         else:
-            motion_file_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "../../../../../../examples/data/amp/" + motion_file,
-            )
+            raise ValueError("Unsupported motion file path")
         self._load_motion(motion_file_path)
 
         # Load object motion file
@@ -185,7 +182,7 @@ class HumanoidHOTU(Humanoid):
             object_motion_file=object_motion_file,
             object_names=self.cfg["env"]["object_asset"]["assetName"],
             device=self.device,
-            height_offset=0.3
+            height_offset=0
         )
 
     def reset_idx(self, env_ids):
@@ -194,7 +191,6 @@ class HumanoidHOTU(Humanoid):
 
         super().reset_idx(env_ids)
         self._init_amp_obs(env_ids)
-        return
 
     def _reset_actors(self, env_ids):
         if self._state_init == HumanoidHOTU.StateInit.Default:
@@ -210,7 +206,6 @@ class HumanoidHOTU(Humanoid):
             assert False, "Unsupported state initialization strategy: {:s}".format(
                 str(self._state_init)
             )
-        return
 
     def _reset_default(self, env_ids):
         self._humanoid_root_states[env_ids] = self._initial_humanoid_root_states[
@@ -219,7 +214,6 @@ class HumanoidHOTU(Humanoid):
         self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
         self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
         self._reset_default_env_ids = env_ids
-        return
 
     def _reset_ref_state_init(self, env_ids):
         num_envs = env_ids.shape[0]
@@ -260,7 +254,6 @@ class HumanoidHOTU(Humanoid):
         self._reset_ref_env_ids = env_ids
         self._reset_ref_motion_ids = motion_ids
         self._reset_ref_motion_times = motion_times
-        return
 
     def _reset_hybrid_state_init(self, env_ids):
         num_envs = env_ids.shape[0]
@@ -277,8 +270,6 @@ class HumanoidHOTU(Humanoid):
         if len(default_reset_ids) > 0:
             self._reset_default(default_reset_ids)
 
-        return
-
     def _init_amp_obs(self, env_ids):
         self._compute_amp_observations(env_ids)
 
@@ -291,12 +282,10 @@ class HumanoidHOTU(Humanoid):
                 self._reset_ref_motion_ids,
                 self._reset_ref_motion_times,
             )
-        return
 
     def _init_amp_obs_default(self, env_ids):
         curr_amp_obs = self._curr_amp_obs_buf[env_ids].unsqueeze(-2)
         self._hist_amp_obs_buf[env_ids] = curr_amp_obs
-        return
 
     def _init_amp_obs_ref(self, env_ids, motion_ids, motion_times):
         dt = self.dt
@@ -336,7 +325,6 @@ class HumanoidHOTU(Humanoid):
         self._hist_amp_obs_buf[env_ids] = amp_obs_demo.view(
             self._hist_amp_obs_buf[env_ids].shape
         )
-        return
 
     def _set_env_state(
             self, env_ids, root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel
@@ -352,7 +340,6 @@ class HumanoidHOTU(Humanoid):
         # self._dof_pos[env_ids, 6] = -1
         # self._dof_pos[env_ids, 28] = 1
         self._dof_vel[env_ids] = dof_vel
-        return
 
     def _update_hist_amp_obs(self, env_ids=None):
         if env_ids is None:
@@ -361,7 +348,6 @@ class HumanoidHOTU(Humanoid):
         else:
             for i in reversed(range(self._amp_obs_buf.shape[1] - 1)):
                 self._amp_obs_buf[env_ids, i + 1] = self._amp_obs_buf[env_ids, i]
-        return
 
     def _compute_amp_observations(self, env_ids=None):
         key_body_pos = self._rigid_body_pos[:, self._key_body_ids, :]
@@ -393,7 +379,6 @@ class HumanoidHOTU(Humanoid):
                 self._dof_obs_size,
                 self._dof_offsets,
             )
-        return
 
 
 @torch.jit.script

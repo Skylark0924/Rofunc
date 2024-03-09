@@ -25,41 +25,35 @@ from rofunc.utils.oslab.path import get_rofunc_path
 
 
 class Humanoid(VecTask):
+    """
+    This class is a wrapper of the Isaac Gym environment for the Humanoid task.
+    """
+
     def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture,
                  force_render):
-        # def __init__(self, config, sim_params, physics_engine, device_type, device_id, headless):
+        # Load the config
         self.cfg = config
-        # self.sim_params = sim_params
-        # self.physics_engine = physics_engine
-
         self._pd_control = self.cfg["env"]["pdControl"]
         self.power_scale = self.cfg["env"]["powerScale"]
         self.randomize = self.cfg["task"]["randomize"]
-
         self.debug_viz = self.cfg["env"]["enableDebugVis"]
         self.camera_follow = self.cfg["env"].get("cameraFollow", False)
         self.plane_static_friction = self.cfg["env"]["plane"]["staticFriction"]
         self.plane_dynamic_friction = self.cfg["env"]["plane"]["dynamicFriction"]
         self.plane_restitution = self.cfg["env"]["plane"]["restitution"]
-
         self.max_episode_length = self.cfg["env"]["episodeLength"]
         self._local_root_obs = self.cfg["env"]["localRootObs"]
         self._root_height_obs = self.cfg["env"].get("rootHeightObs", True)
         self._contact_bodies = self.cfg["env"]["contactBodies"]
         self._termination_height = self.cfg["env"]["terminationHeight"]
         self._enable_early_termination = self.cfg["env"]["enableEarlyTermination"]
-
         key_bodies = self.cfg["env"]["keyBodies"]
         self._setup_character_props(key_bodies)
 
+        # Set the dimensions of the observation and action spaces
         self.cfg["env"]["numObservations"] = self.get_obs_size()
         self.cfg["env"]["numActions"] = self.get_action_size()
 
-        # self.cfg["device_type"] = device_type
-        # self.cfg["device_id"] = device_id
-        # self.cfg["headless"] = headless
-        #
-        # super().__init__(cfg=self.cfg)
         super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
                          graphics_device_id=graphics_device_id, headless=headless,
                          virtual_screen_capture=virtual_screen_capture, force_render=force_render)
@@ -67,7 +61,7 @@ class Humanoid(VecTask):
         dt = self.cfg["sim"]["dt"]
         self.dt = self.control_freq_inv * dt
 
-        # get gym GPU state tensors
+        # Acquiring the state tensors from the simulator
         actor_root_state = self.gym.acquire_actor_root_state_tensor(self.sim)
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
         sensor_tensor = self.gym.acquire_force_sensor_tensor(self.sim)
@@ -80,6 +74,7 @@ class Humanoid(VecTask):
         dof_force_tensor = self.gym.acquire_dof_force_tensor(self.sim)
         self.dof_force_tensor = gymtorch.wrap_tensor(dof_force_tensor).view(self.num_envs, self.num_dof)
 
+        # Update state tensor buffers
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
@@ -93,7 +88,7 @@ class Humanoid(VecTask):
         self._initial_humanoid_root_states = self._humanoid_root_states.clone()
         self._initial_humanoid_root_states[:, 7:13] = 0
 
-        # TODO: check
+        # Get the actor ids for the humanoid and the objects
         self._humanoid_actor_ids = num_actors * torch.arange(self.num_envs, device=self.device, dtype=torch.int32)
         if self.object_names is not None:
             self._object_actor_ids = {
@@ -134,8 +129,6 @@ class Humanoid(VecTask):
         if self.viewer is not None:
             self._init_camera()
 
-        return
-
     def get_obs_size(self):
         return self._num_obs
 
@@ -152,20 +145,17 @@ class Humanoid(VecTask):
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
 
         self._create_ground_plane()
-        self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
+        self._create_envs(self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
 
         # If randomizing, apply once immediately on startup before the fist sim step
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
-
-        return
 
     def reset_idx(self, env_ids):
         self._reset_actors(env_ids)
         self._reset_env_tensors(env_ids)
         self._refresh_sim_tensors()
         self._compute_observations(env_ids)
-        return
 
     def _reset_actors(self, env_ids):
         self._humanoid_root_states[env_ids] = self._initial_humanoid_root_states[env_ids]
@@ -194,17 +184,6 @@ class Humanoid(VecTask):
                 self.gym.set_rigid_body_color(env_ptr, handle, j, gymapi.MESH_VISUAL,
                                               gymapi.Vec3(col[0], col[1], col[2]))
 
-    # def set_char_color(self, col, env_ids):
-    #     for env_id in env_ids:
-    #         env_ptr = self.envs[env_id]
-    #         handle = self.humanoid_handles[env_id]
-    #
-    #         for j in range(self.num_bodies):
-    #             self.gym.set_rigid_body_color(env_ptr, handle, j, gymapi.MESH_VISUAL,
-    #                                           gymapi.Vec3(col[0], col[1], col[2]))
-    #
-    #     return
-
     def _create_ground_plane(self):
         plane_params = gymapi.PlaneParams()
         plane_params.normal = gymapi.Vec3(0.0, 0.0, 1.0)
@@ -212,7 +191,6 @@ class Humanoid(VecTask):
         plane_params.dynamic_friction = self.plane_dynamic_friction
         plane_params.restitution = self.plane_restitution
         self.gym.add_ground(self.sim, plane_params)
-        return
 
     def _setup_character_props(self, key_bodies):
         """
@@ -358,29 +336,19 @@ class Humanoid(VecTask):
         termination_height = self.cfg["env"]["terminationHeight"]
         self._termination_heights = np.array([termination_height] * self.num_bodies)
 
-        head_id = self.gym.find_actor_rigid_body_handle(
-            self.envs[0], self.humanoid_handles[0], "head"
-        )
-        self._termination_heights[head_id] = max(
-            head_term_height, self._termination_heights[head_id]
-        )
+        head_id = self.gym.find_actor_rigid_body_handle(self.envs[0], self.humanoid_handles[0], "head")
+        self._termination_heights[head_id] = max(head_term_height, self._termination_heights[head_id])
 
-        # TODO dzp/ljj fix this
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         if asset_file == "mjcf/amp_humanoid_sword_shield.xml":
             left_arm_id = self.gym.find_actor_rigid_body_handle(
                 self.envs[0], self.humanoid_handles[0], "left_lower_arm"
             )
-            self._termination_heights[left_arm_id] = max(
-                shield_term_height, self._termination_heights[left_arm_id]
-            )
+            self._termination_heights[left_arm_id] = max(shield_term_height, self._termination_heights[left_arm_id])
 
-        self._termination_heights = to_torch(
-            self._termination_heights, device=self.device
-        )
-        return
+        self._termination_heights = to_torch(self._termination_heights, device=self.device)
 
-    def _create_envs(self, num_envs, spacing, num_per_row):
+    def _create_envs(self, spacing, num_per_row):
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
         upper = gymapi.Vec3(spacing, spacing, spacing)
 
@@ -388,11 +356,13 @@ class Humanoid(VecTask):
         rofunc_path = get_rofunc_path()
         asset_root = os.path.join(rofunc_path, "simulator/assets")
 
+        # Load humanoid asset
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         asset_options = gymapi.AssetOptions()
         asset_options.angular_damping = 0.01
         asset_options.max_angular_velocity = 100.0
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
+        asset_options.disable_gravity = True
         # asset_options.fix_base_link = True
         humanoid_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
         actuator_props = self.gym.get_asset_actuator_properties(humanoid_asset)
@@ -410,15 +380,24 @@ class Humanoid(VecTask):
         # Load object assets
         object_asset_files = self.cfg["env"]["object_asset"]["assetFileName"]
         self.object_names = self.cfg["env"]["object_asset"]["assetName"]
-        if object_asset_files is not None:
+        if self.object_names is not None:
             object_assets = {}
-            for i in range(len(object_asset_files)):
+            for i in range(len(self.object_names)):
                 asset_options = gymapi.AssetOptions()
                 asset_options.angular_damping = 0.01
                 asset_options.max_angular_velocity = 100.0
                 asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
+                # asset_options.disable_gravity = True
                 # asset_options.fix_base_link = True
-                object_asset = self.gym.load_asset(self.sim, asset_root, object_asset_files[i], asset_options)
+
+                if 'box' in self.object_names[i].lower():
+                    object_size = self.cfg["env"]["object_asset"]["assetSize"][i]
+                    object_asset = self.gym.create_box(self.sim, *object_size, asset_options)
+                elif self.object_names[i].lower() == 'sphere':
+                    object_radius = self.cfg["env"]["object_asset"]["assetSize"][i]
+                    object_asset = self.gym.create_sphere(self.sim, object_radius, asset_options)
+                else:
+                    object_asset = self.gym.load_asset(self.sim, asset_root, object_asset_files[i], asset_options)
                 object_assets[self.object_names[i]] = object_asset
         else:
             object_assets = None
@@ -572,14 +551,11 @@ class Humanoid(VecTask):
         self._pd_action_offset = to_torch(self._pd_action_offset, device=self.device)
         self._pd_action_scale = to_torch(self._pd_action_scale, device=self.device)
 
-        return
-
     def _get_humanoid_collision_filter(self):
         return 0
 
     def _compute_reward(self, actions):
         self.rew_buf[:] = compute_humanoid_reward(self.obs_buf)
-        return
 
     def _compute_reset(self):
         self.reset_buf[:], self._terminate_buf[:] = compute_humanoid_reset(
@@ -592,7 +568,6 @@ class Humanoid(VecTask):
             self._enable_early_termination,
             self._termination_heights,
         )
-        return
 
     def _refresh_sim_tensors(self):
         self.gym.refresh_dof_state_tensor(self.sim)
@@ -602,7 +577,6 @@ class Humanoid(VecTask):
         self.gym.refresh_force_sensor_tensor(self.sim)
         self.gym.refresh_dof_force_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim)
-        return
 
     def _compute_observations(self, env_ids=None):
         obs = self._compute_humanoid_obs(env_ids)
@@ -611,8 +585,6 @@ class Humanoid(VecTask):
             self.obs_buf[:] = obs
         else:
             self.obs_buf[env_ids] = obs
-
-        return
 
     def _compute_humanoid_obs(self, env_ids=None):
         if env_ids is None:
@@ -648,8 +620,6 @@ class Humanoid(VecTask):
             force_tensor = gymtorch.unwrap_tensor(forces)
             self.gym.set_dof_actuation_force_tensor(self.sim, force_tensor)
 
-        return
-
     def post_physics_step(self):
         self.progress_buf += 1
 
@@ -663,8 +633,6 @@ class Humanoid(VecTask):
         # debug viz
         if self.viewer and self.debug_viz:
             self._update_debug_viz()
-
-        return
 
     def render(self, sync_frame_time=False):
         if self.viewer and self.camera_follow:
@@ -729,7 +697,6 @@ class Humanoid(VecTask):
                 self._cam_prev_char_pos[1],
             )
         self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
-        return
 
     def _update_camera(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
@@ -759,7 +726,6 @@ class Humanoid(VecTask):
 
     def _update_debug_viz(self):
         self.gym.clear_lines(self.viewer)
-        return
 
 
 #####################################################################
