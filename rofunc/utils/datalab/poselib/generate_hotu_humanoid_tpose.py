@@ -83,13 +83,13 @@ def get_hotu_tpose(xml_path, save_path, verbose=True):
     #         quat_from_angle_axis(angle=torch.tensor([-90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
     #         local_rotation[skeleton.index(finger_tune)]
     #     )
-    translation = zero_pose.root_translation
-    translation += torch.tensor([0, 0, 0.9])
+    # translation = zero_pose.root_translation
+    # translation += torch.tensor([0, 0, 0.9])
 
     # save and visualize T-pose
     zero_pose.to_file(save_path)
     if verbose:
-        plot_skeleton_state(zero_pose, verbose=False)
+        plot_skeleton_state(zero_pose, verbose=True)
 
 
 if __name__ == '__main__':

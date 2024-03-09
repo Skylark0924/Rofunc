@@ -414,7 +414,8 @@ class MotionLib:
                     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
                 dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
             elif joint_size == 1:  # TODO: check this
-                if body_id in [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]:  # Right and left fingers except thumbs
+                if body_id in [*[i for i in range(10, 21)],
+                               *[i for i in range(28, 39)]]:  # Right and left fingers except thumbs
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 2])  # assume joint is always along y axis
@@ -515,8 +516,8 @@ class ObjectMotionLib:
             object_poses_dict = {}
             for object_name in self.object_names:
                 data_ptr = labels.index(f'{object_name}.pose.x')
-                assert data_ptr + 6 == labels.index(f'{object_name}.pose.qw')
-                pose = data[:, data_ptr:data_ptr + 7]
+                # assert data_ptr + 6 == labels.index(f'{object_name}.pose.qw')
+                pose = data[:, data_ptr:data_ptr + 3]
                 pose[:, :3] *= self.scales[i]  # convert to meter
                 pose = self._motion_transform(torch.tensor(pose, dtype=torch.float))
 
@@ -582,12 +583,31 @@ class ObjectMotionLib:
         :return: pose: [num_samples, 7]
         """
         # y-up in the optitrack to z-up in IsaacGym
-        tmp = pose[:, 1].clone()
-        pose[:, 1] = -pose[:, 2]
-        pose[:, 2] = tmp - self.height_offset
-        pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor(
-            rf.robolab.quaternion_from_euler(np.pi / 2, 0, 0)), torch.tensor(pose[:, 3:]), )
-        return pose
+        # pose[:, 0] = pose[:, 0]
+        # tmp = pose[:, 1].clone()
+        # pose[:, 1] = -pose[:, 2]
+        # pose[:, 2] = tmp - self.height_offset
+        # pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0.5, 0.5, 0.5, 0.5]),
+        #                                                               torch.tensor(pose[:, 3:]))
+        homo_matrix = torch.tensor(rf.robolab.homo_matrix_from_quaternion([0.5, 0.5, 0.5, 0.5]), dtype=torch.float32)
+        num_samples = len(pose)
+        raw_position = pose[:, :3]
+        new_position = torch.ones((num_samples, 4, 1))
+        new_position[:, :3] = raw_position.resize(num_samples, 3, 1)
+        new_position = torch.bmm(homo_matrix.expand(num_samples, 4, 4), new_position)
+
+        new_pose =  torch.zeros((num_samples, 7))
+        new_pose[:, 3:] = torch.tensor([0, 0, 0, 1], dtype=torch.float32)
+        new_pose[:, :3] = new_position[:, :3].resize(num_samples, 3)
+
+
+        # pose[:, :3] = new_position[:, :3].resize(num_samples, 3)
+        # pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0.5, 0.5, 0.5, 0.5]),
+        #                                                               torch.tensor(pose[:, 3:]))
+        # pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0.5, 0.5, 0.5, 0.5]),
+        #                                                               torch.tensor(pose[:, 3:]))
+
+        return new_pose
 
     def get_motion_state(self, motion_ids, motion_times):
         """
