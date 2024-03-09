@@ -239,8 +239,8 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     root_translation = target_motion.root_translation
     local_rotation = local_rotation[frame_beg:frame_end, ...]
     root_translation = root_translation[frame_beg:frame_end, ...]
-    avg_root_translation = root_translation.mean(axis=0)
-    root_translation[1:] -= avg_root_translation
+    # avg_root_translation = root_translation.mean(axis=0)
+    # root_translation[1:] -= avg_root_translation
 
     new_sk_state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, local_rotation,
                                                                     root_translation, is_local=True)
@@ -303,8 +303,8 @@ def npy_from_fbx(fbx_file):
             "Skeleton_RightUpLeg": "right_thigh",
             "Skeleton_RightLeg": "right_shin",
             "Skeleton_RightFoot": "right_foot",
-            "Skeleton_Spine": "torso",
-            "Skeleton_Head": "head",
+            "Skeleton_Spine1": "torso",
+            "Skeleton_Neck": "head",
             "Skeleton_LeftArm": "left_upper_arm",
             "Skeleton_LeftForeArm": "left_lower_arm",
             "Skeleton_LeftHand": "left_hand",
@@ -353,7 +353,7 @@ def npy_from_fbx(fbx_file):
 
     source_motion = motion_from_fbx(fbx_file, root_joint="Skeleton_Hips", fps=120, visualize=False)
     # config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, source_motion, visualize=False)
+    motion_retargeting(config, source_motion, visualize=True)
 
 
 if __name__ == '__main__':
@@ -361,7 +361,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--fbx_dir", type=str, default=None)
-    parser.add_argument("--fbx_file", type=str, default="/home/ubuntu/Github/Rofunc/examples/data/hotu2/test_data_04_optitrack.fbx")
+    parser.add_argument("--fbx_file", type=str, default="/home/ubuntu/Github/Rofunc/examples/data/hotu2/test_data_01_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     args = parser.parse_args()
 
