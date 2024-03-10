@@ -99,7 +99,7 @@ class Humanoid(VecTask):
         num_actors = self.get_num_actors_per_env()
 
         self._humanoid_root_states = self._root_states.view(self.num_envs, num_actors, actor_root_state.shape[-1])[...,
-                                     0, :]
+                                                                                                                   0, :]
         self._initial_humanoid_root_states = self._humanoid_root_states.clone()
         self._initial_humanoid_root_states[:, 7:13] = 0
 
@@ -159,14 +159,11 @@ class Humanoid(VecTask):
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
 
-        return
-
     def reset_idx(self, env_ids):
         self._reset_actors(env_ids)
         self._reset_env_tensors(env_ids)
         self._refresh_sim_tensors()
         self._compute_observations(env_ids)
-        return
 
     def _reset_actors(self, env_ids):
         self._humanoid_root_states[env_ids] = self._initial_humanoid_root_states[env_ids]
@@ -632,7 +629,7 @@ class Humanoid(VecTask):
 
 
 #####################################################################
-###=========================jit functions=========================###
+### =========================jit functions=========================###
 #####################################################################
 
 
