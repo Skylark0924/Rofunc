@@ -28,5 +28,59 @@ from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
 class PhysHOIAgent(AMPAgent):
-    def __init__(self):
-        super().__init__()
+    """
+    PhysHOI agent
+    """
+
+    def __init__(
+        self,
+        cfg: DictConfig,
+        observation_space: Optional[
+            Union[int, Tuple[int], gym.Space, gymnasium.Space, List]
+        ],
+        action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+        memory: Optional[Union[Memory, Tuple[Memory]]] = None,
+        device: Optional[Union[str, torch.device]] = None,
+        experiment_dir: Optional[str] = None,
+        rofunc_logger: Optional[rf.logger.BeautyLogger] = None,
+        amp_observation_space: Optional[
+            Union[int, Tuple[int], gym.Space, gymnasium.Space]
+        ] = None,
+        motion_dataset: Optional[Union[Memory, Tuple[Memory]]] = None,
+        replay_buffer: Optional[Union[Memory, Tuple[Memory]]] = None,
+        collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None,
+    ):
+        """
+        :param cfg: Configuration
+        :param observation_space: Observation space
+        :param action_space: Action space
+        :param memory: Memory for storing transitions
+        :param device: Device on which the torch tensor is allocated
+        :param experiment_dir: Directory where experiment outputs are saved
+        :param rofunc_logger: Rofunc logger
+        :param amp_observation_space: cfg["env"]["numAMPObsSteps"] * NUM_AMP_OBS_PER_STEP
+        :param motion_dataset: Motion dataset
+        :param replay_buffer: Replay buffer
+        :param collect_reference_motions: Function for collecting reference motions
+        """
+        super().__init__(
+            cfg,
+            observation_space,
+            action_space,
+            memory,
+            device,
+            experiment_dir,
+            rofunc_logger,
+            amp_observation_space,
+            motion_dataset,
+            replay_buffer,
+            collect_reference_motions,
+        )
+
+    def collect_reference_motions(self, num_motions: int) -> torch.Tensor:
+        """
+        Collect reference motions
+        :param num_motions: Number of motions to collect
+        :return: Reference motions
+        """
+        return self.motion_dataset.sample(num_motions)

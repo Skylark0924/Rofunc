@@ -274,7 +274,7 @@ class AMPAgent(BaseAgent):
         # advantages computation
         for i in reversed(range(memory_size)):
             advantage = combined_rewards[i] - values[i] + self._discount * (
-                    next_values[i] + self._td_lambda * not_dones[i] * advantage)
+                next_values[i] + self._td_lambda * not_dones[i] * advantage)
             advantages[i] = advantage
         # returns computation
         values_target = advantages + values
@@ -354,10 +354,10 @@ class AMPAgent(BaseAgent):
                 # discriminator prediction loss
                 if self._least_square_discriminator:
                     discriminator_loss = 0.5 * (
-                            F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean') \
-                            + F.mse_loss(amp_motion_logits, torch.ones_like(amp_motion_logits), reduction='mean'))
+                        F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean')
+                        + F.mse_loss(amp_motion_logits, torch.ones_like(amp_motion_logits), reduction='mean'))
                 else:
-                    discriminator_loss = 0.5 * (nn.BCEWithLogitsLoss()(amp_cat_logits, torch.zeros_like(amp_cat_logits)) \
+                    discriminator_loss = 0.5 * (nn.BCEWithLogitsLoss()(amp_cat_logits, torch.zeros_like(amp_cat_logits))
                                                 + nn.BCEWithLogitsLoss()(amp_motion_logits,
                                                                          torch.ones_like(amp_motion_logits)))
 
@@ -380,7 +380,7 @@ class AMPAgent(BaseAgent):
 
                 # discriminator weight decay
                 if self._discriminator_weight_decay_scale:
-                    weights = [torch.flatten(module.weight) for module in self.discriminator.modules() \
+                    weights = [torch.flatten(module.weight) for module in self.discriminator.modules()
                                if isinstance(module, torch.nn.Linear)]
                     weight_decay = torch.sum(torch.square(torch.cat(weights, dim=-1)))
                     discriminator_loss += self._discriminator_weight_decay_scale * weight_decay
