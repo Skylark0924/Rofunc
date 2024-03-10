@@ -29,7 +29,7 @@ copyright = f"{date.today().year}, Junjia Liu"
 author = 'Junjia Liu'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.2.5'
+release = '0.0.2.6'
 
 # -- General configuration ---------------------------------------------------
 
