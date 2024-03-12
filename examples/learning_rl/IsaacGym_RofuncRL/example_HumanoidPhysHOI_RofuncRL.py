@@ -25,7 +25,7 @@ def train(custom_args):
                       "headless={}".format(custom_args.headless),
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
-    cfg.task.env.motion_file = args.motion_file
+    cfg.task.env.motion_file = custom_args.motion_file
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
