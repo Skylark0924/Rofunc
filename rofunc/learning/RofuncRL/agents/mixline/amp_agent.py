@@ -17,11 +17,12 @@ from typing import Callable, Union, Tuple, Optional, List
 
 import gym
 import gymnasium
-import rofunc as rf
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
+
+import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorAMP
 from rofunc.learning.RofuncRL.models.critic_models import Critic
@@ -275,7 +276,7 @@ class AMPAgent(BaseAgent):
         # advantages computation
         for i in reversed(range(memory_size)):
             advantage = combined_rewards[i] - values[i] + self._discount * (
-                next_values[i] + self._td_lambda * not_dones[i] * advantage)
+                    next_values[i] + self._td_lambda * not_dones[i] * advantage)
             advantages[i] = advantage
         # returns computation
         values_target = advantages + values
@@ -355,8 +356,8 @@ class AMPAgent(BaseAgent):
                 # discriminator prediction loss
                 if self._least_square_discriminator:
                     discriminator_loss = 0.5 * (
-                        F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean')
-                        + F.mse_loss(amp_motion_logits, torch.ones_like(amp_motion_logits), reduction='mean'))
+                            F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean')
+                            + F.mse_loss(amp_motion_logits, torch.ones_like(amp_motion_logits), reduction='mean'))
                 else:
                     discriminator_loss = 0.5 * (nn.BCEWithLogitsLoss()(amp_cat_logits, torch.zeros_like(amp_cat_logits))
                                                 + nn.BCEWithLogitsLoss()(amp_motion_logits,

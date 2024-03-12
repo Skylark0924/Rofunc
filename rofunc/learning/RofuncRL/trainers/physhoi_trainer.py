@@ -24,19 +24,8 @@ class PhysHOITrainer(BaseTrainer):
     def __init__(self, cfg, env, device, env_name, **kwargs):
         super().__init__(cfg, env, device, env_name, **kwargs)
         self.memory = RandomMemory(memory_size=self.rollouts, num_envs=self.env.num_envs, device=device)
-        self.motion_dataset = RandomMemory(memory_size=200000, device=device)
-        self.replay_buffer = RandomMemory(memory_size=1000000, device=device)
-        self.collect_observation = lambda: self.env.reset_done()[0]["obs"]
         self.agent = PhysHOIAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
-                                  device, self.exp_dir, self.rofunc_logger,
-                                  amp_observation_space=2,
-                                  motion_dataset=self.motion_dataset,
-                                  replay_buffer=self.replay_buffer,
-                                  collect_reference_motions=None)
-
-    def pre_interaction(self):
-        if self.collect_observation is not None:
-            self.agent._current_states = self.collect_observation()
+                                  device, self.exp_dir, self.rofunc_logger)
 
     def inference(self):
         states, infos = self.env.reset()

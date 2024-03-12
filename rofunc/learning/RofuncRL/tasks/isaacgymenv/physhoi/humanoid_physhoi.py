@@ -169,10 +169,10 @@ class Humanoid_SMPLX(VecTask):
         self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
         self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
 
-    def reset(self, env_ids=None):
-        if (env_ids is None):
-            env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
-        self._reset_envs(env_ids)
+    # def reset(self, env_ids=None):
+    #     if (env_ids is None):
+    #         env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
+    #     self._reset_envs(env_ids)
 
     def set_char_color(self, col, env_ids):
         for env_id in env_ids:
@@ -183,13 +183,12 @@ class Humanoid_SMPLX(VecTask):
                 self.gym.set_rigid_body_color(env_ptr, handle, j, gymapi.MESH_VISUAL,
                                               gymapi.Vec3(col[0], col[1], col[2]))
 
-    def _reset_envs(self, env_ids):
-        if (len(env_ids) > 0):
-            self._reset_actors(env_ids)
-            self._reset_env_tensors(env_ids)
-            self._refresh_sim_tensors()
-            self._compute_observations(env_ids)
-        return
+    # def reset_idx(self, env_ids):
+    #     if len(env_ids) > 0:
+    #         self._reset_actors(env_ids)
+    #         self._reset_env_tensors(env_ids)
+    #         self._refresh_sim_tensors()
+    #         self._compute_observations(env_ids)
 
     def _reset_env_tensors(self, env_ids):
         env_ids_int32 = self._humanoid_actor_ids[env_ids]
@@ -926,19 +925,19 @@ class HumanoidPhysHOITask(Humanoid_SMPLX):
         self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
                                                      gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
 
-    def _reset_envs(self, env_ids):
+    def reset_idx(self, env_ids):
         self._reset_default_env_ids = []
         self._reset_ref_env_ids = []
 
-        super()._reset_envs(env_ids)
+        super().reset_idx(env_ids)
 
     def _reset_actors(self, env_ids):
-        if (self._state_init == HumanoidPhysHOITask.StateInit.Default):
+        if self._state_init == HumanoidPhysHOITask.StateInit.Default:
             self._reset_default(env_ids)
         elif (self._state_init == HumanoidPhysHOITask.StateInit.Start
               or self._state_init == HumanoidPhysHOITask.StateInit.Random):
             self._reset_ref_state_init(env_ids)
-        elif (self._state_init == HumanoidPhysHOITask.StateInit.Hybrid):
+        elif self._state_init == HumanoidPhysHOITask.StateInit.Hybrid:
             self._reset_hybrid_state_init(env_ids)
         else:
             assert (False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))

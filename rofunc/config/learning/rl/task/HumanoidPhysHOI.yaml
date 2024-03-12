@@ -1,8 +1,14 @@
-# if given, will override the device setting in gym. 
+# used to create the object
+name: HumanoidPhysHOI
+
+physics_engine: ${..physics_engine}
+
+# if given, will override the device setting in gym.
 env: 
-  numEnvs: 2048
+  numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 5
   episodeLength: 40
+  cameraFollow: False # if the camera follows humanoid or not
   isFlagrun: False
   enableDebugVis: False
   playdataset: False
@@ -25,8 +31,10 @@ env:
   terminationHeight: 0.15
   enableEarlyTermination: True
 
+  motion_file:
+
   asset:
-    assetRoot: "physhoi/data/assets"
+#    assetRoot: "physhoi/data/assets"
     assetFileName: "smplx/smplx_capsule.xml"
 
   plane:
@@ -51,7 +59,11 @@ env:
     cg2: 5.
 
 sim:
+  dt: 0.0166 # 1/60 s
   substeps: 2
+  up_axis: "z"
+  use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+  gravity: [ 0.0, 0.0, -9.81 ]
   physx:
     num_threads: 4
     solver_type: 1  # 0: pgs, 1: tgs
