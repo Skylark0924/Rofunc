@@ -22,7 +22,7 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 def download_ckpt(url, name, md5=None):
     beauty_print("Downloading pretrained model {}".format(name), type="info")
     ckpt_path = os.path.join(get_rofunc_path(), 'learning/pre_trained_models/{}'.format(name))
-    gdown.cached_download(url, ckpt_path, md5=md5)
+    gdown.cached_download(url, ckpt_path)
     return ckpt_path
 
 

@@ -17,9 +17,8 @@ from rofunc.learning.utils.utils import set_seed
 
 def train(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
-    task, motion_file = custom_args.task.split('_')
-    args_overrides = ["task={}".format(task),
-                      "train={}{}RofuncRL".format(task, custom_args.agent.upper()),
+    args_overrides = ["task={}".format(custom_args.task),
+                      "train=BaseTaskPHYSHOIRofuncRL",
                       "device_id={}".format(custom_args.sim_device),
                       "rl_device=cuda:{}".format(custom_args.rl_device),
                       "headless={}".format(custom_args.headless),
@@ -31,13 +30,13 @@ def train(custom_args):
     set_seed(cfg.train.Trainer.seed)
 
     # Instantiate the Isaac Gym environment
-    env = Tasks().task_map[task](cfg=cfg_dict,
-                                 rl_device=cfg.rl_device,
-                                 sim_device=f'cuda:{cfg.device_id}',
-                                 graphics_device_id=cfg.device_id,
-                                 headless=cfg.headless,
-                                 virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                 force_render=cfg.force_render)
+    env = Tasks().task_map[custom_args.task](cfg=cfg_dict,
+                                             rl_device=cfg.rl_device,
+                                             sim_device=f'cuda:{cfg.device_id}',
+                                             graphics_device_id=cfg.device_id,
+                                             headless=cfg.headless,
+                                             virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                             force_render=cfg.force_render)
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
@@ -92,7 +91,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     # Available tasks: HumanoidPhyshoi
-    parser.add_argument("--task", type=str, default="HumanoidPhyshoi")
+    parser.add_argument("--task", type=str, default="HumanoidPhysHOI")
     # Available motion files: backdribble, backspin, changeleg, fingerspin, pass, rebound, toss, walkpick
     parser.add_argument("--motion_file", type=str, default="examples/data/ballplay/backdribble.pt")
     # Available agent: physhoi
@@ -100,7 +99,7 @@ if __name__ == '__main__':
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="True")
+    parser.add_argument("--headless", type=str, default="False")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()

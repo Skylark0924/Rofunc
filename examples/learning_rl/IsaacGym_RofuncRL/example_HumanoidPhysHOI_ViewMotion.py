@@ -17,7 +17,7 @@ def inference(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
     args_overrides = [
         f"task=HumanoidPhysHOIViewMotion",
-        "train=BaseTaskPhysHOIRofuncRL",
+        "train=BaseTaskPHYSHOIRofuncRL",
         f"device_id=0",
         f"rl_device=cuda:{gpu_id}",
         "headless={}".format(False),
