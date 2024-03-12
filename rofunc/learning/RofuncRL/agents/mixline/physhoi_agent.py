@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable, Union, Tuple, Optional, List
+from typing import Union, Tuple, Optional
 
 import gym
 import gymnasium
@@ -20,31 +20,23 @@ import torch
 from omegaconf import DictConfig
 
 import rofunc as rf
-from rofunc.learning.RofuncRL.agents.mixline.amp_agent import AMPAgent
+from rofunc.learning.RofuncRL.agents.online.ppo_agent import PPOAgent
 from rofunc.learning.RofuncRL.utils.memory import Memory
 
 
-class PhysHOIAgent(AMPAgent):
+class PhysHOIAgent(PPOAgent):
     """
     PhysHOI agent
     """
 
-    def __init__(
-            self,
-            cfg: DictConfig,
-            observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space, List]],
-            action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
-            memory: Optional[Union[Memory, Tuple[Memory]]] = None,
-            device: Optional[Union[str, torch.device]] = None,
-            experiment_dir: Optional[str] = None,
-            rofunc_logger: Optional[rf.logger.BeautyLogger] = None,
-            amp_observation_space: Optional[
-                Union[int, Tuple[int], gym.Space, gymnasium.Space]
-            ] = None,
-            motion_dataset: Optional[Union[Memory, Tuple[Memory]]] = None,
-            replay_buffer: Optional[Union[Memory, Tuple[Memory]]] = None,
-            collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None,
-    ):
+    def __init__(self,
+                 cfg: DictConfig,
+                 observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 action_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
+                 memory: Optional[Union[Memory, Tuple[Memory]]] = None,
+                 device: Optional[Union[str, torch.device]] = None,
+                 experiment_dir: Optional[str] = None,
+                 rofunc_logger: Optional[rf.logger.BeautyLogger] = None):
         """
         :param cfg: Configuration
         :param observation_space: Observation space
@@ -53,10 +45,6 @@ class PhysHOIAgent(AMPAgent):
         :param device: Device on which the torch tensor is allocated
         :param experiment_dir: Directory where experiment outputs are saved
         :param rofunc_logger: Rofunc logger
-        :param amp_observation_space: cfg["env"]["numAMPObsSteps"] * NUM_AMP_OBS_PER_STEP
-        :param motion_dataset: Motion dataset
-        :param replay_buffer: Replay buffer
-        :param collect_reference_motions: Function for collecting reference motions
         """
         super().__init__(
             cfg,
@@ -66,8 +54,4 @@ class PhysHOIAgent(AMPAgent):
             device,
             experiment_dir,
             rofunc_logger,
-            amp_observation_space,
-            motion_dataset,
-            replay_buffer,
-            collect_reference_motions,
         )
