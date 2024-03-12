@@ -195,8 +195,9 @@ class AMPAgent(BaseAgent):
         self.replay_buffer.create_tensor(name="states", size=self.amp_observation_space, dtype=torch.float32)
 
         # initialize motion dataset
-        for _ in range(math.ceil(self.motion_dataset.memory_size / self._amp_batch_size)):
-            self.motion_dataset.add_samples(states=self.collect_reference_motions(self._amp_batch_size))
+        if self.collect_reference_motions is not None:
+            for _ in range(math.ceil(self.motion_dataset.memory_size / self._amp_batch_size)):
+                self.motion_dataset.add_samples(states=self.collect_reference_motions(self._amp_batch_size))
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if self._current_states is not None:
