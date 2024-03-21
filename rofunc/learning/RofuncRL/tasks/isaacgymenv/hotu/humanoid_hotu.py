@@ -24,7 +24,7 @@ from rofunc.learning.RofuncRL.tasks.isaacgymenv.hotu.motion_lib import MotionLib
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 
 
-class HumanoidHOTU(Humanoid):
+class HumanoidHOTUTask(Humanoid):
     class StateInit(Enum):
         Default = 0
         Start = 1
@@ -35,7 +35,7 @@ class HumanoidHOTU(Humanoid):
         self.cfg = cfg
 
         state_init = cfg["env"]["stateInit"]
-        self._state_init = HumanoidHOTU.StateInit[state_init]
+        self._state_init = HumanoidHOTUTask.StateInit[state_init]
         self._hybrid_init_prob = cfg["env"]["hybridInitProb"]
         self._num_amp_obs_steps = cfg["env"]["numAMPObsSteps"]
         assert self._num_amp_obs_steps >= 2
@@ -182,7 +182,7 @@ class HumanoidHOTU(Humanoid):
             object_motion_file=object_motion_file,
             object_names=self.cfg["env"]["object_asset"]["assetName"],
             device=self.device,
-            height_offset=0
+            height_offset=self._motion_lib.humanoid_height_offsets[0]  # TODO: make it for multiple motions
         )
 
     def reset_idx(self, env_ids):
@@ -193,14 +193,14 @@ class HumanoidHOTU(Humanoid):
         self._init_amp_obs(env_ids)
 
     def _reset_actors(self, env_ids):
-        if self._state_init == HumanoidHOTU.StateInit.Default:
+        if self._state_init == HumanoidHOTUTask.StateInit.Default:
             self._reset_default(env_ids)
         elif (
-                self._state_init == HumanoidHOTU.StateInit.Start
-                or self._state_init == HumanoidHOTU.StateInit.Random
+                self._state_init == HumanoidHOTUTask.StateInit.Start
+                or self._state_init == HumanoidHOTUTask.StateInit.Random
         ):
             self._reset_ref_state_init(env_ids)
-        elif self._state_init == HumanoidHOTU.StateInit.Hybrid:
+        elif self._state_init == HumanoidHOTUTask.StateInit.Hybrid:
             self._reset_hybrid_state_init(env_ids)
         else:
             assert False, "Unsupported state initialization strategy: {:s}".format(
@@ -220,11 +220,11 @@ class HumanoidHOTU(Humanoid):
         motion_ids = self._motion_lib.sample_motions(num_envs)
 
         if (
-                self._state_init == HumanoidHOTU.StateInit.Random
-                or self._state_init == HumanoidHOTU.StateInit.Hybrid
+                self._state_init == HumanoidHOTUTask.StateInit.Random
+                or self._state_init == HumanoidHOTUTask.StateInit.Hybrid
         ):
             motion_times = self._motion_lib.sample_time(motion_ids)
-        elif self._state_init == HumanoidHOTU.StateInit.Start:
+        elif self._state_init == HumanoidHOTUTask.StateInit.Start:
             motion_times = torch.zeros(num_envs, device=self.device)
         else:
             assert (
@@ -239,8 +239,8 @@ class HumanoidHOTU(Humanoid):
             root_ang_vel,
             dof_vel,
             key_pos,
+            _, _
         ) = self._motion_lib.get_motion_state(motion_ids, motion_times)
-
         self._set_env_state(
             env_ids=env_ids,
             root_pos=root_pos,
@@ -308,6 +308,7 @@ class HumanoidHOTU(Humanoid):
             root_ang_vel,
             dof_vel,
             key_pos,
+            _, _
         ) = self._motion_lib.get_motion_state(motion_ids, motion_times)
         amp_obs_demo = build_amp_observations(
             root_pos,
