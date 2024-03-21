@@ -163,7 +163,7 @@ class ActorPPO_Gaussian(BaseActor):
         else:
             output_action = self.cfg.action_scale * self.mean_layer(state)
 
-        log_prob = None
+        log_prob = torch.zeros(output_action.shape[0], 1, device=output_action.device)
         if not deterministic:
             log_std = self.log_std
             if self.cfg.use_log_std_clip:

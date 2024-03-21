@@ -114,9 +114,9 @@ class PPOAgent(BaseAgent):
         self._kl_threshold = self.cfg.Agent.kl_threshold
         self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
         # self._state_preprocessor = None  # TODO: Check
-        # self._state_preprocessor = RunningStandardScaler
-        # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
-        #                                                                 {"size": observation_space, "device": device})
+        self._state_preprocessor = RunningStandardScaler
+        self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
+                                                                        {"size": observation_space, "device": device})
         # self._state_preprocessor = Normalization
         # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
         #                                                                 {"shape": observation_space, "device": device})
@@ -172,9 +172,9 @@ class PPOAgent(BaseAgent):
                 actions = self.policy.mean(self._state_preprocessor(states)).detach()
                 log_prob = None
             else:
-                actions, _ = self.policy(self._state_preprocessor(states))
-                actions = actions.detach()
-                log_prob = None
+                actions, log_prob = self.policy(self._state_preprocessor(states), deterministic=True)
+                # actions = actions.detach()
+                self._current_log_prob = log_prob
         return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
