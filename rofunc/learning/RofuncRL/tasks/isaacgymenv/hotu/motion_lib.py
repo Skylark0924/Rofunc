@@ -100,6 +100,14 @@ class MotionLib:
         self._load_motions(motion_file)
 
         motions = self._motions
+
+        self.humanoid_height_offsets = []
+        for motion in motions:
+            tar_global_pos = motion.global_translation
+            min_h = torch.min(tar_global_pos[..., 2])
+            motion.global_translation[..., 2] -= min_h
+            self.humanoid_height_offsets.append(min_h)
+
         self.gts = torch.cat([m.global_translation for m in motions], dim=0).float()
         self.grs = torch.cat([m.global_rotation for m in motions], dim=0).float()
         self.lrs = torch.cat([m.local_rotation for m in motions], dim=0).float()
@@ -108,6 +116,8 @@ class MotionLib:
             [m.global_root_angular_velocity for m in motions], dim=0
         ).float()
         self.dvs = torch.cat([m.dof_vels for m in motions], dim=0).float()
+
+
 
         lengths = self._motion_num_frames
         lengths_shifted = lengths.roll(1)
@@ -516,8 +526,8 @@ class ObjectMotionLib:
             object_poses_dict = {}
             for object_name in self.object_names:
                 data_ptr = labels.index(f'{object_name}.pose.x')
-                # assert data_ptr + 6 == labels.index(f'{object_name}.pose.qw')
-                pose = data[:, data_ptr:data_ptr + 3]
+                assert data_ptr + 6 == labels.index(f'{object_name}.pose.qw')
+                pose = data[:, data_ptr:data_ptr + 7]
                 pose[:, :3] *= self.scales[i]  # convert to meter
                 pose = self._motion_transform(torch.tensor(pose, dtype=torch.float))
 
@@ -596,16 +606,17 @@ class ObjectMotionLib:
         new_position[:, :3] = raw_position.resize(num_samples, 3, 1)
         new_position = torch.bmm(homo_matrix.expand(num_samples, 4, 4), new_position)
 
-        new_pose =  torch.zeros((num_samples, 7))
-        new_pose[:, 3:] = torch.tensor([0, 0, 0, 1], dtype=torch.float32)
+        new_pose = torch.zeros((num_samples, 7))
+        # new_pose[:, 3:] = torch.tensor([0, 0, 0, 1], dtype=torch.float32)
         new_pose[:, :3] = new_position[:, :3].resize(num_samples, 3)
-
+        new_pose[:, 2] -= self.height_offset.cpu()
 
         # pose[:, :3] = new_position[:, :3].resize(num_samples, 3)
-        # pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0.5, 0.5, 0.5, 0.5]),
-        #                                                               torch.tensor(pose[:, 3:]))
-        # pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0.5, 0.5, 0.5, 0.5]),
-        #                                                               torch.tensor(pose[:, 3:]))
+        new_pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0.5, 0.5, 0.5, 0.5]),
+                                                                          torch.tensor(pose[:, 3:]))
+        # new_pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0, 0, -0.383, 0.924]),
+        new_pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0, 0, 0.924, 0.383]),
+                                                                      torch.tensor(new_pose[:, 3:]))
 
         return new_pose
 

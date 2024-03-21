@@ -10,12 +10,12 @@ import numpy as np
 
 import rofunc as rf
 
-traj_l = np.load('../data/LQT_LQR/taichi_1l.npy')
-traj_l[:, 0] += 0.2
-traj_l[:, 1] = -traj_l[:, 1]
-traj_l[:, 3:] = [1, 0, 0, 0]
-# target_pose = traj_l[10]
-traj_l = traj_l[::20]
+# traj_l = np.load('../data/LQT_LQR/taichi_1l.npy')
+# traj_l[:, 0] += 0.2
+# traj_l[:, 1] = -traj_l[:, 1]
+# traj_l[:, 3:] = [1, 0, 0, 0]
+# # target_pose = traj_l[10]
+# traj_l = traj_l[::20]
 
 args = rf.config.get_sim_config("CURI")
 CURIsim = rf.sim.CURISim(args)

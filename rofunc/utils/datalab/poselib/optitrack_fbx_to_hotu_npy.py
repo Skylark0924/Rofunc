@@ -239,6 +239,8 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     root_translation = target_motion.root_translation
     local_rotation = local_rotation[frame_beg:frame_end, ...]
     root_translation = root_translation[frame_beg:frame_end, ...]
+
+    ## move the human to the origin
     # avg_root_translation = root_translation.mean(axis=0)
     # root_translation[1:] -= avg_root_translation
 
@@ -253,8 +255,10 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     local_rotation = target_motion.local_rotation
     root_translation = target_motion.root_translation
     tar_global_pos = target_motion.global_translation
-    min_h = torch.min(tar_global_pos[..., 2])
-    root_translation[:, 2] += -min_h
+
+    ## Set the human foot on the ground
+    # min_h = torch.min(tar_global_pos[..., 2])
+    # root_translation[:, 2] += -min_h
 
     # adjust the height of the root to avoid ground penetration
     root_height_offset = retarget_cfg["root_height_offset"]
@@ -353,16 +357,17 @@ def npy_from_fbx(fbx_file):
 
     source_motion = motion_from_fbx(fbx_file, root_joint="Skeleton_Hips", fps=120, visualize=False)
     # config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, source_motion, visualize=True)
+    motion_retargeting(config, source_motion, visualize=False)
 
 
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fbx_dir", type=str, default=None)
-    parser.add_argument("--fbx_file", type=str, default="/home/ubuntu/Github/Rofunc/examples/data/hotu2/test_data_01_optitrack.fbx")
-    parser.add_argument("--parallel", action="store_true")
+    parser.add_argument("--fbx_dir", type=str, default="../../../../examples/data/hotu2")
+    # parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
+    parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
+    parser.add_argument("--parallel", action="store_false")
     args = parser.parse_args()
 
     rofunc_path = rf.oslab.get_rofunc_path()
