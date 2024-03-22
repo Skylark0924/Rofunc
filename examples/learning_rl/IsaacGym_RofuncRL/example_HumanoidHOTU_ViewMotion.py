@@ -25,6 +25,7 @@ def inference(custom_args):
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
     cfg.task.env.object_motion_file = custom_args.object_motion_file
+    cfg.task.env.object_asset.assetFileName = custom_args.object_asset_files
     cfg.task.env.object_asset.assetName = custom_args.object_asset_names
     cfg.task.env.object_asset.assetSize = custom_args.object_asset_sizes
 
@@ -61,12 +62,14 @@ if __name__ == "__main__":
     #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
     #  2. custom motion file with absolute path
     parser.add_argument("--motion_file", type=str,
-                        default="examples/data/hotu2/test_data_01_optitrack2hotu.npy")
+                        default="examples/data/hotu2/test_data_04_optitrack2hotu.npy")
     parser.add_argument("--object_motion_file", type=str,
-                        default="examples/data/hotu2/test_data_01_optitrack.csv")
-    parser.add_argument("--object_asset_names", type=str, default=["box:marker 001", "box:marker 002", "box:marker 003", "box:marker 004"])
-    # parser.add_argument("--object_asset_files", type=str, default=["Box.urdf"])
-    parser.add_argument("--object_asset_sizes", type=str, default=[[0.05, 0.05, 0.05], [0.05, 0.05, 0.05], [0.05, 0.05, 0.05], [0.05, 0.05, 0.05]])
+                        default="examples/data/hotu2/test_data_04_optitrack.csv")
+    # parser.add_argument("--object_asset_names", type=str, default=["box:marker 001", "box:marker 002", "box:marker 003", "box:marker 004"])
+    parser.add_argument("--object_asset_names", type=str, default=["box"])
+    parser.add_argument("--object_asset_files", type=str, default=["mjcf/objects/lab_box.xml"])
+    # parser.add_argument("--object_asset_sizes", type=str, default=[[0.05, 0.05, 0.05], [0.05, 0.05, 0.05], [0.05, 0.05, 0.05], [0.05, 0.05, 0.05]])
+    parser.add_argument("--object_asset_sizes", type=str, default=[[1, 1, 1]])
     custom_args = parser.parse_args()
 
     inference(custom_args)

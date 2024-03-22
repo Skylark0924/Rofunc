@@ -3,7 +3,7 @@ Trainer:
   experiment_name:                             # Experiment name for logging.
   experiment_directory:                        # Experiment directory for logging.
   write_interval: 100                          # TensorBoard write interval for logging. (timesteps)
-  checkpoint_interval:                         # Checkpoint interval for logging. (timesteps)
+  checkpoint_interval: 10000                   # Checkpoint interval for logging. (timesteps)
   wandb: True                                  # If true, log to Weights & Biases.
   wandb_kwargs:                                # Weights & Biases kwargs. https://docs.wandb.ai/ref/python/init
     project: RofuncRL                          # Weights & Biases project name.

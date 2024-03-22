@@ -17,11 +17,12 @@ from typing import Callable, Union, Tuple, Optional, List
 
 import gym
 import gymnasium
-import rofunc as rf
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import DictConfig
+
+import rofunc as rf
 from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorAMP
 from rofunc.learning.RofuncRL.models.critic_models import Critic
@@ -195,8 +196,9 @@ class AMPAgent(BaseAgent):
         self.replay_buffer.create_tensor(name="states", size=self.amp_observation_space, dtype=torch.float32)
 
         # initialize motion dataset
-        for _ in range(math.ceil(self.motion_dataset.memory_size / self._amp_batch_size)):
-            self.motion_dataset.add_samples(states=self.collect_reference_motions(self._amp_batch_size))
+        if self.collect_reference_motions is not None:
+            for _ in range(math.ceil(self.motion_dataset.memory_size / self._amp_batch_size)):
+                self.motion_dataset.add_samples(states=self.collect_reference_motions(self._amp_batch_size))
 
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if self._current_states is not None:
@@ -354,10 +356,10 @@ class AMPAgent(BaseAgent):
                 # discriminator prediction loss
                 if self._least_square_discriminator:
                     discriminator_loss = 0.5 * (
-                            F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean') \
+                            F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean')
                             + F.mse_loss(amp_motion_logits, torch.ones_like(amp_motion_logits), reduction='mean'))
                 else:
-                    discriminator_loss = 0.5 * (nn.BCEWithLogitsLoss()(amp_cat_logits, torch.zeros_like(amp_cat_logits)) \
+                    discriminator_loss = 0.5 * (nn.BCEWithLogitsLoss()(amp_cat_logits, torch.zeros_like(amp_cat_logits))
                                                 + nn.BCEWithLogitsLoss()(amp_motion_logits,
                                                                          torch.ones_like(amp_motion_logits)))
 
@@ -380,7 +382,7 @@ class AMPAgent(BaseAgent):
 
                 # discriminator weight decay
                 if self._discriminator_weight_decay_scale:
-                    weights = [torch.flatten(module.weight) for module in self.discriminator.modules() \
+                    weights = [torch.flatten(module.weight) for module in self.discriminator.modules()
                                if isinstance(module, torch.nn.Linear)]
                     weight_decay = torch.sum(torch.square(torch.cat(weights, dim=-1)))
                     discriminator_loss += self._discriminator_weight_decay_scale * weight_decay
