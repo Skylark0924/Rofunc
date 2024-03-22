@@ -103,8 +103,9 @@ class BaseTrainer:
         self.eval_steps = self.cfg.train.Trainer.get("eval_steps", 1000)
         self.eval_env_seed = self.cfg.train.Trainer.get("eval_env_seed", random.randint(0, 10000))
         self.use_eval_thread = self.cfg.train.Trainer.get("use_eval_thread", False)
-        assert self.eval_steps % self.max_episode_steps == 0, \
-            f"eval_steps ({self.eval_steps}) must be a multiple of max_episode_steps ({self.max_episode_steps})."
+        if self.eval_flag:
+            assert self.eval_steps % self.max_episode_steps == 0, \
+                f"eval_steps ({self.eval_steps}) must be a multiple of max_episode_steps ({self.max_episode_steps})."
         self.inference_steps = self.cfg.train.Trainer.get("inference_steps", 1000)
         self.total_rew_mean = -1e4
         self.eval_rew_mean = 0

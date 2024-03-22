@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot name="object">
+  <dynamics damping="0.5" friction="0.9"/>
+  <link name="object">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.12"/>
+      </geometry>
+      <material name="mat">
+        <color rgba="0.7 0.8 0.9 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.12"/>
+      </geometry>
+    </collision>
+  </link>
+
+</robot>
