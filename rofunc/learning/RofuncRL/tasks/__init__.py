@@ -19,6 +19,9 @@ class Tasks:
             from .isaacgymenv.ase.humanoid_reach import HumanoidReachTask
             from .isaacgymenv.ase.humanoid_strike import HumanoidStrikeTask
             from .isaacgymenv.ase.humanoid_view_motion import HumanoidASEViewMotionTask
+            from .isaacgymenv.physhoi.humanoid_physhoi import HumanoidPhysHOITask
+            # from .isaacgymenv.physhoi.physhoi import PhysHOI_BallPlay
+            from .isaacgymenv.hotu.humanoid_hotu import HumanoidHOTUTask
             from .isaacgymenv.hotu.humanoid_view_motion import HumanoidHOTUViewMotionTask
             from .isaacgymenv.hands.shadow_hand_block_stack import ShadowHandBlockStackTask
             from .isaacgymenv.hands.shadow_hand_bottle_cap import ShadowHandBottleCapTask
@@ -65,6 +68,9 @@ class Tasks:
                 "HumanoidASEReachSwordShield": HumanoidReachTask,
                 "HumanoidASEStrikeSwordShield": HumanoidStrikeTask,
                 "HumanoidASEViewMotion": HumanoidASEViewMotionTask,
+                "HumanoidPhysHOI": HumanoidPhysHOITask,
+                # "HumanoidPhysHOI": PhysHOI_BallPlay,
+                "HumanoidHOTU": HumanoidHOTUTask,
                 "HumanoidHOTUViewMotion": HumanoidHOTUViewMotionTask,
                 "BiShadowHandOver": ShadowHandOverTask,
                 "BiShadowHandBlockStack": ShadowHandBlockStackTask,

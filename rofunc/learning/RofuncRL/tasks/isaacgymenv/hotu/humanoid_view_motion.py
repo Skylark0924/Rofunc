@@ -16,10 +16,10 @@ import torch
 from isaacgym import gymtorch
 
 import rofunc as rf
-from rofunc.learning.RofuncRL.tasks.isaacgymenv.hotu.humanoid_hotu import HumanoidHOTU
+from rofunc.learning.RofuncRL.tasks.isaacgymenv.hotu.humanoid_hotu import HumanoidHOTUTask
 
 
-class HumanoidHOTUViewMotionTask(HumanoidHOTU):
+class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
     def __init__(
             self,
             cfg,
