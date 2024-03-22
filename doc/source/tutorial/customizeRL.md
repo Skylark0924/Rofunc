@@ -1,6 +1,50 @@
 # RofuncRL tutorial
 
-This tutorial shows how to customize your own tasks and use [`RofuncRL`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/index.html) to train them.
+This tutorial shows how to customize your own project based on [`RofuncRL`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/index.html).
+
+## Project structure
+
+```plaintext
+project_name/
+├── configs/
+│   ├── task/
+│   │   ├── task_config1.yaml  # task-specific config
+│   │   ├── task_config2.yaml
+│   │   ├── ...
+│   ├── train/
+│   │   ├── train_config1.yaml  # training-specific config according to the agent
+│   │   ├── train_config2.yaml
+│   │   ├── ...
+│   ├── config.yaml  # just copy the default config.yaml from RofuncRL
+├── agents/  # optional, if you want to define your own agent
+│   ├── __init__.py
+│   ├── new_agent.py
+│   ├── new_agent2.py
+│   ├── ...
+├── models/  # optional, if you want to define your own model
+│   ├── __init__.py
+│   ├── ...
+├── tasks/  # your own task definition
+│   ├── __init__.py
+│   ├── myenv.py
+│   ├── ...
+├── trainers/  # optional, if you want to define your own trainer
+│   ├── __init__.py
+│   ├── new_trainer.py
+│   ├── ...
+├── ...
+├── main.py  # your own training and inference script
+```
+
+We provide a [**RofuncRL-based repository template**](https://github.com/Skylark0924/RofuncRL-template) to generate your own repository following the RofuncRL structure by one click.
+
+![RofuncRL-based repository template](../img/template.png)
+
+:::{tip}
+For more details about the configuration system, please refer to [Configuration System](https://rofunc.readthedocs.io/en/latest/tutorial/config_system.html).
+:::
+
+
 
 ## Define your env as OpenAI Gym Env
 
@@ -97,7 +141,3 @@ if __name__ == '__main__':
         inference(custom_args)
 ```
 
-:::{tip}
-1. For more details about the configuration system, please refer to [Configuration System](https://rofunc.readthedocs.io/en/latest/tutorial/config_system.html).
-2. More examples can be found in [Example/RofuncRL](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html).
-:::

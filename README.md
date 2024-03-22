@@ -101,13 +101,10 @@ The available functions and plans can be found as follows.
 
 `RofuncRL` is one of the most important sub-packages of `Rofunc`. It is a modular easy-to-use Reinforcement Learning sub-package designed for Robot Learning tasks. It has been tested with simulators like `OpenAIGym`, `IsaacGym`, `OmniIsaacGym` (see [example gallery](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html)), and also differentiable simulators like `PlasticineLab` and `DiffCloth`. Here is a list of robot tasks trained by `RofuncRL`:
 
+> **Note**\
+> You can customize your own project based on RofuncRL by following the [**RofuncRL customize tutorial**](https://rofunc.readthedocs.io/en/latest/tutorial/customizeRL.html).\
+> We also provide a [**RofuncRL-based repository template**](https://github.com/Skylark0924/RofuncRL-template) to generate your own repository following the RofuncRL structure by one click.\
 > For more details, please check [**the documentation for RofuncRL**](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html).
-
-
-
-
-
-
 
 | Tasks                               | Animation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Performance | [ModelZoo](https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json) |
 |-------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------|
