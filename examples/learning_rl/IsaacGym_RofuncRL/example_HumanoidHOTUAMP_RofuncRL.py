@@ -18,17 +18,13 @@ from rofunc.learning.utils.utils import set_seed
 def train(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
     args_overrides = ["task={}".format(custom_args.task),
-                      "train=Humanoid{}RofuncRL".format(custom_args.agent.upper()),
+                      "train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()),
                       "device_id={}".format(custom_args.sim_device),
                       "rl_device=cuda:{}".format(custom_args.rl_device),
                       "headless={}".format(custom_args.headless),
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
-    cfg.task.env.object_motion_file = custom_args.object_motion_file
-    cfg.task.env.object_asset.assetFileName = custom_args.object_asset_files
-    cfg.task.env.object_asset.assetName = custom_args.object_asset_names
-    cfg.task.env.object_asset.assetSize = custom_args.object_asset_sizes
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -47,32 +43,34 @@ def train(custom_args):
                                                         env=env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
+    if custom_args.ckpt_path is not None:
+        trainer.agent.load_ckpt(custom_args.ckpt_path)
     # Start training
     trainer.train()
 
 
 def inference(custom_args):
     # Config task and trainer parameters for Isaac Gym environments
-    task, motion_file = custom_args.task.split('_')
-    args_overrides = ["task={}".format(task),
-                      "train=Humanoid{}RofuncRL".format(custom_args.agent.upper()),
+    args_overrides = ["task={}".format(custom_args.task),
+                      "train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()),
                       "device_id={}".format(custom_args.sim_device),
                       "rl_device=cuda:{}".format(custom_args.rl_device),
                       "headless={}".format(False),
                       "num_envs={}".format(16)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
+    cfg.task.env.motion_file = custom_args.motion_file
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
 
     # Instantiate the Isaac Gym environment
-    infer_env = Tasks().task_map[task](cfg=cfg_dict,
-                                       rl_device=cfg.rl_device,
-                                       sim_device=f'cuda:{cfg.device_id}',
-                                       graphics_device_id=cfg.device_id,
-                                       headless=cfg.headless,
-                                       virtual_screen_capture=cfg.capture_video,  # TODO: check
-                                       force_render=cfg.force_render)
+    infer_env = Tasks().task_map[custom_args.task](cfg=cfg_dict,
+                                                   rl_device=cfg.rl_device,
+                                                   sim_device=f'cuda:{cfg.device_id}',
+                                                   graphics_device_id=cfg.device_id,
+                                                   headless=cfg.headless,
+                                                   virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                                   force_render=cfg.force_render)
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
@@ -91,23 +89,20 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    # Available tasks: HumanoidHOTU
-    parser.add_argument("--task", type=str, default="HumanoidHOTU")
-    parser.add_argument("--agent", type=str, default="hotu")  # Available agent: amp
-    parser.add_argument("--motion_file", type=str, default="examples/data/hotu2/test_data_01_optitrack2hotu.npy")
-    parser.add_argument("--object_motion_file", type=str, default="examples/data/hotu2/test_data_01_optitrack.csv")
-    parser.add_argument("--object_asset_names", type=str, default=["box"])
-    parser.add_argument("--object_asset_files", type=str, default=["mjcf/objects/lab_box.xml"])
-    parser.add_argument("--object_asset_sizes", type=str, default=[[1, 1, 1]])
-    parser.add_argument("--num_envs", type=int, default=1024)
-    parser.add_argument("--sim_device", type=int, default=1)
+    # Available tasks: HumanoidAMP_backflip, HumanoidAMP_walk, HumanoidAMP_run, HumanoidAMP_dance, HumanoidAMP_hop
+    parser.add_argument("--task", type=str, default="HumanoidAMP")
+    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/HOTU/hotu/data/hotu/011_amp.npy")
+    parser.add_argument("--agent", type=str, default="amp")  # Available agent: amp
+    parser.add_argument("--num_envs", type=int, default=4096)
+    parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
-    parser.add_argument("--headless", type=str, default="True")
+    parser.add_argument("--headless", type=str, default="False")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
-    parser.add_argument("--ckpt_path", type=str, default=None)
+    parser.add_argument("--ckpt_path", type=str,
+                        default="/home/ubuntu/Github/SmartEase/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/runs/RofuncRL_AMPTrainer_HumanoidAMP_24-03-26_18-01-15-506194/checkpoints/ckpt_100000.pth")
     custom_args = parser.parse_args()
 
     if not custom_args.inference:

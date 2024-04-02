@@ -14,7 +14,6 @@ from rofunc.learning.RofuncRL.trainers import Trainers
 
 
 def inference(custom_args):
-    view_motion_config = load_view_motion_config(custom_args.config_name)
     task_name = "HumanoidASEViewMotion"
     args_overrides = [
         f"task={task_name}",
@@ -26,11 +25,7 @@ def inference(custom_args):
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
-
-    # Overwrite
-    cfg.task.env.asset.assetFileName = view_motion_config["asset_name"]
-    cfg.task.env.asset.assetBodyNum = view_motion_config["asset_body_num"]
-    cfg.task.env.asset.assetJointNum = view_motion_config["asset_joint_num"]
+    cfg.task.env.asset.assetFileName = custom_args.asset
 
     cfg_dict = omegaconf_to_dict(cfg.task)
 
@@ -59,12 +54,16 @@ if __name__ == "__main__":
     gpu_id = 1
 
     parser = argparse.ArgumentParser()
-    # Find or define your own config in `rofunc/config/view_motion`
-    parser.add_argument("--config_name", type=str, default="HOTUHumanoid")
+    # Available types of asset file path:
+    #  1. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
+    #  2. mjcf/amp_humanoid_sword_shield.xml
+    #  3. mjcf/hotu_humanoid.xml
+    #  4. mjcf/amp_humanoid.xml
+    parser.add_argument("--asset", type=str, default="mjcf/hotu_humanoid.xml")
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/amp/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="examples/data/amp/ase_humanoid_jog.npy")
+    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/HOTU/hotu/data/hotu/010_amp.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)

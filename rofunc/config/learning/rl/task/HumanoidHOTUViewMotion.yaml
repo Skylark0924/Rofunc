@@ -26,13 +26,11 @@ env:
   enableEarlyTermination: True
 
   # animation files to learn from
-  motion_file: None
-  object_motion_file: None
+  motion_file:
+  object_motion_file:
 
   asset:
     assetFileName: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
-    assetBodyNum: 15
-    assetJointNum: 28
 
   object_asset:
     assetName:         # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere

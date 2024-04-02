@@ -573,6 +573,7 @@ class RobotSim:
                 for i in range(len(attracted_rigid_bodies)):
                     self.update_robot(traj[i], attractor_handles[i], axes_geoms[i], sphere_geoms[i], index, verbose)
 
+                # Deprecated API for object pose update by attaching to dual robot hands
                 # if self.object_handles is not None:
                 #     if index <= 1:
                 #         self.object_poses = object_start_pose

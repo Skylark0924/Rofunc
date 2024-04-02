@@ -202,7 +202,7 @@ class BaseAgent:
         for arg in args:
             if isinstance(arg, torch.Tensor):
                 if arg.device != rl_device:
-                    arg.data = arg.data.to(rl_device)
+                    arg.data = arg.data.clone().to(rl_device)
             elif isinstance(arg, tuple) or isinstance(arg, list):
                 self.multi_gpu_transfer(*arg)
             elif isinstance(arg, dict) or isinstance(arg, collections.OrderedDict):
@@ -213,7 +213,7 @@ class BaseAgent:
                 pass
             elif isinstance(arg, np.ndarray):
                 try:
-                    arg = torch.from_numpy(arg).to(rl_device)
+                    arg = torch.from_numpy(arg).clone().to(rl_device)
                 except:
                     for i in range(len(arg)):
                         self.multi_gpu_transfer(*arg[i])

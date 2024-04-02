@@ -288,6 +288,7 @@ class Humanoid(VecTask):
         #         self._num_actions = 44
         #         self._num_obs = 1 + 19 * (3 + 6 + 3 + 3) - 3
         if asset_file == "mjcf/amp_humanoid.xml":
+            # (dof_body_id/num_dofs_for_current_body/start_of_dof_offset_this_body start_of_dof_offset_next_body)
             # torso (1/3/0 3), head (2/3/3 6), right_upper_arm (3/3/6 9), right_lower_arm (4/1/9 10),
             # right_hand (5/0, omitted as no joint to parent)
             # left_upper_arm (6/3/10 13), left_lower_arm (7/1/13 14), left_hand (8/0), right_thigh (9/3/14 17),
