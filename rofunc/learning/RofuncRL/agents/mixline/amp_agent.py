@@ -194,8 +194,10 @@ class AMPAgent(BaseAgent):
         # Create tensors for motion dataset and replay buffer
         self.motion_dataset.create_tensor(name="states", size=self.amp_observation_space, dtype=torch.float32)
         self.replay_buffer.create_tensor(name="states", size=self.amp_observation_space, dtype=torch.float32)
+        
+        self._initialize_motion_dataset()
 
-        # initialize motion dataset
+    def _initialize_motion_dataset(self):
         if self.collect_reference_motions is not None:
             for _ in range(math.ceil(self.motion_dataset.memory_size / self._amp_batch_size)):
                 self.motion_dataset.add_samples(states=self.collect_reference_motions(self._amp_batch_size))

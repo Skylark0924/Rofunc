@@ -1,9 +1,24 @@
+# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import math
 import os
 
 from PIL import Image as Im
 from isaacgym import gymapi
 from isaacgym import gymtorch
-
+from isaacgym import gymutil
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.vec_task import VecTask
 from rofunc.learning.RofuncRL.tasks.utils.torch_jit_utils import *
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -256,8 +271,6 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
         self.total_successes = 0
         self.total_resets = 0
 
-        from isaacgym import gymutil
-        import math
         # self.attractor_handles, self.axes_geoms, self.sphere_geoms = self._create_attractor("panda_left_link7")
         self.axes_geom = gymutil.AxesGeometry(0.1)
         # Create a wireframe sphere
@@ -1184,8 +1197,6 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
             # self.prev_dof_action = dof_action
 
             # dof_action = torch.where(hand_dist.unsqueeze(-1) > 0.06, -torch.ones_like(dof_action), dof_action)
-
-
 
             self.cur_targets[:, self.useful_joint_index] = scale(dof_action,
                                                                  self.hand_dof_lower_limits[

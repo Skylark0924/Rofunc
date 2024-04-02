@@ -42,7 +42,8 @@ class BaseTrainer:
                  env: Union[gym.Env, gymnasium.Env],
                  device: Optional[Union[str, torch.device]] = None,
                  env_name: Optional[str] = None,
-                 inference: bool = False):
+                 inference: bool = False,
+                 **kwargs):
         self.cfg = cfg
         self.cfg_trainer = cfg.train.Trainer
         self.agent = None
@@ -173,9 +174,11 @@ class BaseTrainer:
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.env.step(actions)
-                next_states, rewards, terminated, truncated, infos = self.agent.multi_gpu_transfer(next_states, rewards,
-                                                                                                   terminated,
-                                                                                                   truncated, infos)
+                if self.device != self.env.device:
+                    next_states, rewards, terminated, truncated, infos = self.agent.multi_gpu_transfer(next_states,
+                                                                                                       rewards,
+                                                                                                       terminated,
+                                                                                                       truncated, infos)
 
                 with torch.no_grad():
                     # Store transition
