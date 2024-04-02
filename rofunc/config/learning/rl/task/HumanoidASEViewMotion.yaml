@@ -26,12 +26,10 @@ env:
   enableEarlyTermination: True
 
   # animation files to learn from
-  motion_file: None
+  motion_file:
 
   asset:
     assetFileName: "mjcf/amp_humanoid.xml"
-    assetBodyNum: 15
-    assetJointNum: 28
 
   plane:
     staticFriction: 1.0
