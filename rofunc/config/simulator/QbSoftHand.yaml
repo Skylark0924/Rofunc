@@ -8,18 +8,23 @@ env:
   numEnvs: 1
   envSpacing: 3.
 
+  controller_type: "ik" # "ik" or "osc"
+  selfCollisionFlag: False
+
   asset:
     robot_name: "QbSoftHand"
     assetRoot:
 #    assetFile: "urdf/curi/urdf/qbhand_right.xml"
 #    assetFile: "mjcf/qbhand_no_virtual_left.xml"
 #    assetFile: "mjcf/qbhand_free_joint_left.xml"
-#    assetFile: "mjcf/qbhand_full_left.xml"
-    assetFile: "urdf/curi/urdf/qbhand_left.urdf"
+    assetFile: "mjcf/qbhand_full_left.xml"
+#    assetFile: "urdf/curi/urdf/qbhand_left.urdf"
     init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
     fix_base_link: True
+    disable_gravity: False
     flip_visual_attachments: False
     armature: 0.01
+    slices_per_cylinder: 1000
 
   object_asset:
 
