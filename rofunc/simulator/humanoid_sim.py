@@ -21,20 +21,20 @@ class HumanoidSim(RobotSim):
     def __init__(self, args):
         super().__init__(args)
 
-    def setup_robot_dof_prop(self, gym=None, envs=None, robot_asset=None, robot_handles=None):
+    def setup_robot_dof_prop(self):
         from isaacgym import gymapi
 
-        gym = self.gym if gym is None else gym
-        envs = self.envs if envs is None else envs
-        robot_asset = self.robot_asset if robot_asset is None else robot_asset
-        robot_handles = self.robot_handles if robot_handles is None else robot_handles
+        gym = self.gym
+        envs = self.envs
+        robot_asset = self.robot_asset
+        robot_handles = self.robot_handles
 
         # configure robot dofs
         robot_dof_props = gym.get_asset_dof_properties(robot_asset)
         robot_lower_limits = robot_dof_props["lower"]
         robot_upper_limits = robot_dof_props["upper"]
         robot_ranges = robot_upper_limits - robot_lower_limits
-        robot_mids = 0.5 * (robot_upper_limits + robot_lower_limits)
+        robot_mids = 0.0 * (robot_upper_limits + robot_lower_limits)
 
         robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
         robot_dof_props["stiffness"][:].fill(300.0)
@@ -51,17 +51,39 @@ class HumanoidSim(RobotSim):
         # # send to torch
         # default_dof_pos_tensor = to_torch(default_dof_pos, device=device)
 
-        for i in range(len(envs)):
+        for env, robot in zip(envs, robot_handles):
             # set dof properties
-            gym.set_actor_dof_properties(envs[i], robot_handles[i], robot_dof_props)
+            gym.set_actor_dof_properties(env, robot, robot_dof_props)
 
             # set initial dof states
-            gym.set_actor_dof_states(envs[i], robot_handles[i], default_dof_state, gymapi.STATE_ALL)
+            gym.set_actor_dof_states(env, robot, default_dof_state, gymapi.STATE_ALL)
 
             # set initial position targets
-            gym.set_actor_dof_position_targets(envs[i], robot_handles[i], default_dof_pos)
+            gym.set_actor_dof_position_targets(env, robot, default_dof_pos)
 
-    def show(self, visual_obs_flag=False, camera_props=None, attached_body=None, local_transform=None):
+    def add_head_embedded_camera(self, camera_props=None, attached_body=None, local_transform=None):
+        from isaacgym import gymapi
+
+        if camera_props is None:
+            # Camera Sensor
+            camera_props = gymapi.CameraProperties()
+            camera_props.width = 1280
+            camera_props.height = 1280
+
+        if attached_body is None:
+            attached_body = "head_link2"
+
+        if local_transform is None:
+            local_transform = gymapi.Transform()
+            local_transform.p = gymapi.Vec3(0.12, 0, 0.18)
+        if self.PlaygroundSim.up_axis == "Y":
+            local_transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(1, 0, 0), np.radians(90.0)) * \
+                                gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 0, 1), np.radians(-90.0))
+        elif self.PlaygroundSim.up_axis == "Z":
+            local_transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(1, 0, 0), np.radians(0.0))
+        self.add_body_attached_camera(camera_props, attached_body, local_transform)
+
+    def show(self, visual_obs_flag=False):
         """
         Visualize the CURI robot
         :param visual_obs_flag: if True, show visual observation
@@ -69,27 +91,10 @@ class HumanoidSim(RobotSim):
         :param attached_body: If visual_obs_flag is True, use this to refer the body the camera attached to
         :param local_transform: If visual_obs_flag is True, use this local transform to adjust the camera pose
         """
-        from isaacgym import gymapi
-
         if visual_obs_flag:
             # Setup a first-person camera embedded in CURI's head
-            if camera_props is None:
-                # Camera Sensor
-                camera_props = gymapi.CameraProperties()
-                camera_props.width = 1280
-                camera_props.height = 1280
-
-            if attached_body is None:
-                attached_body = "head_link2"
-
-            if local_transform is None:
-                local_transform = gymapi.Transform()
-                local_transform.p = gymapi.Vec3(0.12, 0, 0.18)
-                local_transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(1, 0, 0), np.radians(90.0)) * \
-                                    gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.radians(-90.0))
-
-        super().show(visual_obs_flag=visual_obs_flag, camera_props=camera_props, attached_body=attached_body,
-                     local_transform=local_transform)
+            self.add_head_embedded_camera()
+        super().show(visual_obs_flag)
 
     def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index, verbose=True):
         from isaacgym import gymutil

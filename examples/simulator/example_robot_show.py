@@ -9,9 +9,9 @@ import isaacgym
 import rofunc as rf
 
 # CURI
-args = rf.config.get_sim_config("CURI")
-CURIsim = rf.sim.CURISim(args)
-CURIsim.show(visual_obs_flag=True)
+# args = rf.config.get_sim_config("CURI")
+# CURIsim = rf.sim.CURISim(args)
+# CURIsim.show(visual_obs_flag=True)
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -49,9 +49,9 @@ CURIsim.show(visual_obs_flag=True)
 # QbSoftHandsim.show()
 
 # # Humanoid
-# args = rf.config.get_sim_config("Humanoid")
-# Humanoidsim = rf.sim.HumanoidSim(args)
-# Humanoidsim.show()
+args = rf.config.get_sim_config("Humanoid")
+Humanoidsim = rf.sim.HumanoidSim(args)
+Humanoidsim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")
