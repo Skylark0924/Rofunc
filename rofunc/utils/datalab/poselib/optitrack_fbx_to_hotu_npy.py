@@ -213,7 +213,8 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     rotation_to_target_skeleton = torch.tensor(retarget_cfg["rotation"])
 
     # run retargeting
-    target_motion = source_motion.retarget_to_by_tpose(
+    # target_motion = source_motion.retarget_to_by_tpose(
+    target_motion = source_motion.retarget_to_hotu_qbhand_by_tpose(
         joint_mapping=retarget_cfg["joint_mapping"],
         source_tpose=source_tpose,
         target_tpose=target_tpose,
@@ -297,7 +298,8 @@ def npy_from_fbx(fbx_file):
     config = {
         "target_motion_path": fbx_file.replace('_optitrack.fbx', '_optitrack2hotu.npy'),
         "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_optitrack_w_gloves_tpose.npy"),
-        "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
+        # "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
+        "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy"),
         "joint_mapping": {  # Left: Optitrack, Right: MJCF
             # hotu_humanoid.xml
             "Skeleton_Hips": "pelvis",
@@ -357,14 +359,15 @@ def npy_from_fbx(fbx_file):
 
     source_motion = motion_from_fbx(fbx_file, root_joint="Skeleton_Hips", fps=120, visualize=False)
     # config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, source_motion, visualize=False)
+    motion_retargeting(config, source_motion, visualize=True)
 
 
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fbx_dir", type=str, default="../../../../examples/data/hotu2")
+    # parser.add_argument("--fbx_dir", type=str, default="../../../../examples/data/hotu2")
+    parser.add_argument("--fbx_dir", type=str, default=None)
     # parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
     parser.add_argument("--parallel", action="store_false")

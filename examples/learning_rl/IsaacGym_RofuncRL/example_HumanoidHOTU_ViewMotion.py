@@ -65,11 +65,11 @@ if __name__ == "__main__":
     #  2. mjcf/amp_humanoid_sword_shield.xml
     #  3. mjcf/hotu_humanoid.xml
     #  4. mjcf/amp_humanoid.xml
-    parser.add_argument("--asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_no_virtual.xml")
+    parser.add_argument("--asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_full.xml")
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/SmartEase/Rofunc-secret/examples/data/hotu2/test_data_04_optitrack2hotu.npy")
+    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/test_data_01_optitrack2hotu.npy")
 
     parser.add_argument("--use_object_motion", action="store_true")
     parser.add_argument("--object_motion_file", type=str, default="examples/data/hotu2/test_data_04_optitrack.csv")
