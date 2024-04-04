@@ -359,17 +359,17 @@ def npy_from_fbx(fbx_file):
 
     source_motion = motion_from_fbx(fbx_file, root_joint="Skeleton_Hips", fps=120, visualize=False)
     # config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, source_motion, visualize=True)
+    motion_retargeting(config, source_motion, visualize=False)
 
 
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--fbx_dir", type=str, default="../../../../examples/data/hotu2")
-    parser.add_argument("--fbx_dir", type=str, default=None)
-    # parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
+    parser.add_argument("--fbx_dir", type=str, default="../../../../examples/data/hotu2")
+    # parser.add_argument("--fbx_dir", type=str, default=None)
     parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
+    # parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
     parser.add_argument("--parallel", action="store_false")
     args = parser.parse_args()
 
