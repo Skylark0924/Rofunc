@@ -467,7 +467,7 @@ class Humanoid(VecTask):
             start_pose,
             "humanoid",
             col_group,
-            col_filter,
+            1,
             segmentation_id,
         )
 

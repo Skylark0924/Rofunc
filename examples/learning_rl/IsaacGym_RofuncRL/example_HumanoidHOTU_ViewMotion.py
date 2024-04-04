@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/test_data_01_optitrack2hotu.npy")
+    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/test_data_03_optitrack2hotu.npy")
 
     parser.add_argument("--use_object_motion", action="store_true")
     parser.add_argument("--object_motion_file", type=str, default="examples/data/hotu2/test_data_04_optitrack.csv")
