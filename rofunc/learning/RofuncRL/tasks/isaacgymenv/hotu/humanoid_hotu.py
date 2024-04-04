@@ -163,6 +163,8 @@ class HumanoidHOTUTask(Humanoid):
         elif asset_file in ["mjcf/hotu_humanoid_w_qbhand_no_virtual.xml",
                             "mjcf/hotu_humanoid_w_qbhand_no_virtual_no_quat.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
+        elif asset_file == "mjcf/hotu_humanoid_w_qbhand_full.xml":
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 100 + 3 * num_key_bodies
         else:
             print(f"Unsupported humanoid body num: {asset_file}")
             assert False
@@ -175,6 +177,7 @@ class HumanoidHOTUTask(Humanoid):
             dof_offsets=self._dof_offsets,
             key_body_ids=self._key_body_ids.cpu().numpy(),
             device=self.device,
+            humanoid_type=self.cfg["env"]["asset"]["assetFileName"]
         )
 
     def _load_object_motion(self, object_motion_file):

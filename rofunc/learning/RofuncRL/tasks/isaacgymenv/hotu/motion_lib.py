@@ -79,15 +79,17 @@ class DeviceCache:
 
 
 class MotionLib:
-    def __init__(self, motion_file, dof_body_ids, dof_offsets, key_body_ids, device):
+    def __init__(self, motion_file, dof_body_ids, dof_offsets, key_body_ids, device, humanoid_type):
         """
+        Motion library for the IsaacGym humanoid series environments and process the motion data exported from Optitrack
+        or Xsens.
 
-        Args:
-            motion_file:
-            dof_body_ids:
-            dof_offsets:
-            key_body_ids:
-            device:
+        :param motion_file: motion file path, should be .yaml files or .npy files
+        :param dof_body_ids: list of body ids that have degrees of freedom
+        :param dof_offsets: list of dof offsets for each body id
+        :param key_body_ids: list of key body ids
+        :param device: device same as the env/task device
+        :param humanoid_type: the type of humanoid, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
         """
         self._dof_body_ids = dof_body_ids
         self._dof_offsets = dof_offsets
@@ -117,8 +119,6 @@ class MotionLib:
         ).float()
         self.dvs = torch.cat([m.dof_vels for m in motions], dim=0).float()
 
-
-
         lengths = self._motion_num_frames
         lengths_shifted = lengths.roll(1)
         lengths_shifted[0] = 0
@@ -130,6 +130,8 @@ class MotionLib:
 
         self.init_local_rotation = torch.Tensor(
             np.load(os.path.join(rf.oslab.get_rofunc_path(), "utils/datalab/poselib/local_orientation.npy"))).to(device)
+
+        self.humanoid_type = humanoid_type
 
     def num_motions(self):
         return len(self._motions)
@@ -413,23 +415,35 @@ class MotionLib:
             joint_offset = dof_offsets[j]
             joint_size = dof_offsets[j + 1] - joint_offset
 
+            if self.humanoid_type == "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml":
+                right_hand_id = 5
+                left_hand_id = 23
+                right_left_ids_except_thumb = [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]
+                right_left_thumb_knuckle_ids = [6, 24]
+            elif self.humanoid_type == "mjcf/hotu_humanoid_w_qbhand_full.xml":
+                right_hand_id = 5
+                left_hand_id = 41
+                right_left_ids_except_thumb = [*[i for i in range(11, 39)], *[i for i in range(47, 75)]]
+                right_left_thumb_knuckle_ids = [6, 42]
+            else:
+                raise ValueError("Unsupported humanoid type")
+
             if joint_size == 3:
                 joint_q = local_rot[:, body_id]
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
-                if body_id is 5:  # Right hand
+                if body_id is right_hand_id:  # Right hand
                     new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, 1, 0, 0], joint_q)
                     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
-                elif body_id is 23:  # Left hand
+                elif body_id is left_hand_id:  # Left hand
                     new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([1, 0, 0, 0], joint_q)
                     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
                 dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
-            elif joint_size == 1:  # TODO: check this
-                if body_id in [*[i for i in range(10, 21)],
-                               *[i for i in range(28, 39)]]:  # Right and left fingers except thumbs
+            elif joint_size == 1:
+                if body_id in right_left_ids_except_thumb:  # Right and left fingers except thumbs
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 2])  # assume joint is always along y axis
-                elif body_id in [6, 24]:  # right and left thumbs knuckles link
+                elif body_id in right_left_thumb_knuckle_ids:  # right and left thumbs knuckles link
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 0])  # assume joint is always along y axis
@@ -440,7 +454,6 @@ class MotionLib:
 
                 joint_theta = normalize_angle(joint_theta)
                 dof_pos[:, joint_offset] = joint_theta
-
             else:
                 print("Unsupported joint type")
                 assert False
@@ -616,7 +629,7 @@ class ObjectMotionLib:
                                                                           torch.tensor(pose[:, 3:]))
         # new_pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0, 0, -0.383, 0.924]),
         new_pose[:, 3:] = rf.robolab.quaternion_multiply_tensor_multirow2(torch.tensor([0, 0, 0.924, 0.383]),
-                                                                      torch.tensor(new_pose[:, 3:]))
+                                                                          torch.tensor(new_pose[:, 3:]))
 
         return new_pose
 

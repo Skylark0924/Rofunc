@@ -311,15 +311,15 @@ class Humanoid(VecTask):
             self._dof_obs_size = 84  # 14 * 6 (joint_obs_size) = 72
             self._num_actions = 34
             self._num_obs = 1 + 15 * (3 + 6 + 3 + 3) - 3
-        elif asset_file in "mjcf/hotu_humanoid_w_qbhand.xml":
-            self._dof_body_ids = [*[i for i in range(1, 6)], 7, 9, 11, 14, 16, 18, 21, 23, 25, 28, 30, 32, 35, 37, 39,
-                                  *[i for i in range(40, 43)], 44, 46, 48, 51, 53, 55, 58, 60, 62, 65, 67, 69, 72, 74,
-                                  76, *[i for i in range(77, 83)]]  # len=44
-            self._dof_offsets = [0, 3, 6, 9, 10, *[i for i in range(13, 28)], 28, 31, 32, *[i for i in range(35, 50)],
-                                 50, 53, 54, 57, 60, 61, 64]  # len=44+1
-            self._dof_obs_size = 264  # 44 * 6 (joint_obs_size) = 264
-            self._num_actions = 64
-            self._num_obs = 1 + 83 * (3 + 6 + 3 + 3) - 3  # 1243
+        # elif asset_file in "mjcf/hotu_humanoid_w_qbhand.xml":
+        #     self._dof_body_ids = [*[i for i in range(1, 6)], 7, 9, 11, 14, 16, 18, 21, 23, 25, 28, 30, 32, 35, 37, 39,
+        #                           *[i for i in range(40, 43)], 44, 46, 48, 51, 53, 55, 58, 60, 62, 65, 67, 69, 72, 74,
+        #                           76, *[i for i in range(77, 83)]]  # len=44
+        #     self._dof_offsets = [0, 3, 6, 9, 10, *[i for i in range(13, 28)], 28, 31, 32, *[i for i in range(35, 50)],
+        #                          50, 53, 54, 57, 60, 61, 64]  # len=44+1
+        #     self._dof_obs_size = 264  # 44 * 6 (joint_obs_size) = 264
+        #     self._num_actions = 64
+        #     self._num_obs = 1 + 83 * (3 + 6 + 3 + 3) - 3  # 1243
         elif asset_file in ["mjcf/hotu_humanoid_w_qbhand_no_virtual.xml",
                             "mjcf/hotu_humanoid_w_qbhand_no_virtual_no_quat.xml"]:
             self._dof_body_ids = [*[i for i in range(1, 45)]]  # len=44
@@ -328,6 +328,13 @@ class Humanoid(VecTask):
             self._dof_obs_size = 264  # 44 * 6 (joint_obs_size) = 264
             self._num_actions = 64
             self._num_obs = 1 + 45 * (3 + 6 + 3 + 3) - 3  # 673
+        elif asset_file == "mjcf/hotu_humanoid_w_qbhand_full.xml":
+            self._dof_body_ids = [*[i for i in range(1, 81)]]  # len=80
+            self._dof_offsets = [0, 3, 6, 9, 10, *[i for i in range(13, 46)], 46, 49, 50, *[i for i in range(53, 86)],
+                                 86, 89, 90, 93, 96, 97, 100] # len=80+1
+            self._dof_obs_size = 480  # 80 * 6 (joint_obs_size) = 480
+            self._num_actions = 100
+            self._num_obs = 1 + 81 * (3 + 6 + 3 + 3) - 3  # 1203
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
 
