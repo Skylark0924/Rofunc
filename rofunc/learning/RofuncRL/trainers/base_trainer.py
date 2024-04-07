@@ -172,15 +172,14 @@ class BaseTrainer:
                 with torch.no_grad():
                     actions = self.get_action(states)
 
-                # Interact with environment
-                next_states, rewards, terminated, truncated, infos = self.env.step(actions)
-                if self.device != self.env.device:
-                    next_states, rewards, terminated, truncated, infos = self.agent.multi_gpu_transfer(next_states,
-                                                                                                       rewards,
-                                                                                                       terminated,
-                                                                                                       truncated, infos)
-
-                with torch.no_grad():
+                    # Interact with environment
+                    next_states, rewards, terminated, truncated, infos = self.env.step(actions)
+                    if self.device != self.env.device:
+                        next_states, rewards, terminated, truncated, infos = self.agent.multi_gpu_transfer(next_states,
+                                                                                                           rewards,
+                                                                                                           terminated,
+                                                                                                           truncated,
+                                                                                                           infos)
                     # Store transition
                     self.agent.store_transition(states=states, actions=actions, next_states=next_states,
                                                 rewards=rewards, terminated=terminated, truncated=truncated,
