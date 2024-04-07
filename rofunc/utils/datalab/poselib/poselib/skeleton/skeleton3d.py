@@ -114,7 +114,7 @@ class SkeletonTree(Serializable):
         self._local_translation = local_translation
         self._local_orientation = local_orientation
         self._node_indices = {self.node_names[i]: i for i in range(len(self))}
-        
+
         # self.asset_dof_dict = asset_dof_dict
         # self.asset_rigid_body_dict = asset_rigid_body_dict
         # self.asset_joint_dict = asset_joint_dict
@@ -196,7 +196,7 @@ class SkeletonTree(Serializable):
         """
         Parses a mujoco xml scene description file and returns a Skeleton Tree.
         We use the model attribute at the root as the name of the tree.
-        
+
         :param path:
         :type path: string
         :return: The skeleton tree constructed from the mjcf file
@@ -257,7 +257,7 @@ class SkeletonTree(Serializable):
 
     def index(self, node_name):
         """ get the index of the node
-        
+
         :param node_name: the name of the node
         :type node_name: string
         :rtype: int
@@ -289,8 +289,8 @@ class SkeletonTree(Serializable):
 
                 if pairwise_translation is not None:
                     local_translation = pairwise_translation[
-                                        tb_node_index, node_index, :
-                                        ]
+                        tb_node_index, node_index, :
+                    ]
             else:
                 local_translation = self.local_translation[node_index, :]
 
@@ -425,7 +425,7 @@ class SkeletonState(Serializable):
     @property
     def is_local(self):
         """ is the rotation represented in local frame? 
-        
+
         :rtype: bool
         """
         return self._is_local
@@ -437,7 +437,7 @@ class SkeletonState(Serializable):
     @property
     def num_joints(self):
         """ number of joints in the skeleton tree 
-        
+
         :rtype: int
         """
         return self.skeleton_tree.num_joints
@@ -445,7 +445,7 @@ class SkeletonState(Serializable):
     @property
     def skeleton_tree(self):
         """ skeleton tree 
-        
+
         :rtype: SkeletonTree
         """
         return self._skeleton_tree
@@ -453,13 +453,13 @@ class SkeletonState(Serializable):
     @property
     def root_translation(self):
         """ root translation 
-        
+
         :rtype: Tensor
         """
         if not hasattr(self, "_root_translation"):
             self._root_translation = self.tensor[
-                                     ..., self.num_joints * 4: self.num_joints * 4 + 3
-                                     ]
+                ..., self.num_joints * 4: self.num_joints * 4 + 3
+            ]
         return self._root_translation
 
     @property
@@ -532,8 +532,8 @@ class SkeletonState(Serializable):
                     parent_index = self.skeleton_tree.parent_indices[node_index]
                     if parent_index == -1:
                         local_rotation[..., node_index, :] = self.global_rotation[
-                                                             ..., node_index, :
-                                                             ]
+                            ..., node_index, :
+                        ]
                     else:
                         local_rotation[..., node_index, :] = quat_mul_norm(
                             quat_inverse(self.global_rotation[..., parent_index, :]),
@@ -561,9 +561,9 @@ class SkeletonState(Serializable):
         identical to `.root_translation` """
         if not hasattr(self, "_local_translation"):
             broadcast_shape = (
-                    tuple(self.tensor.shape[:-1])
-                    + (len(self.skeleton_tree),)
-                    + tuple(self.skeleton_tree.local_translation.shape[-1:])
+                tuple(self.tensor.shape[:-1])
+                + (len(self.skeleton_tree),)
+                + tuple(self.skeleton_tree.local_translation.shape[-1:])
             )
             local_translation = self.skeleton_tree.local_translation.broadcast_to(
                 *broadcast_shape
@@ -600,7 +600,7 @@ class SkeletonState(Serializable):
         """ The 3D translation from joint frame to the root frame. """
         if not hasattr(self, "_local_translation_to_root"):
             self._local_translation_to_root = (
-                    self.global_translation - self.root_translation.unsqueeze(-1)
+                self.global_translation - self.root_translation.unsqueeze(-1)
             )
         return self._local_translation_to_root
 
@@ -609,7 +609,7 @@ class SkeletonState(Serializable):
         """ The 3D rotation from joint frame to the root frame. It is equivalent to 
         The root_R_world * world_R_node """
         return (
-                quat_inverse(self.global_root_rotation).unsqueeze(-1) * self.global_rotation
+            quat_inverse(self.global_root_rotation).unsqueeze(-1) * self.global_rotation
         )
 
     def compute_forward_vector(
@@ -626,14 +626,14 @@ class SkeletonState(Serializable):
         # Perpendicular to the forward direction.
         # Uses the shoulders and hips to find this.
         side_direction = (
-                global_positions[:, left_shoulder_index].numpy()
-                - global_positions[:, right_shoulder_index].numpy()
-                + global_positions[:, left_hip_index].numpy()
-                - global_positions[:, right_hip_index].numpy()
+            global_positions[:, left_shoulder_index].numpy()
+            - global_positions[:, right_shoulder_index].numpy()
+            + global_positions[:, left_hip_index].numpy()
+            - global_positions[:, right_hip_index].numpy()
         )
         side_direction = (
-                side_direction
-                / np.sqrt((side_direction ** 2).sum(axis=-1))[..., np.newaxis]
+            side_direction
+            / np.sqrt((side_direction ** 2).sum(axis=-1))[..., np.newaxis]
         )
 
         # Forward direction obtained by crossing with the up direction.
@@ -645,8 +645,8 @@ class SkeletonState(Serializable):
             forward_direction, gaussian_filter_width, axis=0, mode="nearest"
         )
         forward_direction = (
-                forward_direction
-                / np.sqrt((forward_direction ** 2).sum(axis=-1))[..., np.newaxis]
+            forward_direction
+            / np.sqrt((forward_direction ** 2).sum(axis=-1))[..., np.newaxis]
         )
 
         return torch.from_numpy(forward_direction)
@@ -698,7 +698,7 @@ class SkeletonState(Serializable):
         :type is_local: bool, optional, default=True
         """
         assert (
-                r.dim() > 0
+            r.dim() > 0
         ), "the rotation needs to have at least 1 dimension (dim = {})".format(r.dim)
         return cls(
             SkeletonState._to_state_vector(r, t),
@@ -853,7 +853,7 @@ class SkeletonState(Serializable):
             len(reduced_target_skeleton_tree),
         )
         assert (
-                len(set(n_joints)) == 1
+            len(set(n_joints)) == 1
         ), "the joint mapping is not consistent with the skeleton trees"
         source_indices = list(
             map(
@@ -924,41 +924,41 @@ class SkeletonState(Serializable):
             1. Drop the joints from the source (self) that do not belong to the joint mapping\
             with an implementation that is similar to "keep_nodes_by_names()" - take a\
             look at the function doc for more details (same for source_tpose)
-            
+
             2. Rotate the source state and the source tpose by "rotation_to_target_skeleton"\
             to align the source with the target orientation
-            
+
             3. Extract the root translation and normalize it to match the scale of the target\
             skeleton
-            
+
             4. Extract the global rotation from source state relative to source tpose and\
             re-apply the relative rotation to the target tpose to construct the global\
             rotation after retargetting
-            
+
             5. Combine the computed global rotation and the root translation from 3 and 4 to\
             complete the retargeting.
-            
+
             6. Make feet on the ground (global translation z)
 
         :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
         the target skeleton
         :type joint_mapping: Dict[str, str]
-        
+
         :param source_tpose_local_rotation: the local rotation of the source skeleton
         :type source_tpose_local_rotation: Tensor
-        
+
         :param source_tpose_root_translation: the root translation of the source tpose
         :type source_tpose_root_translation: np.ndarray
-        
+
         :param target_skeleton_tree: the target skeleton tree
         :type target_skeleton_tree: SkeletonTree
-        
+
         :param target_tpose_local_rotation: the local rotation of the target skeleton
         :type target_tpose_local_rotation: Tensor
-        
+
         :param target_tpose_root_translation: the root translation of the target tpose
         :type target_tpose_root_translation: Tensor
-        
+
         :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
         skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
         the frame of reference of the target skeleton and s is the frame of reference of the source\
@@ -1025,8 +1025,8 @@ class SkeletonState(Serializable):
 
         # STEP 3: Normalize to match the target scale
         root_translation_diff = (
-                                        source_state.root_translation - source_tpose.root_translation
-                                ) * scale_to_target_skeleton
+            source_state.root_translation - source_tpose.root_translation
+        ) * scale_to_target_skeleton
         # STEP 4: the global rotation from source state relative to source tpose and
         # re-apply to the target
         current_skeleton_tree = source_state.skeleton_tree
@@ -1034,10 +1034,10 @@ class SkeletonState(Serializable):
         for current_index, name in enumerate(current_skeleton_tree):
             if name in target_tpose.skeleton_tree:
                 target_tpose_global_rotation[
-                current_index, :
+                    current_index, :
                 ] = target_tpose.global_rotation[
                     target_tpose.skeleton_tree.index(name), :
-                    ]
+                ]
 
         global_rotation_diff = quat_mul_norm(
             source_state.global_rotation, quat_inverse(source_tpose.global_rotation)
@@ -1056,8 +1056,8 @@ class SkeletonState(Serializable):
                 name = target_skeleton_tree.parent_of(name)
             parent_index = current_skeleton_tree.index(name)
             new_global_rotation_output[:, current_index, :] = new_global_rotation[
-                                                              :, parent_index, :
-                                                              ]
+                :, parent_index, :
+            ]
 
         source_state = SkeletonState.from_rotation_and_root_translation(
             skeleton_tree=target_skeleton_tree,
@@ -1189,8 +1189,8 @@ class SkeletonState(Serializable):
 
         # STEP 3: Normalize to match the target scale
         root_translation_diff = (
-                                        source_state.root_translation - source_tpose.root_translation
-                                ) * scale_to_target_skeleton
+            source_state.root_translation - source_tpose.root_translation
+        ) * scale_to_target_skeleton
         # STEP 4: the global rotation from source state relative to source tpose and
         # re-apply to the target
         current_skeleton_tree = source_state.skeleton_tree
@@ -1198,10 +1198,10 @@ class SkeletonState(Serializable):
         for current_index, name in enumerate(current_skeleton_tree):
             if name in target_tpose.skeleton_tree:
                 target_tpose_global_rotation[
-                current_index, :
+                    current_index, :
                 ] = target_tpose.global_rotation[
                     target_tpose.skeleton_tree.index(name), :
-                    ]
+                ]
 
         global_rotation_diff = quat_mul_norm(
             source_state.global_rotation, quat_inverse(source_tpose.global_rotation)
@@ -1220,8 +1220,8 @@ class SkeletonState(Serializable):
                 name = target_skeleton_tree.parent_of(name)
             parent_index = current_skeleton_tree.index(name)
             new_global_rotation_output[:, current_index, :] = new_global_rotation[
-                                                              :, parent_index, :
-                                                              ]
+                :, parent_index, :
+            ]
 
         source_state = SkeletonState.from_rotation_and_root_translation(
             skeleton_tree=target_skeleton_tree,
@@ -1247,13 +1247,13 @@ class SkeletonState(Serializable):
         :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
         the target skeleton
         :type joint_mapping: Dict[str, str]
-        
+
         :param source_tpose: t-pose of the source skeleton
         :type source_tpose: SkeletonState
-        
+
         :param target_tpose: t-pose of the target skeleton
         :type target_tpose: SkeletonState
-        
+
         :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
         skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
         the frame of reference of the target skeleton and s is the frame of reference of the source\
@@ -1266,7 +1266,7 @@ class SkeletonState(Serializable):
         :rtype: SkeletonState
         """
         assert (
-                len(source_tpose.shape) == 0 and len(target_tpose.shape) == 0
+            len(source_tpose.shape) == 0 and len(target_tpose.shape) == 0
         ), "the retargeting script currently doesn't support vectorized operations"
         return self.retarget_to(
             joint_mapping,
@@ -1285,6 +1285,10 @@ class SkeletonMotion(SkeletonState):
         self._fps = fps
         self._object_poses = object_poses
         super().__init__(tensor_backend, skeleton_tree, is_local, *args, **kwargs)
+
+        # self.asset_dof_dict = None
+        # self.asset_rigid_body_dict = None
+        # self.asset_joint_dict = None
 
     def clone(self):
         return SkeletonMotion(
@@ -1392,7 +1396,7 @@ class SkeletonMotion(SkeletonState):
         :rtype: SkeletonMotion
         """
         assert (
-                type(skeleton_state) == SkeletonState
+            type(skeleton_state) == SkeletonState
         ), "expected type of {}, got {}".format(SkeletonState, type(skeleton_state))
         global_velocity = SkeletonMotion._compute_velocity(
             p=skeleton_state.global_translation, time_delta=1 / fps
@@ -1612,22 +1616,22 @@ class SkeletonMotion(SkeletonState):
         :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
         the target skeleton
         :type joint_mapping: Dict[str, str]
-        
+
         :param source_tpose_local_rotation: the local rotation of the source skeleton
         :type source_tpose_local_rotation: Tensor
-        
+
         :param source_tpose_root_translation: the root translation of the source tpose
         :type source_tpose_root_translation: np.ndarray
-        
+
         :param target_skeleton_tree: the target skeleton tree
         :type target_skeleton_tree: SkeletonTree
-        
+
         :param target_tpose_local_rotation: the local rotation of the target skeleton
         :type target_tpose_local_rotation: Tensor
-        
+
         :param target_tpose_root_translation: the root translation of the target tpose
         :type target_tpose_root_translation: Tensor
-        
+
         :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
         skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
         the frame of reference of the target skeleton and s is the frame of reference of the source\
@@ -1733,13 +1737,13 @@ class SkeletonMotion(SkeletonState):
         :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
         the target skeleton
         :type joint_mapping: Dict[str, str]
-        
+
         :param source_tpose: t-pose of the source skeleton
         :type source_tpose: SkeletonState
-        
+
         :param target_tpose: t-pose of the target skeleton
         :type target_tpose: SkeletonState
-        
+
         :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
         skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
         the frame of reference of the target skeleton and s is the frame of reference of the source\
