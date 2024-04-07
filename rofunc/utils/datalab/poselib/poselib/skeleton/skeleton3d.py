@@ -114,6 +114,10 @@ class SkeletonTree(Serializable):
         self._local_translation = local_translation
         self._local_orientation = local_orientation
         self._node_indices = {self.node_names[i]: i for i in range(len(self))}
+        
+        # self.asset_dof_dict = asset_dof_dict
+        # self.asset_rigid_body_dict = asset_rigid_body_dict
+        # self.asset_joint_dict = asset_joint_dict
 
     def __len__(self):
         """ number of nodes in the skeleton tree """
@@ -130,10 +134,13 @@ class SkeletonTree(Serializable):
     def __repr__(self):
         return (
             "SkeletonTree(\n    node_names={},\n    parent_indices={},"
-            "\n    local_translation={}\n)".format(
+            "\n    local_translation={}".format(
                 self._indent(repr(self.node_names)),
                 self._indent(repr(self.parent_indices)),
                 self._indent(repr(self.local_translation)),
+                # self._indent(repr(self.asset_dof_dict)),
+                # self._indent(repr(self.asset_rigid_body_dict)),
+                # self._indent(repr(self.asset_joint_dict))
             )
         )
 
@@ -167,6 +174,9 @@ class SkeletonTree(Serializable):
             list(map(str, dict_repr["node_names"])),
             TensorUtils.from_dict(dict_repr["parent_indices"], *args, **kwargs),
             TensorUtils.from_dict(dict_repr["local_translation"], *args, **kwargs),
+            # dict(dict_repr["asset_dof_dict"]) if "asset_dof_dict" in dict_repr else None,
+            # dict(dict_repr["asset_rigid_body_dict"]) if "asset_rigid_body_dict" in dict_repr else None,
+            # dict(dict_repr["asset_joint_dict"]) if "asset_joint_dict" in dict_repr else None,
         )
 
     def to_dict(self):
@@ -175,6 +185,9 @@ class SkeletonTree(Serializable):
                 ("node_names", self.node_names),
                 ("parent_indices", tensor_to_dict(self.parent_indices)),
                 ("local_translation", tensor_to_dict(self.local_translation)),
+                # ("asset_dof_dict", self.asset_dof_dict),
+                # ("asset_rigid_body_dict", self.asset_rigid_body_dict),
+                # ("asset_joint_dict", self.asset_joint_dict),
             ]
         )
 

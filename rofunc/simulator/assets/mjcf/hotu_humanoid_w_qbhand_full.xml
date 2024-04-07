@@ -90,7 +90,8 @@
                               contype="0" conaffinity="1"/>
                         <site name="right_lower_arm" class="touch" pos="0 0 -0.12" size="0.041 0.0685" zaxis="0 1 0"/>
 
-                        <body name="right_hand" pos="0 0 -0.288947" quat="0 0 1 0">
+                        <!-- <body name="right_hand" pos="0 0 -0.288947" quat="0 0 1 0"> -->
+                        <body name="right_hand" pos="0 0 -0.288947">                        
                             <joint name="right_hand_x" axis="1 0 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".01"/>
                             <joint name="right_hand_y" axis="0 1 0" range="-360 360" stiffness="100" damping="10"
@@ -471,7 +472,8 @@
                               contype="0" conaffinity="1"/>
                         <site name="left_lower_arm" class="touch" pos="0 0 -0.1" size="0.041 0.0685" zaxis="0 0 1"/>
 
-                        <body name="left_hand" pos="0 0 -0.288947"  quat="0 1 0 0">
+                        <!-- <body name="left_hand" pos="0 0 -0.288947"  quat="0 1 0 0"> -->
+                        <body name="left_hand" pos="0 0 -0.288947">
                             <joint name="left_hand_x" axis="1 0 0" range="-360 360" stiffness="100" damping="10"
                                    armature=".01"/>
                             <joint name="left_hand_y" axis="0 1 0" range="-360 360" stiffness="100" damping="10"
