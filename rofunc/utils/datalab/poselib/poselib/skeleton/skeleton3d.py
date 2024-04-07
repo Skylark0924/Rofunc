@@ -1272,6 +1272,10 @@ class SkeletonMotion(SkeletonState):
         self._fps = fps
         self._object_poses = object_poses
         super().__init__(tensor_backend, skeleton_tree, is_local, *args, **kwargs)
+        
+        self.asset_dof_dict = None
+        self.asset_rigid_body_dict = None
+        self.asset_joint_dict = None
 
     def clone(self):
         return SkeletonMotion(

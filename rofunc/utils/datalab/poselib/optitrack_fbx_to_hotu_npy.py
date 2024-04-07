@@ -18,6 +18,8 @@ Attention: Since the Autodesk FBX SDK just supports Python 3.7, this script shou
 
 import multiprocessing
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import rofunc as rf
 from rofunc.utils.datalab.poselib.poselib.core.rotation3d import *
@@ -25,7 +27,7 @@ from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonSta
 from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skeleton_motion_interactive, \
     plot_skeleton_state
 
-
+from isaacgym import gymapi
 # def _project_joints(motion):
 #     right_upper_arm_id = motion.skeleton_tree._node_indices["right_upper_arm"]
 #     right_lower_arm_id = motion.skeleton_tree._node_indices["right_lower_arm"]
@@ -269,6 +271,27 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
                                                                     root_translation, is_local=True)
     target_motion = SkeletonMotion.from_skeleton_state(new_sk_state, fps=target_motion.fps)
 
+    gym = gymapi.acquire_gym()
+    sim = gym.create_sim(0, 0, gymapi.SIM_PHYSX, gymapi.SimParams())
+    rofunc_path = rf.oslab.get_rofunc_path()
+    asset_root = os.path.join(rofunc_path, "simulator/assets")
+
+    # Load humanoid asset
+    asset_file = args.humanoid_asset
+    asset_options = gymapi.AssetOptions()
+    asset_options.angular_damping = 0.01
+    asset_options.max_angular_velocity = 100.0
+    asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
+    asset_options.disable_gravity = False
+    # asset_options.fix_base_link = True
+    humanoid_asset = gym.load_asset(sim, asset_root, asset_file, asset_options)
+    asset_dof_dict = gym.get_asset_dof_dict(humanoid_asset)
+    asset_rigid_body_dict = gym.get_asset_rigid_body_dict(humanoid_asset)
+    asset_joint_dict = gym.get_asset_joint_dict(humanoid_asset)
+    target_motion.asset_dof_dict = asset_dof_dict
+    target_motion.asset_rigid_body_dict = asset_rigid_body_dict
+    target_motion.asset_joint_dict = asset_joint_dict
+
     # save retargeted motion
     target_motion.to_file(retarget_cfg["target_motion_path"])
 
@@ -299,7 +322,7 @@ def npy_from_fbx(fbx_file):
         "target_motion_path": fbx_file.replace('_optitrack.fbx', '_optitrack2hotu.npy'),
         "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_optitrack_w_gloves_tpose.npy"),
         # "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
-        "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy"),
+        "target_tpose": os.path.join(rofunc_path, args.target_tpose),
         "joint_mapping": {  # Left: Optitrack, Right: MJCF
             # hotu_humanoid.xml
             "Skeleton_Hips": "pelvis",
@@ -366,11 +389,19 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fbx_dir", type=str, default="../../../../examples/data/hotu2")
-    # parser.add_argument("--fbx_dir", type=str, default=None)
-    parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
-    # parser.add_argument("--fbx_file", type=str, default="../../../../examples/data/hotu2/test_data_01_optitrack.fbx")
-    parser.add_argument("--parallel", action="store_false")
+    # parser.add_argument("--fbx_dir", type=str, default="../../../../examples/data/hotu2")
+    parser.add_argument("--fbx_dir", type=str, default=None)
+    parser.add_argument("--fbx_file", type=str, default=f"{rf.oslab.get_rofunc_path}/../examples/data/hotu2/test_data_01_optitrack.fbx")
+    # parser.add_argument("--fbx_file", type=str, default=f"{rf.oslab.get_rofunc_path}/../examples/data/hotu2/test_data_01_optitrack.fbx")
+    parser.add_argument("--parallel", action="store_true")
+    # Available asset:
+    #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
+    #                   2. mjcf/amp_humanoid_sword_shield.xml
+    #                   3. mjcf/hotu_humanoid.xml
+    #                   4. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
+    #                   5. mjcf/hotu_humanoid_w_qbhand_full.xml
+    parser.add_argument("--humanoid_asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_full.xml")
+    parser.add_argument("--target_tpose", type=str, default="utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy")
     args = parser.parse_args()
 
     rofunc_path = rf.oslab.get_rofunc_path()
