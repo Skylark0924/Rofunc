@@ -1,5 +1,7 @@
 Model_type:
   hotu_humanoid:  # mjcf/hotu_humanoid.xml rb: 15, dof: 34
+    name:
+      "hotu_humanoid"
     rigid_bodies:
       pelvis: 0
       torso: 1
@@ -54,6 +56,8 @@ Model_type:
     dof_offsets: [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
 
   hotu_humanoid_w_qbhand_full:
+    name:
+      "hotu_humanoid_w_qbhand_full"
     rigid_bodies:
       pelvis: 0
       torso: 1
@@ -61,81 +65,83 @@ Model_type:
       right_upper_arm: 3
       right_lower_arm: 4
       right_hand: 5
-      right_qbhand_thumb_knuckle_link: 6
-      right_qbhand_thumb_proximal_virtual_link: 7
-      right_qbhand_thumb_proximal_link: 8
-      right_qbhand_thumb_distal_virtual_link: 9
-      right_qbhand_thumb_distal_link: 10
-      right_qbhand_index_knuckle_link: 11
-      right_qbhand_index_proximal_virtual_link: 12
-      right_qbhand_index_proximal_link: 13
-      right_qbhand_index_middle_virtual_link: 14
-      right_qbhand_index_middle_link: 15
-      right_qbhand_index_distal_virtual_link: 16
-      right_qbhand_index_distal_link: 17
-      right_qbhand_middle_knuckle_link: 18
-      right_qbhand_middle_proximal_virtual_link: 19
-      right_qbhand_middle_proximal_link: 20
-      right_qbhand_middle_middle_virtual_link: 21
-      right_qbhand_middle_middle_link: 22
-      right_qbhand_middle_distal_virtual_link: 23
-      right_qbhand_middle_distal_link: 24
-      right_qbhand_ring_knuckle_link: 25
-      right_qbhand_ring_proximal_virtual_link: 26
-      right_qbhand_ring_proximal_link: 27
-      right_qbhand_ring_middle_virtual_link: 28
-      right_qbhand_ring_middle_link: 29
-      right_qbhand_ring_distal_virtual_link: 30
-      right_qbhand_ring_distal_link: 31
-      right_qbhand_little_knuckle_link: 32
-      right_qbhand_little_proximal_virtual_link: 33
-      right_qbhand_little_proximal_link: 34
-      right_qbhand_little_middle_virtual_link: 35
-      right_qbhand_little_middle_link: 36
-      right_qbhand_little_distal_virtual_link: 37
-      right_qbhand_little_distal_link: 38
-      left_upper_arm: 39
-      left_lower_arm: 40
-      left_hand: 41
-      left_qbhand_thumb_knuckle_link: 42
-      left_qbhand_thumb_proximal_virtual_link: 43
-      left_qbhand_thumb_proximal_link: 44
-      left_qbhand_thumb_distal_virtual_link: 45
-      left_qbhand_thumb_distal_link: 46
-      left_qbhand_index_knuckle_link: 47
-      left_qbhand_index_proximal_virtual_link: 48
-      left_qbhand_index_proximal_link: 49
-      left_qbhand_index_middle_virtual_link: 50
-      left_qbhand_index_middle_link: 51
-      left_qbhand_index_distal_virtual_link: 52
-      left_qbhand_index_distal_link: 53
-      left_qbhand_middle_knuckle_link: 54
-      left_qbhand_middle_proximal_virtual_link: 55
-      left_qbhand_middle_proximal_link: 56
-      left_qbhand_middle_middle_virtual_link: 57
-      left_qbhand_middle_middle_link: 58
-      left_qbhand_middle_distal_virtual_link: 59
-      left_qbhand_middle_distal_link: 60
-      left_qbhand_ring_knuckle_link: 61
-      left_qbhand_ring_proximal_virtual_link: 62
-      left_qbhand_ring_proximal_link: 63
-      left_qbhand_ring_middle_virtual_link: 64
-      left_qbhand_ring_middle_link: 65
-      left_qbhand_ring_distal_virtual_link: 66
-      left_qbhand_ring_distal_link: 67
-      left_qbhand_little_knuckle_link: 68
-      left_qbhand_little_proximal_virtual_link: 69
-      left_qbhand_little_proximal_link: 70
-      left_qbhand_little_middle_virtual_link: 71
-      left_qbhand_little_middle_link: 72
-      left_qbhand_little_distal_virtual_link: 73  
-      left_qbhand_little_distal_link: 74
-      right_thigh: 75
-      right_shin: 76
-      right_foot: 77
-      left_thigh: 78
-      left_shin: 79
-      left_foot: 80
+      # right_qbhand_root_link: 6
+      right_qbhand_thumb_knuckle_link: 7
+      right_qbhand_thumb_proximal_virtual_link: 8
+      right_qbhand_thumb_proximal_link: 9
+      right_qbhand_thumb_distal_virtual_link: 10
+      right_qbhand_thumb_distal_link: 11
+      right_qbhand_index_knuckle_link: 12
+      right_qbhand_index_proximal_virtual_link: 13
+      right_qbhand_index_proximal_link: 14
+      right_qbhand_index_middle_virtual_link: 15
+      right_qbhand_index_middle_link: 16
+      right_qbhand_index_distal_virtual_link: 17
+      right_qbhand_index_distal_link: 18
+      right_qbhand_middle_knuckle_link: 19
+      right_qbhand_middle_proximal_virtual_link: 20
+      right_qbhand_middle_proximal_link: 21
+      right_qbhand_middle_middle_virtual_link: 22
+      right_qbhand_middle_middle_link: 23
+      right_qbhand_middle_distal_virtual_link: 24
+      right_qbhand_middle_distal_link: 25
+      right_qbhand_ring_knuckle_link: 26
+      right_qbhand_ring_proximal_virtual_link: 27
+      right_qbhand_ring_proximal_link: 28
+      right_qbhand_ring_middle_virtual_link: 29
+      right_qbhand_ring_middle_link: 30
+      right_qbhand_ring_distal_virtual_link: 31
+      right_qbhand_ring_distal_link: 32
+      right_qbhand_little_knuckle_link: 33
+      right_qbhand_little_proximal_virtual_link: 34
+      right_qbhand_little_proximal_link: 35
+      right_qbhand_little_middle_virtual_link: 36
+      right_qbhand_little_middle_link: 37
+      right_qbhand_little_distal_virtual_link: 38
+      right_qbhand_little_distal_link: 39
+      left_upper_arm: 40
+      left_lower_arm: 41
+      left_hand: 42
+      # left_qbhand_root_link: 43
+      left_qbhand_thumb_knuckle_link: 44
+      left_qbhand_thumb_proximal_virtual_link: 45
+      left_qbhand_thumb_proximal_link: 46
+      left_qbhand_thumb_distal_virtual_link: 47
+      left_qbhand_thumb_distal_link: 48
+      left_qbhand_index_knuckle_link: 49
+      left_qbhand_index_proximal_virtual_link: 50
+      left_qbhand_index_proximal_link: 51
+      left_qbhand_index_middle_virtual_link: 52
+      left_qbhand_index_middle_link: 53
+      left_qbhand_index_distal_virtual_link: 54
+      left_qbhand_index_distal_link: 55
+      left_qbhand_middle_knuckle_link: 56
+      left_qbhand_middle_proximal_virtual_link: 57
+      left_qbhand_middle_proximal_link: 58
+      left_qbhand_middle_middle_virtual_link: 59
+      left_qbhand_middle_middle_link: 60
+      left_qbhand_middle_distal_virtual_link: 61
+      left_qbhand_middle_distal_link: 62
+      left_qbhand_ring_knuckle_link: 63
+      left_qbhand_ring_proximal_virtual_link: 64
+      left_qbhand_ring_proximal_link: 65
+      left_qbhand_ring_middle_virtual_link: 66
+      left_qbhand_ring_middle_link: 67
+      left_qbhand_ring_distal_virtual_link: 68
+      left_qbhand_ring_distal_link: 69
+      left_qbhand_little_knuckle_link: 70
+      left_qbhand_little_proximal_virtual_link: 71
+      left_qbhand_little_proximal_link: 72
+      left_qbhand_little_middle_virtual_link: 73
+      left_qbhand_little_middle_link: 74
+      left_qbhand_little_distal_virtual_link: 75  
+      left_qbhand_little_distal_link: 76
+      right_thigh: 77
+      right_shin: 78
+      right_foot: 79
+      left_thigh: 80
+      left_shin: 81
+      left_foot: 82
     dofs:
       abdomen_x: 0
       abdomen_y: 1
