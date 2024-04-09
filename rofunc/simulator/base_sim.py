@@ -172,7 +172,7 @@ class RobotSim:
 
             # add robot, -1 refers to open self-collision detection
             robot_handle = self.gym.create_actor(env, self.robot_asset, pose, self.robot_name, i,
-                                                 -1 if self.self_collision_flag else 2)
+                                                 -1 if self.self_collision_flag else 1)
             self.gym.enable_actor_dof_force_sensors(env, robot_handle)
             robot_handles.append(robot_handle)
 

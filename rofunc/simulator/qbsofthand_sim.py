@@ -34,7 +34,7 @@ class QbSoftHandSim(RobotSim):
         robot_lower_limits = robot_dof_props["lower"]
         robot_upper_limits = robot_dof_props["upper"]
         robot_ranges = robot_upper_limits - robot_lower_limits
-        robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
+        robot_mids = 0.5 * (robot_upper_limits + robot_lower_limits)
 
         robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
         robot_dof_props["stiffness"][:].fill(1000.0)
