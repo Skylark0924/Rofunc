@@ -159,17 +159,17 @@ class ActorPPO_Gaussian(BaseActor):
         state = self.state_encoder(state)
         state = self.backbone_net(state)
         if self.cfg.use_action_out_tanh:
-            output_action = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-action_scale, action_scale]
+            mu = self.cfg.action_scale * torch.tanh(self.mean_layer(state))  # [-action_scale, action_scale]
         else:
-            output_action = self.cfg.action_scale * self.mean_layer(state)
+            mu = self.cfg.action_scale * self.mean_layer(state)
 
-        log_prob = torch.zeros(output_action.shape[0], 1, device=output_action.device)
+        log_prob = torch.zeros(mu.shape[0], 1, device=mu.device)
         if not deterministic:
             log_std = self.log_std
             if self.cfg.use_log_std_clip:
                 log_std = torch.clamp(log_std, self.cfg.log_std_clip_min, self.cfg.log_std_clip_max)
 
-            self.dist = Normal(output_action, log_std.exp())  # Get the Gaussian distribution
+            self.dist = Normal(mu, log_std.exp())  # Get the Gaussian distribution
 
             # sample using the re-parameterization trick
             if action is None:
@@ -178,7 +178,15 @@ class ActorPPO_Gaussian(BaseActor):
                 action = torch.clamp(action, -self.cfg.action_clip, self.cfg.action_clip)  # [-max,max]
             log_prob = self.dist.log_prob(action).sum(dim=-1, keepdim=True)
             output_action = action
-        return output_action, log_prob
+        else:
+            output_action = mu
+
+        res_dict = {
+            'action': output_action,
+            'log_prob': log_prob,
+            'mu': mu
+        }
+        return res_dict
 
     def get_entropy(self):
         return self.dist.entropy()
@@ -224,7 +232,13 @@ class ActorSAC(BaseActor):
         if self.cfg.use_action_clip:
             action = torch.clamp(action, -self.cfg.action_clip, self.cfg.action_clip)  # [-max,max]
         log_prob = self.dist.log_prob(action).sum(dim=-1, keepdim=True)
-        return action, log_prob
+
+        res_dict = {
+            'action': action,
+            'log_prob': log_prob,
+            'mu': mean_action
+        }
+        return res_dict
 
 
 class ActorTD3(ActorSAC):
@@ -238,7 +252,10 @@ class ActorTD3(ActorSAC):
         state = self.state_encoder(state)
         state = self.backbone_net(state)
         mean_action = torch.tanh(self.mean_layer(state))
-        return mean_action, None
+        res_dict = {
+            'action': mean_action
+        }
+        return res_dict
 
 
 class ActorAMP(ActorPPO_Gaussian):

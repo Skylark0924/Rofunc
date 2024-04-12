@@ -257,8 +257,9 @@ class ASEHRLAgent(BaseAgent):
         self.llc_cum_disc_rew = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
         self.need_reset = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
         self.need_terminate = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
-        omega_actions, self._current_log_prob = self.policy(self._state_preprocessor(states),
-                                                            deterministic=deterministic)
+        res_dict = self.policy(self._state_preprocessor(states), deterministic=deterministic)
+        omega_actions, self._current_log_prob = res_dict["action"], res_dict["log_prob"]
+
         self._omega_actions_for_llc = omega_actions
         actions = self._get_llc_action(states, self._omega_actions_for_llc)
         return actions, self._current_log_prob
@@ -374,10 +375,8 @@ class ASEHRLAgent(BaseAgent):
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
                     _, sampled_omega_actions, _) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
-                try:
-                    _, log_prob_now = self.policy(sampled_states, sampled_omega_actions)
-                except:
-                    pass
+                res_dict = self.policy(sampled_states, sampled_omega_actions)
+                log_prob_now = res_dict["log_prob"]
 
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
