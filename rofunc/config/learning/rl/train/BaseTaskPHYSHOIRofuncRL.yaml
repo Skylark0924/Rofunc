@@ -43,11 +43,12 @@ Agent:
 
   entropy_loss_scale: 0.0         # entropy loss scaling factor
   value_loss_scale: 5.0            # value loss scaling factor
+  bound_loss_scale: 10.0
 
   grad_norm_clip: 1.0              # clipping coefficient for the norm of the gradients
   ratio_clip: 0.2                  # clipping coefficient for computing the clipped surrogate objective
   value_clip: 0.2                  # clipping coefficient for computing the value loss (if clip_predicted_values is True)
-  clip_predicted_values: True      # clip predicted values during value loss computation
+  clip_predicted_values: False      # clip predicted values during value loss computation
 
   kl_threshold: 0                  # Initial coefficient for KL divergence.
 
@@ -64,7 +65,7 @@ Agent:
 Model:
   use_init: True
   use_action_clip: True               # If true, clip actions to the action space range.
-  use_same_model: True                # If true, use the same model for the actor and critic.
+  use_same_model: False                # If true, use the same model for the actor and critic.
   use_action_out_tanh: False            # If true, use tanh to scale the action outputs to the action space range.
   action_clip: 1.0                     # clipping coefficient for the norm of the actions
   action_scale: 1.0                    # scaling coefficient for the actions

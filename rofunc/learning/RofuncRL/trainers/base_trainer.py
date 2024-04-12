@@ -269,7 +269,7 @@ class BaseTrainer:
         for _ in tqdm.trange(self.eval_steps):
             with torch.no_grad():
                 # Obtain action from agent
-                actions, _ = self.agent.act(states, deterministic=True)  # TODO: check
+                actions, _, _ = self.agent.act(states, deterministic=True)  # TODO: check
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.eval_env.step(actions)

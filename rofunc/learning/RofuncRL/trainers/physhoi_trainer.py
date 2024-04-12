@@ -29,8 +29,9 @@ class PhysHOITrainer(BaseTrainer):
                                   device, self.exp_dir, self.rofunc_logger)
 
     def pre_interaction(self):
-        if self.collect_observation is not None:
-            self.agent._current_states = self.collect_observation()
+        # if self.collect_observation is not None:
+        #     self.agent._current_states = self.collect_observation()
+        self.env.reset_done()
 
     # def get_action(self, states):
     #     if self._step < self.random_steps:
