@@ -58,6 +58,8 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
             experiment_dir,
             rofunc_logger,
         )
+        self._bound_loss_scale = self.cfg.Agent.bound_loss_scale
+
         if hasattr(cfg.Model, "state_encoder"):
             img_channel = int(self.cfg.Model.state_encoder.inp_channels)
             img_size = int(self.cfg.Model.state_encoder.image_size)
@@ -68,6 +70,9 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
             kd = False
         self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
         self.memory.create_tensor(name="next_values", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="mu", size=self.action_space, dtype=torch.float32)
+
+        self._tensors_names.append("mu")
 
         self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 1)
 
@@ -75,8 +80,10 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
+        self._state_preprocessor.eval()
         BaseAgent.store_transition(self, states=states, actions=actions, next_states=next_states, rewards=rewards,
                                    terminated=terminated, truncated=truncated, infos=infos)
+
         self._current_next_states = next_states
 
         # reward shaping
@@ -152,9 +159,13 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
             for i, (
                     sampled_states, sampled_actions, sampled_dones, sampled_log_prob, sampled_values,
                     sampled_returns,
-                    sampled_advantages) in enumerate(sampled_batches):
-                sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
-                _, log_prob_now = self.policy(sampled_states, sampled_actions)
+                    sampled_advantages, sampled_mu) in enumerate(sampled_batches):
+                # sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
+                self._state_preprocessor.train()
+                sampled_states = self._state_preprocessor(sampled_states)
+                res_dict = self.policy(sampled_states, sampled_actions)
+                log_prob_now = res_dict["log_prob"]
+                mu = res_dict["mu"]
 
                 # compute approximate KL divergence
                 with torch.no_grad():
@@ -170,7 +181,7 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
 
                 # compute policy loss
-                ratio = torch.exp(log_prob_now - sampled_log_prob)
+                ratio = torch.exp(sampled_log_prob - log_prob_now)
                 surrogate = sampled_advantages * ratio
                 surrogate_clipped = sampled_advantages * torch.clip(ratio, 1.0 - self._ratio_clip,
                                                                     1.0 + self._ratio_clip)
@@ -190,40 +201,40 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
                 value_loss = self._value_loss_scale * F.mse_loss(sampled_returns, predicted_values)
 
                 # compute bound loss
-                b_loss = 10 * self.bound_loss(sampled_actions)
+                b_loss = self._bound_loss_scale * self.bound_loss(mu)
                 b_loss = torch.mean(b_loss)
 
-                loss = policy_loss + value_loss + b_loss
+                # loss = policy_loss + value_loss + b_loss
 
-                self.optimizer.zero_grad()
-                self.scaler.scale(loss).backward()
-                self.scaler.unscale_(self.optimizer)
-                if self._grad_norm_clip > 0:
-                    nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
+                # self.optimizer.zero_grad()
+                # self.scaler.scale(loss).backward()
+                # self.scaler.unscale_(self.optimizer)
+                # if self._grad_norm_clip > 0:
+                #     nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
+                # self.scaler.step(self.optimizer)
+                # self.scaler.update()
 
-                # if self.policy is self.value:
-                #     # optimization step
-                #     self.optimizer.zero_grad()
-                #     (policy_loss + entropy_loss + value_loss + b_loss).backward()
-                #     if self._grad_norm_clip > 0:
-                #         nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
-                #     self.optimizer.step()
-                # else:
-                #     # Update policy network
-                #     self.optimizer_policy.zero_grad()
-                #     (policy_loss + entropy_loss + b_loss).backward()
-                #     if self._grad_norm_clip > 0:
-                #         nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
-                #     self.optimizer_policy.step()
-                #
-                #     # Update value network
-                #     self.optimizer_value.zero_grad()
-                #     value_loss.backward()
-                #     if self._grad_norm_clip > 0:
-                #         nn.utils.clip_grad_norm_(self.value.parameters(), self._grad_norm_clip)
-                #     self.optimizer_value.step()
+                if self.policy is self.value:
+                    # optimization step
+                    self.optimizer.zero_grad()
+                    (policy_loss + entropy_loss + value_loss + b_loss).backward()
+                    if self._grad_norm_clip > 0:
+                        nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
+                    self.optimizer.step()
+                else:
+                    # Update policy network
+                    self.optimizer_policy.zero_grad()
+                    (policy_loss + entropy_loss + b_loss).backward()
+                    if self._grad_norm_clip > 0:
+                        nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
+                    self.optimizer_policy.step()
+
+                    # Update value network
+                    self.optimizer_value.zero_grad()
+                    value_loss.backward()
+                    if self._grad_norm_clip > 0:
+                        nn.utils.clip_grad_norm_(self.value.parameters(), self._grad_norm_clip)
+                    self.optimizer_value.step()
 
                 # update cumulative losses
                 cumulative_policy_loss += policy_loss.item()

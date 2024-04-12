@@ -123,16 +123,11 @@ class ASEAgent(AMPAgent):
         if ase_latents is None:
             ase_latents = self._ase_latents
 
-        if not deterministic:
-            # sample stochastic actions
-            actions, log_prob = self.policy(self._state_preprocessor(torch.hstack((states, ase_latents))))
-            # actions, log_prob = self.policy(self._state_preprocessor(states))
-            self._current_log_prob = log_prob
-        else:
-            # choose deterministic actions for evaluation
-            actions, _ = self.policy(self._state_preprocessor(torch.hstack((states, ase_latents))),
-                                     deterministic=True)
-            log_prob = None
+        res_dict = self.policy(self._state_preprocessor(torch.hstack((states, ase_latents))),
+                               deterministic=deterministic)
+        actions = res_dict["action"]
+        log_prob = res_dict["log_prob"]
+        self._current_log_prob = log_prob
         return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
@@ -252,7 +247,8 @@ class ASEAgent(AMPAgent):
                 sampled_states = self._state_preprocessor(torch.hstack((sampled_states, sampled_ase_latents)),
                                                           train=True)
                 # sampled_states = self._state_preprocessor(sampled_states, train=True)
-                _, log_prob_now = self.policy(sampled_states, sampled_actions)
+                res_dict = self.policy(sampled_states, sampled_actions)
+                log_prob_now = res_dict["log_prob"]
 
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
