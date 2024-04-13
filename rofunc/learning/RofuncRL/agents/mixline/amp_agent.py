@@ -209,6 +209,7 @@ class AMPAgent(BaseAgent):
         res_dict = self.policy(self._state_preprocessor(states), deterministic=deterministic)
         actions = res_dict["action"]
         log_prob = res_dict["log_prob"]
+        self._current_log_prob = log_prob
         return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
