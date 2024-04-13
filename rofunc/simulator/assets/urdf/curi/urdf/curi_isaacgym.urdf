@@ -358,7 +358,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/torso_end_v2_zup.stl"/>
+        <mesh filename="../meshes/clover/collision/torso_end_v2.stl"/>
       </geometry>
     </collision>
     <inertial>
