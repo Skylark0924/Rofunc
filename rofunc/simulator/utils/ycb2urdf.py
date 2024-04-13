@@ -23,6 +23,7 @@ from tqdm import tqdm
 from trimesh.decomposition import convex_decomposition
 from trimesh.exchange.export import export_mesh
 from trimesh.version import __version__ as trimesh_version
+from rofunc.utils.oslab.path import get_rofunc_path
 
 YCB_MASS = {
     "001_chips_can": 0.205,
@@ -299,8 +300,10 @@ def create_urdf_file(output_directory, input_mesh):
 
 
 def ycb2urdf():
-    ycb_output_directory = "../assets/urdf/ycb"
-    urdf_output_directory = "../assets/urdf/ycb"
+    # ycb_output_directory = "../assets/urdf/ycb"
+    # urdf_output_directory = "../assets/urdf/ycb"
+    ycb_output_directory = os.path.join(get_rofunc_path(), "simulator/assets/urdf/ycb")
+    urdf_output_directory = os.path.join(get_rofunc_path(), "simulator/assets/urdf/ycb")
     objects = os.listdir(ycb_output_directory)
     with tqdm(total=len(objects)) as t:
         for obj in objects:
