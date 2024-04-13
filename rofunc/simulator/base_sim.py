@@ -130,6 +130,8 @@ class RobotSim:
 
         if self.args.env.object_asset is not None:
             self.add_object()
+        if self.args.env.table is not None:
+            self.add_table()
 
     def create_env(self):
         from isaacgym import gymapi
@@ -286,7 +288,6 @@ class RobotSim:
         return attracted_rigid_bodies, attractor_handles, axes_geoms, sphere_geoms
 
     def add_object(self):
-        # TODO
         from isaacgym import gymapi
 
         asset_root = self.args.env.object_asset.assetRoot or os.path.join(rf.oslab.get_rofunc_path(),
@@ -324,11 +325,26 @@ class RobotSim:
                 object_start_pose.r = gymapi.Quat(*init_poses[j][3:7])
 
                 object_handle = self.gym.create_actor(env_ptr, self.object_assets[j], object_start_pose,
-                                                      object_names[j], i, 2, 0)
+                                                      object_names[j], i, 0, 0)
                 self.object_handles[j].append(object_handle)
                 object_idx = self.gym.get_actor_rigid_body_index(env_ptr, object_handle, 0, gymapi.DOMAIN_SIM)
                 self.object_idxs[j].append(object_idx)
         return self.object_handles, self.object_idxs
+
+    def add_table(self):
+        from isaacgym import gymapi
+
+        table_size = self.args.env.table.size
+        init_pose = self.args.env.table.init_pose
+
+        asset_options = gymapi.AssetOptions()
+        self.table_asset = self.gym.create_box(self.sim, table_size[0], table_size[1], table_size[2], asset_options)
+
+        for i, env_ptr in enumerate(self.envs):
+            table_pose = gymapi.Transform()
+            table_pose.p = gymapi.Vec3(*init_pose[:3])
+            table_pose.r = gymapi.Quat(*init_pose[3:7])
+            self.gym.create_actor(env_ptr, self.table_asset, table_pose, "table", i, 0, 0)
 
     def add_tracking_target_sphere_axes(self):
         """
@@ -376,6 +392,7 @@ class RobotSim:
         from isaacgym import gymtorch
         self._rb_states = self.gym.acquire_rigid_body_state_tensor(self.sim)
         self.rb_states = gymtorch.wrap_tensor(self._rb_states)
+        self.default_rb_states = self.rb_states.clone()
 
     def monitor_dof_states(self):
         from isaacgym import gymtorch
