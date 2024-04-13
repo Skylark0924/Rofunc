@@ -15,6 +15,7 @@
 from typing import List
 
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image as Im
 from isaacgym.torch_utils import *
 
@@ -53,6 +54,10 @@ class CURISim(RobotSim):
                                          "panda_left_finger_joint" in key]
         self.right_gripper_dof_indices = [value for key, value in robot_dof_info["dof_dict"].items() if
                                           "panda_right_finger_joint" in key]
+        self.left_softhand_dof_indices = [value for key, value in robot_dof_info["dof_dict"].items() if
+                                            "left_qbhand" in key and "synergy" not in key and ("knuckle" not in key or "thumb_knuckle" in key)]
+        self.right_softhand_dof_indices = [value for key, value in robot_dof_info["dof_dict"].items() if
+                                             "right_qbhand" in key and "synergy" not in key and ("knuckle" not in key or "thumb_knuckle" in key)]
 
         if self.args.env.asset.assetFile in ["urdf/curi/urdf/curi_isaacgym_dual_arm.urdf",
                                              "urdf/curi/urdf/curi_isaacgym.urdf",
@@ -92,35 +97,42 @@ class CURISim(RobotSim):
         robot_dof_props["damping"][:].fill(40.0)
 
         # Wheels
-        robot_dof_props["driveMode"][self.summit_wheel_dof_indices].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][self.summit_wheel_dof_indices].fill(400.0)
-        robot_dof_props["damping"][self.summit_wheel_dof_indices].fill(40.0)
+        # robot_dof_props["driveMode"][self.summit_wheel_dof_indices] = gymapi.DOF_MODE_POS
+        robot_dof_props["stiffness"][self.summit_wheel_dof_indices] = 400 * np.ones_like(self.summit_wheel_dof_indices)
+        robot_dof_props["damping"][self.summit_wheel_dof_indices] = 40 * np.ones_like(self.summit_wheel_dof_indices)
         # Torso
-        robot_dof_props["driveMode"][self.torso_dof_indices].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][self.torso_dof_indices].fill(1000.0)
-        robot_dof_props["damping"][self.torso_dof_indices].fill(180.0)
+        # robot_dof_props["driveMode"][self.torso_dof_indices].fill(gymapi.DOF_MODE_POS)
+        robot_dof_props["stiffness"][self.torso_dof_indices] = 10000 * np.ones_like(self.torso_dof_indices)
+        robot_dof_props["damping"][self.torso_dof_indices] = 180 * np.ones_like(self.torso_dof_indices)
         # Arms
         if self.robot_controller == "ik":
-            robot_dof_props["driveMode"][self.left_arm_dof_indices].fill(gymapi.DOF_MODE_POS)
-            robot_dof_props["stiffness"][self.left_arm_dof_indices].fill(1000000.0)
-            robot_dof_props["damping"][self.left_arm_dof_indices].fill(40.0)
-            robot_dof_props["driveMode"][self.right_arm_dof_indices].fill(gymapi.DOF_MODE_POS)
-            robot_dof_props["stiffness"][self.right_arm_dof_indices].fill(1000000.0)
-            robot_dof_props["damping"][self.right_arm_dof_indices].fill(40.0)
+            robot_dof_props["driveMode"][self.left_arm_dof_indices] = 1 * np.ones_like(self.left_arm_dof_indices)
+            robot_dof_props["stiffness"][self.left_arm_dof_indices] = 500 * np.ones_like(self.left_arm_dof_indices)
+            robot_dof_props["damping"][self.left_arm_dof_indices] = 50 * np.ones_like(self.left_arm_dof_indices)
+            robot_dof_props["driveMode"][self.right_arm_dof_indices] = 1 * np.ones_like(self.right_arm_dof_indices)
+            robot_dof_props["stiffness"][self.right_arm_dof_indices] = 500 * np.ones_like(self.right_arm_dof_indices)
+            robot_dof_props["damping"][self.right_arm_dof_indices] = 50 * np.ones_like(self.right_arm_dof_indices)
         else:  # osc
-            robot_dof_props["driveMode"][self.left_arm_dof_indices].fill(gymapi.DOF_MODE_EFFORT)
-            robot_dof_props["stiffness"][self.left_arm_dof_indices].fill(0.0)
-            robot_dof_props["damping"][self.left_arm_dof_indices].fill(0.0)
-            robot_dof_props["driveMode"][self.right_arm_dof_indices].fill(gymapi.DOF_MODE_EFFORT)
-            robot_dof_props["stiffness"][self.right_arm_dof_indices].fill(0.0)
-            robot_dof_props["damping"][self.right_arm_dof_indices].fill(0.0)
+            robot_dof_props["driveMode"][self.left_arm_dof_indices] = 3 * np.ones_like(self.left_arm_dof_indices)
+            robot_dof_props["stiffness"][self.left_arm_dof_indices] = 0 * np.ones_like(self.left_arm_dof_indices)
+            robot_dof_props["damping"][self.left_arm_dof_indices] = 0 * np.ones_like(self.left_arm_dof_indices)
+            robot_dof_props["driveMode"][self.right_arm_dof_indices] = 3 * np.ones_like(self.right_arm_dof_indices)
+            robot_dof_props["stiffness"][self.right_arm_dof_indices] = 0 * np.ones_like(self.right_arm_dof_indices)
+            robot_dof_props["damping"][self.right_arm_dof_indices] = 0 * np.ones_like(self.right_arm_dof_indices)
         # grippers
-        robot_dof_props["driveMode"][self.left_gripper_dof_indices].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][self.left_gripper_dof_indices].fill(800.0)
-        robot_dof_props["damping"][self.left_gripper_dof_indices].fill(40.0)
-        robot_dof_props["driveMode"][self.right_gripper_dof_indices].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][self.right_gripper_dof_indices].fill(800.0)
-        robot_dof_props["damping"][self.right_gripper_dof_indices].fill(40.0)
+        robot_dof_props["driveMode"][self.left_gripper_dof_indices] = 1 * np.ones_like(self.left_gripper_dof_indices)
+        robot_dof_props["stiffness"][self.left_gripper_dof_indices] = 1000 * np.ones_like(self.left_gripper_dof_indices)
+        robot_dof_props["damping"][self.left_gripper_dof_indices] = 40 * np.ones_like(self.left_gripper_dof_indices)
+        robot_dof_props["driveMode"][self.right_gripper_dof_indices] = 1 * np.ones_like(self.right_gripper_dof_indices)
+        robot_dof_props["stiffness"][self.right_gripper_dof_indices] = 1000 * np.ones_like(self.right_gripper_dof_indices)
+        robot_dof_props["damping"][self.right_gripper_dof_indices] = 40 * np.ones_like(self.right_gripper_dof_indices)
+        # softhands
+        robot_dof_props["driveMode"][self.left_softhand_dof_indices] = 1 * np.ones_like(self.left_softhand_dof_indices)
+        robot_dof_props["stiffness"][self.left_softhand_dof_indices] = 10 * np.ones_like(self.left_softhand_dof_indices)
+        robot_dof_props["damping"][self.left_softhand_dof_indices] = 40 * np.ones_like(self.left_softhand_dof_indices)
+        robot_dof_props["driveMode"][self.right_softhand_dof_indices] = 1 * np.ones_like(self.right_softhand_dof_indices)
+        robot_dof_props["stiffness"][self.right_softhand_dof_indices] = 10 * np.ones_like(self.right_softhand_dof_indices)
+        robot_dof_props["damping"][self.right_softhand_dof_indices] = 40 * np.ones_like(self.right_softhand_dof_indices)
 
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)
@@ -129,6 +141,9 @@ class CURISim(RobotSim):
         # grippers open
         default_dof_pos[self.left_gripper_dof_indices] = robot_upper_limits[self.left_gripper_dof_indices]
         default_dof_pos[self.right_gripper_dof_indices] = robot_upper_limits[self.right_gripper_dof_indices]
+        # softhands open
+        default_dof_pos[self.left_softhand_dof_indices] = robot_lower_limits[self.left_softhand_dof_indices]
+        default_dof_pos[self.right_softhand_dof_indices] = robot_lower_limits[self.right_softhand_dof_indices]
         self.default_dof_pos = default_dof_pos
 
         default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
@@ -461,6 +476,13 @@ class CURISim(RobotSim):
         self.dof_pos = self.dof_states[:, 0].view(self.num_envs, self.robot_dof_info["dof_count"], 1)
         self.dof_vel = self.dof_states[:, 1].view(self.num_envs, self.robot_dof_info["dof_count"], 1)
 
+        if self.args.env.object_asset is not None:
+            object_names = self.args.env.object_asset.object_names
+            assert len(object_names) == len(self.object_handles), "The number of object names should be the same as the number of object handles"
+            for j in range(len(self.object_handles)):
+                object_dict = self.get_actor_rigid_body_info(self.object_handles[j][0])
+                beauty_print("object_name: {}, object_dict: {}".format(object_names[j], object_dict), type="info")
+
         # Define keyboard and mouse event
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_SPACE, "space_shoot")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_G, "grasp")
@@ -539,7 +561,7 @@ class CURISim(RobotSim):
                         right_gripper_dof_index1 = self.robot_dof_info["dof_dict"]["panda_right_finger_joint1"]
                         right_gripper_dof_index2 = self.robot_dof_info["dof_dict"]["panda_right_finger_joint2"]
                         if ee_link.upper() in ["L", "B"]:
-                            if left_grasp_flag:
+                            if not left_grasp_flag:
                                 pos_action[:, left_gripper_dof_index1] = (
                                         self.dof_pos.squeeze(-1)[:, left_gripper_dof_index1]
                                         - torch.tensor([0.03]))
@@ -572,10 +594,12 @@ class CURISim(RobotSim):
                             right_grasp_flag = not right_grasp_flag
                     elif self.ee_type == "softhand":
                         if ee_link.upper() in ["L", "B"]:
-                            if left_grasp_flag:
-                                left_synergy_action = [1, 0]
-                            else:
-                                left_synergy_action = [0.0, 0.0]
+                            # if left_grasp_flag:
+                            #     left_synergy_action = [1, 0]
+                            # else:
+                            #     left_synergy_action = [0.2, 0.2]
+                            left_synergy_action = input("Input synergy:\n")
+                            left_synergy_action = [float(i) for i in left_synergy_action.split(" ")]
                             left_dof_action = self._get_dof_action_from_synergy(left_synergy_action,
                                                                                 self.useful_left_qbhand_dof_index)
                             for i, index in enumerate(self.useful_left_qbhand_dof_index):
@@ -630,11 +654,33 @@ class CURISim(RobotSim):
                     pos_action[:, self.summit_wheel_dof_indices] = (
                             self.dof_pos.squeeze(-1)[:, self.summit_wheel_dof_indices]
                             - torch.tensor([0.3, -0.3, -0.3, 0.3]))
+                if evt.action == "query_rigid_body_poses" and evt.value > 0:
+                    beauty_print("Left hand pose: {}".format(self.rb_states[curi_link_dict[self.asset_arm_attracted_link[0]]][:7]), type="info")
+                    beauty_print("Right hand pose: {}".format(self.rb_states[curi_link_dict[self.asset_arm_attracted_link[1]]][:7]), type="info")
+                    beauty_print("Robot base pose: {}".format(self.rb_states[0][:7]), type="info")
+                if evt.action == "query_object_pose" and evt.value > 0:
+                    for j in range(len(self.object_handles)):
+                        beauty_print("object_name: {}, object pose: {}".format(self.args.env.object_asset.object_names[j],
+                                                                              self.rb_states[self.object_idxs[j][0]][:7]), type="info")
+
                 if evt.action == "reset" and evt.value > 0:
                     pos_action = torch.tensor(self.default_dof_pos).reshape(self.dof_pos.shape).squeeze(-1)
                     effort_action = torch.zeros_like(pos_action)
                     attracted_link_index = None
                     visual_obs_flag = False
+                    left_grasp_flag = False
+                    right_grasp_flag = False
+                    left_synergy_action = [1.0, 0.0]
+                    right_synergy_action = [1.0, 0.0]
+                    for j in range(len(self.object_handles)):
+                        state = self.gym.get_actor_rigid_body_states(self.envs[0], self.object_handles[j][0], gymapi.STATE_ALL)
+                        init_pose = self.args.env.object_asset.init_poses[j]
+                        state['pose']['p'].fill((init_pose[0], init_pose[1], init_pose[2]))
+                        state['pose']['r'].fill((init_pose[3], init_pose[4], init_pose[5], init_pose[6]))
+                        state['vel']['linear'].fill((0, 0, 0))
+                        state['vel']['angular'].fill((0, 0, 0))
+                        self.gym.set_actor_rigid_body_states(self.envs[0], self.object_handles[j][0], state, gymapi.STATE_ALL)
+                    beauty_print("Reset", type="info")
                 if evt.action == "quit" and evt.value > 0:
                     break
                 if evt.action == "keep_arm_dof" and evt.value > 0:
