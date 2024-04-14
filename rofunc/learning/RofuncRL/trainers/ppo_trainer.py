@@ -24,6 +24,9 @@ class PPOTrainer(BaseTrainer):
         self.agent = PPOAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
                               device, self.exp_dir, self.rofunc_logger)
 
+    def pre_interaction(self):
+        self.env.reset_done()
+
     def post_interaction(self):
         self._rollout += 1
 

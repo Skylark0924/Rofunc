@@ -130,8 +130,9 @@ class RobotSim:
 
         if self.args.env.object_asset is not None:
             self.add_object()
-        if self.args.env.table is not None:
-            self.add_table()
+        if hasattr(self.args.env, "table"):
+            if self.args.env.table is not None:
+                self.add_table()
 
     def create_env(self):
         from isaacgym import gymapi
