@@ -9,14 +9,14 @@ env:
   envSpacing: 3.
 
   controller_type: "ik" # "ik" or "osc"
-  selfCollisionFlag: False
+  selfCollisionFlag: True
 
   asset:
     robot_name: "Humanoid"
     assetRoot:
 #    assetFile: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
     assetFile: "mjcf/hotu_humanoid_w_qbhand_full.xml"
-    init_pose: [0.0, 0.0, 1.8, 0.0, 0.0, 0.0, 1]
+    init_pose: [0.0, 0.0, 1., 0.0, 0.0, 0.0, 1]
     fix_base_link: True
     disable_gravity: False
     flip_visual_attachments: False

@@ -427,6 +427,8 @@ class Humanoid_SMPLX(VecTask):
             ref_obs = self.hoi_data_dict[0]['hoi_data'][next_ts].clone()
             self.obs_buf[env_ids] = torch.cat((obs, ref_obs), dim=-1)
 
+        self.obs_buf = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
+
     def _compute_humanoid_obs(self, env_ids=None):
         if env_ids is None:
             body_pos = self._rigid_body_pos

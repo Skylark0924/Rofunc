@@ -181,7 +181,7 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
 
                 # compute policy loss
-                ratio = torch.exp(sampled_log_prob - log_prob_now)
+                ratio = torch.exp(log_prob_now - sampled_log_prob)
                 surrogate = sampled_advantages * ratio
                 surrogate_clipped = sampled_advantages * torch.clip(ratio, 1.0 - self._ratio_clip,
                                                                     1.0 + self._ratio_clip)
