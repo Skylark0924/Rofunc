@@ -56,6 +56,154 @@ Model_type:
     dof_offsets: [ 0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34 ]
     del_rb:
       - pelvis
+    parts:
+      body:
+        rigid_bodies:
+          - pelvis
+          - torso
+          - head
+          - right_upper_arm
+          - right_lower_arm
+          - right_hand
+          - left_upper_arm
+          - left_lower_arm
+          - left_hand
+          - right_thigh
+          - right_shin
+          - right_foot
+          - left_thigh
+          - left_shin
+          - left_foot
+        dofs:
+          - abdomen_x
+          - abdomen_y
+          - abdomen_z
+          - neck_x
+          - neck_y
+          - neck_z
+          - right_shoulder_x
+          - right_shoulder_y
+          - right_shoulder_z
+          - right_elbow
+          - right_hand_x
+          - right_hand_y
+          - right_hand_z
+          - left_shoulder_x
+          - left_shoulder_y
+          - left_shoulder_z
+          - left_elbow
+          - left_hand_x
+          - left_hand_y
+          - left_hand_z
+          - right_hip_x
+          - right_hip_y
+          - right_hip_z
+          - right_knee
+          - right_ankle_x
+          - right_ankle_y
+          - right_ankle_z
+          - left_hip_x
+          - left_hip_y
+          - left_hip_z
+          - left_knee
+          - left_ankle_x
+          - left_ankle_y
+          - left_ankle_z
+      head:
+        rigid_bodies:
+          - head
+        dofs:
+          - neck_x
+          - neck_y
+          - neck_z
+      torso:
+        rigid_bodies:
+          - torso
+        dofs:
+          - abdomen_x
+          - abdomen_y
+          - abdomen_z
+      left_arm:
+        rigid_bodies:
+          - left_upper_arm
+          - left_lower_arm
+          - left_hand
+        dofs:
+          - left_shoulder_x
+          - left_shoulder_y
+          - left_shoulder_z
+          - left_elbow
+          - left_hand_x
+          - left_hand_y
+          - left_hand_z
+      right_arm:
+        rigid_bodies:
+          - right_upper_arm
+          - right_lower_arm
+          - right_hand
+        dofs:
+          - right_shoulder_x
+          - right_shoulder_y
+          - right_shoulder_z
+          - right_elbow
+          - right_hand_x
+          - right_hand_y
+          - right_hand_z
+      upper_body:
+        rigid_bodies:
+          - torso
+          - head
+          - right_upper_arm
+          - right_lower_arm
+          - right_hand
+          - left_upper_arm
+          - left_lower_arm
+          - left_hand
+        dofs:
+          - abdomen_x
+          - abdomen_y
+          - abdomen_z
+          - neck_x
+          - neck_y
+          - neck_z
+          - right_shoulder_x
+          - right_shoulder_y
+          - right_shoulder_z
+          - right_elbow
+          - right_hand_x
+          - right_hand_y
+          - right_hand_z
+          - left_shoulder_x
+          - left_shoulder_y
+          - left_shoulder_z
+          - left_elbow
+          - left_hand_x
+          - left_hand_y
+          - left_hand_z
+      lower_body:
+        rigid_bodies:
+          - right_thigh
+          - right_shin
+          - right_foot
+          - left_thigh
+          - left_shin
+          - left_foot
+        dofs:
+          - right_hip_x
+          - right_hip_y
+          - right_hip_z
+          - right_knee
+          - right_ankle_x
+          - right_ankle_y
+          - right_ankle_z
+          - left_hip_x
+          - left_hip_y
+          - left_hip_z
+          - left_knee
+          - left_ankle_x
+          - left_ankle_y
+          - left_ankle_z
+
 
   hotu_humanoid_w_qbhand_full:
     name:
@@ -246,7 +394,7 @@ Model_type:
       left_ankle_y: 98
       left_ankle_z: 99
     dof_offsets: [ 0, 3, 6, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 49, 50, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 89, 90, 93, 96, 97, 100 ]
-    del_rb: 
+    del_rb:
       - pelvis
       - right_qbhand_root_link
       - left_qbhand_root_link
@@ -289,6 +437,100 @@ Model_type:
           - left_hand_x
           - left_hand_y
           - left_hand_z
+          - right_hip_x
+          - right_hip_y
+          - right_hip_z
+          - right_knee
+          - right_ankle_x
+          - right_ankle_y
+          - right_ankle_z
+          - left_hip_x
+          - left_hip_y
+          - left_hip_z
+          - left_knee
+          - left_ankle_x
+          - left_ankle_y
+          - left_ankle_z
+      head:
+        rigid_bodies:
+          - head
+        dofs:
+          - neck_x
+          - neck_y
+          - neck_z
+      torso:
+        rigid_bodies:
+          - torso
+        dofs:
+          - abdomen_x
+          - abdomen_y
+          - abdomen_z
+      left_arm:
+        rigid_bodies:
+          - left_upper_arm
+          - left_lower_arm
+          - left_hand
+        dofs:
+          - left_shoulder_x
+          - left_shoulder_y
+          - left_shoulder_z
+          - left_elbow
+          - left_hand_x
+          - left_hand_y
+          - left_hand_z
+      right_arm:
+        rigid_bodies:
+          - right_upper_arm
+          - right_lower_arm
+          - right_hand
+        dofs:
+          - right_shoulder_x
+          - right_shoulder_y
+          - right_shoulder_z
+          - right_elbow
+          - right_hand_x
+          - right_hand_y
+          - right_hand_z
+      upper_body:
+        rigid_bodies:
+          - torso
+          - head
+          - right_upper_arm
+          - right_lower_arm
+          - right_hand
+          - left_upper_arm
+          - left_lower_arm
+          - left_hand
+        dofs:
+          - abdomen_x
+          - abdomen_y
+          - abdomen_z
+          - neck_x
+          - neck_y
+          - neck_z
+          - right_shoulder_x
+          - right_shoulder_y
+          - right_shoulder_z
+          - right_elbow
+          - right_hand_x
+          - right_hand_y
+          - right_hand_z
+          - left_shoulder_x
+          - left_shoulder_y
+          - left_shoulder_z
+          - left_elbow
+          - left_hand_x
+          - left_hand_y
+          - left_hand_z
+      lower_body:
+        rigid_bodies:
+          - right_thigh
+          - right_shin
+          - right_foot
+          - left_thigh
+          - left_shin
+          - left_foot
+        dofs:
           - right_hip_x
           - right_hip_y
           - right_hip_z
@@ -374,69 +616,69 @@ Model_type:
           - left_qbhand_little_distal_virtual_link
           - left_qbhand_little_distal_link
         dofs:
-            - right_qbhand_thumb_knuckle_joint
-            - right_qbhand_thumb_proximal_joint
-            - right_qbhand_thumb_proximal_virtual_joint
-            - right_qbhand_thumb_distal_joint
-            - right_qbhand_thumb_distal_virtual_joint
-            - right_qbhand_index_knuckle_joint
-            - right_qbhand_index_proximal_joint
-            - right_qbhand_index_proximal_virtual_joint
-            - right_qbhand_index_middle_joint
-            - right_qbhand_index_middle_virtual_joint
-            - right_qbhand_index_distal_joint
-            - right_qbhand_index_distal_virtual_joint
-            - right_qbhand_middle_knuckle_joint
-            - right_qbhand_middle_proximal_joint
-            - right_qbhand_middle_proximal_virtual_joint
-            - right_qbhand_middle_middle_joint
-            - right_qbhand_middle_middle_virtual_joint
-            - right_qbhand_middle_distal_joint
-            - right_qbhand_middle_distal_virtual_joint
-            - right_qbhand_ring_knuckle_joint
-            - right_qbhand_ring_proximal_joint
-            - right_qbhand_ring_proximal_virtual_joint
-            - right_qbhand_ring_middle_joint
-            - right_qbhand_ring_middle_virtual_joint
-            - right_qbhand_ring_distal_joint
-            - right_qbhand_ring_distal_virtual_joint
-            - right_qbhand_little_knuckle_joint
-            - right_qbhand_little_proximal_joint
-            - right_qbhand_little_proximal_virtual_joint
-            - right_qbhand_little_middle_joint
-            - right_qbhand_little_middle_virtual_joint
-            - right_qbhand_little_distal_joint
-            - right_qbhand_little_distal_virtual_joint
-            - left_qbhand_thumb_knuckle_joint
-            - left_qbhand_thumb_proximal_joint
-            - left_qbhand_thumb_proximal_virtual_joint
-            - left_qbhand_thumb_distal_joint
-            - left_qbhand_thumb_distal_virtual_joint
-            - left_qbhand_index_knuckle_joint
-            - left_qbhand_index_proximal_joint
-            - left_qbhand_index_proximal_virtual_joint
-            - left_qbhand_index_middle_joint
-            - left_qbhand_index_middle_virtual_joint
-            - left_qbhand_index_distal_joint
-            - left_qbhand_index_distal_virtual_joint
-            - left_qbhand_middle_knuckle_joint
-            - left_qbhand_middle_proximal_joint
-            - left_qbhand_middle_proximal_virtual_joint
-            - left_qbhand_middle_middle_joint
-            - left_qbhand_middle_middle_virtual_joint
-            - left_qbhand_middle_distal_joint
-            - left_qbhand_middle_distal_virtual_joint
-            - left_qbhand_ring_knuckle_joint
-            - left_qbhand_ring_proximal_joint
-            - left_qbhand_ring_proximal_virtual_joint
-            - left_qbhand_ring_middle_joint
-            - left_qbhand_ring_middle_virtual_joint
-            - left_qbhand_ring_distal_joint
-            - left_qbhand_ring_distal_virtual_joint
-            - left_qbhand_little_knuckle_joint
-            - left_qbhand_little_proximal_joint
-            - left_qbhand_little_proximal_virtual_joint
-            - left_qbhand_little_middle_joint
-            - left_qbhand_little_middle_virtual_joint
-            - left_qbhand_little_distal_joint
-            - left_qbhand_little_distal_virtual_joint
+          - right_qbhand_thumb_knuckle_joint
+          - right_qbhand_thumb_proximal_joint
+          - right_qbhand_thumb_proximal_virtual_joint
+          - right_qbhand_thumb_distal_joint
+          - right_qbhand_thumb_distal_virtual_joint
+          - right_qbhand_index_knuckle_joint
+          - right_qbhand_index_proximal_joint
+          - right_qbhand_index_proximal_virtual_joint
+          - right_qbhand_index_middle_joint
+          - right_qbhand_index_middle_virtual_joint
+          - right_qbhand_index_distal_joint
+          - right_qbhand_index_distal_virtual_joint
+          - right_qbhand_middle_knuckle_joint
+          - right_qbhand_middle_proximal_joint
+          - right_qbhand_middle_proximal_virtual_joint
+          - right_qbhand_middle_middle_joint
+          - right_qbhand_middle_middle_virtual_joint
+          - right_qbhand_middle_distal_joint
+          - right_qbhand_middle_distal_virtual_joint
+          - right_qbhand_ring_knuckle_joint
+          - right_qbhand_ring_proximal_joint
+          - right_qbhand_ring_proximal_virtual_joint
+          - right_qbhand_ring_middle_joint
+          - right_qbhand_ring_middle_virtual_joint
+          - right_qbhand_ring_distal_joint
+          - right_qbhand_ring_distal_virtual_joint
+          - right_qbhand_little_knuckle_joint
+          - right_qbhand_little_proximal_joint
+          - right_qbhand_little_proximal_virtual_joint
+          - right_qbhand_little_middle_joint
+          - right_qbhand_little_middle_virtual_joint
+          - right_qbhand_little_distal_joint
+          - right_qbhand_little_distal_virtual_joint
+          - left_qbhand_thumb_knuckle_joint
+          - left_qbhand_thumb_proximal_joint
+          - left_qbhand_thumb_proximal_virtual_joint
+          - left_qbhand_thumb_distal_joint
+          - left_qbhand_thumb_distal_virtual_joint
+          - left_qbhand_index_knuckle_joint
+          - left_qbhand_index_proximal_joint
+          - left_qbhand_index_proximal_virtual_joint
+          - left_qbhand_index_middle_joint
+          - left_qbhand_index_middle_virtual_joint
+          - left_qbhand_index_distal_joint
+          - left_qbhand_index_distal_virtual_joint
+          - left_qbhand_middle_knuckle_joint
+          - left_qbhand_middle_proximal_joint
+          - left_qbhand_middle_proximal_virtual_joint
+          - left_qbhand_middle_middle_joint
+          - left_qbhand_middle_middle_virtual_joint
+          - left_qbhand_middle_distal_joint
+          - left_qbhand_middle_distal_virtual_joint
+          - left_qbhand_ring_knuckle_joint
+          - left_qbhand_ring_proximal_joint
+          - left_qbhand_ring_proximal_virtual_joint
+          - left_qbhand_ring_middle_joint
+          - left_qbhand_ring_middle_virtual_joint
+          - left_qbhand_ring_distal_joint
+          - left_qbhand_ring_distal_virtual_joint
+          - left_qbhand_little_knuckle_joint
+          - left_qbhand_little_proximal_joint
+          - left_qbhand_little_proximal_virtual_joint
+          - left_qbhand_little_middle_joint
+          - left_qbhand_little_middle_virtual_joint
+          - left_qbhand_little_distal_joint
+          - left_qbhand_little_distal_virtual_joint
