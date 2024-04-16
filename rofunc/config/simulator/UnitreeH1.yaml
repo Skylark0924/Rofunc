@@ -17,12 +17,13 @@ env:
   # or have other contacts specified. Setting the collision filter to 0 will
   # enable collisions between all shapes in the actor. Setting the collision filter
   # to anything > 0 will disable all self collisions.
-  collision_mode: 0
+  collision_mode: -1
 
   asset:
     robot_name: "UnitreeH1"
     assetRoot:
-    assetFile: "urdf/UnitreeH1/urdf/h1.xml"
+#    assetFile: "mjcf/UnitreeH1/h1.xml"
+    assetFile: "mjcf/UnitreeH1/h1_w_qbhand.xml"
     init_pose: [0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0]
     fix_base_link: True
     disable_gravity: False

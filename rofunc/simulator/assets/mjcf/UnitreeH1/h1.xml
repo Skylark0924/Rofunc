@@ -1,5 +1,5 @@
 <mujoco model="h1_description">
-    <compiler angle="radian" meshdir="../meshes/"/>
+    <compiler angle="radian" meshdir="../../urdf/UnitreeH1/meshes/"/>
     <statistic meansize="0.226223" extent="2.02548" center="0.015564 2.74848e-06 -0.182867"/>
     <default>
         <motor ctrlrange="-1 1" ctrllimited="true"/>
