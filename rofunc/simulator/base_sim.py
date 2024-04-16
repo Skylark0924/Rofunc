@@ -123,7 +123,7 @@ class RobotSim:
         self.viewer = self.PlaygroundSim.viewer
 
         self.robot_controller = self.args.env.controller_type
-        self.self_collision_flag = self.args.env.selfCollisionFlag
+        self.collision_mode = self.args.env.collision_mode
 
         self.create_env()
         self.setup_robot_dof_prop()
@@ -173,9 +173,18 @@ class RobotSim:
             env = self.gym.create_env(self.sim, env_lower, env_upper, num_per_row)
             envs.append(env)
 
-            # add robot, -1 refers to open self-collision detection
+            # add robot
+            # Create actor
+            #     param1 (Env) – Environment Handle.
+            #     param2 (Asset) – Asset Handle
+            #     param3 (isaacgym.gymapi.Transform) – transform transform of where the actor will be initially placed
+            #     param4 (str) – name of the actor
+            #     param5 (int) – collision group that actor will be part of. The actor will not collide with anything
+            #                    outside of the same collisionGroup
+            #     param6 (int) – bitwise filter for elements in the same collisionGroup to mask off collision
+            #     param7 (int) – segmentation ID used in segmentation camera sensors
             robot_handle = self.gym.create_actor(env, self.robot_asset, pose, self.robot_name, i,
-                                                 -1 if self.self_collision_flag else 1)
+                                                 int(self.collision_mode), 0)
             self.gym.enable_actor_dof_force_sensors(env, robot_handle)
             robot_handles.append(robot_handle)
 
@@ -198,8 +207,14 @@ class RobotSim:
         robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
 
         robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][:].fill(300.0)
-        robot_dof_props["damping"][:].fill(30.0)
+        # if "stiffness" not in robot_dof_props.dtype.names:
+        #     robot_dof_props["stiffness"][:] = 300
+        #     robot_dof_props["damping"][:] = 30
+        # elif robot_dof_props["stiffness"][0] == 0:
+        #     robot_dof_props["stiffness"][:] = 300
+        #     robot_dof_props["damping"][:] = 30
+        robot_dof_props["stiffness"][:] = 300
+        robot_dof_props["damping"][:] = 30
 
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)

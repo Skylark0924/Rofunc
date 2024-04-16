@@ -48,7 +48,7 @@ class WalkerSim(RobotSim):
                 local_transform.r = gymapi.Quat.from_axis_angle(gymapi.Vec3(1, 0, 0), np.radians(90.0)) * \
                                     gymapi.Quat.from_axis_angle(gymapi.Vec3(0, 1, 0), np.radians(-90.0))
 
-        super(WalkerSim, self).show(visual_obs_flag, camera_props, attached_body, local_transform)
+        super(WalkerSim, self).show(visual_obs_flag)
 
     def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index, verbose=True):
         from isaacgym import gymutil
