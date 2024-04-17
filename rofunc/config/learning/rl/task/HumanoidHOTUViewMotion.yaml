@@ -30,7 +30,7 @@ env:
   object_motion_file:
 
   asset:
-    assetFileName: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
+    assetFileName: "mjcf/hotu_humanoid_w_qbhand_full.xml"
 
   object_asset:
     assetName:         # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere

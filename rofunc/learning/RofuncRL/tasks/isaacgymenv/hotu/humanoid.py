@@ -69,8 +69,9 @@ class Humanoid(VecTask):
         rigid_body_state = self.gym.acquire_rigid_body_state_tensor(self.sim)
         contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
 
-        sensors_per_env = 2
-        self.vec_sensor_tensor = gymtorch.wrap_tensor(sensor_tensor).view(self.num_envs, sensors_per_env * 6)
+        if sensor_tensor.ndim != 0:
+            sensors_per_env = 2
+            self.vec_sensor_tensor = gymtorch.wrap_tensor(sensor_tensor).view(self.num_envs, sensors_per_env * 6)
 
         dof_force_tensor = self.gym.acquire_dof_force_tensor(self.sim)
         self.dof_force_tensor = gymtorch.wrap_tensor(dof_force_tensor).view(self.num_envs, self.num_dof)
@@ -335,6 +336,12 @@ class Humanoid(VecTask):
             self._dof_obs_size = 480  # 80 * 6 (joint_obs_size) = 480
             self._num_actions = 100
             self._num_obs = 1 + 81 * (3 + 6 + 3 + 3) - 3  # 1203
+        elif asset_file == "mjcf/UnitreeH1/h1_w_qbhand.xml":
+            self._dof_body_ids = [*[i for i in range(1, 17)], *[i for i in range(18, 56)], *[i for i in range(57, 90)]] # len=87
+            self._dof_offsets = [*[i for i in range(0, 16)], *[i for i in range(18, 56)], *[i for i in range(58, 92)]]  # len=87+1
+            self._dof_obs_size = 522  # 87 * 6 (joint_obs_size) = 522
+            self._num_actions = 91
+            self._num_obs = 1 + 90 * (3 + 6 + 3 + 3) - 3  # 1353
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
 
@@ -373,7 +380,7 @@ class Humanoid(VecTask):
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
         asset_options.disable_gravity = False
         # asset_options.fix_base_link = True
-        humanoid_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
+        self.humanoid_asset = humanoid_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
         actuator_props = self.gym.get_asset_actuator_properties(humanoid_asset)
         motor_efforts = [prop.motor_effort for prop in actuator_props]
 
@@ -383,7 +390,7 @@ class Humanoid(VecTask):
         sensor_pose = gymapi.Transform()
         self.gym.create_asset_force_sensor(humanoid_asset, right_foot_idx, sensor_pose)
         self.gym.create_asset_force_sensor(humanoid_asset, left_foot_idx, sensor_pose)
-        self.max_motor_effort = max(motor_efforts)
+        self.max_motor_effort = max(motor_efforts) if motor_efforts else 360
         self.motor_efforts = to_torch(motor_efforts, device=self.device)
 
         # Load object assets

@@ -417,14 +417,25 @@ class MotionLib:
 
             if self.humanoid_type == "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml":
                 right_hand_id = 5
+                right_hand_ori = [0, 1, 0, 0]
                 left_hand_id = 23
+                left_hand_ori = [1, 0, 0, 0]
                 right_left_ids_except_thumb = [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]
                 right_left_thumb_knuckle_ids = [6, 24]
             elif self.humanoid_type == "mjcf/hotu_humanoid_w_qbhand_full.xml":
                 right_hand_id = 5
+                right_hand_ori = [0, 1, 0, 0]
                 left_hand_id = 41
+                left_hand_ori = [1, 0, 0, 0]
                 right_left_ids_except_thumb = [*[i for i in range(11, 39)], *[i for i in range(47, 75)]]
                 right_left_thumb_knuckle_ids = [6, 42]
+            elif self.humanoid_type == "mjcf/UnitreeH1/h1_w_qbhand.xml":
+                right_hand_id = 55
+                right_hand_ori = [0, 0, 0, 1]
+                left_hand_id = 16
+                left_hand_ori = [0, 0, 0, 1]
+                right_left_ids_except_thumb = [*[i for i in range(23, 51)], *[i for i in range(62, 90)]]
+                right_left_thumb_knuckle_ids = [18, 57]
             else:
                 raise ValueError("Unsupported humanoid type")
 
@@ -432,10 +443,10 @@ class MotionLib:
                 joint_q = local_rot[:, body_id]
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
                 if body_id is right_hand_id:  # Right hand
-                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, 1, 0, 0], joint_q)
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2(right_hand_ori, joint_q)
                     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
                 elif body_id is left_hand_id:  # Left hand
-                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([1, 0, 0, 0], joint_q)
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2(left_hand_ori, joint_q)
                     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
                 dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
             elif joint_size == 1:
