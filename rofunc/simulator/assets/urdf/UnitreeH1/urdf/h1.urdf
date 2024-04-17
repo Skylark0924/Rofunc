@@ -3,8 +3,7 @@
 Stephen Brawner (brawner@gmail.com) 
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot
-  name="h1_description">
+<robot name="h1_description">
   <mujoco>
     <compiler meshdir="../meshes" balanceinertia="true"  discardvisual="false" />
   </mujoco>

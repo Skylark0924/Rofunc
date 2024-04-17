@@ -25,7 +25,8 @@ env:
 #    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
 #    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm_w_softhand.urdf"
 #    assetFile: "urdf/curi/urdf/curi_w_softhand_isaacgym.urdf"
-    assetFile: "urdf/curi/urdf/curi_isaacgym.urdf"
+#    assetFile: "urdf/curi/urdf/curi_isaacgym.urdf"
+    assetFile: "mjcf/curi/curi_w_softhand_isaacgym.xml"
     init_pose: [1., 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
     fix_base_link: False
     disable_gravity: False
@@ -34,15 +35,15 @@ env:
     slices_per_cylinder: 1000
 
   object_asset:
-    object_names: ["mug"]
-    assetRoot:
-    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
-    init_poses: [[0.0, 0, 0.7, 0.5, -0.5, -0.5, 0.5]]
-    fix_base_link: False
+#    object_names: ["power_drill"]
+#    assetRoot:
+#    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
+#    init_poses: [[0.0, 0, 0.7, 0.5, -0.5, -0.5, 0.5]]
+#    fix_base_link: False
 
-  table:
-    init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1]
-    size: [0.5, 1.2, 0.7]
+#  table:
+#    init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1]
+#    size: [0.5, 1.2, 0.7]
 
 
 
