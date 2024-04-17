@@ -25,6 +25,8 @@ def inference(custom_args):
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
     cfg.task.env.asset.assetFileName = custom_args.asset
+    cfg.task.env.keyBodies = custom_args.keyBodies
+    cfg.task.env.contactBodies = custom_args.contactBodies
     if custom_args.use_object_motion:
         cfg.task.env.object_motion_file = custom_args.object_motion_file
         cfg.task.env.object_asset.assetFileName = custom_args.object_asset_files
@@ -65,11 +67,15 @@ if __name__ == "__main__":
     #  2. mjcf/amp_humanoid_sword_shield.xml
     #  3. mjcf/hotu_humanoid.xml
     #  4. mjcf/amp_humanoid.xml
-    parser.add_argument("--asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_full.xml")
+    #  5. mjcf/hotu_humanoid_w_qbhand_full.xml
+    #  6. mjcf/UnitreeH1/h1_w_qbhand.xml
+    parser.add_argument("--asset", type=str, default="mjcf/UnitreeH1/h1_w_qbhand.xml")
+    parser.add_argument("--keyBodies", type=list, default=["right_hand", "left_hand", "right_ankle_link", "left_ankle_link"])
+    parser.add_argument("--contactBodies", type=list, default=["right_ankle_link", "left_ankle_link"])
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/test_data_03_optitrack2hotu.npy")
+    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/test_data_01_optitrack2h1.npy")
 
     parser.add_argument("--use_object_motion", action="store_true")
     parser.add_argument("--object_motion_file", type=str, default="examples/data/hotu2/test_data_04_optitrack.csv")
