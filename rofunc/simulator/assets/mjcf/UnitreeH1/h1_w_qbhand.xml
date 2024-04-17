@@ -64,7 +64,7 @@
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
         <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
         <body name="pelvis" pos="0 0 1" childclass="body">
-            <!--            <freejoint name="root"/>-->
+            <freejoint name="root"/>
             <geom type="mesh" contype="0" conaffinity="0" density="0" rgba="0.1 0.1 0.1 1" mesh="pelvis"/>
 
             <body name="left_hip_yaw_link" pos="0 0.0875 -0.1742">
@@ -150,7 +150,7 @@
                     </body>
                 </body>
             </body>
-            <body name="torso_link">
+            <body name="torso_link" pos="0 0 0">
                 <inertial pos="0.000489 0.002797 0.20484" quat="0.999989 -0.00130808 -0.00282289 -0.00349105"
                           mass="17.789"
                           diaginertia="0.487315 0.409628 0.127837"/>
@@ -1077,4 +1077,63 @@
             </body>
         </body>
     </worldbody>
+
+
+    <actuator>
+        <motor name="left_hip_yaw_joint" gear="125" joint="left_hip_yaw_joint"/>
+        <motor name="left_hip_roll_joint" gear="125" joint="left_hip_roll_joint"/>
+        <motor name="left_hip_pitch_joint" gear="125" joint="left_hip_pitch_joint"/>
+        <motor name="left_knee_joint" gear="125" joint="left_knee_joint"/>
+        <motor name="left_ankle_joint" gear="125" joint="left_ankle_joint"/>
+        <motor name="right_hip_yaw_joint" gear="125" joint="right_hip_yaw_joint"/>
+        <motor name="right_hip_roll_joint" gear="125" joint="right_hip_roll_joint"/>
+        <motor name="right_hip_pitch_joint" gear="125" joint="right_hip_pitch_joint"/>
+        <motor name="right_knee_joint" gear="125" joint="right_knee_joint"/>
+        <motor name="right_ankle_joint" gear="125" joint="right_ankle_joint"/>
+        <motor name="torso_joint" gear="125" joint="torso_joint"/>
+        <motor name="left_shoulder_pitch_joint" gear="125" joint="left_shoulder_pitch_joint"/>
+        <motor name="left_shoulder_roll_joint" gear="125" joint="left_shoulder_roll_joint"/>
+        <motor name="left_shoulder_yaw_joint" gear="125" joint="left_shoulder_yaw_joint"/>
+        <motor name="left_elbow_joint" gear="125" joint="left_elbow_joint"/>
+        <motor name='left_hand_x' gear='50' joint='left_hand_x'/>
+        <motor name='left_hand_y' gear='50' joint='left_hand_y'/>
+        <motor name='left_hand_z' gear='50' joint='left_hand_z'/>
+        <motor name='left_qbhand_thumb_knuckle_joint' gear='50' joint='left_qbhand_thumb_knuckle_joint'/>
+        <motor name='left_qbhand_thumb_proximal_joint' gear='50' joint='left_qbhand_thumb_proximal_joint'/>
+        <motor name='left_qbhand_thumb_distal_joint' gear='50' joint='left_qbhand_thumb_distal_joint'/>
+        <motor name='left_qbhand_index_proximal_joint' gear='50' joint='left_qbhand_index_proximal_joint'/>
+        <motor name='left_qbhand_index_middle_joint' gear='50' joint='left_qbhand_index_middle_joint'/>
+        <motor name='left_qbhand_index_distal_joint' gear='50' joint='left_qbhand_index_distal_joint'/>
+        <motor name='left_qbhand_middle_proximal_joint' gear='50' joint='left_qbhand_middle_proximal_joint'/>
+        <motor name='left_qbhand_middle_middle_joint' gear='50' joint='left_qbhand_middle_middle_joint'/>
+        <motor name='left_qbhand_middle_distal_joint' gear='50' joint='left_qbhand_middle_distal_joint'/>
+        <motor name='left_qbhand_ring_proximal_joint' gear='50' joint='left_qbhand_ring_proximal_joint'/>
+        <motor name='left_qbhand_ring_middle_joint' gear='50' joint='left_qbhand_ring_middle_joint'/>
+        <motor name='left_qbhand_ring_distal_joint' gear='50' joint='left_qbhand_ring_distal_joint'/>
+        <motor name='left_qbhand_little_proximal_joint' gear='50' joint='left_qbhand_little_proximal_joint'/>
+        <motor name='left_qbhand_little_middle_joint' gear='50' joint='left_qbhand_little_middle_joint'/>
+        <motor name='left_qbhand_little_distal_joint' gear='50' joint='left_qbhand_little_distal_joint'/>
+        <motor name="right_shoulder_pitch_joint" gear="125" joint="right_shoulder_pitch_joint"/>
+        <motor name="right_shoulder_roll_joint" gear="125" joint="right_shoulder_roll_joint"/>
+        <motor name="right_shoulder_yaw_joint" gear="125" joint="right_shoulder_yaw_joint"/>
+        <motor name="right_elbow_joint" gear="125" joint="right_elbow_joint"/>
+        <motor name='right_hand_x' gear='50' joint='right_hand_x'/>
+        <motor name='right_hand_y' gear='50' joint='right_hand_y'/>
+        <motor name='right_hand_z' gear='50' joint='right_hand_z'/>
+        <motor name='right_qbhand_thumb_knuckle_joint' gear='50' joint='right_qbhand_thumb_knuckle_joint'/>
+        <motor name='right_qbhand_thumb_proximal_joint' gear='50' joint='right_qbhand_thumb_proximal_joint'/>
+        <motor name='right_qbhand_thumb_distal_joint' gear='50' joint='right_qbhand_thumb_distal_joint'/>
+        <motor name='right_qbhand_index_proximal_joint' gear='50' joint='right_qbhand_index_proximal_joint'/>
+        <motor name='right_qbhand_index_middle_joint' gear='50' joint='right_qbhand_index_middle_joint'/>
+        <motor name='right_qbhand_index_distal_joint' gear='50' joint='right_qbhand_index_distal_joint'/>
+        <motor name='right_qbhand_middle_proximal_joint' gear='50' joint='right_qbhand_middle_proximal_joint'/>
+        <motor name='right_qbhand_middle_middle_joint' gear='50' joint='right_qbhand_middle_middle_joint'/>
+        <motor name='right_qbhand_middle_distal_joint' gear='50' joint='right_qbhand_middle_distal_joint'/>
+        <motor name='right_qbhand_ring_proximal_joint' gear='50' joint='right_qbhand_ring_proximal_joint'/>
+        <motor name='right_qbhand_ring_middle_joint' gear='50' joint='right_qbhand_ring_middle_joint'/>
+        <motor name='right_qbhand_ring_distal_joint' gear='50' joint='right_qbhand_ring_distal_joint'/>
+        <motor name='right_qbhand_little_proximal_joint' gear='50' joint='right_qbhand_little_proximal_joint'/>
+        <motor name='right_qbhand_little_middle_joint' gear='50' joint='right_qbhand_little_middle_joint'/>
+        <motor name='right_qbhand_little_distal_joint' gear='50' joint='right_qbhand_little_distal_joint'/>
+    </actuator>
 </mujoco>

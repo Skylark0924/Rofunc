@@ -165,6 +165,8 @@ class HumanoidHOTUTask(Humanoid):
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
         elif asset_file == "mjcf/hotu_humanoid_w_qbhand_full.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 100 + 3 * num_key_bodies
+        elif asset_file == "mjcf/UnitreeH1/h1_w_qbhand.xml":
+            self._num_amp_obs_per_step = 13 + self._dof_obs_size + 91 + 3 * num_key_bodies
         else:
             print(f"Unsupported humanoid body num: {asset_file}")
             assert False
