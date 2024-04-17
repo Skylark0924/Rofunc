@@ -436,6 +436,19 @@ class MotionLib:
                 left_hand_ori = [0, 0, 0, 1]
                 right_left_ids_except_thumb = [*[i for i in range(23, 51)], *[i for i in range(62, 90)]]
                 right_left_thumb_knuckle_ids = [18, 57]
+                left_shoulder_pitch_id = 12
+                left_shoulder_roll_id = 13
+                left_shoulder_yaw_id = 14
+                right_shoulder_pitch_id = 51
+                right_shoulder_roll_id = 52
+                right_shoulder_yaw_id = 53
+                left_hip_pitch_id = 3
+                left_hip_roll_id = 2
+                left_hip_yaw_id = 1
+                right_hip_pitch_id = 8
+                right_hip_roll_id = 7
+                right_hip_yaw_id = 6
+                torso_id = 11
             else:
                 raise ValueError("Unsupported humanoid type")
 
@@ -453,11 +466,58 @@ class MotionLib:
                 if body_id in right_left_ids_except_thumb:  # Right and left fingers except thumbs
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = -(joint_theta * joint_axis[..., 2])  # assume joint is always along y axis
+                    joint_theta = -(joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
                 elif body_id in right_left_thumb_knuckle_ids:  # right and left thumbs knuckles link
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = -(joint_theta * joint_axis[..., 0])  # assume joint is always along y axis
+                    joint_theta = -(joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
+                elif body_id == left_shoulder_roll_id:  # Roll joint
+                    joint_q = local_rot[:, left_shoulder_pitch_id]
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0.707, 0, 0, 0.707], joint_q)
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(new_joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
+                elif body_id == left_shoulder_yaw_id:  # Yaw joint
+                    joint_q = local_rot[:, left_shoulder_pitch_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                elif body_id == right_shoulder_roll_id:  # Roll joint
+                    joint_q = local_rot[:, right_shoulder_pitch_id]
+                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([-0.707, 0, 0, 0.707], joint_q)
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(new_joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
+                elif body_id == right_shoulder_yaw_id:  # Yaw joint
+                    joint_q = local_rot[:, right_shoulder_pitch_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                elif body_id == torso_id:  # Yaw joint
+                    joint_q = local_rot[:, body_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                elif body_id == left_hip_roll_id:  # Roll joint
+                    joint_q = local_rot[:, left_hip_yaw_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
+                elif body_id == left_hip_pitch_id:  # Pitch joint
+                    joint_q = local_rot[:, left_hip_yaw_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
+                elif body_id == left_hip_yaw_id:  # Yaw joint
+                    joint_q = local_rot[:, left_hip_yaw_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                elif body_id == right_hip_roll_id:  # Roll joint
+                    joint_q = local_rot[:, right_hip_yaw_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
+                elif body_id == right_hip_pitch_id:  # Pitch joint
+                    joint_q = local_rot[:, right_hip_yaw_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
+                elif body_id == right_hip_yaw_id:  # Yaw joint
+                    joint_q = local_rot[:, right_hip_yaw_id]
+                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+
                 else:
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
