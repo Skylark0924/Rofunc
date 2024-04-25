@@ -17,7 +17,7 @@ env:
   # or have other contacts specified. Setting the collision filter to 0 will
   # enable collisions between all shapes in the actor. Setting the collision filter
   # to anything > 0 will disable all self collisions.
-  collision_mode: 1
+  collision_mode: -1
 
   asset:
     robot_name: "CURI"
