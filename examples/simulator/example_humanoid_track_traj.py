@@ -22,5 +22,5 @@ traj_r[:, 3:] = [-0.5, 0.5, 0.5, -0.5]
 rf.lqt.plot_3d_bi(traj_l, traj_r, ori=False)
 
 args = rf.config.get_sim_config("Humanoid")
-Walkersim = rf.sim.HumanoidSim(args)
-Walkersim.run_traj(traj=[traj_r, traj_l], update_freq=0.001)
+HumanoidSim = rf.sim.HumanoidSim(args)
+HumanoidSim.run_traj(traj=[traj_r, traj_l], update_freq=0.001)
