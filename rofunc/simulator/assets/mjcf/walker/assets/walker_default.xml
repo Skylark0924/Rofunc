@@ -1,0 +1,52 @@
+<mujocoinclude>
+  <default>
+    <default class="walker">
+      <position forcelimited="true" ctrllimited="true" kp="870"/>
+      <site rgba="0.8 0.4 0.2 0.5" group="3"/>
+      <!--  Joint damping and friction, directly borrowed from the URDF  -->
+      <default class="walker_head_joints">
+        <joint damping="5"/>
+      </default>
+      <default class="walker_shoulder_j1">
+        <joint damping="15"/>
+      </default>
+      <default class="walker_shoulder_j2">
+        <joint damping="8"/>
+      </default>
+      <default class="walker_upper_arm_joints">
+        <!--  j3, j4  -->
+        <joint damping="5"/>
+      </default>
+      <default class="walker_lower_arm_joints">
+        <!--  j5, j6, j7  -->
+        <joint damping="5" frictionloss="0.5"/>
+      </default>
+      <default class="walker_hip_j1">
+        <joint damping="15"/>
+      </default>
+      <default class="walker_hip_j2">
+        <joint damping="8"/>
+      </default>
+      <default class="walker_hip_j3">
+        <joint damping="5"/>
+      </default>
+      <default class="walker_knee_joint">
+        <joint damping="5"/>
+      </default>
+      <default class="walker_ankle_joints">
+        <joint damping="5" frictionloss="0.5"/>
+      </default>
+      <default class="walker_finger">
+        <joint damping="0.01"/>
+        <!--  TODO These friction parameters are based on Franka gripper  -->
+        <geom friction="1 0.5 0.0001" solref="0.01 1" solimp="0.8 0.9 0.001" margin="0.001" user="0"
+              rgba="0.5 0.6 0.7 .4" contype="1" conaffinity="0" condim="6" group="2" />
+        <position forcerange="0 1" ctrlrange="0 1.5708"/>
+      </default>
+    </default>
+    <!--    <default class="panda_overlay">-->
+    <!--      <joint limited="false" damping="1000" armature="1" frictionloss="10"/>-->
+    <!--      <geom contype="0" conaffinity="0" group="2" type="mesh" rgba=".42 0.42 0.42 .5"/>-->
+    <!--    </default>-->
+  </default>
+</mujocoinclude>

@@ -1339,6 +1339,18 @@
         effort="15"
         velocity="3.1416"/>
   </joint>
+  <link name="left_elbow"/>
+  <joint name="left_elbow_joint" type="fixed">
+    <origin
+        xyz="0 0 0"
+        rpy="0 -1.5708 -3.1416"/>
+    <parent
+        link="left_limb_l4"/>
+    <child
+        link="left_elbow"/>
+    <axis
+        xyz="0 0 1"/>
+  </joint>
   <link
       name="left_limb_l5">
     <inertial>

@@ -8,10 +8,10 @@ This example shows how to visualize robots and objects in the Isaac Gym simulato
 import isaacgym
 import rofunc as rf
 
-# CURI
+# # CURI
 # args = rf.config.get_sim_config("CURI")
 # CURIsim = rf.sim.CURISim(args)
-# CURIsim.show(visual_obs_flag=True)
+# CURIsim.show(visual_obs_flag=False)
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -20,7 +20,7 @@ import rofunc as rf
 
 # CURI-mini
 # args = rf.config.get_sim_config("CURImini")
-# CURIminisim = rf.sim.CURIminiSim(args)
+# CURIminisim = rf.sim.RobotSim(args)
 # CURIminisim.show(visual_obs_flag=True)
 
 # franka
@@ -30,12 +30,12 @@ import rofunc as rf
 
 # baxter
 # args = rf.config.get_sim_config("Baxter")
-# baxtersim = rf.sim.BaxterSim(args)
+# baxtersim = rf.sim.RobotSim(args)
 # baxtersim.show()
 
 # sawyer
 # args = rf.config.get_sim_config("Sawyer")
-# sawyersim = rf.sim.SawyerSim(args)
+# sawyersim = rf.sim.RobotSim(args)
 # sawyersim.show()
 
 # gluon
@@ -49,9 +49,14 @@ import rofunc as rf
 # QbSoftHandsim.show()
 
 # # Humanoid
-args = rf.config.get_sim_config("Humanoid")
-Humanoidsim = rf.sim.HumanoidSim(args)
-Humanoidsim.show()
+# args = rf.config.get_sim_config("Humanoid")
+# Humanoidsim = rf.sim.HumanoidSim(args)
+# Humanoidsim.show()
+
+# Unitree H1
+args = rf.config.get_sim_config("UnitreeH1")
+UnitreeH1sim = rf.sim.RobotSim(args)
+UnitreeH1sim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")
