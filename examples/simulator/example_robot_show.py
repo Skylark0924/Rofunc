@@ -8,10 +8,10 @@ This example shows how to visualize robots and objects in the Isaac Gym simulato
 import isaacgym
 import rofunc as rf
 
-# CURI
-args = rf.config.get_sim_config("CURI")
-CURIsim = rf.sim.CURISim(args)
-CURIsim.show(visual_obs_flag=False)
+# # CURI
+# args = rf.config.get_sim_config("CURI")
+# CURIsim = rf.sim.CURISim(args)
+# CURIsim.show(visual_obs_flag=False)
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -54,9 +54,9 @@ CURIsim.show(visual_obs_flag=False)
 # Humanoidsim.show()
 
 # Unitree H1
-# args = rf.config.get_sim_config("UnitreeH1")
-# UnitreeH1sim = rf.sim.RobotSim(args)
-# UnitreeH1sim.show()
+args = rf.config.get_sim_config("UnitreeH1")
+UnitreeH1sim = rf.sim.RobotSim(args)
+UnitreeH1sim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")

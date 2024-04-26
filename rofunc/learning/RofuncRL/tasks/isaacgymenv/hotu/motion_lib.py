@@ -14,6 +14,7 @@
 
 import os
 import time
+from collections import OrderedDict
 
 import yaml
 from isaacgym.torch_utils import *
@@ -29,14 +30,12 @@ print("MOVING MOTION DATA TO GPU, USING CACHE:", USE_CACHE)
 if not USE_CACHE:
     old_numpy = torch.Tensor.numpy
 
-
     class Patch:
         def numpy(self):
             if self.is_cuda:
                 return self.to("cpu").numpy()
             else:
                 return old_numpy(self)
-
 
     torch.Tensor.numpy = Patch.numpy
 
@@ -79,7 +78,7 @@ class DeviceCache:
 
 
 class MotionLib:
-    def __init__(self, motion_file, dof_body_ids, dof_offsets, key_body_ids, device, humanoid_type):
+    def __init__(self, motion_file, asset_infos, key_body_names, device, humanoid_type, mf_humanoid_type):
         """
         Motion library for the IsaacGym humanoid series environments and process the motion data exported from Optitrack
         or Xsens.
@@ -90,34 +89,59 @@ class MotionLib:
         :param key_body_ids: list of key body ids
         :param device: device same as the env/task device
         :param humanoid_type: the type of humanoid, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
+        :param mf_humanoid_type: the type of humanoid in the motion file, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
         """
-        self._dof_body_ids = dof_body_ids
-        self._dof_offsets = dof_offsets
-        self._num_dof = dof_offsets[-1]
-        self._key_body_ids = torch.tensor(key_body_ids, device=device)
+        self.humanoid_asset_infos = asset_infos
+        self.humanoid_type = humanoid_type
+        self.mf_humanoid_type = mf_humanoid_type
+
+        self.humanoid_rb_dict = self.humanoid_asset_infos[self.humanoid_type]["rigid_bodies"]
+        self.humanoid_dof_dict = self.humanoid_asset_infos[self.humanoid_type]["dofs"]
+        self.humanoid_del_rb = self.humanoid_asset_infos[self.humanoid_type]["del_rb"]
+        self.humanoid_rb_dict_a_del = OrderedDict(
+            {k: v for k, v in self.humanoid_rb_dict.items() if k not in self.humanoid_del_rb}
+        )  # no pelvis and no root links, but still keep the id
+        self.mf_humanoid_rb_dict = self.humanoid_asset_infos[self.mf_humanoid_type]["rigid_bodies"]
+        self.mf_humanoid_dof_dict = self.humanoid_asset_infos[self.mf_humanoid_type]["dofs"]
+        self.mf_humanoid_del_rb = self.humanoid_asset_infos[self.mf_humanoid_type]["del_rb"]
+        self.mf_humanoid_rb_dict_a_del = OrderedDict(
+            {k: v for k, v in self.mf_humanoid_rb_dict.items() if k not in self.mf_humanoid_del_rb}
+        )
+        self.get_skeleton_rb_index()
+        self.get_skeleton_dof_index()
+
+        # no pelvis and no root links, start from 1
+        self._mf_dof_body_ids = [v for k, v in self.mf_humanoid_rb_dict_a_del.items()]
+        self._mf_dof_offsets = self.humanoid_asset_infos[self.mf_humanoid_type]["dof_offsets"]
+        self._mf_num_dof = self._mf_dof_offsets[-1]
         self._device = device
+        self._key_body_ids = self._get_key_body_ids(key_body_names, self.humanoid_rb_dict)
 
         self._object_poses = torch.zeros((), device=device)
 
         self._load_motions(motion_file)
 
-        motions = self._motions
+        self.mf_gts = torch.cat([m.global_translation for m in self._motions], dim=0).float()
+        self.mf_grs = torch.cat([m.global_rotation for m in self._motions], dim=0).float()
+        self.mf_lrs = torch.cat([m.local_rotation for m in self._motions], dim=0).float()
+        self.mf_dvs = torch.cat([m.dof_vels for m in self._motions], dim=0).float()
+
+        if self.mf_humanoid_type != self.humanoid_type:
+            self.transfer_motion_to_humanoid_type()
 
         self.humanoid_height_offsets = []
-        for motion in motions:
+        for motion in self._motions:
             tar_global_pos = motion.global_translation
             min_h = torch.min(tar_global_pos[..., 2])
             motion.global_translation[..., 2] -= min_h
             self.humanoid_height_offsets.append(min_h)
 
-        self.gts = torch.cat([m.global_translation for m in motions], dim=0).float()
-        self.grs = torch.cat([m.global_rotation for m in motions], dim=0).float()
-        self.lrs = torch.cat([m.local_rotation for m in motions], dim=0).float()
-        self.grvs = torch.cat([m.global_root_velocity for m in motions], dim=0).float()
-        self.gravs = torch.cat(
-            [m.global_root_angular_velocity for m in motions], dim=0
-        ).float()
-        self.dvs = torch.cat([m.dof_vels for m in motions], dim=0).float()
+        self.gts = torch.cat([m.global_translation for m in self._motions], dim=0).float()
+        self.grs = torch.cat([m.global_rotation for m in self._motions], dim=0).float()
+        self.lrs = torch.cat([m.local_rotation for m in self._motions], dim=0).float()
+        self.grvs = torch.cat([m.global_root_velocity for m in self._motions], dim=0).float()
+        self.gravs = torch.cat([m.global_root_angular_velocity for m in self._motions], dim=0).float()
+        self.dvs = torch.cat([m.dof_vels for m in self._motions], dim=0).float()
 
         lengths = self._motion_num_frames
         lengths_shifted = lengths.roll(1)
@@ -131,7 +155,69 @@ class MotionLib:
         self.init_local_rotation = torch.Tensor(
             np.load(os.path.join(rf.oslab.get_rofunc_path(), "utils/datalab/poselib/local_orientation.npy"))).to(device)
 
-        self.humanoid_type = humanoid_type
+    def _get_key_body_ids(self, key_body_names, rb_dict):
+        key_body_ids = []
+        for key_body_name in key_body_names:
+            if key_body_name in rb_dict.keys():
+                key_body_ids.append(rb_dict[key_body_name])
+            else:
+                raise ValueError("The key_body_name is not in the mf_humanoid_rb_dict")
+        return torch.tensor(key_body_ids, device=self._device, dtype=torch.long)
+
+    def get_skeleton_rb_index(self):
+        self.mfrb2rb_dict = {}  # rigid body id mapping from motion file humanoid model to humanoid model we need
+        for rb_name in self.mf_humanoid_rb_dict.keys():
+            if rb_name in self.humanoid_rb_dict.keys():
+                self.mfrb2rb_dict[self.mf_humanoid_rb_dict[rb_name]] = self.humanoid_rb_dict[rb_name]
+            else:
+                raise ValueError("The rb_name is not in the humanoid_rb_dict")
+        self.rb2mfrb_dict = {v: k for k, v in self.mfrb2rb_dict.items()}
+
+    def get_skeleton_dof_index(self):
+        self.mfdof2dof_dict = {}
+        for dof_name in self.mf_humanoid_dof_dict.keys():
+            if dof_name in self.humanoid_dof_dict.keys():
+                self.mfdof2dof_dict[self.mf_humanoid_dof_dict[dof_name]] = self.humanoid_dof_dict[dof_name]
+            else:
+                raise ValueError("The dof_name is not in the humanoid_dof_dict")
+        self.dof2mfdof_dict = {v: k for k, v in self.mfdof2dof_dict.items()}
+
+    def transfer_motion_to_humanoid_type(self):
+        """
+        Transfer the motion data with mf_humanoid_type to humanoid_type we need
+        """
+        transferred_motions = []
+        for i in range(self.num_motion_files):
+            motion = self._motions[i]
+            num_frames = motion.global_angular_velocity.shape[0]
+
+            old_global_translation = motion.global_translation.clone()
+            old_global_rotation = motion.global_rotation.clone()
+            old_local_rotation = motion.local_rotation.clone()
+            old_dof_vels = motion.dof_vels.clone()
+
+            motion.global_translation = torch.zeros(
+                (num_frames, len(self.humanoid_rb_dict), 3), device=self._device, dtype=torch.float32)
+            motion.global_rotation = torch.zeros(
+                (num_frames, len(self.humanoid_rb_dict), 4), device=self._device, dtype=torch.float32)
+            motion.local_rotation = torch.zeros(
+                (num_frames, len(self.humanoid_rb_dict), 4), device=self._device, dtype=torch.float32)
+            motion.dof_vels = torch.zeros((num_frames, len(self.humanoid_dof_dict)),
+                                          device=self._device, dtype=torch.float32)
+
+            motion.global_rotation[:, -1] = 1
+            motion.local_rotation[:, -1] = 1
+
+            for index, mf_index in self.rb2mfrb_dict.items():
+                motion.global_translation[:, index] = old_global_translation[:, mf_index]
+                motion.global_rotation[:, index] = old_global_rotation[:, mf_index]
+                motion.local_rotation[:, index] = old_local_rotation[:, mf_index]
+
+            for index, mf_index in self.dof2mfdof_dict.items():
+                motion.dof_vels[:, index] = old_dof_vels[:, mf_index]
+
+            transferred_motions.append(motion)
+        self._motions = transferred_motions
 
     def num_motions(self):
         return len(self._motions)
@@ -191,9 +277,9 @@ class MotionLib:
         Returns:
 
         """
-        n = len(motion_ids)
-        num_bodies = self._get_num_bodies()
-        num_key_bodies = self._key_body_ids.shape[0]
+        # n = len(motion_ids)
+        # num_bodies = self._get_num_bodies()
+        # num_key_bodies = self._mf_key_body_ids.shape[0]
 
         motion_len = self._motion_lengths[motion_ids]
         num_frames = self._motion_num_frames[motion_ids]
@@ -212,8 +298,8 @@ class MotionLib:
         root_rot0 = self.grs[f0l, 0]
         root_rot1 = self.grs[f1l, 0]
 
-        local_rot0 = self.lrs[f0l]
-        local_rot1 = self.lrs[f1l]
+        mf_local_rot0 = self.mf_lrs[f0l]
+        mf_local_rot1 = self.mf_lrs[f1l]
 
         root_vel = self.grvs[f0l]
 
@@ -227,8 +313,8 @@ class MotionLib:
         vals = [
             root_pos0,
             root_pos1,
-            local_rot0,
-            local_rot1,
+            mf_local_rot0,
+            mf_local_rot1,
             root_vel,
             root_ang_vel,
             key_pos0,
@@ -246,10 +332,10 @@ class MotionLib:
         blend_exp = blend.unsqueeze(-1)
         key_pos = (1.0 - blend_exp) * key_pos0 + blend_exp * key_pos1
 
-        local_rot = torch_utils.slerp(
-            local_rot0, local_rot1, torch.unsqueeze(blend, axis=-1)
+        mf_local_rot = torch_utils.slerp(
+            mf_local_rot0, mf_local_rot1, torch.unsqueeze(blend, axis=-1)
         )
-        dof_pos = self._local_rotation_to_dof(local_rot)
+        dof_pos = self._local_rotation_to_dof(mf_local_rot)
 
         return root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos, f0l, f1l
 
@@ -265,10 +351,10 @@ class MotionLib:
         total_len = 0.0
 
         motion_files, motion_weights = self._fetch_motion_files(motion_file)
-        num_motion_files = len(motion_files)
+        self.num_motion_files = len(motion_files)
         import tqdm
 
-        with tqdm.trange(num_motion_files, ncols=100, colour="green") as t_bar:
+        with tqdm.trange(self.num_motion_files, ncols=100, colour="green") as t_bar:
             for f in t_bar:
                 curr_file = motion_files[f]
                 t_bar.set_postfix_str("Loading: {:s}".format(curr_file.split("/")[-1]))
@@ -280,7 +366,7 @@ class MotionLib:
                 num_frames = curr_motion.tensor.shape[0]
                 curr_len = 1.0 / motion_fps * (num_frames - 1)
 
-                self._motion_fps.append(motion_fps)
+                self._motion_fps.append(float(motion_fps))
                 self._motion_dt.append(curr_dt)
                 self._motion_num_frames.append(num_frames)
 
@@ -402,12 +488,12 @@ class MotionLib:
         return dof_vels
 
     def _local_rotation_to_dof(self, local_rot):
-        body_ids = self._dof_body_ids
-        dof_offsets = self._dof_offsets
+        body_ids = self._mf_dof_body_ids
+        dof_offsets = self._mf_dof_offsets
 
         n = local_rot.shape[0]
         dof_pos = torch.zeros(
-            (n, self._num_dof), dtype=torch.float, device=self._device
+            (n, self._mf_num_dof), dtype=torch.float, device=self._device
         )
 
         for j in range(len(body_ids)):
@@ -415,21 +501,22 @@ class MotionLib:
             joint_offset = dof_offsets[j]
             joint_size = dof_offsets[j + 1] - joint_offset
 
-            if self.humanoid_type == "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml":
+            right_hand_id = self.mf_humanoid_rb_dict["right_hand"]
+            left_hand_id = self.mf_humanoid_rb_dict["left_hand"]
+
+            if self.mf_humanoid_type == "hotu_humanoid_w_qbhand_no_virtual":
                 right_hand_id = 5
                 right_hand_ori = [0, 1, 0, 0]
                 left_hand_id = 23
                 left_hand_ori = [1, 0, 0, 0]
                 right_left_ids_except_thumb = [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]
                 right_left_thumb_knuckle_ids = [6, 24]
-            elif self.humanoid_type == "mjcf/hotu_humanoid_w_qbhand_full.xml":
-                right_hand_id = 5
+            elif self.mf_humanoid_type == "hotu_humanoid_w_qbhand_full":
                 right_hand_ori = [0, 1, 0, 0]
-                left_hand_id = 41
                 left_hand_ori = [1, 0, 0, 0]
                 right_left_ids_except_thumb = [*[i for i in range(11, 39)], *[i for i in range(47, 75)]]
                 right_left_thumb_knuckle_ids = [6, 42]
-            elif self.humanoid_type == "mjcf/UnitreeH1/h1_w_qbhand.xml":
+            elif self.mf_humanoid_type == "h1_w_qbhand":
                 right_hand_id = 55
                 right_hand_ori = [0, 0, 0, 1]
                 left_hand_id = 16
@@ -449,18 +536,80 @@ class MotionLib:
                 right_hip_roll_id = 7
                 right_hip_yaw_id = 6
                 torso_id = 11
+            elif self.mf_humanoid_type == "curi_w_softhand_isaacgym":
+                right_hand_id = 54
+                right_hand_ori = [0, 0, 0, 1]
+                left_hand_id = 14
+                left_hand_ori = [0, 0, 0, 1]
+                right_left_ids_except_thumb = [*[i for i in range(20, 48)], *[i for i in range(60, 88)]]
+                right_left_thumb_knuckle_ids = [15, 55]
+
+                torso_id = 5
+                panda_left_link1_id = 8
+                panda_left_link2_id = 9
+                panda_left_link3_id = 10
+                panda_left_link4_id = 11
+                panda_left_link5_id = 12
+                panda_left_link6_id = 13
+                panda_left_link7_id = 14
+                panda_right_link1_id = 48
+                panda_right_link2_id = 49
+                panda_right_link3_id = 50
+                panda_right_link4_id = 51
+                panda_right_link5_id = 52
+                panda_right_link6_id = 53
+                panda_right_link7_id = 54
+            elif self.mf_humanoid_type == "walker":
+                right_left_ids_except_thumb = [*[i for i in range(9, 19)], *[i for i in range(26, 36)]]
+                # right_left_ids = [*[i for i in range(9, 19)], *[i for i in range(26, 36)]]
+                right_left_thumb_knuckle_ids = []
+
+                head_l1_id = 36
+                head_l2_id = 37
+
+                right_limb_l1_id = 2
+                right_limb_l2_id = 3
+                right_limb_l3_id = 4
+                right_limb_l4_id = 5
+                right_limb_l5_id = 6
+                right_limb_l6_id = 7
+                right_limb_l7_id = 8
+                left_limb_l1_id = 19
+                left_limb_l2_id = 20
+                left_limb_l3_id = 21
+                left_limb_l4_id = 22
+                left_limb_l5_id = 23
+                left_limb_l6_id = 24
+                left_limb_l7_id = 25
+
+                right_leg_l1_id = 38
+                right_leg_l2_id = 39
+                right_leg_l3_id = 40
+                right_leg_l4_id = 41
+                right_leg_l5_id = 42
+                right_leg_l6_id = 43
+                left_leg_l1_id = 44
+                left_leg_l2_id = 45
+                left_leg_l3_id = 46
+                left_leg_l4_id = 47
+                left_leg_l5_id = 48
+                left_leg_l6_id = 49
+
+                torso_id = 1
             else:
                 raise ValueError("Unsupported humanoid type")
+                # rf.logger.beauty_print("Unsupported humanoid type", "warning")
+                # pass
 
             if joint_size == 3:
                 joint_q = local_rot[:, body_id]
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
-                if body_id is right_hand_id:  # Right hand
-                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2(right_hand_ori, joint_q)
-                    joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
-                elif body_id is left_hand_id:  # Left hand
-                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2(left_hand_ori, joint_q)
-                    joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
+                # if body_id is right_hand_id:  # Right hand
+                #     new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2(right_hand_ori, joint_q)
+                #     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
+                # elif body_id is left_hand_id:  # Left hand
+                #     new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2(left_hand_ori, joint_q)
+                #     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
                 dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
             elif joint_size == 1:
                 if body_id in right_left_ids_except_thumb:  # Right and left fingers except thumbs
@@ -471,53 +620,184 @@ class MotionLib:
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
-                elif body_id == left_shoulder_roll_id:  # Roll joint
-                    joint_q = local_rot[:, left_shoulder_pitch_id]
-                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0.707, 0, 0, 0.707], joint_q)
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(new_joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
-                elif body_id == left_shoulder_yaw_id:  # Yaw joint
-                    joint_q = local_rot[:, left_shoulder_pitch_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
-                elif body_id == right_shoulder_roll_id:  # Roll joint
-                    joint_q = local_rot[:, right_shoulder_pitch_id]
-                    new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([-0.707, 0, 0, 0.707], joint_q)
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(new_joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
-                elif body_id == right_shoulder_yaw_id:  # Yaw joint
-                    joint_q = local_rot[:, right_shoulder_pitch_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
-                elif body_id == torso_id:  # Yaw joint
-                    joint_q = local_rot[:, body_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
-                elif body_id == left_hip_roll_id:  # Roll joint
-                    joint_q = local_rot[:, left_hip_yaw_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
-                elif body_id == left_hip_pitch_id:  # Pitch joint
-                    joint_q = local_rot[:, left_hip_yaw_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
-                elif body_id == left_hip_yaw_id:  # Yaw joint
-                    joint_q = local_rot[:, left_hip_yaw_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
-                elif body_id == right_hip_roll_id:  # Roll joint
-                    joint_q = local_rot[:, right_hip_yaw_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
-                elif body_id == right_hip_pitch_id:  # Pitch joint
-                    joint_q = local_rot[:, right_hip_yaw_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
-                elif body_id == right_hip_yaw_id:  # Yaw joint
-                    joint_q = local_rot[:, right_hip_yaw_id]
-                    joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
-                    joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
-
+                # elif self.humanoid_type == "mjcf/UnitreeH1/h1_w_qbhand.xml":
+                #     if body_id == left_shoulder_pitch_id:  # Pitch joint
+                #         joint_q = local_rot[:, left_shoulder_pitch_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == left_shoulder_roll_id:  # Roll joint
+                #         joint_q = local_rot[:, left_shoulder_pitch_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0.707, 0, 0, 0.707], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along x axis
+                #     elif body_id == left_shoulder_yaw_id:  # Yaw joint
+                #         joint_q = local_rot[:, left_shoulder_pitch_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along z axis
+                #     elif body_id == right_shoulder_roll_id:  # Roll joint
+                #         joint_q = local_rot[:, right_shoulder_pitch_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([-0.707, 0, 0, 0.707], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
+                #     elif body_id == right_shoulder_yaw_id:  # Yaw joint
+                #         joint_q = local_rot[:, right_shoulder_pitch_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                #     elif body_id == torso_id:  # Yaw joint
+                #         joint_q = local_rot[:, body_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                #     elif body_id == left_hip_roll_id:  # Roll joint
+                #         joint_q = local_rot[:, left_hip_yaw_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
+                #     elif body_id == left_hip_pitch_id:  # Pitch joint
+                #         joint_q = local_rot[:, left_hip_yaw_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
+                #     elif body_id == left_hip_yaw_id:  # Yaw joint
+                #         joint_q = local_rot[:, left_hip_yaw_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                #     elif body_id == right_hip_roll_id:  # Roll joint
+                #         joint_q = local_rot[:, right_hip_yaw_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
+                #     elif body_id == right_hip_pitch_id:  # Pitch joint
+                #         joint_q = local_rot[:, right_hip_yaw_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
+                #     elif body_id == right_hip_yaw_id:  # Yaw joint
+                #         joint_q = local_rot[:, right_hip_yaw_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                #     else:
+                #         joint_q = local_rot[:, body_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
+                #
+                # elif self.humanoid_type == "mjcf/curi/curi_w_softhand_isaacgym.xml":
+                #     if body_id == panda_left_link1_id:
+                #         joint_q = local_rot[:, panda_left_link1_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, 0, 0.382, 0.92], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == panda_left_link2_id:
+                #         joint_q = local_rot[:, panda_left_link1_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, 0, 0.382, 0.92], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
+                #     # elif body_id == panda_left_link3_id:
+                #     #     joint_q = local_rot[:, panda_left_link1_id]
+                #     #     joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, 0, 0.382, 0.92], joint_q)
+                #     #     # joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0.707107, 0, 0, 0.707107], joint_q)
+                #     #     # joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([-0.436865, 0.49775, 0.054428, 0.747283], joint_q)
+                #     #     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #     #     joint_theta = (joint_theta * joint_axis[..., 0])
+                #     elif body_id == panda_left_link4_id:
+                #         joint_q = local_rot[:, panda_left_link4_id]
+                #         # joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0.707107, 0, 0, 0.707107], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
+                #     elif body_id == panda_left_link5_id:
+                #         joint_q = local_rot[:, panda_left_link7_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, -0.707107, 0, 0.707107], joint_q)
+                #         # joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([-0.707107, 0, 0, 0.707107], joint_q)
+                #         # joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([-0.707107, 0, 0, 0.707107], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 0])
+                #     elif body_id == panda_left_link6_id:
+                #         joint_q = local_rot[:, panda_left_link7_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, -0.707107, 0, 0.707107], joint_q)
+                #
+                #         # joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0.707107, 0, 0, 0.707107], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
+                #     elif body_id == panda_left_link7_id:
+                #         joint_q = local_rot[:, panda_left_link7_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0, -0.707107, 0, 0.707107], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == torso_id:  # Yaw joint
+                #         joint_q = local_rot[:, body_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
+                #     else:
+                #         joint_q = local_rot[:, body_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
+                #
+                # elif self.humanoid_type == "mjcf/walker/walker.xml":
+                #     if body_id == head_l1_id:
+                #         joint_q = local_rot[:, head_l1_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == head_l2_id:
+                #         joint_q = local_rot[:, head_l2_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
+                #     elif body_id == right_limb_l1_id:
+                #         joint_q = local_rot[:, right_limb_l1_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == right_limb_l2_id:
+                #         joint_q = local_rot[:, right_limb_l1_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0,-0.707,  0, 0.707], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
+                #     elif body_id == right_limb_l3_id:
+                #         joint_q = local_rot[:, right_limb_l1_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 0])
+                #     elif body_id == right_limb_l4_id:
+                #         joint_q = local_rot[:, right_limb_l4_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == right_limb_l5_id:
+                #         joint_q = local_rot[:, right_limb_l7_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = -(joint_theta * joint_axis[..., 0])
+                #     elif body_id == right_limb_l6_id:
+                #         joint_q = local_rot[:, right_limb_l7_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
+                #     elif body_id == right_limb_l7_id:
+                #         joint_q = local_rot[:, right_limb_l7_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == left_limb_l1_id:
+                #         joint_q = local_rot[:, left_limb_l1_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == left_limb_l2_id:
+                #         joint_q = local_rot[:, left_limb_l1_id]
+                #         joint_q = rf.robolab.quaternion_multiply_tensor_multirow2([0,-0.707,  0, 0.707], joint_q)
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
+                #     elif body_id == left_limb_l3_id:
+                #         joint_q = local_rot[:, left_limb_l1_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 0])
+                #     elif body_id == left_limb_l4_id:
+                #         joint_q = local_rot[:, left_limb_l4_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     elif body_id == left_limb_l5_id:
+                #         joint_q = local_rot[:, left_limb_l7_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 0])
+                #     elif body_id == left_limb_l6_id:
+                #         joint_q = local_rot[:, left_limb_l7_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
+                #     elif body_id == left_limb_l7_id:
+                #         joint_q = local_rot[:, left_limb_l7_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 2])
+                #     else:
+                #         joint_q = local_rot[:, body_id]
+                #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
+                #         joint_theta = (joint_theta * joint_axis[..., 1])
                 else:
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
@@ -529,13 +809,19 @@ class MotionLib:
                 print("Unsupported joint type")
                 assert False
 
+        if self.mf_humanoid_type != self.humanoid_type:
+            mf_dof_pos = dof_pos
+            dof_pos = torch.zeros((n, len(self.humanoid_dof_dict)), dtype=torch.float, device=self._device)
+            for humanoid_index, mf_index in self.dof2mfdof_dict.items():
+                dof_pos[:, humanoid_index] = mf_dof_pos[:, mf_index]
+
         return dof_pos
 
     def _local_rotation_to_dof_vel(self, local_rot0, local_rot1, dt):
-        body_ids = self._dof_body_ids
-        dof_offsets = self._dof_offsets
+        body_ids = self._mf_dof_body_ids
+        dof_offsets = self._mf_dof_offsets
 
-        dof_vel = torch.zeros([self._num_dof], device=self._device)
+        dof_vel = torch.zeros([self._mf_num_dof], device=self._device)
 
         diff_quat_data = quat_mul_norm(quat_inverse(local_rot0), local_rot1)
         diff_angle, diff_axis = quat_angle_axis(diff_quat_data)
