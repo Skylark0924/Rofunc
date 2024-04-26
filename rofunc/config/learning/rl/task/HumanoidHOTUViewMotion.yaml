@@ -27,10 +27,11 @@ env:
 
   # animation files to learn from
   motion_file:
+  motion_file_asset: "mjcf/hotu_humanoid.xml"
   object_motion_file:
 
   asset:
-    assetFileName: "mjcf/hotu_humanoid_w_qbhand_full.xml"
+    assetFileName: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
 
   object_asset:
     assetName:         # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
@@ -65,3 +66,27 @@ sim:
 
 task:
   randomize: False
+
+  # ========= HOTU-2 parameters ==========
+  wb_decompose: False  # if True, decompose the whole body into parts
+  wb_decompose_parameter:
+    parts: ["body"]
+#    body:
+#      rb_ids: [ 0, 1, 2, 3, 4, 20, 21, 22, 38, 39, 40, 41, 42, 43 ]  # length: 14, except pelvis
+#      rb_names: [ "torso", "head", "right_upper_arm", "right_lower_arm", "right_hand", "left_upper_arm", "left_lower_arm", "left_hand", "right_thigh", "right_shin", "right_foot", "left_thigh", "left_shin", "left_foot" ]
+#      dof_ids: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 28, 29, 30, 31, 32, 33, 34, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63 ] # length: 34
+#    hands:
+#      rb_ids: [ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37 ]  # length: 30
+#      rb_names: [ "right_qbhand_thumb_knuckle_link", "right_qbhand_thumb_proximal_link", "right_qbhand_thumb_distal_link", "right_qbhand_index_proximal_link", "right_qbhand_index_middle_link", "right_qbhand_index_distal_link", "right_qbhand_middle_proximal_link", "right_qbhand_middle_middle_link", "right_qbhand_middle_distal_link", "right_qbhand_ring_proximal_link", "right_qbhand_ring_middle_link", "right_qbhand_ring_distal_link", "right_qbhand_little_proximal_link", "right_qbhand_little_middle_link", "right_qbhand_little_distal_link", "left_qbhand_thumb_knuckle_link", "left_qbhand_thumb_proximal_link", "left_qbhand_thumb_distal_link", "left_qbhand_index_proximal_link", "left_qbhand_index_middle_link", "left_qbhand_index_distal_link", "left_qbhand_middle_proximal_link", "left_qbhand_middle_middle_link", "left_qbhand_middle_distal_link", "left_qbhand_ring_proximal_link", "left_qbhand_ring_middle_link", "left_qbhand_ring_distal_link", "left_qbhand_little_proximal_link", "left_qbhand_little_middle_link", "left_qbhand_little_distal_link" ]
+#      dof_ids: [ 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49 ] # length: 30
+#    body:
+#      rb_ids: [ 0, 1, 2, 3, 4, 38, 39, 40, 74, 75, 76, 77, 78, 79 ]  # length: 14, except pelvis
+#      rb_names: [ "torso", "head", "right_upper_arm", "right_lower_arm", "right_hand", "left_upper_arm", "left_lower_arm", "left_hand", "right_thigh", "right_shin", "right_foot", "left_thigh", "left_shin", "left_foot" ]
+#      dof_ids: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 46, 47, 48, 49, 50, 51, 52, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 ] # length: 34
+#    hands:
+#      rb_ids: [ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73 ]  # length: 60
+#      rb_names: [ "right_qbhand_thumb_knuckle_link", "right_qbhand_thumb_proximal_link", "right_qbhand_thumb_distal_link", "right_qbhand_index_proximal_link", "right_qbhand_index_middle_link", "right_qbhand_index_distal_link", "right_qbhand_middle_proximal_link", "right_qbhand_middle_middle_link", "right_qbhand_middle_distal_link", "right_qbhand_ring_proximal_link", "right_qbhand_ring_middle_link", "right_qbhand_ring_distal_link", "right_qbhand_little_proximal_link", "right_qbhand_little_middle_link", "right_qbhand_little_distal_link", "left_qbhand_thumb_knuckle_link", "left_qbhand_thumb_proximal_link", "left_qbhand_thumb_distal_link", "left_qbhand_index_proximal_link", "left_qbhand_index_middle_link", "left_qbhand_index_distal_link", "left_qbhand_middle_proximal_link", "left_qbhand_middle_middle_link", "left_qbhand_middle_distal_link", "left_qbhand_ring_proximal_link", "left_qbhand_ring_middle_link", "left_qbhand_ring_distal_link", "left_qbhand_little_proximal_link", "left_qbhand_little_middle_link", "left_qbhand_little_distal_link" ]
+#      dof_ids: [ 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85 ] # length: 60
+
+
+  use_synergy: True  # if True, use the synergy for the hand
