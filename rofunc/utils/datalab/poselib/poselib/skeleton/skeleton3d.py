@@ -233,8 +233,11 @@ class SkeletonTree(Serializable):
             local_orientation.append(quat)
             curr_index = node_index
             node_index += 1
-            for next_node in xml_node.findall("body"):
-                node_index = _add_xml_node(next_node, curr_index, node_index)
+            try:
+                for next_node in xml_node.findall("body"):
+                    node_index = _add_xml_node(next_node, curr_index, node_index)
+            except:
+                pass
             return node_index
 
         _add_xml_node(xml_body_root, -1, 0)
@@ -893,9 +896,12 @@ class SkeletonState(Serializable):
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
                 elif "left_qbhand_root_link" in x:
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                elif x in ["left_hip_roll_link", "left_hip_pitch_link", "right_hip_roll_link", "right_hip_pitch_link", "left_shoulder_roll_link", "right_shoulder_roll_link", "left_shoulder_yaw_link", "right_shoulder_yaw_link"]:
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
                 else:
                     print(x)
                     raise ValueError("Joint not found in source skeleton")
+                    # pass
 
         return SkeletonState.from_rotation_and_root_translation(
             skeleton_tree=target_skeleton_tree,

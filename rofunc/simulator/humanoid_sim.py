@@ -13,13 +13,30 @@
 # limitations under the License.
 
 import numpy as np
+import torch
 
+from rofunc.config.utils import get_sim_config
 from rofunc.simulator.base_sim import RobotSim
 
 
 class HumanoidSim(RobotSim):
     def __init__(self, args):
         super().__init__(args)
+
+        self.num_bodies = self.get_num_bodies(self.robot_asset)
+        # self.set_char_color(self.robot_handles, self.num_bodies, [0.54, 0.85, 0.2])
+        self.humanoid_asset_infos = get_sim_config(sim_name="Humanoid_info")["Model_type"]
+        self.humanoid_info = self._get_humanoid_info(self.robot_asset_file)
+        self.parts = ["hands", "upper_body", "lower_body"]
+        self.num_parts = len(self.parts)
+        self.whole_rb_dict = self.humanoid_info["rigid_bodies"]
+        self.wb_decompose_param_rb_ids = [
+                [self.whole_rb_dict[rb_name] for rb_name in self.humanoid_info["parts"][part]["rigid_bodies"]]
+            for part in self.parts]
+        self.set_colors_for_parts(self.robot_handles, self.wb_decompose_param_rb_ids)
+
+    def _get_humanoid_info(self, asset_file):
+        return self.humanoid_asset_infos[asset_file.split("/")[-1].split(".")[0]]
 
     def setup_robot_dof_prop(self):
         from isaacgym import gymapi
@@ -121,4 +138,5 @@ class HumanoidSim(RobotSim):
     def run_traj(self, traj, attracted_rigid_bodies=None, update_freq=0.001, verbose=True, **kwargs):
         if attracted_rigid_bodies is None:
             attracted_rigid_bodies = ["left_hand", "right_hand"]
-        self.run_traj_multi_rigid_bodies(traj, attracted_rigid_bodies, update_freq=update_freq, verbose=verbose, **kwargs)
+        self.run_traj_multi_rigid_bodies(traj, attracted_rigid_bodies, update_freq=update_freq, verbose=verbose,
+                                         **kwargs)

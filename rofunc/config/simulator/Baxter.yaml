@@ -7,6 +7,13 @@ sim_device: 'cuda:0'
 env:
   numEnvs: 1
   envSpacing: 3.
+  # If the collision filter for the actor is set to -1,
+  # the actor will use filters loaded in by the asset loaders.
+  # This is important for MJCF files that specify non-zero contypes/conaffinities
+  # or have other contacts specified. Setting the collision filter to 0 will
+  # enable collisions between all shapes in the actor. Setting the collision filter
+  # to anything > 0 will disable all self collisions.
+  collision_mode: 0
 
   asset:
     robot_name: "Baxter"

@@ -20,10 +20,10 @@ from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonSta
 from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skeleton_state
 
 
-def get_hotu_tpose(xml_path, save_path, verbose=True):
+def get_tpose(xml_path, save_path, verbose=True):
     skeleton = SkeletonTree.from_mjcf(xml_path)
-    # import numpy as np
-    # np.save("local_orientation.npy", skeleton.local_orientation)
+    import numpy as np
+    np.save("local_orientation.npy", skeleton.local_orientation)
     # generate zero rotation pose
     zero_pose = SkeletonState.zero_pose_wo_qbhand(skeleton)
     # plot_skeleton_state(zero_pose, verbose=False)
@@ -79,4 +79,4 @@ if __name__ == '__main__':
 
     xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/hotu_humanoid_w_qbhand_full.xml")
     save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy")
-    get_hotu_tpose(xml_path, save_path)
+    get_tpose(xml_path, save_path)

@@ -20,7 +20,7 @@ from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonSta
 from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skeleton_state
 
 
-def get_hotu_tpose(xml_path, save_path, verbose=True):
+def get_tpose(xml_path, save_path, verbose=True):
     skeleton = SkeletonTree.from_mjcf(xml_path)
     # import numpy as np
     # np.save("local_orientation.npy", skeleton.local_orientation)
@@ -30,23 +30,23 @@ def get_hotu_tpose(xml_path, save_path, verbose=True):
 
     # adjust pose into a T Pose
     local_rotation = zero_pose.local_rotation
-    local_rotation[skeleton.index("left_upper_arm")] = quat_mul(
+    local_rotation[skeleton.index("left_shoulder_roll_link")] = quat_mul(
         quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([1.0, 0.0, 0.0]), degree=True),
-        local_rotation[skeleton.index("left_upper_arm")]
+        local_rotation[skeleton.index("left_shoulder_roll_link")]
     )
-    local_rotation[skeleton.index("right_upper_arm")] = quat_mul(
+    local_rotation[skeleton.index("right_shoulder_roll_link")] = quat_mul(
         quat_from_angle_axis(angle=torch.tensor([-90.0]), axis=torch.tensor([1.0, 0.0, 0.0]), degree=True),
-        local_rotation[skeleton.index("right_upper_arm")]
+        local_rotation[skeleton.index("right_shoulder_roll_link")]
     )
-    # local_rotation[skeleton.index("right_hand")] = quat_mul(
-    #     quat_from_angle_axis(angle=torch.tensor([180.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
-    #     local_rotation[skeleton.index("right_hand")]
-    # )
-    # local_rotation[skeleton.index("left_hand")] = quat_mul(
-    #     quat_from_angle_axis(angle=torch.tensor([180.0]), axis=torch.tensor([1.0, 0.0, 0.0]), degree=True),
-    #     local_rotation[skeleton.index("left_hand")]
-    # )
 
+    local_rotation[skeleton.index("left_elbow_link")] = quat_mul(
+        quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
+        local_rotation[skeleton.index("left_elbow_link")]
+    )
+    local_rotation[skeleton.index("right_elbow_link")] = quat_mul(
+        quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
+        local_rotation[skeleton.index("right_elbow_link")]
+    )
     # finger_tune_list = ["right_qbhand_thumb_knuckle_link", "right_qbhand_index_knuckle_link",
     #                     "right_qbhand_middle_knuckle_link", "right_qbhand_ring_knuckle_link",
     #                     "right_qbhand_little_knuckle_link"]
@@ -74,9 +74,6 @@ def get_hotu_tpose(xml_path, save_path, verbose=True):
 
 if __name__ == '__main__':
     rofunc_path = rf.oslab.get_rofunc_path()
-    # xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/hotu_humanoid_w_qbhand_no_virtual.xml")
-    # save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy")
-
-    xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/hotu_humanoid_w_qbhand_full.xml")
-    save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy")
-    get_hotu_tpose(xml_path, save_path)
+    xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/UnitreeH1/h1_w_qbhand.xml")
+    save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_h1_w_qbhand_tpose.npy")
+    get_tpose(xml_path, save_path)

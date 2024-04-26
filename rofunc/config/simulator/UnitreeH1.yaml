@@ -1,28 +1,35 @@
-name: Sawyer
+name: UnitreeH1
 
 physics_engine: 'physx'  #  'physx' or 'flex'
 graphics_device_id: 0
 sim_device: 'cuda:0'
 
+cam_pos: [-3.0, 0.0, 2.0]
+cam_target: [0.0, 0.0, 1.0]
+
 env:
   numEnvs: 1
   envSpacing: 3.
+  controller_type: "ik" # "ik" or "osc"
   # If the collision filter for the actor is set to -1,
   # the actor will use filters loaded in by the asset loaders.
   # This is important for MJCF files that specify non-zero contypes/conaffinities
   # or have other contacts specified. Setting the collision filter to 0 will
   # enable collisions between all shapes in the actor. Setting the collision filter
   # to anything > 0 will disable all self collisions.
-  collision_mode: 0
+  collision_mode: -1
 
   asset:
-    robot_name: "Sawyer"
+    robot_name: "UnitreeH1"
     assetRoot:
-    assetFile: "urdf/sawyer/robot_torque.xml"
-    init_pose: [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-    fix_base_link: False
-    flip_visual_attachments: True
+#    assetFile: "mjcf/UnitreeH1/h1.xml"
+    assetFile: "mjcf/UnitreeH1/h1_w_qbhand.xml"
+    init_pose: [0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0]
+    fix_base_link: True
+    disable_gravity: False
+    flip_visual_attachments: False
     armature: 0.01
+    slices_per_cylinder: 10
 
   object_asset:
 

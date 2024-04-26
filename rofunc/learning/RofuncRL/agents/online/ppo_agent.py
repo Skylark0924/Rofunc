@@ -117,13 +117,11 @@ class PPOAgent(BaseAgent):
         self._state_preprocessor = RunningStandardScaler
         self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
                                                                         {"size": observation_space, "device": device})
-        # self._state_preprocessor = Normalization
-        # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
-        #                                                                 {"shape": observation_space, "device": device})
-
         self._value_preprocessor = RunningStandardScaler
         self._value_preprocessor_kwargs = self.cfg.get("Agent", {}).get("value_preprocessor_kwargs",
                                                                         {"size": 1, "device": device})
+        # self._state_preprocessor = RunningMeanStd(observation_space.shape).to(self.device)
+        # self._value_preprocessor = RunningMeanStd(1).to(self.device)
 
         '''Misc variables'''
         self._current_log_prob = None
