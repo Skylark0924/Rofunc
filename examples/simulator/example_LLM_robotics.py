@@ -17,7 +17,7 @@ import rofunc as rf
 # # target_pose = traj_l[10]
 # traj_l = traj_l[::20]
 
-args = rf.config.get_sim_config("CURI")
+args = rf.config.get_sim_config("CURI_LLM")
 CURIsim = rf.sim.CURISim(args)
 # CURIsim.run_hand_reach_target_pose(target_pose=[traj_l],
 #                                    attracted_hand=["panda_left_hand"])
