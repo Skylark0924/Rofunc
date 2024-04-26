@@ -123,7 +123,7 @@ class RobotSim:
         self.viewer = self.PlaygroundSim.viewer
 
         self.robot_controller = self.args.env.controller_type
-        self.self_collision_flag = self.args.env.selfCollisionFlag
+        self.collision_mode = self.args.env.collision_mode
 
         self.create_env()
         self.setup_robot_dof_prop()
@@ -138,8 +138,9 @@ class RobotSim:
         from isaacgym import gymapi
 
         # Load robot asset
-        asset_root = self.args.env.asset.assetRoot or os.path.join(rf.oslab.get_rofunc_path(), "simulator/assets")
-        asset_file = self.args.env.asset.assetFile
+        self.robot_asset_root = self.args.env.asset.assetRoot or os.path.join(rf.oslab.get_rofunc_path(),
+                                                                              "simulator/assets")
+        self.robot_asset_file = self.args.env.asset.assetFile
 
         asset_options = gymapi.AssetOptions()
         asset_options.fix_base_link = self.args.env.asset.fix_base_link
@@ -151,8 +152,8 @@ class RobotSim:
         init_pose = self.args.env.asset.init_pose
         self.robot_name = self.args.env.asset.robot_name
 
-        beauty_print("Loading robot asset {} from {}".format(asset_file, asset_root), type="info")
-        self.robot_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
+        beauty_print("Loading robot asset {} from {}".format(self.robot_asset_file, self.robot_asset_root), type="info")
+        self.robot_asset = self.gym.load_asset(self.sim, self.robot_asset_root, self.robot_asset_file, asset_options)
 
         # Set up the env grid
         spacing = self.args.env.envSpacing
@@ -173,14 +174,49 @@ class RobotSim:
             env = self.gym.create_env(self.sim, env_lower, env_upper, num_per_row)
             envs.append(env)
 
-            # add robot, -1 refers to open self-collision detection
+            # add robot
+            # Create actor
+            #     param1 (Env) – Environment Handle.
+            #     param2 (Asset) – Asset Handle
+            #     param3 (isaacgym.gymapi.Transform) – transform transform of where the actor will be initially placed
+            #     param4 (str) – name of the actor
+            #     param5 (int) – collision group that actor will be part of. The actor will not collide with anything
+            #                    outside of the same collisionGroup
+            #     param6 (int) – bitwise filter for elements in the same collisionGroup to mask off collision
+            #     param7 (int) – segmentation ID used in segmentation camera sensors
             robot_handle = self.gym.create_actor(env, self.robot_asset, pose, self.robot_name, i,
-                                                 -1 if self.self_collision_flag else 1)
+                                                 int(self.collision_mode), 0)
             self.gym.enable_actor_dof_force_sensors(env, robot_handle)
             robot_handles.append(robot_handle)
 
         self.envs = envs
         self.robot_handles = robot_handles
+
+    def set_colors_for_parts(self, handles, wb_decompose_param_rb_ids):
+        # colors = [[255 / 255., 165 / 255., 0 / 255.], [0.54, 0.85, 0.2], [0.5, 0.5, 0.5], [0.35, 0.35, 0.35]]
+        colors = np.array([[0.54*255, 0.85*255, 0.2*255], (210, 105, 30), (106, 90, 205), (138, 43, 226), (210, 105, 30), (135, 206, 250), (70, 130, 180), (72, 209, 204), (139, 69, 19), (238, 130, 238),
+                  (221, 160, 221), (218, 112, 214), (188, 143, 143), (119, 136, 153),
+                  (153, 50, 204)]) / 255
+        color_list_used = colors[np.random.randint(0, len(colors), size=len(wb_decompose_param_rb_ids))]
+        for part_i in range(self.num_parts):
+            self.set_char_color(handles, wb_decompose_param_rb_ids[part_i], color_list_used[part_i])
+
+    def set_char_color(self, handles, body_ids, col):
+        """
+        Set the color of the character's body parts
+
+        :param body_ids: list of body ids
+        :param col: color in RGB
+        :return:
+        """
+        from isaacgym import gymapi
+        if isinstance(body_ids, int):
+            body_ids = np.arange(body_ids)
+        for i, env_ptr in enumerate(self.envs):
+            handle = handles[i]
+            for j in body_ids:
+                self.gym.set_rigid_body_color(env_ptr, handle, j, gymapi.MESH_VISUAL,
+                                              gymapi.Vec3(col[0], col[1], col[2]))
 
     def setup_robot_dof_prop(self):
         from isaacgym import gymapi
@@ -198,8 +234,14 @@ class RobotSim:
         robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
 
         robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][:].fill(300.0)
-        robot_dof_props["damping"][:].fill(30.0)
+        # if "stiffness" not in robot_dof_props.dtype.names:
+        #     robot_dof_props["stiffness"][:] = 300
+        #     robot_dof_props["damping"][:] = 30
+        # elif robot_dof_props["stiffness"][0] == 0:
+        #     robot_dof_props["stiffness"][:] = 300
+        #     robot_dof_props["damping"][:] = 30
+        robot_dof_props["stiffness"][:] = 300
+        robot_dof_props["damping"][:] = 30
 
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)
@@ -457,12 +499,11 @@ class RobotSim:
         self.gym.destroy_viewer(self.viewer)
         self.gym.destroy_sim(self.sim)
 
-    def get_num_bodies(self):
+    def get_num_bodies(self, robot_asset):
         from isaacgym import gymapi
 
-        robot_asset = self.gym.load_asset(self.sim, self.asset_root, self.asset_file, gymapi.AssetOptions())
         num_bodies = self.gym.get_asset_rigid_body_count(robot_asset)
-        beauty_print("The number of bodies in the robot asset is {}".format(num_bodies), 2)
+        beauty_print("The number of bodies in the robot asset is {}".format(num_bodies), type="info")
         return num_bodies
 
     def get_actor_rigid_body_info(self, actor_handle):

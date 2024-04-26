@@ -297,7 +297,7 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
 
     if visualize:
         # visualize retargeted motion
-        rf.logger.beauty_print("Plot HOTU skeleton motion", type="module")
+        rf.logger.beauty_print("Plot H1 skeleton motion", type="module")
         plot_skeleton_motion_interactive(target_motion, verbose=False)
 
         # state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, target_motion.rotation[0],
@@ -322,26 +322,28 @@ def npy_from_fbx(fbx_file):
 
     rofunc_path = rf.oslab.get_rofunc_path()
     config = {
-        "target_motion_path": fbx_file.replace('_optitrack.fbx', '_optitrack2hotu.npy'),
+        "target_motion_path": fbx_file.replace('_optitrack.fbx', '_optitrack2h1.npy'),
         "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_optitrack_w_gloves_tpose.npy"),
         # "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
         "target_tpose": os.path.join(rofunc_path, args.target_tpose),
         "joint_mapping": {  # Left: Optitrack, Right: MJCF
             # hotu_humanoid.xml
             "Skeleton_Hips": "pelvis",
-            "Skeleton_LeftUpLeg": "left_thigh",
-            "Skeleton_LeftLeg": "left_shin",
-            "Skeleton_LeftFoot": "left_foot",
-            "Skeleton_RightUpLeg": "right_thigh",
-            "Skeleton_RightLeg": "right_shin",
-            "Skeleton_RightFoot": "right_foot",
-            "Skeleton_Spine1": "torso",
-            "Skeleton_Neck": "head",
-            "Skeleton_LeftArm": "left_upper_arm",
-            "Skeleton_LeftForeArm": "left_lower_arm",
+            "Skeleton_LeftUpLeg": "left_hip_yaw_link",
+            "Skeleton_LeftLeg": "left_knee_link",
+            "Skeleton_LeftFoot": "left_ankle_link",
+            "Skeleton_RightUpLeg": "right_hip_yaw_link",
+            "Skeleton_RightLeg": "right_knee_link",
+            "Skeleton_RightFoot": "right_ankle_link",
+            "Skeleton_Spine1": "torso_link",
+            # "Skeleton_Neck": "head",
+            # "Skeleton_LeftShoulder": "left_shoulder_pitch_link",
+            "Skeleton_LeftArm": "left_shoulder_pitch_link",
+            "Skeleton_LeftForeArm": "left_elbow_link",
             "Skeleton_LeftHand": "left_hand",
-            "Skeleton_RightArm": "right_upper_arm",
-            "Skeleton_RightForeArm": "right_lower_arm",
+            # "Skeleton_RightShoulder": "right_shoulder_pitch_link",
+            "Skeleton_RightArm": "right_shoulder_pitch_link",
+            "Skeleton_RightForeArm": "right_elbow_link",
             "Skeleton_RightHand": "right_hand",
             # extra mapping for hotu_humanoid_w_qbhand.xml
             "Skeleton_LeftHandThumb1": "left_qbhand_thumb_knuckle_link",
@@ -377,7 +379,7 @@ def npy_from_fbx(fbx_file):
         },
         # "rotation": [0.707, 0, 0, 0.707], xyzw
         "rotation": [0.5, 0.5, 0.5, 0.5],
-        "scale": 0.001,
+        "scale": 0.01,
         "root_height_offset": 0.0,
         "trim_frame_beg": 0,
         "trim_frame_end": -1
@@ -385,7 +387,7 @@ def npy_from_fbx(fbx_file):
 
     source_motion = motion_from_fbx(fbx_file, root_joint="Skeleton_Hips", fps=120, visualize=False)
     # config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, source_motion, visualize=False)
+    motion_retargeting(config, source_motion, visualize=True)
 
 
 if __name__ == '__main__':
@@ -394,7 +396,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2")
     parser.add_argument("--fbx_dir", type=str, default=None)
-    parser.add_argument("--fbx_file", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
+    parser.add_argument("--fbx_file", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_01_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
@@ -402,9 +404,9 @@ if __name__ == '__main__':
     #                   3. mjcf/hotu_humanoid.xml
     #                   4. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
     #                   5. mjcf/hotu_humanoid_w_qbhand_full.xml
-    parser.add_argument("--humanoid_asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_full.xml")
+    parser.add_argument("--humanoid_asset", type=str, default="mjcf/UnitreeH1/h1_w_qbhand.xml")
     parser.add_argument("--target_tpose", type=str,
-                        default="utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy")
+                        default="utils/datalab/poselib/data/target_h1_w_qbhand_tpose.npy")
     args = parser.parse_args()
 
     rofunc_path = rf.oslab.get_rofunc_path()
