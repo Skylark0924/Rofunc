@@ -15,6 +15,7 @@
 from typing import List
 
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 from PIL import Image as Im
 from isaacgym.torch_utils import *
@@ -463,6 +464,9 @@ class CURISim(RobotSim):
         self.add_tracking_target_sphere_axes()
         self.add_head_embedded_camera()
         fig = plt.figure("Visual observation", figsize=(8, 8))
+        # use rcParams to control the plot window not on the top
+        if matplotlib.rcParams['figure.raise_window']:
+            matplotlib.rcParams['figure.raise_window'] = False
 
         self.gym.prepare_sim(self.sim)
         self.monitor_rigid_body_states()
