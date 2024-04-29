@@ -15,14 +15,14 @@ from rofunc.learning.RofuncRL.trainers import Trainers
 
 def inference(custom_args):
     view_motion_config = load_view_motion_config(custom_args.config_name)
-    task_name = "HumanoidViewMotion"
+    task_name = "HumanoidASEViewMotion"
     args_overrides = [
         f"task={task_name}",
-        "train=HumanoidViewMotionASERofuncRL",
-        "device_id=0",
-        "rl_device=cuda:0",
+        "train=HumanoidASEViewMotionASERofuncRL",
+        f"device_id=0",
+        f"rl_device=cuda:{gpu_id}",
         "headless={}".format(False),
-        "num_envs={}".format(16),
+        "num_envs={}".format(1),
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg.task.env.motion_file = custom_args.motion_file
@@ -44,7 +44,7 @@ def inference(custom_args):
                                             force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map["ase"](cfg=cfg.train,
+    trainer = Trainers().trainer_map["ase"](cfg=cfg,
                                             env=infer_env,
                                             device=cfg.rl_device,
                                             env_name=task_name,
@@ -56,11 +56,15 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_name", type=str, default="HumanoidSpoonPanSimple")
-    parser.add_argument("--motion_file", type=str, default="../hotu/024_amp.npy")
+    # Find or define your own config in `rofunc/config/view_motion`
+    parser.add_argument("--config_name", type=str, default="HOTUHumanoid")
+    # Available types of motion file path:
+    #  1. test data provided by rofunc: `examples/data/amp/*.npy`
+    #  2. custom motion file with absolute path
+    parser.add_argument("--motion_file", type=str, default="examples/data/amp/ase_humanoid_jog.npy")
     custom_args = parser.parse_args()
 
     inference(custom_args)

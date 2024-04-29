@@ -2,7 +2,7 @@
   "AntRofuncRLPPO.pth": {
     "url": "https://drive.google.com/uc?id=1eYEfh3HaR1uK6nbO-O64nC3I72740qvF&export=download",
     "name": "AntRofuncRLPPO.pth",
-    "md5":""
+    "md5": ""
   },
   "CURICabinetPPO_right_arm.pth": {
     "url": "https://drive.google.com/uc?id=1lKPYiJK3N-2uE9C5oekmLs1QiwTmFpJL&export=download",
@@ -82,6 +82,161 @@
   "HumanoidASEHeadingSwordShield.pth": {
     "url": "https://drive.google.com/uc?id=1VVXm1aZknEw3tTgRKfQoA0vaSDvublIF&export=download",
     "name": "HumanoidASEHeadingSwordShield.pth",
+    "md5": ""
+  },
+  "BiShadowHandBlockStackRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=10Xn3t84Z8aNIw6qoIwP5W2fr3e18agGr&export=download",
+    "name": "BiShadowHandBlockStackRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandBottleCapRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1lsr2-AImyZ3vN8KeTTDQWfGIC5Kmp3lj&export=download",
+    "name": "BiShadowHandBottleCapRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandCatchAbreastRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1lEMLP-TaZv0Jgj9Ok-X01Wjr3Licq4Qv&export=download",
+    "name": "BiShadowHandCatchAbreastRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandCatchOver2UnderarmRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1vQqeiJAuFv_bghLJZnevYfHjlrc-z0bq&export=download",
+    "name": "BiShadowHandCatchOver2UnderarmRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandCatchUnderarmRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=12_XEZNJNUs-XjNZriFaj2Jqx0ytGvSVh&export=download",
+    "name": "BiShadowHandCatchUnderarmRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandDoorOpenInwardRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1fTguenc0p1PbUsM7ojhip1ZcFbytpQy_&export=download",
+    "name": "BiShadowHandDoorOpenInwardRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandDoorOpenOutwardRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1o5PLZfkCo8PZbzBwBoPcBFxF78s4mi0v&export=download",
+    "name": "BiShadowHandDoorOpenOutwardRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandDoorCloseInwardRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1I2_hbBs_PZh7cUcDxb21rBWZvGJ8WCSC&export=download",
+    "name": "BiShadowHandDoorCloseInwardRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandDoorCloseOutwardRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=10EU-kEgapbedoWiuH9UVGOjxGFO0T93u&export=download",
+    "name": "BiShadowHandDoorCloseOutwardRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandGraspAndPlaceRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1d_gcI42JZNQP_CKRucD6rC0GvGVyzU0-&export=download",
+    "name": "BiShadowHandGraspAndPlaceRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandLiftUnderarmRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1nUnjsBZRDFc7681Wko8agyDOGgKTQuBu&export=download",
+    "name": "BiShadowHandLiftUnderarmRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandOverRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1BNAuedAtojTIbM9h4NguAL_vz1HVzl0I&export=download",
+    "name": "BiShadowHandOverRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandPenRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1x_ZXXQFRkIIExVrUB48SzNwbvXeMfV0i&export=download",
+    "name": "BiShadowHandPenRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandPushBlockRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=10Zoz60FVikKZ8cE5o7A2Hk326Yqg_e1f&export=download",
+    "name": "BiShadowHandPushBlockRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandReOrientationRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1icfMsTDvVkRjqdXoNIia2L7x2C9Tekrq&export=download",
+    "name": "BiShadowHandReOrientationRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandScissorsRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=182LjDYXJNAcPgtux9J0wfL19JhWyYgZp&export=download",
+    "name": "BiShadowHandScissorsRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandSwingCupRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1qKA0mQRVe_sqoRFNOFh2k6FMzoHdBDax&export=download",
+    "name": "BiShadowHandSwingCupRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandSwitchRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1I0Pzo59lMoeqdSC6BtarH5qe2hX10L4U&export=download",
+    "name": "BiShadowHandSwitchRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "BiShadowHandTwoCatchUnderarmRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1TWXp60AKV-P48_JXvA64-Qi2oijriNAn&export=download",
+    "name": "BiShadowHandTwoCatchUnderarmRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1VxFNboUOclQSzm0nAeA7kMjtNRQAk5-V&export=download",
+    "name": "CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "_CURIQbSoftHandSynergyGraspLarge_Clamp2RofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1--hfNU1_o5x6tl2nb-lRJEzsEkcFD6_k&export=download",
+    "name": "CURIQbSoftHandSynergyGraspLarge_Clamp2RofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspLarge_ClampRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1Se-ghKuTfYgPFK1rNXhyaNqejkCuwlZ6&export=download",
+    "name": "CURIQbSoftHandSynergyGraspLarge_ClampRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1eM5m3qbhXIc9fZgI2AcFepwlcg7PAUEx&export=download",
+    "name": "CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspLarge_MarkerRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1EeTB-8wQTizjB-17YUdpa1dpH6uw0cyQ&export=download",
+    "name": "CURIQbSoftHandSynergyGraspLarge_MarkerRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspMugRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=147e-RAAfGq0EWcTzOyMRpJ-W__PovFOx&export=download",
+    "name": "CURIQbSoftHandSynergyGraspMugRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspPower_DrillRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1mxtw5GVEX_hDeGFTuXodeb5xBG2J5fBB&export=download",
+    "name": "CURIQbSoftHandSynergyGraspPower_DrillRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1Nihlp3PaJtUzhQMsDl871z_0imhurY4M&export=download",
+    "name": "CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=15HdnTp_etpZFtp_b45cYoUFl8XLzsIbm&export=download",
+    "name": "CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "CURIQbSoftHandSynergyGraspScissorsRofuncRLPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1otUypqNP6g4wGPTNNdxnIDozCLxv3ije&export=download",
+    "name": "CURIQbSoftHandSynergyGraspScissorsRofuncRLPPO.pth",
+    "md5": ""
+  },
+  "efficientsam_s_gpu.jit": {
+    "url": "https://drive.google.com/uc?id=1lMCUFOLeQOlIpuaIA00MB174lL7ZiuoS&export=download",
+    "name": "efficientsam_s_gpu.jit",
+    "md5": ""
+  },
+  "efficientsam_ti_gpu.jit": {
+    "url": "https://drive.google.com/uc?id=1DLtOwFfrKhfR8sBw1zutJo1IH0GXoqD1&export=download",
+    "name": "efficientsam_ti_gpu.jit",
     "md5": ""
   }
 }

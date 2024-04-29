@@ -45,17 +45,17 @@ class Draw3DSkeletonState(BasePlotterTask):
         self,
         task_name: str,
         skeleton_state,
-        joints_color: str = "red",
-        lines_color: str = "blue",
+        joints_color: str = "blue",
+        lines_color: str = "red",
         alpha=1.0,
     ) -> None:
         super().__init__(task_name=task_name, task_type="3DSkeletonState")
-        lines, dots = Draw3DSkeletonState._get_lines_and_dots(skeleton_state)
+        lines, dots, dot_names = Draw3DSkeletonState._get_lines_and_dots(skeleton_state)
         self._lines_task = Draw3DLines(
-            self.get_scoped_name("bodies"), lines, joints_color, alpha=alpha
+            self.get_scoped_name("bodies"), lines, lines_color, alpha=alpha
         )
         self._dots_task = Draw3DDots(
-            self.get_scoped_name("joints"), dots, lines_color, alpha=alpha
+            self.get_scoped_name("joints"), dots, dot_names, joints_color, alpha=alpha
         )
 
     @property
@@ -73,6 +73,7 @@ class Draw3DSkeletonState(BasePlotterTask):
             len(skeleton_state.tensor.shape) == 1
         ), "the state has to be zero dimensional"
         dots = skeleton_state.global_translation.numpy()
+        dot_names = np.array(skeleton_state.skeleton_tree.node_names)
         skeleton_tree = skeleton_state.skeleton_tree
         parent_indices = skeleton_tree.parent_indices.numpy()
         lines = []
@@ -81,11 +82,11 @@ class Draw3DSkeletonState(BasePlotterTask):
             if parent_index != -1:
                 lines.append([dots[node_index], dots[parent_index]])
         lines = np.array(lines)
-        return lines, dots
+        return lines, dots, dot_names
 
-    def _update(self, lines, dots) -> None:
+    def _update(self, lines, dots, dot_names) -> None:
         self._lines_task.update(lines)
-        self._dots_task.update(dots)
+        self._dots_task.update(dots, dot_names)
 
     def __iter__(self):
         yield from self._lines_task
@@ -174,6 +175,7 @@ class Draw3DSkeletonMotion(BasePlotterTask):
                 ),
                 axis=0,
             )
+        # dot_names = np.array(curr_skeleton_motion.skeleton_tree.node_names)
         self._skeleton_state_task.update(curr_skeleton_motion)
         self._com_trail_task.update(self._com_pos)
         self._update(*Draw3DSkeletonMotion._get_vel_and_avel(curr_skeleton_motion))

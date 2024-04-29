@@ -121,10 +121,11 @@ True
 
 from __future__ import division
 
+import math
 import warnings
 
-import math
 import numpy as np
+import torch
 
 # Documentation in HTML format can be generated with Epydoc
 __docformat__ = "restructuredtext en"
@@ -1285,6 +1286,7 @@ def euler_from_quaternion(quaternion, axes='sxyz'):
     return euler_from_homo_matrix(homo_matrix_from_quaternion(quaternion), axes)
 
 
+
 def quaternion_from_euler(ai, aj, ak, axes='sxyz'):
     """
     Return quaternion from Euler angles and axis sequence.
@@ -1424,6 +1426,59 @@ def quaternion_multiply(quaternion1, quaternion0):
         x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0,
         -x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0), dtype=np.float64)
 
+
+def quaternion_multiply_tensor(quaternion1, quaternion0):
+    """
+    Return multiplication of two quaternions in the form of tensor.
+
+    >>> q = quaternion_multiply_tensor([1, -2, 3, 4], [-5, 6, 7, 8])
+    >>> np.allclose(q, [[-44, -14, 48, 28]])
+    True
+    """
+    x0, y0, z0, w0 = quaternion0
+    x1, y1, z1, w1 = quaternion1
+    return torch.tensor([[
+        x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
+        -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
+        x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0,
+        -x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0]], dtype=torch.float)
+
+
+def quaternion_multiply_tensor_multirow(quaternion1, quaternion0):
+    """
+    Return multiplication of two quaternions with multiple rows in the form of tensor.
+
+    >>> q = quaternion_multiply_tensor([1, -2, 3, 4], [-5, 6, 7, 8])
+    >>> np.allclose(q, [[-44, -14, 48, 28]])
+    True
+    """
+    x0, y0, z0, w0 = quaternion0
+    x1, y1, z1, w1 = quaternion1[:, 0], quaternion1[:, 1], quaternion1[:, 2], quaternion1[:, 3]
+    x1, y1, z1, w1 = x1.reshape(-1, 1), y1.reshape(-1, 1), z1.reshape(-1, 1), w1.reshape(-1, 1)
+    return torch.hstack((
+        x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
+        -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
+        x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0,
+        -x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0
+    ))
+def quaternion_multiply_tensor_multirow2(quaternion1, quaternion0):
+    """
+    Return multiplication of two quaternions with multiple rows in the form of tensor.
+
+    >>> q = quaternion_multiply_tensor([1, -2, 3, 4], [-5, 6, 7, 8])
+    >>> np.allclose(q, [[-44, -14, 48, 28]])
+    True
+    """
+    x0, y0, z0, w0 = quaternion0[:, 0], quaternion0[:, 1], quaternion0[:, 2], quaternion0[:, 3]
+    x0, y0, z0, w0 = x0.reshape(-1, 1), y0.reshape(-1, 1), z0.reshape(-1, 1), w0.reshape(-1, 1)
+
+    x1, y1, z1, w1 = quaternion1
+    return torch.hstack((
+        x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
+        -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
+        x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0,
+        -x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0
+    ))
 
 def quaternion_conjugate(quaternion):
     """

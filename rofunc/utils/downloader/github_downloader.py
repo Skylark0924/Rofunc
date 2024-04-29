@@ -35,8 +35,8 @@ def download_file(repo: Repository, file_path: str, out: str):
 
 def get_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument("repo", help="The repo where the file or folder is stored")
-    parser.add_argument("path", help="The folder or file you want to download")
+    parser.add_argument("--repo", default="", help="The repo where the file or folder is stored")
+    parser.add_argument("--path", default="", help="The folder or file you want to download")
     parser.add_argument(
         "-o",
         "--out",
@@ -63,6 +63,8 @@ def get_args() -> Namespace:
 
 if __name__ == "__main__":
     args = get_args()
+    args.repo = "NVIDIA-Omniverse/IsaacGymEnvs"
+    args.path = "assets/urdf/ycb/025_mug"
     g = Github()
     repo = g.get_repo(args.repo)
     if args.file:

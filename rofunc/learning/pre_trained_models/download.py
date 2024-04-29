@@ -19,10 +19,10 @@ from rofunc.utils.oslab.path import get_rofunc_path, check_ckpt_exist
 from rofunc.utils.logger.beauty_logger import beauty_print
 
 
-def download_ckpt(url, name, md5):
+def download_ckpt(url, name, md5=None):
     beauty_print("Downloading pretrained model {}".format(name), type="info")
     ckpt_path = os.path.join(get_rofunc_path(), 'learning/pre_trained_models/{}'.format(name))
-    gdown.cached_download(url, ckpt_path, md5=md5)
+    gdown.cached_download(url, ckpt_path)
     return ckpt_path
 
 
@@ -37,5 +37,3 @@ def model_zoo(name, zoo_path="config/learning/model_zoo.json"):
     else:
         raise ValueError(f"Model name {name} not found in model zoo")
     return ckpt_path
-
-

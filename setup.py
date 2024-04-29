@@ -13,7 +13,7 @@ extras = {
 
 setup(
     name="rofunc",
-    version="0.0.2.5",
+    version="0.0.2.6",
     description='Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -24,7 +24,7 @@ setup(
     include_package_data=True,
     extras_require=extras,
     install_requires=['cython==3.0.0a10',  # for mujoco_py
-                      'setuptools==63.2.0',
+                      'setuptools==59.8.0',
                       'pandas',
                       'tqdm==4.65.0',
                       'pillow==9.5.0',
@@ -33,7 +33,7 @@ setup(
                       'hydra-core==1.3.2',
                       'opencv-python==4.7.0.72',
                       'neurokit2==0.2.4',
-                      'gdown==4.7.1',
+                      'gdown==4.6.3',
                       'pytz==2023.3',
                       'shutup==0.2.0',
                       'numpy<=1.23.0',
@@ -44,9 +44,12 @@ setup(
                       'gymnasium>=0.28.1',
                       'tensorboard',
                       'networkx',
-                      'dgl'],
+                      'dgl',
+                      'trimesh==4.0.5',
+                      'wandb==0.16.2'],
     python_requires=">=3.7,<3.9",
-    keywords=['robotics', 'learning from demonstration', 'reinforcement learning', 'robot manipulation'],
+    keywords=['robotics', 'robot learning', 'learning from demonstration', 'reinforcement learning',
+              'robot manipulation'],
     license='MIT',
     entry_points={
         'console_scripts': [

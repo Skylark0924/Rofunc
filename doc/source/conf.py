@@ -29,7 +29,7 @@ copyright = f"{date.today().year}, Junjia Liu"
 author = 'Junjia Liu'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.2.5'
+release = '0.0.2.6'
 
 # -- General configuration ---------------------------------------------------
 
@@ -68,10 +68,11 @@ sphinx_gallery_conf = {
     #  'thumbnail_size': (600, 600),
     #  'image_srcset': ["2x"],
     'subsection_order': ExplicitOrder(['../../examples/data_collection',
-                                       '../../examples/learning_ml',
                                        '../../examples/learning_rl',
+                                       '../../examples/learning_ml',
                                        '../../examples/planning_control',
                                        '../../examples/robolab',
+                                       '../../examples/visualab',
                                        '../../examples/simulator']),
     'within_subsection_order': ExampleTitleSortKey,
     'image_scrapers': ('matplotlib',),

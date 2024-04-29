@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from isaacgym.torch_utils import *
+import numpy as np
 
 from rofunc.simulator.base_sim import RobotSim
 
@@ -34,7 +34,7 @@ class HumanoidSim(RobotSim):
         robot_lower_limits = robot_dof_props["lower"]
         robot_upper_limits = robot_dof_props["upper"]
         robot_ranges = robot_upper_limits - robot_lower_limits
-        robot_mids = 0.3 * (robot_upper_limits + robot_lower_limits)
+        robot_mids = 0.5 * (robot_upper_limits + robot_lower_limits)
 
         robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
         robot_dof_props["stiffness"][:].fill(300.0)
@@ -113,7 +113,7 @@ class HumanoidSim(RobotSim):
                 gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
                 gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
-    def run_traj(self, traj, attracted_joints=None, update_freq=0.001, verbose=True, **kwargs):
-        if attracted_joints is None:
-            attracted_joints = ["left_hand", "right_hand"]
-        self.run_traj_multi_joints(traj, attracted_joints, update_freq=update_freq, verbose=verbose, **kwargs)
+    def run_traj(self, traj, attracted_rigid_bodies=None, update_freq=0.001, verbose=True, **kwargs):
+        if attracted_rigid_bodies is None:
+            attracted_rigid_bodies = ["left_hand", "right_hand"]
+        self.run_traj_multi_rigid_bodies(traj, attracted_rigid_bodies, update_freq=update_freq, verbose=verbose, **kwargs)

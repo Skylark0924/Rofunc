@@ -5,12 +5,13 @@ Visualize robots and objects
 This example shows how to visualize robots and objects in the Isaac Gym simulator in an interactive viewer.
 """
 
+import isaacgym
 import rofunc as rf
 
 # CURI
-# args = rf.config.get_sim_config("CURI")
-# CURIsim = rf.sim.CURISim(args)
-# CURIsim.show()
+args = rf.config.get_sim_config("CURI")
+CURIsim = rf.sim.CURISim(args)
+CURIsim.show(visual_obs_flag=True)
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -20,12 +21,12 @@ import rofunc as rf
 # CURI-mini
 # args = rf.config.get_sim_config("CURImini")
 # CURIminisim = rf.sim.CURIminiSim(args)
-# CURIminisim.show()
+# CURIminisim.show(visual_obs_flag=True)
 
 # franka
-args = rf.config.get_sim_config("Franka")
-frankasim = rf.sim.FrankaSim(args)
-frankasim.show()
+# args = rf.config.get_sim_config("Franka")
+# frankasim = rf.sim.FrankaSim(args)
+# frankasim.show()
 
 # baxter
 # args = rf.config.get_sim_config("Baxter")
@@ -41,6 +42,16 @@ frankasim.show()
 # args = rf.config.get_sim_config("Gluon")
 # Gluonsim = rf.sim.GluonSim(args)
 # Gluonsim.show()
+
+# # qbsofthand
+# args = rf.config.get_sim_config("QbSoftHand")
+# QbSoftHandsim = rf.sim.QbSoftHandSim(args)
+# QbSoftHandsim.show()
+
+# # Humanoid
+# args = rf.config.get_sim_config("Humanoid")
+# Humanoidsim = rf.sim.HumanoidSim(args)
+# Humanoidsim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")

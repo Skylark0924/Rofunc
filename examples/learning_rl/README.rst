@@ -5,32 +5,6 @@ The following are examples of reinforcement learning methods for robot learning.
 
 .. tabs::
 
-
-    .. tab:: OpenAI Gym
-
-        .. tabs::
-
-            .. tab:: Pendulum
-
-                .. code-block:: shell
-
-                    '''Training'''
-                    python examples/learning_rl/OpenAIGym_RofuncRL/example_GymTasks_RofuncRL.py --task=Gym_Pendulum-v1 --agent=[ppo|a2c|td3|sac]
-
-            .. tab:: CartPole
-
-                .. code-block:: shell
-
-                    '''Training''' 
-                    python examples/learning_rl/OpenAIGym_RofuncRL/example_GymTasks_RofuncRL.py --task=Gym_CartPole-v1 --agent=[ppo|a2c|td3|sac]
-
-            .. tab:: Acrobot
-
-                .. code-block:: shell
-
-                    '''Training''' 
-                    python examples/learning_rl/OpenAIGym_RofuncRL/example_GymTasks_RofuncRL.py --task=Gym_Acrobot-v1 --agent=[ppo|a2c|td3|sac]
-
     .. tab:: IsaacGym
 
         .. tabs::
@@ -54,6 +28,18 @@ The following are examples of reinforcement learning methods for robot learning.
 
                     '''Inference with pre-trained model in model zoo'''
                     python examples/learning_rl/IsaacGym_RofuncRL/example_CURICabinet_RofuncRL.py --agent=ppo --inference
+
+            .. tab:: CURIQbSoftHandSynergyGrasp
+
+                .. code-block:: shell
+
+                    # Available objects: Hammer, Spatula, Large_Clamp, Mug, Power_Drill, Knife, Scissors, Large_Marker, Phillips_Screw_Driver
+
+                    '''Training'''
+                    python examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py --task=CURIQbSoftHandSynergyGrasp --agent=ppo --objects=Hammer
+
+                    '''Inference with pre-trained model in model zoo'''
+                    python examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py --task=CURIQbSoftHandSynergyGrasp --agent=ppo --inference --objects=Hammer
 
             .. tab:: FrankaCabinet
 
@@ -142,6 +128,191 @@ The following are examples of reinforcement learning methods for robot learning.
                     python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task=HumanoidASELocationSwordShield --agent=ase --inference
                     # Strike
                     python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task=HumanoidASEStrikeSwordShield --agent=ase --inference
+
+            .. tab:: DexterousHand
+
+                .. code-block:: shell
+
+                    '''Training'''
+                    # Available tasks: BiShadowHandOver, BiShadowHandBlockStack, BiShadowHandBottleCap, BiShadowHandCatchAbreast,
+                    #                  BiShadowHandCatchOver2Underarm, BiShadowHandCatchUnderarm, BiShadowHandDoorOpenInward,
+                    #                  BiShadowHandDoorOpenOutward, BiShadowHandDoorCloseInward, BiShadowHandDoorCloseOutward,
+                    #                  BiShadowHandGraspAndPlace, BiShadowHandLiftUnderarm, BiShadowHandPen, BiShadowHandPointCloud,
+                    #                  BiShadowHandPushBlock, BiShadowHandReOrientation, BiShadowHandScissors, BiShadowHandSwingCup,
+                    #                  BiShadowHandSwitch, BiShadowHandTwoCatchUnderarm
+                    python examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py --task=BiShadowHandOver --agent=ppo
+
+                    '''Inference with pre-trained model in model zoo'''
+                    python examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py --task=BiShadowHandOver --agent=ppo --inference
+
+        .. list-table:: Task Overview
+           :widths: 25 40 40 10
+           :header-rows: 1
+
+           * - Tasks
+             - Animation
+             - Performance
+             - `ModelZoo <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json>`_
+           * - `Ant <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ant.py>`_
+             - .. image:: ../../../img/task_gifs/AntRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `Cartpole <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/cartpole.py>`_
+             -
+             -
+             - 
+           * - `FrankaCabinet <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cabinet.py>`_
+             - .. image:: ../../../img/task_gifs/FrankaCabinetRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `FrankaCubeStack <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cube_stack.py>`_
+             - 
+             - 
+             -
+           * - `CURICabinet <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet.py>`_
+             - .. image:: ../../../img/task_gifs/CURICabinetRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `CURICabinetImage <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_image.py>`_
+             - .. image:: ../../../img/task_gifs/CURICabinetRofuncRLPPO.gif
+             - 
+             -
+           * - `CURICabinetBimanual <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_bimanual.py>`_
+             - 
+             - 
+             -
+           * - `CURIQbSoftHandSynergyGrasp <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/grasp/curi_qbhand_synergy_grasp.py>`_
+             - .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspLarge_clampRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspMugRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspPower_drillRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspScissorsRofuncRLPPO.gif  .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.gif
+             -
+             - ✅
+           * - `Humanoid <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidRofuncRLPPO.gif
+             -
+             - ✅
+           * - `HumanoidAMP_backflip <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidFlipRofuncRLAMP.gif
+             - 
+             - ✅
+           * - `HumanoidAMP_walk <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
+             - 
+             -
+             - ✅
+           * - `HumanoidAMP_run <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidRunRofuncRLAMP.gif
+             - 
+             - ✅
+           * - `HumanoidAMP_dance <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidDanceRofuncRLAMP.gif
+             -
+             - ✅
+           * - `HumanoidAMP_hop <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidHopRofuncRLAMP.gif
+             -
+             - ✅
+           * - `HumanoidASEGetupSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_amp_getup.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidASEGetupSwordShieldRofuncRLASE.gif
+             -
+             - ✅
+           * - `HumanoidASEPerturbSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_perturb.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidASEPerturbSwordShieldRofuncRLASE.gif
+             -
+             - ✅
+           * - `HumanoidASEHeadingSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_heading.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidASEHeadingSwordShieldRofuncRLASE.gif
+             -
+             - ✅
+           * - `HumanoidASELocationSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_location.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidASELocationSwordShieldRofuncRLASE.gif
+             -
+             - ✅
+           * - `HumanoidASEReachSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_reach.py>`_
+             - 
+             -
+             - ✅
+           * - `HumanoidASEStrikeSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_strike.py>`_
+             - .. image:: ../../../img/task_gifs/HumanoidASEStrikeSwordShieldRofuncRLASE.gif
+             - 
+             - ✅
+           * - `BiShadowHandBlockStack <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_block_stack.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandBlockStackRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `BiShadowHandBottleCap <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_bottle_cap.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandBottleCapRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandCatchAbreast <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_abreast.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandCatchAbreastRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandCatchOver2Underarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_over2underarm.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandCatchOver2UnderarmRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandCatchUnderarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_underarm.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandCatchUnderarmRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandDoorOpenInward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_inward.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandDoorOpenInwardRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandDoorOpenOutward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_outward.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandDoorOpenOutwardRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `BiShadowHandDoorCloseInward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_inward.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandDoorCloseInwardRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `BiShadowHandDoorCloseOutward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_outward.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandDoorCloseOutwardRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandGraspAndPlace <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_grasp_and_place.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandGraspAndPlaceRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandLiftUnderarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_lift_underarm.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandLiftUnderarmRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `BiShadowHandOver <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_over.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandOverRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `BiShadowHandPen <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_pen.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandPenRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandPointCloud <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_point_cloud.py>`_
+             - 
+             -
+             - 
+           * - `BiShadowHandPushBlock <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_push_block.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandPushBlockRofuncRLPPO.gif
+             - 
+             - ✅
+           * - `BiShadowHandReOrientation <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_re_orientation.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandReOrientationRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandScissors <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ahandsse/shadow_hand_scissors.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandScissorsRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandSwingCup <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_swing_cup.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandSwingCupRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandSwitch <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_switch.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandSwitchRofuncRLPPO.gif
+             -
+             - ✅
+           * - `BiShadowHandTwoCatchUnderarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_two_catch_underarm.py>`_
+             - .. image:: ../../../img/task_gifs/BiShadowHandTwoCatchUnderarmRofuncRLPPO.gif
+             -
+             - ✅
 
 
     .. tab:: OmniIsaacGym
@@ -241,6 +412,30 @@ The following are examples of reinforcement learning methods for robot learning.
                     '''Training'''
                     python examples/learning_rl/OmniIsaacGym_RofuncRL/example_ShadowHandOmni_RofuncRL.py --agent=ppo
 
+    .. tab:: OpenAI Gym
+
+        .. tabs::
+
+            .. tab:: Pendulum
+
+                .. code-block:: shell
+
+                    '''Training'''
+                    python examples/learning_rl/OpenAIGym_RofuncRL/example_GymTasks_RofuncRL.py --task=Gym_Pendulum-v1 --agent=[ppo|a2c|td3|sac]
+
+            .. tab:: CartPole
+
+                .. code-block:: shell
+
+                    '''Training''' 
+                    python examples/learning_rl/OpenAIGym_RofuncRL/example_GymTasks_RofuncRL.py --task=Gym_CartPole-v1 --agent=[ppo|a2c|td3|sac]
+
+            .. tab:: Acrobot
+
+                .. code-block:: shell
+
+                    '''Training''' 
+                    python examples/learning_rl/OpenAIGym_RofuncRL/example_GymTasks_RofuncRL.py --task=Gym_Acrobot-v1 --agent=[ppo|a2c|td3|sac]
 
     .. tab:: D4RL
 
