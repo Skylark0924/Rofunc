@@ -18,12 +18,12 @@ from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 
 
 class SACTrainer(BaseTrainer):
-    def __init__(self, cfg, env, device, env_name):
-        super().__init__(cfg, env, device, env_name)
-        self.memory = RandomMemory(memory_size=10000, num_envs=self.env.num_envs, device=device, replacement=True)
-        self.agent = SACAgent(cfg, self.env.observation_space, self.env.action_space, self.memory,
+    def __init__(self, cfg, env, device, env_name, **kwargs):
+        super().__init__(cfg, env, device, env_name, **kwargs)
+        self.memory = RandomMemory(memory_size=cfg.train.Trainer.get("memory_size", 10000), num_envs=self.env.num_envs,
+                                   device=device, replacement=True)
+        self.agent = SACAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
                               device, self.exp_dir, self.rofunc_logger)
-        self.setup_wandb()
 
     def post_interaction(self):
         # Update agent

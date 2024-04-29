@@ -61,10 +61,8 @@ class BaseAgent:
         '''Checkpoint'''
         self.checkpoint_modules = {}
         self.checkpoint_interval = self.cfg.Trainer.checkpoint_interval
-        if self.checkpoint_interval > 0:
-            self.checkpoint_dir = os.path.join(self.exp_dir, "checkpoints")
-            rf.oslab.create_dir(self.checkpoint_dir)
-        # self.checkpoint_store_separately = self.cfg.get("Trainer", {}).get("store_separately", False)
+        self.checkpoint_dir = os.path.join(self.exp_dir, "checkpoints")
+        rf.oslab.create_dir(self.checkpoint_dir)
         self.checkpoint_best_modules = {"timestep": 0, "reward": -2 ** 31, "saved": False, "modules": {}}
 
         '''Logging'''
@@ -193,3 +191,35 @@ class BaseAgent:
                     self.rofunc_logger.warning(
                         "Cannot load the {} module. The agent doesn't have such an instance".format(name))
         self.rofunc_logger.info("Loaded the checkpoint from {}".format(path))
+
+    def multi_gpu_transfer(self, *args):
+        """
+        Transfer the tensor data obtained from sim_device to rl_device.
+
+        :param args: Tensor data in different device to be transferred
+        """
+        rl_device = self.device
+        for arg in args:
+            if isinstance(arg, torch.Tensor):
+                if arg.device != rl_device:
+                    arg.data = arg.data.to(rl_device)
+            elif isinstance(arg, tuple) or isinstance(arg, list):
+                self.multi_gpu_transfer(*arg)
+            elif isinstance(arg, dict) or isinstance(arg, collections.OrderedDict):
+                self.multi_gpu_transfer(*arg.values())
+            elif isinstance(arg, float):
+                pass
+            elif isinstance(arg, int):
+                pass
+            elif isinstance(arg, np.ndarray):
+                try:
+                    arg = torch.from_numpy(arg).to(rl_device)
+                except:
+                    for i in range(len(arg)):
+                        self.multi_gpu_transfer(*arg[i])
+            elif isinstance(arg, np.float32) or isinstance(arg, np.float64) or isinstance(arg, np.int32) or isinstance(
+                    arg, np.int64):
+                pass
+            else:
+                raise ValueError("Unknown type: {}".format(type(arg)))
+        return args

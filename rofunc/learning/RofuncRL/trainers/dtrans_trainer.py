@@ -33,19 +33,18 @@ def discount_cumsum(x, gamma):
 
 
 class DTransTrainer(BaseTrainer):
-    def __init__(self, cfg, env, device, env_name):
-        super().__init__(cfg, env, device, env_name)
-        self.agent = DTransAgent(cfg, self.env.observation_space, self.env.action_space, device, self.exp_dir,
+    def __init__(self, cfg, env, device, env_name, **kwargs):
+        super().__init__(cfg, env, device, env_name, **kwargs)
+        self.agent = DTransAgent(cfg.train, self.env.observation_space, self.env.action_space, device, self.exp_dir,
                                  self.rofunc_logger)
-        self.setup_wandb()
 
         self.pct_traj = 1
-        self.dataset_type = self.cfg.Trainer.dataset_type
-        self.dataset_root_path = self.cfg.Trainer.dataset_root_path
-        self.mode = self.cfg.Trainer.mode
-        self.scale = self.cfg.Trainer.scale
-        self.max_episode_steps = self.cfg.Trainer.max_episode_steps
-        self.max_seq_length = self.cfg.Trainer.max_seq_length
+        self.dataset_type = self.cfg.train.Trainer.dataset_type
+        self.dataset_root_path = self.cfg.train.Trainer.dataset_root_path
+        self.mode = self.cfg.train.Trainer.mode
+        self.scale = self.cfg.train.Trainer.scale
+        self.max_episode_steps = self.cfg.train.Trainer.max_episode_steps
+        self.max_seq_length = self.cfg.train.Trainer.max_seq_length
 
         self.loss_mean = 0
 
@@ -190,6 +189,7 @@ class DTransTrainer(BaseTrainer):
             self.rofunc_logger.info(f"Step: {self._step}, {post_str}", local_verbose=False)
 
         # Save checkpoints
-        if not (self._step + 1) % self.agent.checkpoint_interval and \
-                self.agent.checkpoint_interval > 0 and self._step > 1:
-            self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))
+        if self.agent.checkpoint_interval is not None:
+            if not (self._step + 1) % self.agent.checkpoint_interval and \
+                    self.agent.checkpoint_interval > 0 and self._step > 1:
+                self.agent.save_ckpt(os.path.join(self.agent.checkpoint_dir, f"ckpt_{self._step + 1}.pth"))

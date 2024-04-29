@@ -1,0 +1,80 @@
+# used to create the object
+name: HumanoidPhysHOI
+
+physics_engine: ${..physics_engine}
+
+# if given, will override the device setting in gym.
+env: 
+  numEnvs: ${resolve_default:4096,${...num_envs}}
+  envSpacing: 5
+  episodeLength: 40
+  cameraFollow: False # if the camera follows humanoid or not
+  isFlagrun: False
+  enableDebugVis: False
+  playdataset: False
+  projtype: "None"
+  saveImages: False
+  initVel: False
+  
+  pdControl: True
+  powerScale: 1.0
+  controlFrequencyInv: 2 # 30 Hz
+  stateInit: "Start" #Random
+  hybridInitProb: 0.5
+  dataFPS: 25
+  dataFramesScale: 1.2 # 25->30fps
+  ballSize: 1.
+
+  localRootObs: False
+  keyBodies: ["Head", "L_Knee", "R_Knee", "L_Elbow", "R_Elbow", "L_Ankle", "R_Ankle", "L_Index3", "L_Middle3", "L_Pinky3", "L_Ring3","L_Thumb3","R_Index3", "R_Middle3", "R_Pinky3", "R_Ring3","R_Thumb3"] # #["L_Hip", "L_Knee", "left_foot", "L_Toe", "R_Hip", "R_Knee", "right_foot", "R_Toe", "Torso", "Spine", "Chest", "Neck", "Head", "L_Thorax", "L_Shoulder", "L_Elbow", "left_hand", "R_Thorax", "R_Shoulder", "R_Elbow", "right_hand"] #["right_hand", "left_hand", "right_foot", "left_foot"]
+  contactBodies: ["L_Index3", "L_Middle3", "L_Pinky3", "L_Ring3","L_Thumb3","R_Index3", "R_Middle3", "R_Pinky3", "R_Ring3","R_Thumb3"] #["right_foot", "left_foot"]
+  terminationHeight: 0.15
+  enableEarlyTermination: True
+
+  motion_file:
+
+  asset:
+#    assetRoot: "physhoi/data/assets"
+    assetFileName: "smplx/smplx_capsule.xml"
+
+  plane:
+    staticFriction: 1.0
+    dynamicFriction: 1.0
+    restitution: 1.6
+  
+  rewardWeights:
+    p: 50.
+    r: 50.
+    pv: 0.
+    rv: 0.
+
+    op: 1.
+    or: 0.
+    opv: 0.
+    orv: 0.
+
+    ig: 20.
+
+    cg1: 5.
+    cg2: 5.
+
+sim:
+  dt: 0.0166 # 1/60 s
+  substeps: 2
+  up_axis: "z"
+  use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+  gravity: [ 0.0, 0.0, -9.81 ]
+  physx:
+    num_threads: 4
+    solver_type: 1  # 0: pgs, 1: tgs
+    num_position_iterations: 4
+    num_velocity_iterations: 0
+    contact_offset: 0.02
+    rest_offset: 0.0
+    bounce_threshold_velocity: 0.2
+    max_depenetration_velocity: 10.0
+    default_buffer_size_multiplier: 10.0
+
+  flex:
+    num_inner_iterations: 10
+    warm_start: 0.25

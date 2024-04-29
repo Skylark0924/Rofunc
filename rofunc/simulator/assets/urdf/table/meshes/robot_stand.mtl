@@ -1,0 +1,21 @@
+newmtl aluminium_profile_mat
+Ns 818.202393
+Ka 0.800000 0.800000 0.800000
+Kd 0.800000 0.800000 0.800000
+Ks 0.779545 0.779545 0.779545
+Ke 0.000000 0.000000 0.000000
+Ni 10.250000
+d 1.000000
+illum 3
+map_Kd  ./robot_stand_plate_texture.png
+
+newmtl robot_stand_plate_mat
+Ns 250.000000
+Ka 0.895455 0.895455 0.895455
+Kd 0.800000 0.800000 0.800000
+Ks 0.254545 0.254545 0.254545
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd  ./robot_stand_plate_texture.png

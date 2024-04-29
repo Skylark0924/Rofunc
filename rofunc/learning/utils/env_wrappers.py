@@ -22,6 +22,8 @@ from packaging import version
 
 import torch
 
+from rofunc.utils.logger.beauty_logger import beauty_print
+
 __all__ = ["wrap_env"]
 
 
@@ -383,9 +385,9 @@ class GymWrapper(Wrapper):
         except Exception as e:
             print("[WARNING] Failed to check for a vectorized environment: {}".format(e))
 
-        self._drepecated_api = version.parse(gym.__version__) < version.parse(" 0.25.0")
+        self._drepecated_api = version.parse(gym.__version__) < version.parse(" 0.26.0")
         if self._drepecated_api:
-            logger.warning("Using a deprecated version of OpenAI Gym's API: {}".format(gym.__version__))
+            beauty_print("Using a deprecated version of OpenAI Gym's API: {}".format(gym.__version__), type="warning")
 
     @property
     def state_space(self) -> gym.Space:

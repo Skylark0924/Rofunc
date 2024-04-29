@@ -52,8 +52,9 @@ if sim is None:
     quit()
 
 # load ball asset
-asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir, "assets")
-asset_file = "urdf/ball.urdf"
+import rofunc as rf
+asset_root = rf.oslab.get_rofunc_path()
+asset_file = "simulator/assets/urdf/ball.urdf"
 asset = gym.load_asset(sim, asset_root, asset_file, gymapi.AssetOptions())
 
 # set up the env grid
@@ -100,7 +101,7 @@ def new_sub_terrain(): return SubTerrain(width=num_rows, length=num_cols, vertic
 
 
 heightfield[0:num_rows, :] = random_uniform_terrain(new_sub_terrain(), min_height=-0.2, max_height=0.2, step=0.2, downsampled_scale=0.5).height_field_raw
-heightfield[num_rows:2*num_rows, :] = sloped_terrain(new_sub_terrain(), slope=-0.5).height_field_raw
+heightfield[num_rows:2*num_rows, :] = sloped_terrain(new_sub_terrain(), slope=-0).height_field_raw
 heightfield[2*num_rows:3*num_rows, :] = pyramid_sloped_terrain(new_sub_terrain(), slope=-0.5).height_field_raw
 heightfield[3*num_rows:4*num_rows, :] = discrete_obstacles_terrain(new_sub_terrain(), max_height=0.5, min_size=1., max_size=5., num_rects=20).height_field_raw
 heightfield[4*num_rows:5*num_rows, :] = wave_terrain(new_sub_terrain(), num_waves=2., amplitude=1.).height_field_raw

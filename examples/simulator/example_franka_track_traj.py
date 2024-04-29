@@ -5,6 +5,7 @@ Tracking the trajectory by Franka
 This example runs a Tai Chi demo trajectory by using Franka.
 """
 
+import isaacgym
 import numpy as np
 
 import rofunc as rf

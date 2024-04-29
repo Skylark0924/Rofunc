@@ -1,0 +1,22 @@
+dt: 0.011 # 1/90 [s]
+substeps: 2
+up_axis: "z"
+enableCameraSensors: False
+useContactForces: True
+useForceSensors: False
+use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+gravity: [0.0, 0.0, -9.81]
+physx:
+  num_threads: ${....num_threads}
+  solver_type: ${....solver_type}
+  use_gpu: ${contains:"cuda",${....sim_device}} # set to False to run on CPU
+  num_position_iterations: 8
+  num_velocity_iterations: 0
+  max_gpu_contact_pairs: 8388608 # 8*1024*1024
+  num_subscenes: ${....num_subscenes}
+  contact_offset: 0.002
+  rest_offset: 0.0
+  bounce_threshold_velocity: 0.2
+  max_depenetration_velocity: 1000.0
+  default_buffer_size_multiplier: 5.0
+  contact_collection: 2 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (default - all contacts)

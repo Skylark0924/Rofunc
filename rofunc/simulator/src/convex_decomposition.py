@@ -14,6 +14,7 @@ Convex decomposition example
 from isaacgym import gymapi
 from isaacgym import gymutil
 
+import rofunc as rf
 # initialize gym
 gym = gymapi.acquire_gym()
 
@@ -65,7 +66,7 @@ env_upper = gymapi.Vec3(spacing, spacing, spacing)
 initial_pose = gymapi.Transform()
 initial_pose.p = gymapi.Vec3(0.0, 0.0, 0.2)
 
-asset_root = "../assets"
+asset_root = rf.utils.get_rofunc_path() + "/simulator/assets"
 asset_options = gymapi.AssetOptions()
 
 # Load materials from meshes

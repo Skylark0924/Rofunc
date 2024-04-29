@@ -10,10 +10,10 @@
 
 ### Pre-trained latent space model
 
-![](../../../img/ASE3.gif)
+![](../../../img/task_gifs/HumanoidASEGetupSwordShieldRofuncRLASE.gif)
 
 ```shell
-python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEGetupSwordShield --motion_file reallusion_sword_shield/dataset_reallusion_sword_shield.yaml --inference
+python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEGetupSwordShield --motion_file reallusion_sword_shield/dataset_reallusion_sword_shield.yaml --inference
 ```
 
 ### Pre-trained latent space model with perturbation
@@ -23,10 +23,10 @@ boxes to the humanoid robot). It will use **the same pre-trained latent space mo
 the `reset` function to reset by the maximum length of the episode, rather than resetting immediately when robots fall
 on the ground.
 
-![](../../../img/ASE1.gif)
+![](../../../img/task_gifs/HumanoidASEPerturbSwordShieldRofuncRLASE.gif)
 
 ```shell
-python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEPerturbSwordShield --motion_file reallusion_sword_shield/dataset_reallusion_sword_shield.yaml --inference
+python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEPerturbSwordShield --motion_file reallusion_sword_shield/dataset_reallusion_sword_shield.yaml --inference
 ```
 
 > **Note**
@@ -37,18 +37,21 @@ python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEPe
 
 `HumanoidASEHeadingSwordShield` task: the humanoid robot should face to the blue line and walk towards the red line.
 
-![](../../../img/ASE5.gif)
+![](../../../img/task_gifs/HumanoidASEHeadingSwordShieldRofuncRLASE.gif)
 
 ```shell
-python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEHeadingSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
+python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEHeadingSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
 ```
 
 ### High-level policy learning with pre-trained latent space model (Location)
 
 `HumanoidASELocationSwordShield` task: the humanoid robot should walk to the red location.
 
+
+![](../../../img/task_gifs/HumanoidASELocationSwordShieldRofuncRLASE.gif)
+
 ```shell
-python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASELocationSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
+python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASELocationSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
 ```
 
 ### High-level policy learning with pre-trained latent space model (Reach)
@@ -56,17 +59,17 @@ python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASELo
 `HumanoidASEReachSwordShield` task: the humanoid robot should let the sword reach the red point.
 
 ```shell
-python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEReachSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
+python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEReachSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
 ```
 
 ### High-level policy learning with pre-trained latent space model (Strike)
 
 `HumanoidASEStrikeSwordShield` task: the humanoid robot should strike the sword to the block.
 
-![](../../../img/ASE4.gif)
+![](../../../img/task_gifs/HumanoidASEStrikeSwordShieldRofuncRLASE.gif)
 
 ```shell
-python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidASEStrikeSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
+python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidASEStrikeSwordShield --motion_file reallusion_sword_shield/RL_Avatar_Idle_Ready_Motion.npy --inference
 ```
 
 ### Motion visualization
@@ -76,13 +79,13 @@ command to visualize the motion `reallusion_sword_shield/RL_Avatar_Atk_2xCombo01
 using `HumanoidViewMotion`. 
 
 ```shell
-python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidViewMotion --motion_file reallusion_sword_shield/RL_Avatar_Atk_2xCombo01_Motion.npy --inference --headless=False
+python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidViewMotion --motion_file reallusion_sword_shield/RL_Avatar_Atk_2xCombo01_Motion.npy --inference --headless=False
 ```
 
 You can also use the absolute path of the motion file.
 
 ```shell
-python examples/learning_rl/example_HumanoidASE_RofuncRL.py --task HumanoidViewMotion --motion_file /home/ubuntu/Github/Rofunc/examples/data/amp/reallusion_sword_shield/RL_Avatar_Atk_Jump_Motion.npy --inference --headless=False
+python examples/learning_rl/IsaacGym_RofuncRL/example_HumanoidASE_RofuncRL.py --task HumanoidViewMotion --motion_file /home/ubuntu/Github/Rofunc/examples/data/amp/reallusion_sword_shield/RL_Avatar_Atk_Jump_Motion.npy --inference --headless=False
 ```
 
 ## Baseline comparison

@@ -100,67 +100,70 @@ def get_objects(input_path: str):
     return objs_list, meta_list
 
 
-def data_clean(input_path: str, legacy: bool = True, objs: dict = None, save: bool = False):
+def data_clean(input_path: str, legacy: bool = True, objs: dict = None, no_unlabeled=True, save: bool = False):
     """
     Cleans the Optitrack data.
-    Args:
-        input_path (str): path to the Optitrack data.
-        legacy (:obj:`bool`, optional): if True, it will use the legacy version of the function.\
-                                        Defaults to True.
-        objs (:obj:`dict`, optional): dictionary of objects to keep. If set to None, export all data.\
-                                        Defaults to None.
-        save (:obj:`bool`, optional): if True, it will save the cleaned data to disk.\
-                                        Defaults to False.
-    Returns:
-        list: list of cleaned data for all csv in folder. Type of elements in list depend on args.
+
+    :param input_path: path to the Optitrack data.
+    :param legacy: if True, it will use the legacy version of the function. Defaults to True.
+    :param objs: dictionary of objects to keep. If set to None, export all data. Defaults to None.
+    :param no_unlabeled: if True, it will remove the unlabeled data. Defaults to True.
+    :param save: if True, it will save the cleaned data to disk. Defaults to False.
+    :return: list of cleaned data for all csv in folder. Type of elements in list depend on args.
     """
-    # TODO: Must work for **file** or folder input path
-    out_path = os.path.join(input_path, 'process')
-    if save:
-        rf.oslab.create_dir(out_path)
-    demo_csvs = os.listdir(input_path)
-    demo_csvs = sorted(demo_csvs)
+    if input_path.endswith('.csv'):
+        parent_dir = os.path.dirname(input_path)
+        demo_csvs = [os.path.basename(input_path)]
+        input_path = parent_dir
+        out_path = os.path.join(input_path, 'process')
+    else:  # A folder
+        out_path = os.path.join(input_path, 'process')
+        if save:
+            rf.oslab.create_dir(out_path)
+        demo_csvs = os.listdir(input_path)
+        demo_csvs = sorted(demo_csvs)
     out_list = list()
     for i in range(len(demo_csvs)):
         demo_csv = demo_csvs[i]
-        if 'Take' in demo_csv:
-            if legacy:
-                out_list.append(data_clean_legacy(input_path, demo_csv, out_path))
+        if legacy:
+            out_list.append(data_clean_legacy(input_path, demo_csv, out_path))
+        else:
+            if objs is None:
+                out_data = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
+                if save:
+                    out_data.to_csv(os.path.join(out_path, demo_csv))
+                out_list.append(out_data)
             else:
-                if objs is None:
-                    out_data = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
-                    if save:
-                        out_data.to_csv(os.path.join(out_path, demo_csv))
-                    out_list.append(out_data)
-                else:
-                    labels = ['frame', 'time']
-                    out_data = []
-                    data_raw = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
-                    out_data.append(data_raw.iloc[:, 0])
-                    out_data.append(data_raw.iloc[:, 1])
-                    for obj in objs:
-                        labels.extend([f"{obj}.pose.x", f"{obj}.pose.y", f"{obj}.pose.z"]),
-                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['X']])
-                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Y']])
-                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Z']])
-                        if objs[obj]['type'] == 'Rigid Body':
-                            labels.extend([f"{obj}.pose.qx", f"{obj}.pose.qy", f"{obj}.pose.qz", f"{obj}.pose.qw"])
-                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['X']])
-                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Y']])
-                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Z']])
-                            out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['W']])
-                        for marker in objs[obj]['markers']:
-                            labels.extend(
-                                [f"{obj}.marker.{marker}.x", f"{obj}.marker.{marker}.y", f"{obj}.marker.{marker}.z"])
-                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['X']])
-                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Y']])
-                            out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Z']])
-                    out_data = np.array(out_data).T
-                    out_list.append((out_data, labels))
-                    if save:
-                        with open(os.path.join(out_path, demo_csv.replace('.csv', '_labels.pkl')), 'wb') as f:
-                            pkl.dump(labels, f)
-                        np.save(os.path.join(out_path, demo_csv.replace('csv', 'npy')), out_data)
+                labels = ['frame', 'time']
+                out_data = []
+                data_raw = pd.read_csv(os.path.join(input_path, demo_csv), skiprows=6)
+                out_data.append(data_raw.iloc[:, 0])
+                out_data.append(data_raw.iloc[:, 1])
+                for obj in objs:
+                    if no_unlabeled and 'unlabeled' in obj:
+                        continue
+                    labels.extend([f"{obj}.pose.x", f"{obj}.pose.y", f"{obj}.pose.z"]),
+                    out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['X']])
+                    out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Y']])
+                    out_data.append(data_raw.iloc[:, objs[obj]['pose']["Position"]['Z']])
+                    if objs[obj]['type'] == 'Rigid Body':
+                        labels.extend([f"{obj}.pose.qx", f"{obj}.pose.qy", f"{obj}.pose.qz", f"{obj}.pose.qw"])
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['X']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Y']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['Z']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['pose']["Rotation"]['W']])
+                    for marker in objs[obj]['markers']:
+                        labels.extend(
+                            [f"{obj}.marker.{marker}.x", f"{obj}.marker.{marker}.y", f"{obj}.marker.{marker}.z"])
+                        out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['X']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Y']])
+                        out_data.append(data_raw.iloc[:, objs[obj]['markers'][marker]['pose']["Position"]['Z']])
+                out_data = np.array(out_data).T
+                out_list.append((out_data, labels))
+                if save:
+                    with open(os.path.join(out_path, demo_csv.replace('.csv', '_labels.pkl')), 'wb') as f:
+                        pkl.dump(labels, f)
+                    np.save(os.path.join(out_path, demo_csv.replace('csv', 'npy')), out_data)
 
     print('{} finished'.format(input_path.split('/')[-1]))
     return out_list

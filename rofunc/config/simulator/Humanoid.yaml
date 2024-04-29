@@ -11,10 +11,10 @@ env:
   asset:
     robot_name: "Humanoid"
     assetRoot:
-    assetFile: "mjcf/amp_humanoid.xml"
-    init_pose: [0.0, 1.8, 0.0, 0.0, 0.0, 0.0, 1]
-    fix_base_link: False
-    flip_visual_attachments: False
+    assetFile: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
+    init_pose: [0.0, 0.0, 1.8, 0.0, 0.0, 0.0, 1]
+    fix_base_link: True
+    flip_visual_attachments: True
     armature: 0.01
 
   object_asset:

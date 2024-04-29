@@ -17,9 +17,7 @@ from rofunc.learning.utils.utils import set_seed
 def train(custom_args):
     args_overrides = ["task={}".format(custom_args.task),
                       "train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()),
-                      "sim_device={}".format(custom_args.sim_device),
                       "rl_device={}".format(custom_args.rl_device),
-                      "graphics_device_id={}".format(custom_args.graphics_device_id),
                       "headless={}".format(custom_args.headless)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
     gym_task_name = custom_args.task.split('_')[1]
@@ -32,7 +30,7 @@ def train(custom_args):
         env = gym.vector.make(gym_task_name, render_mode=custom_args.render_mode, num_envs=10, asynchronous=False)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)

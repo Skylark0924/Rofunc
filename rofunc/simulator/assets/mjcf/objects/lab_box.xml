@@ -1,0 +1,28 @@
+<mujoco model="lab_box">
+    <compiler meshdir="./meshes"/>
+
+    <default>
+        <motor ctrlrange="-1 1" ctrllimited="true"/>
+        <default class="body">
+            <geom type="capsule" condim="1" friction="1.0 0.05 0.05" solimp=".9 .99 .003" solref=".015 1"/>
+            <joint type="hinge" damping="0.1" stiffness="5" armature=".007" limited="true" solimplimit="0 .99 .01"/>
+            <site size=".04" group="3"/>
+            <default class="force-torque">
+                <site type="box" size=".01 .01 .02" rgba="1 0 0 1"/>
+            </default>
+            <default class="touch">
+                <site type="capsule" rgba="0 0 1 .3"/>
+            </default>
+        </default>
+    </default>
+        <asset>
+        <mesh name="box" file="lab_box.obj" scale="1 1 1"/>
+    </asset>
+    <worldbody>
+        <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
+        <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
+        <body name="box" pos="0 0 1">
+            <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="box"/>
+        </body>
+    </worldbody>
+</mujoco>

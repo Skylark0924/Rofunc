@@ -37,7 +37,7 @@ efforts[4] = -100000
 CURIsim = rf.sim.CURISim(args, num_envs=num_envs, fix_base_link=True)
 CURIsim.init()
 CURIsim.run_traj_multi_joints_with_interference(traj=[traj_l, traj_r],
-                                                attracted_joints=["panda_left_hand", "panda_right_hand"],
+                                                attracted_rigid_bodies=["panda_left_hand", "panda_right_hand"],
                                                 intf_mode="body_forces",
                                                 intf_forces=forces, intf_torques=torques,
                                                 intf_index=[50], update_freq=0.001, save_name='state7')

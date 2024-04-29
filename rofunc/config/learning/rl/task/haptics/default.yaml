@@ -1,0 +1,10 @@
+enable: True
+buzz:
+  proportional_to: 'high_freq'  # Which property is mapped to vibration of the fingers ['force', 'force_increase', 'collision']
+  full_at: 3.  # Which value is equivalent to maximum vibration
+  collision_vibration_time: 0.09  # Time vibration is active after the impact of a finger
+  low_pass_horizon: 0.3 # [s]
+force_feedback:
+  proportional_to: 'force'
+  full_at: 1.0  # Which effective fingertip force is equivalent to maximum feedback force
+  binary: True  # Whether to apply feedback force at 100% once full_at is reached and 0% else

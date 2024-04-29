@@ -201,7 +201,7 @@ class Memory:
 
         # define tensor shape
         tensor_shape = (self.memory_size, self.num_envs, *size) if keep_dimensions else (
-        self.memory_size, self.num_envs, size)
+            self.memory_size, self.num_envs, size)
         view_shape = (-1, *size) if keep_dimensions else (-1, size)
         # create tensor (_tensor_<name>) and add it to the internal storage
         setattr(self, "_tensor_{}".format(name), torch.zeros(tensor_shape, device=self.device, dtype=dtype))
@@ -268,8 +268,12 @@ class Memory:
                     if name in self.tensors:
                         self.tensors[name][self.memory_index].copy_(tensor)
             except:
-                raise ValueError("The tensors have incompatible shapes. \n name: {} \n Expect shape: {} "
-                                 "\n Got shape: {}".format(name, self.tensors[name][self.memory_index].shape, tensor.shape))
+                try:
+                    raise ValueError("The tensors have incompatible shapes. \n name: {} \n Expect shape: {} "
+                                     "\n Got shape: {}".format(name, self.tensors[name][self.memory_index].shape,
+                                                               tensor.shape))
+                except:
+                    raise ValueError("The tensor might be None. \n name: {}".format(name))
             self.memory_index += 1
         # multi environment (number of environments less than num_envs)
         elif dim >= 2 and shape[0] < self.num_envs:

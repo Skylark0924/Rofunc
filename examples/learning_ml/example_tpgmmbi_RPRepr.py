@@ -31,3 +31,13 @@ model_l, model_r = Repr.fit()
 
 # Reproductions for the same situations
 Repr.reproduce([model_l, model_r], show_demo_idx=2)
+
+# Reproductions for new situations
+start_xdx_l = [np.array([-0.5, 1, 0, 0])]
+end_xdx_l = [np.array([4, 4, 0, 0])]
+start_xdx_r = [np.array([6.5, 7, 0, 0])]
+end_xdx_r = end_xdx_l
+
+Repr.task_params = {"left": {"frame_origins": [start_xdx_l, end_xdx_l], "frame_names": ["start", "end"]},
+                    "right": {"frame_origins": [start_xdx_r, end_xdx_r], "frame_names": ["start", "end"]}}
+traj_l, traj_r, _, _ = Repr.generate([model_l, model_r], ref_demo_idx=0)

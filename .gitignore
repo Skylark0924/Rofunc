@@ -179,3 +179,10 @@ doc/source/examples
 doc/source/apidocs
 .vscode/
 *.pth
+rofunc/simulator/assets/urdf/ycb/*
+/rofunc/learning/pre_trained_models/efficientsam_s_gpu.jit
+/rofunc/learning/pre_trained_models/efficientsam_ti_gpu.jit
+
+examples/learning_rl/saved_runs/
+saved_runs/
+wandb

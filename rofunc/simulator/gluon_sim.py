@@ -74,15 +74,15 @@ class GluonSim(RobotSim):
             gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
             gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
-    def run_traj(self, traj, attracted_joints="6_Link", update_freq=0.001):
-        self.run_traj_multi_joints([traj], [attracted_joints], update_freq)
+    def run_traj(self, traj, attracted_rigid_bodies="6_Link", update_freq=0.001):
+        self.run_traj_multi_rigid_bodies([traj], [attracted_rigid_bodies], update_freq)
 
-    def run_traj_multi_joints_with_interference(self, traj: List, intf_index: List, intf_mode: str,
+    def run_traj_multi_rigid_bodies_with_interference(self, traj: List, intf_index: List, intf_mode: str,
                                                 intf_forces=None, intf_torques=None, intf_joints: List = None,
-                                                intf_efforts: np.ndarray = None, attracted_joints: List = None,
+                                                intf_efforts: np.ndarray = None, attracted_rigid_bodies: List = None,
                                                 update_freq=0.001, save_name=None):
         """
-        Run the trajectory with multiple joints with interference, the default is to run the trajectory with the left and
+        Run the trajectory with multiple rigid bodies with interference, the default is to run the trajectory with the left and
         right hand of the CURI robot.
         Args:
             traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
@@ -92,7 +92,7 @@ class GluonSim(RobotSim):
             intf_torques: a tensor of shape (num_envs, num_bodies, 3), the interference torques applied to the bodies
             intf_joints: [list], e.g. ["panda_left_hand"]
             intf_efforts: array containing the efforts for all degrees of freedom of the actor.
-            attracted_joints: [list], e.g. ["panda_left_hand", "panda_right_hand"]
+            attracted_rigid_bodies: [list], e.g. ["panda_left_hand", "panda_right_hand"]
             update_freq: the frequency of updating the robot pose
         """
         from isaacgym import gymapi
@@ -102,8 +102,6 @@ class GluonSim(RobotSim):
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
         assert intf_mode in ["actor_dof_efforts", "body_forces", "body_force_at_pos"], \
             "The interference mode should be one of ['actor_dof_efforts', 'body_forces', 'body_force_at_pos']"
-
-        beauty_print('Execute multi-joint trajectory with interference with the CURI simulator')
 
         device = self.args.sim_device if self.args.use_gpu_pipeline else 'cpu'
         num_bodies = self.get_num_bodies()
@@ -117,7 +115,7 @@ class GluonSim(RobotSim):
             intf_torques = intf_torques.to(device)
 
         # Create the attractor
-        attracted_joints, attractor_handles, axes_geoms, sphere_geoms = self.setup_attractors(traj, attracted_joints)
+        attracted_rigid_bodies, attractor_handles, axes_geoms, sphere_geoms = self.setup_attractors(traj, attracted_rigid_bodies)
 
         # Time to wait in seconds before moving robot
         next_gluon_update_time = 1
@@ -128,7 +126,7 @@ class GluonSim(RobotSim):
             t = self.gym.get_sim_time(self.sim)
             if t >= next_gluon_update_time:
                 self.gym.clear_lines(self.viewer)
-                for i in range(len(attracted_joints)):
+                for i in range(len(attracted_rigid_bodies)):
                     self.update_robot(traj[i], attractor_handles[i], axes_geoms[i], sphere_geoms[i], index)
                 next_gluon_update_time += update_freq
                 index += 1

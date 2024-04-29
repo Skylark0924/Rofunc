@@ -1,0 +1,9 @@
+useRelativeControl: True
+actionMovingAverage: 1.0
+controlFreqInv: 3 # 1 / (controlFreqInv * dt) Hz
+clampActionDeviation: True
+teleoperated: False  # Whether the simulation is controlled via teleoperation
+scale:
+  relativePosSpeed: 2.5
+  relativeRotSpeed: 10
+  handJointSpeed: 10.0

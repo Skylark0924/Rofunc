@@ -32,3 +32,15 @@ model_l, model_r, model_c = Repr.fit()
 
 # Reproductions for the same situations
 Repr.reproduce([model_l, model_r, model_c], show_demo_idx=2)
+
+# Reproductions for new situations
+start_xdx_l = [np.array([-0.5, 1, 0, 0])]
+end_xdx_l = [np.array([5, 4, 0, 0])]
+start_xdx_r = [np.array([6.5, 7, 0, 0])]
+end_xdx_r = end_xdx_l
+
+Repr.task_params = {"left": {"frame_origins": [start_xdx_l, end_xdx_l], "frame_names": ["start", "end"]},
+                    "right": {"frame_origins": [start_xdx_r, end_xdx_r], "frame_names": ["start", "end"]},
+                    "relative": {"frame_origins": [[start_xdx_l[0] - start_xdx_r[0]], [end_xdx_l[0] - end_xdx_r[0]]],
+                                 "frame_names": ["start", "end"]}}
+traj_l, traj_r, _, _ = Repr.generate([model_l, model_r, model_c], ref_demo_idx=1)
