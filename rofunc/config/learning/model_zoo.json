@@ -238,5 +238,15 @@
     "url": "https://drive.google.com/uc?id=1DLtOwFfrKhfR8sBw1zutJo1IH0GXoqD1&export=download",
     "name": "efficientsam_ti_gpu.jit",
     "md5": ""
+  },
+  "ElfinBagWasherOmniPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1ARfMMK8JetzFajlaoOPgFS4Ksb7HJXd6&export=download",
+    "name": "ElfinBagWasherOmniPPO.pth",
+    "md5": ""
+  },
+  "ElfinBagBasketOmniPPO.pth": {
+    "url": "https://drive.google.com/uc?id=1xPDLI4dUFdOUzMUJjW0ZKs_590FKjoo_&export=download",
+    "name": "ElfinBagBasketOmniPPO.pth",
+    "md5": ""
   }
 }

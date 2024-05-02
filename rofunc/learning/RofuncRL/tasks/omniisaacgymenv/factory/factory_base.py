@@ -44,11 +44,11 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.stage import get_current_stage
 from pxr import PhysxSchema, UsdPhysics
 
-import rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_control as fc
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.factory_franka import FactoryFranka
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_schema_class_base import FactoryABCBase
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_schema_config_base import FactorySchemaConfigBase
+import rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_control as fc
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.factory_franka import FactoryFranka
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_schema_class_base import FactoryABCBase
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_schema_config_base import FactorySchemaConfigBase
 
 
 class FactoryBase(RLTask, FactoryABCBase):

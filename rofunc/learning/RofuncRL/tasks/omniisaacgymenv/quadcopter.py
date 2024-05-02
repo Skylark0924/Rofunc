@@ -34,9 +34,9 @@ from omni.isaac.core.prims import RigidPrimView
 from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.torch.rotations import *
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.quadcopter import Quadcopter
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.quadcopter_view import QuadcopterView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.quadcopter import Quadcopter
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.quadcopter_view import QuadcopterView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 
 class QuadcopterOmniTask(RLTask):

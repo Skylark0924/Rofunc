@@ -18,7 +18,7 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from pxr import PhysxSchema
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.usd_utils import set_drive
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.utils.usd_utils import set_drive
 
 
 class Franka(Robot):

@@ -31,11 +31,11 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.stage import get_current_stage
 from omni.isaac.core.utils.torch.rotations import *
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.anymal import Anymal
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.anymal_view import AnymalView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.anymal_terrain_generator import *
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.terrain_utils.terrain_utils import *
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.anymal import Anymal
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.anymal_view import AnymalView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.utils.anymal_terrain_generator import *
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.utils.terrain_utils.terrain_utils import *
 
 
 class AnymalTerrainOmniTask(RLTask):

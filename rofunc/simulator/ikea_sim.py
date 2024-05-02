@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import isaacgym
 import os
 from github import Github
 
-from isaacgym import gymapi
 
 from rofunc.simulator.franka_sim import FrankaSim
 from rofunc.utils.logger.beauty_logger import beauty_print
@@ -41,6 +39,7 @@ class IkeaSim:
             self._init_furniture(ikea_config)
 
     def _init_furniture(self, ikea_config):
+        from isaacgym import gymapi
         furniture_name = ikea_config["name"]
 
         asset_options = gymapi.AssetOptions()
@@ -138,6 +137,7 @@ class IkeaSim:
                 furniture_handles.append(actor_handle)
 
     def _apply_texture(self, env, actor_handle, body_name, texture_file_name=None):
+        from isaacgym import gymapi
         rigid_body_index = self.robot_sim.gym.find_actor_rigid_body_index(
             env, actor_handle, body_name, gymapi.DOMAIN_ACTOR
         )

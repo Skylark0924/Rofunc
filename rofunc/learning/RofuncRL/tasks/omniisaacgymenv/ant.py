@@ -31,9 +31,9 @@ import torch
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.utils.prims import get_prim_at_path
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.ant import Ant
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.shared.locomotion import LocomotionTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.ant import Ant
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.shared.locomotion import LocomotionTask
 
 
 class AntOmniTask(LocomotionTask):

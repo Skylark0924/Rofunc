@@ -7,12 +7,11 @@ Usage Example 2:
 
 """
 
-from isaacgym import gymutil
-from isaacgym import gymapi
 from rofunc.devices.optitrack.process import export
 
 
 def env_setup():
+    from isaacgym import gymutil, gymapi
     """
    set up Isaac gym environment for object pose transfer.
    """

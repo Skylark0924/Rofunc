@@ -18,9 +18,9 @@ from omni.isaac.core.utils.torch.transformations import *
 from omni.physx.scripts import physicsUtils
 from pxr import Gf
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.franka import Franka
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.franka_view import FrankaView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.franka import Franka
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.franka_view import FrankaView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 
 class FrankaDeformableOmniTask(RLTask):

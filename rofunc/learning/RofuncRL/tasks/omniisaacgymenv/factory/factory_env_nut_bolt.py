@@ -41,12 +41,12 @@ from omni.isaac.core.utils.nucleus import get_assets_root_path
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.physx.scripts import utils, physicsUtils
 
-import rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_control as fc
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.factory_franka_view import FactoryFrankaView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_base import FactoryBase
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_schema_class_env import FactoryABCEnv
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_schema_config_env import FactorySchemaConfigEnv
+import rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_control as fc
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.factory_franka_view import FactoryFrankaView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_base import FactoryBase
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_schema_class_env import FactoryABCEnv
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_schema_config_env import FactorySchemaConfigEnv
 
 
 class FactoryEnvNutBolt(FactoryBase, FactoryABCEnv):

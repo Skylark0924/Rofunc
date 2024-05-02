@@ -169,10 +169,7 @@ class ActorPPO_Gaussian(BaseActor):
             if self.cfg.use_log_std_clip:
                 log_std = torch.clamp(log_std, self.cfg.log_std_clip_min, self.cfg.log_std_clip_max)
 
-            try:
-                self.dist = Normal(output_action, log_std.exp())  # Get the Gaussian distribution
-            except:
-                raise ValueError("ddddddd")
+            self.dist = Normal(output_action, log_std.exp())  # Get the Gaussian distribution
 
             # sample using the re-parameterization trick
             if action is None:
