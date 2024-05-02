@@ -598,7 +598,7 @@ def process_omni_config(cfg):
     return omni_config
 
 
-def load_view_motion_config(config_name):
+def get_view_motion_config(config_name):
     """Load the configs stored in config_name.yaml.
 
     Args:

@@ -1,0 +1,17 @@
+keyBodies: [ "right_hand", "left_hand", "right_ankle_link", "left_ankle_link" ]
+contactBodies: [ "right_ankle_link", "left_ankle_link" ]
+
+
+# animation files to learn from
+motion_file:
+motion_file_asset: "mjcf/amp_humanoid_sword_shield.xml"
+object_motion_file:
+
+asset:
+  assetFileName: "mjcf/amp_humanoid_sword_shield.xml"
+
+use_object_motion: False
+object_asset:
+  assetName: [ "box" ]        # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+  assetFileName: [ "mjcf/objects/lab_box.xml" ]     # List of object asset file path
+  assetSize: [ [ 1, 1, 1 ] ]        # List of object size, used for scaling the object and creating the box objects
