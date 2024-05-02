@@ -24,7 +24,7 @@ env:
     assetRoot:
 #    assetFile: "mjcf/UnitreeH1/h1.xml"
     assetFile: "mjcf/UnitreeH1/h1_w_qbhand.xml"
-    init_pose: [0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0]
+    init_pose: [0, 0.0, 1.2, 0.0, 0.0, 1.0, 0.0]
     fix_base_link: True
     disable_gravity: False
     flip_visual_attachments: False

@@ -246,7 +246,7 @@ class RobotSim:
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)
         default_dof_pos = np.zeros(robot_num_dofs, dtype=np.float32)
-        default_dof_pos[:] = robot_mids[:]
+        # default_dof_pos[:] = robot_mids[:]
 
         default_dof_state = np.zeros(robot_num_dofs, gymapi.DofState.dtype)
         default_dof_state["pos"] = default_dof_pos
