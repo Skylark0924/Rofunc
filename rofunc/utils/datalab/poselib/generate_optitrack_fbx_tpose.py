@@ -14,7 +14,6 @@
 
 import os
 
-import isaacgym
 import torch
 
 import rofunc as rf

@@ -20,11 +20,11 @@ from omni.isaac.core.utils.torch.rotations import *
 from omni.isaac.core.utils.torch.transformations import *
 from pxr import UsdGeom
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.cabinet import Cabinet
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.franka import Franka
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.cabinet_view import CabinetView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.franka_view import FrankaView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.cabinet import Cabinet
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.franka import Franka
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.cabinet_view import CabinetView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.franka_view import FrankaView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 
 class FrankaCabinetOmniTask(RLTask):

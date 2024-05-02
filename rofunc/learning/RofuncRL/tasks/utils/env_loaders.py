@@ -169,7 +169,6 @@ def load_isaacgym_env_preview3(task_name: str = "", isaacgymenvs_path: str = "",
 
     from omegaconf import OmegaConf
 
-    import isaacgym
     import isaacgymenvs
 
     # check task from command line arguments
@@ -310,7 +309,7 @@ def load_omniverse_isaacgym_env(task_name: str = "",
     from omni.isaac.gym.vec_env import VecEnvBase, VecEnvMT, TaskStopException
     from omni.isaac.gym.vec_env.vec_env_mt import TrainerMT
 
-    import rofunc.learning.RofuncRL.tasks.omniisaacgym
+    import rofunc.learning.RofuncRL.tasks.omniisaacgymenv
 
     # check task from command line arguments
     defined = False
@@ -332,9 +331,9 @@ def load_omniverse_isaacgym_env(task_name: str = "",
 
     # get rofunc.learning.RofuncRL.tasks.omniisaacgym path from rofunc.learning.RofuncRL.tasks.omniisaacgym package metadata
     if omniisaacgymenvs_path == "":
-        if not hasattr(rofunc.learning.RofuncRL.tasks.omniisaacgym, "__path__"):
+        if not hasattr(rofunc.learning.RofuncRL.tasks.omniisaacgymenv, "__path__"):
             raise RuntimeError("rofunc.learning.RofuncRL.tasks.omniisaacgym package is not installed")
-        omniisaacgymenvs_path = list(rofunc.learning.RofuncRL.tasks.omniisaacgym.__path__)[0]
+        omniisaacgymenvs_path = list(rofunc.learning.RofuncRL.tasks.omniisaacgymenv.__path__)[0]
     config_path = os.path.join(omniisaacgymenvs_path, "cfg")
 
     # set omegaconf resolvers

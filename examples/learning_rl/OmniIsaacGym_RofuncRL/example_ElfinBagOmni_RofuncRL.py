@@ -9,6 +9,7 @@ import argparse
 from rofunc.config.utils import get_config, process_omni_config
 from rofunc.learning.RofuncRL.trainers import Trainers
 from rofunc.learning.RofuncRL.tasks import Tasks
+from rofunc.learning.pre_trained_models.download import model_zoo
 from rofunc.learning.utils.utils import set_seed
 
 
@@ -35,7 +36,7 @@ def train(custom_args):
     omni_env.set_task(task=env, sim_params=omni_cfg.get_physics_params(), backend="torch", init_sim=True)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=omni_env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
@@ -65,19 +66,24 @@ def inference(custom_args):
     omni_env.set_task(task=env, sim_params=omni_cfg.get_physics_params(), backend="torch", init_sim=True)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg.train,
+    trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
                                                         env=omni_env,
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
     # load checkpoint
+    # if custom_args.ckpt_path is None:
+    #     if omni_cfg.task_config["env"]["enable_washer_task"]:
+    #         ckpt_name = "RofuncRL_PPOTrainer_ElfinBagOmni_24-04-18_00-08-44-714616"
+    #     else:
+    #         ckpt_name = "RofuncRL_PPOTrainer_ElfinBagOmni_24-04-18_12-53-19-650902"
+    #     custom_args.ckpt_path = "/home/clover/Rofunc/examples/learning_rl/OmniIsaacGym_RofuncRL/runs/" \
+    #                              + ckpt_name \
+    #                              + "/checkpoints/best_ckpt.pth"
     if custom_args.ckpt_path is None:
-        if omni_cfg.task_config["env"]["enable_washer_task"]:
-            ckpt_name = "RofuncRL_PPOTrainer_ElfinBagOmni_24-04-18_00-08-44-714616"
-        else:
-            ckpt_name = "RofuncRL_PPOTrainer_ElfinBagOmni_24-04-18_12-53-19-650902"
-        custom_args.ckpt_path = "/home/clover/Rofunc/examples/learning_rl/OmniIsaacGym_RofuncRL/runs/" \
-                                 + ckpt_name \
-                                 + "/checkpoints/best_ckpt.pth"
+        if custom_args.task == "ElfinBagWasherOmni":
+            custom_args.ckpt_path = model_zoo(name="ElfinBagWasherOmniPPO.pth")
+        elif custom_args.task == "ElfinBagBasketOmni":
+            custom_args.ckpt_path = model_zoo(name="ElfinBagBasketOmniPPO.pth")
     trainer.agent.load_ckpt(custom_args.ckpt_path)
 
     # Start inference
@@ -85,10 +91,10 @@ def inference(custom_args):
 
 
 if __name__ == '__main__':
-    gpu_id = 1
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="ElfinBagOmni")
+    parser.add_argument("--task", type=str, default="ElfinBagBasketOmni")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--device_id", type=int, default=gpu_id)

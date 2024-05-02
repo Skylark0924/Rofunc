@@ -33,7 +33,7 @@ import torch
 from omni.isaac.core.utils.torch.maths import torch_rand_float, tensor_clamp, unscale
 from omni.isaac.core.utils.torch.rotations import compute_heading_and_up, compute_rot, quat_conjugate
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 
 class LocomotionTask(RLTask):

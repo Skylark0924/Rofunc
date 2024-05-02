@@ -34,8 +34,8 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.stage import get_current_stage
 from omni.isaac.core.utils.torch.maths import *
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.balance_bot import BalanceBot
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.balance_bot import BalanceBot
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 
 class BallBalanceOmniTask(RLTask):

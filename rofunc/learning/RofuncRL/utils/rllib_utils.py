@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import gym.spaces
-import isaacgym
 import numpy as np
 import torch
 from ray.rllib.env import VectorEnv

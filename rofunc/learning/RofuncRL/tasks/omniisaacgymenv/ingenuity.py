@@ -35,9 +35,9 @@ from omni.isaac.core.prims import RigidPrimView
 from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.torch.rotations import *
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.ingenuity import Ingenuity
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.ingenuity_view import IngenuityView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.ingenuity import Ingenuity
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.ingenuity_view import IngenuityView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 
 class IngenuityOmniTask(RLTask):

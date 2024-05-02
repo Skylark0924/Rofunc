@@ -31,9 +31,9 @@ import torch
 from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.torch import *
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.allegro_hand import AllegroHand
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.allegro_hand_view import AllegroHandView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.shared.in_hand_manipulation import InHandManipulationTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.allegro_hand import AllegroHand
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.allegro_hand_view import AllegroHandView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.shared.in_hand_manipulation import InHandManipulationTask
 
 
 class AllegroHandOmniTask(InHandManipulationTask):

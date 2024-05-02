@@ -101,21 +101,21 @@ class Tasks:
             }
         elif env_type == "omniisaacgym":
             # OmniIsaacGym tasks
-            from .omniisaacgym.allegro_hand import AllegroHandOmniTask
-            from .omniisaacgym.ant import AntOmniTask
-            from .omniisaacgym.anymal import AnymalOmniTask
-            from .omniisaacgym.anymal_terrain import AnymalTerrainOmniTask
-            from .omniisaacgym.ball_balance import BallBalanceOmniTask
-            from .omniisaacgym.cartpole import CartpoleOmniTask
-            from .omniisaacgym.crazyflie import CrazyflieOmniTask
-            from .omniisaacgym.franka_cabinet import FrankaCabinetOmniTask
-            from .omniisaacgym.humanoid import HumanoidOmniTask
-            from .omniisaacgym.ingenuity import IngenuityOmniTask
-            from .omniisaacgym.quadcopter import QuadcopterOmniTask
-            from .omniisaacgym.shadow_hand import ShadowHandOmniTask
-            from .omniisaacgym.factory.factory_task_nut_bolt_pick import FactoryNutBoltPickOmniTask
-            from .omniisaacgym.aubo_cube import AuboCubeOmniTask
-            from .omniisaacgym.elfin_bag import ElfinBagOmniTask
+            from .omniisaacgymenv.allegro_hand import AllegroHandOmniTask
+            from .omniisaacgymenv.ant import AntOmniTask
+            from .omniisaacgymenv.anymal import AnymalOmniTask
+            from .omniisaacgymenv.anymal_terrain import AnymalTerrainOmniTask
+            from .omniisaacgymenv.ball_balance import BallBalanceOmniTask
+            from .omniisaacgymenv.cartpole import CartpoleOmniTask
+            from .omniisaacgymenv.crazyflie import CrazyflieOmniTask
+            from .omniisaacgymenv.franka_cabinet import FrankaCabinetOmniTask
+            from .omniisaacgymenv.humanoid import HumanoidOmniTask
+            from .omniisaacgymenv.ingenuity import IngenuityOmniTask
+            from .omniisaacgymenv.quadcopter import QuadcopterOmniTask
+            from .omniisaacgymenv.shadow_hand import ShadowHandOmniTask
+            from .omniisaacgymenv.factory.factory_task_nut_bolt_pick import FactoryNutBoltPickOmniTask
+            from .omniisaacgymenv.aubo_cube import AuboCubeOmniTask
+            from .omniisaacgymenv.elfin_bag import ElfinBagOmniTask
             self.task_map = {
                 "AllegroHandOmni": AllegroHandOmniTask,
                 "AntOmni": AntOmniTask,
@@ -131,5 +131,6 @@ class Tasks:
                 "ShadowHandOmni": ShadowHandOmniTask,
                 "FactoryNutBoltPickOmni": FactoryNutBoltPickOmniTask,
                 "AuboCubeOmni": AuboCubeOmniTask,
-                "ElfinBagOmni": ElfinBagOmniTask,
+                "ElfinBagWasherOmni": ElfinBagOmniTask,
+                "ElfinBagBasketOmni": ElfinBagOmniTask,
             }

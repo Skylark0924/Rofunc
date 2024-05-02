@@ -16,9 +16,9 @@ from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.isaac.core.utils.torch.rotations import *
 from omni.isaac.core.utils.torch.transformations import *
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.elfin import Elfin
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.elfin_view import ElfinView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.elfin import Elfin
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.elfin_view import ElfinView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 class ElfinBagOmniTask(RLTask):
     def __init__(

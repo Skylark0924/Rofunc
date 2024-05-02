@@ -13,10 +13,10 @@
 # limitations under the License.
 
 from typing import List
-
+import numpy as np
+import torch
 import matplotlib.pyplot as plt
 from PIL import Image as Im
-from isaacgym.torch_utils import *
 
 import rofunc as rf
 from rofunc.simulator.base_sim import RobotSim
@@ -24,6 +24,7 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 
 def orientation_error(desired, current):
+    from isaacgym.torch_utils import quat_conjugate, quat_mul
     cc = quat_conjugate(current)
     q_r = quat_mul(desired, cc)
     return q_r[0:3] * torch.sign(q_r[3]).unsqueeze(-1)
@@ -180,6 +181,7 @@ class CURISim(RobotSim):
                 gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
     def control_ik(self, dpose):
+
         damping = 0.1
         # solve damped least squares
         j_eef_T = torch.transpose(self.j_eef, 1, 2)
@@ -188,6 +190,7 @@ class CURISim(RobotSim):
         return u
 
     def control_osc(self, dpose, hand_vel, massmatrix, dof_indices):
+
         kp = 1500.
         kd = 2.0 * np.sqrt(kp)
         kp_null = 10.
@@ -238,7 +241,6 @@ class CURISim(RobotSim):
         """
         from isaacgym import gymapi
         from isaacgym import gymtorch
-        import torch
 
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
         assert intf_mode in ["actor_dof_efforts", "body_forces", "body_force_at_pos"], \
@@ -419,6 +421,7 @@ class CURISim(RobotSim):
 
     def run_with_text_commands(self, verbose=True):
         from isaacgym import gymapi, gymtorch, gymutil
+        from isaacgym.torch_utils import to_torch
 
         self.add_tracking_target_sphere_axes()
         self.add_head_embedded_camera()

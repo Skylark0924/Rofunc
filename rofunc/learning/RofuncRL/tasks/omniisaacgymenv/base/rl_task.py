@@ -37,8 +37,8 @@ from omni.isaac.core.utils.prims import define_prim
 from omni.isaac.cloner import GridCloner
 from omni.isaac.core.utils.extensions import enable_extension
 enable_extension("omni.replicator.isaac")
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.usd_utils import create_distant_light
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.domain_randomization.randomize import Randomizer
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.utils.usd_utils import create_distant_light
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.utils.domain_randomization.randomize import Randomizer
 import omni.kit
 from omni.kit.viewport.utility.camera_state import ViewportCameraState
 from omni.kit.viewport.utility import get_viewport_from_window_name

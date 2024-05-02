@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.utils.terrain_utils.terrain_utils import *
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.utils.terrain_utils.terrain_utils import *
 
 
 # terrain generator

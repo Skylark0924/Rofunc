@@ -20,13 +20,13 @@ from omni.isaac.core.utils.torch.rotations import *
 from omni.isaac.core.utils.torch.transformations import *
 from pxr import UsdGeom
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.aubo import Aubo
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.basket import Basket
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.aubo_view import AuboView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.basket_view import BasketView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.bag import Bag
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.views.bag_view import BagView
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.aubo import Aubo
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.basket import Basket
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.aubo_view import AuboView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.basket_view import BasketView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.bag import Bag
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.views.bag_view import BagView
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 
 class AuboCubeOmniTask(RLTask):

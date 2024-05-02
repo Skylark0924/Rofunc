@@ -34,8 +34,8 @@ import torch
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.utils.prims import get_prim_at_path
 
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.articulations.cartpole import Cartpole
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.base.rl_task import RLTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.articulations.cartpole import Cartpole
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.base.rl_task import RLTask
 
 
 class CartpoleOmniTask(RLTask):

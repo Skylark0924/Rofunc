@@ -39,10 +39,10 @@ import torch
 from omni.isaac.core.simulation_context import SimulationContext
 from omni.isaac.core.utils.torch.transformations import *
 
-import rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_control as fc
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_env_nut_bolt import FactoryEnvNutBolt
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_schema_class_task import FactoryABCTask
-from rofunc.learning.RofuncRL.tasks.omniisaacgym.factory.factory_schema_config_task import FactorySchemaConfigTask
+import rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_control as fc
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_env_nut_bolt import FactoryEnvNutBolt
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_schema_class_task import FactoryABCTask
+from rofunc.learning.RofuncRL.tasks.omniisaacgymenv.factory.factory_schema_config_task import FactorySchemaConfigTask
 
 
 class FactoryNutBoltPickOmniTask(FactoryEnvNutBolt, FactoryABCTask):
