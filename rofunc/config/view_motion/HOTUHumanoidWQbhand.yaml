@@ -1,8 +1,17 @@
-class_name: HumanoidViewMotion
-asset_name: "mjcf/hotu_humanoid_w_qbhand.xml"
-asset_body_num: 83
-asset_joint_num: 102
-asset_dof_num: 100
+keyBodies: [ "right_hand", "left_hand", "right_foot", "left_foot" ]
+contactBodies: [ "right_foot", "left_foot" ]
 
-keyBodies: ["right_hand", "left_hand", "right_foot", "left_foot"]
-contactBodies: ["right_foot", "left_foot"]
+
+# animation files to learn from
+motion_file: "examples/data/hotu2/test_data_05_optitrack2hotu.npy"
+motion_file_asset: "mjcf/hotu_humanoid_w_qbhand_full.xml"
+object_motion_file:
+
+asset:
+  assetFileName: "mjcf/hotu_humanoid_w_qbhand_full.xml"
+
+use_object_motion: False
+object_asset:
+  assetName:         # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+  assetFileName:     # List of object asset file path
+  assetSize:         # List of object size, used for scaling the object and creating the box objects

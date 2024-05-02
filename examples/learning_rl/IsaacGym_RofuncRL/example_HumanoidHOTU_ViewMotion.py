@@ -7,8 +7,9 @@ Preview the motion of the digital humanoid
 
 import isaacgym
 import argparse
+from omegaconf import OmegaConf
 
-from rofunc.config.utils import omegaconf_to_dict, get_config
+from rofunc.config.utils import omegaconf_to_dict, get_config, get_view_motion_config
 from rofunc.learning.RofuncRL.tasks import Tasks
 from rofunc.learning.RofuncRL.trainers import Trainers
 
@@ -23,17 +24,8 @@ def inference(custom_args):
         "num_envs={}".format(1),
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
-    cfg.task.env.motion_file = custom_args.motion_file
-    cfg.task.env.asset.assetFileName = custom_args.asset
-    cfg.task.env.keyBodies = custom_args.keyBodies
-    cfg.task.env.contactBodies = custom_args.contactBodies
-    cfg.task.env.motion_file_asset = custom_args.mf_asset
-    if custom_args.use_object_motion:
-        cfg.task.env.object_motion_file = custom_args.object_motion_file
-        cfg.task.env.object_asset.assetFileName = custom_args.object_asset_files
-        cfg.task.env.object_asset.assetName = custom_args.object_asset_names
-        cfg.task.env.object_asset.assetSize = custom_args.object_asset_sizes
-
+    cfg_view_motion = get_view_motion_config(custom_args.view_motion_type)
+    cfg.task.env = OmegaConf.merge(cfg.task.env, cfg_view_motion)
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     # Instantiate the Isaac Gym environment
@@ -47,11 +39,11 @@ def inference(custom_args):
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map["ase"](cfg=cfg,
-                                             env=infer_env,
-                                             device=cfg.rl_device,
-                                             env_name=custom_args.task,
-                                             hrl=False,
-                                             inference=True)
+                                            env=infer_env,
+                                            device=cfg.rl_device,
+                                            env_name=custom_args.task,
+                                            hrl=False,
+                                            inference=True)
 
     # Start inference
     trainer.inference()
@@ -64,42 +56,12 @@ if __name__ == "__main__":
     # Find or define your own config in `rofunc/config/`
     parser.add_argument("--task", type=str, default="HumanoidHOTUViewMotion")
     # Available types of asset file path:
-    #  1. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
-    #  2. mjcf/amp_humanoid_sword_shield.xml
-    #  3. mjcf/hotu_humanoid.xml
-    #  4. mjcf/amp_humanoid.xml
-    #  5. mjcf/hotu_humanoid_w_qbhand_full.xml
-    #  6. mjcf/UnitreeH1/h1_w_qbhand.xml
-    #  7. mjcf/curi/curi_w_softhand_isaacgym.xml
-    #  8. mjcf/walker/walker.xml
-    # parser.add_argument("--asset", type=str, default="mjcf/UnitreeH1/h1_w_qbhand.xml")
-    # #  1. For H1: ["right_hand", "left_hand", "right_ankle_link", "left_ankle_link"]
-    # #  2. For hotu_humanoid: ["right_hand", "left_hand", "right_foot", "left_foot"]
-    # #  3. For curi: ["panda_right_link7", "panda_left_link7"]
-    # #  4. For walker: ["right_limb_l7", "left_limb_l7", "right_leg_l6", "left_leg_l6"]
-    # parser.add_argument("--keyBodies", type=list, default=["right_hand", "left_hand", "right_ankle_link", "left_ankle_link"])
-    # #  1. For H1: ["right_ankle_link", "left_ankle_link"]
-    # #  2. For curi: ["summit_xls_back_right_wheel_link", "summit_xls_back_left_wheel_link", "summit_xls_front_right_wheel_link", "summit_xls_front_left_wheel_link"]
-    # #  3. For walker: ["right_leg_l6", "left_leg_l6"]
-    # parser.add_argument("--contactBodies", type=list, default=["right_ankle_link", "left_ankle_link"])
-    # # Available types of motion file path:
-    # #  1. test data provided by rofunc: `examples/data/hotu/*.npy`
-    # #  2. custom motion file with absolute path
-    # parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/test_data_05_optitrack2h1.npy")
-
-    parser.add_argument("--asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_full.xml")
-    parser.add_argument("--keyBodies", type=list, default=["right_hand", "left_hand", "right_foot", "left_foot"])
-    parser.add_argument("--contactBodies", type=list, default=["right_foot", "left_foot"])
-    parser.add_argument("--motion_file", type=str, default="examples/data/hotu2/test_data_05_optitrack2hotu.npy")
-    parser.add_argument("--mf_asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_full.xml")
-
-    parser.add_argument("--use_object_motion", action="store_true")
-    parser.add_argument("--object_motion_file", type=str, default="examples/data/hotu2/test_data_04_optitrack.csv")
-    # parser.add_argument("--object_asset_names", type=str, default=["box:marker 001", "box:marker 002", "box:marker 003", "box:marker 004"])
-    parser.add_argument("--object_asset_names", type=str, default=["box"])
-    parser.add_argument("--object_asset_files", type=str, default=["mjcf/objects/lab_box.xml"])
-    # parser.add_argument("--object_asset_sizes", type=str, default=[[0.05, 0.05, 0.05], [0.05, 0.05, 0.05], [0.05, 0.05, 0.05], [0.05, 0.05, 0.05]])
-    parser.add_argument("--object_asset_sizes", type=str, default=[[1, 1, 1]])
+    #  1. HOTUHumanoid
+    #  2. HOTUHumanoidWQbhand
+    #  3. HOTUH1WQbhand
+    #  4. HOTUCURIWQbhand
+    #  5. HOTUWalker
+    parser.add_argument("--view_motion_type", type=str, default="HOTUHumanoid")
     custom_args = parser.parse_args()
 
     inference(custom_args)
