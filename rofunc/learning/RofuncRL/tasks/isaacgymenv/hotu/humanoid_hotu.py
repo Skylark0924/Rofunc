@@ -364,6 +364,7 @@ class HumanoidHOTUTask(Humanoid):
         assert self._dof_offsets[-1] == self.num_dof
 
         self._motion_lib = MotionLib(
+            cfg=self.cfg,
             motion_file=motion_file,
             asset_infos=self.humanoid_asset_infos,
             key_body_names=self.key_bodies,

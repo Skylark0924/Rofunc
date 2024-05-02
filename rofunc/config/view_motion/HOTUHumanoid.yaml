@@ -4,7 +4,13 @@ contactBodies: [ "right_foot", "left_foot" ]
 
 # animation files to learn from
 motion_file: "examples/data/hotu2/test_data_05_optitrack2hotu.npy"
+
 motion_file_asset: "mjcf/hotu_humanoid_w_qbhand_full.xml"
+right_left_ids_except_thumb: [ 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+                               34, 35, 36, 37, 38, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64,
+                               65, 66, 67, 68, 69, 70, 71, 72, 73, 74 ]
+right_left_thumb_knuckle_ids: [ 7, 44 ]
+
 object_motion_file:
 
 asset:
