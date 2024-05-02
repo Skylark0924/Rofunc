@@ -30,12 +30,14 @@ print("MOVING MOTION DATA TO GPU, USING CACHE:", USE_CACHE)
 if not USE_CACHE:
     old_numpy = torch.Tensor.numpy
 
+
     class Patch:
         def numpy(self):
             if self.is_cuda:
                 return self.to("cpu").numpy()
             else:
                 return old_numpy(self)
+
 
     torch.Tensor.numpy = Patch.numpy
 
@@ -78,19 +80,20 @@ class DeviceCache:
 
 
 class MotionLib:
-    def __init__(self, motion_file, asset_infos, key_body_names, device, humanoid_type, mf_humanoid_type):
+    def __init__(self, cfg, motion_file, asset_infos, key_body_names, device, humanoid_type, mf_humanoid_type):
         """
         Motion library for the IsaacGym humanoid series environments and process the motion data exported from Optitrack
         or Xsens.
 
+        :param cfg: the configuration file for the task
         :param motion_file: motion file path, should be .yaml files or .npy files
-        :param dof_body_ids: list of body ids that have degrees of freedom
-        :param dof_offsets: list of dof offsets for each body id
-        :param key_body_ids: list of key body ids
+        :param asset_infos: the asset information dict for the humanoid models
+        :param key_body_names: list of key body ids
         :param device: device same as the env/task device
         :param humanoid_type: the type of humanoid, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
         :param mf_humanoid_type: the type of humanoid in the motion file, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
         """
+        self.cfg = cfg
         self.humanoid_asset_infos = asset_infos
         self.humanoid_type = humanoid_type
         self.mf_humanoid_type = mf_humanoid_type
@@ -166,20 +169,30 @@ class MotionLib:
 
     def get_skeleton_rb_index(self):
         self.mfrb2rb_dict = {}  # rigid body id mapping from motion file humanoid model to humanoid model we need
+        unexpected_rb_names = []
         for rb_name in self.mf_humanoid_rb_dict.keys():
             if rb_name in self.humanoid_rb_dict.keys():
                 self.mfrb2rb_dict[self.mf_humanoid_rb_dict[rb_name]] = self.humanoid_rb_dict[rb_name]
             else:
-                raise ValueError("The rb_name is not in the humanoid_rb_dict")
+                # raise ValueError(f"The {rb_name} is not in the humanoid_rb_dict")
+                unexpected_rb_names.append(rb_name)
+        if len(unexpected_rb_names) > 0:
+            rf.logger.beauty_print(f"The following rigid bodies are not in the humanoid_rb_dict: {unexpected_rb_names}",
+                                   "warning")
         self.rb2mfrb_dict = {v: k for k, v in self.mfrb2rb_dict.items()}
 
     def get_skeleton_dof_index(self):
         self.mfdof2dof_dict = {}
+        unexpected_dof_names = []
         for dof_name in self.mf_humanoid_dof_dict.keys():
             if dof_name in self.humanoid_dof_dict.keys():
                 self.mfdof2dof_dict[self.mf_humanoid_dof_dict[dof_name]] = self.humanoid_dof_dict[dof_name]
             else:
-                raise ValueError("The dof_name is not in the humanoid_dof_dict")
+                # raise ValueError(f"The {dof_name} is not in the humanoid_dof_dict")
+                unexpected_dof_names.append(dof_name)
+        if len(unexpected_dof_names) > 0:
+            rf.logger.beauty_print(f"The following dofs are not in the humanoid_dof_dict: {unexpected_dof_names}",
+                                   "warning")
         self.dof2mfdof_dict = {v: k for k, v in self.mfdof2dof_dict.items()}
 
     def transfer_motion_to_humanoid_type(self):
@@ -501,118 +514,110 @@ class MotionLib:
             joint_offset = dof_offsets[j]
             joint_size = dof_offsets[j + 1] - joint_offset
 
-            right_hand_id = self.mf_humanoid_rb_dict["right_hand"]
-            left_hand_id = self.mf_humanoid_rb_dict["left_hand"]
+            # if self.mf_humanoid_type == "hotu_humanoid_w_qbhand_no_virtual":
+            #     right_hand_id = 5
+            #     right_hand_ori = [0, 1, 0, 0]
+            #     left_hand_id = 23
+            #     left_hand_ori = [1, 0, 0, 0]
+            #     right_left_ids_except_thumb = [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]
+            #     right_left_thumb_knuckle_ids = [6, 24]
+            # elif self.mf_humanoid_type == "hotu_humanoid_w_qbhand_full":
+            #     right_left_ids_except_thumb = [*[i for i in range(11, 39)], *[i for i in range(47, 75)]]
+            #     right_left_thumb_knuckle_ids = [6, 42]
+            # elif self.mf_humanoid_type == "h1_w_qbhand":
+            #     right_hand_id = 55
+            #     right_hand_ori = [0, 0, 0, 1]
+            #     left_hand_id = 16
+            #     left_hand_ori = [0, 0, 0, 1]
+            #     right_left_ids_except_thumb = [*[i for i in range(23, 51)], *[i for i in range(62, 90)]]
+            #     right_left_thumb_knuckle_ids = [18, 57]
+            #     left_shoulder_pitch_id = 12
+            #     left_shoulder_roll_id = 13
+            #     left_shoulder_yaw_id = 14
+            #     right_shoulder_pitch_id = 51
+            #     right_shoulder_roll_id = 52
+            #     right_shoulder_yaw_id = 53
+            #     left_hip_pitch_id = 3
+            #     left_hip_roll_id = 2
+            #     left_hip_yaw_id = 1
+            #     right_hip_pitch_id = 8
+            #     right_hip_roll_id = 7
+            #     right_hip_yaw_id = 6
+            #     torso_id = 11
+            # elif self.mf_humanoid_type == "curi_w_softhand_isaacgym":
+            #     right_hand_id = 54
+            #     right_hand_ori = [0, 0, 0, 1]
+            #     left_hand_id = 14
+            #     left_hand_ori = [0, 0, 0, 1]
+            #     right_left_ids_except_thumb = [*[i for i in range(20, 48)], *[i for i in range(60, 88)]]
+            #     right_left_thumb_knuckle_ids = [15, 55]
+            #
+            #     torso_id = 5
+            #     panda_left_link1_id = 8
+            #     panda_left_link2_id = 9
+            #     panda_left_link3_id = 10
+            #     panda_left_link4_id = 11
+            #     panda_left_link5_id = 12
+            #     panda_left_link6_id = 13
+            #     panda_left_link7_id = 14
+            #     panda_right_link1_id = 48
+            #     panda_right_link2_id = 49
+            #     panda_right_link3_id = 50
+            #     panda_right_link4_id = 51
+            #     panda_right_link5_id = 52
+            #     panda_right_link6_id = 53
+            #     panda_right_link7_id = 54
+            # elif self.mf_humanoid_type == "walker":
+            #     right_left_ids_except_thumb = [*[i for i in range(9, 19)], *[i for i in range(26, 36)]]
+            #     # right_left_ids = [*[i for i in range(9, 19)], *[i for i in range(26, 36)]]
+            #     right_left_thumb_knuckle_ids = []
+            #
+            #     head_l1_id = 36
+            #     head_l2_id = 37
+            #
+            #     right_limb_l1_id = 2
+            #     right_limb_l2_id = 3
+            #     right_limb_l3_id = 4
+            #     right_limb_l4_id = 5
+            #     right_limb_l5_id = 6
+            #     right_limb_l6_id = 7
+            #     right_limb_l7_id = 8
+            #     left_limb_l1_id = 19
+            #     left_limb_l2_id = 20
+            #     left_limb_l3_id = 21
+            #     left_limb_l4_id = 22
+            #     left_limb_l5_id = 23
+            #     left_limb_l6_id = 24
+            #     left_limb_l7_id = 25
+            #
+            #     right_leg_l1_id = 38
+            #     right_leg_l2_id = 39
+            #     right_leg_l3_id = 40
+            #     right_leg_l4_id = 41
+            #     right_leg_l5_id = 42
+            #     right_leg_l6_id = 43
+            #     left_leg_l1_id = 44
+            #     left_leg_l2_id = 45
+            #     left_leg_l3_id = 46
+            #     left_leg_l4_id = 47
+            #     left_leg_l5_id = 48
+            #     left_leg_l6_id = 49
+            #
+            #     torso_id = 1
+            # else:
+            #     raise ValueError("Unsupported humanoid type")
+            #     # rf.logger.beauty_print("Unsupported humanoid type", "warning")
+            #     # pass
 
-            if self.mf_humanoid_type == "hotu_humanoid_w_qbhand_no_virtual":
-                right_hand_id = 5
-                right_hand_ori = [0, 1, 0, 0]
-                left_hand_id = 23
-                left_hand_ori = [1, 0, 0, 0]
-                right_left_ids_except_thumb = [*[i for i in range(10, 21)], *[i for i in range(28, 39)]]
-                right_left_thumb_knuckle_ids = [6, 24]
-            elif self.mf_humanoid_type == "hotu_humanoid_w_qbhand_full":
-                right_hand_ori = [0, 1, 0, 0]
-                left_hand_ori = [1, 0, 0, 0]
-                right_left_ids_except_thumb = [*[i for i in range(11, 39)], *[i for i in range(47, 75)]]
-                right_left_thumb_knuckle_ids = [6, 42]
-            elif self.mf_humanoid_type == "h1_w_qbhand":
-                right_hand_id = 55
-                right_hand_ori = [0, 0, 0, 1]
-                left_hand_id = 16
-                left_hand_ori = [0, 0, 0, 1]
-                right_left_ids_except_thumb = [*[i for i in range(23, 51)], *[i for i in range(62, 90)]]
-                right_left_thumb_knuckle_ids = [18, 57]
-                left_shoulder_pitch_id = 12
-                left_shoulder_roll_id = 13
-                left_shoulder_yaw_id = 14
-                right_shoulder_pitch_id = 51
-                right_shoulder_roll_id = 52
-                right_shoulder_yaw_id = 53
-                left_hip_pitch_id = 3
-                left_hip_roll_id = 2
-                left_hip_yaw_id = 1
-                right_hip_pitch_id = 8
-                right_hip_roll_id = 7
-                right_hip_yaw_id = 6
-                torso_id = 11
-            elif self.mf_humanoid_type == "curi_w_softhand_isaacgym":
-                right_hand_id = 54
-                right_hand_ori = [0, 0, 0, 1]
-                left_hand_id = 14
-                left_hand_ori = [0, 0, 0, 1]
-                right_left_ids_except_thumb = [*[i for i in range(20, 48)], *[i for i in range(60, 88)]]
-                right_left_thumb_knuckle_ids = [15, 55]
-
-                torso_id = 5
-                panda_left_link1_id = 8
-                panda_left_link2_id = 9
-                panda_left_link3_id = 10
-                panda_left_link4_id = 11
-                panda_left_link5_id = 12
-                panda_left_link6_id = 13
-                panda_left_link7_id = 14
-                panda_right_link1_id = 48
-                panda_right_link2_id = 49
-                panda_right_link3_id = 50
-                panda_right_link4_id = 51
-                panda_right_link5_id = 52
-                panda_right_link6_id = 53
-                panda_right_link7_id = 54
-            elif self.mf_humanoid_type == "walker":
-                right_left_ids_except_thumb = [*[i for i in range(9, 19)], *[i for i in range(26, 36)]]
-                # right_left_ids = [*[i for i in range(9, 19)], *[i for i in range(26, 36)]]
-                right_left_thumb_knuckle_ids = []
-
-                head_l1_id = 36
-                head_l2_id = 37
-
-                right_limb_l1_id = 2
-                right_limb_l2_id = 3
-                right_limb_l3_id = 4
-                right_limb_l4_id = 5
-                right_limb_l5_id = 6
-                right_limb_l6_id = 7
-                right_limb_l7_id = 8
-                left_limb_l1_id = 19
-                left_limb_l2_id = 20
-                left_limb_l3_id = 21
-                left_limb_l4_id = 22
-                left_limb_l5_id = 23
-                left_limb_l6_id = 24
-                left_limb_l7_id = 25
-
-                right_leg_l1_id = 38
-                right_leg_l2_id = 39
-                right_leg_l3_id = 40
-                right_leg_l4_id = 41
-                right_leg_l5_id = 42
-                right_leg_l6_id = 43
-                left_leg_l1_id = 44
-                left_leg_l2_id = 45
-                left_leg_l3_id = 46
-                left_leg_l4_id = 47
-                left_leg_l5_id = 48
-                left_leg_l6_id = 49
-
-                torso_id = 1
-            else:
-                raise ValueError("Unsupported humanoid type")
-                # rf.logger.beauty_print("Unsupported humanoid type", "warning")
-                # pass
+            right_left_ids_except_thumb_and_knuckle = self.cfg["env"]["right_left_ids_except_thumb_and_knuckle"]
+            right_left_thumb_knuckle_ids = self.cfg["env"]["right_left_thumb_knuckle_ids"]
 
             if joint_size == 3:
                 joint_q = local_rot[:, body_id]
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
-                # if body_id is right_hand_id:  # Right hand
-                #     new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2(right_hand_ori, joint_q)
-                #     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
-                # elif body_id is left_hand_id:  # Left hand
-                #     new_joint_q = rf.robolab.quaternion_multiply_tensor_multirow2(left_hand_ori, joint_q)
-                #     joint_exp_map = torch_utils.quat_to_exp_map(new_joint_q)
                 dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
             elif joint_size == 1:
-                if body_id in right_left_ids_except_thumb:  # Right and left fingers except thumbs
+                if body_id in right_left_ids_except_thumb_and_knuckle:  # Right and left fingers except thumbs
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
