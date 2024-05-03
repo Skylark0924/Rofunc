@@ -29,16 +29,8 @@ class PhysHOITrainer(BaseTrainer):
                                   device, self.exp_dir, self.rofunc_logger)
 
     def pre_interaction(self):
-        # if self.collect_observation is not None:
-        #     self.agent._current_states = self.collect_observation()
-        self.env.reset_done()
-
-    # def get_action(self, states):
-    #     if self._step < self.random_steps:
-    #         actions = torch.tensor([self.env.action_space.sample() for _ in range(self.env.num_envs)]).to(self.device)
-    #     else:
-    #         actions, _ = self.agent.act(states, deterministic=True)
-    #     return actions
+        if self.collect_observation is not None:
+            self.agent._current_states = self.collect_observation()
 
     def post_interaction(self):
         self._rollout += 1
