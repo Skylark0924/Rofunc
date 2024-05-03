@@ -25,7 +25,9 @@ import rofunc as rf
 import multiprocessing
 import os
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 # from isaacgym import gymapi
 # def _project_joints(motion):
@@ -379,7 +381,7 @@ def npy_from_fbx(fbx_file):
         },
         # "rotation": [0.707, 0, 0, 0.707], xyzw
         "rotation": [0.5, 0.5, 0.5, 0.5],
-        "scale": 0.01,
+        "scale": 0.001,  # Export millimeter to meter
         "root_height_offset": 0.0,
         "trim_frame_beg": 0,
         "trim_frame_end": -1
@@ -396,7 +398,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2")
     parser.add_argument("--fbx_dir", type=str, default=None)
-    parser.add_argument("--fbx_file", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_01_optitrack.fbx")
+    parser.add_argument("--fbx_file", type=str,
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
