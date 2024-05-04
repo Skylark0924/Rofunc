@@ -18,14 +18,16 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 from PIL import Image as Im
-from isaacgym.torch_utils import *
 
 import rofunc as rf
 from rofunc.simulator.base_sim import RobotSim
 from rofunc.utils.logger.beauty_logger import beauty_print
 
+import torch
 
 def orientation_error(desired, current):
+    from isaacgym.torch_utils import quat_conjugate, quat_mul
+    
     cc = quat_conjugate(current)
     q_r = quat_mul(desired, cc)
     return q_r[0:3] * torch.sign(q_r[3]).unsqueeze(-1)
@@ -460,6 +462,7 @@ class CURISim(RobotSim):
 
     def run_with_text_commands(self, verbose=True):
         from isaacgym import gymapi, gymtorch, gymutil
+        from isaacgym.torch_utils import to_torch
 
         self.add_tracking_target_sphere_axes()
         self.add_head_embedded_camera()
@@ -817,6 +820,7 @@ class CURISim(RobotSim):
         self.gym.destroy_sim(self.sim)
 
     def _get_dof_action_from_synergy(self, synergy_action, useful_joint_index):
+        from isaacgym.torch_utils import scale_np
 
         # the first synergy is 0~1, the second is -1~1
         synergy_action[0] = abs(synergy_action[0])
