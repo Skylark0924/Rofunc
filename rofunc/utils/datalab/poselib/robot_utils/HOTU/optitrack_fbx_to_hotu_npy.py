@@ -16,7 +16,7 @@
 Attention: Since the Autodesk FBX SDK just supports Python 3.7, this script should be run with Python 3.7.
 """
 
-from isaacgym import gymapi
+# from isaacgym import gymapi
 from rofunc.utils.datalab.poselib.poselib.visualization.common import plot_skeleton_motion_interactive, \
     plot_skeleton_state
 from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonState, SkeletonMotion

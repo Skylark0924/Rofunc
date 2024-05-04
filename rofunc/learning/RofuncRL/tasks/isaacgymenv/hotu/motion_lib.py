@@ -16,8 +16,8 @@ import os
 import time
 from collections import OrderedDict
 
+import numpy as np
 import yaml
-from isaacgym.torch_utils import *
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
@@ -283,12 +283,9 @@ class MotionLib:
     def get_motion_state(self, motion_ids, motion_times):
         """
 
-        Args:
-            motion_ids:
-            motion_times:
-
-        Returns:
-
+        :param motion_ids:
+        :param motion_times:
+        :return:
         """
         # n = len(motion_ids)
         # num_bodies = self._get_num_bodies()
@@ -339,7 +336,6 @@ class MotionLib:
         blend = blend.unsqueeze(-1)
 
         root_pos = (1.0 - blend) * root_pos0 + blend * root_pos1
-
         root_rot = torch_utils.slerp(root_rot0, root_rot1, blend)
 
         blend_exp = blend.unsqueeze(-1)
@@ -808,7 +804,7 @@ class MotionLib:
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
 
-                joint_theta = normalize_angle(joint_theta)
+                joint_theta = torch_utils.normalize_angle(joint_theta)
                 dof_pos[:, joint_offset] = joint_theta
             else:
                 print("Unsupported joint type")
