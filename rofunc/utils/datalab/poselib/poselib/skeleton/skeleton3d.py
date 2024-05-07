@@ -919,7 +919,7 @@ class SkeletonState(Serializable):
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
                 elif "left_qbhand_root_link" in x:
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
-                elif x in ["left_hip_roll_link", "left_hip_pitch_link", "right_hip_roll_link", "right_hip_pitch_link",
+                elif x in ["left_hip_roll_link", "left_hip_yaw_link", "right_hip_roll_link", "right_hip_yaw_link",
                            "left_shoulder_roll_link", "right_shoulder_roll_link", "left_shoulder_yaw_link",
                            "right_shoulder_yaw_link"]:
                     # For unitree H1
