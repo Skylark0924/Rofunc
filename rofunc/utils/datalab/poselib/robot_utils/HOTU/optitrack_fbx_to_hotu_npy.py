@@ -15,6 +15,7 @@
 """
 Attention: Since the Autodesk FBX SDK just supports Python 3.7, this script should be run with Python 3.7.
 """
+import isaacgym
 import multiprocessing
 import os
 import sys
@@ -194,6 +195,61 @@ def _project_joints(motion):
     return new_motion
 
 
+def _run_sim(motion):
+    pelvis_id = motion.skeleton_tree._node_indices["pelvis"]
+    torso_id = motion.skeleton_tree._node_indices["torso"]
+    head_id = motion.skeleton_tree._node_indices["head"]
+    right_shoulder_id = motion.skeleton_tree._node_indices["right_upper_arm"]
+    right_elbow_id = motion.skeleton_tree._node_indices["right_lower_arm"]
+    right_hand_id = motion.skeleton_tree._node_indices["right_hand"]
+    left_shoulder_id = motion.skeleton_tree._node_indices["left_upper_arm"]
+    left_elbow_id = motion.skeleton_tree._node_indices["left_lower_arm"]
+    left_hand_id = motion.skeleton_tree._node_indices["left_hand"]
+    right_hip_id = motion.skeleton_tree._node_indices["right_thigh"]
+    right_knee_id = motion.skeleton_tree._node_indices["right_shin"]
+    right_foot_id = motion.skeleton_tree._node_indices["right_foot"]
+    left_hip_id = motion.skeleton_tree._node_indices["left_thigh"]
+    left_knee_id = motion.skeleton_tree._node_indices["left_shin"]
+    left_foot_id = motion.skeleton_tree._node_indices["left_foot"]
+
+    motion_rb_states_pos = motion.global_translation
+    motion_rb_states_rot = motion.global_rotation
+
+    # motion_rb_states_pos[:, :, 2] += 0.2
+    motion_rb_states = torch.cat([motion_rb_states_pos, motion_rb_states_rot], dim=-1)
+
+    motion_root_pos = motion_rb_states_pos[:, 0]
+    motion_root_rot = motion_rb_states_rot[:, 0]
+    motion_root_vel = motion.global_root_velocity
+    motion_root_ang_vel = motion.global_root_angular_velocity
+    motion_root_states = torch.cat([motion_root_pos, motion_root_rot, motion_root_vel, motion_root_ang_vel], dim=-1)
+
+    args = rf.config.get_sim_config("Humanoid")
+    Humanoidsim = rf.sim.RobotSim(args)
+    Humanoidsim.run_traj_multi_rigid_bodies(
+        traj=[motion_rb_states[:, torso_id], motion_rb_states[:, pelvis_id], motion_rb_states[:, head_id],
+              motion_rb_states[:, right_shoulder_id], motion_rb_states[:, left_shoulder_id],
+              motion_rb_states[:, right_elbow_id], motion_rb_states[:, left_elbow_id],
+              motion_rb_states[:, right_hand_id], motion_rb_states[:, left_hand_id],
+              motion_rb_states[:, right_hip_id], motion_rb_states[:, left_hip_id],
+              motion_rb_states[:, right_knee_id], motion_rb_states[:, left_knee_id],
+              motion_rb_states[:, right_foot_id], motion_rb_states[:, left_foot_id]
+              ],
+        attr_rbs=["torso", "pelvis", "head",
+                  "right_upper_arm", "left_upper_arm",
+                  "right_lower_arm", "left_lower_arm",
+                  "right_hand", "left_hand",
+                  "right_thigh", "left_thigh",
+                  "right_shin", "left_shin",
+                  "right_foot", "left_foot"
+                  ],
+        update_freq=0.001,
+        root_state=motion_root_states,
+        key_bodies=["right_hand", "left_hand", "right_foot", "left_foot"],
+        verbose=False
+    )
+
+
 def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=True):
     # import fbx file - make sure to provide a valid joint name for root_joint
     motion = SkeletonMotion.from_fbx(
@@ -313,6 +369,8 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         #                                                          target_motion.root_translation[0], is_local=True)
         # plot_skeleton_state(state, verbose=True)
 
+    _run_sim(target_motion)
+
 
 def npy_from_fbx(fbx_file):
     """
@@ -403,8 +461,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2")
     parser.add_argument("--fbx_dir", type=str, default=None)
+    # parser.add_argument("--fbx_file", type=str,
+    #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
-                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
+                        # default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
+                        default="/home/ubuntu/Downloads/MoCap Data/30042024 DATA/Random Movements (Whole Body) Take 2024-04-30 05.35.43 PM.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml

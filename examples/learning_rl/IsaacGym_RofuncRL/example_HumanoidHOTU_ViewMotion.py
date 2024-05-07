@@ -53,7 +53,6 @@ if __name__ == "__main__":
     gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    # Find or define your own config in `rofunc/config/`
     parser.add_argument("--task", type=str, default="HumanoidHOTUViewMotion")
     # Available types of asset file path:
     #  1. HOTUHumanoid
