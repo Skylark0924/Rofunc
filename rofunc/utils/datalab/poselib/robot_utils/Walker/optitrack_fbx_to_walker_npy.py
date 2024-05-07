@@ -25,7 +25,9 @@ import rofunc as rf
 import multiprocessing
 import os
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 # from isaacgym import gymapi
 # def _project_joints(motion):
@@ -185,6 +187,61 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 #     return new_motion
 
 
+def _run_sim(motion):
+    pelvis_id = motion.skeleton_tree._node_indices["base_link"]
+    torso_id = motion.skeleton_tree._node_indices["torso"]
+    head_id = motion.skeleton_tree._node_indices["head_l2"]
+    right_shoulder_id = motion.skeleton_tree._node_indices["right_limb_l1"]
+    right_elbow_id = motion.skeleton_tree._node_indices["right_limb_l4"]
+    right_hand_id = motion.skeleton_tree._node_indices["right_limb_l7"]
+    left_shoulder_id = motion.skeleton_tree._node_indices["left_limb_l1"]
+    left_elbow_id = motion.skeleton_tree._node_indices["left_limb_l4"]
+    left_hand_id = motion.skeleton_tree._node_indices["left_limb_l7"]
+    right_hip_id = motion.skeleton_tree._node_indices["right_leg_l1"]
+    right_knee_id = motion.skeleton_tree._node_indices["right_leg_l4"]
+    right_foot_id = motion.skeleton_tree._node_indices["right_leg_l6"]
+    left_hip_id = motion.skeleton_tree._node_indices["left_leg_l1"]
+    left_knee_id = motion.skeleton_tree._node_indices["left_leg_l4"]
+    left_foot_id = motion.skeleton_tree._node_indices["left_leg_l6"]
+
+    motion_rb_states_pos = motion.global_translation
+    motion_rb_states_rot = motion.global_rotation
+
+    motion_rb_states_pos[:, :, 2] += 0.2
+    motion_rb_states = torch.cat([motion_rb_states_pos, motion_rb_states_rot], dim=-1)
+
+    motion_root_pos = motion_rb_states_pos[:, 0]
+    motion_root_rot = motion_rb_states_rot[:, 0]
+    motion_root_vel = motion.global_root_velocity
+    motion_root_ang_vel = motion.global_root_angular_velocity
+    motion_root_states = torch.cat([motion_root_pos, motion_root_rot, motion_root_vel, motion_root_ang_vel], dim=-1)
+
+    args = rf.config.get_sim_config("Walker")
+    Walkersim = rf.sim.RobotSim(args)
+    Walkersim.run_traj_multi_rigid_bodies(
+        traj=[motion_rb_states[:, torso_id], motion_rb_states[:, pelvis_id], motion_rb_states[:, head_id],
+              motion_rb_states[:, right_shoulder_id], motion_rb_states[:, left_shoulder_id],
+              motion_rb_states[:, right_elbow_id], motion_rb_states[:, left_elbow_id],
+              motion_rb_states[:, right_hand_id], motion_rb_states[:, left_hand_id],
+              motion_rb_states[:, right_hip_id], motion_rb_states[:, left_hip_id],
+              motion_rb_states[:, right_knee_id], motion_rb_states[:, left_knee_id],
+              motion_rb_states[:, right_foot_id], motion_rb_states[:, left_foot_id]
+              ],
+        attr_rbs=["torso", "base_link", "head_l2",
+                  "right_limb_l1", "left_limb_l1",
+                  "right_limb_l4", "left_limb_l4",
+                  "right_limb_l7", "left_limb_l7",
+                  "right_leg_l1", "left_leg_l1",
+                  "right_leg_l4", "left_leg_l4",
+                  "right_leg_l6", "left_leg_l6"
+                  ],
+        update_freq=0.001,
+        root_state=motion_root_states,
+        key_bodies=["right_limb_l7", "left_limb_l7", "right_leg_l6", "left_leg_l6"],
+        verbose=False
+    )
+
+
 def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=True):
     # import fbx file - make sure to provide a valid joint name for root_joint
     motion = SkeletonMotion.from_fbx(
@@ -260,8 +317,8 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     tar_global_pos = target_motion.global_translation
 
     # Set the human foot on the ground
-    # min_h = torch.min(tar_global_pos[..., 2])
-    # root_translation[:, 2] += -min_h
+    min_h = torch.min(tar_global_pos[..., 2])
+    root_translation[:, 2] += -min_h
 
     # adjust the height of the root to avoid ground penetration
     root_height_offset = retarget_cfg["root_height_offset"]
@@ -303,6 +360,8 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         # state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, target_motion.rotation[0],
         #                                                          target_motion.root_translation[0], is_local=True)
         # plot_skeleton_state(state, verbose=True)
+
+    _run_sim(target_motion)
 
 
 def npy_from_fbx(fbx_file):
@@ -380,7 +439,7 @@ def npy_from_fbx(fbx_file):
         # "rotation": [0.707, 0, 0, 0.707], # xyzw
         # "rotation": [0, 0, 0, 1], # xyzw
         "rotation": [0.5, 0.5, 0.5, 0.5],
-        "scale": 0.01,
+        "scale": 0.001,
         "root_height_offset": 0.0,
         "trim_frame_beg": 0,
         "trim_frame_end": -1
@@ -397,7 +456,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2")
     parser.add_argument("--fbx_dir", type=str, default=None)
-    parser.add_argument("--fbx_file", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_01_optitrack.fbx")
+    # parser.add_argument("--fbx_file", type=str,
+    #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
+    parser.add_argument("--fbx_file", type=str,
+                        default="/home/ubuntu/Downloads/MoCap Data/30042024 DATA/Random Movements (Whole Body) Take 2024-04-30 05.35.43 PM.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
