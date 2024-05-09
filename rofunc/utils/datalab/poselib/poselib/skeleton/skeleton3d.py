@@ -28,15 +28,14 @@
 
 import os
 import xml.etree.ElementTree as ET
-from collections import OrderedDict
-from typing import List, Optional, Type, Dict
+from typing import List, Type, Dict
 
 import numpy as np
-import torch
-
-from ..core import *
-from .backend.fbx.fbx_read_wrapper import fbx_to_array
 import scipy.ndimage.filters as filters
+
+import rofunc as rf
+from .backend.fbx.fbx_read_wrapper import fbx_to_array
+from ..core import *
 
 
 class SkeletonTree(Serializable):
@@ -236,8 +235,8 @@ class SkeletonTree(Serializable):
             try:
                 for next_node in xml_node.findall("body"):
                     node_index = _add_xml_node(next_node, curr_index, node_index)
-            except:
-                pass
+            except Exception as e:
+                rf.logger.beauty_print(f"Error in parsing {node_name}: {e}", type="error")
             return node_index
 
         _add_xml_node(xml_body_root, -1, 0)
@@ -933,6 +932,8 @@ class SkeletonState(Serializable):
                 elif x in ["left_limb_l2", "left_limb_l3", "left_limb_l5", "left_limb_l6", "right_limb_l2",
                            "right_limb_l3", "right_limb_l5", "right_limb_l6", "left_leg_l2", "left_leg_l3",
                            "left_leg_l5", "right_leg_l2", "right_leg_l3", "right_leg_l5", "head_l2"]:
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                elif x in ["shoulder_roll_link_r", "shoulder_roll_link_l", "hip_roll_link_l", "hip_pitch_link_l", "hip_roll_link_r", "hip_pitch_link_r"]:
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
                 else:
                     print(x)
