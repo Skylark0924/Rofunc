@@ -15,7 +15,7 @@ env:
   # or have other contacts specified. Setting the collision filter to 0 will
   # enable collisions between all shapes in the actor. Setting the collision filter
   # to anything > 0 will disable all self collisions.
-  collision_mode: -1
+  collision_mode: 1
 
   asset:
     robot_name: "Humanoid"
@@ -23,7 +23,7 @@ env:
 #    assetFile: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
     assetFile: "mjcf/hotu_humanoid_w_qbhand_full.xml"
     init_pose: [0.0, 0.0, 1., 0.0, 0.0, 0.0, 1]
-    fix_base_link: True
+    fix_base_link: False
     disable_gravity: False
     flip_visual_attachments: False
     armature: 0.01

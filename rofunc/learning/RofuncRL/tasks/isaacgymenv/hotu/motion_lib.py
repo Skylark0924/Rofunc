@@ -16,8 +16,9 @@ import os
 import time
 from collections import OrderedDict
 
+import numpy as np
+import torch
 import yaml
-from isaacgym.torch_utils import *
 
 import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
@@ -82,7 +83,7 @@ class DeviceCache:
 class MotionLib:
     def __init__(self, cfg, motion_file, asset_infos, key_body_names, device, humanoid_type, mf_humanoid_type):
         """
-        Motion library for the IsaacGym humanoid series environments and process the motion data exported from Optitrack
+        Motion library for the IsaacGym humanoid series environments, process the motion data exported from Optitrack
         or Xsens.
 
         :param cfg: the configuration file for the task
@@ -90,8 +91,8 @@ class MotionLib:
         :param asset_infos: the asset information dict for the humanoid models
         :param key_body_names: list of key body ids
         :param device: device same as the env/task device
-        :param humanoid_type: the type of humanoid, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
-        :param mf_humanoid_type: the type of humanoid in the motion file, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
+        :param humanoid_type: target humanoid model type, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
+        :param mf_humanoid_type: source humanoid type in the motion file, e.g., hotu_humanoid, hotu_humanoid_w_qbhand_full, etc.
         """
         self.cfg = cfg
         self.humanoid_asset_infos = asset_infos
@@ -110,8 +111,8 @@ class MotionLib:
         self.mf_humanoid_rb_dict_a_del = OrderedDict(
             {k: v for k, v in self.mf_humanoid_rb_dict.items() if k not in self.mf_humanoid_del_rb}
         )
-        self.get_skeleton_rb_index()
-        self.get_skeleton_dof_index()
+        self._get_skeleton_rb_index()
+        self._get_skeleton_dof_index()
 
         # no pelvis and no root links, start from 1
         self._mf_dof_body_ids = [v for k, v in self.mf_humanoid_rb_dict_a_del.items()]
@@ -122,16 +123,18 @@ class MotionLib:
 
         self._object_poses = torch.zeros((), device=device)
 
+        # Load motion from motion files
         self._load_motions(motion_file)
-
         self.mf_gts = torch.cat([m.global_translation for m in self._motions], dim=0).float()
         self.mf_grs = torch.cat([m.global_rotation for m in self._motions], dim=0).float()
         self.mf_lrs = torch.cat([m.local_rotation for m in self._motions], dim=0).float()
         self.mf_dvs = torch.cat([m.dof_vels for m in self._motions], dim=0).float()
 
+        # Transfer motion from mf_humanoid_type to humanoid_type
         if self.mf_humanoid_type != self.humanoid_type:
             self.transfer_motion_to_humanoid_type()
 
+        # Adjust humanoid height to let its feet on the floor
         self.humanoid_height_offsets = []
         for motion in self._motions:
             tar_global_pos = motion.global_translation
@@ -139,25 +142,25 @@ class MotionLib:
             motion.global_translation[..., 2] -= min_h
             self.humanoid_height_offsets.append(min_h)
 
+        # Get motion values based on target humanoid model type
         self.gts = torch.cat([m.global_translation for m in self._motions], dim=0).float()
         self.grs = torch.cat([m.global_rotation for m in self._motions], dim=0).float()
         self.lrs = torch.cat([m.local_rotation for m in self._motions], dim=0).float()
         self.grvs = torch.cat([m.global_root_velocity for m in self._motions], dim=0).float()
         self.gravs = torch.cat([m.global_root_angular_velocity for m in self._motions], dim=0).float()
         self.dvs = torch.cat([m.dof_vels for m in self._motions], dim=0).float()
+        self.dps = torch.cat([m.dof_pos for m in self._motions], dim=0).float()
 
         lengths = self._motion_num_frames
         lengths_shifted = lengths.roll(1)
         lengths_shifted[0] = 0
         self.length_starts = lengths_shifted.cumsum(0)
 
-        self.motion_ids = torch.arange(
-            len(self._motions), dtype=torch.long, device=self._device
-        )
+        self.motion_ids = torch.arange(len(self._motions), dtype=torch.long, device=self._device)
 
-        self.init_local_rotation = torch.Tensor(
-            np.load(os.path.join(rf.oslab.get_rofunc_path(), "utils/datalab/poselib/local_orientation.npy"))).to(device)
-
+    def _num_motions(self):
+        return len(self._motions)
+    
     def _get_key_body_ids(self, key_body_names, rb_dict):
         key_body_ids = []
         for key_body_name in key_body_names:
@@ -167,7 +170,7 @@ class MotionLib:
                 raise ValueError("The key_body_name is not in the mf_humanoid_rb_dict")
         return torch.tensor(key_body_ids, device=self._device, dtype=torch.long)
 
-    def get_skeleton_rb_index(self):
+    def _get_skeleton_rb_index(self):
         self.mfrb2rb_dict = {}  # rigid body id mapping from motion file humanoid model to humanoid model we need
         unexpected_rb_names = []
         for rb_name in self.mf_humanoid_rb_dict.keys():
@@ -181,7 +184,7 @@ class MotionLib:
                                    "warning")
         self.rb2mfrb_dict = {v: k for k, v in self.mfrb2rb_dict.items()}
 
-    def get_skeleton_dof_index(self):
+    def _get_skeleton_dof_index(self):
         self.mfdof2dof_dict = {}
         unexpected_dof_names = []
         for dof_name in self.mf_humanoid_dof_dict.keys():
@@ -197,7 +200,9 @@ class MotionLib:
 
     def transfer_motion_to_humanoid_type(self):
         """
-        Transfer the motion data with mf_humanoid_type to humanoid_type we need
+        Transfer the motion data with mf_humanoid_type to humanoid_type we need.
+        Joints do not exist in the mf_humanoid_type will be regarded as 0.
+        Global translation and rotation for these joints are meaningless.
         """
         transferred_motions = []
         for i in range(self.num_motion_files):
@@ -208,6 +213,7 @@ class MotionLib:
             old_global_rotation = motion.global_rotation.clone()
             old_local_rotation = motion.local_rotation.clone()
             old_dof_vels = motion.dof_vels.clone()
+            old_dof_pos = motion.dof_pos.clone()
 
             motion.global_translation = torch.zeros(
                 (num_frames, len(self.humanoid_rb_dict), 3), device=self._device, dtype=torch.float32)
@@ -228,17 +234,15 @@ class MotionLib:
 
             for index, mf_index in self.dof2mfdof_dict.items():
                 motion.dof_vels[:, index] = old_dof_vels[:, mf_index]
+                motion.dof_pos[:, index] = old_dof_pos[:, mf_index]
 
             transferred_motions.append(motion)
         self._motions = transferred_motions
 
-    def num_motions(self):
-        return len(self._motions)
-
-    def get_total_length(self):
+    def _get_total_length(self):
         return sum(self._motion_lengths)
 
-    def get_motion(self, motion_id):
+    def _get_motion(self, motion_id):
         return self._motions[motion_id]
 
     def sample_motions(self, n):
@@ -246,7 +250,7 @@ class MotionLib:
             self._motion_weights, num_samples=n, replacement=True
         )
 
-        # m = self.num_motions()
+        # m = self._num_motions()
         # motion_ids = np.random.choice(m, size=n, replace=True, p=self._motion_weights)
         # motion_ids = torch.tensor(motion_ids, device=self._device, dtype=torch.long)
         return motion_ids
@@ -267,13 +271,11 @@ class MotionLib:
         return self._motion_lengths[motion_ids]
 
     def get_object_pose(self, frame_id):
-        """Return object pose at frame=id, where id is recorded in motion_ids
+        """
+        Return object pose at frame=id, where id is recorded in motion_ids
 
-        Args:
-            frame_id [list]: Same frame id * num_envs, where num_envs is the environment number.
-
-        Returns:
-
+        :param frame_id: Same frame id * num_envs, where num_envs is the environment number.
+        :return:
         """
         if self._object_poses.ndim == 0:
             return None
@@ -283,12 +285,9 @@ class MotionLib:
     def get_motion_state(self, motion_ids, motion_times):
         """
 
-        Args:
-            motion_ids:
-            motion_times:
-
-        Returns:
-
+        :param motion_ids:
+        :param motion_times:
+        :return:
         """
         # n = len(motion_ids)
         # num_bodies = self._get_num_bodies()
@@ -311,8 +310,8 @@ class MotionLib:
         root_rot0 = self.grs[f0l, 0]
         root_rot1 = self.grs[f1l, 0]
 
-        mf_local_rot0 = self.mf_lrs[f0l]
-        mf_local_rot1 = self.mf_lrs[f1l]
+        # mf_local_rot0 = self.mf_lrs[f0l]
+        # mf_local_rot1 = self.mf_lrs[f1l]
 
         root_vel = self.grvs[f0l]
 
@@ -322,12 +321,14 @@ class MotionLib:
         key_pos1 = self.gts[f1l.unsqueeze(-1), self._key_body_ids.unsqueeze(0)]
 
         dof_vel = self.dvs[f0l]
+        dof_pos0 = self.dps[f0l]
+        dof_pos1 = self.dps[f1l]
 
         vals = [
             root_pos0,
             root_pos1,
-            mf_local_rot0,
-            mf_local_rot1,
+            # mf_local_rot0,
+            # mf_local_rot1,
             root_vel,
             root_ang_vel,
             key_pos0,
@@ -339,16 +340,14 @@ class MotionLib:
         blend = blend.unsqueeze(-1)
 
         root_pos = (1.0 - blend) * root_pos0 + blend * root_pos1
-
         root_rot = torch_utils.slerp(root_rot0, root_rot1, blend)
 
         blend_exp = blend.unsqueeze(-1)
         key_pos = (1.0 - blend_exp) * key_pos0 + blend_exp * key_pos1
 
-        mf_local_rot = torch_utils.slerp(
-            mf_local_rot0, mf_local_rot1, torch.unsqueeze(blend, axis=-1)
-        )
-        dof_pos = self._local_rotation_to_dof(mf_local_rot)
+        # mf_local_rot = torch_utils.slerp(mf_local_rot0, mf_local_rot1, torch.unsqueeze(blend, axis=-1))
+        # dof_pos = self._local_rotation_to_dof(mf_local_rot)
+        dof_pos = (1.0 - blend) * dof_pos0 + blend * dof_pos1
 
         return root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos, f0l, f1l
 
@@ -385,6 +384,9 @@ class MotionLib:
 
                 curr_dof_vels = self._compute_motion_dof_vels(curr_motion)
                 curr_motion.dof_vels = curr_dof_vels
+
+                curr_dof_pos = self._compute_motion_dof_pos(curr_motion)
+                curr_motion.dof_pos = curr_dof_pos
 
                 # Moving motion tensors to the GPU
                 if USE_CACHE:
@@ -433,8 +435,8 @@ class MotionLib:
             self._motion_num_frames, device=self._device
         )
 
-        num_motions = self.num_motions()
-        total_len = self.get_total_length()
+        num_motions = self._num_motions()
+        total_len = self._get_total_length()
 
         print(
             "Loaded {:d} motions with a total length of {:.3f}s.".format(
@@ -469,6 +471,14 @@ class MotionLib:
         return motion_files, motion_weights
 
     def _calc_frame_blend(self, time, len, num_frames, dt):
+        """
+        
+        :param time: 
+        :param len: 
+        :param num_frames: 
+        :param dt: 
+        :return: 
+        """
         phase = time / len
         phase = torch.clip(phase, 0.0, 1.0)
 
@@ -479,9 +489,33 @@ class MotionLib:
         return frame_idx0, frame_idx1, blend
 
     def _get_num_bodies(self):
-        motion = self.get_motion(0)
+        motion = self._get_motion(0)
         num_bodies = motion.num_joints
         return num_bodies
+
+    def _compute_motion_dof_pos(self, motion):
+        """
+        Compute joint positions from local rotation value
+        
+        :param motion: 
+        :return: 
+        """
+        num_frames = motion.tensor.shape[0]
+        dt = 1.0 / motion.fps
+        dof_pos = []
+
+        for f in range(num_frames - 1):
+            local_rot0 = motion.local_rotation[f]
+            local_rot1 = motion.local_rotation[f + 1]
+            local_rot = torch_utils.slerp(local_rot0, local_rot1, dt)
+            frame_dof_vel = self._local_rotation_to_dof(local_rot)
+            frame_dof_vel = frame_dof_vel
+            dof_pos.append(frame_dof_vel)
+
+        dof_pos.append(dof_pos[-1])
+        dof_pos = torch.stack(dof_pos, dim=0)
+
+        return dof_pos
 
     def _compute_motion_dof_vels(self, motion):
         num_frames = motion.tensor.shape[0]
@@ -608,6 +642,8 @@ class MotionLib:
             #     raise ValueError("Unsupported humanoid type")
             #     # rf.logger.beauty_print("Unsupported humanoid type", "warning")
             #     # pass
+
+
 
             right_left_ids_except_thumb_and_knuckle = self.cfg["env"]["right_left_ids_except_thumb_and_knuckle"]
             right_left_thumb_knuckle_ids = self.cfg["env"]["right_left_thumb_knuckle_ids"]
@@ -808,17 +844,17 @@ class MotionLib:
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = (joint_theta * joint_axis[..., 1])  # assume joint is always along y axis
 
-                joint_theta = normalize_angle(joint_theta)
+                joint_theta = torch_utils.normalize_angle(joint_theta)
                 dof_pos[:, joint_offset] = joint_theta
             else:
                 print("Unsupported joint type")
                 assert False
 
-        if self.mf_humanoid_type != self.humanoid_type:
-            mf_dof_pos = dof_pos
-            dof_pos = torch.zeros((n, len(self.humanoid_dof_dict)), dtype=torch.float, device=self._device)
-            for humanoid_index, mf_index in self.dof2mfdof_dict.items():
-                dof_pos[:, humanoid_index] = mf_dof_pos[:, mf_index]
+        # if self.mf_humanoid_type != self.humanoid_type:
+        #     mf_dof_pos = dof_pos
+        #     dof_pos = torch.zeros((n, len(self.humanoid_dof_dict)), dtype=torch.float, device=self._device)
+        #     for humanoid_index, mf_index in self.dof2mfdof_dict.items():
+        #         dof_pos[:, humanoid_index] = mf_dof_pos[:, mf_index]
 
         return dof_pos
 
@@ -851,6 +887,15 @@ class MotionLib:
                 assert False
 
         return dof_vel
+
+    # def spherical_joint_decompose(self, source_spherical_joint_name, target_revolute_joint_name):
+    #     """
+    #     Decompose and represent 3DoF spherical joint with three 1 DoF revolution joint
+    #
+    #     :param source_spherical_joint_name:
+    #     :param target_revolute_joint_name:
+    #     :return:
+    #     """
 
 
 class ObjectMotionLib:
