@@ -14,6 +14,7 @@
 
 from typing import Union, Tuple, Optional, List
 
+import numpy as np
 import gym
 import gymnasium
 import torch
@@ -147,8 +148,12 @@ class ActorPPO_Gaussian(BaseActor):
         self.backbone_net = build_mlp(dims=[self.state_dim, *self.mlp_hidden_dims],
                                       hidden_activation=self.mlp_activation)
         self.mean_layer = nn.Linear(self.mlp_hidden_dims[-1], self.action_dim)
-        # Use 'nn.Parameter' to train log_std automatically
-        self.log_std = nn.Parameter(torch.zeros(self.action_dim))
+        if cfg.fixed_log_std is None:
+            # Use 'nn.Parameter' to train log_std automatically
+            self.log_std = nn.Parameter(torch.zeros(self.action_dim))
+        else:
+            self.log_std = torch.ones(self.action_dim) * cfg.fixed_log_std
+
         self.value_layer = nn.Linear(self.mlp_hidden_dims[-1], 1)
         self.dist = None
         if self.cfg.use_init:
@@ -166,17 +171,29 @@ class ActorPPO_Gaussian(BaseActor):
         log_prob = torch.zeros(mu.shape[0], 1, device=mu.device)
         if not deterministic:
             log_std = self.log_std
-            if self.cfg.use_log_std_clip:
+            if self.cfg.use_log_std_clip and self.cfg.fixed_log_std is None:
                 log_std = torch.clamp(log_std, self.cfg.log_std_clip_min, self.cfg.log_std_clip_max)
-
-            self.dist = Normal(mu, log_std.exp())  # Get the Gaussian distribution
-
+            
+            sigma = log_std.exp()
+            self.dist = Normal(mu, sigma)  # Get the Gaussian distribution
+            
             # sample using the re-parameterization trick
+            # if action is None:
+            #     action = self.dist.rsample()
+            # if self.cfg.use_action_clip:
+            #     action = torch.clamp(action, -self.cfg.action_clip, self.cfg.action_clip)  # [-max,max]
+            # log_prob = self.dist.log_prob(action).sum(dim=-1, keepdim=True)
+            # output_action = action
+
+            # logstd = torch.ones_like(mu) * -2.9
+            # sigma = torch.exp(logstd)
+            # self.dist = Normal(mu, sigma)
             if action is None:
-                action = self.dist.rsample()
+                action = self.dist.sample()
             if self.cfg.use_action_clip:
                 action = torch.clamp(action, -self.cfg.action_clip, self.cfg.action_clip)  # [-max,max]
-            log_prob = self.dist.log_prob(action).sum(dim=-1, keepdim=True)
+            log_prob = -self.neglogp(action, mu, sigma, log_std)
+            log_prob = log_prob.reshape(-1, 1)
             output_action = action
         else:
             output_action = mu
@@ -187,6 +204,11 @@ class ActorPPO_Gaussian(BaseActor):
             'mu': mu
         }
         return res_dict
+
+    def neglogp(self, x, mean, std, logstd):
+        return 0.5 * (((x - mean) / std) ** 2).sum(dim=-1) \
+            + 0.5 * np.log(2.0 * np.pi) * x.size()[-1] \
+            + logstd.sum(dim=-1)
 
     def get_entropy(self):
         return self.dist.entropy()

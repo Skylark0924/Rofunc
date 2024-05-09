@@ -1,4 +1,4 @@
-name: UnitreeH1
+name: Bruce
 
 physics_engine: 'physx'  #  'physx' or 'flex'
 graphics_device_id: 0
@@ -17,19 +17,18 @@ env:
   # or have other contacts specified. Setting the collision filter to 0 will
   # enable collisions between all shapes in the actor. Setting the collision filter
   # to anything > 0 will disable all self collisions.
-  collision_mode: -1
+  collision_mode: 1
 
   asset:
-    robot_name: "UnitreeH1"
+    robot_name: "Bruce"
     assetRoot:
-#    assetFile: "mjcf/UnitreeH1/h1.xml"
-    assetFile: "mjcf/UnitreeH1/h1_w_qbhand.xml"
-    init_pose: [0, 0.0, 1.2, 0.0, 0.0, 1.0, 0.0]
-    fix_base_link: False
-    disable_gravity: True
-    flip_visual_attachments: False
+    assetFile: "mjcf/bruce/bruce.xml"
+    init_pose: [0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0]
+    fix_base_link: True
+    disable_gravity: False
+    flip_visual_attachments: True
     armature: 0.01
-    slices_per_cylinder: 10
+    slices_per_cylinder: 1000
 
   object_asset:
 
