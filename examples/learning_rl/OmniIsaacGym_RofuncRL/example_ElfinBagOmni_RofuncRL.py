@@ -71,14 +71,6 @@ def inference(custom_args):
                                                         device=cfg.rl_device,
                                                         env_name=custom_args.task)
     # load checkpoint
-    # if custom_args.ckpt_path is None:
-    #     if omni_cfg.task_config["env"]["enable_washer_task"]:
-    #         ckpt_name = "RofuncRL_PPOTrainer_ElfinBagOmni_24-04-18_00-08-44-714616"
-    #     else:
-    #         ckpt_name = "RofuncRL_PPOTrainer_ElfinBagOmni_24-04-18_12-53-19-650902"
-    #     custom_args.ckpt_path = "/home/clover/Rofunc/examples/learning_rl/OmniIsaacGym_RofuncRL/runs/" \
-    #                              + ckpt_name \
-    #                              + "/checkpoints/best_ckpt.pth"
     if custom_args.ckpt_path is None:
         if custom_args.task == "ElfinBagWasherOmni":
             custom_args.ckpt_path = model_zoo(name="ElfinBagWasherOmniPPO.pth")
@@ -100,7 +92,7 @@ if __name__ == '__main__':
     parser.add_argument("--device_id", type=int, default=gpu_id)
     parser.add_argument("--rl_device", type=str, default=f"cuda:{gpu_id}")
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
+    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 
