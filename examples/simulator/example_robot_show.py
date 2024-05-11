@@ -9,9 +9,9 @@ import isaacgym
 import rofunc as rf
 
 # CURI
-args = rf.config.get_sim_config("CURI")
-CURIsim = rf.sim.CURISim(args)
-CURIsim.show(visual_obs_flag=True)
+# args = rf.config.get_sim_config("CURI")
+# CURIsim = rf.sim.CURISim(args)
+# CURIsim.show(visual_obs_flag=False)
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -24,9 +24,9 @@ CURIsim.show(visual_obs_flag=True)
 # CURIminisim.show(visual_obs_flag=True)
 
 # franka
-# args = rf.config.get_sim_config("Franka")
-# frankasim = rf.sim.FrankaSim(args)
-# frankasim.show()
+args = rf.config.get_sim_config("Franka")
+frankasim = rf.sim.FrankaSim(args)
+frankasim.show()
 
 # baxter
 # args = rf.config.get_sim_config("Baxter")
