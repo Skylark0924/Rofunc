@@ -7,17 +7,23 @@ sim_device: 'cuda:0'
 env:
   numEnvs: 1
   envSpacing: 3.
+  controller_type: "ik" # "ik" or "osc"
+  selfCollisionFlag: False
 
   asset:
     robot_name: "Franka"
     assetRoot:
     assetFile: "urdf/franka_description/robots/franka_panda.urdf"
-    init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    init_pose: [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ]
     fix_base_link: True
+    disable_gravity: False
     flip_visual_attachments: True
     armature: 0.01
+    slices_per_cylinder: 1000
 
   object_asset:
+
+
 
 sim:
   dt: 0.0166 # 1/60
