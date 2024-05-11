@@ -14,9 +14,16 @@
 > **Documentation: https://rofunc.readthedocs.io/**
 
 <img src="doc/img/task_gif3/CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.gif" width=25% /><img src="doc/img/task_gif3/CURIQbSoftHandSynergyGraspPower_drillRofuncRLPPO.gif" width=25% /><img src="doc/img/task_gif3/CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.gif" width=25% /><img src="doc/img/task_gif3/CURIQbSoftHandSynergyGraspLarge_clampRofuncRLPPO.gif" width=25% />
+<img src="doc/img/task_gif3/CURICoffeeStirring.gif" width=33.3% /><img src="doc/img/task_gif3/CURIScrew.gif" width=33.3% /><img src="doc/img/task_gif3/CURITaichiPushingHand.gif" style="position:absolute;clip: rect(0px 150px 85px 0px); width: 33%"/>
 <img src="doc/img/task_gif3/HumanoidFlipRofuncRLAMP.gif" width=33.3% /><img src="doc/img/task_gif3/HumanoidDanceRofuncRLAMP.gif" width=33.3% /><img src="doc/img/task_gif3/HumanoidRunRofuncRLAMP.gif" width=33.3% />
 <img src="doc/img/task_gif3/HumanoidASEHeadingSwordShieldRofuncRLASE.gif" width=33.3% /><img src="doc/img/task_gif3/HumanoidASEStrikeSwordShieldRofuncRLASE.gif" width=33.3% /><img src="doc/img/task_gif3/HumanoidASELocationSwordShieldRofuncRLASE.gif" width=33.3% />
 <img src="doc/img/task_gif3/BiShadowHandLiftUnderarmRofuncRLPPO.gif" width=33.3% /><img src="doc/img/task_gif3/BiShadowHandDoorOpenOutwardRofuncRLPPO.gif" width=33.3% /><img src="doc/img/task_gif3/BiShadowHandSwingCupRofuncRLPPO.gif" width=33.3% />
+
+
+
+
+
+
 
 Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for **(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including
 _demonstration collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an
@@ -66,7 +73,7 @@ section of the documentation.
 
 <details>
 <summary>The available functions and plans can be found as follows.</summary>
-  
+
 > **Note**
 > ✅: Achieved 🔃: Reformatting ⛔: TODO
 
@@ -113,7 +120,7 @@ section of the documentation.
 
 <details>
 <summary>The list of all supported tasks.</summary>
-  
+
 | Tasks                               | Animation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Performance | [ModelZoo](https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json) |
 |-------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------|
 | Ant                                 | ![](doc/img/task_gifs/AntRofuncRLPPO.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |             | ✅                                                                                                 |
