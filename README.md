@@ -62,8 +62,11 @@ To give you a quick overview of the pipeline of `rofunc`, we provide an interest
 from human demonstration. You can find it in the [Quick start](https://rofunc.readthedocs.io/en/latest/quickstart.html)
 section of the documentation.
 
-The available functions and plans can be found as follows.
 
+
+<details>
+<summary>The available functions and plans can be found as follows.</summary>
+  
 > **Note**
 > ✅: Achieved 🔃: Reformatting ⛔: TODO
 
@@ -96,16 +99,21 @@ The available functions and plans can be found as follows.
 |                                                                                                         |   |            [`AMP(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |            [`ASE(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |                                          `ODTrans(RofuncRL)`                                           | ⛔  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
+</details>
 
 ## RofuncRL
 
 `RofuncRL` is one of the most important sub-packages of `Rofunc`. It is a modular easy-to-use Reinforcement Learning sub-package designed for Robot Learning tasks. It has been tested with simulators like `OpenAIGym`, `IsaacGym`, `OmniIsaacGym` (see [example gallery](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html)), and also differentiable simulators like `PlasticineLab` and `DiffCloth`. Here is a list of robot tasks trained by `RofuncRL`:
+
 
 > **Note**\
 > You can customize your own project based on RofuncRL by following the [**RofuncRL customize tutorial**](https://rofunc.readthedocs.io/en/latest/tutorial/customizeRL.html).\
 > We also provide a [**RofuncRL-based repository template**](https://github.com/Skylark0924/RofuncRL-template) to generate your own repository following the RofuncRL structure by one click.\
 > For more details, please check [**the documentation for RofuncRL**](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html).
 
+<details>
+<summary>The list of all supported tasks.</summary>
+  
 | Tasks                               | Animation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Performance | [ModelZoo](https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json) |
 |-------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------|
 | Ant                                 | ![](doc/img/task_gifs/AntRofuncRLPPO.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |             | ✅                                                                                                 |
@@ -149,7 +157,7 @@ The available functions and plans can be found as follows.
 | BiShadowHand<br/>Switch             | ![](doc/img/task_gifs/BiShadowHandSwitchRofuncRLPPO.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |             | ✅                                                                                                 |
 | BiShadowHand<br/>TwoCatchUnderarm   | ![](doc/img/task_gifs/BiShadowHandTwoCatchUnderarmRofuncRLPPO.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |             | ✅                                                                                                 |
 
-
+</details>
 
 ## Star History
 
@@ -161,13 +169,14 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 
 ```
 @software{liu2023rofunc,
-          title={Rofunc: The full process python package for robot learning from demonstration and robot manipulation},
-          author={Liu, Junjia and Li, Chenzui and Delehelle, Donatien and Li, Zhihao and Chen, Fei},
-          month=jun,
-          year= 2023,
-          publisher={Zenodo},
-          doi={10.5281/zenodo.8084510},
-          url={https://doi.org/10.5281/zenodo.8084510}
+          title = {Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation},
+          author = {Liu, Junjia and Li, Chenzui and Delehelle, Donatien and Li, Zhihao and Chen, Fei},
+          year = {2023},
+          publisher = {Zenodo},
+          doi = {10.5281/zenodo.10016946},
+          url = {https://doi.org/10.5281/zenodo.10016946},
+          dimensions = {true},
+          google_scholar_id = {0EnyYjriUFMC},
 }
 ```
 
