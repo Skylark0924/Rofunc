@@ -20,7 +20,7 @@ Trainer:
   eval_freq:  ${multi:${.max_episode_steps},5} # The frequency of evaluation. (timesteps)
   eval_steps: 1000                             # The number of steps to run for evaluation.
   use_eval_thread: False                       # If true, use a separate thread for evaluation.
-  inference_steps: 1000                        # The number of steps to run for inference.
+  inference_steps: 10000                        # The number of steps to run for inference.
 
 
 # ========== Agent parameters ==========
