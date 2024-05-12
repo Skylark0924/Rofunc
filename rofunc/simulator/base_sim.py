@@ -18,6 +18,7 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 from PIL import Image as Im
 
 import rofunc as rf
@@ -293,13 +294,13 @@ class RobotSim:
         sphere_rot = gymapi.Quat.from_euler_zyx(0.5 * math.pi, 0, 0)
         sphere_pose = gymapi.Transform(r=sphere_rot)
         if attr_type == gymapi.AXIS_ALL:
-            sphere_geom = gymutil.WireframeSphereGeometry(0.03, 12, 12, sphere_pose, color=(1, 0, 0))
+            sphere_geom = gymutil.WireframeSphereGeometry(0.003, 12, 12, sphere_pose, color=(1, 0, 0))
         elif attr_type == gymapi.AXIS_ROTATION:
-            sphere_geom = gymutil.WireframeSphereGeometry(0.03, 12, 12, sphere_pose, color=(0, 1, 0))
+            sphere_geom = gymutil.WireframeSphereGeometry(0.003, 12, 12, sphere_pose, color=(0, 1, 0))
         elif attr_type == gymapi.AXIS_TRANSLATION:
-            sphere_geom = gymutil.WireframeSphereGeometry(0.03, 12, 12, sphere_pose, color=(0, 0, 1))
+            sphere_geom = gymutil.WireframeSphereGeometry(0.003, 12, 12, sphere_pose, color=(0, 0, 1))
         else:
-            sphere_geom = gymutil.WireframeSphereGeometry(0.03, 12, 12, sphere_pose, color=(1, 1, 1))
+            sphere_geom = gymutil.WireframeSphereGeometry(0.003, 12, 12, sphere_pose, color=(1, 1, 1))
 
         for i in range(len(self.envs)):
             env = self.envs[i]
@@ -323,36 +324,25 @@ class RobotSim:
             attractor_handles.append(attractor_handle)
         return attractor_handles, axes_geom, sphere_geom
 
-    def _setup_attractors(self, traj, attr_rbs, attr_type, key_bodies, key_bodies_attr_type,
-                          verbose=True):
+    def _setup_attractors(self, traj, attr_rbs, attr_types, verbose=True):
         """
         Setup the attractors for tracking the trajectory using the embedded Isaac Gym PID controller
 
         :param traj: the trajectory to be tracked
         :param attr_rbs: link names to be attracted, same dim as traj
-        :param attr_type: the default type of the attractors
-        :param key_bodies: link names of the key bodies, should contain in attr_rbs
-        :param key_bodies_attr_type: the type of the attractors for the key bodies
+        :param attr_types: the type of the attractors
         :param verbose: if True, visualize the attractor spheres
         :return:
         """
         assert isinstance(attr_rbs, list), "The attracted joints should be a list"
-        assert len(attr_rbs) > 0, "The length of the attracted joints should be greater than 0"
-        assert len(attr_rbs) == len(
-            traj), "The first dimension of trajectory should equal to attr_rbs"
-        assert all([attracted_rigid_body in attr_rbs for attracted_rigid_body in key_bodies]), \
-            "The key bodies should be contained in the attracted rigid bodies"
+        assert len(attr_rbs) == len(traj), "The first dimension of trajectory should equal to attr_rbs"
+        assert len(attr_rbs) == len(attr_types), "The first dimension of attr_types should equal to attr_rbs"
 
         attractor_handles, axes_geoms, sphere_geoms = [], [], []
         for i in range(len(attr_rbs)):
-            if attr_rbs[i] in key_bodies:
-                attractor_handle, axes_geom, sphere_geom = self._init_attractor(attr_rbs[i],
-                                                                                attr_type=key_bodies_attr_type,
-                                                                                verbose=verbose)
-            else:
-                attractor_handle, axes_geom, sphere_geom = self._init_attractor(attr_rbs[i],
-                                                                                attr_type=attr_type,
-                                                                                verbose=verbose)
+            attractor_handle, axes_geom, sphere_geom = self._init_attractor(attr_rbs[i],
+                                                                            attr_type=attr_types[i],
+                                                                            verbose=verbose)
             attractor_handles.append(attractor_handle)
             axes_geoms.append(axes_geom)
             sphere_geoms.append(sphere_geom)
@@ -534,7 +524,6 @@ class RobotSim:
         self.gym.destroy_sim(self.sim)
 
     def get_num_bodies(self, robot_asset):
-        from isaacgym import gymapi
 
         num_bodies = self.gym.get_asset_rigid_body_count(robot_asset)
         beauty_print("The number of bodies in the robot asset is {}".format(num_bodies), type="info")
@@ -649,10 +638,10 @@ class RobotSim:
             state['vel']['angular'].fill((0, 0, 0))
             self.gym.set_actor_rigid_body_states(self.envs[i], object_handles[i], state, state_type)
 
-    def run_traj_multi_rigid_bodies(self, traj: List, attr_rbs: List = None,
+    def run_traj_multi_rigid_bodies(self, traj: List, attr_rbs: List = None, attr_types=None,
                                     object_start_pose: List = None, object_end_pose: List = None,
                                     object_related_joints: List = None,
-                                    root_state=None, key_bodies=None,
+                                    root_state=None,
                                     update_freq=0.001, verbose=True
                                     ):
         """
@@ -660,16 +649,16 @@ class RobotSim:
 
         :param traj: a list of trajectories, each trajectory is a numpy array of shape (N, 7)
         :param attr_rbs: [list], e.g. ["panda_left_hand", "panda_right_hand"]
+        :param attr_types: [list], e.g. [gymapi.AXIS_ALL, gymapi.AXIS_ROTATION, gymapi.AXIS_TRANSLATION]
         :param object_start_pose: the initial pose of the object
         :param object_end_pose: the final pose of the object
         :param object_related_joints: the related joints of the object
         :param root_state: the root state of the robot
-        :param key_bodies: the key bodies of the robot
         :param update_freq: the frequency of updating the robot pose
         :param verbose: if True, visualize the attractor spheres
         :return:
         """
-        from isaacgym import gymtorch, gymapi
+        from isaacgym import gymtorch
 
         assert isinstance(traj, list) and len(traj) > 0, "The trajectory should be a list of numpy arrays"
         beauty_print('Execute multi rigid bodies trajectory')
@@ -682,14 +671,15 @@ class RobotSim:
         self.robot_root_states = self.root_states.view(self.num_envs, 1, -1)[..., 0, :]
 
         # Create the attractor
-        attr_rbs, attr_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attr_rbs,
-                                                                                  gymapi.AXIS_ROTATION,
-                                                                                  key_bodies, gymapi.AXIS_ALL,
+        attr_rbs, attr_handles, axes_geoms, sphere_geoms = self._setup_attractors(traj, attr_rbs, attr_types,
                                                                                   verbose=verbose)
 
         # Time to wait in seconds before moving robot
         next_update_time = 1
         index = 0
+        dof_states = torch.zeros((traj[0].shape[0], self.dof_states.shape[0], self.dof_states.shape[1]),
+                                 dtype=torch.float32)
+        save_dof_states = True
         while not self.gym.query_viewer_has_closed(self.viewer):
             # Every 0.01 seconds the pose of the attractor is updated
             t = self.gym.get_sim_time(self.sim)
@@ -698,6 +688,9 @@ class RobotSim:
                 self.gym.refresh_rigid_body_state_tensor(self.sim)
                 self.gym.refresh_actor_root_state_tensor(self.sim)
                 self.gym.refresh_dof_state_tensor(self.sim)
+
+                if save_dof_states:
+                    dof_states[index] = self.dof_states.clone()
 
                 self.gym.clear_lines(self.viewer)
                 for i in range(len(attr_rbs)):
@@ -752,7 +745,9 @@ class RobotSim:
                 next_update_time += update_freq
                 index += 1
                 if index >= len(traj[i]):
-                    index = 0
+                    # index = 0
+                    # save_dof_states = False
+                    break   # stop the simulation
 
             # Step the physics
             self.gym.simulate(self.sim)
@@ -766,3 +761,5 @@ class RobotSim:
         print("Done")
         self.gym.destroy_viewer(self.viewer)
         self.gym.destroy_sim(self.sim)
+
+        return dof_states

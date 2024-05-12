@@ -149,7 +149,7 @@ class MotionLib:
         self.grvs = torch.cat([m.global_root_velocity for m in self._motions], dim=0).float()
         self.gravs = torch.cat([m.global_root_angular_velocity for m in self._motions], dim=0).float()
         self.dvs = torch.cat([m.dof_vels for m in self._motions], dim=0).float()
-        self.dps = torch.cat([m.dof_pos for m in self._motions], dim=0).float()
+        # self.dps = torch.cat([m.dof_pos for m in self._motions], dim=0).float()
 
         lengths = self._motion_num_frames
         lengths_shifted = lengths.roll(1)
@@ -160,7 +160,7 @@ class MotionLib:
 
     def _num_motions(self):
         return len(self._motions)
-    
+
     def _get_key_body_ids(self, key_body_names, rb_dict):
         key_body_ids = []
         for key_body_name in key_body_names:
@@ -310,8 +310,8 @@ class MotionLib:
         root_rot0 = self.grs[f0l, 0]
         root_rot1 = self.grs[f1l, 0]
 
-        # mf_local_rot0 = self.mf_lrs[f0l]
-        # mf_local_rot1 = self.mf_lrs[f1l]
+        mf_local_rot0 = self.mf_lrs[f0l]
+        mf_local_rot1 = self.mf_lrs[f1l]
 
         root_vel = self.grvs[f0l]
 
@@ -321,14 +321,12 @@ class MotionLib:
         key_pos1 = self.gts[f1l.unsqueeze(-1), self._key_body_ids.unsqueeze(0)]
 
         dof_vel = self.dvs[f0l]
-        dof_pos0 = self.dps[f0l]
-        dof_pos1 = self.dps[f1l]
 
         vals = [
             root_pos0,
             root_pos1,
-            # mf_local_rot0,
-            # mf_local_rot1,
+            mf_local_rot0,
+            mf_local_rot1,
             root_vel,
             root_ang_vel,
             key_pos0,
@@ -345,9 +343,9 @@ class MotionLib:
         blend_exp = blend.unsqueeze(-1)
         key_pos = (1.0 - blend_exp) * key_pos0 + blend_exp * key_pos1
 
-        # mf_local_rot = torch_utils.slerp(mf_local_rot0, mf_local_rot1, torch.unsqueeze(blend, axis=-1))
-        # dof_pos = self._local_rotation_to_dof(mf_local_rot)
-        dof_pos = (1.0 - blend) * dof_pos0 + blend * dof_pos1
+        mf_local_rot = torch_utils.slerp(mf_local_rot0, mf_local_rot1, torch.unsqueeze(blend, axis=-1))
+        dof_pos = self._local_rotation_to_dof(mf_local_rot)
+        # dof_pos = (1.0 - blend) * dof_pos0 + blend * dof_pos1
 
         return root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos, f0l, f1l
 
@@ -385,8 +383,8 @@ class MotionLib:
                 curr_dof_vels = self._compute_motion_dof_vels(curr_motion)
                 curr_motion.dof_vels = curr_dof_vels
 
-                curr_dof_pos = self._compute_motion_dof_pos(curr_motion)
-                curr_motion.dof_pos = curr_dof_pos
+                # curr_dof_pos = self._compute_motion_dof_pos(curr_motion)
+                # curr_motion.dof_pos = curr_dof_pos
 
                 # Moving motion tensors to the GPU
                 if USE_CACHE:
@@ -435,12 +433,12 @@ class MotionLib:
             self._motion_num_frames, device=self._device
         )
 
-        num_motions = self._num_motions()
+        self.num_motions = self._num_motions()
         total_len = self._get_total_length()
 
         print(
             "Loaded {:d} motions with a total length of {:.3f}s.".format(
-                num_motions, total_len
+                self.num_motions, total_len
             )
         )
 
@@ -504,16 +502,16 @@ class MotionLib:
         dt = 1.0 / motion.fps
         dof_pos = []
 
-        for f in range(num_frames - 1):
-            local_rot0 = motion.local_rotation[f]
-            local_rot1 = motion.local_rotation[f + 1]
-            local_rot = torch_utils.slerp(local_rot0, local_rot1, dt)
-            frame_dof_vel = self._local_rotation_to_dof(local_rot)
-            frame_dof_vel = frame_dof_vel
-            dof_pos.append(frame_dof_vel)
+        # for f in range(num_frames - 1):
+        local_rot0 = motion.local_rotation[[i for i in range(num_frames - 1)]]
+        local_rot1 = motion.local_rotation[[i for i in range(1, num_frames)]]
 
-        dof_pos.append(dof_pos[-1])
-        dof_pos = torch.stack(dof_pos, dim=0)
+        local_rot = torch_utils.slerp(local_rot0, local_rot1, torch.tensor(dt))
+        dof_pos = self._local_rotation_to_dof(local_rot)
+        # dof_pos.append(frame_dof_pos)
+        #
+        # dof_pos.append(dof_pos[-1])
+        # dof_pos = torch.stack(dof_pos, dim=0)
 
         return dof_pos
 
@@ -642,8 +640,6 @@ class MotionLib:
             #     raise ValueError("Unsupported humanoid type")
             #     # rf.logger.beauty_print("Unsupported humanoid type", "warning")
             #     # pass
-
-
 
             right_left_ids_except_thumb_and_knuckle = self.cfg["env"]["right_left_ids_except_thumb_and_knuckle"]
             right_left_thumb_knuckle_ids = self.cfg["env"]["right_left_thumb_knuckle_ids"]
@@ -850,11 +846,11 @@ class MotionLib:
                 print("Unsupported joint type")
                 assert False
 
-        # if self.mf_humanoid_type != self.humanoid_type:
-        #     mf_dof_pos = dof_pos
-        #     dof_pos = torch.zeros((n, len(self.humanoid_dof_dict)), dtype=torch.float, device=self._device)
-        #     for humanoid_index, mf_index in self.dof2mfdof_dict.items():
-        #         dof_pos[:, humanoid_index] = mf_dof_pos[:, mf_index]
+        if self.mf_humanoid_type != self.humanoid_type:
+            mf_dof_pos = dof_pos
+            dof_pos = torch.zeros((n, len(self.humanoid_dof_dict)), dtype=torch.float, device=self._device)
+            for humanoid_index, mf_index in self.dof2mfdof_dict.items():
+                dof_pos[:, humanoid_index] = mf_dof_pos[:, mf_index]
 
         return dof_pos
 

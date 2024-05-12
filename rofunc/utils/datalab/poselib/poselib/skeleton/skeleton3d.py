@@ -928,12 +928,15 @@ class SkeletonState(Serializable):
                            "panda_left_link2", "panda_right_link2", "panda_left_link3", "panda_right_link3",
                            "panda_left_link5", "panda_right_link5",
                            "panda_left_link6", "panda_right_link6", "head_link2", "root"]:
+                    # For CURI
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
                 elif x in ["left_limb_l2", "left_limb_l3", "left_limb_l5", "left_limb_l6", "right_limb_l2",
                            "right_limb_l3", "right_limb_l5", "right_limb_l6", "left_leg_l2", "left_leg_l3",
                            "left_leg_l5", "right_leg_l2", "right_leg_l3", "right_leg_l5", "head_l2"]:
+                    # For walker
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
                 elif x in ["shoulder_roll_link_r", "shoulder_roll_link_l", "hip_roll_link_l", "hip_pitch_link_l", "hip_roll_link_r", "hip_pitch_link_r"]:
+                    # For bruce
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
                 else:
                     print(x)

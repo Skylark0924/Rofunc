@@ -196,24 +196,48 @@ def _project_joints(motion):
 
 
 def _run_sim(motion):
-    pelvis_id = motion.skeleton_tree._node_indices["pelvis"]
-    torso_id = motion.skeleton_tree._node_indices["torso"]
-    head_id = motion.skeleton_tree._node_indices["head"]
-    right_shoulder_id = motion.skeleton_tree._node_indices["right_upper_arm"]
-    right_elbow_id = motion.skeleton_tree._node_indices["right_lower_arm"]
-    right_hand_id = motion.skeleton_tree._node_indices["right_hand"]
-    left_shoulder_id = motion.skeleton_tree._node_indices["left_upper_arm"]
-    left_elbow_id = motion.skeleton_tree._node_indices["left_lower_arm"]
-    left_hand_id = motion.skeleton_tree._node_indices["left_hand"]
-    right_hip_id = motion.skeleton_tree._node_indices["right_thigh"]
-    right_knee_id = motion.skeleton_tree._node_indices["right_shin"]
-    right_foot_id = motion.skeleton_tree._node_indices["right_foot"]
-    left_hip_id = motion.skeleton_tree._node_indices["left_thigh"]
-    left_knee_id = motion.skeleton_tree._node_indices["left_shin"]
-    left_foot_id = motion.skeleton_tree._node_indices["left_foot"]
+    from isaacgym import gymapi
+
+    body_links = {"right_hand": gymapi.AXIS_ALL, "left_hand": gymapi.AXIS_ALL,
+                  "right_foot": gymapi.AXIS_ALL, "left_foot": gymapi.AXIS_ALL,
+                  "torso": gymapi.AXIS_ROTATION, "pelvis": gymapi.AXIS_ROTATION, "head": gymapi.AXIS_ROTATION,
+                  "right_upper_arm": gymapi.AXIS_ROTATION, "left_upper_arm": gymapi.AXIS_ROTATION,
+                  "right_lower_arm": gymapi.AXIS_ROTATION, "left_lower_arm": gymapi.AXIS_ROTATION,
+                  "right_thigh": gymapi.AXIS_ROTATION, "left_thigh": gymapi.AXIS_ROTATION,
+                  "right_shin": gymapi.AXIS_ROTATION, "left_shin": gymapi.AXIS_ROTATION,
+                  }
+    body_ids = [motion.skeleton_tree._node_indices[link] for link in body_links]
+
+    hand_links = ["left_qbhand_thumb_knuckle_link", "left_qbhand_thumb_proximal_link",
+                  "left_qbhand_thumb_distal_link", "left_qbhand_index_proximal_link",
+                  "left_qbhand_index_middle_link", "left_qbhand_index_distal_link",
+                  "left_qbhand_middle_proximal_link", "left_qbhand_middle_middle_link",
+                  "left_qbhand_middle_distal_link", "left_qbhand_ring_proximal_link",
+                  "left_qbhand_ring_middle_link", "left_qbhand_ring_distal_link",
+                  "left_qbhand_little_proximal_link", "left_qbhand_little_middle_link",
+                  "left_qbhand_little_distal_link",
+                  "right_qbhand_thumb_knuckle_link", "right_qbhand_thumb_proximal_link",
+                  "right_qbhand_thumb_distal_link", "right_qbhand_index_proximal_link",
+                  "right_qbhand_index_middle_link", "right_qbhand_index_distal_link",
+                  "right_qbhand_middle_proximal_link", "right_qbhand_middle_middle_link",
+                  "right_qbhand_middle_distal_link", "right_qbhand_ring_proximal_link",
+                  "right_qbhand_ring_middle_link", "right_qbhand_ring_distal_link",
+                  "right_qbhand_little_proximal_link", "right_qbhand_little_middle_link",
+                  "right_qbhand_little_distal_link"]
+    hand_ids = [motion.skeleton_tree._node_indices[link] for link in hand_links]
+    # all_links = body_links + hand_links
+    # all_ids = body_ids + hand_ids
+    all_links = list(body_links.keys())
+    all_ids = body_ids
+    all_types = list(body_links.values())
 
     motion_rb_states_pos = motion.global_translation
     motion_rb_states_rot = motion.global_rotation
+
+    # motion_rb_states_rot[:, hand_ids] = quat_mul(
+    #     torch.tensor([0, 0, -1, 0]),
+    #     motion_rb_states_rot[:, hand_ids]
+    # )
 
     # motion_rb_states_pos[:, :, 2] += 0.2
     motion_rb_states = torch.cat([motion_rb_states_pos, motion_rb_states_rot], dim=-1)
@@ -226,28 +250,15 @@ def _run_sim(motion):
 
     args = rf.config.get_sim_config("Humanoid")
     Humanoidsim = rf.sim.RobotSim(args)
-    Humanoidsim.run_traj_multi_rigid_bodies(
-        traj=[motion_rb_states[:, torso_id], motion_rb_states[:, pelvis_id], motion_rb_states[:, head_id],
-              motion_rb_states[:, right_shoulder_id], motion_rb_states[:, left_shoulder_id],
-              motion_rb_states[:, right_elbow_id], motion_rb_states[:, left_elbow_id],
-              motion_rb_states[:, right_hand_id], motion_rb_states[:, left_hand_id],
-              motion_rb_states[:, right_hip_id], motion_rb_states[:, left_hip_id],
-              motion_rb_states[:, right_knee_id], motion_rb_states[:, left_knee_id],
-              motion_rb_states[:, right_foot_id], motion_rb_states[:, left_foot_id]
-              ],
-        attr_rbs=["torso", "pelvis", "head",
-                  "right_upper_arm", "left_upper_arm",
-                  "right_lower_arm", "left_lower_arm",
-                  "right_hand", "left_hand",
-                  "right_thigh", "left_thigh",
-                  "right_shin", "left_shin",
-                  "right_foot", "left_foot"
-                  ],
+    dof_states = Humanoidsim.run_traj_multi_rigid_bodies(
+        traj=[motion_rb_states[:, id] for id in all_ids],
+        attr_rbs=all_links,
+        attr_types=all_types,
         update_freq=0.001,
         root_state=motion_root_states,
-        key_bodies=["right_hand", "left_hand", "right_foot", "left_foot"],
-        verbose=False
+        verbose=True
     )
+    return dof_states
 
 
 def motion_from_fbx(fbx_file_path, root_joint, fps=60, visualize=True):
@@ -369,7 +380,9 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         #                                                          target_motion.root_translation[0], is_local=True)
         # plot_skeleton_state(state, verbose=True)
 
-    _run_sim(target_motion)
+    dof_states = _run_sim(target_motion)
+    dof_states = np.array(dof_states.cpu().numpy())
+    np.save(retarget_cfg["target_dof_states_path"], dof_states)
 
 
 def npy_from_fbx(fbx_file):
@@ -390,6 +403,7 @@ def npy_from_fbx(fbx_file):
     rofunc_path = rf.oslab.get_rofunc_path()
     config = {
         "target_motion_path": fbx_file.replace('_optitrack.fbx', '_optitrack2hotu.npy'),
+        "target_dof_states_path": fbx_file.replace('_optitrack.fbx', '_optitrack2hotu_dof_states.npy'),
         "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_optitrack_w_gloves_tpose.npy"),
         # "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
         "target_tpose": os.path.join(rofunc_path, args.target_tpose),
@@ -465,7 +479,7 @@ if __name__ == '__main__':
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
                         # default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
-                        default="/home/ubuntu/Downloads/MoCap Data/30042024 DATA/Random Movements (Whole Body) Take 2024-04-30 05.35.43 PM.fbx")
+                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml

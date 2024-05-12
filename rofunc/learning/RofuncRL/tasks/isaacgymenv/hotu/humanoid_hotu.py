@@ -122,6 +122,7 @@ class HumanoidHOTUTask(Humanoid):
 
         # Load motion file
         self._load_motion(cfg["env"].get("motion_file", None))
+        self._load_extra_dof_states(cfg["env"].get("motion_dof_states_file", None))
 
         # Load object motion file
         self._load_object_motion(cfg["env"].get("object_motion_file", None))
@@ -372,6 +373,20 @@ class HumanoidHOTUTask(Humanoid):
             humanoid_type=self.humanoid_info["name"],
             mf_humanoid_type=self.mf_humanoid_info["name"],
         )
+
+    def _load_extra_dof_states(self, extra_dof_states_path):
+        if extra_dof_states_path is not None:
+            if rf.oslab.is_absl_path(extra_dof_states_path):
+                dof_states_file = extra_dof_states_path
+            elif extra_dof_states_path.split("/")[0] == "examples":
+                dof_states_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                               "../../../../../../" + extra_dof_states_path)
+            else:
+                raise ValueError("Unsupported motion file path")
+
+            self.extra_dof_states = np.load(dof_states_file)
+        else:
+            self.extra_dof_states = None
 
     def _load_object_motion(self, object_motion_file_path):
         if object_motion_file_path is not None:
