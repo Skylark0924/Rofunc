@@ -3,7 +3,8 @@ contactBodies: [ "right_ankle_link", "left_ankle_link" ]
 
 
 # animation files to learn from
-motion_file: "examples/data/hotu2/test_data_05_optitrack2h1.npy"
+motion_file: "examples/data/hotu2/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2h1.npy"
+motion_dof_states_file: "examples/data/hotu2/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2h1_dof_states.npy"
 motion_file_asset: "mjcf/UnitreeH1/h1_w_qbhand.xml"
 object_motion_file:
 

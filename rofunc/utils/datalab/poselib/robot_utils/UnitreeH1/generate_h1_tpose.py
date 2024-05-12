@@ -25,11 +25,17 @@ def get_tpose(xml_path, save_path, verbose=True):
     # import numpy as np
     # np.save("local_orientation.npy", skeleton.local_orientation)
     # generate zero rotation pose
-    zero_pose = SkeletonState.zero_pose_wo_qbhand(skeleton)
+    # zero_pose = SkeletonState.zero_pose_wo_qbhand(skeleton)
+    zero_pose = SkeletonState.zero_pose(skeleton)
     # plot_skeleton_state(zero_pose, verbose=False)
 
     # adjust pose into a T Pose
     local_rotation = zero_pose.local_rotation
+
+    skeleton_ori = skeleton.local_orientation
+    skeleton_ori = torch.cat([skeleton_ori[:, 1:], skeleton_ori[:, :1]], dim=1)
+    local_rotation[:] = skeleton_ori[:]
+
     local_rotation[skeleton.index("left_shoulder_roll_link")] = quat_mul(
         quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([1.0, 0.0, 0.0]), degree=True),
         local_rotation[skeleton.index("left_shoulder_roll_link")]
