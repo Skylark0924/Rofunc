@@ -935,7 +935,7 @@ class SkeletonState(Serializable):
                            "left_leg_l5", "right_leg_l2", "right_leg_l3", "right_leg_l5", "head_l2"]:
                     # For walker
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
-                elif x in ["shoulder_roll_link_r", "shoulder_roll_link_l", "hip_roll_link_l", "hip_pitch_link_l", "hip_roll_link_r", "hip_pitch_link_r"]:
+                elif x in ["shoulder_pitch_link_r", "shoulder_pitch_link_l", "hip_roll_link_l", "hip_pitch_link_l", "hip_roll_link_r", "hip_pitch_link_r"]:
                     # For bruce
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
                 else:

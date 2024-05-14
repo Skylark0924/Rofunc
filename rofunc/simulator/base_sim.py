@@ -79,8 +79,8 @@ class PlaygroundSim:
             cam_pos = self.args.get("cam_pos", (3.0, 2.0, 0.0))
             cam_target = self.args.get("cam_target", (0.0, 0.0, 0.0))
         elif self.up_axis == "Z":
-            cam_pos = self.args.get("cam_pos", (3.0, 0.0, 2.0))
-            cam_target = self.args.get("cam_target", (0.0, 0.0, 0.0))
+            cam_pos = self.args.get("cam_pos", (-3.0, 0.0, 2.0))
+            cam_target = self.args.get("cam_target", (1.0, 0.0, 1.0))
 
         # Create viewer
         camera_props = gymapi.CameraProperties()
@@ -284,8 +284,8 @@ class RobotSim:
         attractor_properties = gymapi.AttractorProperties()
         # Make attractor in all axes
         attractor_properties.axes = attr_type
-        attractor_properties.stiffness = 5e5 if attr_type == gymapi.AXIS_ALL else 5000
-        attractor_properties.damping = 5e3 if attr_type == gymapi.AXIS_ALL else 500
+        attractor_properties.stiffness = 5e5 if attr_type == gymapi.AXIS_ALL or attr_type ==gymapi.AXIS_TRANSLATION else 5000
+        attractor_properties.damping = 5e3 if attr_type == gymapi.AXIS_ALL or attr_type ==gymapi.AXIS_TRANSLATION else 500
 
         # Create helper geometry used for visualization
         # Create a wireframe axis
@@ -307,7 +307,7 @@ class RobotSim:
             handle = self.robot_handles[i]
 
             body_dict = self.gym.get_actor_rigid_body_dict(env, handle)
-            beauty_print(f"get_actor_rigid_body_dict: {body_dict}")
+            # beauty_print(f"get_actor_rigid_body_dict: {body_dict}")
             props = self.gym.get_actor_rigid_body_states(env, handle, gymapi.STATE_POS)
             attracted_rigid_body_handle = self.gym.find_actor_rigid_body_handle(env, handle, attracted_rigid_body)
 
@@ -745,9 +745,9 @@ class RobotSim:
                 next_update_time += update_freq
                 index += 1
                 if index >= len(traj[i]):
-                    # index = 0
+                    index = 0
                     # save_dof_states = False
-                    break   # stop the simulation
+                    # break   # stop the simulation
 
             # Step the physics
             self.gym.simulate(self.sim)
