@@ -50,6 +50,8 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         self._motion_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.long)
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
 
+        self.use_object_motion = cfg["env"]["use_object_motion"]
+
     def pre_physics_step(self, actions):
         self.actions = actions.to(self.device).clone()
 
@@ -87,9 +89,15 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         dof_vel = torch.zeros_like(dof_vel)
 
         if self.extra_dof_states is not None:
-            dof_pos = torch.tensor(self.extra_dof_states[f0l:f1l, :, 0]).to(self.device)
+            if self.extra_rewrite_dof_names is not None:
+                try:
+                    dof_pos[:, self.extra_rewrite_dof_id] = torch.tensor(
+                        self.extra_dof_states[f0l-1:f1l-1, self.extra_rewrite_dof_id, 0]).to(self.device)
+                except:
+                    print(f0l, f1l)
+            # dof_pos = torch.tensor(self.extra_dof_states[f0l:f1l, :, 0]).to(self.device)
 
-        if self.object_names is not None:
+        if self.use_object_motion:
             object_poses = self._object_motion_lib.get_motion_state(motion_ids, motion_times)
             for object_name, object_pose in object_poses.items():
                 # 13-dim for the actor root state: [x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz]

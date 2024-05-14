@@ -29,6 +29,7 @@ env:
   # animation files to learn from
   motion_file:
   motion_dof_states_file:
+  extra_rewrite_dof_names:
 
   motion_file_asset:
   right_left_ids_except_thumb_and_knuckle:

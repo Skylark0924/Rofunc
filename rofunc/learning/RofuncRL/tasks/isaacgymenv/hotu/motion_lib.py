@@ -158,6 +158,12 @@ class MotionLib:
 
         self.motion_ids = torch.arange(len(self._motions), dtype=torch.long, device=self._device)
 
+        self.right_left_ids_except_thumb_and_knuckle = [rb_id for rb_name, rb_id in self.mf_humanoid_rb_dict.items() if
+                                                        "qbhand" in rb_name and "thumb" not in rb_name and
+                                                        "knuckle" not in rb_name and "root_link" not in rb_name]
+        self.right_left_thumb_knuckle_ids = [rb_id for rb_name, rb_id in self.mf_humanoid_rb_dict.items() if
+                                             "thumb_knuckle" in rb_name]
+
     def _num_motions(self):
         return len(self._motions)
 
@@ -641,19 +647,16 @@ class MotionLib:
             #     # rf.logger.beauty_print("Unsupported humanoid type", "warning")
             #     # pass
 
-            right_left_ids_except_thumb_and_knuckle = self.cfg["env"]["right_left_ids_except_thumb_and_knuckle"]
-            right_left_thumb_knuckle_ids = self.cfg["env"]["right_left_thumb_knuckle_ids"]
-
             if joint_size == 3:
                 joint_q = local_rot[:, body_id]
                 joint_exp_map = torch_utils.quat_to_exp_map(joint_q)
                 dof_pos[:, joint_offset: (joint_offset + joint_size)] = joint_exp_map
             elif joint_size == 1:
-                if body_id in right_left_ids_except_thumb_and_knuckle:  # Right and left fingers except thumbs
+                if body_id in self.right_left_ids_except_thumb_and_knuckle:  # Right and left fingers except thumbs
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 2])  # assume joint is always along z axis
-                elif body_id in right_left_thumb_knuckle_ids:  # right and left thumbs knuckles link
+                elif body_id in self.right_left_thumb_knuckle_ids:  # right and left thumbs knuckles link
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 0])  # assume joint is always along x axis

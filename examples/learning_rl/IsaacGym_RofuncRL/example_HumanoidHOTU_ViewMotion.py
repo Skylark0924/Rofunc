@@ -60,6 +60,7 @@ if __name__ == "__main__":
     #  3. HOTUH1WQbhand
     #  4. HOTUCURIWQbhand
     #  5. HOTUWalker
+    #  6. HOTUBruce
     parser.add_argument("--view_motion_type", type=str, default="HOTUH1WQbhand")
     custom_args = parser.parse_args()
 
