@@ -239,7 +239,7 @@ def _run_sim(motion):
     #     motion_rb_states_rot[:, hand_ids]
     # )
 
-    # motion_rb_states_pos[:, :, 2] += 0.2
+    motion_rb_states_pos[:, :, 2] -= 0.1
     motion_rb_states = torch.cat([motion_rb_states_pos, motion_rb_states_rot], dim=-1)
 
     motion_root_pos = motion_rb_states_pos[:, 0]
@@ -256,7 +256,7 @@ def _run_sim(motion):
         attr_types=all_types,
         update_freq=0.001,
         root_state=motion_root_states,
-        verbose=True
+        verbose=False
     )
     return dof_states
 
@@ -479,7 +479,7 @@ if __name__ == '__main__':
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
                         # default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
+                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml

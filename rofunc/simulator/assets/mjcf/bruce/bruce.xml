@@ -57,7 +57,7 @@
                           rgba="0.752941 0.752941 0.752941 1"
                           mesh="hip_roll_link_r"/>
                     <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="hip_roll_link_r"/>
-                    <body name="hip_pitch_link_r"  pos="0 0 0" quat="0.707107 0.707107 0 0">
+                    <body name="hip_pitch_link_r" pos="0 0 0" quat="0.707107 0.707107 0 0">
                         <inertial pos="0.140714 -0.0086817 0.00167429" quat="-0.0210718 0.710934 0.00543456 0.702922"
                                   mass="0.72849" diaginertia="0.0181996 0.0179488 0.000479326"/>
                         <joint name="hip_pitch_r" pos="0 0 0" axis="0 0 1" range="-3.1415 3.1415"/>
@@ -91,14 +91,14 @@
                 <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1"
                       mesh="hip_yaw_link_l"/>
                 <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="hip_yaw_link_l"/>
-                <body name="hip_roll_link_l"  pos="0 0 0" quat="0.500001 -0.499999 0.500001 0.499999">
+                <body name="hip_roll_link_l" pos="0 0 0" quat="0.500001 -0.499999 0.500001 0.499999">
                     <inertial pos="-1.51e-07 0 6.88e-06" mass="0.05" diaginertia="1e-05 1e-05 1e-05"/>
                     <joint name="hip_roll_l" pos="0 0 0" axis="0 0 1" range="-3.1415 3.1415"/>
                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                           rgba="0.752941 0.752941 0.752941 1"
                           mesh="hip_roll_link_l"/>
                     <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="hip_roll_link_l"/>
-                    <body name="hip_pitch_link_l"  pos="0 0 0" quat="0.707107 0.707107 0 0">
+                    <body name="hip_pitch_link_l" pos="0 0 0" quat="0.707107 0.707107 0 0">
                         <inertial pos="0.142447 -0.00832054 0.00049317" quat="-0.002203 0.702817 0.024599 0.710942"
                                   mass="0.720628" diaginertia="0.018195 0.0179541 0.000461885"/>
                         <joint name="hip_pitch_l" pos="0 0 0" axis="0 0 1" range="-3.1415 3.1415"/>
@@ -128,14 +128,14 @@
             <body name="shoulder_pitch_link_r" pos="0.029216 -0.12375 0.152985" quat="0.5 0.5 -0.5 0.5">
                 <inertial pos="0 -0.00038323 -0.0141368" quat="0.999984 0.0057278 0 0" mass="0.0493169"
                           diaginertia="2.507e-05 2.40321e-05 8.31794e-06"/>
-                <joint name="shoulder_pitch_r" pos="0 0 0" axis="0 0 1" range="-3.1415 3.1415"/>
+                <joint name="shoulder_pitch_r" pos="0 0 0" axis="0 0 1" range="-1.57 1.57"/>
                 <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1"
                       mesh="shoulder_pitch_link_r"/>
                 <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="shoulder_pitch_link_r"/>
-                <body name="shoulder_roll_link_r" pos="0 0 0"  quat="0.5 0.5 -0.5 0.5">
+                <body name="shoulder_roll_link_r" pos="0 0 0" quat="0.5 0.5 -0.5 0.5">
                     <inertial pos="0.0570939 -0.00419463 0.00093738" quat="-0.205082 0.694437 -0.169487 0.66856"
                               mass="0.024" diaginertia="0.000126403 0.000125807 7.29e-06"/>
-                    <joint name="shoulder_roll_r" pos="0 0 0" axis="0 0 1" range="-3.1415 3.1415"/>
+                    <joint name="shoulder_roll_r" pos="0 0 0" axis="0 0 1" range="-1.57 1.57"/>
                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                           rgba="0.752941 0.752941 0.752941 1"
                           mesh="shoulder_roll_link_r"/>
@@ -144,10 +144,13 @@
                         <inertial pos="0.0217884 0 0.0003604" quat="0.499291 0.500708 0.500708 0.499291"
                                   mass="0.0524404"
                                   diaginertia="7.261e-05 7.10305e-05 7.52949e-06"/>
-                        <joint name="elbow_pitch_r" pos="0 0 0" axis="0 0 1" range="-3.1415 3.1415"/>
+                        <joint name="elbow_pitch_r" pos="0 0 0" axis="0 0 1" range="-1.57 1.57"/>
                         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                               rgba="0.752941 0.752941 0.752941 1" mesh="elbow_pitch_link_r"/>
                         <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="elbow_pitch_link_r"/>
+                        <body name="hand_r" pos="0.12 0 0" quat="0.707107 0.707107 0 0">
+                            <geom type="sphere" contype="0" conaffinity="1" size="0.005" rgba="0.752941 0.752941 0.752941 1"/>
+                        </body>
                     </body>
                 </body>
             </body>
@@ -158,10 +161,10 @@
                 <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1"
                       mesh="shoulder_pitch_link_l"/>
                 <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="shoulder_pitch_link_l"/>
-                <body name="shoulder_roll_link_l" pos="0 0 0"  quat="0.5 0.5 -0.5 0.5">
+                <body name="shoulder_roll_link_l" pos="0 0 0" quat="0.5 0.5 -0.5 0.5">
                     <inertial pos="0.0570939 0.00419463 0.00094155" quat="0.207025 0.693936 0.171489 0.667971"
                               mass="0.0313652" diaginertia="0.000165195 0.000164406 9.52871e-06"/>
-                    <joint name="shoulder_roll_l" pos="0 0 0" axis="0 0 1" range="-3.1415 3.1415"/>
+                    <joint name="shoulder_roll_l" pos="0 0 0" axis="0 0 1" range="-1.57 1.57"/>
                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                           rgba="0.752941 0.752941 0.752941 1"
                           mesh="shoulder_roll_link_l"/>
@@ -170,10 +173,13 @@
                         <inertial pos="0.0217884 0 0.0003604" quat="0.499291 0.500708 0.500708 0.499291"
                                   mass="0.0524404"
                                   diaginertia="7.261e-05 7.10305e-05 7.52949e-06"/>
-                        <joint name="elbow_pitch_l" pos="0 0 0" axis="0 0 1" range="-3.1415 3.1415"/>
+                        <joint name="elbow_pitch_l" pos="0 0 0" axis="0 0 1" range="-1.57 1.57"/>
                         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                               rgba="0.752941 0.752941 0.752941 1" mesh="elbow_pitch_link_l"/>
                         <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="elbow_pitch_link_l"/>
+                        <body name="hand_l" pos="0.12 0 0" quat="0.707107 0.707107 0 0">
+                            <geom type="sphere" contype="0" conaffinity="1" size="0.005" rgba="0.752941 0.752941 0.752941 1"/>
+                        </body>
                     </body>
                 </body>
             </body>

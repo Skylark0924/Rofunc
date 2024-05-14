@@ -330,6 +330,12 @@ class Humanoid(VecTask):
             self._dof_obs_size = 288  # 48 * 6 (joint_obs_size) = 288
             self._num_actions = 48
             self._num_obs = 1 + 50 * (3 + 6 + 3 + 3) - 3  # 1353
+        elif asset_file == "mjcf/bruce/bruce.xml":
+            self._dof_body_ids = [*[i for i in range(2, 50)]] # len=48
+            self._dof_offsets = [*[i for i in range(0, 49)]]  # len=48+1
+            self._dof_obs_size = 288  # 48 * 6 (joint_obs_size) = 288
+            self._num_actions = 48
+            self._num_obs = 1 + 50 * (3 + 6 + 3 + 3) - 3  # 1353
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
 

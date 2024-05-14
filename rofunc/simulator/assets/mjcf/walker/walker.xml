@@ -190,7 +190,7 @@
                                 <inertial pos="0.0187332 0.0270289 -0.000700112"
                                           quat="0.594877 0.353764 -0.619731 0.370008"
                                           mass="0.111556" diaginertia="0.001 0.001 0.001"/>
-                                <joint name="right_limb_j4" pos="0 0 0" axis="0 0 -1" limited="true" range="-2.234 0"/>
+                                <joint name="right_limb_j4" pos="0 0 0" axis="0 0 -1" limited="true" range="-2.234 -0.2"/>
                                 <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
                                       mesh="right_limb_l4"/>
                                 <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="right_limb_l4"/>
@@ -427,7 +427,7 @@
                                 <inertial pos="0.0187474 -0.0269366 -0.000697445"
                                           quat="0.353751 0.594738 -0.370052 0.619845" mass="0.111546"
                                           diaginertia="0.001 0.001 0.001"/>
-                                <joint name="left_limb_j4" pos="0 0 0" axis="0 0 1" limited="true" range="-2.234 0"/>
+                                <joint name="left_limb_j4" pos="0 0 0" axis="0 0 1" limited="true" range="-2.234 -0.2"/>
                                 <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
                                       mesh="left_limb_l4"/>
                                 <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
