@@ -48,6 +48,7 @@ class Humanoid(VecTask):
         self._termination_height = self.cfg["env"]["terminationHeight"]
         self._enable_early_termination = self.cfg["env"]["enableEarlyTermination"]
         self.camera_follow = self.cfg["env"].get("cameraFollow", False)
+        self.use_object_motion = self.cfg["env"].get("use_object_motion", False)
 
         self.humanoid_asset_infos = get_sim_config(sim_name="Humanoid_info")["Model_type"]
 
@@ -95,7 +96,7 @@ class Humanoid(VecTask):
 
         # Get the actor ids for the humanoid and the objects
         self._humanoid_actor_ids = num_actors * torch.arange(self.num_envs, device=self.device, dtype=torch.int32)
-        if self.object_names is not None:
+        if self.use_object_motion and self.object_names is not None:
             self._object_actor_ids = {
                 object_name: torch.tensor(
                     [self.gym.get_actor_index(self.envs[i], self.object_handles[object_name][i], gymapi.DOMAIN_SIM) for
@@ -312,30 +313,30 @@ class Humanoid(VecTask):
             self._dof_obs_size = 480  # 80 * 6 (joint_obs_size) = 480
             self._num_actions = 100
             self._num_obs = 1 + 83 * (3 + 6 + 3 + 3) - 3  # 1203
-        elif asset_file == "mjcf/UnitreeH1/h1_w_qbhand.xml":
-            self._dof_body_ids = [*[i for i in range(1, 17)], *[i for i in range(18, 56)], *[i for i in range(57, 90)]] # len=87
-            self._dof_offsets = [*[i for i in range(0, 16)], *[i for i in range(18, 56)], *[i for i in range(58, 92)]]  # len=87+1
-            self._dof_obs_size = 522  # 87 * 6 (joint_obs_size) = 522
-            self._num_actions = 91
-            self._num_obs = 1 + 90 * (3 + 6 + 3 + 3) - 3  # 1353
-        elif asset_file== "mjcf/curi/curi_w_softhand_isaacgym.xml":
-            self._dof_body_ids = [*[i for i in range(1, 88)]] # len=87
+        # elif asset_file == "mjcf/UnitreeH1/h1_w_qbhand.xml":
+        #     self._dof_body_ids = [*[i for i in range(1, 17)], *[i for i in range(18, 56)], *[i for i in range(57, 90)]] # len=87
+        #     self._dof_offsets = [*[i for i in range(0, 16)], *[i for i in range(18, 56)], *[i for i in range(58, 92)]]  # len=87+1
+        #     self._dof_obs_size = 522  # 87 * 6 (joint_obs_size) = 522
+        #     self._num_actions = 91
+        #     self._num_obs = 1 + 90 * (3 + 6 + 3 + 3) - 3  # 1353
+        elif asset_file == "mjcf/curi/curi_w_softhand_isaacgym.xml":
+            self._dof_body_ids = [*[i for i in range(1, 88)]]  # len=87
             self._dof_offsets = [*[i for i in range(0, 88)]]  # len=87+1
             self._dof_obs_size = 522  # 87 * 6 (joint_obs_size) = 522
             self._num_actions = 87
             self._num_obs = 1 + 88 * (3 + 6 + 3 + 3) - 3  # 1353
-        elif asset_file == "mjcf/walker/walker.xml":
-            self._dof_body_ids = [*[i for i in range(2, 50)]] # len=48
-            self._dof_offsets = [*[i for i in range(0, 49)]]  # len=48+1
-            self._dof_obs_size = 288  # 48 * 6 (joint_obs_size) = 288
-            self._num_actions = 48
-            self._num_obs = 1 + 50 * (3 + 6 + 3 + 3) - 3  # 1353
-        elif asset_file == "mjcf/bruce/bruce.xml":
-            self._dof_body_ids = [*[i for i in range(2, 50)]] # len=48
-            self._dof_offsets = [*[i for i in range(0, 49)]]  # len=48+1
-            self._dof_obs_size = 288  # 48 * 6 (joint_obs_size) = 288
-            self._num_actions = 48
-            self._num_obs = 1 + 50 * (3 + 6 + 3 + 3) - 3  # 1353
+        # elif asset_file == :
+        #     self._dof_body_ids = [*[i for i in range(2, 50)]] # len=48
+        #     self._dof_offsets = [*[i for i in range(0, 49)]]  # len=48+1
+        #     self._dof_obs_size = 288  # 48 * 6 (joint_obs_size) = 288
+        #     self._num_actions = 48
+        #     self._num_obs = 1 + 50 * (3 + 6 + 3 + 3) - 3  # 1353
+        elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml"]:
+            humanoid_info = self._get_humanoid_info(asset_file)
+            self._dof_offsets = humanoid_info["dof_offsets"]
+            self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96
+            self._num_actions = len(humanoid_info["dofs"])
+            self._num_obs = 1 + len(humanoid_info["rigid_bodies"]) * (3 + 6 + 3 + 3) - 3
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
 
@@ -390,7 +391,7 @@ class Humanoid(VecTask):
         # Load object assets
         object_asset_files = self.cfg["env"]["object_asset"]["assetFileName"]
         self.object_names = self.cfg["env"]["object_asset"]["assetName"]
-        if self.object_names is not None:
+        if self.use_object_motion:
             object_assets = {}
             for i in range(len(self.object_names)):
                 asset_options = gymapi.AssetOptions()

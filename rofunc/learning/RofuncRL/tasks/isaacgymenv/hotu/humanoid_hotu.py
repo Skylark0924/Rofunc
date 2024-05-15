@@ -125,7 +125,11 @@ class HumanoidHOTUTask(Humanoid):
         self._load_extra_dof_states(cfg["env"].get("motion_dof_states_file", None))
         self.extra_rewrite_dof_names = cfg["env"].get("extra_rewrite_dof_names", None)
         if self.extra_rewrite_dof_names is not None:
-            self.extra_rewrite_dof_id = [self.humanoid_info["dofs"][dof_name] for dof_name in self.extra_rewrite_dof_names]
+            if self.extra_rewrite_dof_names == "all":
+                self.extra_rewrite_dof_id = [id for id in self.humanoid_info["dofs"].values()]
+            else:
+                self.extra_rewrite_dof_id = [self.humanoid_info["dofs"][dof_name] for dof_name in
+                                             self.extra_rewrite_dof_names]
 
         # Load object motion file
         self._load_object_motion(cfg["env"].get("object_motion_file", None))
@@ -351,7 +355,7 @@ class HumanoidHOTUTask(Humanoid):
                 self._num_amp_obs_per_step = num_amp_obs_per_step_list
             else:
                 self._num_amp_obs_per_step = 13 + self._dof_obs_size + 100 + 3 * num_key_bodies
-        elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/curi/curi_w_softhand_isaacgym.xml", 
+        elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/curi/curi_w_softhand_isaacgym.xml",
                             "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + self._num_actions + 3 * num_key_bodies
         else:

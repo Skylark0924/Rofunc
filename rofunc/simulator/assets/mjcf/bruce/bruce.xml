@@ -185,4 +185,23 @@
             </body>
         </body>
     </worldbody>
+
+    <actuator>
+        <motor gear="1" joint="hip_yaw_r"/>
+        <motor gear="1" joint="hip_roll_r"/>
+        <motor gear="1" joint="hip_pitch_r"/>
+        <motor gear="1" joint="knee_pitch_r"/>
+        <motor gear="1" joint="ankle_pitch_r"/>
+        <motor gear="1" joint="hip_yaw_l"/>
+        <motor gear="1" joint="hip_roll_l"/>
+        <motor gear="1" joint="hip_pitch_l"/>
+        <motor gear="1" joint="knee_pitch_l"/>
+        <motor gear="1" joint="ankle_pitch_l"/>
+        <motor gear="1" joint="shoulder_pitch_r"/>
+        <motor gear="1" joint="shoulder_roll_r"/>
+        <motor gear="1" joint="elbow_pitch_r"/>
+        <motor gear="1" joint="shoulder_pitch_l"/>
+        <motor gear="1" joint="shoulder_roll_l"/>
+        <motor gear="1" joint="elbow_pitch_l"/>
+    </actuator>
 </mujoco>

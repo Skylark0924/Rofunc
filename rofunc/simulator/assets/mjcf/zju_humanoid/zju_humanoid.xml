@@ -1,0 +1,298 @@
+<mujoco model="ZJU_Humanoid">
+    <compiler angle="radian" meshdir="../../urdf/zju_humanoid/low_meshes/"/>
+    <statistic meansize="0.547401" extent="1.83853" center="0.00045652 9.85972e-05 -0.561266"/>
+    <asset>
+        <mesh name="TORSO" file="TORSO.STL"/>
+        <mesh name="SCAPULA_R" file="SCAPULA_R.STL"/>
+        <mesh name="SHOULDER_R" file="SHOULDER_R.STL"/>
+        <mesh name="UPPERARM_R" file="UPPERARM_R.STL"/>
+        <mesh name="FOREARM_R" file="FOREARM_R.STL"/>
+        <mesh name="WRIST_REVOLUTE_R" file="WRIST_REVOLUTE_R.STL"/>
+        <mesh name="WRIST_UPDOWN_R" file="WRIST_UPDOWN_R.STL"/>
+        <mesh name="HAND_R" file="HAND_R.STL"/>
+        <mesh name="SCAPULA_L" file="SCAPULA_L.STL"/>
+        <mesh name="SHOULDER_L" file="SHOULDER_L.STL"/>
+        <mesh name="UPPERARM_L" file="UPPERARM_L.STL"/>
+        <mesh name="FOREARM_L" file="FOREARM_L.STL"/>
+        <mesh name="WRIST_REVOLUTE_L" file="WRIST_REVOLUTE_L.STL"/>
+        <mesh name="WRIST_UPDOWN_L" file="WRIST_UPDOWN_L.STL"/>
+        <mesh name="HAND_L" file="HAND_L.STL"/>
+        <mesh name="SACRUM" file="SACRUM.STL"/>
+        <mesh name="ILIUM_R" file="ILIUM_R.STL"/>
+        <mesh name="ISCHIUM_R" file="ISCHIUM_R.STL"/>
+        <mesh name="THIGH_R" file="THIGH_R.STL"/>
+        <mesh name="SHANK_R" file="SHANK_R.STL"/>
+        <mesh name="ASTRAGALUS_R" file="ASTRAGALUS_R.STL"/>
+        <mesh name="FOOT_R" file="FOOT_R.STL"/>
+        <mesh name="TIPTOE_Z_R" file="TIPTOE_Z_R.STL"/>
+        <mesh name="ILIUM_L" file="ILIUM_L.STL"/>
+        <mesh name="ISCHIUM_L" file="ISCHIUM_L.STL"/>
+        <mesh name="THIGH_L" file="THIGH_L.STL"/>
+        <mesh name="SHANK_L" file="SHANK_L.STL"/>
+        <mesh name="ASTRAGALUS_L" file="ASTRAGALUS_L.STL"/>
+        <mesh name="FOOT_L" file="FOOT_L.STL"/>
+        <mesh name="TIPTOE_Z_L" file="TIPTOE_Z_L.STL"/>
+        <mesh name="NECK" file="NECK.STL"/>
+        <mesh name="HEAD" file="HEAD.STL"/>
+    </asset>
+    <worldbody>
+        <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
+        <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
+        <body name="pelvis" pos="0 0 1.4">
+            <geom type="mesh" contype="0" conaffinity="1" group="1" density="0" rgba="1 1 1 1" mesh="TORSO"/>
+<!--            <geom type="mesh" rgba="1 1 1 1" mesh="TORSO"/>-->
+            <body name="SCAPULA_R" pos="-0.00138723 -0.158688 -0.0466034" quat="0.173648 0.984808 0 0">
+                <inertial pos="-0.00646516 -0.277778 0.312056" quat="0.984938 0.172776 0.00364574 0.00573034"
+                          mass="25.9304" diaginertia="4.30358 3.65836 0.762952"/>
+                <joint name="Shoulder_Y_R" pos="0 0 0" axis="0 -1 0" range="-3.14 1.22"/>
+                <geom type="mesh" contype="0" conaffinity="1" group="1" density="0" rgba="1 1 1 1" mesh="SCAPULA_R"/>
+<!--                <geom type="mesh" rgba="1 1 1 1" mesh="SCAPULA_R"/>-->
+                <body name="SHOULDER_R" pos="0 0.0752023 0" quat="0.173648 -0.984808 0 0">
+                    <inertial pos="-0.00646516 0.224963 -0.413963" quat="0.999977 -0.000881804 -0.00458533 -0.00501013"
+                              mass="25.9304" diaginertia="4.30358 3.65836 0.762952"/>
+                    <joint name="Shoulder_X_R" pos="0 0 0" axis="1 0 0" range="-2.26 0"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                          mesh="SHOULDER_R"/>
+                    <geom type="mesh" rgba="1 1 1 1" mesh="SHOULDER_R"/>
+                    <body name="UPPERARM_R" pos="-1e-05 0 -0.0845">
+                        <inertial pos="-0.00645516 0.224963 -0.329463"
+                                  quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                  diaginertia="4.30358 3.65836 0.762952"/>
+                        <joint name="Shoulder_Z_R" pos="0 0 0" axis="0 0 1" range="-2.09 2.09"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                              mesh="UPPERARM_R"/>
+                        <geom type="mesh" rgba="1 1 1 1" mesh="UPPERARM_R"/>
+                        <body name="FOREARM_R" pos="0 0 -0.1455">
+                            <inertial pos="-0.00645516 0.224963 -0.183962"
+                                      quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                      diaginertia="4.30358 3.65836 0.762952"/>
+                            <joint name="Elbow_R" pos="0 0 0" axis="0 1 0" range="-1.57 0"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                                  mesh="FOREARM_R"/>
+                            <geom type="mesh" rgba="1 1 1 1" mesh="FOREARM_R"/>
+                            <body name="WRIST_REVOLUTE_R" pos="0 0 -0.0684244">
+                                <inertial pos="-0.00645516 0.224963 -0.115538"
+                                          quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                          diaginertia="4.30358 3.65836 0.762952"/>
+                                <joint name="Wrist_Z_R" pos="0 0 0" axis="0 0 1" range="-2.96 2.96"/>
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"  rgba="1 1 1 1"
+                                      mesh="WRIST_REVOLUTE_R"/>
+                                <geom type="mesh" rgba="1 1 1 1" mesh="WRIST_REVOLUTE_R"/>
+                                <body name="WRIST_UPDOWN_R" pos="0 0 -0.20158">
+                                    <inertial pos="-0.00645516 0.224963 0.0860423"
+                                              quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                              diaginertia="4.30358 3.65836 0.762952"/>
+                                    <joint name="Wrist_Y_R" pos="0 0 0" axis="0 -1 0" range="-0.87 0.87"/>
+                                    <geom type="mesh" contype="0" conaffinity="1" group="1" density="0"  rgba="1 1 1 1"
+                                          mesh="WRIST_UPDOWN_R"/>
+                                    <geom type="mesh" rgba="1 1 1 1" mesh="WRIST_UPDOWN_R"/>
+                                    <body name="HAND_R" pos="0 0 0">
+                                        <inertial pos="-0.00645516 0.224963 0.0860423"
+                                                  quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                                  diaginertia="4.30358 3.65836 0.762952"/>
+                                        <joint name="Wrist_X_R" pos="0 0 0" axis="1 0 0" range="-0.87 1.57"/>
+                                        <geom type="mesh" contype="0" conaffinity="1" group="1" density="0"
+                                              rgba="1 1 1 1" mesh="HAND_R"/>
+                                        <geom type="mesh" rgba="1 1 1 1" mesh="HAND_R"/>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="SCAPULA_L" pos="-0.00138723 0.158688 -0.0466034" quat="0.984808 0.173648 0 0">
+                <inertial pos="-0.00646516 -0.286031 -0.309051" quat="0.984632 -0.174513 -0.00538577 -0.00413784"
+                          mass="25.9304" diaginertia="4.30358 3.65836 0.762952"/>
+                <joint name="Shoulder_Y_L" pos="0 0 0" axis="0 1 0" range="-1.22 3.14"/>
+                <geom type="mesh" contype="0" conaffinity="1" group="1" density="0" rgba="1 1 1 1" mesh="SCAPULA_L"/>
+<!--                <geom type="mesh" rgba="1 1 1 1" mesh="SCAPULA_L"/>-->
+                <body name="SHOULDER_L" pos="0 0.0752023 0" quat="0.984808 -0.173648 0 0">
+                    <inertial pos="-0.00646516 -0.233747 -0.413963" quat="0.999977 -0.000881804 -0.00458533 -0.00501013"
+                              mass="25.9304" diaginertia="4.30358 3.65836 0.762952"/>
+                    <joint name="Shoulder_X_L" pos="0 0 0" axis="1 0 0" range="0 2.26"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                          mesh="SHOULDER_L"/>
+                    <geom type="mesh" rgba="1 1 1 1" mesh="SHOULDER_L"/>
+                    <body name="UPPERARM_L" pos="0 0 -0.0845">
+                        <inertial pos="-0.00645516 -0.233747 -0.329463"
+                                  quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                  diaginertia="4.30358 3.65836 0.762952"/>
+                        <joint name="Shoulder_Z_L" pos="0 0 0" axis="0 0 1" range="-2.09 2.09"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                              mesh="UPPERARM_L"/>
+                        <geom type="mesh" rgba="1 1 1 1" mesh="UPPERARM_L"/>
+                        <body name="FOREARM_L" pos="0 0 -0.1455">
+                            <inertial pos="-0.00645516 -0.233747 -0.183962"
+                                      quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                      diaginertia="4.30358 3.65836 0.762952"/>
+                            <joint name="Elbow_L" pos="0 0 0" axis="0 -1 0" range="0 1.57"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                                  mesh="FOREARM_L"/>
+                            <geom type="mesh" rgba="1 1 1 1" mesh="FOREARM_L"/>
+                            <body name="WRIST_REVOLUTE_L" pos="0 0 -0.0684244">
+                                <inertial pos="-0.00645516 -0.233746 -0.115538"
+                                          quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                          diaginertia="4.30358 3.65836 0.762952"/>
+                                <joint name="Wrist_Z_L" pos="0 0 0" axis="0 0 1" range="-2.96 2.96"/>
+                                <geom type="mesh" contype="0" conaffinity="1" group="1" density="0" rgba="1 1 1 1"
+                                      mesh="WRIST_REVOLUTE_L"/>
+<!--                                <geom type="mesh" rgba="1 1 1 1" mesh="WRIST_REVOLUTE_L"/>-->
+                                <body name="WRIST_UPDOWN_L" pos="0 0 -0.20158">
+                                    <inertial pos="-0.00645516 -0.233746 0.0860423"
+                                              quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                              diaginertia="4.30358 3.65836 0.762952"/>
+                                    <joint name="Wrist_Y_L" pos="0 0 0" axis="0 1 0" range="-0.87 0.87"/>
+                                    <geom type="mesh" contype="0" conaffinity="1" group="1" density="0" rgba="1 1 1 1"
+                                          mesh="WRIST_UPDOWN_L"/>
+<!--                                    <geom type="mesh" rgba="1 1 1 1" mesh="WRIST_UPDOWN_L"/>-->
+                                    <body name="HAND_L" pos="0 0 0">
+                                        <inertial pos="-0.00645516 -0.233746 0.0860423"
+                                                  quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                                  diaginertia="4.30358 3.65836 0.762952"/>
+                                        <joint name="Wrist_X_L" pos="0 0 0" axis="1 0 0" range="-1.57 0.87"/>
+                                        <geom type="mesh" contype="0" conaffinity="1" group="1" density="0"
+                                              rgba="1 1 1 1" mesh="HAND_L"/>
+<!--                                        <geom type="mesh" rgba="1 1 1 1" mesh="HAND_L"/>-->
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="SACRUM" pos="-0.00138723 0 -0.412139">
+                <inertial pos="-0.00646516 -0.00439177 -0.022706" quat="0.999977 -0.000881804 -0.00458533 -0.00501013"
+                          mass="25.9304" diaginertia="4.30358 3.65836 0.762952"/>
+                <joint name="A_Waist" pos="0 0 0" axis="0 0 -1" range="-0.785 0.785"/>
+                <geom type="mesh" contype="0" conaffinity="1" group="1" density="0" rgba="1 1 1 1" mesh="SACRUM"/>
+<!--                <geom type="mesh" rgba="1 1 1 1" mesh="SACRUM"/>-->
+                <body name="ILIUM_R" pos="0 -0.051 -0.1698">
+                    <inertial pos="-0.00646516 0.0466082 0.147094" quat="0.999977 -0.000881804 -0.00458533 -0.00501013"
+                              mass="25.9304" diaginertia="4.30358 3.65836 0.762952"/>
+                    <joint name="Hip_Z_R" pos="0 0 0" axis="0 0 1" range="-0.209 0.209"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="ILIUM_R"/>
+                    <geom type="mesh" rgba="1 1 1 1" mesh="ILIUM_R"/>
+                    <body name="ISCHIUM_R" pos="0 -0.0375 0">
+                        <inertial pos="-0.00646516 0.0841082 0.147094"
+                                  quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                  diaginertia="4.30358 3.65836 0.762952"/>
+                        <joint name="Hip_X_R" pos="0 0 0" axis="-1 0 0" range="-0.436 0.436"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                              mesh="ISCHIUM_R"/>
+                        <geom type="mesh" rgba="1 1 1 1" mesh="ISCHIUM_R"/>
+                        <body name="THIGH_R" pos="0 -0.043004 0">
+                            <inertial pos="-0.00646516 0.127112 0.147094"
+                                      quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                      diaginertia="4.30358 3.65836 0.762952"/>
+                            <joint name="Hip_Y_R" pos="0 0 0" axis="0 1 0" range="-2.443 0.436"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                                  mesh="THIGH_R"/>
+<!--                            <geom type="mesh" rgba="1 1 1 1" mesh="THIGH_R"/>-->
+                            <body name="SHANK_R" pos="0 0 -0.34">
+                                <inertial pos="-0.00646516 0.127112 0.487094"
+                                          quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                          diaginertia="4.30358 3.65836 0.762952"/>
+                                <joint name="Knee_R" pos="0 0 0" axis="0 1 0" range="0 2.443"/>
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                                      mesh="SHANK_R"/>
+                                <geom type="mesh" rgba="1 1 1 1" mesh="SHANK_R"/>
+                                <body name="ASTRAGALUS_R" pos="0 0 -0.36">
+                                    <inertial pos="-0.00646516 0.127112 0.847094"
+                                              quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                              diaginertia="4.30358 3.65836 0.762952"/>
+                                    <joint name="Ankle_Y_R" pos="0 0 0" axis="0 -1 0" range="-0.698 1.309"/>
+                                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                                          mesh="ASTRAGALUS_R"/>
+                                    <geom type="mesh" rgba="1 1 1 1" mesh="ASTRAGALUS_R"/>
+                                    <body name="FOOT_R" pos="0 0 0">
+                                        <inertial pos="-0.00646516 0.127112 0.847094"
+                                                  quat="0.999977 -0.000881805 -0.00458533 -0.00501006" mass="25.9304"
+                                                  diaginertia="4.30358 3.65836 0.762952"/>
+                                        <joint name="Ankle_X_R" pos="0 0 0" axis="-1 0 0" range="-0.331 0.331"/>
+                                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                                              rgba="1 1 1 1" mesh="FOOT_R"/>
+<!--                                        <geom type="mesh" rgba="1 1 1 1" mesh="FOOT_R"/>-->
+                                        <geom pos="0 0 -0.08497" type="mesh" contype="0" conaffinity="0" group="1"
+                                              density="0" rgba="1 1 1 1" mesh="TIPTOE_Z_R"/>
+                                        <geom pos="0 0 -0.08497" type="mesh" rgba="1 1 1 1" mesh="TIPTOE_Z_R"/>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+                <body name="ILIUM_L" pos="0 0.051 -0.1698">
+                    <inertial pos="-0.00646516 -0.0553918 0.147094" quat="0.999977 -0.000881804 -0.00458533 -0.00501013"
+                              mass="25.9304" diaginertia="4.30358 3.65836 0.762952"/>
+                    <joint name="Hip_Z_L" pos="0 0 0" axis="0 0 1" range="-0.209 0.209"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="ILIUM_L"/>
+                    <geom type="mesh" rgba="1 1 1 1" mesh="ILIUM_L"/>
+                    <body name="ISCHIUM_L" pos="0 0.0375 0">
+                        <inertial pos="-0.00646516 -0.0928918 0.147094"
+                                  quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                  diaginertia="4.30358 3.65836 0.762952"/>
+                        <joint name="Hip_X_L" pos="0 0 0" axis="-1 0 0" range="-0.436 0.436"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                              mesh="ISCHIUM_L"/>
+                        <geom type="mesh" rgba="1 1 1 1" mesh="ISCHIUM_L"/>
+                        <body name="THIGH_L" pos="0 0.043004 0">
+                            <inertial pos="-0.00646516 -0.135896 0.147094"
+                                      quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                      diaginertia="4.30358 3.65836 0.762952"/>
+                            <joint name="Hip_Y_L" pos="0 0 0" axis="0 -1 0" range="-2.443 0.436"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                                  mesh="THIGH_L"/>
+<!--                            <geom type="mesh" rgba="1 1 1 1" mesh="THIGH_L"/>-->
+                            <body name="SHANK_L" pos="0 0 -0.34">
+                                <inertial pos="-0.00646516 -0.135896 0.487094"
+                                          quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                          diaginertia="4.30358 3.65836 0.762952"/>
+                                <joint name="Knee_L" pos="0 0 0" axis="0 -1 0" range="0 2.443"/>
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                                      mesh="SHANK_L"/>
+                                <geom type="mesh" rgba="1 1 1 1" mesh="SHANK_L"/>
+                                <body name="ASTRAGALUS_L" pos="0 0 -0.36">
+                                    <inertial pos="-0.00646516 -0.135896 0.847094"
+                                              quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                                              diaginertia="4.30358 3.65836 0.762952"/>
+                                    <joint name="Ankle_Y_L" pos="0 0 0" axis="0 1 0" range="-0.698 1.309"/>
+                                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
+                                          mesh="ASTRAGALUS_L"/>
+                                    <geom type="mesh" rgba="1 1 1 1" mesh="ASTRAGALUS_L"/>
+                                    <body name="FOOT_L" pos="0 0 0">
+                                        <inertial pos="-0.00646516 -0.135896 0.847094"
+                                                  quat="0.999977 -0.000881802 -0.00458533 -0.00501006" mass="25.9304"
+                                                  diaginertia="4.30358 3.65836 0.762952"/>
+                                        <joint name="Ankle_X_L" pos="0 0 0" axis="-1 0 0" range="-0.331 0.331"/>
+                                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                                              rgba="1 1 1 1" mesh="FOOT_L"/>
+<!--                                        <geom type="mesh" rgba="1 1 1 1" mesh="FOOT_L"/>-->
+                                        <geom pos="0 0 -0.08497" type="mesh" contype="0" conaffinity="0" group="1"
+                                              density="0" rgba="1 1 1 1" mesh="TIPTOE_Z_L"/>
+                                        <geom pos="0 0 -0.08497" type="mesh" rgba="1 1 1 1" mesh="TIPTOE_Z_L"/>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="NECK" pos="-0.00138723 0 0.089">
+                <inertial pos="-0.00646516 -0.00439177 -0.523845" quat="0.999977 -0.000881804 -0.00458533 -0.00501013"
+                          mass="25.9304" diaginertia="4.30358 3.65836 0.762952"/>
+                <joint name="Neck_Z" pos="0 0 0" axis="0 0 -1" range="-0.785 0.785"/>
+                <geom type="mesh" contype="0" conaffinity="1" group="1" density="0" rgba="1 1 1 1" mesh="NECK"/>
+<!--                <geom type="mesh" rgba="1 1 1 1" mesh="NECK"/>-->
+                <body name="HEAD" pos="0 0 0.042">
+                    <inertial pos="-0.00646516 -0.00439177 -0.565845"
+                              quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="25.9304"
+                              diaginertia="4.30358 3.65836 0.762952"/>
+                    <joint name="Neck_Y" pos="0 0 0" axis="0 -1 0" range="-0.174 0.349"/>
+                    <geom type="mesh" contype="0" conaffinity="1" group="1" density="0" rgba="1 1 1 1" mesh="HEAD"/>
+<!--                    <geom type="mesh" rgba="1 1 1 1" mesh="HEAD"/>-->
+                </body>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>

@@ -1,0 +1,1838 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="3N2-JUNE">
+    <mujoco>
+    <compiler meshdir="../low_meshes" balanceinertia="true"  discardvisual="false" />
+  </mujoco>
+  <link
+    name="TORSO">
+    <inertial>
+      <origin
+        xyz="-0.00785238905615515 -0.00439176851960852 -0.434845226080249"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/TORSO.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/TORSO.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="SCAPULA_R">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504101 -0.277777523831803 0.312055529138348"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="0.0171224879299573"
+        ixz="-0.0282979518595639"
+        iyy="3.32315600789368"
+        iyz="0.926428155612619"
+        izz="1.09852228931174" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SCAPULA_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SCAPULA_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_Y_R"
+    type="revolute">
+    <origin
+      xyz="-0.00138723248111385 -0.158687981083071 -0.0466034395598998"
+      rpy="2.79252680319093 0 0" />
+    <parent
+      link="TORSO" />
+    <child
+      link="SCAPULA_R" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3.14"
+      upper="1.22"
+      effort="54.67"
+      velocity="4.58" />
+  </joint>
+  <link
+    name="SHOULDER_R">
+    <inertial>
+      <origin
+        xyz="-0.0064651565750415 0.224963302998176 -0.413962503980782"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SHOULDER_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SHOULDER_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_X_R"
+    type="revolute">
+    <origin
+      xyz="0 0.0752023468861673 0"
+      rpy="-2.79252680319093 0 0" />
+    <parent
+      link="SCAPULA_R" />
+    <child
+      link="SHOULDER_R" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-2.26"
+      upper="0"
+      effort="54.67"
+      velocity="4.58" />
+  </joint>
+  <link
+    name="UPPERARM_R">
+    <inertial>
+      <origin
+        xyz="-0.00645515655852015 0.224963302998208 -0.329462504089342"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/UPPERARM_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/UPPERARM_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_Z_R"
+    type="revolute">
+    <origin
+      xyz="-1.00000165213499E-05 0 -0.08449999989144"
+      rpy="0 0 0" />
+    <parent
+      link="SHOULDER_R" />
+    <child
+      link="UPPERARM_R" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.09"
+      upper="2.09"
+      effort="54.67"
+      velocity="4.58" />
+  </joint>
+  <link
+    name="FOREARM_R">
+    <inertial>
+      <origin
+        xyz="-0.00645515656392481 0.224963302998207 -0.183962052391409"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/FOREARM_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/FOREARM_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Elbow_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.145500451697933"
+      rpy="0 0 0" />
+    <parent
+      link="UPPERARM_R" />
+    <child
+      link="FOREARM_R" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="33"
+      velocity="7.17" />
+  </joint>
+  <link
+    name="WRIST_REVOLUTE_R">
+    <inertial>
+      <origin
+        xyz="-0.00645515656388007 0.224962690413193 -0.115537678757091"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/WRIST_REVOLUTE_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/WRIST_REVOLUTE_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_Z_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0684243736343182"
+      rpy="0 0 0" />
+    <parent
+      link="FOREARM_R" />
+    <child
+      link="WRIST_REVOLUTE_R" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.96"
+      upper="2.96"
+      effort="15"
+      velocity="4.58" />
+  </joint>
+  <link
+    name="WRIST_UPDOWN_R">
+    <inertial>
+      <origin
+        xyz="-0.00645515656403976 0.22496269041319 0.0860423212910959"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/WRIST_UPDOWN_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/WRIST_UPDOWN_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_Y_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.201580000048187"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_REVOLUTE_R" />
+    <child
+      link="WRIST_UPDOWN_R" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-0.87"
+      upper="0.87"
+      effort="7"
+      velocity="3.62" />
+  </joint>
+  <link
+    name="HAND_R">
+    <inertial>
+      <origin
+        xyz="-0.00645515656403976 0.22496269041319 0.0860423212910959"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/HAND_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/HAND_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_X_R"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_UPDOWN_R" />
+    <child
+      link="HAND_R" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-0.87"
+      upper="1.57"
+      effort="7"
+      velocity="3.62" />
+  </joint>
+  <link
+    name="SCAPULA_L">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504169 -0.28603134877195 -0.309051382541286"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="0.00507298610370806"
+        ixz="0.0326836118620404"
+        iyy="3.31634457446292"
+        iyz="-0.934545705874443"
+        izz="1.1053337227425" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SCAPULA_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SCAPULA_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_Y_L"
+    type="revolute">
+    <origin
+      xyz="-0.00138723248111634 0.158687981083071 -0.0466034395599046"
+      rpy="0.349065850398855 0 0" />
+    <parent
+      link="TORSO" />
+    <child
+      link="SCAPULA_L" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.22"
+      upper="3.14"
+      effort="54.67"
+      velocity="4.58" />
+  </joint>
+  <link
+    name="SHOULDER_L">
+    <inertial>
+      <origin
+        xyz="-0.00646515657503806 -0.233746840139784 -0.413962504018045"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SHOULDER_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SHOULDER_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_X_L"
+    type="revolute">
+    <origin
+      xyz="0 0.0752023469951288 0"
+      rpy="-0.349065850398855 0 0" />
+    <parent
+      link="SCAPULA_L" />
+    <child
+      link="SHOULDER_L" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="2.26"
+      effort="54.67"
+      velocity="4.58" />
+  </joint>
+  <link
+    name="UPPERARM_L">
+    <inertial>
+      <origin
+        xyz="-0.00645515658031821 -0.233746840139802 -0.329462503180776"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/UPPERARM_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/UPPERARM_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_Z_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0845000008372683"
+      rpy="0 0 0" />
+    <parent
+      link="SHOULDER_L" />
+    <child
+      link="UPPERARM_L" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.09"
+      upper="2.09"
+      effort="54.67"
+      velocity="4.58" />
+  </joint>
+  <link
+    name="FOREARM_L">
+    <inertial>
+      <origin
+        xyz="-0.00645515655755445 -0.233746840139811 -0.18396205112677"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/FOREARM_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/FOREARM_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Elbow_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.145500452054007"
+      rpy="0 0 0" />
+    <parent
+      link="UPPERARM_L" />
+    <child
+      link="FOREARM_L" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="33"
+      velocity="7.17" />
+  </joint>
+  <link
+    name="WRIST_REVOLUTE_L">
+    <inertial>
+      <origin
+        xyz="-0.00645515654564635 -0.233746227554888 -0.115537678749359"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/WRIST_REVOLUTE_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/WRIST_REVOLUTE_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_Z_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0684243723774107"
+      rpy="0 0 0" />
+    <parent
+      link="FOREARM_L" />
+    <child
+      link="WRIST_REVOLUTE_L" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.96"
+      upper="2.96"
+      effort="15"
+      velocity="4.58" />
+  </joint>
+  <link
+    name="WRIST_UPDOWN_L">
+    <inertial>
+      <origin
+        xyz="-0.00645515655231084 -0.23374621229878 0.0860423212989512"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/WRIST_UPDOWN_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/WRIST_UPDOWN_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_Y_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.20158000004831"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_REVOLUTE_L" />
+    <child
+      link="WRIST_UPDOWN_L" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-0.87"
+      upper="0.87"
+      effort="7"
+      velocity="3.62" />
+  </joint>
+  <link
+    name="HAND_L">
+    <inertial>
+      <origin
+        xyz="-0.00645515655231084 -0.23374621229878 0.0860423212989512"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/HAND_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/HAND_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_X_L"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_UPDOWN_L" />
+    <child
+      link="HAND_L" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="0.87"
+      effort="7"
+      velocity="3.62" />
+  </joint>
+  <link
+    name="SACRUM">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504405 -0.00439176851960685 -0.0227060142688145"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SACRUM.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SACRUM.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="A_Waist"
+    type="revolute">
+    <origin
+      xyz="-0.0013872324811111 0 -0.412139211811435"
+      rpy="0 0 0" />
+    <parent
+      link="TORSO" />
+    <child
+      link="SACRUM" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.785"
+      upper="0.785"
+      effort="31.2"
+      velocity="7.85" />
+  </joint>
+  <link
+    name="ILIUM_R">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504697 0.0466082314803938 0.147093985731185"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ILIUM_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ILIUM_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Hip_Z_R"
+    type="revolute">
+    <origin
+      xyz="0 -0.0510000000000007 -0.169799999999999"
+      rpy="0 0 0" />
+    <parent
+      link="SACRUM" />
+    <child
+      link="ILIUM_R" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-0.209"
+      upper="0.209"
+      effort="72"
+      velocity="9.37" />
+  </joint>
+  <link
+    name="ISCHIUM_R">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504416 0.084108231480387 0.147093985731186"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ISCHIUM_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ISCHIUM_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Hip_X_R"
+    type="revolute">
+    <origin
+      xyz="0 -0.0374999999999931 0"
+      rpy="0 0 0" />
+    <parent
+      link="ILIUM_R" />
+    <child
+      link="ISCHIUM_R" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-0.436"
+      upper="0.436"
+      effort="72"
+      velocity="8.37" />
+  </joint>
+  <link
+    name="THIGH_R">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504515 0.127112237071496 0.147093985731184"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/THIGH_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/THIGH_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Hip_Y_R"
+    type="revolute">
+    <origin
+      xyz="0 -0.0430040055911086 0"
+      rpy="0 0 0" />
+    <parent
+      link="ISCHIUM_R" />
+    <child
+      link="THIGH_R" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-2.443"
+      upper="0.436"
+      effort="31.2"
+      velocity="7.85" />
+  </joint>
+  <link
+    name="SHANK_R">
+    <inertial>
+      <origin
+        xyz="-0.00646516179338893 0.127112237071497 0.487093988447714"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SHANK_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SHANK_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Knee_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.34000000271653"
+      rpy="0 0 0" />
+    <parent
+      link="THIGH_R" />
+    <child
+      link="SHANK_R" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="0"
+      upper="2.443"
+      effort="72"
+      velocity="9.37" />
+  </joint>
+  <link
+    name="ASTRAGALUS_R">
+    <inertial>
+      <origin
+        xyz="-0.0064651617933778 0.127112237071498 0.847093988447712"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ASTRAGALUS_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ASTRAGALUS_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Ankle_Y_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.359999999999998"
+      rpy="0 0 0" />
+    <parent
+      link="SHANK_R" />
+    <child
+      link="ASTRAGALUS_R" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-0.698"
+      upper="1.309"
+      effort="13"
+      velocity="10.26" />
+  </joint>
+  <link
+    name="FOOT_R">
+    <inertial>
+      <origin
+        xyz="-0.0064651617933778 0.127112237071498 0.847093988447712"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/FOOT_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/FOOT_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Ankle_X_R"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="ASTRAGALUS_R" />
+    <child
+      link="FOOT_R" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-0.331"
+      upper="0.331"
+      effort="18"
+      velocity="10.26" />
+  </joint>
+  <link
+    name="TIPTOE_Z_R">
+    <inertial>
+      <origin
+        xyz="1.38777878078145E-17 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="6.67588438887831E-08" />
+      <inertia
+        ixx="1.66897109721958E-15"
+        ixy="0"
+        ixz="0"
+        iyy="1.66897109721958E-15"
+        iyz="0"
+        izz="1.66897109721958E-15" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/TIPTOE_Z_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/TIPTOE_Z_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Tiptoe_Z_R"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.0849700000000022"
+      rpy="0 0 0" />
+    <parent
+      link="FOOT_R" />
+    <child
+      link="TIPTOE_Z_R" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="ILIUM_L">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504465 -0.0553917685196062 0.147093985731184"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ILIUM_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ILIUM_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Hip_Z_L"
+    type="revolute">
+    <origin
+      xyz="0 0.0509999999999993 -0.169799999999999"
+      rpy="0 0 0" />
+    <parent
+      link="SACRUM" />
+    <child
+      link="ILIUM_L" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-0.209"
+      upper="0.209"
+      effort="72"
+      velocity="9.37" />
+  </joint>
+  <link
+    name="ISCHIUM_L">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504027 -0.092891768519614 0.147093985731186"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ISCHIUM_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ISCHIUM_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Hip_X_L"
+    type="revolute">
+    <origin
+      xyz="0 0.0375000000000079 0"
+      rpy="0 0 0" />
+    <parent
+      link="ILIUM_L" />
+    <child
+      link="ISCHIUM_L" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-0.436"
+      upper="0.436"
+      effort="72"
+      velocity="8.37" />
+  </joint>
+  <link
+    name="THIGH_L">
+    <inertial>
+      <origin
+        xyz="-0.00646515657503931 -0.135895774110727 0.147093985731185"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/THIGH_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/THIGH_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Hip_Y_L"
+    type="revolute">
+    <origin
+      xyz="0 0.0430040055911133 0"
+      rpy="0 0 0" />
+    <parent
+      link="ISCHIUM_L" />
+    <child
+      link="THIGH_L" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-2.443"
+      upper="0.436"
+      effort="31.2"
+      velocity="7.85" />
+  </joint>
+  <link
+    name="SHANK_L">
+    <inertial>
+      <origin
+        xyz="-0.00646515657503627 -0.135895774110726 0.487093985731233"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SHANK_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/SHANK_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Knee_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.340000000000048"
+      rpy="0 0 0" />
+    <parent
+      link="THIGH_L" />
+    <child
+      link="SHANK_L" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="0"
+      upper="2.443"
+      effort="72"
+      velocity="9.37" />
+  </joint>
+  <link
+    name="ASTRAGALUS_L">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504038 -0.135895774110725 0.84709398573124"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ASTRAGALUS_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/ASTRAGALUS_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Ankle_Y_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.360000000000007"
+      rpy="0 0 0" />
+    <parent
+      link="SHANK_L" />
+    <child
+      link="ASTRAGALUS_L" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-0.698"
+      upper="1.309"
+      effort="13"
+      velocity="10.26" />
+  </joint>
+  <link
+    name="FOOT_L">
+    <inertial>
+      <origin
+        xyz="-0.00646515657504038 -0.135895774110725 0.84709398573124"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/FOOT_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/FOOT_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Ankle_X_L"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="ASTRAGALUS_L" />
+    <child
+      link="FOOT_L" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-0.331"
+      upper="0.331"
+      effort="18"
+      velocity="10.26" />
+  </joint>
+  <link
+    name="TIPTOE_Z_L">
+    <inertial>
+      <origin
+        xyz="1.38777878078145E-17 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="6.67588438887831E-08" />
+      <inertia
+        ixx="1.66897109721958E-15"
+        ixy="0"
+        ixz="0"
+        iyy="1.66897109721958E-15"
+        iyz="0"
+        izz="1.66897109721958E-15" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/TIPTOE_Z_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/TIPTOE_Z_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Tiptoe_Z_L"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.0849700027164743"
+      rpy="0 0 0" />
+    <parent
+      link="FOOT_L" />
+    <child
+      link="TIPTOE_Z_L" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="NECK">
+    <inertial>
+      <origin
+        xyz="-0.0064651565750363 -0.00439176851961525 -0.52384522608025"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/NECK.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/NECK.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Neck_Z"
+    type="revolute">
+    <origin
+      xyz="-0.00138723248111886 0 0.0890000000000004"
+      rpy="0 0 0" />
+    <parent
+      link="TORSO" />
+    <child
+      link="NECK" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.785"
+      upper="0.785"
+      effort="7"
+      velocity="3.62" />
+  </joint>
+  <link
+    name="HEAD">
+    <inertial>
+      <origin
+        xyz="-0.00646515657503448 -0.00439176851961304 -0.565845226080245"
+        rpy="0 0 0" />
+      <mass
+        value="25.9304036556032" />
+      <inertia
+        ixx="4.30322251593693"
+        ixy="-0.00641140600644516"
+        ixz="0.0324476123216818"
+        iyy="3.65841983734266"
+        iyz="-0.00529835464166608"
+        izz="0.763258459862768" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/HEAD.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://3N2-JUNE/meshes/HEAD.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Neck_Y"
+    type="revolute">
+    <origin
+      xyz="0 0 0.0419999999999958"
+      rpy="0 0 0" />
+    <parent
+      link="NECK" />
+    <child
+      link="HEAD" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-0.174"
+      upper="0.349"
+      effort="7"
+      velocity="3.62" />
+  </joint>
+</robot>

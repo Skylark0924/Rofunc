@@ -234,11 +234,6 @@ def _run_sim(motion):
     motion_rb_states_pos = motion.global_translation
     motion_rb_states_rot = motion.global_rotation
 
-    # motion_rb_states_rot[:, hand_ids] = quat_mul(
-    #     torch.tensor([0, 0, -1, 0]),
-    #     motion_rb_states_rot[:, hand_ids]
-    # )
-
     motion_rb_states_pos[:, :, 2] -= 0.1
     motion_rb_states = torch.cat([motion_rb_states_pos, motion_rb_states_rot], dim=-1)
 
@@ -347,27 +342,6 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
                                                                     root_translation, is_local=True)
     target_motion = SkeletonMotion.from_skeleton_state(new_sk_state, fps=target_motion.fps)
 
-    # gym = gymapi.acquire_gym()
-    # sim = gym.create_sim(0, 0, gymapi.SIM_PHYSX, gymapi.SimParams())
-    # rofunc_path = rf.oslab.get_rofunc_path()
-    # asset_root = os.path.join(rofunc_path, "simulator/assets")
-
-    # # Load humanoid asset
-    # asset_file = args.humanoid_asset
-    # asset_options = gymapi.AssetOptions()
-    # asset_options.angular_damping = 0.01
-    # asset_options.max_angular_velocity = 100.0
-    # asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
-    # asset_options.disable_gravity = False
-    # # asset_options.fix_base_link = True
-    # humanoid_asset = gym.load_asset(sim, asset_root, asset_file, asset_options)
-    # asset_dof_dict = gym.get_asset_dof_dict(humanoid_asset)
-    # asset_rigid_body_dict = gym.get_asset_rigid_body_dict(humanoid_asset)
-    # asset_joint_dict = gym.get_asset_joint_dict(humanoid_asset)
-    # target_motion.skeleton_tree.asset_dof_dict = asset_dof_dict
-    # target_motion.skeleton_tree.asset_rigid_body_dict = asset_rigid_body_dict
-    # target_motion.skeleton_tree.asset_joint_dict = asset_joint_dict
-
     # save retargeted motion
     target_motion.to_file(retarget_cfg["target_motion_path"])
 
@@ -375,10 +349,6 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         # visualize retargeted motion
         rf.logger.beauty_print("Plot HOTU skeleton motion", type="module")
         plot_skeleton_motion_interactive(target_motion, verbose=False)
-
-        # state = SkeletonState.from_rotation_and_root_translation(target_motion.skeleton_tree, target_motion.rotation[0],
-        #                                                          target_motion.root_translation[0], is_local=True)
-        # plot_skeleton_state(state, verbose=True)
 
     dof_states = _run_sim(target_motion)
     dof_states = np.array(dof_states.cpu().numpy())
@@ -501,11 +471,6 @@ if __name__ == '__main__':
         fbx_files = [args.fbx_file]
     else:
         raise ValueError("Please provide a valid fbx_dir or fbx_file.")
-    # fbx_dir = os.path.join(rofunc_path, "../examples/data/hotu")
-    # fbx_dir = "/home/ubuntu/Data/2023_11_15_HED/has_gloves"
-    # fbx_files = rf.oslab.list_absl_path(fbx_dir, suffix='.fbx')
-    # fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
-    # fbx_files = [os.path.join(rofunc_path, "../examples/data/hotu/test_data_01_xsens.fbx")]
 
     if args.parallel:
         pool = multiprocessing.Pool()
