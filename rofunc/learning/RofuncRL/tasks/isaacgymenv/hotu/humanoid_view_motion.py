@@ -50,8 +50,6 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         self._motion_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.long)
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
 
-        self.use_object_motion = cfg["env"]["use_object_motion"]
-
     def pre_physics_step(self, actions):
         self.actions = actions.to(self.device).clone()
 
@@ -92,7 +90,7 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
             if self.extra_rewrite_dof_names is not None:
                 try:
                     dof_pos[:, self.extra_rewrite_dof_id] = torch.tensor(
-                        self.extra_dof_states[f0l-1:f1l-1, self.extra_rewrite_dof_id, 0]).to(self.device)
+                        self.extra_dof_states[f0l - 1:f1l - 1, self.extra_rewrite_dof_id, 0]).to(self.device)
                 except:
                     print(f0l, f1l)
             # dof_pos = torch.tensor(self.extra_dof_states[f0l:f1l, :, 0]).to(self.device)

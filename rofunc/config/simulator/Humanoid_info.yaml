@@ -52,7 +52,7 @@ Model_type:
       left_ankle_x: 31
       left_ankle_y: 32
       left_ankle_z: 33
-    dof_offsets: [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]
+    dof_offsets: [ 0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34 ]
     del_rb:
       - pelvis
     parts:
@@ -949,97 +949,169 @@ Model_type:
       right_qbhand_little_distal_joint: 89
       right_qbhand_little_distal_virtual_joint: 90
     dof_offsets:
-      [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        18,
-        19,
-        20,
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        30,
-        31,
-        32,
-        33,
-        34,
-        35,
-        36,
-        37,
-        38,
-        39,
-        40,
-        41,
-        42,
-        43,
-        44,
-        45,
-        46,
-        47,
-        48,
-        49,
-        50,
-        51,
-        52,
-        53,
-        54,
-        55,
-        58,
-        59,
-        60,
-        61,
-        62,
-        63,
-        64,
-        65,
-        66,
-        67,
-        68,
-        69,
-        70,
-        71,
-        72,
-        73,
-        74,
-        75,
-        76,
-        77,
-        78,
-        79,
-        80,
-        81,
-        82,
-        83,
-        84,
-        85,
-        86,
-        87,
-        88,
-        89,
-        90,
-        91,
-      ]
+      [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 58,
+        59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86,
+        87, 88, 89, 90, 91 ]
     del_rb:
       - pelvis
       - right_qbhand_root_link
       - left_qbhand_root_link
+
+  walker:
+    name: "walker"
+    rigid_bodies:
+      base_link: 0
+      torso: 1
+      right_limb_l1: 2
+      right_limb_l2: 3
+      right_limb_l3: 4
+      right_limb_l4: 5
+      right_limb_l5: 6
+      right_limb_l6: 7
+      right_limb_l7: 8
+      right_thumb_l1: 9
+      right_thumb_l2: 10
+      right_index_l1: 11
+      right_index_l2: 12
+      right_middle_l1: 13
+      right_middle_l2: 14
+      right_ring_l1: 15
+      right_ring_l2: 16
+      right_pinky_l1: 17
+      right_pinky_l2: 18
+      left_limb_l1: 19
+      left_limb_l2: 20
+      left_limb_l3: 21
+      left_limb_l4: 22
+      left_limb_l5: 23
+      left_limb_l6: 24
+      left_limb_l7: 25
+      left_thumb_l1: 26
+      left_thumb_l2: 27
+      left_index_l1: 28
+      left_index_l2: 29
+      left_middle_l1: 30
+      left_middle_l2: 31
+      left_ring_l1: 32
+      left_ring_l2: 33
+      left_pinky_l1: 34
+      left_pinky_l2: 35
+      head_l1: 36
+      head_l2: 37
+      right_leg_l1: 38
+      right_leg_l2: 39
+      right_leg_l3: 40
+      right_leg_l4: 41
+      right_leg_l5: 42
+      right_leg_l6: 43
+      left_leg_l1: 44
+      left_leg_l2: 45
+      left_leg_l3: 46
+      left_leg_l4: 47
+      left_leg_l5: 48
+      left_leg_l6: 49
+    dofs:
+      right_limb_j1: 0
+      right_limb_j2: 1
+      right_limb_j3: 2
+      right_limb_j4: 3
+      right_limb_j5: 4
+      right_limb_j6: 5
+      right_limb_j7: 6
+      right_thumb_j1: 7
+      right_thumb_j2: 8
+      right_index_j1: 9
+      right_index_j2: 10
+      right_middle_j1: 11
+      right_middle_j2: 12
+      right_ring_j1: 13
+      right_ring_j2: 14
+      right_pinky_j1: 15
+      right_pinky_j2: 16
+      left_limb_j1: 17
+      left_limb_j2: 18
+      left_limb_j3: 19
+      left_limb_j4: 20
+      left_limb_j5: 21
+      left_limb_j6: 22
+      left_limb_j7: 23
+      left_thumb_j1: 24
+      left_thumb_j2: 25
+      left_index_j1: 26
+      left_index_j2: 27
+      left_middle_j1: 28
+      left_middle_j2: 29
+      left_ring_j1: 30
+      left_ring_j2: 31
+      left_pinky_j1: 32
+      left_pinky_j2: 33
+      head_j1: 34
+      head_j2: 35
+      right_leg_j1: 36
+      right_leg_j2: 37
+      right_leg_j3: 38
+      right_leg_j4: 39
+      right_leg_j5: 40
+      right_leg_j6: 41
+      left_leg_j1: 42
+      left_leg_j2: 43
+      left_leg_j3: 44
+      left_leg_j4: 45
+      left_leg_j5: 46
+      left_leg_j6: 47
+    dof_offsets:
+      [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+        30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48 ]
+    del_rb:
+      - base_link
+      - torso
+
+  bruce:
+    name: "bruce"
+    rigid_bodies:
+      pelvis: 0
+      hip_yaw_link_r: 1
+      hip_roll_link_r: 2
+      hip_pitch_link_r: 3
+      knee_pitch_link_r: 4
+      ankle_pitch_link_r: 5
+      hip_yaw_link_l: 6
+      hip_roll_link_l: 7
+      hip_pitch_link_l: 8
+      knee_pitch_link_l: 9
+      ankle_pitch_link_l: 10
+      shoulder_pitch_link_r: 11
+      shoulder_roll_link_r: 12
+      elbow_pitch_link_r: 13
+      hand_r: 14
+      shoulder_pitch_link_l: 15
+      shoulder_roll_link_l: 16
+      elbow_pitch_link_l: 17
+      hand_l: 18
+    dofs:
+      hip_yaw_r: 0
+      hip_roll_r: 1
+      hip_pitch_r: 2
+      knee_pitch_r: 3
+      ankle_pitch_r: 4
+      hip_yaw_l: 5
+      hip_roll_l: 6
+      hip_pitch_l: 7
+      knee_pitch_l: 8
+      ankle_pitch_l: 9
+      shoulder_pitch_r: 10
+      shoulder_roll_r: 11
+      elbow_pitch_r: 12
+      shoulder_pitch_l: 13
+      shoulder_roll_l: 14
+      elbow_pitch_l: 15
+    dof_offsets:
+      [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ]
+    del_rb:
+      - pelvis
+      - hand_r
+      - hand_l
+
+
+
