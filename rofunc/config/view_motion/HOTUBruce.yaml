@@ -1,14 +1,15 @@
-keyBodies: [ "right_hand", "left_hand", "right_ankle_link", "left_ankle_link" ]
-contactBodies: [ "right_ankle_link", "left_ankle_link" ]
+keyBodies: [ "hand_r", "hand_l", "ankle_pitch_link_r", "ankle_pitch_link_l" ]
+contactBodies: [ "ankle_pitch_link_r", "ankle_pitch_link_l" ]
 
 
 # animation files to learn from
 motion_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2bruce.npy"
-#motion_dof_states_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2h1_dof_states.npy"
+motion_dof_states_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2bruce_dof_states.npy"
+extra_rewrite_dof_names: "all"
+
 motion_file_asset: "mjcf/bruce/bruce.xml"
 
 object_motion_file:
-
 
 asset:
   assetFileName: "mjcf/bruce/bruce.xml"

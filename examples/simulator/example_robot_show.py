@@ -49,9 +49,9 @@ import rofunc as rf
 # QbSoftHandsim.show()
 
 # # Humanoid
-args = rf.config.get_sim_config("Humanoid")
-Humanoidsim = rf.sim.HumanoidSim(args)
-Humanoidsim.show()
+# args = rf.config.get_sim_config("Humanoid")
+# Humanoidsim = rf.sim.HumanoidSim(args)
+# Humanoidsim.show()
 
 # Unitree H1
 # args = rf.config.get_sim_config("UnitreeH1")
@@ -62,6 +62,11 @@ Humanoidsim.show()
 # args = rf.config.get_sim_config("Bruce")
 # Brucesim = rf.sim.RobotSim(args)
 # Brucesim.show()
+
+# ZJU humanoid
+args = rf.config.get_sim_config("ZJUHumanoid")
+ZJUHumanoidsim = rf.sim.RobotSim(args)
+ZJUHumanoidsim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")
