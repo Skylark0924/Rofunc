@@ -1,5 +1,5 @@
 <mujoco model="ZJU_Humanoid">
-    <compiler angle="radian" meshdir="../../urdf/zju_humanoid/low_meshes/"/>
+    <compiler angle="radian"/>
     <statistic meansize="0.514972" extent="1.83853" center="0.00045652 9.85972e-05 -0.561266"/>
     <default>
         <motor ctrlrange="-1 1" ctrllimited="true"/>
@@ -16,38 +16,38 @@
         </default>
     </default>
     <asset>
-        <mesh name="TORSO" file="TORSO.STL"/>
-        <mesh name="SCAPULA_R" file="SCAPULA_R.STL"/>
-        <mesh name="SHOULDER_R" file="SHOULDER_R.STL"/>
-        <mesh name="UPPERARM_R" file="UPPERARM_R.STL"/>
-        <mesh name="FOREARM_R" file="FOREARM_R.STL"/>
-        <mesh name="WRIST_REVOLUTE_R" file="WRIST_REVOLUTE_R.STL"/>
-        <mesh name="WRIST_UPDOWN_R" file="WRIST_UPDOWN_R.STL"/>
-        <mesh name="HAND_R" file="HAND_R.STL"/>
-        <mesh name="SCAPULA_L" file="SCAPULA_L.STL"/>
-        <mesh name="SHOULDER_L" file="SHOULDER_L.STL"/>
-        <mesh name="UPPERARM_L" file="UPPERARM_L.STL"/>
-        <mesh name="FOREARM_L" file="FOREARM_L.STL"/>
-        <mesh name="WRIST_REVOLUTE_L" file="WRIST_REVOLUTE_L.STL"/>
-        <mesh name="WRIST_UPDOWN_L" file="WRIST_UPDOWN_L.STL"/>
-        <mesh name="HAND_L" file="HAND_L.STL"/>
-        <mesh name="SACRUM" file="SACRUM.STL"/>
-        <mesh name="ILIUM_R" file="ILIUM_R.STL"/>
-        <mesh name="ISCHIUM_R" file="ISCHIUM_R.STL"/>
-        <mesh name="THIGH_R" file="THIGH_R.STL"/>
-        <mesh name="SHANK_R" file="SHANK_R.STL"/>
-        <mesh name="ASTRAGALUS_R" file="ASTRAGALUS_R.STL"/>
-        <mesh name="FOOT_R" file="FOOT_R.STL"/>
-        <mesh name="TIPTOE_Z_R" file="TIPTOE_Z_R.STL"/>
-        <mesh name="ILIUM_L" file="ILIUM_L.STL"/>
-        <mesh name="ISCHIUM_L" file="ISCHIUM_L.STL"/>
-        <mesh name="THIGH_L" file="THIGH_L.STL"/>
-        <mesh name="SHANK_L" file="SHANK_L.STL"/>
-        <mesh name="ASTRAGALUS_L" file="ASTRAGALUS_L.STL"/>
-        <mesh name="FOOT_L" file="FOOT_L.STL"/>
-        <mesh name="TIPTOE_Z_L" file="TIPTOE_Z_L.STL"/>
-        <mesh name="NECK" file="NECK.STL"/>
-        <mesh name="HEAD" file="HEAD.STL"/>
+        <mesh name="TORSO" file="../../urdf/zju_humanoid/low_meshes/TORSO.STL"/>
+        <mesh name="SCAPULA_R" file="../../urdf/zju_humanoid/low_meshes/SCAPULA_R.STL"/>
+        <mesh name="SHOULDER_R" file="../../urdf/zju_humanoid/low_meshes/SHOULDER_R.STL"/>
+        <mesh name="UPPERARM_R" file="../../urdf/zju_humanoid/low_meshes/UPPERARM_R.STL"/>
+        <mesh name="FOREARM_R" file="../../urdf/zju_humanoid/low_meshes/FOREARM_R.STL"/>
+        <mesh name="WRIST_REVOLUTE_R" file="../../urdf/zju_humanoid/low_meshes/WRIST_REVOLUTE_R.STL"/>
+        <mesh name="WRIST_UPDOWN_R" file="../../urdf/zju_humanoid/low_meshes/WRIST_UPDOWN_R.STL"/>
+        <mesh name="HAND_R" file="../../urdf/zju_humanoid/low_meshes/HAND_R.STL"/>
+        <mesh name="SCAPULA_L" file="../../urdf/zju_humanoid/low_meshes/SCAPULA_L.STL"/>
+        <mesh name="SHOULDER_L" file="../../urdf/zju_humanoid/low_meshes/SHOULDER_L.STL"/>
+        <mesh name="UPPERARM_L" file="../../urdf/zju_humanoid/low_meshes/UPPERARM_L.STL"/>
+        <mesh name="FOREARM_L" file="../../urdf/zju_humanoid/low_meshes/FOREARM_L.STL"/>
+        <mesh name="WRIST_REVOLUTE_L" file="../../urdf/zju_humanoid/low_meshes/WRIST_REVOLUTE_L.STL"/>
+        <mesh name="WRIST_UPDOWN_L" file="../../urdf/zju_humanoid/low_meshes/WRIST_UPDOWN_L.STL"/>
+        <mesh name="HAND_L" file="../../urdf/zju_humanoid/low_meshes/HAND_L.STL"/>
+        <mesh name="SACRUM" file="../../urdf/zju_humanoid/low_meshes/SACRUM.STL"/>
+        <mesh name="ILIUM_R" file="../../urdf/zju_humanoid/low_meshes/ILIUM_R.STL"/>
+        <mesh name="ISCHIUM_R" file="../../urdf/zju_humanoid/low_meshes/ISCHIUM_R.STL"/>
+        <mesh name="THIGH_R" file="../../urdf/zju_humanoid/low_meshes/THIGH_R.STL"/>
+        <mesh name="SHANK_R" file="../../urdf/zju_humanoid/low_meshes/SHANK_R.STL"/>
+        <mesh name="ASTRAGALUS_R" file="../../urdf/zju_humanoid/low_meshes/ASTRAGALUS_R.STL"/>
+        <mesh name="FOOT_R" file="../../urdf/zju_humanoid/low_meshes/FOOT_R.STL"/>
+        <mesh name="TIPTOE_Z_R" file="../../urdf/zju_humanoid/low_meshes/TIPTOE_Z_R.STL"/>
+        <mesh name="ILIUM_L" file="../../urdf/zju_humanoid/low_meshes/ILIUM_L.STL"/>
+        <mesh name="ISCHIUM_L" file="../../urdf/zju_humanoid/low_meshes/ISCHIUM_L.STL"/>
+        <mesh name="THIGH_L" file="../../urdf/zju_humanoid/low_meshes/THIGH_L.STL"/>
+        <mesh name="SHANK_L" file="../../urdf/zju_humanoid/low_meshes/SHANK_L.STL"/>
+        <mesh name="ASTRAGALUS_L" file="../../urdf/zju_humanoid/low_meshes/ASTRAGALUS_L.STL"/>
+        <mesh name="FOOT_L" file="../../urdf/zju_humanoid/low_meshes/FOOT_L.STL"/>
+        <mesh name="TIPTOE_Z_L" file="../../urdf/zju_humanoid/low_meshes/TIPTOE_Z_L.STL"/>
+        <mesh name="NECK" file="../../urdf/zju_humanoid/low_meshes/NECK.STL"/>
+        <mesh name="HEAD" file="../../urdf/zju_humanoid/low_meshes/HEAD.STL"/>
     </asset>
     <worldbody>
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
@@ -100,7 +100,7 @@
                                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
                                           mesh="WRIST_UPDOWN_R"/>
                                     <geom type="mesh" rgba="1 1 1 1" mesh="WRIST_UPDOWN_R"/>
-                                    <body name="HAND_R">
+                                    <body name="HAND_R" pos="0 0 0">
                                         <inertial pos="-0.00645516 0.224963 0.0860423"
                                                   quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="2.59"
                                                   diaginertia="4.30358 3.65836 0.762952"/>
@@ -159,7 +159,7 @@
                                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
                                           mesh="WRIST_UPDOWN_L"/>
                                     <geom type="mesh" rgba="1 1 1 1" mesh="WRIST_UPDOWN_L"/>
-                                    <body name="HAND_L">
+                                    <body name="HAND_L" pos="0 0 0">
                                         <inertial pos="-0.00645516 -0.233746 0.0860423"
                                                   quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="2.59"
                                                   diaginertia="4.30358 3.65836 0.762952"/>
@@ -212,7 +212,7 @@
                                     <joint name="Ankle_Y_R" pos="0 0 0" axis="0 -1 0" range="-0.698 1.309"/>
                                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
                                           mesh="ASTRAGALUS_R"/>
-                                    <body name="FOOT_R">
+                                    <body name="FOOT_R" pos="0 0 0">
                                         <inertial pos="-0.00323258 0.0635561 0.381062"
                                                   quat="0.999782 -0.0197712 -0.00438517 -0.00517033" mass="5.18"
                                                   diaginertia="5.44958 4.78971 0.777604"/>
@@ -263,7 +263,7 @@
                                     <joint name="Ankle_Y_L" pos="0 0 0" axis="0 1 0" range="-0.698 1.309"/>
                                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
                                           mesh="ASTRAGALUS_L"/>
-                                    <body name="FOOT_L">
+                                    <body name="FOOT_L" pos="0 0 0">
                                         <inertial pos="-0.00323258 -0.0679479 0.381062"
                                                   quat="0.999784 0.0198425 -0.00424682 -0.004572" mass="5.18"
                                                   diaginertia="5.45257 4.78974 0.780582"/>
