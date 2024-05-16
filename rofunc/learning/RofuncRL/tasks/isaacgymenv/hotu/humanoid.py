@@ -331,7 +331,8 @@ class Humanoid(VecTask):
         #     self._dof_obs_size = 288  # 48 * 6 (joint_obs_size) = 288
         #     self._num_actions = 48
         #     self._num_obs = 1 + 50 * (3 + 6 + 3 + 3) - 3  # 1353
-        elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml"]:
+        elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"]:
             humanoid_info = self._get_humanoid_info(asset_file)
             self._dof_offsets = humanoid_info["dof_offsets"]
             self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96

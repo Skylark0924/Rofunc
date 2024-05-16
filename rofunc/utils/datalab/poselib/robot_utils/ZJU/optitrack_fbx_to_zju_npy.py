@@ -382,14 +382,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 def _run_sim(motion):
     from isaacgym import gymapi
 
-    body_links = {"torso_link": gymapi.AXIS_ROTATION,
-                  "right_elbow_link": gymapi.AXIS_ROTATION, "left_elbow_link": gymapi.AXIS_ROTATION,
-                  "right_hand": gymapi.AXIS_ALL, "left_hand": gymapi.AXIS_ALL,
-                  "pelvis": gymapi.AXIS_ROTATION,
-                  "left_hip_pitch_link": gymapi.AXIS_ROTATION, "right_hip_pitch_link": gymapi.AXIS_ROTATION,
-                  "left_shoulder_yaw_link": gymapi.AXIS_ROTATION, "right_shoulder_yaw_link": gymapi.AXIS_ROTATION,
-                  "left_knee_link": gymapi.AXIS_ALL, "right_knee_link": gymapi.AXIS_ALL,
-                  "left_ankle_link": gymapi.AXIS_ALL, "right_ankle_link": gymapi.AXIS_ALL}
+    body_links = {"pelvis": gymapi.AXIS_ROTATION,
+                  "FOREARM_R": gymapi.AXIS_ROTATION, "FOREARM_L": gymapi.AXIS_ROTATION,
+                  "HAND_R": gymapi.AXIS_ALL, "HAND_L": gymapi.AXIS_ALL,
+                  "SACRUM": gymapi.AXIS_ROTATION,
+                  "THIGH_L": gymapi.AXIS_ROTATION, "THIGH_R": gymapi.AXIS_ROTATION,
+                  "UPPERARM_L": gymapi.AXIS_ROTATION, "UPPERARM_R": gymapi.AXIS_ROTATION,
+                  "SHANK_L": gymapi.AXIS_ALL, "SHANK_R": gymapi.AXIS_ALL,
+                  "FOOT_L": gymapi.AXIS_ALL, "FOOT_R": gymapi.AXIS_ALL}
     body_ids = [motion.skeleton_tree._node_indices[link] for link in body_links.keys()]
     hand_links = ["right_qbhand_root_link", "left_qbhand_root_link",
                   "left_qbhand_thumb_knuckle_link", "left_qbhand_thumb_proximal_link",
@@ -408,7 +408,7 @@ def _run_sim(motion):
                   "right_qbhand_ring_middle_link", "right_qbhand_ring_distal_link",
                   "right_qbhand_little_proximal_link", "right_qbhand_little_middle_link",
                   "right_qbhand_little_distal_link"]
-    hand_ids = [motion.skeleton_tree._node_indices[link] for link in hand_links]
+    # hand_ids = [motion.skeleton_tree._node_indices[link] for link in hand_links]
 
     # all_links = body_links + hand_links
     # all_ids = body_ids + hand_ids
@@ -433,9 +433,9 @@ def _run_sim(motion):
     motion_root_ang_vel = motion.global_root_angular_velocity
     motion_root_states = torch.cat([motion_root_pos, motion_root_rot, motion_root_vel, motion_root_ang_vel], dim=-1)
 
-    args = rf.config.get_sim_config("UnitreeH1")
-    UnitreeH1sim = rf.sim.RobotSim(args)
-    dof_states = UnitreeH1sim.run_traj_multi_rigid_bodies(
+    args = rf.config.get_sim_config("ZJUHumanoid")
+    ZJUHumanoidsim = rf.sim.RobotSim(args)
+    dof_states = ZJUHumanoidsim.run_traj_multi_rigid_bodies(
         traj=[motion_rb_states[:, id] for id in all_ids],
         attr_rbs=all_links,
         update_freq=0.001,
@@ -537,7 +537,7 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
 
     if visualize:
         # visualize retargeted motion
-        rf.logger.beauty_print("Plot H1 skeleton motion", type="module")
+        rf.logger.beauty_print("Plot ZJUHumanoid skeleton motion", type="module")
         plot_skeleton_motion_interactive(target_motion, verbose=False)
 
     dof_states = _run_sim(target_motion)
@@ -563,33 +563,30 @@ def npy_from_fbx(fbx_file):
 
     rofunc_path = rf.oslab.get_rofunc_path()
     config = {
-        "target_motion_path": fbx_file.replace('_optitrack.fbx', '_optitrack2h1.npy'),
-        "target_dof_states_path": fbx_file.replace('_optitrack.fbx', '_optitrack2h1_dof_states.npy'),
+        "target_motion_path": fbx_file.replace('_optitrack.fbx', '_optitrack2zju.npy'),
+        "target_dof_states_path": fbx_file.replace('_optitrack.fbx', '_optitrack2zju_dof_states.npy'),
         "source_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/source_optitrack_w_gloves_tpose.npy"),
         # "target_tpose": os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy"),
         "target_tpose": os.path.join(rofunc_path, args.target_tpose),
         "joint_mapping": {  # Left: Optitrack, Right: MJCF
-            # hotu_humanoid.xml
+            # zju_humanoid.xml
             "Skeleton_Hips": "pelvis",
-            # "Skeleton_LeftUpLeg": "left_hip_yaw_link",
-            "Skeleton_LeftUpLeg": "left_hip_pitch_link",
-            "Skeleton_LeftLeg": "left_knee_link",
-            "Skeleton_LeftFoot": "left_ankle_link",
-            # "Skeleton_RightUpLeg": "right_hip_yaw_link",
-            "Skeleton_RightUpLeg": "right_hip_pitch_link",
-            "Skeleton_RightLeg": "right_knee_link",
-            "Skeleton_RightFoot": "right_ankle_link",
-            "Skeleton_Spine1": "torso_link",
-            # "Skeleton_Neck": "head",
-            "Skeleton_LeftArm": "left_shoulder_pitch_link",
-            # "Skeleton_LeftArm": "left_shoulder_yaw_link",
-            "Skeleton_LeftForeArm": "left_elbow_link",
-            "Skeleton_LeftHand": "left_hand",
-            "Skeleton_RightArm": "right_shoulder_pitch_link",
-            # "Skeleton_RightArm": "right_shoulder_yaw_link",
-            "Skeleton_RightForeArm": "right_elbow_link",
-            "Skeleton_RightHand": "right_hand",
-            # extra mapping for hotu_humanoid_w_qbhand.xml
+            "Skeleton_LeftUpLeg": "THIGH_L",
+            "Skeleton_LeftLeg": "SHANK_L",
+            "Skeleton_LeftFoot": "FOOT_L",
+            "Skeleton_RightUpLeg": "THIGH_R",
+            "Skeleton_RightLeg": "SHANK_R",
+            "Skeleton_RightFoot": "FOOT_R",
+            "Skeleton_Spine": "SACRUM",
+            "Skeleton_Neck": "NECK",
+            "Skeleton_Head": "HEAD",
+            "Skeleton_LeftArm": "UPPERARM_L",
+            "Skeleton_LeftForeArm": "FOREARM_L",
+            "Skeleton_LeftHand": "HAND_L",
+            "Skeleton_RightArm": "UPPERARM_R",
+            "Skeleton_RightForeArm": "FOREARM_R",
+            "Skeleton_RightHand": "HAND_R",
+            # # extra mapping for zju_humanoid_w_qbhand.xml
             "Skeleton_LeftHandThumb1": "left_qbhand_thumb_knuckle_link",
             "Skeleton_LeftHandThumb2": "left_qbhand_thumb_proximal_link",
             "Skeleton_LeftHandThumb3": "left_qbhand_thumb_distal_link",
@@ -631,7 +628,7 @@ def npy_from_fbx(fbx_file):
 
     source_motion = motion_from_fbx(fbx_file, root_joint="Skeleton_Hips", fps=120, visualize=False)
     # config["target_motion_path"] = fbx_file.replace('.fbx', '_amp.npy')
-    motion_retargeting(config, source_motion, visualize=False)
+    motion_retargeting(config, source_motion, visualize=True)
 
 
 if __name__ == '__main__':
@@ -640,10 +637,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
     parser.add_argument("--fbx_dir", type=str, default=None)
-    # parser.add_argument("--fbx_file", type=str,
-    #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_04_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
+                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
@@ -651,9 +646,9 @@ if __name__ == '__main__':
     #                   3. mjcf/hotu_humanoid.xml
     #                   4. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
     #                   5. mjcf/hotu_humanoid_w_qbhand_full.xml
-    parser.add_argument("--humanoid_asset", type=str, default="mjcf/UnitreeH1/h1_w_qbhand.xml")
+    parser.add_argument("--humanoid_asset", type=str, default="mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml")
     parser.add_argument("--target_tpose", type=str,
-                        default="utils/datalab/poselib/data/target_h1_w_qbhand_tpose.npy")
+                        default="utils/datalab/poselib/data/target_zju_humanoid_w_qbhand_tpose.npy")
     args = parser.parse_args()
 
     rofunc_path = rf.oslab.get_rofunc_path()

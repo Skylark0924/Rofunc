@@ -356,7 +356,8 @@ class HumanoidHOTUTask(Humanoid):
             else:
                 self._num_amp_obs_per_step = 13 + self._dof_obs_size + 100 + 3 * num_key_bodies
         elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/curi/curi_w_softhand_isaacgym.xml",
-                            "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml"]:
+                            "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + self._num_actions + 3 * num_key_bodies
         else:
             print(f"Unsupported humanoid body type: {asset_file}")

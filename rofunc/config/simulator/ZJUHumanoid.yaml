@@ -22,7 +22,8 @@ env:
   asset:
     robot_name: "ZJUHumanoid"
     assetRoot:
-    assetFile: "mjcf/zju_humanoid/zju_humanoid.xml"
+#    assetFile: "mjcf/zju_humanoid/zju_humanoid.xml"
+    assetFile: "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"
 #    assetFile: "urdf/zju_humanoid/urdf/zju_humanoid.urdf"
     init_pose: [0, 0.0, 1.5, 0.0, 0.0, 1.0, 0.0]
     fix_base_link: True
