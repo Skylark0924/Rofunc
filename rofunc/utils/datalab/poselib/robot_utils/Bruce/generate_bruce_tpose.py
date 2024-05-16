@@ -78,14 +78,7 @@ def get_tpose(xml_path, save_path, verbose=True):
         torch.tensor([0.707107, 0, 0, 0.707107]),
         local_rotation[skeleton.index("hip_pitch_link_l")]
     )
-    # local_rotation[skeleton.index("left_elbow_link")] = quat_mul(
-    #     quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
-    #     local_rotation[skeleton.index("left_elbow_link")]
-    # )
-    # local_rotation[skeleton.index("right_elbow_link")] = quat_mul(
-    #     quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
-    #     local_rotation[skeleton.index("right_elbow_link")]
-    # )
+
     # finger_tune_list = ["right_qbhand_thumb_knuckle_link", "right_qbhand_index_knuckle_link",
     #                     "right_qbhand_middle_knuckle_link", "right_qbhand_ring_knuckle_link",
     #                     "right_qbhand_little_knuckle_link"]

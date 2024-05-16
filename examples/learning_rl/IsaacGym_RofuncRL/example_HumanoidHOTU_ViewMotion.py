@@ -2,7 +2,7 @@
 Humanoid Motion View (RofuncRL)
 ===========================
 
-Preview the motion of the digital humanoid
+Preview the motion data of the digital human and humanoid robots
 """
 
 import isaacgym
@@ -38,7 +38,7 @@ def inference(custom_args):
                                                    force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    trainer = Trainers().trainer_map["ase"](cfg=cfg,
+    trainer = Trainers().trainer_map["hotu"](cfg=cfg,
                                             env=infer_env,
                                             device=cfg.rl_device,
                                             env_name=custom_args.task,
@@ -60,7 +60,9 @@ if __name__ == "__main__":
     #  3. HOTUH1WQbhand
     #  4. HOTUCURIWQbhand
     #  5. HOTUWalker
-    parser.add_argument("--view_motion_type", type=str, default="HOTUH1WQbhand")
+    #  6. HOTUBruce
+    #  7. HOTUZJUHumanoid
+    parser.add_argument("--view_motion_type", type=str, default="HOTUZJUHumanoid")
     custom_args = parser.parse_args()
 
     inference(custom_args)
