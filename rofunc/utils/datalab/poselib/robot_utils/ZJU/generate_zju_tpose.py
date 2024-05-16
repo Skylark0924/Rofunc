@@ -36,23 +36,23 @@ def get_tpose(xml_path, save_path, verbose=True):
     skeleton_ori = torch.cat([skeleton_ori[:, 1:], skeleton_ori[:, :1]], dim=1)
     local_rotation[:] = skeleton_ori[:]
 
-    local_rotation[skeleton.index("left_shoulder_roll_link")] = quat_mul(
+    local_rotation[skeleton.index("SHOULDER_L")] = quat_mul(
         quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([1.0, 0.0, 0.0]), degree=True),
-        local_rotation[skeleton.index("left_shoulder_roll_link")]
+        local_rotation[skeleton.index("SHOULDER_L")]
     )
-    local_rotation[skeleton.index("right_shoulder_roll_link")] = quat_mul(
+    local_rotation[skeleton.index("SHOULDER_R")] = quat_mul(
         quat_from_angle_axis(angle=torch.tensor([-90.0]), axis=torch.tensor([1.0, 0.0, 0.0]), degree=True),
-        local_rotation[skeleton.index("right_shoulder_roll_link")]
+        local_rotation[skeleton.index("SHOULDER_R")]
     )
-
-    local_rotation[skeleton.index("left_elbow_link")] = quat_mul(
-        quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
-        local_rotation[skeleton.index("left_elbow_link")]
-    )
-    local_rotation[skeleton.index("right_elbow_link")] = quat_mul(
-        quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
-        local_rotation[skeleton.index("right_elbow_link")]
-    )
+    #
+    # local_rotation[skeleton.index("left_elbow_link")] = quat_mul(
+    #     quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
+    #     local_rotation[skeleton.index("left_elbow_link")]
+    # )
+    # local_rotation[skeleton.index("right_elbow_link")] = quat_mul(
+    #     quat_from_angle_axis(angle=torch.tensor([90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
+    #     local_rotation[skeleton.index("right_elbow_link")]
+    # )
     # finger_tune_list = ["right_qbhand_thumb_knuckle_link", "right_qbhand_index_knuckle_link",
     #                     "right_qbhand_middle_knuckle_link", "right_qbhand_ring_knuckle_link",
     #                     "right_qbhand_little_knuckle_link"]
@@ -80,6 +80,6 @@ def get_tpose(xml_path, save_path, verbose=True):
 
 if __name__ == '__main__':
     rofunc_path = rf.oslab.get_rofunc_path()
-    xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/UnitreeH1/h1_w_qbhand.xml")
-    save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_h1_w_qbhand_tpose.npy")
+    xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml")
+    save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_zju_humanoid_w_qbhand_tpose.npy")
     get_tpose(xml_path, save_path)

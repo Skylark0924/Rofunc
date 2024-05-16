@@ -11,11 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import torch
 from isaacgym import gymtorch
 
-import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.hotu.humanoid_hotu import HumanoidHOTUTask
 
 
@@ -48,7 +46,7 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
 
         self._motion_dt = control_freq_inv * self.sim_params.dt
 
-        num_motions = self._motion_lib.num_motions()
+        num_motions = self._motion_lib.num_motions
         self._motion_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.long)
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
 
@@ -69,7 +67,7 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         return 1  # disable self collisions
 
     def _motion_sync(self):
-        num_motions = self._motion_lib.num_motions()
+        num_motions = self._motion_lib.num_motions
         motion_ids = self._motion_ids
         motion_times = self.progress_buf * self._motion_dt
 
@@ -88,7 +86,16 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         root_ang_vel = torch.zeros_like(root_ang_vel)
         dof_vel = torch.zeros_like(dof_vel)
 
-        if self.object_names is not None:
+        if self.extra_dof_states is not None:
+            if self.extra_rewrite_dof_names is not None:
+                try:
+                    dof_pos[:, self.extra_rewrite_dof_id] = torch.tensor(
+                        self.extra_dof_states[f0l - 1:f1l - 1, self.extra_rewrite_dof_id, 0]).to(self.device)
+                except:
+                    print(f0l, f1l)
+            # dof_pos = torch.tensor(self.extra_dof_states[f0l:f1l, :, 0]).to(self.device)
+
+        if self.use_object_motion:
             object_poses = self._object_motion_lib.get_motion_state(motion_ids, motion_times)
             for object_name, object_pose in object_poses.items():
                 # 13-dim for the actor root state: [x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz]
@@ -144,7 +151,7 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         return
 
     def _reset_env_tensors(self, env_ids):
-        num_motions = self._motion_lib.num_motions()
+        num_motions = self._motion_lib.num_motions
         self._motion_ids[env_ids] = torch.remainder(
             self._motion_ids[env_ids] + self.num_envs, num_motions
         )
