@@ -745,9 +745,9 @@ class RobotSim:
                 next_update_time += update_freq
                 index += 1
                 if index >= len(traj[i]):
-                    index = 0
+                    # index = 0
                     # save_dof_states = False
-                    # break   # stop the simulation
+                    break   # stop the simulation
 
             # Step the physics
             self.gym.simulate(self.sim)

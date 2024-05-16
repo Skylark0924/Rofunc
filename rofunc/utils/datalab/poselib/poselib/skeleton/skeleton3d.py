@@ -938,9 +938,12 @@ class SkeletonState(Serializable):
                 elif x in ["shoulder_pitch_link_r", "shoulder_pitch_link_l", "hip_roll_link_l", "hip_pitch_link_l", "hip_roll_link_r", "hip_pitch_link_r"]:
                     # For bruce
                     a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                # elif x in ["SCAPULA_R", "SHOULDER_R", "WRIST_REVOLUTE_R", "WRIST_UPDOWN_R", "SCAPULA_L", "SHOULDER_L",
+                #     "WRIST_REVOLUTE_L", "WRIST_UPDOWN_L", "ILIUM_R", "ISCHIUM_R",
                 else:
                     print(x)
-                    raise ValueError("Joint not found in source skeleton")
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                    # raise ValueError("Joint not found in source skeleton")
                     # pass
 
         return SkeletonState.from_rotation_and_root_translation(

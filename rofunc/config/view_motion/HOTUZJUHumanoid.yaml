@@ -1,26 +1,18 @@
-keyBodies: [ "right_hand", "left_hand", "right_ankle_link", "left_ankle_link" ]
-contactBodies: [ "right_ankle_link", "left_ankle_link" ]
+keyBodies: [ "HAND_R", "HAND_L", "FOOT_R", "FOOT_L" ]
+contactBodies: [ "FOOT_R", "FOOT_L" ]
 
 
 # animation files to learn from
-motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2h1.npy"
-motion_dof_states_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2h1_dof_states.npy"
-extra_rewrite_dof_names: [ "left_hip_yaw_joint", "left_hip_roll_joint", "left_hip_pitch_joint",
-#                           "left_knee_joint",
-                           "left_ankle_joint",
-                           "right_hip_yaw_joint", "right_hip_roll_joint", "right_hip_pitch_joint",
-#                           "right_knee_joint",
-                           "right_ankle_joint",
-                           "left_shoulder_pitch_joint", "left_shoulder_roll_joint", "left_elbow_joint", "left_hand_x", "left_hand_y", "left_hand_z",
-                           "left_shoulder_yaw_joint", "right_shoulder_pitch_joint", "right_shoulder_roll_joint", "right_shoulder_yaw_joint",
-                           "right_elbow_joint", "right_hand_x", "right_hand_y", "right_hand_z" ]
+motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2zju.npy"
+motion_dof_states_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2zju_dof_states.npy"
+extra_rewrite_dof_names: "all"
 
-motion_file_asset: "mjcf/zju_humanoid/zju_humanoid.xml"
+motion_file_asset: "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"
 
 object_motion_file:
 
 asset:
-  assetFileName: "mjcf/zju_humanoid/zju_humanoid.xml"
+  assetFileName: "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"
 
 use_object_motion: False
 object_asset:

@@ -61,7 +61,8 @@ if __name__ == "__main__":
     #  4. HOTUCURIWQbhand
     #  5. HOTUWalker
     #  6. HOTUBruce
-    parser.add_argument("--view_motion_type", type=str, default="HOTUH1WQbhand")
+    #  7. HOTUZJUHumanoid
+    parser.add_argument("--view_motion_type", type=str, default="HOTUZJUHumanoid")
     custom_args = parser.parse_args()
 
     inference(custom_args)
