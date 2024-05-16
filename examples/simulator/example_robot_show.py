@@ -59,9 +59,14 @@ import rofunc as rf
 # UnitreeH1sim.show()
 
 # Bruce humanoid
-args = rf.config.get_sim_config("Bruce")
-Brucesim = rf.sim.RobotSim(args)
-Brucesim.show()
+# args = rf.config.get_sim_config("Bruce")
+# Brucesim = rf.sim.RobotSim(args)
+# Brucesim.show()
+
+# ZJU humanoid
+args = rf.config.get_sim_config("ZJUHumanoid")
+ZJUHumanoidsim = rf.sim.RobotSim(args)
+ZJUHumanoidsim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")
