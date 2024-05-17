@@ -2,8 +2,9 @@ keyBodies: [ "right_limb_l7", "left_limb_l7", "right_leg_l6", "left_leg_l6" ]
 contactBodies: [ "right_leg_l6", "left_leg_l6" ]
 
 # animation files to learn from
-motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2walker.npy"
-motion_dof_states_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2walker_dof_states.npy"
+motion_file: "examples/data/hotu2/20240509/all_walker_motion.yaml"
+
+use_extra_dof_states_motion: True
 extra_rewrite_dof_names: [ "right_limb_j1", "right_limb_j2", "right_limb_j3", "right_limb_j4", "right_limb_j5",
                            "right_limb_j6", "right_limb_j7", "left_limb_j1", "left_limb_j2", "left_limb_j3",
                            "left_limb_j4", "left_limb_j5", "left_limb_j6", "left_limb_j7", "head_j1",

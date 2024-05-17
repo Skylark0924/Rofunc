@@ -580,8 +580,7 @@ class Humanoid(VecTask):
         self._pd_action_scale = to_torch(self._pd_action_scale, device=self.device)
 
     def _get_humanoid_collision_filter(self):
-        return -1  # use default collision filter defined by MJCF
-        # return 1  # turn off self-collision
+        return self.cfg.get("env", {}).get("collisionFilter", -1)
 
     def _compute_reward(self, actions):
         self.rew_buf[:] = compute_humanoid_reward(self.obs_buf)
