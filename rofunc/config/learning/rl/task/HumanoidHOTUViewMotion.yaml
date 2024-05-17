@@ -15,6 +15,7 @@ env:
   pdControl: True
   powerScale: 1.0
   controlFrequencyInv: 2 # 30 Hz
+  collisionFilter: -1 # -1: collision defined by MJCF, 0: all collision detection, 1: no collision detection
   stateInit: "Random"
   hybridInitProb: 0.5
   numAMPObsSteps: 2
@@ -28,7 +29,7 @@ env:
 
   # animation files to learn from
   motion_file:
-  motion_dof_states_file:
+  use_extra_dof_states_motion: False
   extra_rewrite_dof_names:
 
   motion_file_asset:

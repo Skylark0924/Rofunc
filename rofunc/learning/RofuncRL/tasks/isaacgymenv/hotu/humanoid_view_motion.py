@@ -86,14 +86,14 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         root_ang_vel = torch.zeros_like(root_ang_vel)
         dof_vel = torch.zeros_like(dof_vel)
 
-        if self.extra_dof_states is not None:
-            if self.extra_rewrite_dof_names is not None:
-                try:
-                    dof_pos[:, self.extra_rewrite_dof_id] = torch.tensor(
-                        self.extra_dof_states[f0l - 1:f1l - 1, self.extra_rewrite_dof_id, 0]).to(self.device)
-                except:
-                    print(f0l, f1l)
-            # dof_pos = torch.tensor(self.extra_dof_states[f0l:f1l, :, 0]).to(self.device)
+        # if self.extra_dof_states is not None:
+        #     if self.extra_rewrite_dof_names is not None:
+        #         try:
+        #             dof_pos[:, self.extra_rewrite_dof_id] = torch.tensor(
+        #                 self.extra_dof_states[f0l - 1:f1l - 1, self.extra_rewrite_dof_id, 0]).to(self.device)
+        #         except:
+        #             print(f0l, f1l)
+        #     # dof_pos = torch.tensor(self.extra_dof_states[f0l:f1l, :, 0]).to(self.device)
 
         if self.use_object_motion:
             object_poses = self._object_motion_lib.get_motion_state(motion_ids, motion_times)
