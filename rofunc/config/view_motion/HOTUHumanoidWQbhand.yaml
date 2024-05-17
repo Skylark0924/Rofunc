@@ -4,8 +4,10 @@ contactBodies: [ "right_foot", "left_foot" ]
 
 # animation files to learn from
 #motion_file: "examples/data/hotu2/test_data_01_optitrack2hotu.npy"
-motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2hotu.npy"
+motion_file: "examples/data/hotu2/20240509/all_hotu_motion.yaml"
 #motion_dof_states_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2hotu_dof_states.npy"
+
+use_extra_dof_states_motion: False
 
 motion_file_asset: "mjcf/hotu_humanoid_w_qbhand_full.xml"
 # right_left_ids_except_thumb_and_knuckle: [ 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32,

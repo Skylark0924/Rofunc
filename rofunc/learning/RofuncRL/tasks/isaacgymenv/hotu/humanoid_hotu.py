@@ -15,14 +15,13 @@
 import os
 from enum import Enum
 
-import rofunc as rf
-import torch
 from gym import spaces
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
+
+import rofunc as rf
 from rofunc.config.utils import get_sim_config
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
-
 from .humanoid import Humanoid, dof_to_obs
 from .motion_lib import MotionLib, ObjectMotionLib
 
@@ -122,14 +121,6 @@ class HumanoidHOTUTask(Humanoid):
 
         # Load motion file
         self._load_motion(cfg["env"].get("motion_file", None))
-        self._load_extra_dof_states(cfg["env"].get("motion_dof_states_file", None))
-        self.extra_rewrite_dof_names = cfg["env"].get("extra_rewrite_dof_names", None)
-        if self.extra_rewrite_dof_names is not None:
-            if self.extra_rewrite_dof_names == "all":
-                self.extra_rewrite_dof_id = [id for id in self.humanoid_info["dofs"].values()]
-            else:
-                self.extra_rewrite_dof_id = [self.humanoid_info["dofs"][dof_name] for dof_name in
-                                             self.extra_rewrite_dof_names]
 
         # Load object motion file
         self._load_object_motion(cfg["env"].get("object_motion_file", None))

@@ -17,7 +17,7 @@ import time
 from collections import OrderedDict
 
 import numpy as np
-import torch
+import tqdm
 import yaml
 
 import rofunc as rf
@@ -114,6 +114,15 @@ class MotionLib:
         self._get_skeleton_rb_index()
         self._get_skeleton_dof_index()
 
+        self.use_extra_dof_states_motion = cfg["env"]["use_extra_dof_states_motion"]
+        self.extra_rewrite_dof_names = cfg["env"].get("extra_rewrite_dof_names", None)
+        if self.use_extra_dof_states_motion and self.extra_rewrite_dof_names is not None:
+            if self.extra_rewrite_dof_names == "all":
+                self.extra_rewrite_dof_id = [id for id in self.mf_humanoid_dof_dict.values()]
+            else:
+                self.extra_rewrite_dof_id = [self.mf_humanoid_dof_dict[dof_name] for dof_name in
+                                             self.extra_rewrite_dof_names]
+
         # no pelvis and no root links, start from 1
         self._mf_dof_body_ids = [v for k, v in self.mf_humanoid_rb_dict_a_del.items()]
         self._mf_dof_offsets = self.humanoid_asset_infos[self.mf_humanoid_type]["dof_offsets"]
@@ -128,7 +137,10 @@ class MotionLib:
         self.mf_gts = torch.cat([m.global_translation for m in self._motions], dim=0).float()
         self.mf_grs = torch.cat([m.global_rotation for m in self._motions], dim=0).float()
         self.mf_lrs = torch.cat([m.local_rotation for m in self._motions], dim=0).float()
-        self.mf_dvs = torch.cat([m.dof_vels for m in self._motions], dim=0).float()
+
+        if self.use_extra_dof_states_motion:
+            self.mf_dps = torch.cat([m[:, :, 0] for m in self._motion_dof_states], dim=0).float()
+            self.mf_dvs = torch.cat([m[:, :, 1] for m in self._motion_dof_states], dim=0).float()
 
         # Transfer motion from mf_humanoid_type to humanoid_type
         if self.mf_humanoid_type != self.humanoid_type:
@@ -276,6 +288,109 @@ class MotionLib:
     def get_motion_length(self, motion_ids):
         return self._motion_lengths[motion_ids]
 
+    def _load_motions(self, motion_file):
+        self._motions = []
+        self._motion_lengths = []
+        self._motion_weights = []
+        self._motion_fps = []
+        self._motion_dt = []
+        self._motion_num_frames = []
+        self._motion_files = []
+        self._motion_dof_states = []
+
+        motion_files, motion_weights = self._fetch_motion_files(motion_file)
+        self.motion_files = motion_files
+        self.num_motion_files = len(motion_files)
+
+        with tqdm.trange(self.num_motion_files, ncols=100, colour="green") as t_bar:
+            for f in t_bar:
+                curr_file = motion_files[f]
+                t_bar.set_postfix_str("Loading: {:s}".format(curr_file.split("/")[-1]))
+                curr_motion = SkeletonMotion.from_file(curr_file)
+
+                motion_fps = curr_motion.fps
+                curr_dt = 1.0 / motion_fps
+
+                num_frames = curr_motion.tensor.shape[0]
+                curr_len = 1.0 / motion_fps * (num_frames - 1)
+
+                self._motion_fps.append(float(motion_fps))
+                self._motion_dt.append(curr_dt)
+                self._motion_num_frames.append(num_frames)
+
+                curr_dof_vels = self._compute_motion_dof_vels(curr_motion)
+                curr_motion.dof_vels = curr_dof_vels
+
+                # Moving motion tensors to the GPU
+                if USE_CACHE:
+                    curr_motion = DeviceCache(curr_motion, self._device)
+                else:
+                    curr_motion.tensor = curr_motion.tensor.to(self._device)
+                    curr_motion._skeleton_tree._parent_indices = (
+                        curr_motion._skeleton_tree._parent_indices.to(self._device)
+                    )
+                    curr_motion._skeleton_tree._local_translation = (
+                        curr_motion._skeleton_tree._local_translation.to(self._device)
+                    )
+                    curr_motion._rotation = curr_motion._rotation.to(self._device)
+
+                self._motions.append(curr_motion)
+                self._motion_lengths.append(curr_len)
+
+                curr_weight = motion_weights[f]
+                self._motion_weights.append(curr_weight)
+                self._motion_files.append(curr_file)
+
+                if self.use_extra_dof_states_motion:
+                    curr_dof_states_file = curr_file.replace(".npy", "_dof_states.npy")
+                    curr_dof_states = np.load(curr_dof_states_file)
+                    curr_dof_states = torch.tensor(curr_dof_states, device=self._device, dtype=torch.float32)
+                    self._motion_dof_states.append(curr_dof_states)
+
+        for motion in self._motions:
+            if motion.object_poses is not None:
+                self._object_poses = motion.object_poses
+                self._object_poses = torch.tensor(self._object_poses, device=self._device, dtype=torch.float32)
+                break
+
+        self._motion_lengths = torch.tensor(self._motion_lengths, device=self._device, dtype=torch.float32)
+        self._motion_weights = torch.tensor(self._motion_weights, dtype=torch.float32, device=self._device)
+        self._motion_weights /= self._motion_weights.sum()
+        self._motion_fps = torch.tensor(self._motion_fps, device=self._device, dtype=torch.float32)
+        self._motion_dt = torch.tensor(self._motion_dt, device=self._device, dtype=torch.float32)
+        self._motion_num_frames = torch.tensor(self._motion_num_frames, device=self._device)
+
+        self.num_motions = self._num_motions()
+        total_len = self._get_total_length()
+
+        print("Loaded {:d} motions with a total length of {:.3f}s.".format(self.num_motions, total_len))
+
+    @staticmethod
+    def _fetch_motion_files(motion_file):
+        ext = os.path.splitext(motion_file)[1]
+        if ext == ".yaml":
+            dir_name = os.path.dirname(motion_file)
+            motion_files = []
+            motion_weights = []
+
+            with open(os.path.join(os.getcwd(), motion_file), "r") as f:
+                motion_config = yaml.load(f, Loader=yaml.SafeLoader)
+
+            motion_list = motion_config["motions"]
+            for motion_entry in motion_list:
+                curr_file = motion_entry["file"]
+                curr_weight = motion_entry["weight"]
+                assert curr_weight >= 0
+
+                curr_file = os.path.join(dir_name, curr_file)
+                motion_weights.append(curr_weight)
+                motion_files.append(curr_file)
+        else:
+            motion_files = [motion_file]
+            motion_weights = [1.0]
+
+        return motion_files, motion_weights
+
     def get_object_pose(self, frame_id):
         """
         Return object pose at frame=id, where id is recorded in motion_ids
@@ -290,22 +405,17 @@ class MotionLib:
 
     def get_motion_state(self, motion_ids, motion_times):
         """
+        Get the motion state at the given time for the given motion ids
 
-        :param motion_ids:
+        :param motion_ids: the list of motion ids, useful for yaml file
         :param motion_times:
         :return:
         """
-        # n = len(motion_ids)
-        # num_bodies = self._get_num_bodies()
-        # num_key_bodies = self._mf_key_body_ids.shape[0]
-
         motion_len = self._motion_lengths[motion_ids]
         num_frames = self._motion_num_frames[motion_ids]
         dt = self._motion_dt[motion_ids]
 
-        frame_idx0, frame_idx1, blend = self._calc_frame_blend(
-            motion_times, motion_len, num_frames, dt
-        )
+        frame_idx0, frame_idx1, blend = self._calc_frame_blend(motion_times, motion_len, num_frames, dt)
 
         f0l = frame_idx0 + self.length_starts[motion_ids]
         f1l = frame_idx1 + self.length_starts[motion_ids]
@@ -351,128 +461,12 @@ class MotionLib:
 
         mf_local_rot = torch_utils.slerp(mf_local_rot0, mf_local_rot1, torch.unsqueeze(blend, axis=-1))
         dof_pos = self._local_rotation_to_dof(mf_local_rot)
-        # dof_pos = (1.0 - blend) * dof_pos0 + blend * dof_pos1
+
+        if self.use_extra_dof_states_motion:
+            dof_pos[:, self.extra_rewrite_dof_id] = self.mf_dps[f0l][:, self.extra_rewrite_dof_id]
+            dof_vel[:, self.extra_rewrite_dof_id] = self.mf_dvs[f0l][:, self.extra_rewrite_dof_id]
 
         return root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos, f0l, f1l
-
-    def _load_motions(self, motion_file):
-        self._motions = []
-        self._motion_lengths = []
-        self._motion_weights = []
-        self._motion_fps = []
-        self._motion_dt = []
-        self._motion_num_frames = []
-        self._motion_files = []
-
-        total_len = 0.0
-
-        motion_files, motion_weights = self._fetch_motion_files(motion_file)
-        self.num_motion_files = len(motion_files)
-        import tqdm
-
-        with tqdm.trange(self.num_motion_files, ncols=100, colour="green") as t_bar:
-            for f in t_bar:
-                curr_file = motion_files[f]
-                t_bar.set_postfix_str("Loading: {:s}".format(curr_file.split("/")[-1]))
-                curr_motion = SkeletonMotion.from_file(curr_file)
-
-                motion_fps = curr_motion.fps
-                curr_dt = 1.0 / motion_fps
-
-                num_frames = curr_motion.tensor.shape[0]
-                curr_len = 1.0 / motion_fps * (num_frames - 1)
-
-                self._motion_fps.append(float(motion_fps))
-                self._motion_dt.append(curr_dt)
-                self._motion_num_frames.append(num_frames)
-
-                curr_dof_vels = self._compute_motion_dof_vels(curr_motion)
-                curr_motion.dof_vels = curr_dof_vels
-
-                # curr_dof_pos = self._compute_motion_dof_pos(curr_motion)
-                # curr_motion.dof_pos = curr_dof_pos
-
-                # Moving motion tensors to the GPU
-                if USE_CACHE:
-                    curr_motion = DeviceCache(curr_motion, self._device)
-                else:
-                    curr_motion.tensor = curr_motion.tensor.to(self._device)
-                    curr_motion._skeleton_tree._parent_indices = (
-                        curr_motion._skeleton_tree._parent_indices.to(self._device)
-                    )
-                    curr_motion._skeleton_tree._local_translation = (
-                        curr_motion._skeleton_tree._local_translation.to(self._device)
-                    )
-                    curr_motion._rotation = curr_motion._rotation.to(self._device)
-
-                self._motions.append(curr_motion)
-                self._motion_lengths.append(curr_len)
-
-                curr_weight = motion_weights[f]
-                self._motion_weights.append(curr_weight)
-                self._motion_files.append(curr_file)
-
-        for motion in self._motions:
-            if motion.object_poses is not None:
-                self._object_poses = motion.object_poses
-                self._object_poses = torch.tensor(
-                    self._object_poses, device=self._device, dtype=torch.float32
-                )
-                break
-
-        self._motion_lengths = torch.tensor(
-            self._motion_lengths, device=self._device, dtype=torch.float32
-        )
-
-        self._motion_weights = torch.tensor(
-            self._motion_weights, dtype=torch.float32, device=self._device
-        )
-        self._motion_weights /= self._motion_weights.sum()
-
-        self._motion_fps = torch.tensor(
-            self._motion_fps, device=self._device, dtype=torch.float32
-        )
-        self._motion_dt = torch.tensor(
-            self._motion_dt, device=self._device, dtype=torch.float32
-        )
-        self._motion_num_frames = torch.tensor(
-            self._motion_num_frames, device=self._device
-        )
-
-        self.num_motions = self._num_motions()
-        total_len = self._get_total_length()
-
-        print(
-            "Loaded {:d} motions with a total length of {:.3f}s.".format(
-                self.num_motions, total_len
-            )
-        )
-
-    @staticmethod
-    def _fetch_motion_files(motion_file):
-        ext = os.path.splitext(motion_file)[1]
-        if ext == ".yaml":
-            dir_name = os.path.dirname(motion_file)
-            motion_files = []
-            motion_weights = []
-
-            with open(os.path.join(os.getcwd(), motion_file), "r") as f:
-                motion_config = yaml.load(f, Loader=yaml.SafeLoader)
-
-            motion_list = motion_config["motions"]
-            for motion_entry in motion_list:
-                curr_file = motion_entry["file"]
-                curr_weight = motion_entry["weight"]
-                assert curr_weight >= 0
-
-                curr_file = os.path.join(dir_name, curr_file)
-                motion_weights.append(curr_weight)
-                motion_files.append(curr_file)
-        else:
-            motion_files = [motion_file]
-            motion_weights = [1.0]
-
-        return motion_files, motion_weights
 
     def _calc_frame_blend(self, time, len, num_frames, dt):
         """
