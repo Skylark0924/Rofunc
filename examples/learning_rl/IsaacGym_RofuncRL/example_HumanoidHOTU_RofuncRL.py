@@ -45,9 +45,12 @@ def train(custom_args):
     trainer = Trainers().trainer_map["hotu"](cfg=cfg,
                                              env=env,
                                              device=cfg.rl_device,
-                                             env_name=custom_args.task,
+                                             env_name=f"{custom_args.task}_{custom_args.humanoid_robot_type}",
                                              hrl=hrl)
 
+    if custom_args.ckpt_path is not None:
+        # load checkpoint
+        trainer.agent.load_ckpt(custom_args.ckpt_path)
     # Start training
     trainer.train()
 
@@ -78,21 +81,22 @@ def inference(custom_args):
     trainer = Trainers().trainer_map["hotu"](cfg=cfg,
                                              env=infer_env,
                                              device=cfg.rl_device,
-                                             env_name=custom_args.task,
+                                             env_name=f"{custom_args.task}_{custom_args.humanoid_robot_type}",
                                              hrl=False,
                                              inference=True)
 
+    trainer.agent.load_ckpt(custom_args.ckpt_path)
     # Start inference
     trainer.inference()
 
 
 if __name__ == "__main__":
-    gpu_id = 1
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="HumanoidHOTUGetup")
-    parser.add_argument("--num_envs", type=int, default=512)
-    parser.add_argument("--sim_device", type=int, default=1)
+    parser.add_argument("--num_envs", type=int, default=4096)
+    parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
 
     # Available types of asset file path:
@@ -103,7 +107,7 @@ if __name__ == "__main__":
     #  5. HOTUWalker
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoidWQbhand
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhand")
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUWalker")
 
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
