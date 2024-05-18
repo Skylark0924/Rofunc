@@ -26,7 +26,10 @@ def train(custom_args):
                       "num_envs={}".format(custom_args.num_envs)]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg_view_motion = get_view_motion_config(custom_args.humanoid_robot_type)
-    cfg.task.env = OmegaConf.merge(cfg.task.env, cfg_view_motion)
+    cfg.task.env = OmegaConf.merge(cfg.task.env, cfg_view_motion["env"])
+    cfg.task.task = OmegaConf.merge(cfg.task.task, cfg_view_motion["task"])
+    if custom_args.debug == "True":
+        cfg.train.Trainer.wandb = False
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -46,11 +49,13 @@ def train(custom_args):
                                              env=env,
                                              device=cfg.rl_device,
                                              env_name=f"{custom_args.task}_{custom_args.humanoid_robot_type}",
-                                             hrl=hrl)
+                                             mode=custom_args.mode)
 
     if custom_args.ckpt_path is not None:
         # load checkpoint
-        trainer.agent.load_ckpt(custom_args.ckpt_path)
+        trainer.agent.load_ckpt(custom_args.ckpt_path,
+                                load_modules=["policy", "value", "optimizer_policy", "optimizer_value",
+                                              "state_preprocessor", "value_preprocessor"])
     # Start training
     trainer.train()
 
@@ -65,7 +70,8 @@ def inference(custom_args):
                       ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg_view_motion = get_view_motion_config(custom_args.humanoid_robot_type)
-    cfg.task.env = OmegaConf.merge(cfg.task.env, cfg_view_motion)
+    cfg.task.env = OmegaConf.merge(cfg.task.env, cfg_view_motion["env"])
+    cfg.task.task = OmegaConf.merge(cfg.task.task, cfg_view_motion["task"])
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     # Instantiate the Isaac Gym environment
@@ -107,8 +113,10 @@ if __name__ == "__main__":
     #  5. HOTUWalker
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoidWQbhand
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUWalker")
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhand")
+    parser.add_argument("--mode", type=str, default="LLC")
 
+    parser.add_argument("--debug", type=str, default="False")
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
