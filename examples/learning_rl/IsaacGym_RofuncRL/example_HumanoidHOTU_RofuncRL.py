@@ -9,9 +9,11 @@ import isaacgym
 import argparse
 from omegaconf import OmegaConf
 
-from rofunc.config.utils import omegaconf_to_dict, get_config, get_view_motion_config
+from rofunc.config.utils import get_view_motion_config
+from rofunc.config.utils import omegaconf_to_dict, get_config
 from rofunc.learning.RofuncRL.tasks import Tasks
 from rofunc.learning.RofuncRL.trainers import Trainers
+from rofunc.learning.utils.utils import set_seed
 
 
 def train(custom_args):
@@ -85,12 +87,12 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="HumanoidHOTUGetup")
-    parser.add_argument("--num_envs", type=int, default=4096)
-    parser.add_argument("--sim_device", type=int, default=0)
+    parser.add_argument("--num_envs", type=int, default=512)
+    parser.add_argument("--sim_device", type=int, default=1)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
 
     # Available types of asset file path:
@@ -100,8 +102,8 @@ if __name__ == "__main__":
     #  4. HOTUCURIWQbhand
     #  5. HOTUWalker
     #  6. HOTUBruce
-    #  7. HOTUZJUHumanoid
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUH1WQbhand")
+    #  7. HOTUZJUHumanoidWQbhand
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhand")
 
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
@@ -113,4 +115,3 @@ if __name__ == "__main__":
         train(custom_args)
     else:
         inference(custom_args)
-

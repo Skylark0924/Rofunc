@@ -4,8 +4,6 @@ contactBodies: [ "ankle_pitch_link_r", "ankle_pitch_link_l" ]
 
 # animation files to learn from
 motion_file: "examples/data/hotu2/20240509/all_bruce_motion.yaml"
-#motion_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2bruce.npy"
-#motion_dof_states_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2bruce_dof_states.npy"
 
 use_extra_dof_states_motion: True
 extra_rewrite_dof_names: "all"

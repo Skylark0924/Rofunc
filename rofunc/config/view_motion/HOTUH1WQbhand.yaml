@@ -7,10 +7,10 @@ motion_file: "examples/data/hotu2/20240509/all_h1_motion.yaml"
 
 use_extra_dof_states_motion: True
 extra_rewrite_dof_names: [ "left_hip_yaw_joint", "left_hip_roll_joint", "left_hip_pitch_joint",
-#                           "left_knee_joint",
+                           "left_knee_joint",
                            "left_ankle_joint",
                            "right_hip_yaw_joint", "right_hip_roll_joint", "right_hip_pitch_joint",
-#                           "right_knee_joint",
+                           "right_knee_joint",
                            "right_ankle_joint",
                            "left_shoulder_pitch_joint", "left_shoulder_roll_joint", "left_elbow_joint", "left_hand_x", "left_hand_y", "left_hand_z",
                            "left_shoulder_yaw_joint", "right_shoulder_pitch_joint", "right_shoulder_roll_joint", "right_shoulder_yaw_joint",
