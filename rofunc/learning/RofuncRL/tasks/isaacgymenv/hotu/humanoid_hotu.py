@@ -15,14 +15,13 @@
 import os
 from enum import Enum
 
-import rofunc as rf
-import torch
 from gym import spaces
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
+
+import rofunc as rf
 from rofunc.config.utils import get_sim_config
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
-
 from .humanoid import Humanoid, dof_to_obs
 from .motion_lib import MotionLib, ObjectMotionLib
 
@@ -36,7 +35,7 @@ class HumanoidHOTUTask(Humanoid):
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
-        self.override_unuse_actions = True
+        self.override_unuse_actions = False
 
         state_init = cfg["env"]["stateInit"]
         self._state_init = HumanoidHOTUTask.StateInit[state_init]
@@ -122,14 +121,6 @@ class HumanoidHOTUTask(Humanoid):
 
         # Load motion file
         self._load_motion(cfg["env"].get("motion_file", None))
-        self._load_extra_dof_states(cfg["env"].get("motion_dof_states_file", None))
-        self.extra_rewrite_dof_names = cfg["env"].get("extra_rewrite_dof_names", None)
-        if self.extra_rewrite_dof_names is not None:
-            if self.extra_rewrite_dof_names == "all":
-                self.extra_rewrite_dof_id = [id for id in self.humanoid_info["dofs"].values()]
-            else:
-                self.extra_rewrite_dof_id = [self.humanoid_info["dofs"][dof_name] for dof_name in
-                                             self.extra_rewrite_dof_names]
 
         # Load object motion file
         self._load_object_motion(cfg["env"].get("object_motion_file", None))
@@ -384,19 +375,19 @@ class HumanoidHOTUTask(Humanoid):
             mf_humanoid_type=self.mf_humanoid_info["name"],
         )
 
-    def _load_extra_dof_states(self, extra_dof_states_path):
-        if extra_dof_states_path is not None:
-            if rf.oslab.is_absl_path(extra_dof_states_path):
-                dof_states_file = extra_dof_states_path
-            elif extra_dof_states_path.split("/")[0] == "examples":
-                dof_states_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                               "../../../../../../" + extra_dof_states_path)
-            else:
-                raise ValueError("Unsupported motion file path")
-
-            self.extra_dof_states = np.load(dof_states_file)
-        else:
-            self.extra_dof_states = None
+    # def _load_extra_dof_states(self, extra_dof_states_path):
+    #     if extra_dof_states_path is not None:
+    #         if rf.oslab.is_absl_path(extra_dof_states_path):
+    #             dof_states_file = extra_dof_states_path
+    #         elif extra_dof_states_path.split("/")[0] == "examples":
+    #             dof_states_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    #                                            "../../../../../../" + extra_dof_states_path)
+    #         else:
+    #             raise ValueError("Unsupported motion file path")
+    #
+    #         self.extra_dof_states = np.load(dof_states_file)
+    #     else:
+    #         self.extra_dof_states = None
 
     def _load_object_motion(self, object_motion_file_path):
         if object_motion_file_path is not None:
@@ -665,44 +656,44 @@ class HumanoidHOTUTask(Humanoid):
             else:
                 self._curr_amp_obs_buf[env_ids] = amp_obs
 
-    def amp_obs_decompose(self, amp_obs, wb_decompose_param_rb_index, wb_decompose_param_dof_ids, first_is_body):
-        root_h_obs, root_rot_obs, local_root_vel, local_root_ang_vel, dof_obs, dof_vel, flat_local_key_pos = amp_obs
-        amp_obs_list = []
-        for part_i in range(len(wb_decompose_param_dof_ids)):
-            dof_obs_size_this_part = len(wb_decompose_param_dof_ids[part_i])
-            dof_obs_this_part = torch.zeros(root_h_obs.shape[:-1] + (dof_obs_size_this_part,),
-                                            device=root_h_obs.device)
-            i = 0
-            for j in wb_decompose_param_dof_ids[part_i]:
-                try:
-                    dof_obs_this_part[:, i: i + 1] = dof_obs[:, j: (j + 1)]
-                except:
-                    pass
-                i += 1
-            dof_vel_this_part = dof_vel[:, wb_decompose_param_dof_ids[part_i]]
-            if part_i == 0 and first_is_body:
-                amp_obs_this_part = torch.cat(
-                    (
-                        root_h_obs,  # (num_envs, 1)
-                        root_rot_obs,  # (num_envs, 6)
-                        local_root_vel,  # (num_envs, 3)
-                        local_root_ang_vel,  # (num_envs, 3)
-                        dof_obs_this_part,  # (num_envs, 84)
-                        dof_vel_this_part,  # (num_envs, 34)
-                        flat_local_key_pos,  # (num_envs, 3 * num_key_body)
-                    ),
-                    dim=-1,
-                )
-            else:
-                amp_obs_this_part = torch.cat(
-                    (
-                        dof_obs_this_part,  # (num_envs, 180)
-                        dof_vel_this_part,  # (num_envs, 30)
-                    ),
-                    dim=-1,
-                )
-            amp_obs_list.append(amp_obs_this_part)
-        return amp_obs_list
+    # def amp_obs_decompose(self, amp_obs, wb_decompose_param_rb_index, wb_decompose_param_dof_ids, first_is_body):
+    #     root_h_obs, root_rot_obs, local_root_vel, local_root_ang_vel, dof_obs, dof_vel, flat_local_key_pos = amp_obs
+    #     amp_obs_list = []
+    #     for part_i in range(len(wb_decompose_param_dof_ids)):
+    #         dof_obs_size_this_part = len(wb_decompose_param_dof_ids[part_i])
+    #         dof_obs_this_part = torch.zeros(root_h_obs.shape[:-1] + (dof_obs_size_this_part,),
+    #                                         device=root_h_obs.device)
+    #         i = 0
+    #         for j in wb_decompose_param_dof_ids[part_i]:
+    #             try:
+    #                 dof_obs_this_part[:, i: i + 1] = dof_obs[:, j: (j + 1)]
+    #             except:
+    #                 pass
+    #             i += 1
+    #         dof_vel_this_part = dof_vel[:, wb_decompose_param_dof_ids[part_i]]
+    #         if part_i == 0 and first_is_body:
+    #             amp_obs_this_part = torch.cat(
+    #                 (
+    #                     root_h_obs,  # (num_envs, 1)
+    #                     root_rot_obs,  # (num_envs, 6)
+    #                     local_root_vel,  # (num_envs, 3)
+    #                     local_root_ang_vel,  # (num_envs, 3)
+    #                     dof_obs_this_part,  # (num_envs, 84)
+    #                     dof_vel_this_part,  # (num_envs, 34)
+    #                     flat_local_key_pos,  # (num_envs, 3 * num_key_body)
+    #                 ),
+    #                 dim=-1,
+    #             )
+    #         else:
+    #             amp_obs_this_part = torch.cat(
+    #                 (
+    #                     dof_obs_this_part,  # (num_envs, 180)
+    #                     dof_vel_this_part,  # (num_envs, 30)
+    #                 ),
+    #                 dim=-1,
+    #             )
+    #         amp_obs_list.append(amp_obs_this_part)
+    #     return amp_obs_list
 
 
 @torch.jit.script

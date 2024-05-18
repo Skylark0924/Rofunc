@@ -51,7 +51,20 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
 
     def pre_physics_step(self, actions):
-        self.actions = actions.to(self.device).clone()
+        expanded_actions = torch.zeros((actions.shape[0], 100), device=self.device)
+        asset_file = self.cfg["env"]["asset"]["assetFileName"]
+
+        dof_dict = self.humanoid_asset_infos[asset_file.split("/")[-1].split(".")[0]]["dofs"]
+
+        j = 0
+        for dof, index in dof_dict.items():
+            if "qbhand" not in dof:
+                expanded_actions[:, index] = actions[:, j]
+                j += 1
+
+        self.actions = expanded_actions.to(self.device).clone()
+
+        # self.actions = actions.to(self.device).clone()
 
         # Set the actuation force to zero so that the motion is not affected
         # So the action obtaining from the policy is not the real action
@@ -85,15 +98,6 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         root_vel = torch.zeros_like(root_vel)
         root_ang_vel = torch.zeros_like(root_ang_vel)
         dof_vel = torch.zeros_like(dof_vel)
-
-        if self.extra_dof_states is not None:
-            if self.extra_rewrite_dof_names is not None:
-                try:
-                    dof_pos[:, self.extra_rewrite_dof_id] = torch.tensor(
-                        self.extra_dof_states[f0l - 1:f1l - 1, self.extra_rewrite_dof_id, 0]).to(self.device)
-                except:
-                    print(f0l, f1l)
-            # dof_pos = torch.tensor(self.extra_dof_states[f0l:f1l, :, 0]).to(self.device)
 
         if self.use_object_motion:
             object_poses = self._object_motion_lib.get_motion_state(motion_ids, motion_times)
@@ -145,7 +149,6 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         self.reset_buf[:], self._terminate_buf[:] = compute_view_motion_reset(
             self.reset_buf, motion_lengths, self.progress_buf, self._motion_dt
         )
-        return
 
     def _reset_actors(self, env_ids):
         return
@@ -159,7 +162,6 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
         self._terminate_buf[env_ids] = 0
-        return
 
 
 @torch.jit.script

@@ -170,7 +170,7 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     dof_states = _run_sim(target_motion)
     dof_states = np.array(dof_states.cpu().numpy())
     np.save(retarget_cfg["target_dof_states_path"], dof_states)
-    rf.logger.beauty_print(f"Save Walker dof_states to {retarget_cfg['target_motion_path']}", type="module")
+    rf.logger.beauty_print(f"Saved Walker dof_states to {retarget_cfg['target_motion_path']}", type="module")
 
 
 def npy_from_fbx(fbx_file):
@@ -262,8 +262,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
-    parser.add_argument("--fbx_dir", type=str, default=None)
+    parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
+    # parser.add_argument("--fbx_dir", type=str, default=None)
     # parser.add_argument("--fbx_file", type=str,
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
@@ -299,4 +299,6 @@ if __name__ == '__main__':
         pool.map(npy_from_fbx, fbx_files)
     else:
         for fbx_file in fbx_files:
+            if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2walker_dof_states.npy')):
+                continue
             npy_from_fbx(fbx_file)
