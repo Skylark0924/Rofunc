@@ -77,6 +77,7 @@ class HumanoidHOTUGetupTask(HumanoidHOTUTask):
         num_envs = env_ids.shape[0]
         recovery_probs = to_torch(np.array([self._recovery_episode_prob] * num_envs), device=self.device)
         recovery_mask = torch.bernoulli(recovery_probs) == 1.0
+        self._terminate_buf = self._terminate_buf.to(self.device)
         terminated_mask = (self._terminate_buf[env_ids] == 1)
         recovery_mask = torch.logical_and(recovery_mask, terminated_mask)
 
