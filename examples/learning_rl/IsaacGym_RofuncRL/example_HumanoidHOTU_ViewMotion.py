@@ -21,7 +21,7 @@ def inference(custom_args):
         f"device_id=0",
         f"rl_device=cuda:{gpu_id}",
         "headless={}".format(False),
-        "num_envs={}".format(1),
+        "num_envs={}".format(16),
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
     cfg_view_motion = get_view_motion_config(custom_args.view_motion_type)
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     #  5. HOTUWalker
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
-    parser.add_argument("--view_motion_type", type=str, default="HOTUZJUHumanoid")
+    parser.add_argument("--view_motion_type", type=str, default="HOTUH1WQbhand")
     custom_args = parser.parse_args()
 
     inference(custom_args)

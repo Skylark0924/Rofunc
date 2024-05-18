@@ -170,15 +170,18 @@ class BaseAgent:
         torch.save(modules, path)
         self.rofunc_logger.info("Saved the checkpoint to {}".format(path), local_verbose=False)
 
-    def load_ckpt(self, path: str):
+    def load_ckpt(self, path: str, load_modules: list = None):
         """
         Load the agent model parameters from a checkpoint.
         :param path:
+        :param load_modules: List of modules to be loaded
         :return:
         """
         modules = torch.load(path, map_location=self.device)
         if type(modules) is dict:
             for name, data in modules.items():
+                if load_modules is not None and name not in load_modules:
+                    continue
                 module = self.checkpoint_modules.get(name, None)
                 if module is not None:
                     if hasattr(module, "load_state_dict"):
