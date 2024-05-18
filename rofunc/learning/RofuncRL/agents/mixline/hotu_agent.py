@@ -34,9 +34,7 @@ from rofunc.learning.RofuncRL.utils.memory import Memory
 
 class HOTUAgent(ASEAgent):
     """
-    Adversarial Motion Priors (AMP) agent \n
-    “AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control”. Peng et al. 2021. https://arxiv.org/abs/2104.02180 \n
-    Rofunc documentation: https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html
+    HOTU agent
     """
 
     def __init__(self,
