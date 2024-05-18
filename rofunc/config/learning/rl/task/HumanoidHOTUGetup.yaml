@@ -74,6 +74,7 @@ sim:
     default_buffer_size_multiplier: 10.0
     num_subscenes: ${....num_subscenes}
     contact_collection: 2 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (default - all contacts)
+    max_gpu_contact_pairs: 8388608 # 8*1024*1024
 
   flex:
     num_inner_iterations: 10
