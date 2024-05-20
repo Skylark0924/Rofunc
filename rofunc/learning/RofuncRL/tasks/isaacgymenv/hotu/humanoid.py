@@ -49,6 +49,8 @@ class Humanoid(VecTask):
         self._enable_early_termination = self.cfg["env"]["enableEarlyTermination"]
         self.camera_follow = self.cfg["env"].get("cameraFollow", False)
         self.use_object_motion = self.cfg["env"].get("use_object_motion", False)
+        self._char_height = self.cfg["env"].get("charHeight", 1.0)
+        self._head_rb_name = self.cfg["env"].get("headRbName", "head")
 
         self.humanoid_asset_infos = get_sim_config(sim_name="Humanoid_info")["Model_type"]
 
@@ -320,7 +322,7 @@ class Humanoid(VecTask):
             self._num_actions = 87
             self._num_obs = 1 + 88 * (3 + 6 + 3 + 3) - 3  # 1353
         elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
-                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"]:
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml"]:
             humanoid_info = self._get_humanoid_info(asset_file)
             self._dof_offsets = humanoid_info["dof_offsets"]
             self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96
@@ -336,7 +338,7 @@ class Humanoid(VecTask):
         termination_height = self.cfg["env"]["terminationHeight"]
         self._termination_heights = np.array([termination_height] * self.num_bodies)
 
-        head_id = self.gym.find_actor_rigid_body_handle(self.envs[0], self.humanoid_handles[0], "head")
+        head_id = self.gym.find_actor_rigid_body_handle(self.envs[0], self.humanoid_handles[0], self._head_rb_name)
         self._termination_heights[head_id] = max(head_term_height, self._termination_heights[head_id])
 
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
@@ -447,7 +449,7 @@ class Humanoid(VecTask):
         segmentation_id = 0
 
         start_pose = gymapi.Transform()
-        char_h = 0.89
+        char_h = self._char_height
 
         start_pose.p = gymapi.Vec3(*get_axis_params(char_h, self.up_axis_idx))
         start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
@@ -476,6 +478,8 @@ class Humanoid(VecTask):
         if self._pd_control:
             dof_prop = self.gym.get_asset_dof_properties(humanoid_asset)
             dof_prop["driveMode"] = gymapi.DOF_MODE_POS
+            dof_prop["stiffness"] = 300
+            dof_prop["damping"] = 30
             self.gym.set_actor_dof_properties(env_ptr, humanoid_handle, dof_prop)
 
         self.humanoid_handles.append(humanoid_handle)
@@ -556,10 +560,10 @@ class Humanoid(VecTask):
         self._pd_action_offset = 0.5 * (lim_high + lim_low)
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         dof_dict = self._get_humanoid_info(asset_file)["dofs"]
-        for dof, index in dof_dict.items():
-            if "qbhand" in dof:
-                self._pd_action_offset[index] = 0.0
-            # elif dof == "right_hand":
+        # for dof, index in dof_dict.items():
+        #     if "qbhand" in dof:
+        #         self._pd_action_offset[index] = 0.0
+        #     # elif dof == "right_hand":
             #     self._pd_action_offset[index] = 0.
             # elif dof == "left_hand":
             #     self._pd_action_offset[index] = 0.
