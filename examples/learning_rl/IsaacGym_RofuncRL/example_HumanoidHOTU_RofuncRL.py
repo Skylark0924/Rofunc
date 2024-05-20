@@ -44,7 +44,6 @@ def train(custom_args):
                                              force_render=cfg.force_render)
 
     # Instantiate the RL trainer
-    hrl = False if "Getup" in custom_args.task or "Perturb" in custom_args.task or "ViewMotion" in custom_args.task else True
     trainer = Trainers().trainer_map["hotu"](cfg=cfg,
                                              env=env,
                                              device=cfg.rl_device,
@@ -88,7 +87,7 @@ def inference(custom_args):
                                              env=infer_env,
                                              device=cfg.rl_device,
                                              env_name=f"{custom_args.task}_{custom_args.humanoid_robot_type}",
-                                             hrl=False,
+                                             mode=custom_args.mode,
                                              inference=True)
 
     trainer.agent.load_ckpt(custom_args.ckpt_path)
@@ -97,12 +96,12 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="HumanoidHOTUGetup")
-    parser.add_argument("--num_envs", type=int, default=4096)
-    parser.add_argument("--sim_device", type=int, default=0)
+    parser.add_argument("--num_envs", type=int, default=1024)
+    parser.add_argument("--sim_device", type=int, default=gpu_id)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
 
     # Available types of asset file path:
@@ -112,7 +111,8 @@ if __name__ == "__main__":
     #  4. HOTUCURIWQbhand
     #  5. HOTUWalker
     #  6. HOTUBruce
-    #  7. HOTUZJUHumanoidWQbhand
+    #  7. HOTUZJUHumanoid
+    #  8. HOTUZJUHumanoidWQbhand
     parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhand")
     parser.add_argument("--mode", type=str, default="LLC")
 

@@ -24,9 +24,9 @@ import rofunc as rf
 # CURIminisim.show(visual_obs_flag=True)
 
 # franka
-args = rf.config.get_sim_config("Franka")
-frankasim = rf.sim.FrankaSim(args)
-frankasim.show()
+# args = rf.config.get_sim_config("Franka")
+# frankasim = rf.sim.FrankaSim(args)
+# frankasim.show()
 
 # baxter
 # args = rf.config.get_sim_config("Baxter")

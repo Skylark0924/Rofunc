@@ -118,9 +118,11 @@ class MotionLib:
         self.extra_rewrite_dof_names = cfg["env"].get("extra_rewrite_dof_names", None)
         if self.use_extra_dof_states_motion and self.extra_rewrite_dof_names is not None:
             if self.extra_rewrite_dof_names == "all":
-                self.extra_rewrite_dof_id = [id for id in self.mf_humanoid_dof_dict.values()]
+                self.extra_rewrite_dof_id = [id for id in self.humanoid_dof_dict.values()]
+                self.mf_extra_rewrite_dof_id = [id for id in self.mf_humanoid_dof_dict.values()]
             else:
-                self.extra_rewrite_dof_id = [self.mf_humanoid_dof_dict[dof_name] for dof_name in
+                self.extra_rewrite_dof_id = [self.humanoid_dof_dict[dof_name] for dof_name in self.extra_rewrite_dof_names]
+                self.mf_extra_rewrite_dof_id = [self.mf_humanoid_dof_dict[dof_name] for dof_name in
                                              self.extra_rewrite_dof_names]
 
         # no pelvis and no root links, start from 1
@@ -231,7 +233,7 @@ class MotionLib:
             old_global_rotation = motion.global_rotation.clone()
             old_local_rotation = motion.local_rotation.clone()
             old_dof_vels = motion.dof_vels.clone()
-            old_dof_pos = motion.dof_pos.clone()
+            # old_dof_pos = motion.dof_pos.clone()
 
             motion.global_translation = torch.zeros(
                 (num_frames, len(self.humanoid_rb_dict), 3), device=self._device, dtype=torch.float32)
@@ -252,7 +254,7 @@ class MotionLib:
 
             for index, mf_index in self.dof2mfdof_dict.items():
                 motion.dof_vels[:, index] = old_dof_vels[:, mf_index]
-                motion.dof_pos[:, index] = old_dof_pos[:, mf_index]
+                # motion.dof_pos[:, index] = old_dof_pos[:, mf_index]
 
             transferred_motions.append(motion)
         self._motions = transferred_motions
@@ -463,8 +465,10 @@ class MotionLib:
         dof_pos = self._local_rotation_to_dof(mf_local_rot)
 
         if self.use_extra_dof_states_motion:
-            dof_pos[:, self.extra_rewrite_dof_id] = self.mf_dps[f0l][:, self.extra_rewrite_dof_id]
-            dof_vel[:, self.extra_rewrite_dof_id] = self.mf_dvs[f0l][:, self.extra_rewrite_dof_id]
+            dof_pos[:, self.extra_rewrite_dof_id] = self.mf_dps[f1l][:, self.mf_extra_rewrite_dof_id]
+            dof_vel[:, self.extra_rewrite_dof_id] = self.mf_dvs[f1l][:, self.mf_extra_rewrite_dof_id]
+
+        root_pos[:, 2] += 0.2
 
         return root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel, key_pos, f0l, f1l
 

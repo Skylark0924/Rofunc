@@ -1113,6 +1113,74 @@ Model_type:
       - hand_r
       - hand_l
 
+  zju_humanoid:
+    name: "zju_humanoid"
+    rigid_bodies:
+      pelvis: 0
+      SCAPULA_R: 1
+      SHOULDER_R: 2
+      UPPERARM_R: 3
+      FOREARM_R: 4
+      WRIST_REVOLUTE_R: 5
+      WRIST_UPDOWN_R: 6
+      HAND_R: 7
+      SCAPULA_L: 8
+      SHOULDER_L: 9
+      UPPERARM_L: 10
+      FOREARM_L: 11
+      WRIST_REVOLUTE_L: 12
+      WRIST_UPDOWN_L: 13
+      HAND_L: 14
+      SACRUM: 15
+      ILIUM_R: 16
+      ISCHIUM_R: 17
+      THIGH_R: 18
+      SHANK_R: 19
+      ASTRAGALUS_R: 20
+      FOOT_R: 21
+      ILIUM_L: 22
+      ISCHIUM_L: 23
+      THIGH_L: 24
+      SHANK_L: 25
+      ASTRAGALUS_L: 26
+      FOOT_L: 27
+      NECK: 28
+      HEAD: 29
+    dofs:
+      Shoulder_Y_R: 0
+      Shoulder_X_R: 1
+      Shoulder_Z_R: 2
+      Elbow_R: 3
+      Wrist_Z_R: 4
+      Wrist_Y_R: 5
+      Wrist_X_R: 6
+      Shoulder_Y_L: 7
+      Shoulder_X_L: 8
+      Shoulder_Z_L: 9
+      Elbow_L: 10
+      Wrist_Z_L: 11
+      Wrist_Y_L: 12
+      Wrist_X_L: 13
+      A_Waist: 14
+      Hip_Z_R: 15
+      Hip_X_R: 16
+      Hip_Y_R: 17
+      Knee_R: 18
+      Ankle_Y_R: 19
+      Ankle_X_R: 20
+      Hip_Z_L: 21
+      Hip_X_L: 22
+      Hip_Y_L: 23
+      Knee_L: 24
+      Ankle_Y_L: 25
+      Ankle_X_L: 26
+      Neck_Z: 27
+      Neck_Y: 28
+    dof_offsets:
+      [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 ]
+    del_rb:
+      - pelvis
+
   zju_humanoid_w_qbhand:
     name: "zju_humanoid_w_qbhand"
     rigid_bodies:
@@ -1308,7 +1376,6 @@ Model_type:
       Ankle_X_L: 92
       Neck_Z: 93
       Neck_Y: 94
-
     dof_offsets:
       [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
         30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
@@ -1316,7 +1383,5 @@ Model_type:
         86, 87, 88, 89, 90, 91, 92, 93, 94, 95 ]
     del_rb:
       - pelvis
-#      - HAND_R
-#      - HAND_L
 
 

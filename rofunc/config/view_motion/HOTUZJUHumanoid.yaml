@@ -1,4 +1,7 @@
 env:
+  stateInit: "Hybrid"
+  enableEarlyTermination: True
+
   terminationHeight: 0.15
   charHeight: 1.5
 
@@ -22,7 +25,7 @@ env:
   object_motion_file:
 
   asset:
-    assetFileName: "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"
+    assetFileName: "mjcf/zju_humanoid/zju_humanoid.xml"
 
   use_object_motion: False
   object_asset:
