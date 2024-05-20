@@ -26,6 +26,8 @@ env:
 
   keyBodies:
   contactBodies:
+  charHeight: 1.0
+  headRbName: "head"
 
   # animation files to learn from
   motion_file:
