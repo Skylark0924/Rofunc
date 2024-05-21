@@ -114,6 +114,22 @@ class MotionLib:
         self._get_skeleton_rb_index()
         self._get_skeleton_dof_index()
 
+        if "w_qbhand" in self.humanoid_type:
+            self.useful_right_qbhand_dof_index = sorted(
+                [value for key, value in self.humanoid_dof_dict.items() if
+                 ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
+                 ("ring_knuckle" not in key) and ("little_knuckle" not in key) and ("synergy" not in key) and (
+                         "right_qbhand" in key)])
+            self.useful_left_qbhand_dof_index = sorted(
+                [value for key, value in self.humanoid_dof_dict.items() if
+                 ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
+                 ("ring_knuckle" not in key) and ("little_knuckle" not in key) and ("synergy" not in key) and (
+                         "left_qbhand" in key)])
+
+            self.virtual2real_dof_index_map_dict = {value: self.humanoid_dof_dict[key.replace("_virtual", "")] for
+                                                    key, value in self.humanoid_dof_dict.items() if
+                                                    "virtual" in key}
+
         self.use_extra_dof_states_motion = cfg["env"]["use_extra_dof_states_motion"]
         self.extra_rewrite_dof_names = cfg["env"].get("extra_rewrite_dof_names", None)
         if self.use_extra_dof_states_motion and self.extra_rewrite_dof_names is not None:
@@ -121,9 +137,10 @@ class MotionLib:
                 self.extra_rewrite_dof_id = [id for id in self.humanoid_dof_dict.values()]
                 self.mf_extra_rewrite_dof_id = [id for id in self.mf_humanoid_dof_dict.values()]
             else:
-                self.extra_rewrite_dof_id = [self.humanoid_dof_dict[dof_name] for dof_name in self.extra_rewrite_dof_names]
-                self.mf_extra_rewrite_dof_id = [self.mf_humanoid_dof_dict[dof_name] for dof_name in
+                self.extra_rewrite_dof_id = [self.humanoid_dof_dict[dof_name] for dof_name in
                                              self.extra_rewrite_dof_names]
+                self.mf_extra_rewrite_dof_id = [self.mf_humanoid_dof_dict[dof_name] for dof_name in
+                                                self.extra_rewrite_dof_names]
 
         # no pelvis and no root links, start from 1
         self._mf_dof_body_ids = [v for k, v in self.mf_humanoid_rb_dict_a_del.items()]
@@ -467,6 +484,11 @@ class MotionLib:
         if self.use_extra_dof_states_motion:
             dof_pos[:, self.extra_rewrite_dof_id] = self.mf_dps[f1l][:, self.mf_extra_rewrite_dof_id]
             dof_vel[:, self.extra_rewrite_dof_id] = self.mf_dvs[f1l][:, self.mf_extra_rewrite_dof_id]
+
+        if "w_qbhand" in self.humanoid_type:
+            for virtual_id, real_id in self.virtual2real_dof_index_map_dict.items():
+                dof_pos[:, virtual_id] = dof_pos[:, real_id].clone()
+                dof_vel[:, virtual_id] = dof_vel[:, real_id].clone()
 
         root_pos[:, 2] += 0.2
 

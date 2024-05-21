@@ -169,32 +169,41 @@ class HumanoidHOTUTask(Humanoid):
 
     def pre_physics_step(self, actions):
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
-        if self.use_synergy and asset_file == "mjcf/hotu_humanoid_w_qbhand_full.xml":
-            right_synergy_action = actions[:, -2 * 2:-2].clone()
-            right_dof_action = self._get_dof_action_from_synergy(right_synergy_action,
-                                                                 self.useful_right_qbhand_dof_index)
-            left_synergy_action = actions[:, -2:].clone()
-            left_dof_action = self._get_dof_action_from_synergy(left_synergy_action,
-                                                                self.useful_left_qbhand_dof_index)
+        # if self.use_synergy and asset_file == "mjcf/hotu_humanoid_w_qbhand_full.xml":
+        #     right_synergy_action = actions[:, -2 * 2:-2].clone()
+        #     right_dof_action = self._get_dof_action_from_synergy(right_synergy_action,
+        #                                                          self.useful_right_qbhand_dof_index)
+        #     left_synergy_action = actions[:, -2:].clone()
+        #     left_dof_action = self._get_dof_action_from_synergy(left_synergy_action,
+        #                                                         self.useful_left_qbhand_dof_index)
+        #
+        #     expanded_actions = torch.zeros((actions.shape[0], 100), device=self.device)
+        #
+        #     j = 0
+        #     for dof, index in self.humanoid_info["dofs"].items():
+        #         if "qbhand" not in dof:
+        #             expanded_actions[:, index] = actions[:, j]
+        #             j += 1
+        #
+        #     for i, index in enumerate(self.useful_right_qbhand_dof_index):
+        #         expanded_actions[:, index] = right_dof_action[:, i]
+        #     for i, index in enumerate(self.useful_left_qbhand_dof_index):
+        #         expanded_actions[:, index] = left_dof_action[:, i]
+        #
+        #     for key, value in self.virtual2real_dof_index_map_dict.items():
+        #         expanded_actions[:, key] = expanded_actions[:, value]
+        #     self.actions = expanded_actions.to(self.device).clone()
+        # else:
+        #     self.actions = actions.to(self.device).clone()
 
-            expanded_actions = torch.zeros((actions.shape[0], 100), device=self.device)
-
-            j = 0
-            for dof, index in self.humanoid_info["dofs"].items():
-                if "qbhand" not in dof:
-                    expanded_actions[:, index] = actions[:, j]
-                    j += 1
-
-            for i, index in enumerate(self.useful_right_qbhand_dof_index):
-                expanded_actions[:, index] = right_dof_action[:, i]
-            for i, index in enumerate(self.useful_left_qbhand_dof_index):
-                expanded_actions[:, index] = left_dof_action[:, i]
-
-            for key, value in self.virtual2real_dof_index_map_dict.items():
-                expanded_actions[:, key] = expanded_actions[:, value]
-            self.actions = expanded_actions.to(self.device).clone()
-        else:
-            self.actions = actions.to(self.device).clone()
+        self.actions = torch.zeros((actions.shape[0], len(self.humanoid_info["dofs"])), device=self.device)
+        i = 0
+        for dof_name, index in self.humanoid_info["dofs"].items():
+            if "qbhand" in dof_name:
+                self.actions[:, index] = 0
+            else:
+                self.actions[:, index] = actions[:, i]
+                i += 1
 
         if self.override_unuse_actions:
             tmp_action = torch.zeros_like(self.actions).to(self.device)
@@ -288,6 +297,8 @@ class HumanoidHOTUTask(Humanoid):
                                              self.wb_decompose_param_dof_ids, self.parts[0] == "body")
         else:
             amp_obs_demo = amp_obs_concat(amp_obs_demo)
+
+
         return amp_obs_demo
 
     def _build_amp_obs_demo_buf(self, num_samples):
@@ -348,8 +359,21 @@ class HumanoidHOTUTask(Humanoid):
                 self._num_amp_obs_per_step = 13 + self._dof_obs_size + 100 + 3 * num_key_bodies
         elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/curi/curi_w_softhand_isaacgym.xml",
                             "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
-                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml"]:
-            self._num_amp_obs_per_step = 13 + self._dof_obs_size + self._num_actions + 3 * num_key_bodies
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml",
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml"]:
+            if self.wb_decompose:
+                num_amp_obs_per_step_list = []
+                for i, part in enumerate(self.parts):
+                    num_rb = len(self.wb_decompose_param_rb_index[i])
+                    num_dof = len(self.wb_decompose_param_dof_ids[i])
+                    if part == "body":  # body
+                        num_amp_obs_per_step = 13 + num_rb * 6 + num_dof + 3 * num_key_bodies
+                    else:
+                        num_amp_obs_per_step = num_rb * 6 + num_dof
+                    num_amp_obs_per_step_list.append(num_amp_obs_per_step)
+                self._num_amp_obs_per_step = num_amp_obs_per_step_list
+            else:
+                self._num_amp_obs_per_step = 13 + self._dof_obs_size + self._num_actions + 3 * num_key_bodies
         else:
             print(f"Unsupported humanoid body type: {asset_file}")
             assert False

@@ -243,8 +243,8 @@ class RobotSim:
         # elif robot_dof_props["stiffness"][0] == 0:
         #     robot_dof_props["stiffness"][:] = 300
         #     robot_dof_props["damping"][:] = 30
-        robot_dof_props["stiffness"][:] = 300
-        robot_dof_props["damping"][:] = 30
+        robot_dof_props["stiffness"][:] = 0
+        robot_dof_props["damping"][:] = 0
 
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)
