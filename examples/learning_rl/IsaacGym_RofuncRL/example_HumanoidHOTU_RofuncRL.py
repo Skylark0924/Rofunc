@@ -113,7 +113,7 @@ if __name__ == "__main__":
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
     #  8. HOTUZJUHumanoidWQbhand
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhand")
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhandNew")
     parser.add_argument("--mode", type=str, default="LLC")
 
     parser.add_argument("--debug", type=str, default="False")

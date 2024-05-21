@@ -322,11 +322,12 @@ class Humanoid(VecTask):
             self._num_actions = 87
             self._num_obs = 1 + 88 * (3 + 6 + 3 + 3) - 3  # 1353
         elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
-                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml"]:
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml",
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml"]:
             humanoid_info = self._get_humanoid_info(asset_file)
             self._dof_offsets = humanoid_info["dof_offsets"]
             self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96
-            self._num_actions = len(humanoid_info["dofs"])
+            self._num_actions = len(humanoid_info["dofs"]) - 58
             self._num_obs = 1 + len(humanoid_info["rigid_bodies"]) * (3 + 6 + 3 + 3) - 3
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
