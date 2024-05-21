@@ -680,7 +680,7 @@ class MotionLib:
                     joint_q = local_rot[:, body_id]
                     joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
                     joint_theta = -(joint_theta * joint_axis[..., 0])  # assume joint is always along x axis
-                # elif self.humanoid_type == "mjcf/UnitreeH1/h1_w_qbhand.xml":
+                # elif self.humanoid_type == "mjcf/unitreeH1/h1_w_qbhand.xml":
                 #     if body_id == left_shoulder_pitch_id:  # Pitch joint
                 #         joint_q = local_rot[:, left_shoulder_pitch_id]
                 #         joint_theta, joint_axis = torch_utils.quat_to_angle_axis(joint_q)
