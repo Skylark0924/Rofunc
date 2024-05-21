@@ -15,6 +15,7 @@
 
 <img src="doc/img/task_gif3/CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.gif" width=25% /><img src="doc/img/task_gif3/CURIQbSoftHandSynergyGraspPower_drillRofuncRLPPO.gif" width=25% /><img src="doc/img/task_gif3/CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.gif" width=25% /><img src="doc/img/task_gif3/CURIQbSoftHandSynergyGraspLarge_clampRofuncRLPPO.gif" width=25% />
 <img src="doc/img/task_gif3/CURICoffeeStirring.gif" width=33.3% /><img src="doc/img/task_gif3/CURIScrew.gif" width=33.3% /><img src="doc/img/task_gif3/CURITaichiPushingHand.gif" width=33.3% />
+<img src="doc/img/task_gif3/HOTU_Random_Motion.gif" width=25% /><img src="doc/img/task_gif3/H1_Random_Motion.gif" width=25% /><img src="doc/img/task_gif3/Bruce_Random_Motion.gif" width=25% /><img src="doc/img/task_gif3/Walker_Random_Motion.gif" width=25% />
 <img src="doc/img/task_gif3/HumanoidFlipRofuncRLAMP.gif" width=33.3% /><img src="doc/img/task_gif3/HumanoidDanceRofuncRLAMP.gif" width=33.3% /><img src="doc/img/task_gif3/HumanoidRunRofuncRLAMP.gif" width=33.3% />
 <img src="doc/img/task_gif3/HumanoidASEHeadingSwordShieldRofuncRLASE.gif" width=33.3% /><img src="doc/img/task_gif3/HumanoidASEStrikeSwordShieldRofuncRLASE.gif" width=33.3% /><img src="doc/img/task_gif3/HumanoidASELocationSwordShieldRofuncRLASE.gif" width=33.3% />
 <img src="doc/img/task_gif3/BiShadowHandLiftUnderarmRofuncRLPPO.gif" width=33.3% /><img src="doc/img/task_gif3/BiShadowHandDoorOpenOutwardRofuncRLPPO.gif" width=33.3% /><img src="doc/img/task_gif3/BiShadowHandSwingCupRofuncRLPPO.gif" width=33.3% />
