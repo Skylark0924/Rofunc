@@ -454,10 +454,10 @@ if __name__ == '__main__':
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
     #                   2. mjcf/amp_humanoid_sword_shield.xml
-    #                   3. mjcf/hotu_humanoid.xml
+    #                   3. mjcf/hotu/hotu_humanoid.xml
     #                   4. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
-    #                   5. mjcf/hotu_humanoid_w_qbhand_full.xml
-    parser.add_argument("--humanoid_asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_full.xml")
+    #                   5. mjcf/hotu/hotu_humanoid_w_qbhand_full.xml
+    parser.add_argument("--humanoid_asset", type=str, default="mjcf/hotu/hotu_humanoid_w_qbhand_full.xml")
     parser.add_argument("--target_tpose", type=str,
                         default="utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy")
     args = parser.parse_args()

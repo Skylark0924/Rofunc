@@ -21,7 +21,8 @@ env:
     robot_name: "Humanoid"
     assetRoot:
 #    assetFile: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
-    assetFile: "mjcf/hotu_humanoid_w_qbhand_full.xml"
+#    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml"
+    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
     init_pose: [0.0, 0.0, 1., 0.0, 0.0, 0.0, 1]
     fix_base_link: False
     disable_gravity: False
