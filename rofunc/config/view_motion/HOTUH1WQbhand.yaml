@@ -22,12 +22,12 @@ env:
                              "left_shoulder_yaw_joint", "right_shoulder_pitch_joint", "right_shoulder_roll_joint", "right_shoulder_yaw_joint",
                              "right_elbow_joint", "right_hand_x", "right_hand_y", "right_hand_z" ]
 
-  motion_file_asset: "mjcf/UnitreeH1/h1_w_qbhand.xml"
+  motion_file_asset: "mjcf/unitreeH1/h1_w_qbhand.xml"
 
   object_motion_file:
 
   asset:
-    assetFileName: "mjcf/UnitreeH1/h1_w_qbhand.xml"
+    assetFileName: "mjcf/unitreeH1/h1_w_qbhand.xml"
 
   use_object_motion: False
   object_asset:

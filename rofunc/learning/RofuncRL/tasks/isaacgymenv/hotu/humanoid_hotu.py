@@ -169,7 +169,7 @@ class HumanoidHOTUTask(Humanoid):
 
     def pre_physics_step(self, actions):
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
-        # if self.use_synergy and asset_file == "mjcf/hotu_humanoid_w_qbhand_full.xml":
+        # if self.use_synergy and asset_file == "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml":
         #     right_synergy_action = actions[:, -2 * 2:-2].clone()
         #     right_dof_action = self._get_dof_action_from_synergy(right_synergy_action,
         #                                                          self.useful_right_qbhand_dof_index)
@@ -324,7 +324,7 @@ class HumanoidHOTUTask(Humanoid):
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 28 + 3 * num_key_bodies
         elif asset_file == "mjcf/amp_humanoid_sword_shield.xml":
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 31 + 3 * num_key_bodies
-        elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu_humanoid.xml"]:
+        elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu/hotu_humanoid.xml"]:
             if self.wb_decompose:
                 num_amp_obs_per_step_list = []
                 for i, part in enumerate(self.parts):
@@ -343,7 +343,7 @@ class HumanoidHOTUTask(Humanoid):
         elif asset_file in ["mjcf/hotu_humanoid_w_qbhand_no_virtual.xml",
                             "mjcf/hotu_humanoid_w_qbhand_no_virtual_no_quat.xml"]:
             self._num_amp_obs_per_step = 13 + self._dof_obs_size + 64 + 3 * num_key_bodies
-        elif asset_file == "mjcf/hotu_humanoid_w_qbhand_full.xml":
+        elif asset_file == "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml":
             if self.wb_decompose:
                 num_amp_obs_per_step_list = []
                 for i, part in enumerate(self.parts):
@@ -357,7 +357,7 @@ class HumanoidHOTUTask(Humanoid):
                 self._num_amp_obs_per_step = num_amp_obs_per_step_list
             else:
                 self._num_amp_obs_per_step = 13 + self._dof_obs_size + 100 + 3 * num_key_bodies
-        elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/curi/curi_w_softhand_isaacgym.xml",
+        elif asset_file in ["mjcf/unitreeH1/h1_w_qbhand.xml", "mjcf/curi/curi_w_softhand_isaacgym.xml",
                             "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
                             "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml",
                             "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml"]:
