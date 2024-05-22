@@ -51,20 +51,21 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
 
     def pre_physics_step(self, actions):
-        # expanded_actions = torch.zeros((actions.shape[0], 100), device=self.device)
-        # asset_file = self.cfg["env"]["asset"]["assetFileName"]
-        #
-        # dof_dict = self.humanoid_asset_infos[asset_file.split("/")[-1].split(".")[0]]["dofs"]
-        #
-        # j = 0
-        # for dof, index in dof_dict.items():
-        #     if "qbhand" not in dof:
-        #         expanded_actions[:, index] = actions[:, j]
-        #         j += 1
-        #
-        # self.actions = expanded_actions.to(self.device).clone()
+        # TODO: just for avoiding warning
+        expanded_actions = torch.zeros((actions.shape[0], len(self.humanoid_info["dofs"])), device=self.device)
+        asset_file = self.cfg["env"]["asset"]["assetFileName"]
 
-        self.actions = actions.to(self.device).clone()
+        dof_dict = self.humanoid_asset_infos[asset_file.split("/")[-1].split(".")[0]]["dofs"]
+
+        j = 0
+        for dof, index in dof_dict.items():
+            if "qbhand" not in dof:
+                expanded_actions[:, index] = actions[:, j]
+                j += 1
+
+        self.actions = expanded_actions.to(self.device).clone()
+
+        # self.actions = actions.to(self.device).clone()
 
         # Set the actuation force to zero so that the motion is not affected
         # So the action obtaining from the policy is not the real action

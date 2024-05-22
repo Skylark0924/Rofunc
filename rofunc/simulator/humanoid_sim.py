@@ -54,8 +54,8 @@ class HumanoidSim(RobotSim):
         robot_mids = 0.5 * (robot_upper_limits + robot_lower_limits)
 
         robot_dof_props["driveMode"][:].fill(gymapi.DOF_MODE_POS)
-        robot_dof_props["stiffness"][:].fill(300.0)
-        robot_dof_props["damping"][:].fill(30.0)
+        robot_dof_props["stiffness"][:].fill(0.0)
+        robot_dof_props["damping"][:].fill(0.0)
 
         # default dof states and position targets
         robot_num_dofs = gym.get_asset_dof_count(robot_asset)
