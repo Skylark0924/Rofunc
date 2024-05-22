@@ -362,7 +362,9 @@ class HumanoidHOTUTask(Humanoid):
         elif asset_file in ["mjcf/unitreeH1/h1_w_qbhand.xml", "mjcf/curi/curi_w_softhand_isaacgym.xml",
                             "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
                             "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml",
-                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml", "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"]:
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml",
+                            "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml",
+                            "mjcf/unitreeH1/h1_w_qbhand_new.xml"]:
             if self.wb_decompose:
                 num_amp_obs_per_step_list = []
                 for i, part in enumerate(self.parts):

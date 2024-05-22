@@ -73,7 +73,7 @@
               scale="0.0007 0.0007 0.0007"/>
         <mesh name="ph_medium" file="../../urdf/curi/meshes/qbhand/ph_medium.stl" scale="0.001 0.001 0.001"/>
         <mesh name="ph_medium_collision" file="../../urdf/curi/meshes/qbhand/ph_medium_collision.stl"
-              scale="0.0007 0.001 0.0007"/>
+              scale="0.0007 0.0007 0.0007"/>
     </asset>
     <worldbody>
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>

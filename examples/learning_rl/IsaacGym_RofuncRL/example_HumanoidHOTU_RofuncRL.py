@@ -95,7 +95,7 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="HumanoidHOTUGetup")
