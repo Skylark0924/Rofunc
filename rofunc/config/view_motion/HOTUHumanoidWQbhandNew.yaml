@@ -28,5 +28,5 @@ env:
 task:
   wb_decompose: True  # if True, decompose the whole body into parts
   wb_decompose_parameter:
-    parts: [ "body" ]
+    parts: [ "body", "hands" ]
   use_synergy: False  # if True, use the synergy for the hand
