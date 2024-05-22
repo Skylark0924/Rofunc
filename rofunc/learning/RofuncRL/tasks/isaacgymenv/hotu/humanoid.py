@@ -323,7 +323,7 @@ class Humanoid(VecTask):
             self._num_obs = 1 + 88 * (3 + 6 + 3 + 3) - 3  # 1353
         elif asset_file in ["mjcf/unitreeH1/h1_w_qbhand.xml", "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
                             "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml",
-                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml"]:
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml", "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"]:
             humanoid_info = self._get_humanoid_info(asset_file)
             self._dof_offsets = humanoid_info["dof_offsets"]
             self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96
