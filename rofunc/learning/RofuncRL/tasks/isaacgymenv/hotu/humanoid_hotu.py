@@ -196,14 +196,16 @@ class HumanoidHOTUTask(Humanoid):
         # else:
         #     self.actions = actions.to(self.device).clone()
 
-        self.actions = torch.zeros((actions.shape[0], len(self.humanoid_info["dofs"])), device=self.device)
-        i = 0
-        for dof_name, index in self.humanoid_info["dofs"].items():
-            if "qbhand" in dof_name:
-                self.actions[:, index] = 0
-            else:
-                self.actions[:, index] = actions[:, i]
-                i += 1
+        # self.actions = torch.zeros((actions.shape[0], len(self.humanoid_info["dofs"])), device=self.device)
+        # i = 0
+        # for dof_name, index in self.humanoid_info["dofs"].items():
+        #     if "qbhand" in dof_name:
+        #         self.actions[:, index] = 0
+        #     else:
+        #         self.actions[:, index] = actions[:, i]
+        #         i += 1
+
+        self.actions = actions.to(self.device).clone()
 
         if self.override_unuse_actions:
             tmp_action = torch.zeros_like(self.actions).to(self.device)
