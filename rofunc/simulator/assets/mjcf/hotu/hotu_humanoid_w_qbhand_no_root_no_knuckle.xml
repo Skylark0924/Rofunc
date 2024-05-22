@@ -1,6 +1,6 @@
 <!--This hotu humanoid model removes knuckle joints (except thumb knuckle) and right/left root links-->
 <mujoco model="humanoid">
-    <compiler angle="degree" meshdir="../urdf/curi/meshes/qbhand/"/>
+    <compiler angle="degree" meshdir="../../urdf/curi/meshes/qbhand/"/>
     <statistic extent="2" center="0 0 1"/>
     <option timestep="0.00555"/>
     <default>

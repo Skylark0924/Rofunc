@@ -1,5 +1,5 @@
 <mujoco model="humanoid">
-    <compiler angle="degree" meshdir="../urdf/curi/meshes/qbhand/"/>
+    <compiler angle="degree" meshdir="../../urdf/curi/meshes/qbhand/"/>
     <statistic extent="2" center="0 0 1"/>
     <option timestep="0.00555"/>
     <default>
@@ -17,33 +17,33 @@
         </default>
     </default>
     <asset>
-        <mesh name="flange_iso_04" file="flange_iso_04.stl" scale="0.001 0.001 0.001"/>
-        <mesh name="palm_pinch_r" file="palm_pinch_r.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="flange_iso_04" file="flange_iso_04.stl" scale="0.0007 0.0007 0.0007"/>
+        <mesh name="palm_pinch_r" file="palm_pinch_r.stl" scale="0.0007 0.0007 0.0007"/>
         <mesh name="palm_pinch_r_collision" file="palm_pinch_r.stl" scale="0.0005 0.0005 0.0005"/>
-        <mesh name="ph_thumb_r" file="ph_thumb_r.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="ph_thumb_r" file="ph_thumb_r.stl" scale="0.0007 0.0007 0.0007"/>
         <mesh name="ph_thumb_r_collision" file="ph_thumb_r_collision.stl" scale="0.0007 0.0007 0.0007"/>
-        <mesh name="palm_pinch_l" file="palm_pinch_l.stl" scale="0.001 0.001 0.001"/>
-        <mesh name="palm_pinch_l_collision" file="palm_pinch_r.stl" scale="0.0005 0.0005 0.0005"/>
-        <mesh name="ph_thumb_l" file="ph_thumb_l.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="palm_pinch_l" file="palm_pinch_l.stl" scale="0.0007 0.0007 0.0007"/>
+        <mesh name="palm_pinch_l_collision" file="palm_pinch_l.stl" scale="0.0005 0.0005 0.0005"/>
+        <mesh name="ph_thumb_l" file="ph_thumb_l.stl" scale="0.0007 0.0007 0.0007"/>
         <mesh name="ph_thumb_l_collision" file="ph_thumb_l_collision.stl" scale="0.0007 0.0007 0.0007"/>
-        <mesh name="ph_short" file="ph_short.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="ph_short" file="ph_short.stl" scale="0.0007 0.0007 0.0007"/>
         <mesh name="ph_short_collision" file="ph_short_collision.stl" scale="0.0007 0.0007 0.0007"/>
-        <mesh name="ph_distal" file="ph_distal.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="ph_distal" file="ph_distal.stl" scale="0.0007 0.0007 0.0007"/>
         <mesh name="ph_distal_collision" file="ph_distal_collision.stl" scale="0.0007 0.0007 0.0007"/>
-        <mesh name="ph_knuckle" file="ph_knuckle.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="ph_knuckle" file="ph_knuckle.stl" scale="0.0007 0.0007 0.0007"/>
         <mesh name="ph_knuckle_collision" file="ph_knuckle_collision.stl" scale="0.0007 0.0007 0.0007"/>
-        <mesh name="ph_medium" file="ph_medium.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="ph_medium" file="ph_medium.stl" scale="0.0007 0.0007 0.0007"/>
         <mesh name="ph_medium_collision" file="ph_medium_collision.stl" scale="0.0007 0.0007 0.0007"/>
     </asset>
-
     <worldbody>
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
         <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
         <body name="pelvis" pos="0 0 1" childclass="body">
             <freejoint name="root"/>
             <site name="root" class="force-torque"/>
-            <geom name="pelvis" type="sphere" pos="0 0 0.07" size=".09" density="2226"/>
-            <geom name="upper_waist" type="sphere" pos="0 0 0.205" size="0.07" density="2226"/>
+            <geom name="pelvis" type="sphere" pos="0 0 0.07" size=".09" density="2226" contype="0" conaffinity="1"/>
+            <geom name="upper_waist" type="sphere" pos="0 0 0.205" size="0.07" density="2226" contype="0"
+                  conaffinity="1"/>
             <site name="pelvis" class="touch" type="sphere" pos="0 0 0.07" size="0.091"/>
             <site name="upper_waist" class="touch" type="sphere" pos="0 0 0.205" size="0.071"/>
 
@@ -57,7 +57,7 @@
                        armature=".025"/>
                 <joint name="abdomen_z" pos="0 0 0" axis="0 0 1" range="-50 50" stiffness="600" damping="60"
                        armature=".025"/>
-                <geom name="torso" type="sphere" pos="0 0 0.12" size="0.11" density="1794"/>
+                <geom name="torso" type="sphere" pos="0 0 0.12" size="0.11" density="1794" contype="0" conaffinity="1"/>
                 <site name="torso" class="touch" type="sphere" pos="0 0 0.12" size="0.111"/>
 
                 <geom name="right_clavicle" fromto="-0.0060125 -0.0457775 0.2287955 -0.016835 -0.128177 0.2376182"
@@ -103,9 +103,14 @@
                             <site name="right_hand" class="touch" type="sphere" size=".041"/>
 
                             <body name="right_qbhand_root_link" pos="0.0 0.0 0.0" quat="0 0 1 0">
-                                <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04"/>
-                                <geom pos="-0.0045 0.0145 0.144" quat="0.707388 0.706825 0 0" type="mesh"
-                                      rgba="0.35 0.35 0.35 1" mesh="palm_pinch_r" contype="0" conaffinity="0"/>
+<!--                                <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"-->
+<!--                                      conaffinity="1"-->
+
+<!--                                />-->
+                                <geom pos="-0.0045 0.0145 0.12" quat="0.707388 0.706825 0 0" type="mesh"
+                                      rgba="0.35 0.35 0.35 1" mesh="palm_pinch_r" contype="0" conaffinity="1"
+
+                                />
                                 <geom pos="-0.0045 0.0145 0.12" quat="0.707388 0.706825 0 0" type="mesh"
                                       rgba="0.35 0.35 0.35 1" mesh="palm_pinch_r_collision" contype="0"/>
 
@@ -116,45 +121,45 @@
                                               diaginertia="1.4342e-06 1.35762e-06 3.12515e-07"/>
                                     <joint name="right_qbhand_thumb_knuckle_joint" pos="0 0 0" axis="0 0 -1"
                                            limited="true"
-                                           range="0 1.57"/>
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                           range="0 90"/>
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_thumb_r"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_thumb_r_collision"/>
-                                    <body name="right_qbhand_thumb_proximal_virtual_link"
-                                          pos="0.0255 -0.0038 -0.00012"
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_thumb_r_collision"/>
+                                    <body name="right_qbhand_thumb_proximal_virtual_link" pos="0.0255 -0.0038 -0.00012"
                                           quat="0.841496 -0.540263 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
-                                        <joint name="right_qbhand_thumb_proximal_joint" pos="0 0 0"
-                                               axis="0 0 -1"
-                                               limited="true" range="0 0.785"/>
+                                        <joint name="right_qbhand_thumb_proximal_joint" pos="0 0 0" axis="0 0 -1"
+                                               limited="true" range="0 45"/>
                                         <body name="right_qbhand_thumb_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00476016 -0.00137869 0"
                                                       quat="0.0365143 0.706163 -0.0365143 0.706163"
-                                                      mass="0.0063"
-                                                      diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
+                                                      mass="0.0063" diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
                                             <joint name="right_qbhand_thumb_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
-                                                   limited="true" range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   limited="true" range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1" mesh="ph_short"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_short_collision"/>
                                             <body name="right_qbhand_thumb_distal_virtual_link" pos="0.009 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="right_qbhand_thumb_distal_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
-                                                       limited="true" range="0 0.785"/>
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="right_qbhand_thumb_distal_joint" pos="0 0 0" axis="0 0 -1"
+                                                       limited="true" range="0 45"/>
                                                 <body name="right_qbhand_thumb_distal_link" pos="0.013 0 0">
                                                     <inertial pos="0.00880255 -0.00172193 0"
                                                               quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                               mass="0.009"
                                                               diaginertia="6.6782e-07 5.99819e-07 2.654e-07"/>
-                                                    <joint name="right_qbhand_thumb_distal_virtual_joint"
-                                                           pos="0 0 0"
-                                                           axis="0 0 -1" limited="true" range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                    <joint name="right_qbhand_thumb_distal_virtual_joint" pos="0 0 0"
+                                                           axis="0 0 -1" limited="true" range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1" mesh="ph_distal"/>
                                                     <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_distal_collision"/>
@@ -169,19 +174,20 @@
                                               quat="0.587164 0.394003 0.394003 0.587164"
                                               mass="0.0095"
                                               diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-                                    <!--                                            <joint name="right_qbhand_index_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-                                    <!--                                                   limited="true"-->
-                                    <!--                                                   range="-0.523 0.523"/>-->
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                    <!--                                    <joint name="right_qbhand_index_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                    <!--                                           limited="true"-->
+                                    <!--                                           range="-30 30"/>-->
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_knuckle"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_knuckle_collision"/>
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_knuckle_collision"/>
                                     <body name="right_qbhand_index_proximal_virtual_link" pos="0.009 0 0"
                                           quat="0.707388 0.706825 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
-                                        <joint name="right_qbhand_index_proximal_joint" pos="0 0 0"
-                                               axis="0 0 -1"
-                                               limited="true" range="0 0.785"/>
+                                        <joint name="right_qbhand_index_proximal_joint" pos="0 0 0" axis="0 0 -1"
+                                               limited="true" range="0 45"/>
                                         <body name="right_qbhand_index_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00877074 -0.00178631 0"
                                                       quat="0.0123083 0.707 -0.0123083 0.707" mass="0.0082"
@@ -189,43 +195,40 @@
                                             <joint name="right_qbhand_index_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
                                                    limited="true"
-                                                   range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium_collision"/>
                                             <body name="right_qbhand_index_middle_virtual_link" pos="0.017 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="right_qbhand_index_middle_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="right_qbhand_index_middle_joint" pos="0 0 0" axis="0 0 -1"
                                                        limited="true"
-                                                       range="0 0.785"/>
+                                                       range="0 45"/>
                                                 <body name="right_qbhand_index_middle_link" pos="0.013 0 0">
                                                     <inertial pos="0.00476016 -0.00137869 0"
                                                               quat="0.0365143 0.706163 -0.0365143 0.706163"
                                                               mass="0.0063"
                                                               diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
-                                                    <joint name="right_qbhand_index_middle_virtual_joint"
-                                                           pos="0 0 0"
+                                                    <joint name="right_qbhand_index_middle_virtual_joint" pos="0 0 0"
                                                            axis="0 0 -1" limited="true"
-                                                           range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
-                                                          rgba="0.35 0.35 0.35 1"
-                                                          mesh="ph_short"/>
+                                                           range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                                          rgba="0.35 0.35 0.35 1" mesh="ph_short"/>
                                                     <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short_collision"/>
-                                                    <body name="right_qbhand_index_distal_virtual_link"
-                                                          pos="0.009 0 0">
+                                                    <body name="right_qbhand_index_distal_virtual_link" pos="0.009 0 0">
                                                         <inertial pos="0 0 0" mass="0.0001"
                                                                   diaginertia="1e-09 1e-09 1e-09"/>
-                                                        <joint name="right_qbhand_index_distal_joint"
-                                                               pos="0 0 0"
+                                                        <joint name="right_qbhand_index_distal_joint" pos="0 0 0"
                                                                axis="0 0 -1" limited="true"
-                                                               range="0 0.785"/>
-                                                        <body name="right_qbhand_index_distal_link"
-                                                              pos="0.013 0 0">
+                                                               range="0 45"/>
+                                                        <body name="right_qbhand_index_distal_link" pos="0.013 0 0">
                                                             <inertial pos="0.00880255 -0.00172193 0"
                                                                       quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                                       mass="0.009"
@@ -233,12 +236,13 @@
                                                             <joint name="right_qbhand_index_distal_virtual_joint"
                                                                    pos="0 0 0"
                                                                    axis="0 0 -1"
-                                                                   limited="true" range="0 0.785"/>
-                                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                                   limited="true" range="0 45"/>
+                                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                                   rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal"/>
-                                                            <geom type="mesh" contype="0"
-                                                                  rgba="0.35 0.35 0.35 1"
+                                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal_collision"/>
                                                         </body>
                                                     </body>
@@ -249,24 +253,24 @@
                                 </body>
                                 <body name="right_qbhand_middle_knuckle_link" pos="-0.0045 0.000500004 0.144011"
                                       quat="0.500398 0.5 -0.499602 0.5">
-                                    <inertial pos="0.000427536 0 -0.00143217"
-                                              quat="0.587164 0.394003 0.394003 0.587164"
+                                    <inertial pos="0.000427536 0 -0.00143217" quat="0.587164 0.394003 0.394003 0.587164"
                                               mass="0.0095"
                                               diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-                                    <!--                                            <joint name="right_qbhand_middle_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-                                    <!--                                                   limited="true"-->
-                                    <!--                                                   range="-0.523 0.523"/>-->
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                    <!--                                    <joint name="right_qbhand_middle_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                    <!--                                           limited="true"-->
+                                    <!--                                           range="-30 30"/>-->
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_knuckle"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_knuckle_collision"/>
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_knuckle_collision"/>
                                     <body name="right_qbhand_middle_proximal_virtual_link" pos="0.009 0 0"
                                           quat="0.707388 0.706825 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
-                                        <joint name="right_qbhand_middle_proximal_joint" pos="0 0 0"
-                                               axis="0 0 -1"
+                                        <joint name="right_qbhand_middle_proximal_joint" pos="0 0 0" axis="0 0 -1"
                                                limited="true"
-                                               range="0 0.785"/>
+                                               range="0 45"/>
                                         <body name="right_qbhand_middle_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00877074 -0.00178631 0"
                                                       quat="0.0123083 0.707 -0.0123083 0.707" mass="0.0082"
@@ -274,30 +278,30 @@
                                             <joint name="right_qbhand_middle_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
                                                    limited="true"
-                                                   range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium_collision"/>
-                                            <body name="right_qbhand_middle_middle_virtual_link"
-                                                  pos="0.017 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="right_qbhand_middle_middle_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
+                                            <body name="right_qbhand_middle_middle_virtual_link" pos="0.017 0 0">
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="right_qbhand_middle_middle_joint" pos="0 0 0" axis="0 0 -1"
                                                        limited="true"
-                                                       range="0 0.785"/>
+                                                       range="0 45"/>
                                                 <body name="right_qbhand_middle_middle_link" pos="0.013 0 0">
                                                     <inertial pos="0.00476016 -0.00137869 0"
                                                               quat="0.0365143 0.706163 -0.0365143 0.706163"
                                                               mass="0.0063"
                                                               diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
-                                                    <joint name="right_qbhand_middle_middle_virtual_joint"
-                                                           pos="0 0 0"
+                                                    <joint name="right_qbhand_middle_middle_virtual_joint" pos="0 0 0"
                                                            axis="0 0 -1"
-                                                           limited="true" range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                           limited="true" range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short"/>
                                                     <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -306,12 +310,10 @@
                                                           pos="0.009 0 0">
                                                         <inertial pos="0 0 0" mass="0.0001"
                                                                   diaginertia="1e-09 1e-09 1e-09"/>
-                                                        <joint name="right_qbhand_middle_distal_joint"
-                                                               pos="0 0 0"
+                                                        <joint name="right_qbhand_middle_distal_joint" pos="0 0 0"
                                                                axis="0 0 -1" limited="true"
-                                                               range="0 0.785"/>
-                                                        <body name="right_qbhand_middle_distal_link"
-                                                              pos="0.013 0 0">
+                                                               range="0 45"/>
+                                                        <body name="right_qbhand_middle_distal_link" pos="0.013 0 0">
                                                             <inertial pos="0.00880255 -0.00172193 0"
                                                                       quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                                       mass="0.009"
@@ -319,12 +321,13 @@
                                                             <joint name="right_qbhand_middle_distal_virtual_joint"
                                                                    pos="0 0 0"
                                                                    axis="0 0 -1"
-                                                                   limited="true" range="0 0.785"/>
-                                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                                   limited="true" range="0 45"/>
+                                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                                   rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal"/>
-                                                            <geom type="mesh" contype="0"
-                                                                  rgba="0.35 0.35 0.35 1"
+                                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal_collision"/>
                                                         </body>
                                                     </body>
@@ -335,22 +338,23 @@
                                 </body>
                                 <body name="right_qbhand_ring_knuckle_link" pos="0.0155 0.00049443 0.137011"
                                       quat="0.500398 0.5 -0.499602 0.5">
-                                    <inertial pos="0.000427536 0 -0.00143217"
-                                              quat="0.587164 0.394003 0.394003 0.587164"
+                                    <inertial pos="0.000427536 0 -0.00143217" quat="0.587164 0.394003 0.394003 0.587164"
                                               mass="0.0095"
                                               diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-                                    <!--                                            <joint name="right_qbhand_ring_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-                                    <!--                                                   limited="true"-->
-                                    <!--                                                   range="-0.523 0.523"/>-->
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                    <!--                                    <joint name="right_qbhand_ring_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                    <!--                                           limited="true"-->
+                                    <!--                                           range="-30 30"/>-->
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_knuckle"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_knuckle_collision"/>
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_knuckle_collision"/>
                                     <body name="right_qbhand_ring_proximal_virtual_link" pos="0.009 0 0"
                                           quat="0.707388 0.706825 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
                                         <joint name="right_qbhand_ring_proximal_joint" pos="0 0 0" axis="0 0 -1"
-                                               limited="true" range="0 0.785"/>
+                                               limited="true" range="0 45"/>
                                         <body name="right_qbhand_ring_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00877074 -0.00178631 0"
                                                       quat="0.0123083 0.707 -0.0123083 0.707" mass="0.0082"
@@ -358,43 +362,43 @@
                                             <joint name="right_qbhand_ring_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
                                                    limited="true"
-                                                   range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   range="0 45"/>
+                                            <geom type="mesh" contype="0"
+                                                  conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium_collision"/>
                                             <body name="right_qbhand_ring_middle_virtual_link" pos="0.017 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="right_qbhand_ring_middle_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="right_qbhand_ring_middle_joint" pos="0 0 0" axis="0 0 -1"
                                                        limited="true"
-                                                       range="0 0.785"/>
+                                                       range="0 45"/>
                                                 <body name="right_qbhand_ring_middle_link" pos="0.013 0 0">
                                                     <inertial pos="0.00476016 -0.00137869 0"
                                                               quat="0.0365143 0.706163 -0.0365143 0.706163"
                                                               mass="0.0063"
                                                               diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
-                                                    <joint name="right_qbhand_ring_middle_virtual_joint"
-                                                           pos="0 0 0"
+                                                    <joint name="right_qbhand_ring_middle_virtual_joint" pos="0 0 0"
                                                            axis="0 0 -1" limited="true"
-                                                           range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                           range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short"/>
                                                     <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short_collision"/>
-                                                    <body name="right_qbhand_ring_distal_virtual_link"
-                                                          pos="0.009 0 0">
+                                                    <body name="right_qbhand_ring_distal_virtual_link" pos="0.009 0 0">
                                                         <inertial pos="0 0 0" mass="0.0001"
                                                                   diaginertia="1e-09 1e-09 1e-09"/>
                                                         <joint name="right_qbhand_ring_distal_joint" pos="0 0 0"
                                                                axis="0 0 -1"
                                                                limited="true"
-                                                               range="0 0.785"/>
-                                                        <body name="right_qbhand_ring_distal_link"
-                                                              pos="0.013 0 0">
+                                                               range="0 45"/>
+                                                        <body name="right_qbhand_ring_distal_link" pos="0.013 0 0">
                                                             <inertial pos="0.00880255 -0.00172193 0"
                                                                       quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                                       mass="0.009"
@@ -402,12 +406,13 @@
                                                             <joint name="right_qbhand_ring_distal_virtual_joint"
                                                                    pos="0 0 0"
                                                                    axis="0 0 -1"
-                                                                   limited="true" range="0 0.785"/>
-                                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                                   limited="true" range="0 45"/>
+                                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                                   rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal"/>
-                                                            <geom type="mesh" contype="0"
-                                                                  rgba="0.35 0.35 0.35 1"
+                                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal_collision"/>
                                                         </body>
                                                     </body>
@@ -418,56 +423,55 @@
                                 </body>
                                 <body name="right_qbhand_little_knuckle_link" pos="0.0355 0.000490449 0.132011"
                                       quat="0.500398 0.5 -0.499602 0.5">
-                                    <inertial pos="0.000427536 0 -0.00143217"
-                                              quat="0.587164 0.394003 0.394003 0.587164"
+                                    <inertial pos="0.000427536 0 -0.00143217" quat="0.587164 0.394003 0.394003 0.587164"
                                               mass="0.0095"
                                               diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-                                    <!--                                            <joint name="right_qbhand_little_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-                                    <!--                                                   limited="true"-->
-                                    <!--                                                   range="-0.523 0.523"/>-->
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                    <!--                                    <joint name="right_qbhand_little_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                    <!--                                           limited="true"-->
+                                    <!--                                           range="-30 30"/>-->
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_knuckle"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_knuckle_collision"/>
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_knuckle_collision"/>
                                     <body name="right_qbhand_little_proximal_virtual_link" pos="0.009 0 0"
                                           quat="0.707388 0.706825 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
-                                        <joint name="right_qbhand_little_proximal_joint" pos="0 0 0"
-                                               axis="0 0 -1"
+                                        <joint name="right_qbhand_little_proximal_joint" pos="0 0 0" axis="0 0 -1"
                                                limited="true"
-                                               range="0 0.785"/>
+                                               range="0 45"/>
                                         <body name="right_qbhand_little_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00476016 -0.00137869 0"
                                                       quat="0.0365143 0.706163 -0.0365143 0.706163"
-                                                      mass="0.0063"
-                                                      diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
+                                                      mass="0.0063" diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
                                             <joint name="right_qbhand_little_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
                                                    limited="true"
-                                                   range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_short"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_short_collision"/>
-                                            <body name="right_qbhand_little_middle_virtual_link"
-                                                  pos="0.009 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="right_qbhand_little_middle_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
+                                            <body name="right_qbhand_little_middle_virtual_link" pos="0.009 0 0">
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="right_qbhand_little_middle_joint" pos="0 0 0" axis="0 0 -1"
                                                        limited="true"
-                                                       range="0 0.785"/>
+                                                       range="0 45"/>
                                                 <body name="right_qbhand_little_middle_link" pos="0.013 0 0">
                                                     <inertial pos="0.00476016 -0.00137869 0"
                                                               quat="0.0365143 0.706163 -0.0365143 0.706163"
                                                               mass="0.0063"
                                                               diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
-                                                    <joint name="right_qbhand_little_middle_virtual_joint"
-                                                           pos="0 0 0"
+                                                    <joint name="right_qbhand_little_middle_virtual_joint" pos="0 0 0"
                                                            axis="0 0 -1"
-                                                           limited="true" range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                           limited="true" range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short"/>
                                                     <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -476,12 +480,10 @@
                                                           pos="0.009 0 0">
                                                         <inertial pos="0 0 0" mass="0.0001"
                                                                   diaginertia="1e-09 1e-09 1e-09"/>
-                                                        <joint name="right_qbhand_little_distal_joint"
-                                                               pos="0 0 0"
+                                                        <joint name="right_qbhand_little_distal_joint" pos="0 0 0"
                                                                axis="0 0 -1" limited="true"
-                                                               range="0 0.785"/>
-                                                        <body name="right_qbhand_little_distal_link"
-                                                              pos="0.013 0 0">
+                                                               range="0 45"/>
+                                                        <body name="right_qbhand_little_distal_link" pos="0.013 0 0">
                                                             <inertial pos="0.00880255 -0.00172193 0"
                                                                       quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                                       mass="0.009"
@@ -489,14 +491,13 @@
                                                             <joint name="right_qbhand_little_distal_virtual_joint"
                                                                    pos="0 0 0"
                                                                    axis="0 0 -1"
-                                                                   limited="true" range="0 0.785"/>
-                                                            <geom type="mesh"
-                                                                  contype="0"
-                                                                  conaffinity="0"
+                                                                   limited="true" range="0 45"/>
+                                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                                   rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal"/>
-                                                            <geom type="mesh" contype="0"
-                                                                  rgba="0.35 0.35 0.35 1"
+                                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal_collision"/>
                                                         </body>
                                                     </body>
@@ -524,7 +525,10 @@
                         <joint name="left_elbow" axis="0 1 0" range="-160 0" stiffness="150" damping="15"
                                armature=".015"/>
                         <geom name="left_lower_arm" fromto="0 0 -0.0525 0 0 -0.1875" size="0.04" density="1056"
-                              contype="0" conaffinity="1"/>
+                              contype="0" conaffinity="1"
+
+
+                        />
                         <site name="left_lower_arm" class="touch" pos="0 0 -0.1" size="0.041 0.0685" zaxis="0 0 1"/>
 
                         <!-- <body name="left_hand" pos="0 0 -0.288947"  quat="0 1 0 0"> -->
@@ -539,13 +543,17 @@
                             <site name="left_hand" class="touch" type="sphere" size=".041"/>
 
                             <body name="left_qbhand_root_link" pos="0.0 0.0 0.0" quat="0 1 0 0">
-                                <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04"/>
-                                <geom pos="0.0045 0.0145 0.144" quat="0.000563312 0.000562864 0.706825 0.707388"
+<!--                                <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"-->
+<!--                                      conaffinity="1"-->
+
+<!--                                />-->
+                                <geom pos="0.0045 0.0145 0.12" quat="0.000563312 0.000562864 0.706825 0.707388"
                                       type="mesh"
-                                      rgba="0.35 0.35 0.35 1" mesh="palm_pinch_l" contype="0" conaffinity="0"/>
+                                      rgba="0.35 0.35 0.35 1" mesh="palm_pinch_l" contype="0" conaffinity="1"/>
                                 <geom pos="0.0045 0.0145 0.12" quat="0.000563312 0.000562864 0.706825 0.707388"
                                       type="mesh"
                                       rgba="0.35 0.35 0.35 1" mesh="palm_pinch_l_collision" contype="0"/>
+
                                 <body name="left_qbhand_thumb_knuckle_link" pos="0.0485032 0.0164669 0.0975016"
                                       quat="-0.999998 -0.000796326 6.34136e-07 0.00159265">
                                     <inertial pos="0.0130716 0.00273463 0.000640905"
@@ -553,48 +561,47 @@
                                               diaginertia="1.43383e-06 1.35753e-06 3.12211e-07"/>
                                     <joint name="left_qbhand_thumb_knuckle_joint" pos="0 0 0" axis="0 0 1"
                                            limited="true"
-                                           range="0 1.57"/>
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                           range="0 90"/>
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_thumb_l"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_thumb_l_collision"/>
-                                    <body name="left_qbhand_thumb_proximal_virtual_link"
-                                          pos="0.0255 0.0038 -0.00012"
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_thumb_l_collision"/>
+                                    <body name="left_qbhand_thumb_proximal_virtual_link" pos="0.0255 0.0038 -0.00012"
                                           quat="0.540302 -0.841471 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
                                         <joint name="left_qbhand_thumb_proximal_joint" pos="0 0 0" axis="0 0 -1"
-                                               limited="true" range="0 0.785"/>
+                                               limited="true" range="0 45"/>
                                         <body name="left_qbhand_thumb_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00476016 -0.00137869 0"
                                                       quat="0.0365143 0.706163 -0.0365143 0.706163"
-                                                      mass="0.0063"
-                                                      diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
+                                                      mass="0.0063" diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
                                             <joint name="left_qbhand_thumb_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
-                                                   limited="true" range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   limited="true" range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1" mesh="ph_short"/>
-                                            <geom type="mesh" contype="0"
-                                                  rgba="0.35 0.35 0.35 1"
+                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_short_collision"/>
                                             <body name="left_qbhand_thumb_distal_virtual_link" pos="0.009 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="left_qbhand_thumb_distal_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
-                                                       limited="true" range="0 0.785"/>
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="left_qbhand_thumb_distal_joint" pos="0 0 0" axis="0 0 -1"
+                                                       limited="true" range="0 45"/>
                                                 <body name="left_qbhand_thumb_distal_link" pos="0.013 0 0">
                                                     <inertial pos="0.00880255 -0.00172193 0"
                                                               quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                               mass="0.009"
                                                               diaginertia="6.6782e-07 5.99819e-07 2.654e-07"/>
-                                                    <joint name="left_qbhand_thumb_distal_virtual_joint"
-                                                           pos="0 0 0"
-                                                           axis="0 0 -1" limited="true" range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                    <joint name="left_qbhand_thumb_distal_virtual_joint" pos="0 0 0"
+                                                           axis="0 0 -1" limited="true" range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1" mesh="ph_distal"/>
-                                                    <geom type="mesh" contype="0"
-                                                          rgba="0.35 0.35 0.35 1"
+                                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_distal_collision"/>
                                                 </body>
                                             </body>
@@ -607,18 +614,20 @@
                                               quat="0.587164 0.394003 0.394003 0.587164"
                                               mass="0.0095"
                                               diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-                                    <!--                                            <joint name="left_qbhand_index_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-                                    <!--                                                   limited="true"-->
-                                    <!--                                                   range="-0.523 0.523"/>-->
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                    <!--                                    <joint name="left_qbhand_index_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                    <!--                                           limited="true"-->
+                                    <!--                                           range="-30 30"/>-->
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_knuckle"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_knuckle_collision"/>
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_knuckle_collision"/>
                                     <body name="left_qbhand_index_proximal_virtual_link" pos="0.009 0 0"
                                           quat="0.707388 0.706825 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
                                         <joint name="left_qbhand_index_proximal_joint" pos="0 0 0" axis="0 0 -1"
-                                               limited="true" range="0 0.785"/>
+                                               limited="true" range="0 45"/>
                                         <body name="left_qbhand_index_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00877074 -0.00178631 0"
                                                       quat="0.0123083 0.707 -0.0123083 0.707" mass="0.0082"
@@ -626,44 +635,41 @@
                                             <joint name="left_qbhand_index_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
                                                    limited="true"
-                                                   range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium"/>
-                                            <geom type="mesh" contype="0"
-                                                  rgba="0.35 0.35 0.35 1"
+                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium_collision"/>
                                             <body name="left_qbhand_index_middle_virtual_link" pos="0.017 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="left_qbhand_index_middle_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="left_qbhand_index_middle_joint" pos="0 0 0" axis="0 0 -1"
                                                        limited="true"
-                                                       range="0 0.785"/>
+                                                       range="0 45"/>
                                                 <body name="left_qbhand_index_middle_link" pos="0.013 0 0">
                                                     <inertial pos="0.00476016 -0.00137869 0"
                                                               quat="0.0365143 0.706163 -0.0365143 0.706163"
                                                               mass="0.0063"
                                                               diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
-                                                    <joint name="left_qbhand_index_middle_virtual_joint"
-                                                           pos="0 0 0"
+                                                    <joint name="left_qbhand_index_middle_virtual_joint" pos="0 0 0"
                                                            axis="0 0 -1" limited="true"
-                                                           range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                           range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short"/>
-                                                    <geom type="mesh" contype="0"
-                                                          rgba="0.35 0.35 0.35 1"
+                                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short_collision"/>
-                                                    <body name="left_qbhand_index_distal_virtual_link"
-                                                          pos="0.009 0 0">
+                                                    <body name="left_qbhand_index_distal_virtual_link" pos="0.009 0 0">
                                                         <inertial pos="0 0 0" mass="0.0001"
                                                                   diaginertia="1e-09 1e-09 1e-09"/>
                                                         <joint name="left_qbhand_index_distal_joint" pos="0 0 0"
                                                                axis="0 0 -1" limited="true"
-                                                               range="0 0.785"/>
-                                                        <body name="left_qbhand_index_distal_link"
-                                                              pos="0.013 0 0">
+                                                               range="0 45"/>
+                                                        <body name="left_qbhand_index_distal_link" pos="0.013 0 0">
                                                             <inertial pos="0.00880255 -0.00172193 0"
                                                                       quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                                       mass="0.009"
@@ -671,12 +677,13 @@
                                                             <joint name="left_qbhand_index_distal_virtual_joint"
                                                                    pos="0 0 0"
                                                                    axis="0 0 -1"
-                                                                   limited="true" range="0 0.785"/>
-                                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                                   limited="true" range="0 45"/>
+                                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                                   rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal"/>
-                                                            <geom type="mesh" contype="0"
-                                                                  rgba="0.35 0.35 0.35 1"
+                                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal_collision"/>
                                                         </body>
                                                     </body>
@@ -685,27 +692,26 @@
                                         </body>
                                     </body>
                                 </body>
-                                <body name="left_qbhand_middle_knuckle_link"
-                                      pos="0.0044777 0.000500022 0.143989"
+                                <body name="left_qbhand_middle_knuckle_link" pos="0.0044777 0.000500022 0.143989"
                                       quat="-0.499999 -0.500397 0.500796 -0.498805">
-                                    <inertial pos="0.000427536 0 -0.00143217"
-                                              quat="0.587164 0.394003 0.394003 0.587164"
+                                    <inertial pos="0.000427536 0 -0.00143217" quat="0.587164 0.394003 0.394003 0.587164"
                                               mass="0.0095"
                                               diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-                                    <!--                                            <joint name="left_qbhand_middle_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-                                    <!--                                                   limited="true"-->
-                                    <!--                                                   range="-0.523 0.523"/>-->
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                    <!--                                    <joint name="left_qbhand_middle_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                    <!--                                           limited="true"-->
+                                    <!--                                           range="-30 30"/>-->
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_knuckle"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_knuckle_collision"/>
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_knuckle_collision"/>
                                     <body name="left_qbhand_middle_proximal_virtual_link" pos="0.009 0 0"
                                           quat="0.707388 0.706825 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
-                                        <joint name="left_qbhand_middle_proximal_joint" pos="0 0 0"
-                                               axis="0 0 -1"
+                                        <joint name="left_qbhand_middle_proximal_joint" pos="0 0 0" axis="0 0 -1"
                                                limited="true"
-                                               range="0 0.785"/>
+                                               range="0 45"/>
                                         <body name="left_qbhand_middle_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00877074 -0.00178631 0"
                                                       quat="0.0123083 0.707 -0.0123083 0.707" mass="0.0082"
@@ -713,45 +719,41 @@
                                             <joint name="left_qbhand_middle_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
                                                    limited="true"
-                                                   range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium"/>
-                                            <geom type="mesh" contype="0"
-                                                  rgba="0.35 0.35 0.35 1"
+                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium_collision"/>
                                             <body name="left_qbhand_middle_middle_virtual_link" pos="0.017 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="left_qbhand_middle_middle_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="left_qbhand_middle_middle_joint" pos="0 0 0" axis="0 0 -1"
                                                        limited="true"
-                                                       range="0 0.785"/>
+                                                       range="0 45"/>
                                                 <body name="left_qbhand_middle_middle_link" pos="0.013 0 0">
                                                     <inertial pos="0.00476016 -0.00137869 0"
                                                               quat="0.0365143 0.706163 -0.0365143 0.706163"
                                                               mass="0.0063"
                                                               diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
-                                                    <joint name="left_qbhand_middle_middle_virtual_joint"
-                                                           pos="0 0 0"
+                                                    <joint name="left_qbhand_middle_middle_virtual_joint" pos="0 0 0"
                                                            axis="0 0 -1"
-                                                           limited="true" range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                           limited="true" range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short"/>
-                                                    <geom type="mesh" contype="0"
-                                                          rgba="0.35 0.35 0.35 1"
+                                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short_collision"/>
-                                                    <body name="left_qbhand_middle_distal_virtual_link"
-                                                          pos="0.009 0 0">
+                                                    <body name="left_qbhand_middle_distal_virtual_link" pos="0.009 0 0">
                                                         <inertial pos="0 0 0" mass="0.0001"
                                                                   diaginertia="1e-09 1e-09 1e-09"/>
-                                                        <joint name="left_qbhand_middle_distal_joint"
-                                                               pos="0 0 0"
+                                                        <joint name="left_qbhand_middle_distal_joint" pos="0 0 0"
                                                                axis="0 0 -1" limited="true"
-                                                               range="0 0.785"/>
-                                                        <body name="left_qbhand_middle_distal_link"
-                                                              pos="0.013 0 0">
+                                                               range="0 45"/>
+                                                        <body name="left_qbhand_middle_distal_link" pos="0.013 0 0">
                                                             <inertial pos="0.00880255 -0.00172193 0"
                                                                       quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                                       mass="0.009"
@@ -759,12 +761,13 @@
                                                             <joint name="left_qbhand_middle_distal_virtual_joint"
                                                                    pos="0 0 0"
                                                                    axis="0 0 -1"
-                                                                   limited="true" range="0 0.785"/>
-                                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                                   limited="true" range="0 45"/>
+                                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                                   rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal"/>
-                                                            <geom type="mesh" contype="0"
-                                                                  rgba="0.35 0.35 0.35 1"
+                                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal_collision"/>
                                                         </body>
                                                     </body>
@@ -775,22 +778,23 @@
                                 </body>
                                 <body name="left_qbhand_ring_knuckle_link" pos="-0.0155223 0.00053745 0.136989"
                                       quat="-0.499999 -0.500397 0.500796 -0.498805">
-                                    <inertial pos="0.000427536 0 -0.00143217"
-                                              quat="0.587164 0.394003 0.394003 0.587164"
+                                    <inertial pos="0.000427536 0 -0.00143217" quat="0.587164 0.394003 0.394003 0.587164"
                                               mass="0.0095"
                                               diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-                                    <!--                                            <joint name="left_qbhand_ring_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-                                    <!--                                                   limited="true"-->
-                                    <!--                                                   range="-0.523 0.523"/>-->
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                    <!--                                    <joint name="left_qbhand_ring_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                    <!--                                           limited="true"-->
+                                    <!--                                           range="-30 30"/>-->
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_knuckle"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_knuckle_collision"/>
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_knuckle_collision"/>
                                     <body name="left_qbhand_ring_proximal_virtual_link" pos="0.009 0 0"
                                           quat="0.707388 0.706825 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
                                         <joint name="left_qbhand_ring_proximal_joint" pos="0 0 0" axis="0 0 -1"
-                                               limited="true" range="0 0.785"/>
+                                               limited="true" range="0 45"/>
                                         <body name="left_qbhand_ring_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00877074 -0.00178631 0"
                                                       quat="0.0123083 0.707 -0.0123083 0.707" mass="0.0082"
@@ -798,45 +802,42 @@
                                             <joint name="left_qbhand_ring_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
                                                    limited="true"
-                                                   range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium"/>
-                                            <geom type="mesh" contype="0"
-                                                  rgba="0.35 0.35 0.35 1"
+                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_medium_collision"/>
                                             <body name="left_qbhand_ring_middle_virtual_link" pos="0.017 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="left_qbhand_ring_middle_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="left_qbhand_ring_middle_joint" pos="0 0 0" axis="0 0 -1"
                                                        limited="true"
-                                                       range="0 0.785"/>
+                                                       range="0 45"/>
                                                 <body name="left_qbhand_ring_middle_link" pos="0.013 0 0">
                                                     <inertial pos="0.00476016 -0.00137869 0"
                                                               quat="0.0365143 0.706163 -0.0365143 0.706163"
                                                               mass="0.0063"
                                                               diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
-                                                    <joint name="left_qbhand_ring_middle_virtual_joint"
-                                                           pos="0 0 0"
+                                                    <joint name="left_qbhand_ring_middle_virtual_joint" pos="0 0 0"
                                                            axis="0 0 -1" limited="true"
-                                                           range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                           range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short"/>
-                                                    <geom type="mesh" contype="0"
-                                                          rgba="0.35 0.35 0.35 1"
+                                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short_collision"/>
-                                                    <body name="left_qbhand_ring_distal_virtual_link"
-                                                          pos="0.009 0 0">
+                                                    <body name="left_qbhand_ring_distal_virtual_link" pos="0.009 0 0">
                                                         <inertial pos="0 0 0" mass="0.0001"
                                                                   diaginertia="1e-09 1e-09 1e-09"/>
                                                         <joint name="left_qbhand_ring_distal_joint" pos="0 0 0"
                                                                axis="0 0 -1"
                                                                limited="true"
-                                                               range="0 0.785"/>
-                                                        <body name="left_qbhand_ring_distal_link"
-                                                              pos="0.013 0 0">
+                                                               range="0 45"/>
+                                                        <body name="left_qbhand_ring_distal_link" pos="0.013 0 0">
                                                             <inertial pos="0.00880255 -0.00172193 0"
                                                                       quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                                       mass="0.009"
@@ -844,12 +845,13 @@
                                                             <joint name="left_qbhand_ring_distal_virtual_joint"
                                                                    pos="0 0 0"
                                                                    axis="0 0 -1"
-                                                                   limited="true" range="0 0.785"/>
-                                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                                   limited="true" range="0 45"/>
+                                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                                   rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal"/>
-                                                            <geom type="mesh" contype="0"
-                                                                  rgba="0.35 0.35 0.35 1"
+                                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal_collision"/>
                                                         </body>
                                                     </body>
@@ -858,74 +860,68 @@
                                         </body>
                                     </body>
                                 </body>
-                                <body name="left_qbhand_little_knuckle_link"
-                                      pos="-0.0355222 0.000573284 0.131989"
+                                <body name="left_qbhand_little_knuckle_link" pos="-0.0355222 0.000573284 0.131989"
                                       quat="-0.499999 -0.500397 0.500796 -0.498805">
-                                    <inertial pos="0.000427536 0 -0.00143217"
-                                              quat="0.587164 0.394003 0.394003 0.587164"
+                                    <inertial pos="0.000427536 0 -0.00143217" quat="0.587164 0.394003 0.394003 0.587164"
                                               mass="0.0095"
                                               diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-                                    <!--                                            <joint name="left_qbhand_little_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-                                    <!--                                                   limited="true"-->
-                                    <!--                                                   range="-0.523 0.523"/>-->
-                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
+                                    <!--                                    <joint name="left_qbhand_little_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                    <!--                                           limited="true"-->
+                                    <!--                                           range="-30 30"/>-->
+                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
+                                          rgba="0.35 0.35 0.35 1"
                                           mesh="ph_knuckle"/>
-                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
-                                          mesh="ph_knuckle_collision"/>
+                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1" mesh="ph_knuckle_collision"/>
                                     <body name="left_qbhand_little_proximal_virtual_link" pos="0.009 0 0"
                                           quat="0.707388 0.706825 0 0">
                                         <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
-                                        <joint name="left_qbhand_little_proximal_joint" pos="0 0 0"
-                                               axis="0 0 -1"
+                                        <joint name="left_qbhand_little_proximal_joint" pos="0 0 0" axis="0 0 -1"
                                                limited="true"
-                                               range="0 0.785"/>
+                                               range="0 45"/>
                                         <body name="left_qbhand_little_proximal_link" pos="0.013 0 0">
                                             <inertial pos="0.00476016 -0.00137869 0"
                                                       quat="0.0365143 0.706163 -0.0365143 0.706163"
-                                                      mass="0.0063"
-                                                      diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
+                                                      mass="0.0063" diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
                                             <joint name="left_qbhand_little_proximal_virtual_joint" pos="0 0 0"
                                                    axis="0 0 -1"
                                                    limited="true"
-                                                   range="0 0.785"/>
-                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                   range="0 45"/>
+                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                   rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_short"/>
-                                            <geom type="mesh" contype="0"
-                                                  rgba="0.35 0.35 0.35 1"
+                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_short_collision"/>
                                             <body name="left_qbhand_little_middle_virtual_link" pos="0.009 0 0">
-                                                <inertial pos="0 0 0" mass="0.0001"
-                                                          diaginertia="1e-09 1e-09 1e-09"/>
-                                                <joint name="left_qbhand_little_middle_joint" pos="0 0 0"
-                                                       axis="0 0 -1"
+                                                <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09"/>
+                                                <joint name="left_qbhand_little_middle_joint" pos="0 0 0" axis="0 0 -1"
                                                        limited="true"
-                                                       range="0 0.785"/>
+                                                       range="0 45"/>
                                                 <body name="left_qbhand_little_middle_link" pos="0.013 0 0">
                                                     <inertial pos="0.00476016 -0.00137869 0"
                                                               quat="0.0365143 0.706163 -0.0365143 0.706163"
                                                               mass="0.0063"
                                                               diaginertia="2.6915e-07 2.3576e-07 1.79645e-07"/>
-                                                    <joint name="left_qbhand_little_middle_virtual_joint"
-                                                           pos="0 0 0"
+                                                    <joint name="left_qbhand_little_middle_virtual_joint" pos="0 0 0"
                                                            axis="0 0 -1"
-                                                           limited="true" range="0 0.785"/>
-                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                           limited="true" range="0 45"/>
+                                                    <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                           rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short"/>
-                                                    <geom type="mesh" contype="0"
-                                                          rgba="0.35 0.35 0.35 1"
+                                                    <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                           mesh="ph_short_collision"/>
-                                                    <body name="left_qbhand_little_distal_virtual_link"
-                                                          pos="0.009 0 0">
+                                                    <body name="left_qbhand_little_distal_virtual_link" pos="0.009 0 0">
                                                         <inertial pos="0 0 0" mass="0.0001"
                                                                   diaginertia="1e-09 1e-09 1e-09"/>
-                                                        <joint name="left_qbhand_little_distal_joint"
-                                                               pos="0 0 0"
+                                                        <joint name="left_qbhand_little_distal_joint" pos="0 0 0"
                                                                axis="0 0 -1" limited="true"
-                                                               range="0 0.785"/>
-                                                        <body name="left_qbhand_little_distal_link"
-                                                              pos="0.013 0 0">
+                                                               range="0 45"/>
+                                                        <body name="left_qbhand_little_distal_link" pos="0.013 0 0">
                                                             <inertial pos="0.00880255 -0.00172193 0"
                                                                       quat="0.0131386 0.706985 -0.0131386 0.706985"
                                                                       mass="0.009"
@@ -933,12 +929,13 @@
                                                             <joint name="left_qbhand_little_distal_virtual_joint"
                                                                    pos="0 0 0"
                                                                    axis="0 0 -1"
-                                                                   limited="true" range="0 0.785"/>
-                                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                                   limited="true" range="0 45"/>
+                                                            <geom type="mesh" contype="0" conaffinity="1"
+
+
                                                                   rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal"/>
-                                                            <geom type="mesh" contype="0"
-                                                                  rgba="0.35 0.35 0.35 1"
+                                                            <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
                                                                   mesh="ph_distal_collision"/>
                                                         </body>
                                                     </body>
