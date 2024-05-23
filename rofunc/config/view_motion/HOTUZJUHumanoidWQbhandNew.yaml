@@ -12,8 +12,8 @@ env:
 
 
   # animation files to learn from
-#  motion_file: "examples/data/hotu2/20240509/all_zju_motion.yaml"
-  motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2zju.npy"
+  motion_file: "examples/data/hotu2/20240509/all_zju_motion.yaml"
+#  motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2zju.npy"
 
   use_extra_dof_states_motion: True
   extra_rewrite_dof_names: [ "Shoulder_Y_R", "Shoulder_X_R", "Shoulder_Z_R", "Elbow_R", "Wrist_Z_R", "Wrist_Y_R", "Wrist_X_R",
@@ -21,7 +21,7 @@ env:
                              "A_Waist", "Hip_Y_R", "Hip_X_R", "Hip_Z_R", "Knee_R", "Ankle_Y_R", "Ankle_X_R", "Hip_Y_L", "Hip_X_L",
                              "Hip_Z_L", "Knee_L", "Ankle_Y_L", "Ankle_X_L", "Neck_Z", "Neck_Y" ]
 
-  motion_file_asset: "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"
+  motion_file_asset: "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml"
 
   object_motion_file:
 

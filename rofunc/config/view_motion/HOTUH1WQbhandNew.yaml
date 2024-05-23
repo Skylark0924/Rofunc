@@ -5,6 +5,7 @@ env:
   keyBodies: [ "right_hand", "left_hand", "right_ankle_link", "left_ankle_link" ]
   contactBodies: [ "right_ankle_link", "left_ankle_link" ]
   headRbName: "torso_link"
+  collisionFilter: -1
 
   # animation files to learn from
   motion_file: "examples/data/hotu2/20240509/all_h1_motion.yaml"
@@ -22,7 +23,7 @@ env:
                              "left_shoulder_yaw_joint", "right_shoulder_pitch_joint", "right_shoulder_roll_joint", "right_shoulder_yaw_joint",
                              "right_elbow_joint", "right_hand_x", "right_hand_y", "right_hand_z" ]
 
-  motion_file_asset: "mjcf/unitreeH1/h1_w_qbhand.xml"
+  motion_file_asset: "mjcf/unitreeH1/h1_w_qbhand_new.xml"
 
   object_motion_file:
 

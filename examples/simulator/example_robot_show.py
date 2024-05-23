@@ -54,9 +54,9 @@ import rofunc as rf
 # Humanoidsim.show()
 
 # Unitree H1
-args = rf.config.get_sim_config("UnitreeH1")
-UnitreeH1sim = rf.sim.RobotSim(args)
-UnitreeH1sim.show()
+# args = rf.config.get_sim_config("UnitreeH1")
+# UnitreeH1sim = rf.sim.RobotSim(args)
+# UnitreeH1sim.show()
 
 # Bruce humanoid
 # args = rf.config.get_sim_config("Bruce")
@@ -64,9 +64,9 @@ UnitreeH1sim.show()
 # Brucesim.show()
 
 # ZJU humanoid
-# args = rf.config.get_sim_config("ZJUHumanoid")
-# ZJUHumanoidsim = rf.sim.RobotSim(args)
-# ZJUHumanoidsim.show()
+args = rf.config.get_sim_config("ZJUHumanoid")
+ZJUHumanoidsim = rf.sim.RobotSim(args)
+ZJUHumanoidsim.show()
 
 # Themis
 # args = rf.config.get_sim_config("Themis")

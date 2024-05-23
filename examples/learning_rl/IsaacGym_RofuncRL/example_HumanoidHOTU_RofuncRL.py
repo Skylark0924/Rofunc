@@ -53,7 +53,8 @@ def train(custom_args):
     if custom_args.ckpt_path is not None:
         # load checkpoint
         trainer.agent.load_ckpt(custom_args.ckpt_path,
-                                load_modules=["encoder", "discriminator"])
+                                load_modules=["policy", "value", "optimizer_policy", "optimizer_value",
+                                              "state_preprocessor", "value_preprocessor", "encoder", "discriminator"])
     # Start training
     trainer.train()
 
@@ -95,7 +96,7 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 1
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="HumanoidHOTUGetup")
@@ -105,20 +106,20 @@ if __name__ == "__main__":
 
     # Available types of asset file path:
     #  1. HOTUHumanoid
-    #  2. HOTUHumanoidWQbhand
-    #  3. HOTUH1WQbhand
+    #  2. HOTUHumanoidWQbhandNew
+    #  3. HOTUH1WQbhandNew
     #  4. HOTUCURIWQbhand
     #  5. HOTUWalker
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
-    #  8. HOTUZJUHumanoidWQbhand
+    #  8. HOTUZJUHumanoidWQbhandNew
     parser.add_argument("--humanoid_robot_type", type=str, default="HOTUHumanoidWQbhandNew")
     parser.add_argument("--mode", type=str, default="LLC")
 
     parser.add_argument("--debug", type=str, default="False")
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
-    parser.add_argument("--ckpt_path", type=str, default=None)
+    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
+    parser.add_argument("--ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUHumanoidWQbhandNew_24-05-23_02-30-24-901588/checkpoints/best_ckpt.pth")
 
     custom_args = parser.parse_args()
 
