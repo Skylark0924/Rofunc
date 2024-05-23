@@ -12,7 +12,7 @@ env:
 
   use_extra_dof_states_motion: False
 
-  motion_file_asset: "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml"
+  motion_file_asset: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
 
   object_motion_file:
 
@@ -28,5 +28,5 @@ env:
 task:
   wb_decompose: True  # if True, decompose the whole body into parts
   wb_decompose_parameter:
-    parts: [ "body"]
+    parts: [ "body", "hands" ]
   use_synergy: False  # if True, use the synergy for the hand

@@ -204,7 +204,7 @@ def _run_sim(motion):
                   "right_upper_arm": gymapi.AXIS_ROTATION, "left_upper_arm": gymapi.AXIS_ROTATION,
                   "right_lower_arm": gymapi.AXIS_ROTATION, "left_lower_arm": gymapi.AXIS_ROTATION,
                   "right_thigh": gymapi.AXIS_ROTATION, "left_thigh": gymapi.AXIS_ROTATION,
-                  "right_shin": gymapi.AXIS_ROTATION, "left_shin": gymapi.AXIS_ROTATION,
+                  "right_shin": gymapi.AXIS_ALL, "left_shin": gymapi.AXIS_ALL,
                   }
     body_ids = [motion.skeleton_tree._node_indices[link] for link in body_links]
 
@@ -457,7 +457,7 @@ if __name__ == '__main__':
     #                   3. mjcf/hotu/hotu_humanoid.xml
     #                   4. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
     #                   5. mjcf/hotu/hotu_humanoid_w_qbhand_full.xml
-    parser.add_argument("--humanoid_asset", type=str, default="mjcf/hotu/hotu_humanoid_w_qbhand_full.xml")
+    parser.add_argument("--humanoid_asset", type=str, default="mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml")
     parser.add_argument("--target_tpose", type=str,
                         default="utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy")
     args = parser.parse_args()
@@ -472,11 +472,18 @@ if __name__ == '__main__':
     else:
         raise ValueError("Please provide a valid fbx_dir or fbx_file.")
 
+    from tqdm import tqdm
     if args.parallel:
         pool = multiprocessing.Pool()
         pool.map(npy_from_fbx, fbx_files)
     else:
-        for fbx_file in fbx_files:
-            if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2hotu_dof_states.npy')):
-                continue
-            npy_from_fbx(fbx_file)
+        with tqdm(total=len(fbx_files)) as pbar:
+            for fbx_file in fbx_files:
+                # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2hotu_dof_states.npy')):
+                #     continue
+                npy_from_fbx(fbx_file)
+                pbar.update(1)
+        # for fbx_file in fbx_files:
+            # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2hotu_dof_states.npy')):
+            #     continue
+            # npy_from_fbx(fbx_file)

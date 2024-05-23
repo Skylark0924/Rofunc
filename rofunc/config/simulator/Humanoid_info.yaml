@@ -1805,7 +1805,6 @@ Model_type:
           - left_qbhand_little_distal_joint
           - left_qbhand_little_distal_virtual_joint
 
-
   walker:
     name: "walker"
     rigid_bodies:
@@ -2497,4 +2496,194 @@ Model_type:
           - Ankle_X_L
           - Neck_Z
           - Neck_Y
-        
+      hands:
+        rigid_bodies:
+          - right_qbhand_thumb_knuckle_link
+          - right_qbhand_thumb_proximal_virtual_link
+          - right_qbhand_thumb_proximal_link
+          - right_qbhand_thumb_distal_virtual_link
+          - right_qbhand_thumb_distal_link
+          - right_qbhand_index_knuckle_link
+          - right_qbhand_index_proximal_virtual_link
+          - right_qbhand_index_proximal_link
+          - right_qbhand_index_middle_virtual_link
+          - right_qbhand_index_middle_link
+          - right_qbhand_index_distal_virtual_link
+          - right_qbhand_index_distal_link
+          - right_qbhand_middle_knuckle_link
+          - right_qbhand_middle_proximal_virtual_link
+          - right_qbhand_middle_proximal_link
+          - right_qbhand_middle_middle_virtual_link
+          - right_qbhand_middle_middle_link
+          - right_qbhand_middle_distal_virtual_link
+          - right_qbhand_middle_distal_link
+          - right_qbhand_ring_knuckle_link
+          - right_qbhand_ring_proximal_virtual_link
+          - right_qbhand_ring_proximal_link
+          - right_qbhand_ring_middle_virtual_link
+          - right_qbhand_ring_middle_link
+          - right_qbhand_ring_distal_virtual_link
+          - right_qbhand_ring_distal_link
+          - right_qbhand_little_knuckle_link
+          - right_qbhand_little_proximal_virtual_link
+          - right_qbhand_little_proximal_link
+          - right_qbhand_little_middle_virtual_link
+          - right_qbhand_little_middle_link
+          - right_qbhand_little_distal_virtual_link
+          - right_qbhand_little_distal_link
+          - left_qbhand_thumb_knuckle_link
+          - left_qbhand_thumb_proximal_virtual_link
+          - left_qbhand_thumb_proximal_link
+          - left_qbhand_thumb_distal_virtual_link
+          - left_qbhand_thumb_distal_link
+          - left_qbhand_index_knuckle_link
+          - left_qbhand_index_proximal_virtual_link
+          - left_qbhand_index_proximal_link
+          - left_qbhand_index_middle_virtual_link
+          - left_qbhand_index_middle_link
+          - left_qbhand_index_distal_virtual_link
+          - left_qbhand_index_distal_link
+          - left_qbhand_middle_knuckle_link
+          - left_qbhand_middle_proximal_virtual_link
+          - left_qbhand_middle_proximal_link
+          - left_qbhand_middle_middle_virtual_link
+          - left_qbhand_middle_middle_link
+          - left_qbhand_middle_distal_virtual_link
+          - left_qbhand_middle_distal_link
+          - left_qbhand_ring_knuckle_link
+          - left_qbhand_ring_proximal_virtual_link
+          - left_qbhand_ring_proximal_link
+          - left_qbhand_ring_middle_virtual_link
+          - left_qbhand_ring_middle_link
+          - left_qbhand_ring_distal_virtual_link
+          - left_qbhand_ring_distal_link
+          - left_qbhand_little_knuckle_link
+          - left_qbhand_little_proximal_virtual_link
+          - left_qbhand_little_proximal_link
+          - left_qbhand_little_middle_virtual_link
+          - left_qbhand_little_middle_link
+          - left_qbhand_little_distal_virtual_link
+          - left_qbhand_little_distal_link
+        dofs:
+          - right_qbhand_thumb_knuckle_joint
+          - right_qbhand_thumb_proximal_joint
+          - right_qbhand_thumb_proximal_virtual_joint
+          - right_qbhand_thumb_distal_joint
+          - right_qbhand_thumb_distal_virtual_joint
+          - right_qbhand_index_proximal_joint
+          - right_qbhand_index_proximal_virtual_joint
+          - right_qbhand_index_middle_joint
+          - right_qbhand_index_middle_virtual_joint
+          - right_qbhand_index_distal_joint
+          - right_qbhand_index_distal_virtual_joint
+          - right_qbhand_middle_proximal_joint
+          - right_qbhand_middle_proximal_virtual_joint
+          - right_qbhand_middle_middle_joint
+          - right_qbhand_middle_middle_virtual_joint
+          - right_qbhand_middle_distal_joint
+          - right_qbhand_middle_distal_virtual_joint
+          - right_qbhand_ring_proximal_joint
+          - right_qbhand_ring_proximal_virtual_joint
+          - right_qbhand_ring_middle_joint
+          - right_qbhand_ring_middle_virtual_joint
+          - right_qbhand_ring_distal_joint
+          - right_qbhand_ring_distal_virtual_joint
+          - right_qbhand_little_proximal_joint
+          - right_qbhand_little_proximal_virtual_joint
+          - right_qbhand_little_middle_joint
+          - right_qbhand_little_middle_virtual_joint
+          - right_qbhand_little_distal_joint
+          - right_qbhand_little_distal_virtual_joint
+          - left_qbhand_thumb_knuckle_joint
+          - left_qbhand_thumb_proximal_joint
+          - left_qbhand_thumb_proximal_virtual_joint
+          - left_qbhand_thumb_distal_joint
+          - left_qbhand_thumb_distal_virtual_joint
+          - left_qbhand_index_proximal_joint
+          - left_qbhand_index_proximal_virtual_joint
+          - left_qbhand_index_middle_joint
+          - left_qbhand_index_middle_virtual_joint
+          - left_qbhand_index_distal_joint
+          - left_qbhand_index_distal_virtual_joint
+          - left_qbhand_middle_proximal_joint
+          - left_qbhand_middle_proximal_virtual_joint
+          - left_qbhand_middle_middle_joint
+          - left_qbhand_middle_middle_virtual_joint
+          - left_qbhand_middle_distal_joint
+          - left_qbhand_middle_distal_virtual_joint
+          - left_qbhand_ring_proximal_joint
+          - left_qbhand_ring_proximal_virtual_joint
+          - left_qbhand_ring_middle_joint
+          - left_qbhand_ring_middle_virtual_joint
+          - left_qbhand_ring_distal_joint
+          - left_qbhand_ring_distal_virtual_joint
+          - left_qbhand_little_proximal_joint
+          - left_qbhand_little_proximal_virtual_joint
+          - left_qbhand_little_middle_joint
+          - left_qbhand_little_middle_virtual_joint
+          - left_qbhand_little_distal_joint
+          - left_qbhand_little_distal_virtual_joint
+
+  themis:
+    name: "themis"
+    rigid_bodies:
+      pelvis: 0
+      HIP_R: 1
+      HIP_ABAD_R: 2
+      FEMUR_R: 3
+      TIBIA_R: 4
+      ANKLE_R: 5
+      FOOT_R: 6
+      HIP_L: 7
+      HIP_ABAD_L: 8
+      FEMUR_L: 9
+      TIBIA_L: 10
+      ANKLE_L: 11
+      FOOT_L: 12
+    dofs:
+      HIP_YAW_R: 0
+      HIP_ROLL_R: 1
+      HIP_PITCH_R: 2
+      KNEE_PITCH_R: 3
+      ANKLE_PITCH_R: 4
+      ANKLE_ROLL_R: 5
+      HIP_YAW_L: 6
+      HIP_ROLL_L: 7
+      HIP_PITCH_L: 8
+      KNEE_PITCH_L: 9
+      ANKLE_PITCH_L: 10
+      ANKLE_ROLL_L: 11
+    dof_offsets:
+      [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+    del_rb:
+      - pelvis
+    parts:
+      body:
+        rigid_bodies:
+          - pelvis
+          - HIP_R
+          - HIP_ABAD_R
+          - FEMUR_R
+          - TIBIA_R
+          - ANKLE_R
+          - FOOT_R
+          - HIP_L
+          - HIP_ABAD_L
+          - FEMUR_L
+          - TIBIA_L
+          - ANKLE_L
+          - FOOT_L
+        dofs:
+          - HIP_YAW_R
+          - HIP_ROLL_R
+          - HIP_PITCH_R
+          - KNEE_PITCH_R
+          - ANKLE_PITCH_R
+          - ANKLE_ROLL_R
+          - HIP_YAW_L
+          - HIP_ROLL_L
+          - HIP_PITCH_L
+          - KNEE_PITCH_L
+          - ANKLE_PITCH_L
+          - ANKLE_ROLL_L
+      

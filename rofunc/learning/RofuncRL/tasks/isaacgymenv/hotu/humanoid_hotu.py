@@ -498,6 +498,7 @@ class HumanoidHOTUTask(Humanoid):
          dof_vel,
          key_pos,
          _, _) = self._motion_lib.get_motion_state(motion_ids, motion_times)
+        root_pos[:, 2] += 0.2
         self._set_env_state(
             env_ids=env_ids,
             root_pos=root_pos,

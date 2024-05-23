@@ -58,7 +58,7 @@
                                 <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                                       rgba="0.79216 0.81961 0.93333 1" mesh="ANKLE_R"/>
                                 <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="ANKLE_R"/>
-                                <body name="FOOT_R" quat="0.707105 -0.707108 0 0">
+                                <body name="FOOT_R" pos="0 0 0" quat="0.707105 -0.707108 0 0">
                                     <inertial pos="0.01948 -3e-05 0.03906" quat="0.991335 0 -0.131355 0" mass="0.17981"
                                               diaginertia="0.000723159 0.00072 8.68412e-05"/>
                                     <joint name="ANKLE_ROLL_R" pos="0 0 0" axis="0 0 1"/>
@@ -107,7 +107,7 @@
                                 <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                                       rgba="0.79216 0.81961 0.93333 1" mesh="ANKLE_L"/>
                                 <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="ANKLE_L"/>
-                                <body name="FOOT_L" quat="0.707105 -0.707108 0 0">
+                                <body name="FOOT_L" pos="0 0 0" quat="0.707105 -0.707108 0 0">
                                     <inertial pos="0.01948 -3e-05 0.03906" quat="0.991335 0 -0.131355 0" mass="0.17981"
                                               diaginertia="0.000723159 0.00072 8.68412e-05"/>
                                     <joint name="ANKLE_ROLL_L" pos="0 0 0" axis="0 0 1"/>
