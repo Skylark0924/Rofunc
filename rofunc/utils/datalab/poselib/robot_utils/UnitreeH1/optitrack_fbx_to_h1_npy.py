@@ -651,7 +651,7 @@ if __name__ == '__main__':
     #                   3. mjcf/hotu/hotu_humanoid.xml
     #                   4. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
     #                   5. mjcf/hotu/hotu_humanoid_w_qbhand_full.xml
-    parser.add_argument("--humanoid_asset", type=str, default="mjcf/unitreeH1/h1_w_qbhand.xml")
+    parser.add_argument("--humanoid_asset", type=str, default="mjcf/unitreeH1/h1_w_qbhand_new.xml")
     parser.add_argument("--target_tpose", type=str,
                         default="utils/datalab/poselib/data/target_h1_w_qbhand_tpose.npy")
     args = parser.parse_args()
@@ -671,11 +671,14 @@ if __name__ == '__main__':
     # fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
     # fbx_files = [os.path.join(rofunc_path, "../examples/data/hotu/test_data_01_xsens.fbx")]
 
+    from tqdm import tqdm
     if args.parallel:
         pool = multiprocessing.Pool()
         pool.map(npy_from_fbx, fbx_files)
     else:
-        for fbx_file in fbx_files:
-            if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2h1_dof_states.npy')):
-                continue
-            npy_from_fbx(fbx_file)
+        with tqdm(total=len(fbx_files)) as pbar:
+            for fbx_file in fbx_files:
+                # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2h1_dof_states.npy')):
+                #     continue
+                npy_from_fbx(fbx_file)
+                pbar.update(1)

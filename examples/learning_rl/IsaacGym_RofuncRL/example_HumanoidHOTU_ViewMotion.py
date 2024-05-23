@@ -57,14 +57,14 @@ if __name__ == "__main__":
     parser.add_argument("--task", type=str, default="HumanoidHOTUViewMotion")
     # Available types of asset file path:
     #  1. HOTUHumanoid
-    #  2. HOTUHumanoidWQbhand
-    #  3. HOTUH1WQbhand
+    #  2. HOTUHumanoidWQbhandNew
+    #  3. HOTUH1WQbhandNew
     #  4. HOTUCURIWQbhand
     #  5. HOTUWalker
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
-    #  8. HOTUZJUHumanoidWQbhand
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUH1WQbhandNew")
+    #  8. HOTUZJUHumanoidWQbhandNew
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhandNew")
     custom_args = parser.parse_args()
 
     inference(custom_args)
