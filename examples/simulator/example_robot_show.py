@@ -69,9 +69,9 @@ ZJUHumanoidsim = rf.sim.RobotSim(args)
 ZJUHumanoidsim.show()
 
 # Themis
-# args = rf.config.get_sim_config("Themis")
-# Themissim = rf.sim.RobotSim(args)
-# Themissim.show()
+args = rf.config.get_sim_config("Themis")
+Themissim = rf.sim.RobotSim(args)
+Themissim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")
