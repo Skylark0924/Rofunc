@@ -53,7 +53,6 @@ class HumanoidHOTUTask(Humanoid):
         self.mf_humanoid_info = self._get_humanoid_info(self.mf_humanoid_asset_file)
 
         self.wb_decompose = cfg["task"].get("wb_decompose", False)
-        self.use_synergy = cfg["task"].get("use_synergy", False)
         if self.wb_decompose:
             self.parts = cfg["task"]["wb_decompose_parameter"]["parts"]
             self.num_parts = len(self.parts)
@@ -100,24 +99,34 @@ class HumanoidHOTUTask(Humanoid):
         self._check_humanoid_info(self.humanoid_asset_file, self.humanoid_info)
         self._check_humanoid_info(self.mf_humanoid_asset_file, self.mf_humanoid_info)
 
-        if self.use_synergy:
-            self.synergy_action_matrix = torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                                       [2, 2, 2, 1, 1, 1, 0, 0, 0, -1, -1, -1, -2, -2, -2]],
-                                                      device=sim_device, dtype=torch.float32)
-            self.useful_right_qbhand_dof_index = sorted(
-                [value for key, value in self.humanoid_info["dofs"].items() if
-                 ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
-                 ("ring_knuckle" not in key) and ("little_knuckle" not in key) and ("synergy" not in key) and (
-                         "right_qbhand" in key)])
-            self.useful_left_qbhand_dof_index = sorted(
-                [value for key, value in self.humanoid_info["dofs"].items() if
-                 ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
-                 ("ring_knuckle" not in key) and ("little_knuckle" not in key) and ("synergy" not in key) and (
-                         "left_qbhand" in key)])
+        # if self.use_synergy:
+        self.synergy_action_matrix = torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                                   [2, 2, 2, 1, 1, 1, 0, 0, 0, -1, -1, -1, -2, -2, -2]],
+                                                  device=sim_device, dtype=torch.float32)
+        self.useful_right_qbhand_dof_index = sorted(
+            [value for key, value in self.humanoid_info["dofs"].items() if
+             ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
+             ("ring_knuckle" not in key) and ("little_knuckle" not in key) and ("synergy" not in key) and (
+                     "right_qbhand" in key)])
+        self.useful_left_qbhand_dof_index = sorted(
+            [value for key, value in self.humanoid_info["dofs"].items() if
+             ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
+             ("ring_knuckle" not in key) and ("little_knuckle" not in key) and ("synergy" not in key) and (
+                     "left_qbhand" in key)])
+        self.useful_right_qbhand_rb_index = sorted(
+            [value for key, value in self.humanoid_info["rigid_bodies"].items() if
+             ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
+             ("ring_knuckle" not in key) and ("little_knuckle" not in key) and ("synergy" not in key) and (
+                     "root" not in key) and ("right_qbhand" in key)])
+        self.useful_left_qbhand_rb_index = sorted(
+            [value for key, value in self.humanoid_info["rigid_bodies"].items() if
+             ("virtual" not in key) and ("index_knuckle" not in key) and ("middle_knuckle" not in key) and
+             ("ring_knuckle" not in key) and ("little_knuckle" not in key) and ("synergy" not in key) and (
+                     "root" not in key) and ("left_qbhand" in key)])
 
-            self.virtual2real_dof_index_map_dict = {value: self.humanoid_info["dofs"][key.replace("_virtual", "")] for
-                                                    key, value in self.humanoid_info["dofs"].items() if
-                                                    "virtual" in key}
+        self.virtual2real_dof_index_map_dict = {value: self.humanoid_info["dofs"][key.replace("_virtual", "")] for
+                                                key, value in self.humanoid_info["dofs"].items() if
+                                                "virtual" in key}
 
         # Load motion file
         self._load_motion(cfg["env"].get("motion_file", None))
@@ -169,32 +178,32 @@ class HumanoidHOTUTask(Humanoid):
 
     def pre_physics_step(self, actions):
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
-        # if self.use_synergy and asset_file == "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml":
-        #     right_synergy_action = actions[:, -2 * 2:-2].clone()
-        #     right_dof_action = self._get_dof_action_from_synergy(right_synergy_action,
-        #                                                          self.useful_right_qbhand_dof_index)
-        #     left_synergy_action = actions[:, -2:].clone()
-        #     left_dof_action = self._get_dof_action_from_synergy(left_synergy_action,
-        #                                                         self.useful_left_qbhand_dof_index)
-        #
-        #     expanded_actions = torch.zeros((actions.shape[0], 100), device=self.device)
-        #
-        #     j = 0
-        #     for dof, index in self.humanoid_info["dofs"].items():
-        #         if "qbhand" not in dof:
-        #             expanded_actions[:, index] = actions[:, j]
-        #             j += 1
-        #
-        #     for i, index in enumerate(self.useful_right_qbhand_dof_index):
-        #         expanded_actions[:, index] = right_dof_action[:, i]
-        #     for i, index in enumerate(self.useful_left_qbhand_dof_index):
-        #         expanded_actions[:, index] = left_dof_action[:, i]
-        #
-        #     for key, value in self.virtual2real_dof_index_map_dict.items():
-        #         expanded_actions[:, key] = expanded_actions[:, value]
-        #     self.actions = expanded_actions.to(self.device).clone()
-        # else:
-        #     self.actions = actions.to(self.device).clone()
+        if self.use_synergy and "w_qbhand" in asset_file:
+            right_synergy_action = actions[:, -2 * 2:-2].clone()
+            right_hand_dof_action = self._get_dof_action_from_synergy(right_synergy_action,
+                                                                      self.useful_right_qbhand_dof_index)
+            left_synergy_action = actions[:, -2:].clone()
+            left_hand_dof_action = self._get_dof_action_from_synergy(left_synergy_action,
+                                                                     self.useful_left_qbhand_dof_index)
+
+            expanded_actions = torch.zeros((actions.shape[0], len(self.humanoid_info["dofs"])), device=self.device)
+
+            j = 0
+            for dof, index in self.humanoid_info["dofs"].items():
+                if "qbhand" not in dof:
+                    expanded_actions[:, index] = actions[:, j]
+                    j += 1
+
+            for i, index in enumerate(self.useful_right_qbhand_dof_index):
+                expanded_actions[:, index] = right_hand_dof_action[:, i]
+            for i, index in enumerate(self.useful_left_qbhand_dof_index):
+                expanded_actions[:, index] = left_hand_dof_action[:, i]
+
+            for key, value in self.virtual2real_dof_index_map_dict.items():
+                expanded_actions[:, key] = expanded_actions[:, value]
+            self.actions = expanded_actions.to(self.device).clone()
+        else:
+            self.actions = actions.to(self.device).clone()
 
         # self.actions = torch.zeros((actions.shape[0], len(self.humanoid_info["dofs"])), device=self.device)
         # i = 0
@@ -205,12 +214,10 @@ class HumanoidHOTUTask(Humanoid):
         #         self.actions[:, index] = actions[:, i]
         #         i += 1
 
-        self.actions = actions.to(self.device).clone()
-
-        if self.override_unuse_actions:
-            tmp_action = torch.zeros_like(self.actions).to(self.device)
-            tmp_action[:, self.wb_decompose_param_dof_ids[0]] = self.actions[:, self.wb_decompose_param_dof_ids[0]]
-            self.actions = tmp_action
+        # if self.override_unuse_actions:
+        #     tmp_action = torch.zeros_like(self.actions).to(self.device)
+        #     tmp_action[:, self.wb_decompose_param_dof_ids[0]] = self.actions[:, self.wb_decompose_param_dof_ids[0]]
+        #     self.actions = tmp_action
 
         if self._pd_control:
             pd_tar = self._action_to_pd_targets(self.actions)
@@ -295,11 +302,10 @@ class HumanoidHOTUTask(Humanoid):
                                               self._dof_obs_size, self._dof_offsets,
                                               )
         if self.wb_decompose:
-            amp_obs_demo = amp_obs_decompose(amp_obs_demo, self.wb_decompose_param_rb_index,
-                                             self.wb_decompose_param_dof_ids, self.parts[0] == "body")
+            amp_obs_demo = self.amp_obs_decompose(amp_obs_demo, self.wb_decompose_param_rb_index,
+                                                  self.wb_decompose_param_dof_ids, self.parts)
         else:
             amp_obs_demo = amp_obs_concat(amp_obs_demo)
-
 
         return amp_obs_demo
 
@@ -372,6 +378,13 @@ class HumanoidHOTUTask(Humanoid):
                     num_dof = len(self.wb_decompose_param_dof_ids[i])
                     if part == "body":  # body
                         num_amp_obs_per_step = 13 + num_rb * 6 + num_dof + 3 * num_key_bodies
+                    elif part == "hands" and "qbhand" in asset_file and self.use_synergy:
+                        num_rb = 30  # no virtual links
+                        num_dof = 30  # no virtual dofs
+                        # if self.use_synergy:
+                        #     num_amp_obs_per_step = num_rb * 6 + 4  # 4 for synergy
+                        # else:
+                        num_amp_obs_per_step = num_rb * 6 + num_dof
                     else:
                         num_amp_obs_per_step = num_rb * 6 + num_dof
                     num_amp_obs_per_step_list.append(num_amp_obs_per_step)
@@ -402,20 +415,6 @@ class HumanoidHOTUTask(Humanoid):
             humanoid_type=self.humanoid_info["name"],
             mf_humanoid_type=self.mf_humanoid_info["name"],
         )
-
-    # def _load_extra_dof_states(self, extra_dof_states_path):
-    #     if extra_dof_states_path is not None:
-    #         if rf.oslab.is_absl_path(extra_dof_states_path):
-    #             dof_states_file = extra_dof_states_path
-    #         elif extra_dof_states_path.split("/")[0] == "examples":
-    #             dof_states_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                            "../../../../../../" + extra_dof_states_path)
-    #         else:
-    #             raise ValueError("Unsupported motion file path")
-    #
-    #         self.extra_dof_states = np.load(dof_states_file)
-    #     else:
-    #         self.extra_dof_states = None
 
     def _load_object_motion(self, object_motion_file_path):
         if object_motion_file_path is not None:
@@ -587,8 +586,8 @@ class HumanoidHOTUTask(Humanoid):
             self._dof_offsets,
         )
         if self.wb_decompose:
-            amp_obs_demo = amp_obs_decompose(amp_obs_demo, self.wb_decompose_param_rb_index,
-                                             self.wb_decompose_param_dof_ids, self.parts[0] == "body")
+            amp_obs_demo = self.amp_obs_decompose(amp_obs_demo, self.wb_decompose_param_rb_index,
+                                                  self.wb_decompose_param_dof_ids, self.parts)
         else:
             amp_obs_demo = amp_obs_concat(amp_obs_demo)
 
@@ -666,8 +665,8 @@ class HumanoidHOTUTask(Humanoid):
                 self._dof_offsets,
             )
         if self.wb_decompose:
-            amp_obs = amp_obs_decompose(amp_obs, self.wb_decompose_param_rb_index,
-                                        self.wb_decompose_param_dof_ids, self.parts[0] == "body")
+            amp_obs = self.amp_obs_decompose(amp_obs, self.wb_decompose_param_rb_index,
+                                             self.wb_decompose_param_dof_ids, self.parts)
         else:
             amp_obs = amp_obs_concat(amp_obs)
 
@@ -685,44 +684,61 @@ class HumanoidHOTUTask(Humanoid):
             else:
                 self._curr_amp_obs_buf[env_ids] = amp_obs
 
-    # def amp_obs_decompose(self, amp_obs, wb_decompose_param_rb_index, wb_decompose_param_dof_ids, first_is_body):
-    #     root_h_obs, root_rot_obs, local_root_vel, local_root_ang_vel, dof_obs, dof_vel, flat_local_key_pos = amp_obs
-    #     amp_obs_list = []
-    #     for part_i in range(len(wb_decompose_param_dof_ids)):
-    #         dof_obs_size_this_part = len(wb_decompose_param_dof_ids[part_i])
-    #         dof_obs_this_part = torch.zeros(root_h_obs.shape[:-1] + (dof_obs_size_this_part,),
-    #                                         device=root_h_obs.device)
-    #         i = 0
-    #         for j in wb_decompose_param_dof_ids[part_i]:
-    #             try:
-    #                 dof_obs_this_part[:, i: i + 1] = dof_obs[:, j: (j + 1)]
-    #             except:
-    #                 pass
-    #             i += 1
-    #         dof_vel_this_part = dof_vel[:, wb_decompose_param_dof_ids[part_i]]
-    #         if part_i == 0 and first_is_body:
-    #             amp_obs_this_part = torch.cat(
-    #                 (
-    #                     root_h_obs,  # (num_envs, 1)
-    #                     root_rot_obs,  # (num_envs, 6)
-    #                     local_root_vel,  # (num_envs, 3)
-    #                     local_root_ang_vel,  # (num_envs, 3)
-    #                     dof_obs_this_part,  # (num_envs, 84)
-    #                     dof_vel_this_part,  # (num_envs, 34)
-    #                     flat_local_key_pos,  # (num_envs, 3 * num_key_body)
-    #                 ),
-    #                 dim=-1,
-    #             )
-    #         else:
-    #             amp_obs_this_part = torch.cat(
-    #                 (
-    #                     dof_obs_this_part,  # (num_envs, 180)
-    #                     dof_vel_this_part,  # (num_envs, 30)
-    #                 ),
-    #                 dim=-1,
-    #             )
-    #         amp_obs_list.append(amp_obs_this_part)
-    #     return amp_obs_list
+    def amp_obs_decompose(self, amp_obs, wb_decompose_param_rb_index, wb_decompose_param_dof_ids, part_names, ):
+        root_h_obs, root_rot_obs, local_root_vel, local_root_ang_vel, dof_obs, dof_vel, flat_local_key_pos = amp_obs
+        amp_obs_list = []
+        for part_i in range(len(wb_decompose_param_rb_index)):
+            dof_obs_size_this_part = len(wb_decompose_param_rb_index[part_i]) * 6
+            if part_names[part_i] == "hands" and "qbhand" in self.cfg["env"]["asset"]["assetFileName"]:
+                dof_obs_size_this_part = 30 * 6
+            dof_obs_this_part = torch.zeros(root_h_obs.shape[:-1] + (dof_obs_size_this_part,),
+                                            device=root_h_obs.device)
+            i = 0
+            for j in wb_decompose_param_rb_index[part_i]:
+                if part_names[part_i] == "hands" and "qbhand" in self.cfg["env"]["asset"]["assetFileName"]:
+                    if "virtual" not in self.whole_rb_names_a_del[j]:
+                        dof_obs_this_part[:, (i * 6): ((i + 1) * 6)] = dof_obs[:, (j * 6): ((j + 1) * 6)]
+                        i += 1
+                else:
+                    dof_obs_this_part[:, (i * 6): ((i + 1) * 6)] = dof_obs[:, (j * 6): ((j + 1) * 6)]
+                    i += 1
+            if part_names[part_i] == "hands" and "qbhand" in self.cfg["env"]["asset"]["assetFileName"]:
+                dof_vel_this_part = dof_vel[:, [id for id in wb_decompose_param_dof_ids[part_i] if
+                                                id in self.useful_right_qbhand_dof_index
+                                                or id in self.useful_left_qbhand_dof_index]]
+            else:
+                dof_vel_this_part = dof_vel[:, wb_decompose_param_dof_ids[part_i]]
+            if part_i == 0 and part_names[part_i] == "body":
+                amp_obs_this_part = torch.cat(
+                    (
+                        root_h_obs,  # (num_envs, 1)
+                        root_rot_obs,  # (num_envs, 6)
+                        local_root_vel,  # (num_envs, 3)
+                        local_root_ang_vel,  # (num_envs, 3)
+                        dof_obs_this_part,  # (num_envs, 84)
+                        dof_vel_this_part,  # (num_envs, 34)
+                        flat_local_key_pos,  # (num_envs, 3 * num_key_body)
+                    ),
+                    dim=-1,
+                )
+            elif part_names[part_i] == "hands" and "qbhand" in self.cfg["env"]["asset"]["assetFileName"]:
+                amp_obs_this_part = torch.cat(
+                    (
+                        dof_obs_this_part,  # (num_envs, 180)
+                        dof_vel_this_part,  # (num_envs, 30)
+                    ),
+                    dim=-1,
+                )
+            else:
+                amp_obs_this_part = torch.cat(
+                    (
+                        dof_obs_this_part,  # (num_envs, 180)
+                        dof_vel_this_part,  # (num_envs, 30)
+                    ),
+                    dim=-1,
+                )
+            amp_obs_list.append(amp_obs_this_part)
+        return amp_obs_list
 
 
 @torch.jit.script
@@ -743,43 +759,43 @@ def amp_obs_concat(amp_obs):
     )
 
 
-@torch.jit.script
-def amp_obs_decompose(amp_obs, wb_decompose_param_rb_index, wb_decompose_param_dof_ids, first_is_body):
-    # type: (Tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor], List[Tensor], List[Tensor], bool) -> List[Tensor]
-    root_h_obs, root_rot_obs, local_root_vel, local_root_ang_vel, dof_obs, dof_vel, flat_local_key_pos = amp_obs
-    amp_obs_list = []
-    for part_i in range(len(wb_decompose_param_rb_index)):
-        dof_obs_size_this_part = len(wb_decompose_param_rb_index[part_i]) * 6
-        dof_obs_this_part = torch.zeros(root_h_obs.shape[:-1] + (dof_obs_size_this_part,),
-                                        device=root_h_obs.device)
-        i = 0
-        for j in wb_decompose_param_rb_index[part_i]:
-            dof_obs_this_part[:, (i * 6): ((i + 1) * 6)] = dof_obs[:, (j * 6): ((j + 1) * 6)]
-            i += 1
-        dof_vel_this_part = dof_vel[:, wb_decompose_param_dof_ids[part_i]]
-        if part_i == 0 and first_is_body:
-            amp_obs_this_part = torch.cat(
-                (
-                    root_h_obs,  # (num_envs, 1)
-                    root_rot_obs,  # (num_envs, 6)
-                    local_root_vel,  # (num_envs, 3)
-                    local_root_ang_vel,  # (num_envs, 3)
-                    dof_obs_this_part,  # (num_envs, 84)
-                    dof_vel_this_part,  # (num_envs, 34)
-                    flat_local_key_pos,  # (num_envs, 3 * num_key_body)
-                ),
-                dim=-1,
-            )
-        else:
-            amp_obs_this_part = torch.cat(
-                (
-                    dof_obs_this_part,  # (num_envs, 180)
-                    dof_vel_this_part,  # (num_envs, 30)
-                ),
-                dim=-1,
-            )
-        amp_obs_list.append(amp_obs_this_part)
-    return amp_obs_list
+# @torch.jit.script
+# def amp_obs_decompose(amp_obs, wb_decompose_param_rb_index, wb_decompose_param_dof_ids, first_is_body):
+#     # type: (Tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor], List[Tensor], List[Tensor], bool) -> List[Tensor]
+#     root_h_obs, root_rot_obs, local_root_vel, local_root_ang_vel, dof_obs, dof_vel, flat_local_key_pos = amp_obs
+#     amp_obs_list = []
+#     for part_i in range(len(wb_decompose_param_rb_index)):
+#         dof_obs_size_this_part = len(wb_decompose_param_rb_index[part_i]) * 6
+#         dof_obs_this_part = torch.zeros(root_h_obs.shape[:-1] + (dof_obs_size_this_part,),
+#                                         device=root_h_obs.device)
+#         i = 0
+#         for j in wb_decompose_param_rb_index[part_i]:
+#             dof_obs_this_part[:, (i * 6): ((i + 1) * 6)] = dof_obs[:, (j * 6): ((j + 1) * 6)]
+#             i += 1
+#         dof_vel_this_part = dof_vel[:, wb_decompose_param_dof_ids[part_i]]
+#         if part_i == 0 and first_is_body:
+#             amp_obs_this_part = torch.cat(
+#                 (
+#                     root_h_obs,  # (num_envs, 1)
+#                     root_rot_obs,  # (num_envs, 6)
+#                     local_root_vel,  # (num_envs, 3)
+#                     local_root_ang_vel,  # (num_envs, 3)
+#                     dof_obs_this_part,  # (num_envs, 84)
+#                     dof_vel_this_part,  # (num_envs, 34)
+#                     flat_local_key_pos,  # (num_envs, 3 * num_key_body)
+#                 ),
+#                 dim=-1,
+#             )
+#         else:
+#             amp_obs_this_part = torch.cat(
+#                 (
+#                     dof_obs_this_part,  # (num_envs, 180)
+#                     dof_vel_this_part,  # (num_envs, 30)
+#                 ),
+#                 dim=-1,
+#             )
+#         amp_obs_list.append(amp_obs_this_part)
+#     return amp_obs_list
 
 
 @torch.jit.script
