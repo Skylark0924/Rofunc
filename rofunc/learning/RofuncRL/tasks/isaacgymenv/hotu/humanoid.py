@@ -51,6 +51,7 @@ class Humanoid(VecTask):
         self.use_object_motion = self.cfg["env"].get("use_object_motion", False)
         self._char_height = self.cfg["env"].get("charHeight", 1.0)
         self._head_rb_name = self.cfg["env"].get("headRbName", "head")
+        self.use_synergy = self.cfg["task"].get("use_synergy", False)
 
         self.humanoid_asset_infos = get_sim_config(sim_name="Humanoid_info")["Model_type"]
 
@@ -328,9 +329,12 @@ class Humanoid(VecTask):
                             "mjcf/unitreeH1/h1_w_qbhand_new.xml"]:
             humanoid_info = self._get_humanoid_info(asset_file)
             self._dof_offsets = humanoid_info["dof_offsets"]
-            self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96
-            # self._num_actions = len(humanoid_info["dofs"]) - 58
-            self._num_actions = len(humanoid_info["dofs"])
+            self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(
+                humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96
+            if "w_qbhand" in asset_file and self.use_synergy:
+                self._num_actions = len(humanoid_info["dofs"]) - 58 + 4
+            else:
+                self._num_actions = len(humanoid_info["dofs"])
             self._num_obs = 1 + len(humanoid_info["rigid_bodies"]) * (3 + 6 + 3 + 3) - 3
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
@@ -568,9 +572,9 @@ class Humanoid(VecTask):
         #     if "qbhand" in dof:
         #         self._pd_action_offset[index] = 0.0
         #     # elif dof == "right_hand":
-            #     self._pd_action_offset[index] = 0.
-            # elif dof == "left_hand":
-            #     self._pd_action_offset[index] = 0.
+        #     self._pd_action_offset[index] = 0.
+        # elif dof == "left_hand":
+        #     self._pd_action_offset[index] = 0.
         self._pd_action_scale = 0.5 * (lim_high - lim_low)
         self._pd_action_offset = to_torch(self._pd_action_offset, device=self.device)
         self._pd_action_scale = to_torch(self._pd_action_scale, device=self.device)

@@ -38,4 +38,4 @@ task:
   wb_decompose: True  # if True, decompose the whole body into parts
   wb_decompose_parameter:
     parts: [ "body" ]
-  use_synergy: False  # if True, use the synergy for the hand
+  use_synergy: True  # if True, use the synergy for the hand

@@ -31,7 +31,9 @@ class PlaygroundSim:
         self.up_axis = None
         self.init_sim()
         self.init_viewer()
-        self.init_plane()
+        # self.init_plane()
+        self.init_terrain()
+        self.init_light()
 
     def init_sim(self):
         from isaacgym import gymapi
@@ -105,6 +107,33 @@ class PlaygroundSim:
         elif self.up_axis == "Z":
             plane_params.normal = gymapi.Vec3(0, 0, 1)
         self.gym.add_ground(self.sim, plane_params)
+
+    def init_terrain(self):
+        from isaacgym import gymapi
+        from isaacgym.terrain_utils import SubTerrain, convert_heightfield_to_trimesh, sloped_terrain
+
+        heightfield = np.zeros((256, 256), dtype=np.int16)
+        horizontal_scale = 1  # [m]
+        vertical_scale = 1  # [m]
+
+        # def new_sub_terrain(): return SubTerrain()
+
+        heightfield = sloped_terrain(SubTerrain(), slope=-0).height_field_raw
+        vertices, triangles = convert_heightfield_to_trimesh(heightfield, horizontal_scale=horizontal_scale,
+                                                             vertical_scale=vertical_scale, slope_threshold=1.5)
+        tm_params = gymapi.TriangleMeshParams()
+        tm_params.nb_vertices = vertices.shape[0]
+        tm_params.nb_triangles = triangles.shape[0]
+        tm_params.transform.p.x = -128.
+        tm_params.transform.p.y = -128.
+        self.gym.add_triangle_mesh(self.sim, vertices.flatten(), triangles.flatten(), tm_params)
+
+    def init_light(self):
+        from isaacgym import gymapi
+        l_color = gymapi.Vec3(1, 1, 1)
+        l_ambient = gymapi.Vec3(0.12, 0.12, 0.12)
+        l_direction = gymapi.Vec3(-1, 0, 1)
+        self.gym.set_light_parameters(self.sim, 0, l_color, l_ambient, l_direction)
 
 
 class RobotSim:
@@ -284,8 +313,8 @@ class RobotSim:
         attractor_properties = gymapi.AttractorProperties()
         # Make attractor in all axes
         attractor_properties.axes = attr_type
-        attractor_properties.stiffness = 5e5 if attr_type == gymapi.AXIS_ALL or attr_type ==gymapi.AXIS_TRANSLATION else 5000
-        attractor_properties.damping = 5e3 if attr_type == gymapi.AXIS_ALL or attr_type ==gymapi.AXIS_TRANSLATION else 500
+        attractor_properties.stiffness = 5e5 if attr_type == gymapi.AXIS_ALL or attr_type == gymapi.AXIS_TRANSLATION else 5000
+        attractor_properties.damping = 5e3 if attr_type == gymapi.AXIS_ALL or attr_type == gymapi.AXIS_TRANSLATION else 500
 
         # Create helper geometry used for visualization
         # Create a wireframe axis
@@ -747,7 +776,7 @@ class RobotSim:
                 if index >= len(traj[i]):
                     # index = 0
                     # save_dof_states = False
-                    break   # stop the simulation
+                    break  # stop the simulation
 
             # Step the physics
             self.gym.simulate(self.sim)
