@@ -23,7 +23,7 @@ env:
     robot_name: "Bruce"
     assetRoot:
     assetFile: "mjcf/bruce/bruce.xml"
-    init_pose: [0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0]
+    init_pose: [0.0, 0.0, 0.4, 0.0, 0.0, 1.0, 0.0]
     fix_base_link: True
     disable_gravity: False
     flip_visual_attachments: True
@@ -31,7 +31,16 @@ env:
     slices_per_cylinder: 1000
 
   object_asset:
+    object_names: ["power_drill"]
+    assetRoot:
+    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
+    init_poses: [[-0.3, 0, 0.33, 0.5, -0.5, -0.5, 0.5]]
+    fix_base_link: True
 
+  table:
+    init_pose: [-0.5, 0.0, 0.1, 0.0, 0.0, 0.0, 1]
+    size: [0.5, 0.6, 0.3]
+    fix_base_link: True
 sim:
   dt: 0.0166 # 1/60
   substeps: 1
