@@ -25,7 +25,7 @@ env:
 #    assetFile: "mjcf/unitreeH1/h1.xml"
 #    assetFile: "mjcf/unitreeH1/h1_w_qbhand.xml"
     assetFile: "mjcf/unitreeH1/h1_w_qbhand_new.xml"
-    init_pose: [0, 0.0, 1.2, 0.0, 0.0, 1.0, 0.0]
+    init_pose: [0.2, 0.0, 0.85, -0.3, 0.0, 1.0, 0.0]
     fix_base_link: True
     disable_gravity: False
     flip_visual_attachments: False
@@ -33,6 +33,16 @@ env:
     slices_per_cylinder: 10
 
   object_asset:
+    object_names: ["power_drill"]
+    assetRoot:
+    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
+    init_poses: [[-0.5, 0, 0.73,0.6532815, -0.2705981, -0.2705981, 0.6532815]]
+    fix_base_link: True
+
+  table:
+    init_pose: [-0.5, 0.0, 0.4, 0.0, 0.0, 0.0, 1]
+    size: [0.5, 0.6, 0.5]
+    fix_base_link: True
 
 sim:
   dt: 0.0166 # 1/60

@@ -224,14 +224,17 @@ class RobotSim:
 
     def set_colors_for_parts(self, handles, wb_decompose_param_rb_ids):
         # colors = [[255 / 255., 165 / 255., 0 / 255.], [0.54, 0.85, 0.2], [0.5, 0.5, 0.5], [0.35, 0.35, 0.35]]
-        colors = np.array(
-            [[0.54 * 255, 0.85 * 255, 0.2 * 255], (210, 105, 30), (106, 90, 205), (138, 43, 226), (210, 105, 30),
-             (135, 206, 250), (70, 130, 180), (72, 209, 204), (139, 69, 19), (238, 130, 238),
-             (221, 160, 221), (218, 112, 214), (188, 143, 143), (119, 136, 153),
-             (153, 50, 204)]) / 255
-        color_list_used = colors[np.random.randint(0, len(colors), size=len(wb_decompose_param_rb_ids))]
+        # colors = np.array(
+        #     [[0.54 * 255, 0.85 * 255, 0.2 * 255], (210, 105, 30), (106, 90, 205), (138, 43, 226),
+        #      (135, 206, 250), (70, 130, 180), (72, 209, 204), (139, 69, 19), (238, 130, 238),
+        #      (221, 160, 221), (218, 112, 214), (188, 143, 143), (119, 136, 153),
+        #      (153, 50, 204)]) / 255
+
+        # (238, 130, 238)
+        colors = np.array([[0.54 * 255, 0.85 * 255, 0.2 * 255], (218, 112, 214), (210, 105, 30)]) / 255
+        # color_list_used = colors[np.random.randint(0, len(colors), size=len(wb_decompose_param_rb_ids))]
         for part_i in range(self.num_parts):
-            self.set_char_color(handles, wb_decompose_param_rb_ids[part_i], color_list_used[part_i])
+            self.set_char_color(handles, wb_decompose_param_rb_ids[part_i], colors[part_i])
 
     def set_char_color(self, handles, body_ids, col):
         """
@@ -427,7 +430,9 @@ class RobotSim:
         table_size = self.args.env.table.size
         init_pose = self.args.env.table.init_pose
 
+
         asset_options = gymapi.AssetOptions()
+        asset_options.fix_base_link = self.args.env.table.fix_base_link
         self.table_asset = self.gym.create_box(self.sim, table_size[0], table_size[1], table_size[2], asset_options)
 
         for i, env_ptr in enumerate(self.envs):
@@ -774,9 +779,9 @@ class RobotSim:
                 next_update_time += update_freq
                 index += 1
                 if index >= len(traj[i]):
-                    # index = 0
+                    index = 0
                     # save_dof_states = False
-                    break  # stop the simulation
+                    # break  # stop the simulation
 
             # Step the physics
             self.gym.simulate(self.sim)
