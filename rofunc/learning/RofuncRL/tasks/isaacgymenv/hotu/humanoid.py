@@ -52,6 +52,8 @@ class Humanoid(VecTask):
         self._char_height = self.cfg["env"].get("charHeight", 1.0)
         self._head_rb_name = self.cfg["env"].get("headRbName", "head")
         self.use_synergy = self.cfg["task"].get("use_synergy", False)
+        self._env_spacing = self.cfg["env"].get("envSpacing", 1.0)
+        self._num_env_per_row = self.cfg["env"].get("numEnvPerRow", int(np.sqrt(self.cfg["env"]["numEnvs"])))
 
         self.humanoid_asset_infos = get_sim_config(sim_name="Humanoid_info")["Model_type"]
 
@@ -186,11 +188,35 @@ class Humanoid(VecTask):
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
 
         self._create_ground_plane()
-        self._create_envs(self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
+        # self.init_light()
+        # self.init_terrain()
+        self._create_envs(self._env_spacing, self._num_env_per_row)
 
         # If randomizing, apply once immediately on startup before the fist sim step
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
+
+    def init_terrain(self):
+        from isaacgym.terrain_utils import SubTerrain, convert_heightfield_to_trimesh, sloped_terrain
+
+        horizontal_scale = 1  # [m]
+        vertical_scale = 1  # [m]
+
+        heightfield = sloped_terrain(SubTerrain(), slope=-0).height_field_raw
+        vertices, triangles = convert_heightfield_to_trimesh(heightfield, horizontal_scale=horizontal_scale,
+                                                             vertical_scale=vertical_scale, slope_threshold=1.5)
+        tm_params = gymapi.TriangleMeshParams()
+        tm_params.nb_vertices = vertices.shape[0]
+        tm_params.nb_triangles = triangles.shape[0]
+        tm_params.transform.p.x = -128.
+        tm_params.transform.p.y = -128.
+        self.gym.add_triangle_mesh(self.sim, vertices.flatten(), triangles.flatten(), tm_params)
+
+    def init_light(self):
+        l_color = gymapi.Vec3(1, 1, 1)
+        l_ambient = gymapi.Vec3(0.12, 0.12, 0.12)
+        l_direction = gymapi.Vec3(-1, 0, 1)
+        self.gym.set_light_parameters(self.sim, 0, l_color, l_ambient, l_direction)
 
     def reset_idx(self, env_ids):
         self._reset_actors(env_ids)
@@ -474,14 +500,14 @@ class Humanoid(VecTask):
 
         self.gym.enable_actor_dof_force_sensors(env_ptr, humanoid_handle)
 
-        for j in range(self.num_bodies):
-            self.gym.set_rigid_body_color(
-                env_ptr,
-                humanoid_handle,
-                j,
-                gymapi.MESH_VISUAL,
-                gymapi.Vec3(0.54, 0.85, 0.2),
-            )
+        # for j in range(self.num_bodies):
+        #     self.gym.set_rigid_body_color(
+        #         env_ptr,
+        #         humanoid_handle,
+        #         j,
+        #         gymapi.MESH_VISUAL,
+        #         gymapi.Vec3(0.54, 0.85, 0.2),
+        #     )
 
         if self._pd_control:
             dof_prop = self.gym.get_asset_dof_properties(humanoid_asset)

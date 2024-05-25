@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import numpy as np
 import torch
+from isaacgym import gymapi
 from isaacgym import gymtorch
 
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.hotu.humanoid_hotu import HumanoidHOTUTask
@@ -33,6 +35,8 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
 
         cfg["env"]["controlFrequencyInv"] = 1
         cfg["env"]["pdControl"] = False
+        self._incremental_playback = cfg["env"]["incrementalPlayback"]
+        self._incremental_dt = cfg["env"]["incrementalDt"]
 
         super().__init__(
             cfg=cfg,
@@ -49,6 +53,8 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         num_motions = self._motion_lib.num_motions
         self._motion_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.long)
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
+
+        # self.set_colors_for_parts(self.humanoid_handles, self.wb_decompose_param_rb_ids)
 
     def pre_physics_step(self, actions):
         # TODO: just for avoiding warning
@@ -84,6 +90,10 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         num_motions = self._motion_lib.num_motions
         motion_ids = self._motion_ids
         motion_times = self.progress_buf * self._motion_dt
+
+        if self._incremental_playback:
+            env_list = torch.arange(self.num_envs, device=self.device)
+            motion_times += env_list * self._incremental_dt
 
         (
             root_pos,
