@@ -14,6 +14,8 @@ env:
   # animation files to learn from
   motion_file: "examples/data/hotu2/20240509/all_zju_motion.yaml"
 #  motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2zju.npy"
+#  motion_file: "examples/data/hotu2/20240509/Jumping_Take 2024-05-09 04.15.38 PM_optitrack2zju.npy"
+
 
   use_extra_dof_states_motion: True
   extra_rewrite_dof_names: [ "Shoulder_Y_R", "Shoulder_X_R", "Shoulder_Z_R", "Elbow_R", "Wrist_Z_R", "Wrist_Y_R", "Wrist_X_R",

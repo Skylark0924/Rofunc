@@ -64,7 +64,7 @@ if __name__ == "__main__":
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
     #  8. HOTUZJUHumanoidWQbhandNew
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhandNew")
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUH1WQbhandNew")
     custom_args = parser.parse_args()
 
     inference(custom_args)

@@ -148,7 +148,8 @@ class HumanoidHOTUTask(Humanoid):
                                 device=self.device, dtype=torch.float))
                 self._curr_amp_obs_buf.append(self._amp_obs_buf[part_i][:, 0])
                 self._hist_amp_obs_buf.append(self._amp_obs_buf[part_i][:, 1:])
-            self._set_colors_for_parts()
+            # self.set_colors_for_parts(self.humanoid_handles, self.wb_decompose_param_rb_ids)
+            # self._set_colors_for_parts()
         else:
             self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf,
                                              np.ones(self.get_num_amp_obs()) * np.Inf)
@@ -160,7 +161,8 @@ class HumanoidHOTUTask(Humanoid):
         self._amp_obs_demo_buf = None
 
     def _set_colors_for_parts(self):
-        colors = [[255 / 255., 165 / 255., 0 / 255.], [0.54, 0.85, 0.2], [0.5, 0.5, 0.5], [0.35, 0.35, 0.35]]
+        # colors = [[255 / 255., 165 / 255., 0 / 255.], [0.54, 0.85, 0.2], [0.5, 0.5, 0.5], [0.35, 0.35, 0.35]]
+        colors = np.array([[0.54 * 255, 0.85 * 255, 0.2 * 255], (218, 112, 214), (210, 105, 30)]) / 255
         for part_i in range(self.num_parts):
             self.set_char_color(self.wb_decompose_param_rb_ids[part_i], colors[part_i])
 
