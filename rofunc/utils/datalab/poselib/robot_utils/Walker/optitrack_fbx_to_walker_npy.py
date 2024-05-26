@@ -40,8 +40,7 @@ def _run_sim(motion):
                   "left_leg_l1": gymapi.AXIS_ROTATION, "right_leg_l1": gymapi.AXIS_ROTATION,
                   "left_limb_l1": gymapi.AXIS_ROTATION, "right_limb_l1": gymapi.AXIS_ROTATION,
                   "left_leg_l4": gymapi.AXIS_ALL, "right_leg_l4": gymapi.AXIS_ALL,
-                  "left_leg_l6": gymapi.AXIS_ALL, "right_leg_l6": gymapi.AXIS_ALL,
-                  "head_l2": gymapi.AXIS_ALL}
+                  "left_leg_l6": gymapi.AXIS_ALL, "right_leg_l6": gymapi.AXIS_ALL}
     body_ids = [motion.skeleton_tree._node_indices[link] for link in body_links.keys()]
 
     all_links = list(body_links.keys())
