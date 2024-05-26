@@ -34,16 +34,16 @@ env:
     slices_per_cylinder: 10
 
   object_asset:
-    object_names: ["power_drill"]
-    assetRoot:
-    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
-    init_poses: [[-0.5, 0, 0.93, 0.5, -0.5, -0.5, 0.5]]
-    fix_base_link: True
-
-  table:
-    init_pose: [-0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1]
-    size: [0.5, 0.6, 0.7]
-    fix_base_link: True
+#    object_names: ["power_drill"]
+#    assetRoot:
+#    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
+#    init_poses: [[-0.5, 0, 0.93, 0.5, -0.5, -0.5, 0.5]]
+#    fix_base_link: True
+#
+#  table:
+#    init_pose: [-0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1]
+#    size: [0.5, 0.6, 0.7]
+#    fix_base_link: True
 
 sim:
   dt: 0.0166 # 1/60
