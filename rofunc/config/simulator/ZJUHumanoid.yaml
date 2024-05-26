@@ -17,18 +17,20 @@ env:
   # or have other contacts specified. Setting the collision filter to 0 will
   # enable collisions between all shapes in the actor. Setting the collision filter
   # to anything > 0 will disable all self collisions.
-  collision_mode: 0
+  collision_mode: -1
 
   asset:
     robot_name: "ZJUHumanoid"
     assetRoot:
 #    assetFile: "mjcf/zju_humanoid/zju_humanoid.xml"
 #    assetFile: "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"
-    assetFile: "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml"
-#    assetFile: "urdf/zju_humanoid/urdf/zju_humanoid.urdf"
-    init_pose: [0, 0.0, 1.5, -0.2, 0.0, 1.0, 0.0]
+#    assetFile: "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml"
+#    assetFile: "urdf/zju_humanoid/urdf/zju_humanoid_new_inertia.urdf"
+    assetFile: "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new_inertia.xml"
+#    init_pose: [0, 0.0, 1.5, -0.2, 0.0, 1.0, 0.0]
+    init_pose: [0, 0.0, 1.5, 0, 0.0, 1.0, 0.0]
     fix_base_link: True
-    disable_gravity: False
+    disable_gravity: True
     flip_visual_attachments: False
     armature: 0.01
     slices_per_cylinder: 10
