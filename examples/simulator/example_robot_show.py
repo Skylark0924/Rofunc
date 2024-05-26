@@ -9,9 +9,9 @@ import isaacgym
 import rofunc as rf
 
 # # CURI
-args = rf.config.get_sim_config("CURI")
-CURIsim = rf.sim.CURISim(args)
-CURIsim.show(visual_obs_flag=False)
+# args = rf.config.get_sim_config("CURI")
+# CURIsim = rf.sim.CURISim(args)
+# CURIsim.show(visual_obs_flag=False)
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -64,9 +64,9 @@ CURIsim.show(visual_obs_flag=False)
 # Brucesim.show()
 
 # ZJU humanoid
-# args = rf.config.get_sim_config("ZJUHumanoid")
-# ZJUHumanoidsim = rf.sim.RobotSim(args)
-# ZJUHumanoidsim.show()
+args = rf.config.get_sim_config("ZJUHumanoid")
+ZJUHumanoidsim = rf.sim.RobotSim(args)
+ZJUHumanoidsim.show()
 
 # Themis
 # args = rf.config.get_sim_config("Themis")

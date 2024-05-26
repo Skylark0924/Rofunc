@@ -1,5 +1,5 @@
 env:
-  terminationHeight: 0.15
+  terminationHeight: 0.5
   charHeight: 1
 
   keyBodies: [ "right_hand", "left_hand", "right_ankle_link", "left_ankle_link" ]
