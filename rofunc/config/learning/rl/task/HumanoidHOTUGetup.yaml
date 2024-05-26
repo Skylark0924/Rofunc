@@ -18,7 +18,7 @@ env:
   collisionFilter: -1 # -1: collision defined by MJCF, 0: all collision detection, 1: no collision detection
   stateInit: "Hybrid"
   hybridInitProb: 0.5
-  numAMPObsSteps: 10
+  numAMPObsSteps: 5
   recoveryEpisodeProb: 0.2
   recoverySteps: 60
   fallInitProb: 0.1
