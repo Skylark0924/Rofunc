@@ -96,11 +96,11 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 1
+    gpu_id = 0
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="HumanoidHOTUGetup")
-    parser.add_argument("--num_envs", type=int, default=2048)
+    parser.add_argument("--num_envs", type=int, default=1024)
     parser.add_argument("--sim_device", type=int, default=gpu_id)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
 
@@ -113,13 +113,13 @@ if __name__ == "__main__":
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
     #  8. HOTUZJUHumanoidWQbhandNew
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUH1WQbhandNew")
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhandNew")
     parser.add_argument("--mode", type=str, default="LLC")
 
     parser.add_argument("--debug", type=str, default="False")
-    parser.add_argument("--headless", type=str, default="True")
+    parser.add_argument("--headless", type=str, default="False")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
-    parser.add_argument("--ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUH1WQbhandNew_24-05-26_02-12-02-468318/checkpoints/best_ckpt.pth")
+    parser.add_argument("--ckpt_path", type=str, default=None)
 
     custom_args = parser.parse_args()
 
