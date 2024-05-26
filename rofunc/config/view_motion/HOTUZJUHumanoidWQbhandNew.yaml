@@ -2,13 +2,13 @@ env:
   stateInit: "Hybrid"
   enableEarlyTermination: True
 
-  terminationHeight: 0.15
+  terminationHeight: 0.5
   charHeight: 1.5
 
   keyBodies: [ "HAND_R", "HAND_L", "FOOT_R", "FOOT_L" ]
   contactBodies: [ "FOOT_R", "FOOT_L", "ASTRAGALUS_R", "ASTRAGALUS_L"]
   headRbName: "HEAD"
-  collisionFilter: 1
+  collisionFilter: -1
 
 
   # animation files to learn from

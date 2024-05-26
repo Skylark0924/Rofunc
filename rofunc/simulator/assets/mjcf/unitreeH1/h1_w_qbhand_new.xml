@@ -1,6 +1,8 @@
 <mujoco model="H1_W_Qbhand">
     <compiler angle="radian"/>
-    <statistic meansize="0.226223" extent="2.02548" center="0.015564 2.74848e-06 -0.182867"/>
+    <!--    <statistic meansize="0.226223" extent="2.02548" center="0.015564 2.74848e-06 -0.182867"/>-->
+    <statistic extent="2" center="0 0 1"/>
+    <option timestep="0.00555"/>
     <default>
         <motor ctrlrange="-1 1" ctrllimited="true"/>
         <default class="body">
@@ -207,8 +209,8 @@
                                     <site name="left_hand" class="touch" type="sphere" size=".041"/>
 
                                     <body name="left_qbhand_root_link" pos="0.0 0.0 0.0" quat="0 0.707 0 0.707">
-                                        <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"
-                                              conaffinity="0"/>
+                                        <!--                                        <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"-->
+                                        <!--                                              conaffinity="0"/>-->
                                         <geom pos="0.0045 0.0145 0.144" quat="0.000563312 0.000562864 0.706825 0.707388"
                                               type="mesh"
                                               rgba="0.35 0.35 0.35 1" mesh="palm_pinch_l" contype="0" conaffinity="0"/>
@@ -277,9 +279,9 @@
                                                       quat="0.587164 0.394003 0.394003 0.587164"
                                                       mass="0.0095"
                                                       diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-<!--                                            <joint name="left_qbhand_index_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-<!--                                                   limited="true"-->
-<!--                                                   range="-0.523 0.523"/>-->
+                                            <!--                                            <joint name="left_qbhand_index_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                            <!--                                                   limited="true"-->
+                                            <!--                                                   range="-0.523 0.523"/>-->
                                             <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_knuckle"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -362,9 +364,9 @@
                                                       quat="0.587164 0.394003 0.394003 0.587164"
                                                       mass="0.0095"
                                                       diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-<!--                                            <joint name="left_qbhand_middle_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-<!--                                                   limited="true"-->
-<!--                                                   range="-0.523 0.523"/>-->
+                                            <!--                                            <joint name="left_qbhand_middle_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                            <!--                                                   limited="true"-->
+                                            <!--                                                   range="-0.523 0.523"/>-->
                                             <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_knuckle"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -449,9 +451,9 @@
                                                       quat="0.587164 0.394003 0.394003 0.587164"
                                                       mass="0.0095"
                                                       diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-<!--                                            <joint name="left_qbhand_ring_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-<!--                                                   limited="true"-->
-<!--                                                   range="-0.523 0.523"/>-->
+                                            <!--                                            <joint name="left_qbhand_ring_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                            <!--                                                   limited="true"-->
+                                            <!--                                                   range="-0.523 0.523"/>-->
                                             <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_knuckle"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -535,9 +537,9 @@
                                                       quat="0.587164 0.394003 0.394003 0.587164"
                                                       mass="0.0095"
                                                       diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-<!--                                            <joint name="left_qbhand_little_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-<!--                                                   limited="true"-->
-<!--                                                   range="-0.523 0.523"/>-->
+                                            <!--                                            <joint name="left_qbhand_little_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                            <!--                                                   limited="true"-->
+                                            <!--                                                   range="-0.523 0.523"/>-->
                                             <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_knuckle"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -669,8 +671,8 @@
                                     <site name="right_hand" class="touch" type="sphere" size=".041"/>
 
                                     <body name="right_qbhand_root_link" pos="0.0 0.0 0.0" quat="0.707 0 0.707 0">
-                                        <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"
-                                              conaffinity="0"/>
+                                        <!--                                        <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"-->
+                                        <!--                                              conaffinity="0"/>-->
                                         <geom pos="-0.0045 0.0145 0.144" quat="0.707388 0.706825 0 0" type="mesh"
                                               rgba="0.35 0.35 0.35 1" mesh="palm_pinch_r" contype="0" conaffinity="0"/>
                                         <geom pos="-0.0045 0.0145 0.12" quat="0.707388 0.706825 0 0" type="mesh"
@@ -736,9 +738,9 @@
                                                       quat="0.587164 0.394003 0.394003 0.587164"
                                                       mass="0.0095"
                                                       diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-<!--                                            <joint name="right_qbhand_index_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-<!--                                                   limited="true"-->
-<!--                                                   range="-0.523 0.523"/>-->
+                                            <!--                                            <joint name="right_qbhand_index_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                            <!--                                                   limited="true"-->
+                                            <!--                                                   range="-0.523 0.523"/>-->
                                             <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_knuckle"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -820,9 +822,9 @@
                                                       quat="0.587164 0.394003 0.394003 0.587164"
                                                       mass="0.0095"
                                                       diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-<!--                                            <joint name="right_qbhand_middle_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-<!--                                                   limited="true"-->
-<!--                                                   range="-0.523 0.523"/>-->
+                                            <!--                                            <joint name="right_qbhand_middle_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                            <!--                                                   limited="true"-->
+                                            <!--                                                   range="-0.523 0.523"/>-->
                                             <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_knuckle"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -906,9 +908,9 @@
                                                       quat="0.587164 0.394003 0.394003 0.587164"
                                                       mass="0.0095"
                                                       diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-<!--                                            <joint name="right_qbhand_ring_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-<!--                                                   limited="true"-->
-<!--                                                   range="-0.523 0.523"/>-->
+                                            <!--                                            <joint name="right_qbhand_ring_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                            <!--                                                   limited="true"-->
+                                            <!--                                                   range="-0.523 0.523"/>-->
                                             <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_knuckle"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"
@@ -989,9 +991,9 @@
                                                       quat="0.587164 0.394003 0.394003 0.587164"
                                                       mass="0.0095"
                                                       diaginertia="1.12538e-06 7.39498e-07 6.27245e-07"/>
-<!--                                            <joint name="right_qbhand_little_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
-<!--                                                   limited="true"-->
-<!--                                                   range="-0.523 0.523"/>-->
+                                            <!--                                            <joint name="right_qbhand_little_knuckle_joint" pos="0 0 0" axis="0 0 -1"-->
+                                            <!--                                                   limited="true"-->
+                                            <!--                                                   range="-0.523 0.523"/>-->
                                             <geom type="mesh" contype="0" conaffinity="0" rgba="0.35 0.35 0.35 1"
                                                   mesh="ph_knuckle"/>
                                             <geom type="mesh" contype="0" rgba="0.35 0.35 0.35 1"

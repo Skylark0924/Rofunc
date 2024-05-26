@@ -131,8 +131,8 @@
                                                   quat="0.999977 -0.000881804 -0.00458533 -0.00501013" mass="2.59e-02"
                                                   diaginertia="4.30358e-05 3.65836e-05 0.762952e-05"/>
                                         <joint name="Wrist_X_R" pos="0 0 0" axis="1 0 0" range="-0.87 1.57"/>
-                                        <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"
-                                              conaffinity="0"/>
+<!--                                        <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"-->
+<!--                                              conaffinity="0"/>-->
                                         <geom pos="-0.0045 0.0145 0.144" quat="0.707388 0.706825 0 0" type="mesh"
                                               rgba="0.35 0.35 0.35 1" mesh="palm_pinch_r" contype="0" conaffinity="0"/>
                                         <geom pos="-0.0045 0.0145 0.12" quat="0.707388 0.706825 0 0" type="mesh"
@@ -589,8 +589,8 @@
 
                                     <body name="HAND_L" pos="0 0 0" quat="0 1 0 0">
                                         <joint name="Wrist_X_L" pos="0 0 0" axis="1 0 0" range="-1.57 0.87"/>
-                                        <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"
-                                              conaffinity="0"/>
+<!--                                        <geom type="mesh" rgba="0.35 0.35 0.35 1" mesh="flange_iso_04" contype="0"-->
+<!--                                              conaffinity="0"/>-->
                                         <geom pos="0.0045 0.0145 0.144" quat="0.000563312 0.000562864 0.706825 0.707388"
                                               type="mesh"
                                               rgba="0.35 0.35 0.35 1" mesh="palm_pinch_l" contype="0" conaffinity="0"/>
