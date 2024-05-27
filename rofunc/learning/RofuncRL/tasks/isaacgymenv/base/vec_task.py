@@ -274,7 +274,7 @@ class VecTask(Env):
             camera_props.horizontal_fov = 30
             camera_props.width = 1920
             camera_props.height = 1080
-
+            camera_props.use_collision_geometry = True
 
             self.viewer = self.gym.create_viewer(self.sim, camera_props)
             self.gym.subscribe_viewer_keyboard_event(

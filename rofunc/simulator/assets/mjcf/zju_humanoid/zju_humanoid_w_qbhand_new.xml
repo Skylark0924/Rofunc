@@ -1045,17 +1045,13 @@
                                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
                                           mesh="ASTRAGALUS_R"/>
                                     <body name="FOOT_R" pos="0 0 0">
-                                        <inertial pos="0.00433177 3.9405e-05 -0.0704107"
-                                                  quat="0.465563 0.521345 0.493802 0.517311" mass="2"
-                                                  diaginertia="0.00367321 0.00309571 0.00136331"/>
-
+                                        <inertial pos="0.00866354 7.881e-05 -0.0558514"
+                                                  quat="0.396705 0.58473 0.447454 0.548179" mass="1"
+                                                  diaginertia="0.00322115 0.00306229 0.000925779"/>
                                         <joint name="Ankle_X_R" pos="0 0 0" axis="-1 0 0" range="-0.331 0.331"/>
                                         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                                               rgba="1 1 1 1" mesh="FOOT_R"/>
                                         <geom type="mesh" rgba="1 1 1 1" mesh="FOOT_R"/>
-                                        <geom pos="0 0 -0.08497" type="mesh" contype="0" conaffinity="0" group="1"
-                                              density="0" rgba="1 1 1 1" mesh="TIPTOE_Z_R"/>
-                                        <geom pos="0 0 -0.08497" type="mesh" rgba="1 1 1 1" mesh="TIPTOE_Z_R"/>
                                     </body>
                                 </body>
                             </body>
@@ -1095,17 +1091,13 @@
                                     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1"
                                           mesh="ASTRAGALUS_L"/>
                                     <body name="FOOT_L" pos="0 0 0">
-                                        <inertial pos="0.00424697 -3.5415e-05 -0.0707894"
-                                                  quat="0.516491 0.490072 0.525419 0.465834" mass="2"
-                                                  diaginertia="0.00356718 0.00308551 0.00138821"/>
-
+                                        <inertial pos="0.00849393 -7.083e-05 -0.0566089"
+                                                  quat="0.579566 0.391217 0.623753 0.349262" mass="1"
+                                                  diaginertia="0.00314571 0.00304568 0.000972959"/>
                                         <joint name="Ankle_X_L" pos="0 0 0" axis="-1 0 0" range="-0.331 0.331"/>
                                         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
                                               rgba="1 1 1 1" mesh="FOOT_L"/>
                                         <geom type="mesh" rgba="1 1 1 1" mesh="FOOT_L"/>
-                                        <geom pos="0 0 -0.08497" type="mesh" contype="0" conaffinity="0" group="1"
-                                              density="0" rgba="1 1 1 1" mesh="TIPTOE_Z_L"/>
-                                        <geom pos="0 0 -0.08497" type="mesh" rgba="1 1 1 1" mesh="TIPTOE_Z_L"/>
                                     </body>
                                 </body>
                             </body>

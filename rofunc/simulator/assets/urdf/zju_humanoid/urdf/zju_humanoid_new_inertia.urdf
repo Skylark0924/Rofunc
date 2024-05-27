@@ -1027,51 +1027,7 @@
       effort="18"
       velocity="10.26" />
   </joint>
-  <link
-    name="TIPTOE_Z_R">
-<inertial>
-  <origin xyz="-0.00000000 0.00000000 0.00000000"/>
-  <mass value="1.00000000"/>
-  <inertia ixx="0.00000002" ixy="0.00000000" ixz="0.00000000" iyy="0.00000002" iyz="-0.00000000" izz="0.00000002"/>
-</inertial>
 
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="../low_meshes/TIPTOE_Z_R.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="1 1 1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="../low_meshes/TIPTOE_Z_R.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="Tiptoe_Z_R"
-    type="fixed">
-    <origin
-      xyz="0 0 -0.0849700000000022"
-      rpy="0 0 0" />
-    <parent
-      link="FOOT_R" />
-    <child
-      link="TIPTOE_Z_R" />
-    <axis
-      xyz="0 0 0" />
-  </joint>
   <link
     name="ILIUM_L">
 <inertial>
@@ -1336,50 +1292,7 @@
       effort="18"
       velocity="10.26" />
   </joint>
-  <link
-    name="TIPTOE_Z_L">
-<inertial>
-  <origin xyz="-0.00000000 0.00000000 0.00000000"/>
-  <mass value="1.00000000"/>
-  <inertia ixx="0.00000002" ixy="0.00000000" ixz="0.00000000" iyy="0.00000002" iyz="-0.00000000" izz="0.00000002"/>
-</inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="../low_meshes/TIPTOE_Z_L.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="1 1 1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="../low_meshes/TIPTOE_Z_L.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="Tiptoe_Z_L"
-    type="fixed">
-    <origin
-      xyz="0 0 -0.0849700027164743"
-      rpy="0 0 0" />
-    <parent
-      link="FOOT_L" />
-    <child
-      link="TIPTOE_Z_L" />
-    <axis
-      xyz="0 0 0" />
-  </joint>
+
   <link
     name="NECK">
 <inertial>
