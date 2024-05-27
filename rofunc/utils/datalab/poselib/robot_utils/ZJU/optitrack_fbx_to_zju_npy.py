@@ -638,7 +638,7 @@ if __name__ == '__main__':
     parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
     # parser.add_argument("--fbx_dir", type=str, default=None)
     parser.add_argument("--fbx_file", type=str,
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
+                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Finger movememnt_Take 2024-05-09 04.17.53 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
@@ -673,7 +673,7 @@ if __name__ == '__main__':
     else:
         with tqdm(total=len(fbx_files)) as pbar:
             for fbx_file in fbx_files:
-                if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2zju_dof_states.npy')):
-                    continue
+                # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2zju_dof_states.npy')):
+                #     continue
                 npy_from_fbx(fbx_file)
                 pbar.update(1)
