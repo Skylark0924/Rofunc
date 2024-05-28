@@ -40,7 +40,7 @@ class HOTUTrainer(BaseTrainer):
                                       collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
                                           num_samples))
 
-        elif self.mode == "HLMM":  # HLMM
+        elif self.mode == "HRL":  # HRL
             self.agent = ASEHRLAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
                                      device, self.exp_dir, self.rofunc_logger,
                                      amp_observation_space=self.env.amp_observation_space,
@@ -49,15 +49,15 @@ class HOTUTrainer(BaseTrainer):
                                      collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
                                          num_samples),
                                      task_related_state_size=self.env.get_task_obs_size())
-        elif self.mode == "RLRF":  # RLRF
-            self.agent = HOTURLRFAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
-                                       device, self.exp_dir, self.rofunc_logger,
-                                       amp_observation_space=self.env.amp_observation_space,
-                                       motion_dataset=self.motion_dataset,
-                                       replay_buffer=self.replay_buffer,
-                                       collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
-                                           num_samples),
-                                       task_related_state_size=self.env.get_task_obs_size())
+        # elif self.mode == "RLRF":  # RLRF
+        #     self.agent = HOTURLRFAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
+        #                                device, self.exp_dir, self.rofunc_logger,
+        #                                amp_observation_space=self.env.amp_observation_space,
+        #                                motion_dataset=self.motion_dataset,
+        #                                replay_buffer=self.replay_buffer,
+        #                                collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
+        #                                    num_samples),
+        #                                task_related_state_size=self.env.get_task_obs_size())
         else:
             raise NotImplementedError
 
