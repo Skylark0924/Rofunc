@@ -45,7 +45,8 @@ class ASEAgent(AMPAgent):
                  amp_observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]] = None,
                  motion_dataset: Optional[Union[Memory, Tuple[Memory]]] = None,
                  replay_buffer: Optional[Union[Memory, Tuple[Memory]]] = None,
-                 collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None):
+                 collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None,
+                 num_part: Optional[int] = 1):
         """
         :param cfg: Configuration
         :param observation_space: Observation space
@@ -58,6 +59,7 @@ class ASEAgent(AMPAgent):
         :param motion_dataset: Motion dataset
         :param replay_buffer: Replay buffer
         :param collect_reference_motions: Function for collecting reference motions
+        :param num_part: Number of parts, for HOTU
         """
         """ASE specific parameters"""
         self._lr_e = cfg.Agent.lr_e
@@ -83,8 +85,8 @@ class ASEAgent(AMPAgent):
                                output_dim=self._ase_latent_dim,
                                cfg_name='encoder').to(device)
 
-        super().__init__(cfg, observation_space.shape[0] + self._ase_latent_dim, action_space, memory, device,
-                         experiment_dir, rofunc_logger, amp_observation_space, motion_dataset, replay_buffer,
+        super().__init__(cfg, observation_space.shape[0] + self._ase_latent_dim * num_part, action_space, memory,
+                         device, experiment_dir, rofunc_logger, amp_observation_space, motion_dataset, replay_buffer,
                          collect_reference_motions)
         self.models['encoder'] = self.encoder
         self.checkpoint_modules['encoder'] = self.encoder

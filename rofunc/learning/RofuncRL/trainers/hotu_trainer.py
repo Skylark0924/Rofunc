@@ -62,6 +62,12 @@ class HOTUTrainer(BaseTrainer):
             raise NotImplementedError
 
         '''Misc variables'''
+        if not isinstance(self.env.amp_observation_space, list):
+            amp_observation_space = [self.env.amp_observation_space]
+        else:
+            amp_observation_space = self.env.amp_observation_space
+        self.num_parts = len(amp_observation_space)
+
         self._latent_reset_steps = torch.zeros(self.env.num_envs, dtype=torch.int32).to(self.device)
         self._latent_steps_min = self.cfg.train.Agent.ase_latent_steps_min
         self._latent_steps_max = self.cfg.train.Agent.ase_latent_steps_max
@@ -69,7 +75,9 @@ class HOTUTrainer(BaseTrainer):
     def _reset_latents(self, env_ids):
         # Equ. 11, provide the model with a latent space
         z_bar = torch.normal(torch.zeros([len(env_ids), self.agent._ase_latent_dim]))
-        self.agent._ase_latents[env_ids] = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
+        for i in range(self.num_parts):
+            self.agent._ase_latents[i][env_ids] = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
+        # self.agent._ase_latents[env_ids] = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
 
     def _reset_latent_step_count(self, env_ids):
         self._latent_reset_steps[env_ids] = torch.randint_like(self._latent_reset_steps[env_ids],
@@ -89,7 +97,7 @@ class HOTUTrainer(BaseTrainer):
                 high=self._latent_steps_max)
 
     def pre_interaction(self):
-        if self.mode in ['HLMM', 'RLRF']:
+        if self.mode in 'HRL':
             if self.collect_observation is not None:  # Reset failed envs
                 obs_dict, done_env_ids = self.env.reset_done()
                 self.agent._current_states = obs_dict["obs"]
