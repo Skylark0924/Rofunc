@@ -54,11 +54,11 @@ def train(custom_args):
 
     if custom_args.ckpt_path is not None:
         # load checkpoint
-        trainer.agent.load_ckpt(custom_args.ckpt_path,
+        trainer.agent.load_ckpt(custom_args.ckpt_path,)
                                 # load_modules=["policy", "value", "optimizer_policy", "optimizer_value",
                                 #               "state_preprocessor", "value_preprocessor"])
-                                load_modules=["policy", "value", "optimizer_policy", "optimizer_value",
-                                              "state_preprocessor", "value_preprocessor", "encoder", "discriminator"])
+                                # load_modules=["policy", "value", "optimizer_policy", "optimizer_value",
+                                #               "state_preprocessor", "value_preprocessor", "encoder", "discriminator"])
         # load_modules=["encoder", "discriminator"])
     # Start training
     trainer.train()
@@ -101,7 +101,7 @@ def inference(custom_args):
 
 
 if __name__ == "__main__":
-    gpu_id = 0
+    gpu_id = 1
 
     parser = argparse.ArgumentParser()
     # Available tasks:
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     #  3. HumanoidHOTUPerturb
     #  4. HumanoidHOTUHeading
     #  5. HumanoidHOTULocation
-    parser.add_argument("--task", type=str, default="HumanoidHOTULocation")
+    parser.add_argument("--task", type=str, default="HumanoidHOTUGetup")
     parser.add_argument("--num_envs", type=int, default=2048)
     parser.add_argument("--sim_device", type=int, default=gpu_id)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
@@ -124,19 +124,23 @@ if __name__ == "__main__":
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
     #  8. HOTUZJUHumanoidWQbhandNew
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUHumanoidWQbhandNew")
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUZJUHumanoidWQbhandNew")
     # Available modes:
     #  1. LLC
     #  2. HRL
-    parser.add_argument("--mode", type=str, default="HRL")
+    parser.add_argument("--mode", type=str, default="LLC")
 
     parser.add_argument("--debug", type=str, default="False")
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
-    parser.add_argument("--ckpt_path", type=str, default=None)
+    parser.add_argument("--ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUHumanoidWQbhandNew_24-05-26_21-16-24-361269_body_amp5/checkpoints/best_ckpt.pth")
 
-    parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUHumanoidWQbhandNew_24-05-26_21-16-24-361269_body_amp5/checkpoints/best_ckpt.pth")
+    # HOTU
     # parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUHumanoidWQbhandNew_24-05-26_21-16-24-361269_body_amp5/checkpoints/best_ckpt.pth")
+    # ZJU
+    parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUZJUHumanoidWQbhandNew_24-05-26_18-57-20-244370_body_amp5/checkpoints/best_ckpt.pth")
+    # H1
+    # parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUH1WQbhandNew_24-05-27_16-59-15-598225_body_amp5/checkpoints/best_ckpt.pth")
 
     custom_args = parser.parse_args()
 
