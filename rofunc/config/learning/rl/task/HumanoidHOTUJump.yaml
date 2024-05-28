@@ -1,5 +1,5 @@
 # used to create the object
-name: HumanoidHOTUGetup
+name: HumanoidHOTUJump
 
 physics_engine: ${..physics_engine}
 
@@ -16,12 +16,9 @@ env:
   powerScale: 1.0
   controlFrequencyInv: 2 # 30 Hz
   collisionFilter: -1 # -1: collision defined by MJCF, 0: all collision detection, 1: no collision detection
-  stateInit: "Hybrid"
+  stateInit: "Default"
   hybridInitProb: 0.5
   numAMPObsSteps: 5
-  recoveryEpisodeProb: 0.2
-  recoverySteps: 60
-  fallInitProb: 0.1
   
   localRootObs: True
   keyBodies:
@@ -40,6 +37,12 @@ env:
   right_left_ids_except_thumb_and_knuckle:
   right_left_thumb_knuckle_ids:
 
+  tarSpeedMin: 1.5
+  tarSpeedMax: 1.6
+  headingChangeStepsMin: 100
+  headingChangeStepsMax: 200
+  enableRandHeading: True
+  enableTaskObs: False
 
   object_motion_file:
 
@@ -65,7 +68,7 @@ sim:
   gravity: [ 0.0, 0.0, -9.81 ]
   physx:
     num_threads: ${....num_threads}
-    solver_type: ${....solver_type}
+    solver_type: ${....solver_type}  # 0: pgs, 1: tgs
     use_gpu: ${contains:"cuda",${....sim_device}} # set to False to run on CPU
     num_position_iterations: 4
     num_velocity_iterations: 0
@@ -74,9 +77,6 @@ sim:
     bounce_threshold_velocity: 0.2
     max_depenetration_velocity: 10.0
     default_buffer_size_multiplier: 10.0
-    max_gpu_contact_pairs: 8388608 # 8*1024*1024
-    num_subscenes: ${....num_subscenes}
-    contact_collection: 2 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (default - all contacts)
 
   flex:
     num_inner_iterations: 10

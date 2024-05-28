@@ -19,10 +19,10 @@ from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
 import rofunc as rf
+from rofunc.config.utils import get_sim_config
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.vec_task import VecTask
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 from rofunc.utils.oslab.path import get_rofunc_path
-from rofunc.config.utils import get_sim_config
 
 
 class Humanoid(VecTask):

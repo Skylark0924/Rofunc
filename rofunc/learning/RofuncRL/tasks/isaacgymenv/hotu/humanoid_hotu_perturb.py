@@ -31,8 +31,8 @@ import os
 from isaacgym import gymapi, gymtorch
 from isaacgym.torch_utils import *
 
-from rofunc.utils.oslab.path import get_rofunc_path
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.hotu.humanoid_hotu import HumanoidHOTUTask
+from rofunc.utils.oslab.path import get_rofunc_path
 
 PERTURB_OBJS = [
     ["small", 60],
