@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from copy import deepcopy
+from typing import Callable, Union, Tuple, Optional
+
 import gym
 import gymnasium
 import numpy as np
@@ -20,13 +23,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from hydra.core.global_hydra import GlobalHydra
 from omegaconf import DictConfig
-from typing import Callable, Union, Tuple, Optional
-from copy import deepcopy
 
 import rofunc as rf
 from rofunc.config.utils import get_config
-from rofunc.learning.RofuncRL.agents.mixline.ase_agent import ASEAgent
-from rofunc.learning.RofuncRL.agents.mixline.ase_hrl_agent import ASEHRLAgent
+from rofunc.learning.RofuncRL.agents.base_agent import BaseAgent
+from rofunc.learning.RofuncRL.agents.mixline.hotu_llc_agent import HOTULLCAgent
 from rofunc.learning.RofuncRL.models.actor_models import ActorPPO_Beta, ActorPPO_Gaussian
 from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
@@ -36,7 +37,7 @@ from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 from rofunc.learning.pre_trained_models.download import model_zoo
 
 
-class HOTUHRLAgent(ASEHRLAgent):
+class HOTUHRLAgent(BaseAgent):
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -64,33 +65,70 @@ class HOTUHRLAgent(ASEHRLAgent):
         :param collect_reference_motions: Function for collecting reference motions
         :param task_related_state_size: Size of task-related states
         """
+        """ASE specific parameters"""
+        self._ase_latent_dim = cfg.Agent.ase_latent_dim
+        self._task_related_state_size = task_related_state_size
+        super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
+
+        """HOTU specific parameters"""
         if not isinstance(amp_observation_space, list):
             amp_observation_space = [amp_observation_space]
-
         self.num_parts = len(amp_observation_space)
         self.whole_amp_obs_space = amp_observation_space  # Whole AMP observation space
-
         self.motion_dataset_list = []
         self.replay_buffer_list = []
         for i in range(self.num_parts):
             self.motion_dataset_list.append(deepcopy(motion_dataset))
             self.replay_buffer_list.append(deepcopy(replay_buffer))
 
-        super().__init__(cfg, observation_space, action_space, memory, device,
-                         experiment_dir, rofunc_logger, amp_observation_space[0], motion_dataset, replay_buffer,
-                         collect_reference_motions, task_related_state_size)  # Initialize the first part
+        super().__init__(cfg, observation_space, action_space, memory, device, experiment_dir, rofunc_logger)
 
+        '''Define models for HOTU HRL agent'''
+        if self.cfg.Model.actor.type == "Beta":
+            self.policy = ActorPPO_Beta(cfg.Model, observation_space, self._ase_latent_dim * self.num_parts,
+                                        self.se).to(self.device)
+        else:
+            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, self._ase_latent_dim * self.num_parts,
+                                            self.se).to(self.device)
+        self.value = Critic(cfg.Model, observation_space, self._ase_latent_dim * self.num_parts, self.se).to(
+            self.device)
+        self.models = {"policy": self.policy, "value": self.value}
+        # checkpoint models
+        self.checkpoint_modules["policy"] = self.policy
+        self.checkpoint_modules["value"] = self.value
+
+        self.rofunc_logger.module(f"Policy model: {self.policy}")
+        self.rofunc_logger.module(f"Value model: {self.value}")
+
+        '''Create tensors in memory'''
+        if hasattr(cfg.Model, "state_encoder"):
+            img_channel = int(self.cfg.Model.state_encoder.inp_channels)
+            img_size = int(self.cfg.Model.state_encoder.image_size)
+            state_tensor_size = (img_channel, img_size, img_size)
+            kd = True
+        else:
+            state_tensor_size = self.observation_space
+            kd = False
+        self.memory.create_tensor(name="states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
+        self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
+        self.memory.create_tensor(name="actions", size=self.action_space, dtype=torch.float32)
+        self.memory.create_tensor(name="omega_actions", size=self._ase_latent_dim, dtype=torch.float32)
+        self.memory.create_tensor(name="rewards", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="terminated", size=1, dtype=torch.bool)
+        self.memory.create_tensor(name="log_prob", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="values", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="returns", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="advantages", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="next_values", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="disc_rewards", size=1, dtype=torch.float32)
         self._tensors_names = ["states", "actions", "rewards", "next_states", "terminated", "log_prob", "values",
-                               "returns", "advantages", "amp_states", "next_values", "omega_actions", "disc_rewards"]
+                               "returns", "advantages", "next_values", "omega_actions", "disc_rewards"]
 
         for i in range(self.num_parts):
             self._tensors_names.append(f"amp_states_{i}")
-            self._tensors_names.append(f"omega_actions_{i}")
+            # self._tensors_names.append(f"disc_rewards_{i}")
             self.memory.create_tensor(name=f"amp_states_{i}", size=amp_observation_space[i], dtype=torch.float32)
-            self.memory.create_tensor(name=f"omega_actions_{i}", size=amp_observation_space[i], dtype=torch.float32)
-            # self.memory.create_tensor(name=f"ase_latents_{i}", size=self._ase_latent_dim, dtype=torch.float32)
-
-
+            # self.memory.create_tensor(name=f"disc_rewards_{i}", size=1, dtype=torch.float32)
 
         '''Get hyper-parameters from config'''
         self._discount = self.cfg.Agent.discount
@@ -123,20 +161,19 @@ class HOTUHRLAgent(ASEHRLAgent):
 
         """Define pre-trained low-level controller"""
         GlobalHydra.instance().clear()
-        args_overrides = ["task=HumanoidASEGetupSwordShield", "train=HumanoidASEGetupSwordShieldASERofuncRL"]
+        args_overrides = ["task=HumanoidHOTUGetup", "train=HumanoidHOTUGetupRofuncRL"]
         self.llc_config = get_config('./learning/rl', 'config', args=args_overrides)
         if self.cfg.Agent.llc_ckpt_path is None:
-            llc_ckpt_path = model_zoo(name="HumanoidASEGetupSwordShield.pth")
+            llc_ckpt_path = model_zoo(name="HumanoidASEGetupSwordShield.pth")  # TODO
         else:
             llc_ckpt_path = self.cfg.Agent.llc_ckpt_path
         llc_observation_space = gym.spaces.Box(low=-np.inf, high=np.inf,
                                                shape=(observation_space.shape[0] - self._task_related_state_size,))
         llc_memory = RandomMemory(memory_size=self.memory.memory_size, num_envs=self.memory.num_envs, device=device)
-        self.llc_agent = ASEAgent(self.llc_config.train, llc_observation_space, action_space, llc_memory, device,
-                                  experiment_dir, rofunc_logger, amp_observation_space,
-                                  motion_dataset, replay_buffer, collect_reference_motions)
+        self.llc_agent = HOTULLCAgent(self.llc_config.train, llc_observation_space, action_space, llc_memory, device,
+                                      experiment_dir, rofunc_logger, amp_observation_space,
+                                      motion_dataset, replay_buffer, collect_reference_motions)
         self.llc_agent.load_ckpt(llc_ckpt_path)
-        # self._build_llc()
 
         '''Misc variables'''
         self._current_states = None
@@ -173,54 +210,14 @@ class HOTUHRLAgent(ASEHRLAgent):
 
         super()._set_up()
 
-    def _build_llc(self):
-        from .utils import ase_network_builder
-        from .utils import ase_agent
-        from .utils import ase_models
-        import yaml
-        with open(
-                "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/learning/RofuncRL/agents/mixline/utils/ase_humanoid_hrl.yaml",
-                'r') as f:
-            llc_config = yaml.load(f, Loader=yaml.SafeLoader)
-            llc_config_params = llc_config['params']
-
-        llc_checkpoint = "/home/ubuntu/Github/Knowledge-Universe/Robotics/Roadmap-for-robot-science/rofunc/learning/RofuncRL/agents/mixline/utils/ase_llc_reallusion_sword_shield.pth"
-        assert (llc_checkpoint != "")
-
-        network_params = llc_config_params['network']
-        network_builder = ase_network_builder.ASEBuilder()
-        network_builder.load(network_params)
-
-        network = ase_models.ModelASEContinuous(network_builder)
-        llc_agent_config = self._build_llc_agent_config(llc_config_params, network)
-
-        self.llc_agent = ase_agent.ASEAgent('llc', llc_agent_config)
-        self.llc_agent.restore(llc_checkpoint)
-        print("Loaded LLC checkpoint from {:s}".format(llc_checkpoint))
-        self.llc_agent.set_eval()
-
-    def _build_llc_agent_config(self, config_params, network):
-        from .utils.observer import RLGPUAlgoObserver
-
-        llc_env_info = {'action_space': gym.spaces.Box(-1.0, 1.0, (31,)),
-                        'observation_space': gym.spaces.Box(-np.inf, np.inf, (253,)),
-                        'amp_observation_space': gym.spaces.Box(-np.inf, np.inf, (1400,))}
-        # obs_space = llc_env_info['observation_space']
-        # obs_size = obs_space.shape[0]
-        # obs_size -= self._task_related_state_size
-        # llc_env_info['observation_space'] = gym.spaces.Box(obs_space.low[:obs_size], obs_space.high[:obs_size])
-
-        config = config_params['config']
-        config['network'] = network
-        config['num_actors'] = 4096
-        config['features'] = {'observer': RLGPUAlgoObserver()}
-        config['env_info'] = llc_env_info
-        return config
-
     def _get_llc_action(self, states: torch.Tensor, omega_actions: torch.Tensor):
         # get actions from low-level controller
         task_agnostic_states = states[:, :-self._task_related_state_size]
+
+        omega_actions = omega_actions.view((omega_actions.shape[0], self.num_parts, self._ase_latent_dim))
         z = torch.nn.functional.normalize(omega_actions, dim=-1)
+        z = z.view((z.shape[0], self.num_parts * self._ase_latent_dim))
+
         actions, _ = self.llc_agent.act(task_agnostic_states, deterministic=False, ase_latents=z)
         # actions, _ = self.llc_agent.model.a2c_network.eval_actor(obs=task_agnostic_states, ase_latents=z)
         # self._llc_step += 1
@@ -242,9 +239,10 @@ class HOTUHRLAgent(ASEHRLAgent):
         actions = self._get_llc_action(states, self._omega_actions_for_llc)
         return actions, self._current_log_prob
 
-    def _get_disc_reward(self, amp_states):
+    def _get_disc_reward(self, amp_states, part_i):
         with torch.no_grad():
-            amp_logits = self.llc_agent.discriminator(self.llc_agent._amp_state_preprocessor(amp_states))
+            amp_logits = self.llc_agent.discriminator_list[part_i](
+                self.llc_agent._amp_state_preprocessor_list[part_i](amp_states))
             if self.llc_agent._least_square_discriminator:
                 style_rewards = torch.maximum(torch.tensor(1 - 0.25 * torch.square(1 - amp_logits)),
                                               torch.tensor(0.0001, device=self.device))
@@ -258,7 +256,7 @@ class HOTUHRLAgent(ASEHRLAgent):
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
 
         # self.llc_cum_rew.add_(rewards)
-        amp_obs = infos['amp_obs']
+        # amp_obs = infos['amp_obs']
         # curr_disc_reward = self._get_disc_reward(amp_obs)
         # self.llc_cum_disc_rew.add_(curr_disc_reward)
         # self.need_reset.add_(terminated + truncated)
@@ -269,8 +267,6 @@ class HOTUHRLAgent(ASEHRLAgent):
         #                          terminated=self.need_reset, truncated=self.need_reset, infos=infos)
         super().store_transition(states=states, actions=actions, next_states=next_states,
                                  rewards=rewards, terminated=terminated, truncated=truncated, infos=infos)
-
-        amp_states = infos["amp_obs"]
 
         # reward shaping
         if self._rewards_shaper is not None:
@@ -296,13 +292,20 @@ class HOTUHRLAgent(ASEHRLAgent):
         #                         values=values, amp_states=amp_states, next_values=next_values,
         #                         omega_actions=self._omega_actions_for_llc,
         #                         disc_rewards=self.llc_cum_disc_rew)
+        amp_states_dict = {f"amp_states_{i}": infos[f"amp_obs_{i}"] for i in range(self.num_parts)}
+
+        disc_rewards = 1
+        for i in range(self.num_parts):
+            tmp_disc_rew = self._get_disc_reward(amp_states_dict[f"amp_states_{i}"], i)
+            disc_rewards *= tmp_disc_rew
         self.memory.add_samples(states=states, actions=actions,
                                 rewards=rewards,
                                 next_states=next_states,
                                 terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
-                                values=values, amp_states=amp_states, next_values=next_values,
+                                values=values, next_values=next_values,
                                 omega_actions=self._omega_actions_for_llc,
-                                disc_rewards=self._get_disc_reward(amp_obs))
+                                disc_rewards=disc_rewards,
+                                **amp_states_dict)
 
     def update_net(self):
         """
@@ -346,12 +349,18 @@ class HOTUHRLAgent(ASEHRLAgent):
         cumulative_entropy_loss = 0
         cumulative_value_loss = 0
 
+        # self._tensors_names = ["states", "actions", "rewards", "next_states", "terminated", "log_prob", "values",
+        #                        "returns", "advantages", "next_values", "omega_actions", "disc_rewards"]
         # learning epochs
         for epoch in range(self._learning_epochs):
             # mini-batches loop
-            for i, (sampled_states, _, sampled_rewards, samples_next_states, samples_terminated,
-                    sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
-                    _, sampled_omega_actions, _) in enumerate(sampled_batches):
+            for i, sampled_tensors in enumerate(sampled_batches):
+                (sampled_states, _, sampled_rewards, samples_next_states, samples_terminated,
+                 sampled_log_prob, sampled_values, sampled_returns, sampled_advantages,
+                 _, sampled_omega_actions, _) = sampled_tensors[:12]
+                # for i, (sampled_states, _, sampled_rewards, samples_next_states, samples_terminated,
+                #         sampled_log_prob, sampled_values, sampled_returns, sampled_advantages,
+                #         _, sampled_omega_actions, _) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
                 res_dict = self.policy(sampled_states, sampled_omega_actions)
                 log_prob_now = res_dict["log_prob"]

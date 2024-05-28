@@ -1,5 +1,5 @@
 # used to create the object
-name: HumanoidHOTUJump
+name: HumanoidHOTUHeading
 
 physics_engine: ${..physics_engine}
 
@@ -42,7 +42,7 @@ env:
   headingChangeStepsMin: 100
   headingChangeStepsMax: 200
   enableRandHeading: True
-  enableTaskObs: False
+  enableTaskObs: True
 
   object_motion_file:
 
