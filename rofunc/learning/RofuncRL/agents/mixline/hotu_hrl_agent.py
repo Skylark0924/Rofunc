@@ -567,12 +567,20 @@ class HOTUHRLAgent(BaseAgent):
 
         self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._mini_batch_size))
         self.track_data("Loss / Value loss", cumulative_value_loss / (self._learning_epochs * self._mini_batch_size))
+        if self.learn_style:
+            for part_i in range(self.num_parts):
+                self.track_data(f"Loss / Discriminator loss {part_i}",
+                                discriminator_loss_list[part_i] / (self._learning_epochs * self._mini_batch_size))
         if self._entropy_loss_scale:
             self.track_data("Loss / Entropy loss",
                             cumulative_entropy_loss / (self._learning_epochs * self._mini_batch_size))
         if self._lr_scheduler:
             self.track_data("Learning / Learning rate (policy)", self.scheduler_policy.get_last_lr()[0])
             self.track_data("Learning / Learning rate (value)", self.scheduler_value.get_last_lr()[0])
+            if self.learn_style:
+                for part_i in range(self.num_parts):
+                    self.track_data(f"Learning / Learning rate (discriminator {part_i})",
+                                    self.hrl_scheduler_disc_list[part_i].get_last_lr()[0])
 
     def _calc_disc_loss(self, sampled_amp_states, sampled_replay_batches, sampled_motion_batches,
                         discriminator, amp_state_preprocessor, i):
