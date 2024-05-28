@@ -473,6 +473,7 @@ class HOTUHRLAgent(BaseAgent):
         cumulative_policy_loss = 0
         cumulative_entropy_loss = 0
         cumulative_value_loss = 0
+        cumulative_hrl_disc_loss_list = np.zeros(self.num_parts)
 
         # learning epochs
         for epoch in range(self._learning_epochs):
@@ -548,6 +549,9 @@ class HOTUHRLAgent(BaseAgent):
                 cumulative_value_loss += value_loss.item()
                 if self._entropy_loss_scale:
                     cumulative_entropy_loss += entropy_loss.item()
+                if self.learn_style:
+                    for i in range(self.num_parts):
+                        cumulative_hrl_disc_loss_list[i] += discriminator_loss_list[i].item()
 
             # update learning rate
             if self._lr_scheduler:
@@ -570,7 +574,7 @@ class HOTUHRLAgent(BaseAgent):
         if self.learn_style:
             for part_i in range(self.num_parts):
                 self.track_data(f"Loss / Discriminator loss {part_i}",
-                                discriminator_loss_list[part_i] / (self._learning_epochs * self._mini_batch_size))
+                                cumulative_hrl_disc_loss_list[part_i] / (self._learning_epochs * self._mini_batch_size))
         if self._entropy_loss_scale:
             self.track_data("Loss / Entropy loss",
                             cumulative_entropy_loss / (self._learning_epochs * self._mini_batch_size))
