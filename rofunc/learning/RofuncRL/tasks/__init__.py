@@ -23,6 +23,7 @@ class Tasks:
             # from .isaacgymenv.physhoi.physhoi import PhysHOI_BallPlay
             # from .isaacgymenv.hotu.humanoid_hotu import HumanoidHOTUTask
             from .isaacgymenv.hotu.humanoid_hotu_getup import HumanoidHOTUGetupTask
+            from .isaacgymenv.hotu.humanoid_hotu_perturb import HumanoidHOTUPerturbTask
             from .isaacgymenv.hotu.humanoid_view_motion import HumanoidHOTUViewMotionTask
             from .isaacgymenv.hands.shadow_hand_block_stack import ShadowHandBlockStackTask
             from .isaacgymenv.hands.shadow_hand_bottle_cap import ShadowHandBottleCapTask
@@ -72,6 +73,7 @@ class Tasks:
                 "HumanoidPhysHOI": HumanoidPhysHOITask,
                 # "HumanoidPhysHOI": PhysHOI_BallPlay,
                 "HumanoidHOTUGetup": HumanoidHOTUGetupTask,
+                "HumanoidHOTUPerturb": HumanoidHOTUPerturbTask,
                 "HumanoidHOTUViewMotion": HumanoidHOTUViewMotionTask,
                 "BiShadowHandOver": ShadowHandOverTask,
                 "BiShadowHandBlockStack": ShadowHandBlockStackTask,
