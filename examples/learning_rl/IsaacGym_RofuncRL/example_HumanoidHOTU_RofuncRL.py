@@ -30,6 +30,8 @@ def train(custom_args):
     cfg.task.task = OmegaConf.merge(cfg.task.task, cfg_view_motion["task"])
     if custom_args.debug == "True":
         cfg.train.Trainer.wandb = False
+    if custom_args.mode == "HRL":
+        cfg.train.Agent.llc_ckpt_path = custom_args.llc_ckpt_path
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     set_seed(cfg.train.Trainer.seed)
@@ -106,7 +108,8 @@ if __name__ == "__main__":
     #  1. HumanoidHOTUGetup
     #  2. HumanoidHOTUViewMotion
     #  3. HumanoidHOTUPerturb
-    parser.add_argument("--task", type=str, default="HumanoidHOTUGetup")
+    #  4. HumanoidHOTUHeading
+    parser.add_argument("--task", type=str, default="HumanoidHOTUHeading")
     parser.add_argument("--num_envs", type=int, default=2048)
     parser.add_argument("--sim_device", type=int, default=gpu_id)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
@@ -124,12 +127,14 @@ if __name__ == "__main__":
     # Available modes:
     #  1. LLC
     #  2. HRL
-    parser.add_argument("--mode", type=str, default="LLC")
+    parser.add_argument("--mode", type=str, default="HRL")
 
     parser.add_argument("--debug", type=str, default="True")
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
+
+    parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUHumanoidWQbhandNew_24-05-26_21-16-24-361269_body_amp5/checkpoints/best_ckpt.pth")
 
     custom_args = parser.parse_args()
 

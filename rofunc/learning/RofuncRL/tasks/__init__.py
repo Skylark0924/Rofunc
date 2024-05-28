@@ -25,6 +25,7 @@ class Tasks:
             from .isaacgymenv.hotu.humanoid_hotu_getup import HumanoidHOTUGetupTask
             from .isaacgymenv.hotu.humanoid_hotu_perturb import HumanoidHOTUPerturbTask
             from .isaacgymenv.hotu.humanoid_view_motion import HumanoidHOTUViewMotionTask
+            from .isaacgymenv.hotu.humanoid_hotu_heading import HumanoidHOTUHeadingTask
             from .isaacgymenv.hands.shadow_hand_block_stack import ShadowHandBlockStackTask
             from .isaacgymenv.hands.shadow_hand_bottle_cap import ShadowHandBottleCapTask
             from .isaacgymenv.hands.shadow_hand_catch_abreast import ShadowHandCatchAbreastTask
@@ -75,6 +76,8 @@ class Tasks:
                 "HumanoidHOTUGetup": HumanoidHOTUGetupTask,
                 "HumanoidHOTUPerturb": HumanoidHOTUPerturbTask,
                 "HumanoidHOTUViewMotion": HumanoidHOTUViewMotionTask,
+                "HumanoidHOTUHeading": HumanoidHOTUHeadingTask,
+
                 "BiShadowHandOver": ShadowHandOverTask,
                 "BiShadowHandBlockStack": ShadowHandBlockStackTask,
                 "BiShadowHandBottleCap": ShadowHandBottleCapTask,
