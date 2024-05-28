@@ -6,7 +6,7 @@ physics_engine: ${..physics_engine}
 # if given, will override the device setting in gym.
 env:
   numEnvs: ${resolve_default:4096,${...num_envs}}
-  envSpacing: 5
+  envSpacing: 2
   episodeLength: 300
   cameraFollow: False # if the camera follows humanoid or not
   isFlagrun: False
