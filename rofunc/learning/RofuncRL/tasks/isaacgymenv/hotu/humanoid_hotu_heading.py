@@ -137,12 +137,12 @@ class HumanoidHOTUHeadingTask(HumanoidHOTUHRLTask):
 
         marker_handle = self.gym.create_actor(env_ptr, self._marker_asset, default_pose, "marker", col_group,
                                               col_filter, segmentation_id)
-        self.gym.set_rigid_body_color(env_ptr, marker_handle, 0, gymapi.MESH_VISUAL, gymapi.Vec3(0.8, 0.0, 0.0))
+        self.gym.set_rigid_body_color(env_ptr, marker_handle, 0, gymapi.MESH_VISUAL, gymapi.Vec3(0.8, 0.0, 0.0))  # red
         self._marker_handles.append(marker_handle)
 
         face_marker_handle = self.gym.create_actor(env_ptr, self._marker_asset, default_pose, "face_marker", col_group,
                                                    col_filter, segmentation_id)
-        self.gym.set_rigid_body_color(env_ptr, face_marker_handle, 0, gymapi.MESH_VISUAL, gymapi.Vec3(0.0, 0.0, 0.8))
+        self.gym.set_rigid_body_color(env_ptr, face_marker_handle, 0, gymapi.MESH_VISUAL, gymapi.Vec3(0.0, 0.0, 0.8))  # blue
         self._face_marker_handles.append(face_marker_handle)
 
     def _build_marker_state_tensors(self):
