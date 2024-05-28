@@ -53,8 +53,11 @@ def train(custom_args):
     if custom_args.ckpt_path is not None:
         # load checkpoint
         trainer.agent.load_ckpt(custom_args.ckpt_path,
+                                # load_modules=["policy", "value", "optimizer_policy", "optimizer_value",
+                                #               "state_preprocessor", "value_preprocessor"])
                                 load_modules=["policy", "value", "optimizer_policy", "optimizer_value",
                                               "state_preprocessor", "value_preprocessor", "encoder", "discriminator"])
+        # load_modules=["encoder", "discriminator"])
     # Start training
     trainer.train()
 
