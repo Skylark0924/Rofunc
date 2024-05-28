@@ -17,6 +17,7 @@ from typing import Callable, Union, Tuple, Optional
 
 import gym
 import gymnasium
+import math
 import numpy as np
 import torch
 import torch.nn as nn
@@ -32,6 +33,7 @@ from rofunc.learning.RofuncRL.models.actor_models import ActorPPO_Beta, ActorPPO
 from rofunc.learning.RofuncRL.models.critic_models import Critic
 from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
+from rofunc.learning.RofuncRL.processors.standard_scaler import empty_preprocessor
 from rofunc.learning.RofuncRL.utils.memory import Memory
 from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 from rofunc.learning.pre_trained_models.download import model_zoo
@@ -65,6 +67,11 @@ class HOTUHRLAgent(BaseAgent):
         :param collect_reference_motions: Function for collecting reference motions
         :param task_related_state_size: Size of task-related states
         """
+        self.amp_observation_space = amp_observation_space
+        self.motion_dataset = motion_dataset
+        self.replay_buffer = replay_buffer
+        self.collect_reference_motions = collect_reference_motions
+
         """ASE specific parameters"""
         self._ase_latent_dim = cfg.Agent.ase_latent_dim
         self._task_related_state_size = task_related_state_size
@@ -92,6 +99,9 @@ class HOTUHRLAgent(BaseAgent):
                                             self.se).to(self.device)
         self.value = Critic(cfg.Model, observation_space, self._ase_latent_dim * self.num_parts, self.se).to(
             self.device)
+
+        self.learn_style = self.cfg.Agent.learn_style
+
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
@@ -187,7 +197,65 @@ class HOTUHRLAgent(BaseAgent):
         self.need_reset = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
         self.need_terminate = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
 
+        if self.learn_style:
+            self._build_decompose_model()
+
         self._set_up()
+
+    def _build_decompose_model(self):
+        self._lr_d = self.cfg.Agent.lr_d
+        self.hrl_discriminator = Critic(self.cfg.Model, self.whole_amp_obs_space[0], self.action_space, self.se,
+                                        cfg_name='discriminator').to(self.device)
+
+        self._amp_state_preprocessor = RunningStandardScaler
+        self._amp_state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("amp_state_preprocessor_kwargs",
+                                                                            {"size": self.whole_amp_obs_space[0],
+                                                                             "device": self.device})
+        self.hrl_optimizer_disc = torch.optim.Adam(self.hrl_discriminator.parameters(), lr=self._lr_d,
+                                                   eps=self._adam_eps)
+        if self._lr_scheduler is not None:
+            self.hrl_scheduler_disc = self._lr_scheduler(self.hrl_optimizer_disc, **self._lr_scheduler_kwargs)
+        self.checkpoint_modules["hrl_optimizer_disc"] = self.hrl_optimizer_disc
+
+        self.hrl_discriminator_list = [self.hrl_discriminator]
+        self._amp_state_preprocessor_kwargs_list = [self._amp_state_preprocessor_kwargs]
+        self.hrl_optimizer_disc_list = [self.hrl_optimizer_disc]
+        self.hrl_scheduler_disc_list = [self.hrl_scheduler_disc]
+
+        if self._amp_state_preprocessor:
+            self._amp_state_preprocessor = self._amp_state_preprocessor(**self._amp_state_preprocessor_kwargs)
+            self.checkpoint_modules["amp_state_preprocessor"] = self._amp_state_preprocessor
+        else:
+            self._amp_state_preprocessor = empty_preprocessor
+        self._amp_state_preprocessor_list = [self._amp_state_preprocessor]
+
+        for i in range(1, self.num_parts):
+            disc_model = Critic(cfg=self.cfg.Model,
+                                observation_space=self.whole_amp_obs_space[i],
+                                action_space=self.action_space,
+                                state_encoder=self.se,
+                                cfg_name='discriminator').to(self.device)
+            self.rofunc_logger.module(f"Discriminator model {i}: {disc_model}")
+
+            amp_state_pre_kwargs = {"size": self.whole_amp_obs_space[i], "device": self.device}
+            optimizer_disc = torch.optim.Adam(disc_model.parameters(), lr=self._lr_d, eps=self._adam_eps)
+            amp_state_preprocessor = RunningStandardScaler(**amp_state_pre_kwargs)
+
+            if self._lr_scheduler is not None:
+                hrl_scheduler_disc = self._lr_scheduler(optimizer_disc, **self._lr_scheduler_kwargs)
+                self.hrl_scheduler_disc_list.append(hrl_scheduler_disc)
+
+            self.hrl_discriminator_list.append(disc_model)
+            self._amp_state_preprocessor_kwargs_list.append(amp_state_pre_kwargs)
+            self.hrl_optimizer_disc_list.append(optimizer_disc)
+            self._amp_state_preprocessor_list.append(amp_state_preprocessor)
+
+    def _initialize_motion_dataset(self):
+        if self.collect_reference_motions is not None:
+            for i in range(self.num_parts):
+                for _ in range(math.ceil(self.motion_dataset.memory_size / self.llc_agent._amp_batch_size)):
+                    self.motion_dataset_list[i].add_samples(
+                        states=self.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
 
     def _set_up(self):
         assert hasattr(self, "policy"), "Policy is not defined."
@@ -210,9 +278,19 @@ class HOTUHRLAgent(BaseAgent):
 
         super()._set_up()
 
+        for i in range(self.num_parts):
+            self.motion_dataset_list[i].create_tensor(name="states", size=self.whole_amp_obs_space[i],
+                                                      dtype=torch.float32)
+            self.replay_buffer_list[i].create_tensor(name="states", size=self.whole_amp_obs_space[i],
+                                                     dtype=torch.float32)
+        self._initialize_motion_dataset()
+
     def _get_llc_action(self, states: torch.Tensor, omega_actions: torch.Tensor):
         # get actions from low-level controller
-        task_agnostic_states = states[:, :-self._task_related_state_size]
+        if self._task_related_state_size == 0:
+            task_agnostic_states = states
+        else:
+            task_agnostic_states = states[:, :-self._task_related_state_size]
 
         omega_actions = omega_actions.view((omega_actions.shape[0], self.num_parts, self._ase_latent_dim))
         z = torch.nn.functional.normalize(omega_actions, dim=-1)
@@ -317,6 +395,31 @@ class HOTUHRLAgent(BaseAgent):
         style_rewards = self.memory.get_tensor_by_name("disc_rewards")
         combined_rewards = self._task_reward_weight * rewards + self._style_reward_weight * style_rewards
 
+        if self.learn_style:
+            amp_logits_list = []
+            for i in range(self.num_parts):
+                # update dataset of reference motions
+                self.motion_dataset_list[i].add_samples(
+                    states=self.llc_agent.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
+                amp_logits_list.append(
+                    self.hrl_discriminator_list[i](
+                        self._amp_state_preprocessor_list[i](self.memory.get_tensor_by_name(f"amp_states_{i}"))))
+
+            hrl_style_rewards = 1
+            for i in range(self.num_parts):
+                if self.llc_agent._least_square_discriminator:
+                    hrl_style_rewards_tmp = torch.maximum(
+                        torch.tensor(1 - 0.25 * torch.square(1 - amp_logits_list[i])),
+                        torch.tensor(0.0001, device=self.device))
+                else:
+                    hrl_style_rewards_tmp = -torch.log(
+                        torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits_list[i]))),
+                                      torch.tensor(0.0001, device=self.device)))
+                hrl_style_rewards *= hrl_style_rewards_tmp
+            hrl_style_rewards *= self.llc_agent._discriminator_reward_scale
+
+            combined_rewards += self._style_reward_weight * hrl_style_rewards
+
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
         next_values = self.memory.get_tensor_by_name("next_values")
@@ -345,12 +448,27 @@ class HOTUHRLAgent(BaseAgent):
         '''Sample mini-batches from memory and update the network'''
         sampled_batches = self.memory.sample_all(names=self._tensors_names, mini_batches=self._mini_batch_size)
 
+        sampled_motion_batches_list = []
+        sampled_replay_batches_list = []
+        for i in range(self.num_parts):
+            sampled_motion_batches = self.motion_dataset_list[i].sample(names=["states"],
+                                                                        batch_size=self.memory.memory_size * self.memory.num_envs,
+                                                                        mini_batches=self._mini_batch_size)
+
+            if len(self.replay_buffer):
+                sampled_replay_batches = self.replay_buffer_list[i].sample(names=["states"],
+                                                                           batch_size=self.memory.memory_size * self.memory.num_envs,
+                                                                           mini_batches=self._mini_batch_size)
+            else:
+                sampled_replay_batches = [[batches[self._tensors_names.index(f"amp_states_{i}")]] for batches in
+                                          sampled_batches]
+            sampled_motion_batches_list.append(sampled_motion_batches)
+            sampled_replay_batches_list.append(sampled_replay_batches)
+
         cumulative_policy_loss = 0
         cumulative_entropy_loss = 0
         cumulative_value_loss = 0
 
-        # self._tensors_names = ["states", "actions", "rewards", "next_states", "terminated", "log_prob", "values",
-        #                        "returns", "advantages", "next_values", "omega_actions", "disc_rewards"]
         # learning epochs
         for epoch in range(self._learning_epochs):
             # mini-batches loop
@@ -358,9 +476,13 @@ class HOTUHRLAgent(BaseAgent):
                 (sampled_states, _, sampled_rewards, samples_next_states, samples_terminated,
                  sampled_log_prob, sampled_values, sampled_returns, sampled_advantages,
                  _, sampled_omega_actions, _) = sampled_tensors[:12]
-                # for i, (sampled_states, _, sampled_rewards, samples_next_states, samples_terminated,
-                #         sampled_log_prob, sampled_values, sampled_returns, sampled_advantages,
-                #         _, sampled_omega_actions, _) in enumerate(sampled_batches):
+
+                sampled_amp_states_list = []
+                for part_i in range(self.num_parts):
+                    sampled_amp_states = sampled_tensors[self._tensors_names.index(f"amp_states_{part_i}")]
+                    sampled_amp_states_list.append(sampled_amp_states)
+                assert len(sampled_amp_states_list) == self.num_parts
+
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
                 res_dict = self.policy(sampled_states, sampled_omega_actions)
                 log_prob_now = res_dict["log_prob"]
@@ -385,6 +507,17 @@ class HOTUHRLAgent(BaseAgent):
                                                                    max=self._value_clip)
                 value_loss = self._value_loss_scale * F.mse_loss(sampled_returns, predicted_values)
 
+                if self.learn_style:
+                    discriminator_loss_list = []
+                    for part_i in range(self.num_parts):
+                        discriminator_loss = self._calc_disc_loss(sampled_amp_states_list[part_i],
+                                                                  sampled_replay_batches_list[part_i],
+                                                                  sampled_motion_batches_list[part_i],
+                                                                  self.hrl_discriminator_list[part_i],
+                                                                  self._amp_state_preprocessor_list[part_i],
+                                                                  i)
+                        discriminator_loss_list.append(discriminator_loss)
+
                 '''Update networks'''
                 # Update policy network
                 self.optimizer_policy.zero_grad()
@@ -400,6 +533,11 @@ class HOTUHRLAgent(BaseAgent):
                     nn.utils.clip_grad_norm_(self.value.parameters(), self._grad_norm_clip)
                 self.optimizer_value.step()
 
+                if self.learn_style:
+                    for part_i in range(self.num_parts):
+                        self._update_disc(discriminator_loss_list[part_i], self.hrl_discriminator_list[part_i],
+                                          self.hrl_optimizer_disc_list[part_i])
+
                 # update cumulative losses
                 cumulative_policy_loss += policy_loss.item()
                 cumulative_value_loss += value_loss.item()
@@ -410,6 +548,10 @@ class HOTUHRLAgent(BaseAgent):
             if self._lr_scheduler:
                 self.scheduler_policy.step()
                 self.scheduler_value.step()
+
+                if self.learn_style:
+                    for part_i in range(self.num_parts):
+                        self.hrl_scheduler_disc_list[part_i].step()
 
         # record data
         self.track_data("Info / Combined rewards", combined_rewards.mean().cpu())
@@ -424,3 +566,75 @@ class HOTUHRLAgent(BaseAgent):
         if self._lr_scheduler:
             self.track_data("Learning / Learning rate (policy)", self.scheduler_policy.get_last_lr()[0])
             self.track_data("Learning / Learning rate (value)", self.scheduler_value.get_last_lr()[0])
+
+    def _calc_disc_loss(self, sampled_amp_states, sampled_replay_batches, sampled_motion_batches,
+                        discriminator, amp_state_preprocessor, i):
+        # compute discriminator loss
+        if self.llc_agent._discriminator_batch_size:
+            sampled_amp_states_batch = amp_state_preprocessor(
+                sampled_amp_states[0:self.llc_agent._discriminator_batch_size], train=True)
+            sampled_amp_replay_states = amp_state_preprocessor(
+                sampled_replay_batches[i][0][0:self.llc_agent._discriminator_batch_size], train=True)
+            sampled_amp_motion_states = amp_state_preprocessor(
+                sampled_motion_batches[i][0][0:self.llc_agent._discriminator_batch_size], train=True)
+        else:
+            sampled_amp_states_batch = amp_state_preprocessor(sampled_amp_states, train=True)
+            sampled_amp_replay_states = amp_state_preprocessor(sampled_replay_batches[i][0],
+                                                               train=True)
+            sampled_amp_motion_states = amp_state_preprocessor(sampled_motion_batches[i][0],
+                                                               train=True)
+
+        sampled_amp_motion_states.requires_grad_(True)
+        amp_logits = discriminator(sampled_amp_states_batch)
+        amp_replay_logits = discriminator(sampled_amp_replay_states)
+        amp_motion_logits = discriminator(sampled_amp_motion_states)
+        amp_cat_logits = torch.cat([amp_logits, amp_replay_logits], dim=0)
+
+        # discriminator prediction loss
+        if self.llc_agent._least_square_discriminator:
+            discriminator_loss = 0.5 * (
+                    F.mse_loss(amp_cat_logits, -torch.ones_like(amp_cat_logits), reduction='mean')
+                    + F.mse_loss(amp_motion_logits, torch.ones_like(amp_motion_logits),
+                                 reduction='mean'))
+        else:
+            discriminator_loss = 0.5 * (
+                    nn.BCEWithLogitsLoss()(amp_cat_logits, torch.zeros_like(amp_cat_logits))
+                    + nn.BCEWithLogitsLoss()(amp_motion_logits,
+                                             torch.ones_like(amp_motion_logits)))
+
+        # discriminator logit regularization
+        if self.llc_agent._discriminator_logit_regularization_scale:
+            logit_weights = torch.flatten(list(discriminator.modules())[-1].weight)
+            discriminator_loss += self.llc_agent._discriminator_logit_regularization_scale * torch.sum(
+                torch.square(logit_weights))
+
+        # discriminator gradient penalty TODO: check whether this is used
+        if self.llc_agent._discriminator_gradient_penalty_scale:
+            amp_motion_gradient = torch.autograd.grad(amp_motion_logits,
+                                                      sampled_amp_motion_states,
+                                                      grad_outputs=torch.ones_like(
+                                                          amp_motion_logits),
+                                                      create_graph=True,
+                                                      retain_graph=True,
+                                                      only_inputs=True)
+            gradient_penalty = torch.sum(torch.square(amp_motion_gradient[0]), dim=-1).mean()
+            discriminator_loss += self.llc_agent._discriminator_gradient_penalty_scale * gradient_penalty
+
+        # discriminator weight decay
+        if self.llc_agent._discriminator_weight_decay_scale:
+            weights = [torch.flatten(module.weight) for module in discriminator.modules()
+                       if isinstance(module, torch.nn.Linear)]
+            weight_decay = torch.sum(torch.square(torch.cat(weights, dim=-1)))
+            discriminator_loss += self.llc_agent._discriminator_weight_decay_scale * weight_decay
+
+        discriminator_loss *= self.llc_agent._discriminator_loss_scale
+
+        return discriminator_loss
+
+    def _update_disc(self, discriminator_loss, discriminator, optimizer_disc):
+        # Update discriminator network
+        optimizer_disc.zero_grad()
+        discriminator_loss.backward()
+        if self._grad_norm_clip > 0:
+            nn.utils.clip_grad_norm_(discriminator.parameters(), self._grad_norm_clip)
+        optimizer_disc.step()
