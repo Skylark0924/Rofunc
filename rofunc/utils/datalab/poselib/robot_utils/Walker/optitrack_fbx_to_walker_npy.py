@@ -40,7 +40,8 @@ def _run_sim(motion):
                   "left_leg_l1": gymapi.AXIS_ROTATION, "right_leg_l1": gymapi.AXIS_ROTATION,
                   "left_limb_l1": gymapi.AXIS_ROTATION, "right_limb_l1": gymapi.AXIS_ROTATION,
                   "left_leg_l4": gymapi.AXIS_ALL, "right_leg_l4": gymapi.AXIS_ALL,
-                  "left_leg_l6": gymapi.AXIS_ALL, "right_leg_l6": gymapi.AXIS_ALL}
+                  "left_leg_l6": gymapi.AXIS_ALL, "right_leg_l6": gymapi.AXIS_ALL,
+                  "head_l2": gymapi.AXIS_ROTATION,}
     body_ids = [motion.skeleton_tree._node_indices[link] for link in body_links.keys()]
 
     all_links = list(body_links.keys())
@@ -266,7 +267,7 @@ if __name__ == '__main__':
     # parser.add_argument("--fbx_file", type=str,
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
@@ -298,6 +299,6 @@ if __name__ == '__main__':
         pool.map(npy_from_fbx, fbx_files)
     else:
         for fbx_file in fbx_files:
-            if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2walker_dof_states.npy')):
-                continue
+            # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2walker_dof_states.npy')):
+            #     continue
             npy_from_fbx(fbx_file)

@@ -16,6 +16,7 @@
 Attention: Since the Autodesk FBX SDK just supports Python 3.7, this script should be run with Python 3.7.
 """
 
+from tqdm import tqdm
 import multiprocessing
 import os
 import sys
@@ -269,7 +270,7 @@ if __name__ == '__main__':
     # parser.add_argument("--fbx_file", type=str,
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_04_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
@@ -301,7 +302,9 @@ if __name__ == '__main__':
         pool = multiprocessing.Pool()
         pool.map(npy_from_fbx, fbx_files)
     else:
-        for fbx_file in fbx_files:
-            if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2bruce_dof_states.npy')):
-                continue
-            npy_from_fbx(fbx_file)
+        with tqdm(total=len(fbx_files)) as pbar:
+            for fbx_file in fbx_files:
+                # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2bruce_dof_states.npy')):
+                #     continue
+                npy_from_fbx(fbx_file)
+                pbar.update(1)

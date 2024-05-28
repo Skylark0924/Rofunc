@@ -7,8 +7,8 @@ env:
   collisionFilter: -1
 
   # animation files to learn from
-#  motion_file: "examples/data/hotu2/20240509/all_hotu_motion.yaml"
-  motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2hotu.npy"
+  motion_file: "examples/data/hotu2/20240509/all_hotu_motion.yaml"
+#  motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2hotu.npy"
 #  motion_file: "examples/data/hotu2/20240509/Jumping_Take 2024-05-09 04.15.38 PM_optitrack2hotu.npy"
 
   use_extra_dof_states_motion: False

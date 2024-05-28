@@ -54,7 +54,7 @@ def train(custom_args):
         # load checkpoint
         trainer.agent.load_ckpt(custom_args.ckpt_path,
                                 load_modules=["policy", "value", "optimizer_policy", "optimizer_value",
-                                              "state_preprocessor", "value_preprocessor"])
+                                              "state_preprocessor", "value_preprocessor", "encoder", "discriminator"])
     # Start training
     trainer.train()
 
@@ -113,13 +113,13 @@ if __name__ == "__main__":
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
     #  8. HOTUZJUHumanoidWQbhandNew
-    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUH1WQbhandNew")
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUHumanoidWQbhandNew")
     parser.add_argument("--mode", type=str, default="LLC")
 
     parser.add_argument("--debug", type=str, default="False")
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
-    parser.add_argument("--ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUH1WQbhandNew_24-05-26_14-36-25-412409_amp_10/checkpoints/best_ckpt.pth")
+    parser.add_argument("--ckpt_path", type=str, default=None)
 
     custom_args = parser.parse_args()
 
