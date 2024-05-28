@@ -14,7 +14,7 @@
 import torch
 
 from rofunc.learning.RofuncRL.agents.mixline.hotu_llc_agent import HOTULLCAgent
-from rofunc.learning.RofuncRL.agents.mixline.hotu_hlmm_agent import HOTUHLMMAgent
+from rofunc.learning.RofuncRL.agents.mixline.hotu_hrl_agent import HOTUHRLAgent
 from rofunc.learning.RofuncRL.agents.mixline.ase_agent import ASEAgent
 from rofunc.learning.RofuncRL.agents.mixline.ase_hrl_agent import ASEHRLAgent
 from rofunc.learning.RofuncRL.trainers.base_trainer import BaseTrainer
@@ -41,14 +41,14 @@ class HOTUTrainer(BaseTrainer):
                                           num_samples))
 
         elif self.mode == "HRL":  # HRL
-            self.agent = ASEHRLAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
-                                     device, self.exp_dir, self.rofunc_logger,
-                                     amp_observation_space=self.env.amp_observation_space,
-                                     motion_dataset=self.motion_dataset,
-                                     replay_buffer=self.replay_buffer,
-                                     collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
-                                         num_samples),
-                                     task_related_state_size=self.env.get_task_obs_size())
+            self.agent = HOTUHRLAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
+                                      device, self.exp_dir, self.rofunc_logger,
+                                      amp_observation_space=self.env.amp_observation_space,
+                                      motion_dataset=self.motion_dataset,
+                                      replay_buffer=self.replay_buffer,
+                                      collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
+                                          num_samples),
+                                      task_related_state_size=self.env.get_task_obs_size())
         # elif self.mode == "RLRF":  # RLRF
         #     self.agent = HOTURLRFAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
         #                                device, self.exp_dir, self.rofunc_logger,
