@@ -94,8 +94,8 @@ class HumanoidHOTULocationTask(HumanoidHOTUHRLTask):
 
         self._marker_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
 
-    def _build_env(self, env_id, env_ptr, humanoid_asset):
-        super()._build_env(env_id, env_ptr, humanoid_asset)
+    def _build_env(self, env_id, env_ptr, humanoid_asset, object_assets):
+        super()._build_env(env_id, env_ptr, humanoid_asset, object_assets)
 
         if not self.headless:
             self._build_marker(env_id, env_ptr)
