@@ -206,6 +206,8 @@ class HOTUHRLAgent(BaseAgent):
         self._lr_d = self.cfg.Agent.lr_d
         self.hrl_discriminator = Critic(self.cfg.Model, self.whole_amp_obs_space[0], self.action_space, self.se,
                                         cfg_name='discriminator').to(self.device)
+        self.rofunc_logger.module(f"HRL Discriminator model {0}: {self.hrl_discriminator}")
+        self.checkpoint_modules["hrl_discriminator"] = self.hrl_discriminator
 
         self._amp_state_preprocessor = RunningStandardScaler
         self._amp_state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("amp_state_preprocessor_kwargs",
@@ -235,11 +237,14 @@ class HOTUHRLAgent(BaseAgent):
                                 action_space=self.action_space,
                                 state_encoder=self.se,
                                 cfg_name='discriminator').to(self.device)
-            self.rofunc_logger.module(f"Discriminator model {i}: {disc_model}")
+            self.rofunc_logger.module(f"HRL Discriminator model {i}: {disc_model}")
+            self.checkpoint_modules[f"hrl_discriminator_{i}"] = disc_model
 
             amp_state_pre_kwargs = {"size": self.whole_amp_obs_space[i], "device": self.device}
             optimizer_disc = torch.optim.Adam(disc_model.parameters(), lr=self._lr_d, eps=self._adam_eps)
             amp_state_preprocessor = RunningStandardScaler(**amp_state_pre_kwargs)
+            self.checkpoint_modules[f"hrl_optimizer_disc_{i}"] = optimizer_disc
+            self.checkpoint_modules[f"amp_state_preprocessor_{i}"] = amp_state_preprocessor
 
             if self._lr_scheduler is not None:
                 hrl_scheduler_disc = self._lr_scheduler(optimizer_disc, **self._lr_scheduler_kwargs)
@@ -557,6 +562,8 @@ class HOTUHRLAgent(BaseAgent):
         self.track_data("Info / Combined rewards", combined_rewards.mean().cpu())
         self.track_data("Info / Style rewards", style_rewards.mean().cpu())
         self.track_data("Info / Task rewards", rewards.mean().cpu())
+        if self.learn_style:
+            self.track_data("Info / HRL style rewards", hrl_style_rewards.mean().cpu())
 
         self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._mini_batch_size))
         self.track_data("Loss / Value loss", cumulative_value_loss / (self._learning_epochs * self._mini_batch_size))
