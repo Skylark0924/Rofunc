@@ -449,7 +449,7 @@ if __name__ == '__main__':
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
                         # default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml

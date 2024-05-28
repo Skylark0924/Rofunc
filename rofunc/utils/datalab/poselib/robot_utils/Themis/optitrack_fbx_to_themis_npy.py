@@ -634,7 +634,7 @@ if __name__ == '__main__':
     # parser.add_argument("--fbx_file", type=str,
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_04_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
