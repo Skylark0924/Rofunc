@@ -73,12 +73,12 @@ class HumanoidHOTULocationTask(HumanoidHOTUHRLTask):
                                                      gymtorch.unwrap_tensor(self._marker_actor_ids),
                                                      len(self._marker_actor_ids))
 
-    def _create_envs(self, num_envs, spacing, num_per_row):
+    def _create_envs(self, spacing, num_per_row):
         if not self.headless:
             self._marker_handles = []
             self._load_marker_asset()
 
-        super()._create_envs(num_envs, spacing, num_per_row)
+        super()._create_envs(spacing, num_per_row)
 
     def _load_marker_asset(self):
         asset_root = os.path.join(get_rofunc_path(), "simulator/assets")
