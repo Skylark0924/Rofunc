@@ -76,6 +76,8 @@ def inference(custom_args):
     cfg_view_motion = get_view_motion_config(custom_args.humanoid_robot_type)
     cfg.task.env = OmegaConf.merge(cfg.task.env, cfg_view_motion["env"])
     cfg.task.task = OmegaConf.merge(cfg.task.task, cfg_view_motion["task"])
+    if custom_args.mode == "HRL":
+        cfg.train.Agent.llc_ckpt_path = custom_args.llc_ckpt_path
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     # Instantiate the Isaac Gym environment
