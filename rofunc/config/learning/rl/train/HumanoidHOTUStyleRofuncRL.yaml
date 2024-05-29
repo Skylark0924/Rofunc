@@ -54,8 +54,11 @@ Agent:
   ase_latent_steps_min: 1
   ase_latent_steps_max: 150
 
-  task_reward_weight: 0.9
-  style_reward_weight: 0.1
+  task_reward_weight: 0
+  style_reward_weight: 1
+  hrl_style_reward_weight: 2
+
+  least_square_discriminator: false
 
   kl_threshold: 0                  # Initial coefficient for KL divergence.
 
