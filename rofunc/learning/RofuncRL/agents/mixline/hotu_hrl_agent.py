@@ -159,6 +159,8 @@ class HOTUHRLAgent(BaseAgent):
         self._clip_predicted_values = self.cfg.Agent.clip_predicted_values
         self._task_reward_weight = self.cfg.Agent.task_reward_weight
         self._style_reward_weight = self.cfg.Agent.style_reward_weight
+        self._hrl_style_reward_weight = self.cfg.Agent.hrl_style_reward_weight
+        self._hrl_least_square_discriminator = self.cfg.Agent.least_square_discriminator
         self._kl_threshold = self.cfg.Agent.kl_threshold
         self._rewards_shaper = None
         # self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 0.01)
@@ -256,11 +258,11 @@ class HOTUHRLAgent(BaseAgent):
             self._amp_state_preprocessor_list.append(amp_state_preprocessor)
 
     def _initialize_motion_dataset(self):
-        if self.collect_reference_motions is not None:
+        if self.llc_agent.collect_reference_motions is not None:
             for i in range(self.num_parts):
                 for _ in range(math.ceil(self.motion_dataset.memory_size / self.llc_agent._amp_batch_size)):
                     self.motion_dataset_list[i].add_samples(
-                        states=self.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
+                        states=self.llc_agent.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
 
     def _set_up(self):
         assert hasattr(self, "policy"), "Policy is not defined."
@@ -401,29 +403,32 @@ class HOTUHRLAgent(BaseAgent):
         combined_rewards = self._task_reward_weight * rewards + self._style_reward_weight * style_rewards
 
         if self.learn_style:
-            amp_logits_list = []
+            amp_states_list = []
             for i in range(self.num_parts):
                 # update dataset of reference motions
                 self.motion_dataset_list[i].add_samples(
                     states=self.llc_agent.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
-                amp_logits_list.append(
-                    self.hrl_discriminator_list[i](
-                        self._amp_state_preprocessor_list[i](self.memory.get_tensor_by_name(f"amp_states_{i}"))))
+                amp_states_list.append(self.memory.get_tensor_by_name(f"amp_states_{i}"))
 
-            hrl_style_rewards = 1
-            for i in range(self.num_parts):
-                if self.llc_agent._least_square_discriminator:
-                    hrl_style_rewards_tmp = torch.maximum(
-                        torch.tensor(1 - 0.25 * torch.square(1 - amp_logits_list[i])),
-                        torch.tensor(0.0001, device=self.device))
-                else:
-                    hrl_style_rewards_tmp = -torch.log(
-                        torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits_list[i]))),
-                                      torch.tensor(0.0001, device=self.device)))
-                hrl_style_rewards *= hrl_style_rewards_tmp
-            hrl_style_rewards *= self.llc_agent._discriminator_reward_scale
+            with torch.no_grad():
+                amp_logits_list = []
+                for i in range(self.num_parts):
+                    amp_logits_list.append(
+                        self.hrl_discriminator_list[i](self._amp_state_preprocessor_list[i](amp_states_list[i])))
 
-            combined_rewards += self._style_reward_weight * hrl_style_rewards
+                hrl_style_rewards = 1
+                for i in range(self.num_parts):
+                    if self._hrl_least_square_discriminator:
+                        hrl_style_rewards_tmp = torch.maximum(
+                            torch.tensor(1 - 0.25 * torch.square(1 - amp_logits_list[i])),
+                            torch.tensor(0.0001, device=self.device))
+                    else:
+                        hrl_style_rewards_tmp = -torch.log(
+                            torch.maximum(torch.tensor(1 - 1 / (1 + torch.exp(-amp_logits_list[i]))),
+                                          torch.tensor(0.0001, device=self.device)))
+                    hrl_style_rewards *= hrl_style_rewards_tmp
+
+                combined_rewards += self._hrl_style_reward_weight * hrl_style_rewards
 
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
@@ -514,7 +519,7 @@ class HOTUHRLAgent(BaseAgent):
                 value_loss = self._value_loss_scale * F.mse_loss(sampled_returns, predicted_values)
 
                 if self.learn_style:
-                    discriminator_loss_list = []
+                    hrl_discriminator_loss_list = []
                     for part_i in range(self.num_parts):
                         discriminator_loss = self._calc_disc_loss(sampled_amp_states_list[part_i],
                                                                   sampled_replay_batches_list[part_i],
@@ -522,7 +527,7 @@ class HOTUHRLAgent(BaseAgent):
                                                                   self.hrl_discriminator_list[part_i],
                                                                   self._amp_state_preprocessor_list[part_i],
                                                                   i)
-                        discriminator_loss_list.append(discriminator_loss)
+                        hrl_discriminator_loss_list.append(discriminator_loss)
 
                 '''Update networks'''
                 # Update policy network
@@ -541,7 +546,7 @@ class HOTUHRLAgent(BaseAgent):
 
                 if self.learn_style:
                     for part_i in range(self.num_parts):
-                        self._update_disc(discriminator_loss_list[part_i], self.hrl_discriminator_list[part_i],
+                        self._update_disc(hrl_discriminator_loss_list[part_i], self.hrl_discriminator_list[part_i],
                                           self.hrl_optimizer_disc_list[part_i])
 
                 # update cumulative losses
@@ -551,7 +556,7 @@ class HOTUHRLAgent(BaseAgent):
                     cumulative_entropy_loss += entropy_loss.item()
                 if self.learn_style:
                     for i in range(self.num_parts):
-                        cumulative_hrl_disc_loss_list[i] += discriminator_loss_list[i].item()
+                        cumulative_hrl_disc_loss_list[i] += hrl_discriminator_loss_list[i].item()
 
             # update learning rate
             if self._lr_scheduler:
@@ -561,6 +566,11 @@ class HOTUHRLAgent(BaseAgent):
                 if self.learn_style:
                     for part_i in range(self.num_parts):
                         self.hrl_scheduler_disc_list[part_i].step()
+
+        if self.learn_style:
+            # update AMP replay buffer
+            for i in range(self.num_parts):
+                self.replay_buffer_list[i].add_samples(states=amp_states_list[i].view(-1, amp_states_list[i].shape[-1]))
 
         # record data
         self.track_data("Info / Combined rewards", combined_rewards.mean().cpu())
