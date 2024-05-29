@@ -206,34 +206,13 @@ class HOTUHRLAgent(BaseAgent):
 
     def _build_decompose_model(self):
         self._lr_d = self.cfg.Agent.lr_d
-        self.hrl_discriminator = Critic(self.cfg.Model, self.whole_amp_obs_space[0], self.action_space, self.se,
-                                        cfg_name='discriminator').to(self.device)
-        self.rofunc_logger.module(f"HRL Discriminator model {0}: {self.hrl_discriminator}")
-        self.checkpoint_modules["hrl_discriminator"] = self.hrl_discriminator
+        self.hrl_scheduler_disc_list = []
+        self.hrl_discriminator_list = []
+        self._hrl_amp_state_preprocessor_kwargs_list = []
+        self.hrl_optimizer_disc_list = []
+        self._hrl_amp_state_preprocessor_list = []
 
-        self._amp_state_preprocessor = RunningStandardScaler
-        self._amp_state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("amp_state_preprocessor_kwargs",
-                                                                            {"size": self.whole_amp_obs_space[0],
-                                                                             "device": self.device})
-        self.hrl_optimizer_disc = torch.optim.Adam(self.hrl_discriminator.parameters(), lr=self._lr_d,
-                                                   eps=self._adam_eps)
-        if self._lr_scheduler is not None:
-            self.hrl_scheduler_disc = self._lr_scheduler(self.hrl_optimizer_disc, **self._lr_scheduler_kwargs)
-        self.checkpoint_modules["hrl_optimizer_disc"] = self.hrl_optimizer_disc
-
-        self.hrl_discriminator_list = [self.hrl_discriminator]
-        self._amp_state_preprocessor_kwargs_list = [self._amp_state_preprocessor_kwargs]
-        self.hrl_optimizer_disc_list = [self.hrl_optimizer_disc]
-        self.hrl_scheduler_disc_list = [self.hrl_scheduler_disc]
-
-        if self._amp_state_preprocessor:
-            self._amp_state_preprocessor = self._amp_state_preprocessor(**self._amp_state_preprocessor_kwargs)
-            self.checkpoint_modules["amp_state_preprocessor"] = self._amp_state_preprocessor
-        else:
-            self._amp_state_preprocessor = empty_preprocessor
-        self._amp_state_preprocessor_list = [self._amp_state_preprocessor]
-
-        for i in range(1, self.num_parts):
+        for i in range(self.num_parts):
             disc_model = Critic(cfg=self.cfg.Model,
                                 observation_space=self.whole_amp_obs_space[i],
                                 action_space=self.action_space,
@@ -246,23 +225,23 @@ class HOTUHRLAgent(BaseAgent):
             optimizer_disc = torch.optim.Adam(disc_model.parameters(), lr=self._lr_d, eps=self._adam_eps)
             amp_state_preprocessor = RunningStandardScaler(**amp_state_pre_kwargs)
             self.checkpoint_modules[f"hrl_optimizer_disc_{i}"] = optimizer_disc
-            self.checkpoint_modules[f"amp_state_preprocessor_{i}"] = amp_state_preprocessor
+            self.checkpoint_modules[f"hrl_amp_state_preprocessor_{i}"] = amp_state_preprocessor
 
             if self._lr_scheduler is not None:
-                hrl_scheduler_disc = self._lr_scheduler(optimizer_disc, **self._lr_scheduler_kwargs)
-                self.hrl_scheduler_disc_list.append(hrl_scheduler_disc)
+                scheduler_disc = self._lr_scheduler(optimizer_disc, **self._lr_scheduler_kwargs)
+                self.hrl_scheduler_disc_list.append(scheduler_disc)
 
             self.hrl_discriminator_list.append(disc_model)
-            self._amp_state_preprocessor_kwargs_list.append(amp_state_pre_kwargs)
+            self._hrl_amp_state_preprocessor_kwargs_list.append(amp_state_pre_kwargs)
             self.hrl_optimizer_disc_list.append(optimizer_disc)
-            self._amp_state_preprocessor_list.append(amp_state_preprocessor)
+            self._hrl_amp_state_preprocessor_list.append(amp_state_preprocessor)
 
     def _initialize_motion_dataset(self):
-        if self.llc_agent.collect_reference_motions is not None:
+        if self.collect_reference_motions is not None:
             for i in range(self.num_parts):
                 for _ in range(math.ceil(self.motion_dataset.memory_size / self.llc_agent._amp_batch_size)):
                     self.motion_dataset_list[i].add_samples(
-                        states=self.llc_agent.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
+                        states=self.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
 
     def _set_up(self):
         assert hasattr(self, "policy"), "Policy is not defined."
@@ -407,14 +386,14 @@ class HOTUHRLAgent(BaseAgent):
             for i in range(self.num_parts):
                 # update dataset of reference motions
                 self.motion_dataset_list[i].add_samples(
-                    states=self.llc_agent.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
+                    states=self.collect_reference_motions(self.llc_agent._amp_batch_size)[i])
                 amp_states_list.append(self.memory.get_tensor_by_name(f"amp_states_{i}"))
 
             with torch.no_grad():
                 amp_logits_list = []
                 for i in range(self.num_parts):
                     amp_logits_list.append(
-                        self.hrl_discriminator_list[i](self._amp_state_preprocessor_list[i](amp_states_list[i])))
+                        self.hrl_discriminator_list[i](self._hrl_amp_state_preprocessor_list[i](amp_states_list[i])))
 
                 hrl_style_rewards = 1
                 for i in range(self.num_parts):
@@ -428,7 +407,7 @@ class HOTUHRLAgent(BaseAgent):
                                           torch.tensor(0.0001, device=self.device)))
                     hrl_style_rewards *= hrl_style_rewards_tmp
 
-                combined_rewards += self._hrl_style_reward_weight * hrl_style_rewards
+            combined_rewards = self._hrl_style_reward_weight * hrl_style_rewards
 
         '''Compute Generalized Advantage Estimator (GAE)'''
         values = self.memory.get_tensor_by_name("values")
@@ -525,7 +504,7 @@ class HOTUHRLAgent(BaseAgent):
                                                                   sampled_replay_batches_list[part_i],
                                                                   sampled_motion_batches_list[part_i],
                                                                   self.hrl_discriminator_list[part_i],
-                                                                  self._amp_state_preprocessor_list[part_i],
+                                                                  self._hrl_amp_state_preprocessor_list[part_i],
                                                                   i)
                         hrl_discriminator_loss_list.append(discriminator_loss)
 
