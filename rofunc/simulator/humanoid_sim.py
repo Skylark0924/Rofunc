@@ -31,7 +31,7 @@ class HumanoidSim(RobotSim):
         self.num_parts = len(self.parts)
         self.whole_rb_dict = self.humanoid_info["rigid_bodies"]
         self.wb_decompose_param_rb_ids = [
-                [self.whole_rb_dict[rb_name] for rb_name in self.humanoid_info["parts"][part]["rigid_bodies"]]
+            [self.whole_rb_dict[rb_name] for rb_name in self.humanoid_info["parts"][part]["rigid_bodies"]]
             for part in self.parts]
         self.set_colors_for_parts(self.robot_handles, self.wb_decompose_param_rb_ids)
 
@@ -112,28 +112,6 @@ class HumanoidSim(RobotSim):
             # Setup a first-person camera embedded in CURI's head
             self.add_head_embedded_camera()
         super().show(visual_obs_flag)
-
-    def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index, verbose=True):
-        from isaacgym import gymutil
-
-        for i in range(self.num_envs):
-            # Update attractor target from current franka state
-            attractor_properties = self.gym.get_attractor_properties(self.envs[i], attractor_handles[i])
-            pose = attractor_properties.target
-            # pose.p: (x, y, z), pose.r: (w, x, y, z)
-            pose.p.x = traj[index, 0]
-            pose.p.y = traj[index, 1]
-            pose.p.z = traj[index, 2]
-            pose.r.w = traj[index, 6]
-            pose.r.x = traj[index, 3]
-            pose.r.y = traj[index, 4]
-            pose.r.z = traj[index, 5]
-            self.gym.set_attractor_target(self.envs[i], attractor_handles[i], pose)
-
-            if verbose:
-                # Draw axes and sphere at attractor location
-                gymutil.draw_lines(axes_geom, self.gym, self.viewer, self.envs[i], pose)
-                gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], pose)
 
     def run_traj(self, traj, attracted_rigid_bodies=None, update_freq=0.001, verbose=True, **kwargs):
         if attracted_rigid_bodies is None:
