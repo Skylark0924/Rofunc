@@ -39,7 +39,7 @@
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
         <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
         <body name="pelvis" pos="0 0 1" childclass="body">
-            <!--            <freejoint name="root"/>-->
+                        <freejoint name="root"/>
             <site name="root" class="force-torque"/>
             <geom name="pelvis" type="sphere" pos="0 0 0.07" size=".09" density="2226" contype="0" conaffinity="1"/>
             <geom name="upper_waist" type="sphere" pos="0 0 0.205" size="0.07" density="2226" contype="0"
@@ -47,15 +47,17 @@
             <site name="pelvis" class="touch" type="sphere" pos="0 0 0.07" size="0.091"/>
             <site name="upper_waist" class="touch" type="sphere" pos="0 0 0.205" size="0.071"/>
 
-            <body name="translate_pelvis" pos="0 0 0">
-                <joint name="translate_x" type="slide" axis="1 0 0" range="-5 5"/>
-                <joint name="translate_y" type="slide" axis="0 1 0" range="-5 5"/>
-                <joint name="translate_z" type="slide" axis="0 0 1" range="-5 5"/>
+<!--            <joint name="free" type="free" />-->
 
-                <body name="rotation_pelvis" pos="0 0 0">
-                    <joint name="rotate_x" type="hinge" axis="1 0 0" range="-60 60"/>
-                    <joint name="rotate_y" type="hinge" axis="0 1 0" range="-60 90"/>
-                    <joint name="rotate_z" type="hinge" axis="0 0 1" range="-50 50"/>
+<!--            <body name="translate_pelvis" pos="0 0 0">-->
+<!--                <joint name="translate_x" type="slide" axis="1 0 0" range="-5 5"/>-->
+<!--                <joint name="translate_y" type="slide" axis="0 1 0" range="-5 5"/>-->
+<!--                <joint name="translate_z" type="slide" axis="0 0 1" range="-5 5"/>-->
+
+<!--&lt;!&ndash;                <body name="rotation_pelvis" pos="0 0 0">&ndash;&gt;-->
+<!--                    <joint name="rotate_x" type="hinge" axis="1 0 0" range="-60 60"/>-->
+<!--                    <joint name="rotate_y" type="hinge" axis="0 1 0" range="-60 90"/>-->
+<!--                    <joint name="rotate_z" type="hinge" axis="0 0 1" range="-50 50"/>-->
 
                     <body name="torso" pos="0 0 0.236151">
                         <light name="top" pos="0 0 2" mode="trackcom"/>
@@ -1129,8 +1131,8 @@
                             </body>
                         </body>
                     </body>
-                </body>
-            </body>
+<!--                </body>-->
+<!--            </body>-->
         </body>
     </worldbody>
 
