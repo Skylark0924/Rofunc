@@ -28,15 +28,20 @@ def get_tpose(xml_path, save_path, verbose=True):
 
     # # adjust pose into a T Pose
     local_rotation = zero_pose.local_rotation
-    local_rotation[skeleton.index("panda_left_link2")] = quat_mul(
-        quat_from_angle_axis(angle=torch.tensor([45.0]), axis=torch.tensor([0.0, 0.0, 1.0]), degree=True),
-        local_rotation[skeleton.index("panda_left_link2")]
-    )
-    local_rotation[skeleton.index("panda_right_link2")] = quat_mul(
-        quat_from_angle_axis(angle=torch.tensor([-45.0]), axis=torch.tensor([0.0, 0.0, 1.0]), degree=True),
-        local_rotation[skeleton.index("panda_right_link2")]
-    )
 
+    skeleton_ori = skeleton.local_orientation
+    skeleton_ori = torch.cat([skeleton_ori[:, 1:], skeleton_ori[:, :1]], dim=1)
+    local_rotation[:] = skeleton_ori[:]
+
+
+    local_rotation[skeleton.index("panda_left_link4")] = quat_mul(
+        quat_from_angle_axis(angle=torch.tensor([10.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
+        local_rotation[skeleton.index("panda_left_link4")]
+    )
+    local_rotation[skeleton.index("panda_right_link4")] = quat_mul(
+        quat_from_angle_axis(angle=torch.tensor([10.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
+        local_rotation[skeleton.index("panda_right_link4")]
+    )
     local_rotation[skeleton.index("panda_left_link6")] = quat_mul(
         quat_from_angle_axis(angle=torch.tensor([-90.0]), axis=torch.tensor([0.0, 1.0, 0.0]), degree=True),
         local_rotation[skeleton.index("panda_left_link6")]
