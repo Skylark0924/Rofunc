@@ -128,11 +128,16 @@ class HOTULLCAgent(ASEAgent):
                                 cfg_name='encoder').to(self.device)
             self.rofunc_logger.module(f"Discriminator model {i}: {disc_model}")
             self.rofunc_logger.module(f"Encoder model {i}: {enc_model}")
+            self.checkpoint_modules[f"discriminator_{i}"] = disc_model
+            self.checkpoint_modules[f"encoder_{i}"] = enc_model
 
             amp_state_pre_kwargs = {"size": self.whole_amp_obs_space[i], "device": self.device}
             optimizer_disc = torch.optim.Adam(disc_model.parameters(), lr=self._lr_d, eps=self._adam_eps)
             optimizer_enc = torch.optim.Adam(enc_model.parameters(), lr=self._lr_e, eps=self._adam_eps)
             amp_state_preprocessor = RunningStandardScaler(**amp_state_pre_kwargs)
+            self.checkpoint_modules[f"optimizer_disc_{i}"] = optimizer_disc
+            self.checkpoint_modules[f"optimizer_enc_{i}"] = optimizer_enc
+            self.checkpoint_modules[f"amp_state_preprocessor_{i}"] = amp_state_preprocessor
 
             if self._lr_scheduler is not None:
                 scheduler_disc = self._lr_scheduler(optimizer_disc, **self._lr_scheduler_kwargs)
