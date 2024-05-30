@@ -187,9 +187,9 @@ class Humanoid(VecTask):
         self.up_axis_idx = 2  # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
 
-        self._create_ground_plane()
-        # self.init_light()
-        # self.init_terrain()
+        # self._create_ground_plane()
+        self.init_light()
+        self.init_terrain()
         self._create_envs(self._env_spacing, self._num_env_per_row)
 
         # If randomizing, apply once immediately on startup before the fist sim step
@@ -214,7 +214,7 @@ class Humanoid(VecTask):
 
     def init_light(self):
         l_color = gymapi.Vec3(1, 1, 1)
-        l_ambient = gymapi.Vec3(0.12, 0.12, 0.12)
+        l_ambient = gymapi.Vec3(0.2, 0.2, 0.2)
         l_direction = gymapi.Vec3(-1, 0, 1)
         self.gym.set_light_parameters(self.sim, 0, l_color, l_ambient, l_direction)
 
@@ -352,6 +352,7 @@ class Humanoid(VecTask):
                             "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml",
                             "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml",
                             "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml",
+                            "mjcf/hotu/hotu_humanoid_w_qbhand_full_new_joint.xml",
                             "mjcf/unitreeH1/h1_w_qbhand_new.xml"]:
             humanoid_info = self._get_humanoid_info(asset_file)
             self._dof_offsets = humanoid_info["dof_offsets"]
@@ -733,7 +734,7 @@ class Humanoid(VecTask):
         self._cam_prev_char_pos = self._humanoid_root_states[0, 0:3].cpu().numpy()
 
         cam_pos = gymapi.Vec3(
-            self._cam_prev_char_pos[0], self._cam_prev_char_pos[1] - 3.0, 1.0
+            self._cam_prev_char_pos[0], self._cam_prev_char_pos[1] - 40.0, 5.0
         )
         cam_target = gymapi.Vec3(
             self._cam_prev_char_pos[0], self._cam_prev_char_pos[1], 1.0
@@ -809,7 +810,7 @@ def dof_to_obs(pose, dof_obs_size, dof_offsets):
             )
             joint_pose_q = quat_from_angle_axis(joint_pose[..., 0], axis)
         else:
-            joint_pose_q = None
+            # joint_pose_q = 0
             assert False, "Unsupported joint type"
 
         joint_dof_obs = torch_utils.quat_to_tan_norm(joint_pose_q)
