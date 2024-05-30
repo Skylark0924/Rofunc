@@ -86,7 +86,7 @@ class PlaygroundSim:
 
         # Create viewer
         camera_props = gymapi.CameraProperties()
-        camera_props.horizontal_fov = self.args.get("camera_horizontal_fov", 75.0)
+        camera_props.horizontal_fov = self.args.get("camera_horizontal_fov", 20.0)
         camera_props.width = self.args.get("camera_width", 1920)
         camera_props.height = self.args.get("camera_height", 1080)
         camera_props.use_collision_geometry = self.args.get("camera_use_collision_geometry", False)
@@ -145,6 +145,7 @@ class RobotSim:
         """
         self.args = args
         self.num_envs = self.args.env.numEnvs
+        self.num_envs_per_row = self.args.env.numEnvPerRow
 
         # Initial gym, sim, and viewer
         self.PlaygroundSim = PlaygroundSim(self.args)
@@ -195,7 +196,7 @@ class RobotSim:
 
         # configure env grid
         print("Creating %d environments" % self.num_envs)
-        num_per_row = int(math.sqrt(self.num_envs))
+        num_per_row = int(self.num_envs_per_row) if self.num_envs_per_row is not None else int(math.sqrt(self.num_envs))
         pose = gymapi.Transform()
         pose.p = gymapi.Vec3(*init_pose[:3])
         pose.r = gymapi.Quat(*init_pose[3:7])
@@ -430,7 +431,6 @@ class RobotSim:
         table_size = self.args.env.table.size
         init_pose = self.args.env.table.init_pose
 
-
         asset_options = gymapi.AssetOptions()
         asset_options.fix_base_link = self.args.env.table.fix_base_link
         self.table_asset = self.gym.create_box(self.sim, table_size[0], table_size[1], table_size[2], asset_options)
@@ -631,7 +631,7 @@ class RobotSim:
         else:
             raise ValueError("The mode {} is not supported".format(mode))
 
-    def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index, verbose=True):
+    def update_robot(self, traj, attractor_handles, axes_geom, sphere_geom, index, verbose=True, index_list=None):
         from isaacgym import gymutil
 
         for i in range(self.num_envs):
@@ -639,6 +639,8 @@ class RobotSim:
             attractor_properties = self.gym.get_attractor_properties(self.envs[i], attractor_handles[i])
             pose = attractor_properties.target
             # pose.p: (x, y, z), pose.r: (w, x, y, z)
+            if index_list is not None:
+                index = index_list[i]
             pose.p.x = traj[index, 0]
             pose.p.y = traj[index, 1]
             pose.p.z = traj[index, 2]
@@ -676,7 +678,9 @@ class RobotSim:
                                     object_start_pose: List = None, object_end_pose: List = None,
                                     object_related_joints: List = None,
                                     root_state=None,
-                                    update_freq=0.001, verbose=True
+                                    update_freq=0.001, verbose=True,
+                                    index_list=None,
+                                    recursive_play=False
                                     ):
         """
         Set multiple attractors to let the robot run the trajectory with multiple rigid bodies.
@@ -690,6 +694,8 @@ class RobotSim:
         :param root_state: the root state of the robot
         :param update_freq: the frequency of updating the robot pose
         :param verbose: if True, visualize the attractor spheres
+        :param index_list:
+        :param recursive_play:
         :return:
         """
         from isaacgym import gymtorch
@@ -701,6 +707,10 @@ class RobotSim:
         self.monitor_rigid_body_states()
         self.monitor_actor_root_states()
         self.monitor_dof_states()
+
+
+        if root_state is not None:
+            root_state = root_state.repeat(self.num_envs, 1, 1).reshape((-1, self.num_envs, 13))
 
         self.robot_root_states = self.root_states.view(self.num_envs, 1, -1)[..., 0, :]
 
@@ -728,11 +738,18 @@ class RobotSim:
 
                 self.gym.clear_lines(self.viewer)
                 for i in range(len(attr_rbs)):
-                    self.update_robot(traj[i], attr_handles[i], axes_geoms[i], sphere_geoms[i], index, verbose)
+                    self.update_robot(traj[i], attr_handles[i], axes_geoms[i], sphere_geoms[i], index, verbose,
+                                      index_list=index_list)
 
                 if root_state is not None:
-                    self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(
-                        root_state[index].reshape(self.root_states.shape)))
+                    if index_list is not None:
+                        root_state_tmp = torch.vstack([root_state[idx, 0] for idx in index_list])
+
+                        self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(
+                            root_state_tmp.reshape(self.root_states.shape)))
+                    else:
+                        self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(
+                            root_state[index].reshape(self.root_states.shape)))
 
                 # Deprecated API for object pose update by attaching to dual robot hands
                 # if self.object_handles is not None:
@@ -779,9 +796,10 @@ class RobotSim:
                 next_update_time += update_freq
                 index += 1
                 if index >= len(traj[i]):
-                    # index = 0
-                    # save_dof_states = False
-                    break  # stop the simulation
+                    if recursive_play:
+                        index = 0
+                    else:
+                        break  # stop the simulation
 
             # Step the physics
             self.gym.simulate(self.sim)

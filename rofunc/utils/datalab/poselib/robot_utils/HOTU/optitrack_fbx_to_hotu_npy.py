@@ -251,7 +251,9 @@ def _run_sim(motion):
         attr_types=all_types,
         update_freq=0.001,
         root_state=motion_root_states,
-        verbose=False
+        verbose=False,
+        # index_list=[300, 600, 900, 1334, 1600, 1800, 2100, 2400, 2700, 3000],
+        # recursive_play=True
     )
     return dof_states
 
@@ -351,9 +353,9 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         plot_skeleton_motion_interactive(target_motion, verbose=False)
 
     dof_states = _run_sim(target_motion)
-    dof_states = np.array(dof_states.cpu().numpy())
-    np.save(retarget_cfg["target_dof_states_path"], dof_states)
-    rf.logger.beauty_print(f"Saved HOTU dof_states to {retarget_cfg['target_motion_path']}", type="module")
+    # dof_states = np.array(dof_states.cpu().numpy())
+    # np.save(retarget_cfg["target_dof_states_path"], dof_states)
+    # rf.logger.beauty_print(f"Saved HOTU dof_states to {retarget_cfg['target_motion_path']}", type="module")
 
 
 def npy_from_fbx(fbx_file):
@@ -443,13 +445,13 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
-    # parser.add_argument("--fbx_dir", type=str, default=None)
+    # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
+    parser.add_argument("--fbx_dir", type=str, default=None)
     # parser.add_argument("--fbx_file", type=str,
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
                         # default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
-                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml

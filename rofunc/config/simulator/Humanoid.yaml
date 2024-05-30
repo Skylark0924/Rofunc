@@ -5,8 +5,9 @@ graphics_device_id: 0
 sim_device: 'cuda:0'
 
 env:
-  numEnvs: 1
-  envSpacing: 3.
+  numEnvs: 16
+  envSpacing: 1
+  numEnvPerRow: 1
 
   controller_type: "ik" # "ik" or "osc"
   # If the collision filter for the actor is set to -1,
@@ -22,10 +23,10 @@ env:
     assetRoot:
 #    assetFile: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
 #    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml"
-#    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
-    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new_joint.xml"
+    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
+#    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new_joint.xml"
     init_pose: [0.0, 0.0, 0.8, 0.0, 0.0, 1.0, 0]
-    fix_base_link: True
+    fix_base_link: False
     disable_gravity: False
     flip_visual_attachments: False
     armature: 0.01
