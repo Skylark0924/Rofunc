@@ -8,8 +8,10 @@ cam_pos: [-3.0, 0.0, 2.0]
 cam_target: [0.0, 0.0, 1.0]
 
 env:
-  numEnvs: 1
-  envSpacing: 3.
+  numEnvs: 16
+  envSpacing: 0.5
+  numEnvPerRow: 1
+
   controller_type: "ik" # "ik" or "osc"
   # If the collision filter for the actor is set to -1,
   # the actor will use filters loaded in by the asset loaders.
@@ -24,7 +26,7 @@ env:
     assetRoot:
     assetFile: "mjcf/bruce/bruce.xml"
     init_pose: [0.0, 0.0, 0.4, 0.0, 0.0, 1.0, 0.0]
-    fix_base_link: True
+    fix_base_link: False
     disable_gravity: False
     flip_visual_attachments: True
     armature: 0.01
@@ -53,7 +55,7 @@ sim:
     use_gpu: False # set to False to run on CPU
     num_position_iterations: 12
     num_velocity_iterations: 1
-    contact_offset: 0.005
+    contact_offset: 0.002
     rest_offset: 0.0
     bounce_threshold_velocity: 0.2
     max_depenetration_velocity: 1000.0

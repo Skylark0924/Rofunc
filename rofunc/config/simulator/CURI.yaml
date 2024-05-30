@@ -8,8 +8,10 @@ cam_pos: [-3.0, 0.0, 2.0]
 cam_target: [0.0, 0.0, 1.0]
 
 env:
-  numEnvs: 1
-  envSpacing: 3.
+  numEnvs: 16
+  envSpacing: 1.5
+  numEnvPerRow: 1
+
   controller_type: "ik" # "ik" or "osc"
   # If the collision filter for the actor is set to -1,
   # the actor will use filters loaded in by the asset loaders.

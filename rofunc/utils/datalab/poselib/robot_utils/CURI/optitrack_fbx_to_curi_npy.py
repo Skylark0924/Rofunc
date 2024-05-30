@@ -33,11 +33,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def _run_sim(motion):
-    body_links = {"torso_base2": gymapi.AXIS_TRANSLATION, "root": gymapi.AXIS_TRANSLATION,
-                  "head_link1": gymapi.AXIS_TRANSLATION,
-                  "panda_right_link1": gymapi.AXIS_TRANSLATION, "panda_left_link1": gymapi.AXIS_TRANSLATION,
-                  "panda_right_link4": gymapi.AXIS_TRANSLATION, "panda_left_link4": gymapi.AXIS_TRANSLATION,
-                  "panda_right_link7": gymapi.AXIS_TRANSLATION, "panda_left_link7": gymapi.AXIS_TRANSLATION
+    body_links = {
+        # "torso_base2": gymapi.AXIS_ROTATION, "root": gymapi.AXIS_ROTATION,
+                  "head_link1": gymapi.AXIS_ROTATION,
+                  "panda_right_link1": gymapi.AXIS_ROTATION, "panda_left_link1": gymapi.AXIS_ROTATION,
+                  "panda_right_link4": gymapi.AXIS_ROTATION, "panda_left_link4": gymapi.AXIS_ROTATION,
+                  "panda_right_link7": gymapi.AXIS_ROTATION, "panda_left_link7": gymapi.AXIS_ROTATION
                   }
     body_ids = [motion.skeleton_tree._node_indices[link] for link in body_links.keys()]
     hand_links = [
@@ -81,7 +82,7 @@ def _run_sim(motion):
         traj=[motion_rb_states[:, id] for id in all_ids],
         attr_rbs=all_links,
         update_freq=0.001,
-        root_state=motion_root_states,
+        # root_state=motion_root_states,
         attr_types=all_types,
         verbose=False
     )
@@ -282,7 +283,7 @@ if __name__ == '__main__':
     # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2")
     parser.add_argument("--fbx_dir", type=str, default=None)
     parser.add_argument("--fbx_file", type=str,
-                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
@@ -318,7 +319,7 @@ if __name__ == '__main__':
     else:
         with tqdm(total=len(fbx_files)) as pbar:
             for fbx_file in fbx_files:
-                # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2h1_dof_states.npy')):
+                # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2curi_dof_states.npy')):
                 #     continue
                 npy_from_fbx(fbx_file)
                 pbar.update(1)
