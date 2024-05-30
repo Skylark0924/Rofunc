@@ -149,7 +149,7 @@ class HumanoidHOTUTask(Humanoid):
                 self._curr_amp_obs_buf.append(self._amp_obs_buf[part_i][:, 0])
                 self._hist_amp_obs_buf.append(self._amp_obs_buf[part_i][:, 1:])
             # self.set_colors_for_parts(self.humanoid_handles, self.wb_decompose_param_rb_ids)
-            # self._set_colors_for_parts()
+            self._set_colors_for_parts()
         else:
             self._amp_obs_space = spaces.Box(np.ones(self.get_num_amp_obs()) * -np.Inf,
                                              np.ones(self.get_num_amp_obs()) * np.Inf)
@@ -158,13 +158,37 @@ class HumanoidHOTUTask(Humanoid):
             self._curr_amp_obs_buf = self._amp_obs_buf[:, 0]
             self._hist_amp_obs_buf = self._amp_obs_buf[:, 1:]
 
+            self._set_color()
         self._amp_obs_demo_buf = None
 
     def _set_colors_for_parts(self):
         # colors = [[255 / 255., 165 / 255., 0 / 255.], [0.54, 0.85, 0.2], [0.5, 0.5, 0.5], [0.35, 0.35, 0.35]]
         colors = np.array([[0.54 * 255, 0.85 * 255, 0.2 * 255], (218, 112, 214), (210, 105, 30)]) / 255
-        for part_i in range(self.num_parts):
-            self.set_char_color(self.wb_decompose_param_rb_ids[part_i], colors[part_i])
+        # colors = np.array([[70, 70, 70]]) / 255
+        # for part_i in range(self.num_parts):
+        #     self.set_char_color(self.wb_decompose_param_rb_ids[part_i], colors[part_i])
+        parts = ["hands", "upper_body", "lower_body"]
+        # parts = ["body"]
+        num_parts = len(parts)
+        wb_decompose_param_rb_ids = [
+            torch.tensor(
+                [self.whole_rb_dict[rb_name] for rb_name in self.humanoid_info["parts"][part]["rigid_bodies"]],
+                device=self.device, dtype=torch.long)
+            for part in parts]
+
+        for part_i in range(num_parts):
+            self.set_char_color(wb_decompose_param_rb_ids[part_i], colors[part_i])
+
+    def _set_color(self):
+        from isaacgym import gymapi
+
+        col = np.array([70, 70, 70]) / 255
+        for i in range(self.num_envs):
+            env_ptr = self.envs[i]
+            handle = self.humanoid_handles[i]
+            for j in range(self.num_bodies):
+                self.gym.set_rigid_body_color(env_ptr, handle, j, gymapi.MESH_VISUAL,
+                                              gymapi.Vec3(col[0], col[1], col[2]))
 
     def _get_dof_action_from_synergy(self, synergy_action, useful_joint_index):
         # the first synergy is 0~1, the second is -1~1
@@ -372,6 +396,7 @@ class HumanoidHOTUTask(Humanoid):
                             "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml",
                             "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml",
                             "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml",
+                            "mjcf/hotu/hotu_humanoid_w_qbhand_full_new_joint.xml",
                             "mjcf/unitreeH1/h1_w_qbhand_new.xml"]:
             if self.wb_decompose:
                 num_amp_obs_per_step_list = []
