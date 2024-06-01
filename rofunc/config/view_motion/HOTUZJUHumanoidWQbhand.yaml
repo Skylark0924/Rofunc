@@ -1,6 +1,10 @@
 env:
+  terminationHeight: 0.15
+  charHeight: 1.5
+
   keyBodies: [ "HAND_R", "HAND_L", "FOOT_R", "FOOT_L" ]
-  contactBodies: [ "FOOT_R", "FOOT_L" ]
+  contactBodies: [ "FOOT_R", "FOOT_L", "ASTRAGALUS_R", "ASTRAGALUS_L"]
+  headRbName: "HEAD"
 
 
   # animation files to learn from
@@ -30,4 +34,4 @@ task:
   wb_decompose: False  # if True, decompose the whole body into parts
   wb_decompose_parameter:
     parts: [ "body" ]
-  use_synergy: True  # if True, use the synergy for the hand
+  use_synergy: False  # if True, use the synergy for the hand

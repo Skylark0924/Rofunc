@@ -8,8 +8,10 @@ cam_pos: [-3.0, 0.0, 2.0]
 cam_target: [0.0, 0.0, 1.0]
 
 env:
-  numEnvs: 1
-  envSpacing: 3.
+  numEnvs: 16
+  envSpacing: 1.5
+  numEnvPerRow: 1
+
   controller_type: "ik" # "ik" or "osc"
   # If the collision filter for the actor is set to -1,
   # the actor will use filters loaded in by the asset loaders.
@@ -27,8 +29,8 @@ env:
 #    assetFile: "urdf/curi/urdf/curi_w_softhand_isaacgym.urdf"
 #    assetFile: "urdf/curi/urdf/curi_isaacgym.urdf"
     assetFile: "mjcf/curi/curi_w_softhand_isaacgym.xml"
-    init_pose: [1., 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
-    fix_base_link: False
+    init_pose: [0.8, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+    fix_base_link: True
     disable_gravity: False
     flip_visual_attachments: True
     armature: 0.01
@@ -38,12 +40,13 @@ env:
 #    object_names: ["power_drill"]
 #    assetRoot:
 #    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
-#    init_poses: [[0.0, 0, 0.7, 0.5, -0.5, -0.5, 0.5]]
-#    fix_base_link: False
-
+#    init_poses: [[-0.5, 0, 0.93, 0.3535534, -0.6123724, -0.6123724, 0.3535534]]
+#    fix_base_link: True
+#
 #  table:
-#    init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1]
-#    size: [0.5, 1.2, 0.7]
+#    init_pose: [-0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1]
+#    size: [0.5, 0.6, 0.7]
+#    fix_base_link: True
 
 
 

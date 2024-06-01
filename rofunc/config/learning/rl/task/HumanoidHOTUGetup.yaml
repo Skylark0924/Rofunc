@@ -6,7 +6,7 @@ physics_engine: ${..physics_engine}
 # if given, will override the device setting in gym.
 env:
   numEnvs: ${resolve_default:4096,${...num_envs}}
-  envSpacing: 5
+  envSpacing: 2
   episodeLength: 300
   cameraFollow: False # if the camera follows humanoid or not
   isFlagrun: False
@@ -18,7 +18,7 @@ env:
   collisionFilter: -1 # -1: collision defined by MJCF, 0: all collision detection, 1: no collision detection
   stateInit: "Hybrid"
   hybridInitProb: 0.5
-  numAMPObsSteps: 2
+  numAMPObsSteps: 5
   recoveryEpisodeProb: 0.2
   recoverySteps: 60
   fallInitProb: 0.1
@@ -28,6 +28,8 @@ env:
   contactBodies:
   terminationHeight: 0.15
   enableEarlyTermination: True
+  charHeight: 1.0
+  headRbName: "head"
 
   # animation files to learn from
   motion_file:
@@ -67,7 +69,7 @@ sim:
     use_gpu: ${contains:"cuda",${....sim_device}} # set to False to run on CPU
     num_position_iterations: 4
     num_velocity_iterations: 0
-    contact_offset: 0.02
+    contact_offset: 0.002
     rest_offset: 0.0
     bounce_threshold_velocity: 0.2
     max_depenetration_velocity: 10.0

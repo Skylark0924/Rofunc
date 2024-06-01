@@ -3,8 +3,8 @@ motions:
     weight: 1
   - file: "Chest pressing_Take 2024-05-09 04.21.46 PM_optitrack2zju.npy"
     weight: 1
-  - file: "Finger movememnt_Take 2024-05-09 04.17.53 PM_optitrack2zju.npy"
-    weight: 1
+#  - file: "Finger movememnt_Take 2024-05-09 04.17.53 PM_optitrack2zju.npy"
+#    weight: 1
   - file: "Handshake_Take 2024-05-09 04.20.17 PM_optitrack2zju.npy"
     weight: 1
   - file: "Hook_Take 2024-05-09 04.34.03 PM_optitrack2zju.npy"

@@ -204,7 +204,7 @@ def _run_sim(motion):
                   "right_upper_arm": gymapi.AXIS_ROTATION, "left_upper_arm": gymapi.AXIS_ROTATION,
                   "right_lower_arm": gymapi.AXIS_ROTATION, "left_lower_arm": gymapi.AXIS_ROTATION,
                   "right_thigh": gymapi.AXIS_ROTATION, "left_thigh": gymapi.AXIS_ROTATION,
-                  "right_shin": gymapi.AXIS_ROTATION, "left_shin": gymapi.AXIS_ROTATION,
+                  "right_shin": gymapi.AXIS_ALL, "left_shin": gymapi.AXIS_ALL,
                   }
     body_ids = [motion.skeleton_tree._node_indices[link] for link in body_links]
 
@@ -251,7 +251,9 @@ def _run_sim(motion):
         attr_types=all_types,
         update_freq=0.001,
         root_state=motion_root_states,
-        verbose=False
+        verbose=False,
+        # index_list=[300, 600, 900, 1334, 1600, 1800, 2100, 2400, 2700, 3000],
+        # recursive_play=True
     )
     return dof_states
 
@@ -351,9 +353,9 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
         plot_skeleton_motion_interactive(target_motion, verbose=False)
 
     dof_states = _run_sim(target_motion)
-    dof_states = np.array(dof_states.cpu().numpy())
-    np.save(retarget_cfg["target_dof_states_path"], dof_states)
-    rf.logger.beauty_print(f"Saved HOTU dof_states to {retarget_cfg['target_motion_path']}", type="module")
+    # dof_states = np.array(dof_states.cpu().numpy())
+    # np.save(retarget_cfg["target_dof_states_path"], dof_states)
+    # rf.logger.beauty_print(f"Saved HOTU dof_states to {retarget_cfg['target_motion_path']}", type="module")
 
 
 def npy_from_fbx(fbx_file):
@@ -443,21 +445,21 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
-    # parser.add_argument("--fbx_dir", type=str, default=None)
+    # parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
+    parser.add_argument("--fbx_dir", type=str, default=None)
     # parser.add_argument("--fbx_file", type=str,
     #                     default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
     parser.add_argument("--fbx_file", type=str,
                         # default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/test_data_05_optitrack.fbx")
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack.fbx")
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
     #                   2. mjcf/amp_humanoid_sword_shield.xml
-    #                   3. mjcf/hotu_humanoid.xml
+    #                   3. mjcf/hotu/hotu_humanoid.xml
     #                   4. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
-    #                   5. mjcf/hotu_humanoid_w_qbhand_full.xml
-    parser.add_argument("--humanoid_asset", type=str, default="mjcf/hotu_humanoid_w_qbhand_full.xml")
+    #                   5. mjcf/hotu/hotu_humanoid_w_qbhand_full.xml
+    parser.add_argument("--humanoid_asset", type=str, default="mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml")
     parser.add_argument("--target_tpose", type=str,
                         default="utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy")
     args = parser.parse_args()
@@ -472,11 +474,18 @@ if __name__ == '__main__':
     else:
         raise ValueError("Please provide a valid fbx_dir or fbx_file.")
 
+    from tqdm import tqdm
     if args.parallel:
         pool = multiprocessing.Pool()
         pool.map(npy_from_fbx, fbx_files)
     else:
-        for fbx_file in fbx_files:
-            if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2hotu_dof_states.npy')):
-                continue
-            npy_from_fbx(fbx_file)
+        with tqdm(total=len(fbx_files)) as pbar:
+            for fbx_file in fbx_files:
+                # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2hotu_dof_states.npy')):
+                #     continue
+                npy_from_fbx(fbx_file)
+                pbar.update(1)
+        # for fbx_file in fbx_files:
+            # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2hotu_dof_states.npy')):
+            #     continue
+            # npy_from_fbx(fbx_file)
