@@ -1,23 +1,31 @@
-keyBodies: [ "right_hand", "left_hand", "right_foot", "left_foot" ]
-contactBodies: [ "right_foot", "left_foot" ]
+env:
+  terminationHeight: 0.5
+  charHeight: 0.89
+
+  keyBodies: [ "right_hand", "left_hand", "right_foot", "left_foot" ]
+  contactBodies: [ "right_foot", "left_foot" ]
 
 
-# animation files to learn from
-motion_file: "examples/data/hotu2/test_data_05_optitrack2hotu.npy"
+  # animation files to learn from
+  motion_file: "examples/data/hotu2/20240509/all_hotu_motion.yaml"
 
-motion_file_asset: "mjcf/hotu_humanoid_w_qbhand_full.xml"
-right_left_ids_except_thumb: [ 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
-                               34, 35, 36, 37, 38, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64,
-                               65, 66, 67, 68, 69, 70, 71, 72, 73, 74 ]
-right_left_thumb_knuckle_ids: [ 7, 44 ]
+  use_extra_dof_states_motion: False
 
-object_motion_file:
+  motion_file_asset: "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml"
 
-asset:
-  assetFileName: "mjcf/hotu_humanoid.xml"
+  object_motion_file:
 
-use_object_motion: False
-object_asset:
-  assetName:         # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
-  assetFileName:     # List of object asset file path
-  assetSize:         # List of object size, used for scaling the object and creating the box objects
+  asset:
+    assetFileName: "mjcf/hotu/hotu_humanoid.xml"
+
+  use_object_motion: False
+  object_asset:
+    assetName:         # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+    assetFileName:     # List of object asset file path
+    assetSize:         # List of object size, used for scaling the object and creating the box objects
+
+task:
+  wb_decompose: False  # if True, decompose the whole body into parts
+  wb_decompose_parameter:
+    parts: [ "body" ]
+  use_synergy: False  # if True, use the synergy for the hand

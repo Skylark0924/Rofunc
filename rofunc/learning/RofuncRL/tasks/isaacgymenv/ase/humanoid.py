@@ -254,7 +254,7 @@ class Humanoid(VecTask):
             self._dof_obs_size = 78
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-        elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu_humanoid.xml"]:
+        elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu/hotu_humanoid.xml"]:
             self._dof_body_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]  # len=14
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]  # len=14+1
             self._dof_obs_size = 84  # 14 * 6 (joint_obs_size) = 72

@@ -54,7 +54,8 @@ class ASEHRLAgent(BaseAgent):
                  motion_dataset: Optional[Union[Memory, Tuple[Memory]]] = None,
                  replay_buffer: Optional[Union[Memory, Tuple[Memory]]] = None,
                  collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None,
-                 task_related_state_size: Optional[int] = None, ):
+                 task_related_state_size: Optional[int] = None,
+                 num_part: Optional[int] = 1):
         """
         :param cfg: Configuration
         :param observation_space: Observation space
@@ -68,6 +69,7 @@ class ASEHRLAgent(BaseAgent):
         :param replay_buffer: Replay buffer
         :param collect_reference_motions: Function for collecting reference motions
         :param task_related_state_size: Size of task-related states
+        :param num_part: Number of parts
         """
         """ASE specific parameters"""
         self._ase_latent_dim = cfg.Agent.ase_latent_dim
@@ -76,10 +78,12 @@ class ASEHRLAgent(BaseAgent):
 
         '''Define models for ASE HRL agent'''
         if self.cfg.Model.actor.type == "Beta":
-            self.policy = ActorPPO_Beta(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
+            self.policy = ActorPPO_Beta(cfg.Model, observation_space, self._ase_latent_dim * num_part, self.se).to(
+                self.device)
         else:
-            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
+            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, self._ase_latent_dim * num_part, self.se).to(
+                self.device)
+        self.value = Critic(cfg.Model, observation_space, self._ase_latent_dim * num_part, self.se).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy

@@ -197,3 +197,6 @@ wandb
 *_optitrack2hotu_dof_states.npy
 *_optitrack2zju.npy
 *_optitrack2zju_dof_states.npy
+*_optitrack2curi.npy
+*_optitrack2curi_dof_states.npy
+rofunc/simulator/assets/urdf/themis/archive/

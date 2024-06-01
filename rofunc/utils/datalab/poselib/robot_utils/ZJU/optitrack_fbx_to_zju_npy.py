@@ -383,7 +383,7 @@ def _run_sim(motion):
     from isaacgym import gymapi
 
     body_links = {"pelvis": gymapi.AXIS_ROTATION,
-                  "FOREARM_R": gymapi.AXIS_ROTATION, "FOREARM_L": gymapi.AXIS_ROTATION,
+                  "FOREARM_R": gymapi.AXIS_ALL, "FOREARM_L": gymapi.AXIS_ALL,
                   "HAND_R": gymapi.AXIS_ALL, "HAND_L": gymapi.AXIS_ALL,
                   "SACRUM": gymapi.AXIS_ROTATION,
                   "THIGH_L": gymapi.AXIS_ROTATION, "THIGH_R": gymapi.AXIS_ROTATION,
@@ -424,7 +424,7 @@ def _run_sim(motion):
     #     motion_rb_states_rot[:, hand_ids]
     # )
 
-    motion_rb_states_pos[:, :, 2] += 0.06
+    motion_rb_states_pos[:, :, 2] += 0.1
     motion_rb_states = torch.cat([motion_rb_states_pos, motion_rb_states_rot], dim=-1)
 
     motion_root_pos = motion_rb_states_pos[:, 0]
@@ -441,7 +441,7 @@ def _run_sim(motion):
         update_freq=0.001,
         root_state=motion_root_states,
         attr_types=all_types,
-        verbose=False
+        verbose=True
     )
     return dof_states
 
@@ -638,15 +638,15 @@ if __name__ == '__main__':
     parser.add_argument("--fbx_dir", type=str, default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509")
     # parser.add_argument("--fbx_dir", type=str, default=None)
     parser.add_argument("--fbx_file", type=str,
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack.fbx")
+                        default=f"{rf.oslab.get_rofunc_path()}/../examples/data/hotu2/20240509/Finger movememnt_Take 2024-05-09 04.17.53 PM_optitrack.fbx")
     parser.add_argument("--parallel", action="store_true")
     # Available asset:
     #                   1. mjcf/amp_humanoid_spoon_pan_fixed.xml
     #                   2. mjcf/amp_humanoid_sword_shield.xml
-    #                   3. mjcf/hotu_humanoid.xml
+    #                   3. mjcf/hotu/hotu_humanoid.xml
     #                   4. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
-    #                   5. mjcf/hotu_humanoid_w_qbhand_full.xml
-    parser.add_argument("--humanoid_asset", type=str, default="mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml")
+    #                   5. mjcf/hotu/hotu_humanoid_w_qbhand_full.xml
+    parser.add_argument("--humanoid_asset", type=str, default="mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml")
     parser.add_argument("--target_tpose", type=str,
                         default="utils/datalab/poselib/data/target_zju_humanoid_w_qbhand_tpose.npy")
     args = parser.parse_args()
@@ -666,11 +666,14 @@ if __name__ == '__main__':
     # fbx_files = ["/home/ubuntu/Data/2023_11_15_HED/has_gloves/New Session-009.fbx"]
     # fbx_files = [os.path.join(rofunc_path, "../examples/data/hotu/test_data_01_xsens.fbx")]
 
+    from tqdm import tqdm
     if args.parallel:
         pool = multiprocessing.Pool()
         pool.map(npy_from_fbx, fbx_files)
     else:
-        for fbx_file in fbx_files:
-            if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2zju_dof_states.npy')):
-                continue
-            npy_from_fbx(fbx_file)
+        with tqdm(total=len(fbx_files)) as pbar:
+            for fbx_file in fbx_files:
+                # if os.path.exists(fbx_file.replace('_optitrack.fbx', '_optitrack2zju_dof_states.npy')):
+                #     continue
+                npy_from_fbx(fbx_file)
+                pbar.update(1)

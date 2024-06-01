@@ -24,9 +24,9 @@ import rofunc as rf
 # CURIminisim.show(visual_obs_flag=True)
 
 # franka
-args = rf.config.get_sim_config("Franka")
-frankasim = rf.sim.FrankaSim(args)
-frankasim.show()
+# args = rf.config.get_sim_config("Franka")
+# frankasim = rf.sim.FrankaSim(args)
+# frankasim.show()
 
 # baxter
 # args = rf.config.get_sim_config("Baxter")
@@ -48,10 +48,10 @@ frankasim.show()
 # QbSoftHandsim = rf.sim.QbSoftHandSim(args)
 # QbSoftHandsim.show()
 
-# # Humanoid
-# args = rf.config.get_sim_config("Humanoid")
-# Humanoidsim = rf.sim.HumanoidSim(args)
-# Humanoidsim.show()
+# HOTU
+args = rf.config.get_sim_config("Humanoid")
+Humanoidsim = rf.sim.HumanoidSim(args)
+Humanoidsim.show()
 
 # Unitree H1
 # args = rf.config.get_sim_config("UnitreeH1")
@@ -64,9 +64,14 @@ frankasim.show()
 # Brucesim.show()
 
 # ZJU humanoid
-args = rf.config.get_sim_config("ZJUHumanoid")
-ZJUHumanoidsim = rf.sim.RobotSim(args)
-ZJUHumanoidsim.show()
+# args = rf.config.get_sim_config("ZJUHumanoid")
+# ZJUHumanoidsim = rf.sim.RobotSim(args)
+# ZJUHumanoidsim.show()
+
+# Themis
+# args = rf.config.get_sim_config("Themis")
+# Themissim = rf.sim.RobotSim(args)
+# Themissim.show()
 
 # TODO: Multi Robots
 # curi_args = rf.config.get_sim_config("CURI")

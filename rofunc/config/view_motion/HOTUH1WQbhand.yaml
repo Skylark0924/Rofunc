@@ -1,10 +1,15 @@
 env:
+  terminationHeight: 0.15
+  charHeight: 1
+
   keyBodies: [ "right_hand", "left_hand", "right_ankle_link", "left_ankle_link" ]
   contactBodies: [ "right_ankle_link", "left_ankle_link" ]
-
+  headRbName: "torso_link"
 
   # animation files to learn from
   motion_file: "examples/data/hotu2/20240509/all_h1_motion.yaml"
+#  motion_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2h1.npy"
+
 
   use_extra_dof_states_motion: True
   extra_rewrite_dof_names: [ "left_hip_yaw_joint", "left_hip_roll_joint", "left_hip_pitch_joint",
@@ -17,12 +22,12 @@ env:
                              "left_shoulder_yaw_joint", "right_shoulder_pitch_joint", "right_shoulder_roll_joint", "right_shoulder_yaw_joint",
                              "right_elbow_joint", "right_hand_x", "right_hand_y", "right_hand_z" ]
 
-  motion_file_asset: "mjcf/UnitreeH1/h1_w_qbhand.xml"
+  motion_file_asset: "mjcf/unitreeH1/h1_w_qbhand.xml"
 
   object_motion_file:
 
   asset:
-    assetFileName: "mjcf/UnitreeH1/h1_w_qbhand.xml"
+    assetFileName: "mjcf/unitreeH1/h1_w_qbhand.xml"
 
   use_object_motion: False
   object_asset:

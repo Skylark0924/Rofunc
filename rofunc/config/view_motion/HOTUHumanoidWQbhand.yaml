@@ -1,4 +1,7 @@
 env:
+  terminationHeight: 0.5
+  charHeight: 0.89
+
   keyBodies: [ "right_hand", "left_hand", "right_foot", "left_foot" ]
   contactBodies: [ "right_foot", "left_foot" ]
 
@@ -8,12 +11,12 @@ env:
 
   use_extra_dof_states_motion: False
 
-  motion_file_asset: "mjcf/hotu_humanoid_w_qbhand_full.xml"
+  motion_file_asset: "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml"
 
   object_motion_file:
 
   asset:
-    assetFileName: "mjcf/hotu_humanoid_w_qbhand_full.xml"
+    assetFileName: "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml"
 
   use_object_motion: False
   object_asset:
@@ -25,4 +28,4 @@ task:
   wb_decompose: False  # if True, decompose the whole body into parts
   wb_decompose_parameter:
     parts: [ "body" ]
-  use_synergy: True  # if True, use the synergy for the hand
+  use_synergy: False  # if True, use the synergy for the hand

@@ -5,8 +5,9 @@ graphics_device_id: 0
 sim_device: 'cuda:0'
 
 env:
-  numEnvs: 1
-  envSpacing: 3.
+  numEnvs: 16
+  envSpacing: 1
+  numEnvPerRow: 1
 
   controller_type: "ik" # "ik" or "osc"
   # If the collision filter for the actor is set to -1,
@@ -15,14 +16,16 @@ env:
   # or have other contacts specified. Setting the collision filter to 0 will
   # enable collisions between all shapes in the actor. Setting the collision filter
   # to anything > 0 will disable all self collisions.
-  collision_mode: 1
+  collision_mode: -1
 
   asset:
     robot_name: "Humanoid"
     assetRoot:
 #    assetFile: "mjcf/hotu_humanoid_w_qbhand_no_virtual.xml"
-    assetFile: "mjcf/hotu_humanoid_w_qbhand_full.xml"
-    init_pose: [0.0, 0.0, 1., 0.0, 0.0, 0.0, 1]
+#    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml"
+    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
+#    assetFile: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new_joint.xml"
+    init_pose: [0.0, 0.0, 0.8, 0.0, 0.0, 1.0, 0]
     fix_base_link: False
     disable_gravity: False
     flip_visual_attachments: False
@@ -30,6 +33,17 @@ env:
     slices_per_cylinder: 1000
 
   object_asset:
+#    object_names: ["power_drill"]
+#    assetRoot:
+#    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
+#    init_poses: [[-0.5, 0, 0.93, 0.5, -0.5, -0.5, 0.5]]
+#    fix_base_link: True
+#
+#  table:
+#    init_pose: [-0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1]
+#    size: [0.5, 0.6, 0.7]
+#    fix_base_link: True
+
 
 sim:
   dt: 0.0166 # 1/60

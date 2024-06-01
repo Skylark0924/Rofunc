@@ -24,8 +24,9 @@ def inference(custom_args):
         "num_envs={}".format(16),
     ]
     cfg = get_config("./learning/rl", "config", args=args_overrides)
-    cfg_view_motion = get_view_motion_config(custom_args.view_motion_type)
-    cfg.task.env = OmegaConf.merge(cfg.task.env, cfg_view_motion)
+    cfg_view_motion = get_view_motion_config(custom_args.humanoid_robot_type)
+    cfg.task.env = OmegaConf.merge(cfg.task.env, cfg_view_motion["env"])
+    cfg.task.task = OmegaConf.merge(cfg.task.task, cfg_view_motion["task"])
     cfg_dict = omegaconf_to_dict(cfg.task)
 
     # Instantiate the Isaac Gym environment
@@ -39,11 +40,11 @@ def inference(custom_args):
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map["hotu"](cfg=cfg,
-                                            env=infer_env,
-                                            device=cfg.rl_device,
-                                            env_name=custom_args.task,
-                                            hrl=False,
-                                            inference=True)
+                                             env=infer_env,
+                                             device=cfg.rl_device,
+                                             env_name=f"{custom_args.task}_{custom_args.humanoid_robot_type}",
+                                             mode="LLC",
+                                             inference=True)
 
     # Start inference
     trainer.inference()
@@ -56,13 +57,14 @@ if __name__ == "__main__":
     parser.add_argument("--task", type=str, default="HumanoidHOTUViewMotion")
     # Available types of asset file path:
     #  1. HOTUHumanoid
-    #  2. HOTUHumanoidWQbhand
-    #  3. HOTUH1WQbhand
+    #  2. HOTUHumanoidWQbhandNew
+    #  3. HOTUH1WQbhandNew
     #  4. HOTUCURIWQbhand
     #  5. HOTUWalker
     #  6. HOTUBruce
     #  7. HOTUZJUHumanoid
-    parser.add_argument("--view_motion_type", type=str, default="HOTUH1WQbhand")
+    #  8. HOTUZJUHumanoidWQbhandNew
+    parser.add_argument("--humanoid_robot_type", type=str, default="HOTUHumanoidWQbhandNew")
     custom_args = parser.parse_args()
 
     inference(custom_args)
