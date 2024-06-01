@@ -80,6 +80,6 @@ def get_tpose(xml_path, save_path, verbose=True):
 
 if __name__ == '__main__':
     rofunc_path = rf.oslab.get_rofunc_path()
-    xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/UnitreeH1/h1_w_qbhand.xml")
+    xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/unitreeH1/h1_w_qbhand_new.xml")
     save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_h1_w_qbhand_tpose.npy")
     get_tpose(xml_path, save_path)

@@ -77,6 +77,6 @@ if __name__ == '__main__':
     # xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/hotu_humanoid_w_qbhand_no_virtual.xml")
     # save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_tpose.npy")
 
-    xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/hotu_humanoid_w_qbhand_full.xml")
+    xml_path = os.path.join(rofunc_path, "simulator/assets/mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml")
     save_path = os.path.join(rofunc_path, "utils/datalab/poselib/data/target_hotu_humanoid_w_qbhand_full_tpose.npy")
     get_hotu_tpose(xml_path, save_path)

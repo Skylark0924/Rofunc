@@ -36,6 +36,7 @@ class HOTULLCAgent(ASEAgent):
     """
     HOTU - low-level controller agent for learning human and robots motion priors from unstructured motion data
     """
+
     def __init__(self,
                  cfg: DictConfig,
                  observation_space: Optional[Union[int, Tuple[int], gym.Space, gymnasium.Space]],
@@ -75,14 +76,18 @@ class HOTULLCAgent(ASEAgent):
 
         super().__init__(cfg, observation_space, action_space, memory, device,
                          experiment_dir, rofunc_logger, amp_observation_space[0], motion_dataset, replay_buffer,
-                         collect_reference_motions)  # Initialize the first part
+                         collect_reference_motions, num_part=self.num_parts)  # Initialize the first part
+
+        self._ase_latents = [torch.zeros((self.memory.num_envs, self._ase_latent_dim), dtype=torch.float32,
+                                         device=self.device) for _ in range(self.num_parts)]
 
         self._tensors_names = ["states", "actions", "rewards", "next_states", "terminated", "log_prob", "values",
-                               "returns", "advantages", "next_values", "ase_latents"]
+                               "returns", "advantages", "next_values"]
         for i in range(self.num_parts):
             self._tensors_names.append(f"amp_states_{i}")
+            self._tensors_names.append(f"ase_latents_{i}")
             self.memory.create_tensor(name=f"amp_states_{i}", size=amp_observation_space[i], dtype=torch.float32)
-            # self.memory.create_tensor(name=f"ase_latents_{i}", size=self._ase_latent_dim, dtype=torch.float32)
+            self.memory.create_tensor(name=f"ase_latents_{i}", size=self._ase_latent_dim, dtype=torch.float32)
 
         self._build_decompose_model()
 
@@ -123,11 +128,16 @@ class HOTULLCAgent(ASEAgent):
                                 cfg_name='encoder').to(self.device)
             self.rofunc_logger.module(f"Discriminator model {i}: {disc_model}")
             self.rofunc_logger.module(f"Encoder model {i}: {enc_model}")
+            self.checkpoint_modules[f"discriminator_{i}"] = disc_model
+            self.checkpoint_modules[f"encoder_{i}"] = enc_model
 
             amp_state_pre_kwargs = {"size": self.whole_amp_obs_space[i], "device": self.device}
             optimizer_disc = torch.optim.Adam(disc_model.parameters(), lr=self._lr_d, eps=self._adam_eps)
             optimizer_enc = torch.optim.Adam(enc_model.parameters(), lr=self._lr_e, eps=self._adam_eps)
             amp_state_preprocessor = RunningStandardScaler(**amp_state_pre_kwargs)
+            self.checkpoint_modules[f"optimizer_disc_{i}"] = optimizer_disc
+            self.checkpoint_modules[f"optimizer_enc_{i}"] = optimizer_enc
+            self.checkpoint_modules[f"amp_state_preprocessor_{i}"] = amp_state_preprocessor
 
             if self._lr_scheduler is not None:
                 scheduler_disc = self._lr_scheduler(optimizer_disc, **self._lr_scheduler_kwargs)
@@ -142,6 +152,24 @@ class HOTULLCAgent(ASEAgent):
             self.optimizer_enc_list.append(optimizer_enc)
             self._amp_state_preprocessor_list.append(amp_state_preprocessor)
 
+    def act(self, states: torch.Tensor, deterministic: bool = False, ase_latents: torch.Tensor = None):
+        if self._current_states is not None:
+            states = self._current_states
+
+        if ase_latents is None:
+            # ase_latents = self._ase_latents
+            compose_ase_latents = self._ase_latents[0]
+            for i in range(1, self.num_parts):
+                compose_ase_latents = torch.hstack((compose_ase_latents, self._ase_latents[i]))
+            ase_latents = compose_ase_latents
+
+        res_dict = self.policy(self._state_preprocessor(torch.hstack((states, ase_latents))),
+                               deterministic=deterministic)
+        actions = res_dict["action"]
+        log_prob = res_dict["log_prob"]
+        self._current_log_prob = log_prob
+        return actions, log_prob
+
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor,
                          infos: torch.Tensor):
@@ -155,22 +183,27 @@ class HOTULLCAgent(ASEAgent):
         if self._rewards_shaper is not None:
             rewards = self._rewards_shaper(rewards)
 
+        compose_ase_latents = self._ase_latents[0]
+        for i in range(1, self.num_parts):
+            compose_ase_latents = torch.hstack((compose_ase_latents, self._ase_latents[i]))
+
         # compute values
-        values = self.value(self._state_preprocessor(torch.hstack((states, self._ase_latents))))
+        values = self.value(self._state_preprocessor(torch.hstack((states, compose_ase_latents))))
         # values = self.value(self._state_preprocessor(states))
         values = self._value_preprocessor(values, inverse=True)
 
-        next_values = self.value(self._state_preprocessor(torch.hstack((next_states, self._ase_latents))))
+        next_values = self.value(self._state_preprocessor(torch.hstack((next_states, compose_ase_latents))))
         # next_values = self.value(self._state_preprocessor(next_states))
         next_values = self._value_preprocessor(next_values, inverse=True)
         next_values *= infos['terminate'].view(-1, 1).logical_not()
 
         # storage transition in memory
         amp_states_dict = {f"amp_states_{i}": infos[f"amp_obs_{i}"] for i in range(self.num_parts)}
+        ase_latents_dict = {f"ase_latents_{i}": self._ase_latents[i] for i in range(self.num_parts)}
         self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
                                 terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
-                                values=values, next_values=next_values, ase_latents=self._ase_latents,
-                                **amp_states_dict)
+                                values=values, next_values=next_values,
+                                **amp_states_dict, **ase_latents_dict)
 
     def update_net(self):
         """
@@ -178,13 +211,15 @@ class HOTULLCAgent(ASEAgent):
         """
         '''Compute combined rewards'''
         rewards = self.memory.get_tensor_by_name("rewards")
-        ase_latents = self.memory.get_tensor_by_name("ase_latents")
+        # ase_latents = self.memory.get_tensor_by_name("ase_latents")
 
         amp_states_list = []
+        ase_latents_list = []
         for i in range(self.num_parts):
             # update dataset of reference motions
             self.motion_dataset_list[i].add_samples(states=self.collect_reference_motions(self._amp_batch_size)[i])
             amp_states_list.append(self.memory.get_tensor_by_name(f"amp_states_{i}"))
+            ase_latents_list.append(self.memory.get_tensor_by_name(f"ase_latents_{i}"))
 
         with torch.no_grad():
             # Compute style reward from discriminator
@@ -216,7 +251,7 @@ class HOTULLCAgent(ASEAgent):
                     enc_output = self.encoder_list[i](
                         self._amp_state_preprocessor_list[i](amp_states_list[i]))
                 enc_output = torch.nn.functional.normalize(enc_output, dim=-1)
-                enc_reward_tmp = torch.clamp_min(torch.sum(enc_output * ase_latents, dim=-1, keepdim=True), 0.0)
+                enc_reward_tmp = torch.clamp_min(torch.sum(enc_output * ase_latents_list[i], dim=-1, keepdim=True), 0.0)
                 # enc_reward_tmp *= self._enc_reward_scale
                 enc_reward *= enc_reward_tmp
             enc_reward *= self._enc_reward_scale
@@ -279,13 +314,24 @@ class HOTULLCAgent(ASEAgent):
             # mini-batches loop
             for i, sampled_tensors in enumerate(sampled_batches):
                 (sampled_states, sampled_actions, sampled_rewards, samples_next_states, samples_terminated,
-                 sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, _,
-                 sampled_ase_latents) = sampled_tensors[:11]
+                 sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, _) = sampled_tensors[:10]
 
-                sampled_amp_states_list = sampled_tensors[11:]
+                sampled_amp_states_list = []
+                sampled_ase_latents_list = []
+                for part_i in range(self.num_parts):
+                    sampled_amp_states = sampled_tensors[self._tensors_names.index(f"amp_states_{part_i}")]
+                    sampled_ase_latents = sampled_tensors[self._tensors_names.index(f"ase_latents_{part_i}")]
+                    sampled_amp_states_list.append(sampled_amp_states)
+                    sampled_ase_latents_list.append(sampled_ase_latents)
+
                 assert len(sampled_amp_states_list) == self.num_parts
+                assert len(sampled_ase_latents_list) == self.num_parts
 
-                sampled_states = self._state_preprocessor(torch.hstack((sampled_states, sampled_ase_latents)),
+                compose_ase_latents = sampled_ase_latents_list[0]
+                for part_i in range(1, self.num_parts):
+                    compose_ase_latents = torch.hstack((compose_ase_latents, sampled_ase_latents_list[part_i]))
+
+                sampled_states = self._state_preprocessor(torch.hstack((sampled_states, compose_ase_latents)),
                                                           train=True)
                 # sampled_states = self._state_preprocessor(sampled_states, train=True)
                 res_dict = self.policy(sampled_states, sampled_actions)
@@ -317,7 +363,7 @@ class HOTULLCAgent(ASEAgent):
                     discriminator_loss, enc_loss = self._calc_disc_enc_loss(sampled_amp_states_list[part_i],
                                                                             sampled_replay_batches_list[part_i],
                                                                             sampled_motion_batches_list[part_i],
-                                                                            sampled_ase_latents,
+                                                                            sampled_ase_latents_list[part_i],
                                                                             self.discriminator_list[part_i],
                                                                             self.encoder_list[part_i],
                                                                             self._amp_state_preprocessor_list[part_i],

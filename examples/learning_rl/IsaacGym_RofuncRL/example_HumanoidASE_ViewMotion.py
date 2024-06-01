@@ -57,9 +57,9 @@ if __name__ == "__main__":
     # Available types of asset file path:
     #  1. mjcf/hotu_humanoid_w_qbhand_no_virtual.xml
     #  2. mjcf/amp_humanoid_sword_shield.xml
-    #  3. mjcf/hotu_humanoid.xml
+    #  3. mjcf/hotu/hotu_humanoid.xml
     #  4. mjcf/amp_humanoid.xml
-    parser.add_argument("--asset", type=str, default="mjcf/hotu_humanoid.xml")
+    parser.add_argument("--asset", type=str, default="mjcf/hotu/hotu_humanoid.xml")
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/amp/*.npy`
     #  2. custom motion file with absolute path

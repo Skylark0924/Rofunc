@@ -19,10 +19,10 @@ from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 
 import rofunc as rf
+from rofunc.config.utils import get_sim_config
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.base.vec_task import VecTask
 from rofunc.learning.RofuncRL.tasks.utils import torch_jit_utils as torch_utils
 from rofunc.utils.oslab.path import get_rofunc_path
-from rofunc.config.utils import get_sim_config
 
 
 class Humanoid(VecTask):
@@ -49,6 +49,11 @@ class Humanoid(VecTask):
         self._enable_early_termination = self.cfg["env"]["enableEarlyTermination"]
         self.camera_follow = self.cfg["env"].get("cameraFollow", False)
         self.use_object_motion = self.cfg["env"].get("use_object_motion", False)
+        self._char_height = self.cfg["env"].get("charHeight", 1.0)
+        self._head_rb_name = self.cfg["env"].get("headRbName", "head")
+        self.use_synergy = self.cfg["task"].get("use_synergy", False)
+        self._env_spacing = self.cfg["env"].get("envSpacing", 1.0)
+        self._num_env_per_row = self.cfg["env"].get("numEnvPerRow", int(np.sqrt(self.cfg["env"]["numEnvs"])))
 
         self.humanoid_asset_infos = get_sim_config(sim_name="Humanoid_info")["Model_type"]
 
@@ -182,12 +187,36 @@ class Humanoid(VecTask):
         self.up_axis_idx = 2  # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
 
-        self._create_ground_plane()
-        self._create_envs(self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
+        # self._create_ground_plane()
+        self.init_light()
+        self.init_terrain()
+        self._create_envs(self._env_spacing, self._num_env_per_row)
 
         # If randomizing, apply once immediately on startup before the fist sim step
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
+
+    def init_terrain(self):
+        from isaacgym.terrain_utils import SubTerrain, convert_heightfield_to_trimesh, sloped_terrain
+
+        horizontal_scale = 1  # [m]
+        vertical_scale = 1  # [m]
+
+        heightfield = sloped_terrain(SubTerrain(), slope=-0).height_field_raw
+        vertices, triangles = convert_heightfield_to_trimesh(heightfield, horizontal_scale=horizontal_scale,
+                                                             vertical_scale=vertical_scale, slope_threshold=1.5)
+        tm_params = gymapi.TriangleMeshParams()
+        tm_params.nb_vertices = vertices.shape[0]
+        tm_params.nb_triangles = triangles.shape[0]
+        tm_params.transform.p.x = -128.
+        tm_params.transform.p.y = -128.
+        self.gym.add_triangle_mesh(self.sim, vertices.flatten(), triangles.flatten(), tm_params)
+
+    def init_light(self):
+        l_color = gymapi.Vec3(1, 1, 1)
+        l_ambient = gymapi.Vec3(0.2, 0.2, 0.2)
+        l_direction = gymapi.Vec3(-1, 0, 1)
+        self.gym.set_light_parameters(self.sim, 0, l_color, l_ambient, l_direction)
 
     def reset_idx(self, env_ids):
         self._reset_actors(env_ids)
@@ -278,7 +307,7 @@ class Humanoid(VecTask):
             self._dof_obs_size = 78
             self._num_actions = 31
             self._num_obs = 1 + 17 * (3 + 6 + 3 + 3) - 3
-        elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu_humanoid.xml"]:
+        elif asset_file in ["mjcf/amp_humanoid_spoon_pan_fixed.xml", "mjcf/hotu/hotu_humanoid.xml"]:
             self._dof_body_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]  # len=14
             self._dof_offsets = [0, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34]  # len=14+1
             self._dof_obs_size = 84  # 14 * 6 (joint_obs_size) = 84
@@ -302,7 +331,7 @@ class Humanoid(VecTask):
             self._dof_obs_size = 264  # 44 * 6 (joint_obs_size) = 264
             self._num_actions = 64
             self._num_obs = 1 + 45 * (3 + 6 + 3 + 3) - 3  # 673
-        elif asset_file == "mjcf/hotu_humanoid_w_qbhand_full.xml":
+        elif asset_file == "mjcf/hotu/hotu_humanoid_w_qbhand_full.xml":
             # self._dof_body_ids = [*[i for i in range(1, 81)]]  # len=80
             # self._dof_offsets = [0, 3, 6, 9, 10, *[i for i in range(13, 46)], 46, 49, 50, *[i for i in range(53, 86)],
             #                      86, 89, 90, 93, 96, 97, 100] # len=80+1
@@ -319,12 +348,20 @@ class Humanoid(VecTask):
             self._dof_obs_size = 522  # 87 * 6 (joint_obs_size) = 522
             self._num_actions = 87
             self._num_obs = 1 + 88 * (3 + 6 + 3 + 3) - 3  # 1353
-        elif asset_file in ["mjcf/UnitreeH1/h1_w_qbhand.xml", "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
-                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"]:
+        elif asset_file in ["mjcf/unitreeH1/h1_w_qbhand.xml", "mjcf/walker/walker.xml", "mjcf/bruce/bruce.xml",
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml", "mjcf/zju_humanoid/zju_humanoid.xml",
+                            "mjcf/zju_humanoid/zju_humanoid_w_qbhand_new.xml",
+                            "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml",
+                            "mjcf/hotu/hotu_humanoid_w_qbhand_full_new_joint.xml",
+                            "mjcf/unitreeH1/h1_w_qbhand_new.xml"]:
             humanoid_info = self._get_humanoid_info(asset_file)
             self._dof_offsets = humanoid_info["dof_offsets"]
-            self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96
-            self._num_actions = len(humanoid_info["dofs"])
+            self._dof_obs_size = (len(humanoid_info["rigid_bodies"]) - len(
+                humanoid_info["del_rb"])) * 6  # 16 * 6 (joint_obs_size) = 96
+            if "w_qbhand" in asset_file and self.use_synergy:
+                self._num_actions = len(humanoid_info["dofs"]) - 58 + 4
+            else:
+                self._num_actions = len(humanoid_info["dofs"])
             self._num_obs = 1 + len(humanoid_info["rigid_bodies"]) * (3 + 6 + 3 + 3) - 3
         else:
             raise rf.logger.beauty_print(f"Unsupported character config file: {asset_file}")
@@ -336,7 +373,7 @@ class Humanoid(VecTask):
         termination_height = self.cfg["env"]["terminationHeight"]
         self._termination_heights = np.array([termination_height] * self.num_bodies)
 
-        head_id = self.gym.find_actor_rigid_body_handle(self.envs[0], self.humanoid_handles[0], "head")
+        head_id = self.gym.find_actor_rigid_body_handle(self.envs[0], self.humanoid_handles[0], self._head_rb_name)
         self._termination_heights[head_id] = max(head_term_height, self._termination_heights[head_id])
 
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
@@ -447,7 +484,7 @@ class Humanoid(VecTask):
         segmentation_id = 0
 
         start_pose = gymapi.Transform()
-        char_h = 0.89
+        char_h = self._char_height
 
         start_pose.p = gymapi.Vec3(*get_axis_params(char_h, self.up_axis_idx))
         start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
@@ -464,18 +501,20 @@ class Humanoid(VecTask):
 
         self.gym.enable_actor_dof_force_sensors(env_ptr, humanoid_handle)
 
-        for j in range(self.num_bodies):
-            self.gym.set_rigid_body_color(
-                env_ptr,
-                humanoid_handle,
-                j,
-                gymapi.MESH_VISUAL,
-                gymapi.Vec3(0.54, 0.85, 0.2),
-            )
+        # for j in range(self.num_bodies):
+        #     self.gym.set_rigid_body_color(
+        #         env_ptr,
+        #         humanoid_handle,
+        #         j,
+        #         gymapi.MESH_VISUAL,
+        #         gymapi.Vec3(0.54, 0.85, 0.2),
+        #     )
 
         if self._pd_control:
             dof_prop = self.gym.get_asset_dof_properties(humanoid_asset)
             dof_prop["driveMode"] = gymapi.DOF_MODE_POS
+            dof_prop["stiffness"] = 300
+            dof_prop["damping"] = 30
             self.gym.set_actor_dof_properties(env_ptr, humanoid_handle, dof_prop)
 
         self.humanoid_handles.append(humanoid_handle)
@@ -556,13 +595,13 @@ class Humanoid(VecTask):
         self._pd_action_offset = 0.5 * (lim_high + lim_low)
         asset_file = self.cfg["env"]["asset"]["assetFileName"]
         dof_dict = self._get_humanoid_info(asset_file)["dofs"]
-        for dof, index in dof_dict.items():
-            if "qbhand" in dof:
-                self._pd_action_offset[index] = 0.0
-            # elif dof == "right_hand":
-            #     self._pd_action_offset[index] = 0.
-            # elif dof == "left_hand":
-            #     self._pd_action_offset[index] = 0.
+        # for dof, index in dof_dict.items():
+        #     if "qbhand" in dof:
+        #         self._pd_action_offset[index] = 0.0
+        #     # elif dof == "right_hand":
+        #     self._pd_action_offset[index] = 0.
+        # elif dof == "left_hand":
+        #     self._pd_action_offset[index] = 0.
         self._pd_action_scale = 0.5 * (lim_high - lim_low)
         self._pd_action_offset = to_torch(self._pd_action_offset, device=self.device)
         self._pd_action_scale = to_torch(self._pd_action_scale, device=self.device)
@@ -695,7 +734,7 @@ class Humanoid(VecTask):
         self._cam_prev_char_pos = self._humanoid_root_states[0, 0:3].cpu().numpy()
 
         cam_pos = gymapi.Vec3(
-            self._cam_prev_char_pos[0], self._cam_prev_char_pos[1] - 3.0, 1.0
+            self._cam_prev_char_pos[0], self._cam_prev_char_pos[1] - 40.0, 5.0
         )
         cam_target = gymapi.Vec3(
             self._cam_prev_char_pos[0], self._cam_prev_char_pos[1], 1.0
@@ -771,7 +810,7 @@ def dof_to_obs(pose, dof_obs_size, dof_offsets):
             )
             joint_pose_q = quat_from_angle_axis(joint_pose[..., 0], axis)
         else:
-            joint_pose_q = None
+            # joint_pose_q = 0
             assert False, "Unsupported joint type"
 
         joint_dof_obs = torch_utils.quat_to_tan_norm(joint_pose_q)

@@ -1,6 +1,10 @@
 env:
+  terminationHeight: 0.5
+  charHeight: 1
+
   keyBodies: [ "right_limb_l7", "left_limb_l7", "right_leg_l6", "left_leg_l6" ]
   contactBodies: [ "right_leg_l6", "left_leg_l6" ]
+  headRbName: "head_l2"
 
   # animation files to learn from
   motion_file: "examples/data/hotu2/20240509/all_walker_motion.yaml"

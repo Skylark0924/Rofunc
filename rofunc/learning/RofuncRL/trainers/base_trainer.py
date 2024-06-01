@@ -66,7 +66,6 @@ class BaseTrainer:
 
         '''Rofunc logger'''
         self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.train.Trainer.rofunc_logger_kwargs.verbose)
-        self.rofunc_logger.info(f"Trainer configurations:\n{OmegaConf.to_yaml(self.cfg.train)}")
 
         '''Setup Weights & Biases'''
         self.setup_wandb()
@@ -121,7 +120,8 @@ class BaseTrainer:
                                 f"  num_envs: {self.env.num_envs}")
 
         if hasattr(self.env._env, "cfg"):
-            self.rofunc_logger.info(f"Task configurations:\n{self.env._env.cfg}")
+            self.rofunc_logger.info(f"Task configurations:\n{OmegaConf.to_yaml(self.env._env.cfg)}")
+            self.rofunc_logger.info(f"Trainer configurations:\n{OmegaConf.to_yaml(self.cfg.train)}")
 
         '''Normalization'''
         self.state_norm = Normalization(shape=self.env.observation_space, device=device)
