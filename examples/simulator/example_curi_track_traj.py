@@ -12,8 +12,8 @@ import rofunc as rf
 
 traj_l = np.load('../data/LQT_LQR/taichi_1l.npy')
 traj_r = np.load('../data/LQT_LQR/taichi_1r.npy')
-traj_l[:, 0] += 0.2
-traj_r[:, 0] += 0.2
+traj_l[:, 0] += 0.8
+traj_r[:, 0] += 0.8
 traj_l[:, 1] = -traj_l[:, 1]
 traj_r[:, 1] = -traj_r[:, 1]
 traj_l[:, 3:] = [1, 0, 0, 0]

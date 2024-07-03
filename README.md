@@ -178,8 +178,8 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 ```
 @software{liu2023rofunc,
           title = {Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation},
-          author = {Liu, Junjia and Li, Chenzui and Delehelle, Donatien and Li, Zhihao and Yu, Minghao and Chen, Fei},
-          year = {2023},     
+          author = {Liu, Junjia and Dong, Zhipeng and Li, Chenzui and Li, Zhihao and Yu, Minghao and Delehelle, Donatien and Chen, Fei},
+          year = {2023},
           publisher = {Zenodo},
           doi = {10.5281/zenodo.10016946},
           url = {https://doi.org/10.5281/zenodo.10016946},
