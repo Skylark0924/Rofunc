@@ -20,7 +20,7 @@ setup(
     author="Junjia Liu",
     author_email="jjliu@mae.cuhk.edu.hk",
     url='https://github.com/Skylark0924/Rofunc',
-    packages=find_packages(exclude=["others"]),
+    packages=find_packages(),
     include_package_data=True,
     extras_require=extras,
     install_requires=['cython==3.0.0a10',  # for mujoco_py
