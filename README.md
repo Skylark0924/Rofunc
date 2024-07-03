@@ -49,8 +49,10 @@ processing, learning, and its deployment on robots.
 
 
 ## Update News 🎉🎉🎉
+
+### v0.0.2.6 Support dexterous grasping and human-humanoid robot skill transfer
+- [2024-06-30] 🎉🚀 **Human-level skill transfer from human to heterogeneous humanoid robots have been completed and are awaiting release.**
 - [2024-01-24] 🚀 [CURI Synergy-based Softhand grasping tasks](https://github.com/Skylark0924/Rofunc/blob/main/examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py) are supported to be trained by `RofuncRL`.
-- [2023-12-24] 🚀 [Dexterous hand (Shadow Hand, Allegro Hand, qbSofthand) tasks](https://github.com/Skylark0924/Rofunc/blob/main/examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py) are supported to be trained by `RofuncRL`.
 - [2023-12-03] 🖼️ [Segment-Anything (SAM)](https://segment-anything.com/) is supported in an interactive mode, check the examples in Visualab ([segment anything](https://github.com/Skylark0924/Rofunc/blob/main/examples/visualab/example_sam_seg.py), [segment with prompt](https://github.com/Skylark0924/Rofunc/blob/main/examples/visualab/example_sam_seg_w_prompt.py)).
 - **[2023-10-31] 🚀 [`RofuncRL`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/index.html): A modular easy-to-use Reinforcement Learning sub-package designed for Robot Learning tasks is released. It has been tested with simulators like `OpenAIGym`, `IsaacGym`, `OmniIsaacGym` (see [example gallery](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html)), and also differentiable simulators like `PlasticineLab` and `DiffCloth`.**
 - ...
