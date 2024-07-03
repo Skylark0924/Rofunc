@@ -33,7 +33,7 @@ setup(
                       'hydra-core==1.3.2',
                       'opencv-python==4.7.0.72',
                       'neurokit2==0.2.4',
-                      'gdown==5.2.0',
+                      'gdown',
                       'pytz==2023.3',
                       'shutup==0.2.0',
                       'numpy<=1.23.0',
