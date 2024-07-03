@@ -65,7 +65,7 @@ def inference(custom_args):
                       "train={}{}RofuncRL".format(custom_args.task, custom_args.agent.upper()),
                       "device_id={}".format(custom_args.sim_device),
                       "rl_device=cuda:{}".format(custom_args.rl_device),
-                      "headless={}".format(False),
+                      "headless={}".format(True),
                       "num_envs={}".format(1)]
     cfg = get_config('./learning/rl', 'config', args=args_overrides)
     if custom_args.task == "CURIQbSoftHandSynergyGrasp":
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     parser.add_argument("--task", type=str, default="CURIQbSoftHandSynergyGrasp")
     # Available objects: Hammer, Spatula, Large_Clamp, Mug, Power_Drill, Knife, Scissors, Large_Marker, Phillips_Screw_Driver
     # Only for CURIQbSoftHandSynergyGrasp
-    parser.add_argument("--object", type=str, default="Hammer")
+    parser.add_argument("--object", type=str, default="Mug")
     # Only for CURIQbSoftHandSynergyGrasp
     parser.add_argument("--use_synergy", type=str, default="True")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     parser.add_argument("--sim_device", type=int, default=0)
     parser.add_argument("--rl_device", type=int, default=gpu_id)
     parser.add_argument("--headless", type=str, default="True")
-    parser.add_argument("--inference", action="store_true", help="turn to inference mode while adding this argument")
+    parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
     parser.add_argument("--ckpt_path", type=str, default=None)
     custom_args = parser.parse_args()
 

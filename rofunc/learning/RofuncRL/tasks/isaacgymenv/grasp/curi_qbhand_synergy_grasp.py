@@ -144,9 +144,9 @@ class CURIQbSoftHandSynergyGraspTask(VecTask):
 
         self.num_agents = 1
         if self.cfg["env"]["useSynergy"]:
-            self.cfg["env"]["numActions"] = 2 + 6  # 2-dim synergy for controlling each hand
+            self.cfg["env"]["numActions"] = 2 + 7  # 2-dim synergy for controlling each hand
         else:
-            self.cfg["env"]["numActions"] = 15 + 6  # 15-dim dof for controlling each hand
+            self.cfg["env"]["numActions"] = 15 + 7  # 15-dim dof for controlling each hand
         self.num_action = self.cfg["env"]["numActions"]
 
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render)
