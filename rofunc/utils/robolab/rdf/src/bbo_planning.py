@@ -29,23 +29,37 @@ class BBOPlanner():
             rf.robolab.homo_matrix_from_quaternion([-0.436865, 0.49775, 0.054428, 0.747283])[:3, :3]).to(self.device)
         self.pose_r[0, :3, :3] = torch.tensor(
             rf.robolab.homo_matrix_from_quaternion([0.436865, 0.49775, -0.054428, 0.747283])[:3, :3]).to(self.device)
+
+        # self.pose_l[0, :3, :3] = torch.tensor(
+        #     rf.robolab.homo_matrix_from_quaternion([-0.437, 0.747, -0.054, -0.498, ])[:3, :3]).to(self.device)
+        # self.pose_r[0, :3, :3] = torch.tensor(
+        #     rf.robolab.homo_matrix_from_quaternion([0.437, 0.747, -0.054, -0.498, ])[:3, :3]).to(self.device)
+
         # self.pose_r[0, :3, 3] = torch.tensor([0.6198, -0.7636, 0]).to(self.device)
 
-        self.pose_l[0, :3, 3] = torch.tensor([0.396519, 0.305557, 0.644388]).to(self.device)
-        self.pose_r[0, :3, 3] = torch.tensor([0.396519, -0.305557, 0.644388]).to(self.device)
+        self.pose_l[0, :3, 3] = torch.tensor([0.396519, 0.07, 0.644388]).to(self.device)
+        self.pose_r[0, :3, 3] = torch.tensor([0.396519, -0.07, 0.644388]).to(self.device)
+        # self.pose_l[0, :3, 3] = torch.tensor([0.398, -0.07, 1.2]).to(self.device)
+        # self.pose_r[0, :3, 3] = torch.tensor([0.398, 0.07, 1.2]).to(self.device)
         # self.mid_l = torch.tensor([ 0.42704887,  0.17838557,  0.10469598, -1.74670609, -0.05181788 , 2.16040988,-2.29006758]).reshape(-1,7).to(self.device)
         # self.mid_r = torch.tensor( [ 0.79520689 , 0.37705809, -0.01953359, -1.50133787,  0.14086509,  1.87535585, 1.05259796]).reshape(-1,7).to(self.device)
 
     def load_box_object(self):
         """load a box with size .3*.3*.3 based on urdf path"""
+        # self.box_pos = np.array([0.7934301890820722, 0.05027181819137394, 0.2246743147850761])
+
         self.box_pos = np.array([0.7934301890820722, 0.05027181819137394, 0.2246743147850761])
         self.box_size = np.array([0.38, 0.24, 0.26])
         # self.box_rotation = np.array([[0.707, 0.707, 0],
         #                               [-0.707, 0.707, 0],
         #                               [0, 0, 1]])
 
-        self.box_rotation = np.array([[1, 0, 0],
-                                      [0, 1, 0],
+        # self.box_rotation = np.array([[1, 0, 0],
+        #                               [0, 1, 0],
+        #                               [0, 0, 1]])
+
+        self.box_rotation = np.array([[0,  1.57, 0],
+                                      [-1.57, 0, 0],
                                       [0, 0, 1]])
         #  internal points
         mesh = trimesh.creation.box(self.box_size)
