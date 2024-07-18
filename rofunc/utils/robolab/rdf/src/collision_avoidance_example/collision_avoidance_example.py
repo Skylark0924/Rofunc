@@ -10,8 +10,8 @@ import math
 
 CUR_PATH = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(CUR_PATH, '../'))
-import bf_sdf
-from panda_layer.panda_layer import PandaLayer
+from rofunc.utils.robolab.rdf import bf_sdf
+from rofunc.utils.robolab.rdf.panda_layer.panda_layer import PandaLayer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 robot = PandaLayer(device)

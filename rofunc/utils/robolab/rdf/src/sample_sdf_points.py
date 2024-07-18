@@ -1,11 +1,9 @@
-import trimesh
 import glob
 import os
-import numpy as np
+
 import mesh_to_sdf
-import skimage
-import pyrender
-import torch
+import numpy as np
+import trimesh
 
 mesh_path = os.path.dirname(os.path.realpath(__file__)) + "/panda_layer/meshes/voxel_128/*.stl"
 mesh_files = glob.glob(mesh_path)

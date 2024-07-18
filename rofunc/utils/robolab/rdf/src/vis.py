@@ -196,4 +196,4 @@ if __name__ == '__main__':
     plot_2D_panda_sdf(pose, theta, bp_sdf, nbData=80, model=model, device=args.device)
 
     # vis 3D SDF with gradient
-    # plot_3D_panda_with_gradient(pose,theta,bp_sdf,model=model,device=args.device)
+    plot_3D_panda_with_gradient(pose,theta,bp_sdf,model=model,device=args.device)
