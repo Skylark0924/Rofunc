@@ -1,32 +1,23 @@
-import rofunc as rf
+from rofunc.utils.robolab.kinematics.mjcf import build_chain_from_mjcf
 
 
-def check_urdf(urdf_path):
-    from urdfpy import URDF
+def build_chain_from_model(model_path: str, verbose=False):
+    """
+    Build a serial chain from a URDF or MuJoCo XML file
 
-    robot = URDF.load(urdf_path)
-    # link_number = len(robot.links)
-    # joint_number = len(robot.joints)
+    :param model_path: the path of the URDF or MuJoCo XML file
+    :param verbose: whether to print the chain
+    :return: robot kinematics chain
+    """
+    import pytorch_kinematics as pk
 
-    link_name = []
-    for link in robot.links:
-        link_name.append(link.name)
-    rf.logger.beauty_print('Robot link names (total {}): {}'.format(len(robot.links), link_name), type='info')
+    if model_path.endswith(".urdf"):
+        chain = pk.build_chain_from_urdf(open(model_path).read())
+    elif model_path.endswith(".xml"):
+        chain = build_chain_from_mjcf(model_path)
+    else:
+        raise ValueError("Invalid model path")
 
-    joint_name = []
-    for joint in robot.joints:
-        joint_name.append(joint.name)
-    rf.logger.beauty_print('Robot joint names (total {}): {}'.format(len(robot.joints), joint_name), type='info')
-
-    actuated_joint_name = []
-    for joint in robot.actuated_joints:
-        actuated_joint_name.append(joint.name)
-    rf.logger.beauty_print(
-        'Robot actuated joint names (total {}): {}'.format(len(robot.actuated_joints), actuated_joint_name),
-        type='info')
-
-    # for joint in robot.joints:
-    #     print('{} connects {} to {}'.format(
-    #         joint.name, joint.parent, joint.child))
-
-    return link_name, joint_name, actuated_joint_name
+    if verbose:
+        print(chain)
+    return chain

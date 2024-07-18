@@ -1,0 +1,7 @@
+numpy
+pyyaml
+trimesh
+argparse
+pyglet==1.5.0
+matplotlib
+git+https://github.com/marian42/mesh_to_sdf.git #mesh-to-sdf

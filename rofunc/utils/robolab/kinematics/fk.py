@@ -1,26 +1,39 @@
-def get_fk_from_model(urdf_path, joint_name, joint_value, export_link):
-    """
+from rofunc.utils.robolab.kinematics.utils import build_chain_from_model
 
-    :param urdf_path:
-    :param joint_name:
+
+def get_fk_from_chain(chain, joint_value, export_link_name):
+    """
+    Get the forward kinematics from a serial chain
+
+    :param chain:
     :param joint_value:
-    :param export_link:
-    :return:
+    :param export_link_name:
+    :return: the position, rotation of the end effector, and the transformation matrices of all links
     """
-    from urdfpy import URDF
+    import pytorch_kinematics as pk
 
-    robot = URDF.load(urdf_path)
-    link_name = []
-    for link in robot.links:
-        str = link.name
-        link_name.append(str)
+    # do forward kinematics and get transform objects; end_only=False gives a dictionary of transforms for all links
+    ret = chain.forward_kinematics(joint_value)
+    # look up the transform for a specific link
+    tg = ret[export_link_name]
+    # get transform matrix (1,4,4), then convert to separate position and unit quaternion
+    m = tg.get_matrix()
+    pos = m[:, :3, 3]
+    rot = pk.matrix_to_quaternion(m[:, :3, :3])
+    return pos, rot, ret
 
-    cfg = {}
-    for key, value in zip(joint_name, joint_value):
-        if key != 'reference':
-            cfg[key] = value
-    forward_kinematics = robot.link_fk(cfg=cfg)
 
-    export_pose = forward_kinematics[robot.links[link_name.index(export_link)]]
+def get_fk_from_model(model_path: str, joint_value, export_link, verbose=False):
+    """
+    Get the forward kinematics from a URDF or MuJoCo XML file
 
-    return robot, export_pose, cfg
+    :param model_path: the path of the URDF or MuJoCo XML file
+    :param joint_value: the value of the joints
+    :param export_link: the name of the end effector link
+    :param verbose: whether to print the chain
+    :return: the position, rotation of the end effector, and the transformation matrices of all links
+    """
+
+    chain = build_chain_from_model(model_path, verbose)
+    pos, rot, tg = get_fk_from_chain(chain, joint_value, export_link)
+    return pos, rot, tg

@@ -38,7 +38,6 @@
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
         <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
         <body name="pelvis" pos="0 0 0.5" childclass="body">
-            <freejoint name="root"/>
             <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1"
                   mesh="base_link"/>
             <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="base_link"/>
