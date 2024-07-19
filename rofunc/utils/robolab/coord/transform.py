@@ -1286,7 +1286,6 @@ def euler_from_quaternion(quaternion, axes='sxyz'):
     return euler_from_homo_matrix(homo_matrix_from_quaternion(quaternion), axes)
 
 
-
 def quaternion_from_euler(ai, aj, ak, axes='sxyz'):
     """
     Return quaternion from Euler angles and axis sequence.
@@ -1461,6 +1460,8 @@ def quaternion_multiply_tensor_multirow(quaternion1, quaternion0):
         x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0,
         -x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0
     ))
+
+
 def quaternion_multiply_tensor_multirow2(quaternion1, quaternion0):
     """
     Return multiplication of two quaternions with multiple rows in the form of tensor.
@@ -1479,6 +1480,7 @@ def quaternion_multiply_tensor_multirow2(quaternion1, quaternion0):
         x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0,
         -x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0
     ))
+
 
 def quaternion_conjugate(quaternion):
     """

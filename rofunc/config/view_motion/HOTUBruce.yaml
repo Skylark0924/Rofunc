@@ -1,4 +1,6 @@
 env:
+  envSpacing: 1
+
   keyBodies: [ "hand_r", "hand_l", "ankle_pitch_link_r", "ankle_pitch_link_l" ]
   contactBodies: [ "ankle_pitch_link_r", "ankle_pitch_link_l" ]
 
