@@ -5,7 +5,7 @@ import bf_sdf
 import matplotlib.pyplot as plt
 import numpy as np
 import trimesh
-import utils
+from rofunc.utils.robolab.rdf import utils
 import argparse
 
 

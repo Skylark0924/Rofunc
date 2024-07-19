@@ -85,7 +85,7 @@ def eval_chamfer_distance(tag):
 
 
 def visualize_reconstructed_whole_body(model, trans_list, tag):
-    mesh_path = os.path.join(CUR_DIR, f"output_meshes/{tag}_*.stl")
+    mesh_path = os.path.join(CUR_DIR, f"src/output_meshes/{tag}_*.stl")
     mesh_files = glob.glob(mesh_path)
     mesh_files.sort()
     view_mat = np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0], [0, 0, 0, 1]])

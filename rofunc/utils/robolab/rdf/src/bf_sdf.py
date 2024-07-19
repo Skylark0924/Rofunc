@@ -5,7 +5,7 @@ import numpy as np
 np.set_printoptions(threshold=np.inf)
 import glob
 import trimesh
-import utils
+from rofunc.utils.robolab.rdf import utils
 import mesh_to_sdf
 import skimage
 from panda_layer.panda_layer import PandaLayer
@@ -300,11 +300,11 @@ if __name__ == '__main__':
     trans_list = panda.get_transformations_each_link(pose, theta)
     utils.visualize_reconstructed_whole_body(model, trans_list, tag=f'BP_{args.n_func}')
 
-    # run RDF 
-    x = torch.rand(128, 3).to(args.device) * 2.0 - 1.0
-    theta = torch.rand(2, 7).to(args.device).float()
-    pose = torch.from_numpy(np.identity(4)).unsqueeze(0).to(args.device).expand(len(theta), 4, 4).float()
-    sdf, gradient = bp_sdf.get_whole_body_sdf_batch(x, pose, theta, model, use_derivative=True)
-    print('sdf:', sdf.shape, 'gradient:', gradient.shape)
-    sdf, joint_grad = bp_sdf.get_whole_body_sdf_with_joints_grad_batch(x, pose, theta, model)
-    print('sdf:', sdf.shape, 'joint gradient:', joint_grad.shape)
+    # # run RDF
+    # x = torch.rand(128, 3).to(args.device) * 2.0 - 1.0
+    # theta = torch.rand(2, 7).to(args.device).float()
+    # pose = torch.from_numpy(np.identity(4)).unsqueeze(0).to(args.device).expand(len(theta), 4, 4).float()
+    # sdf, gradient = bp_sdf.get_whole_body_sdf_batch(x, pose, theta, model, use_derivative=True)
+    # print('sdf:', sdf.shape, 'gradient:', gradient.shape)
+    # sdf, joint_grad = bp_sdf.get_whole_body_sdf_with_joints_grad_batch(x, pose, theta, model)
+    # print('sdf:', sdf.shape, 'joint gradient:', joint_grad.shape)
