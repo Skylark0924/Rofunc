@@ -5,7 +5,7 @@ import time
 import bf_sdf, nn_sdf, sphere
 from panda_layer.panda_layer import PandaLayer
 import argparse
-import utils
+from rofunc.utils.robolab.rdf import utils
 import yaml
 
 CUR_DIR = os.path.dirname(os.path.abspath(__file__))

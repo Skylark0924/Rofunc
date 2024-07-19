@@ -6,13 +6,11 @@ import torch
 np.set_printoptions(threshold=np.inf)
 import glob
 import trimesh
-import utils
 import mesh_to_sdf
 import skimage
-import argparse
 import rofunc as rf
-import pyrender
 from tqdm import tqdm
+from rofunc.utils.robolab.rdf import utils
 
 
 class RDF_BP:
@@ -182,7 +180,7 @@ class RDF_BP:
         else:
             for i, mf in enumerate(tqdm(mesh_files)):
                 res = train_single_mesh(mf, i)
-                mesh_dict[res['i']] = res
+                mesh_dict[res['mesh_name']] = res
 
         self.mesh_dict = mesh_dict
         if self.save_mesh_dict:
@@ -343,63 +341,16 @@ class RDF_BP:
         scene = trimesh.Scene()
         for i, mf in enumerate(mesh_files):
             mesh = trimesh.load(mf)
-            mesh_dict = model[i]
+            mesh_name = mf.split('/')[-1].split('.')[0]
+            if 'finger' in mesh_name:
+                mesh_dict = model['finger']
+            else:
+                mesh_dict = model[mesh_name.split('_')[-1]]
             offset = mesh_dict['offset'].cpu().numpy()
             scale = mesh_dict['scale']
             mesh.vertices = mesh.vertices * scale + offset
-            mesh.apply_transform(trans_list[i].squeeze().cpu().numpy())
+
+            mesh.apply_transform(trans_list[mesh_name.split('_')[-1]].squeeze().cpu().numpy())
             mesh.apply_transform(view_mat)
             scene.add_geometry(mesh)
         scene.show()
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--device', default='cuda', type=str)
-    parser.add_argument('--domain_max', default=1.0, type=float)
-    parser.add_argument('--domain_min', default=-1.0, type=float)
-    parser.add_argument('--n_func', default=8, type=int)
-    parser.add_argument('--train_epoch', default=200, type=int)
-    parser.add_argument('--train', action='store_true')
-    parser.add_argument('--save_mesh_dict', action='store_false')
-    parser.add_argument('--load_sampled_points', action='store_false')
-    parser.add_argument('--sampled_points_dir',
-                        default='/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/rofunc/simulator/assets/urdf/franka_description/rdf/sdf_points',
-                        type=str)
-    parser.add_argument('--parallel', action='store_true')
-    parser.add_argument('--robot_model',
-                        default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/rofunc/simulator/assets/urdf/franka_description",
-                        type=str)
-    args = parser.parse_args()
-
-    rdf_bp = RDF_BP(args)
-
-    #  train Bernstein Polynomial model
-    if args.train:
-        rdf_bp.train()
-
-    # load trained model
-    model_path = os.path.join(args.robot_model, 'rdf/BP', f'BP_{args.n_func}.pt')
-    model = torch.load(model_path)
-
-    # visualize the Bernstein Polynomial model for each robot link
-    # rdf_bp.create_surface_mesh(model, nbData=128, vis=True, save_mesh_name=f'BP_{args.n_func}')
-
-    # visualize the Bernstein Polynomial model for the whole body
-    from panda_layer.panda_layer import PandaLayer
-
-    panda = PandaLayer(args.device)
-    theta = torch.tensor([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]).float().to(args.device).reshape(-1, 7)
-    pose = torch.from_numpy(np.identity(4)).to(args.device).reshape(-1, 4, 4).expand(len(theta), 4, 4).float()
-    trans_list = panda.get_transformations_each_link(pose, theta)
-    rdf_bp.visualize_reconstructed_whole_body(model, trans_list, tag=f'BP_{args.n_func}')
-
-    # # run RDF
-    # x = torch.rand(128, 3).to(args.device) * 2.0 - 1.0
-    # theta = torch.rand(2, 7).to(args.device).float()
-    # pose = torch.from_numpy(np.identity(4)).unsqueeze(0).to(args.device).expand(len(theta), 4, 4).float()
-    # sdf, gradient = bp_sdf.get_whole_body_sdf_batch(x, pose, theta, model, use_derivative=True)
-    # print('sdf:', sdf.shape, 'gradient:', gradient.shape)
-    # sdf, joint_grad = bp_sdf.get_whole_body_sdf_with_joints_grad_batch(x, pose, theta, model)
-    # print('sdf:', sdf.shape, 'joint gradient:', joint_grad.shape)

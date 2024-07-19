@@ -1,5 +1,5 @@
 from rofunc.utils.robolab.kinematics.fk import get_fk_from_chain
-from rofunc.utils.robolab.coord import convert_ori_format, convert_quat_order
+from rofunc.utils.robolab.coord import convert_ori_format, convert_quat_order, homo_matrix_from_quat_tensor
 
 
 class RobotModel:
@@ -53,7 +53,9 @@ class RobotModel:
         :return: the joint values
         """
         if self.solve_engine == "pytorch_kinematics":
-            from rofunc.utils.robolab.kinematics import pytorch_kinematics_utils as pk_utils
-            return pk_utils.get_ik_from_chain(self.chain, ee_pose[:3], ee_pose[3:], self.device)
-        else:
-            raise ValueError("Inverse kinematics is not supported in this engine")
+            return get_ik_from_chain(self.chain, ee_pose[:3], ee_pose[3:], self.device)
+        elif self.solve_engine == "kinpy":
+            import kinpy as kp
+            self.serial_chain = kp.chain.SerialChain(self.chain, export_link_name)
+            homo_matrix = homo_matrix_from_quat_tensor(ee_pose[3:], ee_pose[:3])
+            return self.serial_chain.inverse_kinematics(homo_matrix)

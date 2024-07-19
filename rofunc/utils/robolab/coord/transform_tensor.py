@@ -29,6 +29,27 @@ import torch
 _EPS = torch.finfo(torch.float32).eps * 4.0
 
 
+def check_pos_tensor(pos):
+    """
+    Check if the input position is valid.
+
+    >>> check_pos_tensor([0, 0, 0])
+    tensor([[0., 0., 0.]])
+    >>> check_pos_tensor([[0, 0, 0]])
+    tensor([[0., 0., 0.]])
+    >>> check_pos_tensor(np.array([0, 0, 0]))
+    tensor([[0., 0., 0.]])
+
+    :param pos: (batch, 3) or (3, )
+    :return: position
+    """
+    pos = torch.tensor(pos, dtype=torch.float32)
+    if len(pos.shape) == 1:
+        pos = pos.unsqueeze(0)
+    assert pos.shape[-1] == 3, "The last dimension of the input tensor should be 3."
+    return pos
+
+
 def check_quat_tensor(quat):
     """
     Check if the input quat is normalized.
@@ -412,3 +433,29 @@ def euler_from_rot_matrix_tensor(rot_matrix):
     euler = torch.stack([roll, pitch, yaw], dim=-1)
 
     return euler
+
+
+def homo_matrix_from_quat_tensor(quat, pos=None):
+    """
+    Convert quat and pos to homogeneous matrix
+
+    :param quat:
+    :param pos:
+    :return:
+    """
+    quat = check_quat_tensor(quat)
+    if pos is not None:
+        pos = check_pos_tensor(pos)
+        assert quat.shape[0] == pos.shape[0]
+    else:
+        pos = torch.zeros((quat.shape[0], 3))
+
+    batch_size = quat.shape[0]
+    device = quat.device
+
+    homo_matrix = torch.zeros((batch_size, 4, 4), device=device)
+    rot_matrix = rot_matrix_from_quat_tensor(quat)
+    homo_matrix[:, :3, :3] = rot_matrix
+    homo_matrix[:, :3, 3] = pos
+    homo_matrix[:, 3, 3] = 1
+    return homo_matrix
