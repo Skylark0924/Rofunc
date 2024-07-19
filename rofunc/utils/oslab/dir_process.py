@@ -22,7 +22,7 @@ import rofunc as rf
 
 def create_dir(path, local_verbose=False):
     """
-    Create the directory if it does not exist.
+    Create the directory if it does not exist, can create the parent directories as well.
 
     Example::
 

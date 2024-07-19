@@ -9,9 +9,9 @@ import isaacgym
 import rofunc as rf
 
 # # CURI
-# args = rf.config.get_sim_config("CURI")
-# CURIsim = rf.sim.CURISim(args)
-# CURIsim.show(visual_obs_flag=False)
+args = rf.config.get_sim_config("CURI")
+CURIsim = rf.sim.CURISim(args)
+CURIsim.show(visual_obs_flag=False)
 
 # walker
 # args = rf.config.get_sim_config("Walker")
@@ -49,9 +49,9 @@ import rofunc as rf
 # QbSoftHandsim.show()
 
 # HOTU
-args = rf.config.get_sim_config("Humanoid")
-Humanoidsim = rf.sim.HumanoidSim(args)
-Humanoidsim.show()
+# args = rf.config.get_sim_config("Humanoid")
+# Humanoidsim = rf.sim.HumanoidSim(args)
+# Humanoidsim.show()
 
 # Unitree H1
 # args = rf.config.get_sim_config("UnitreeH1")
