@@ -1,0 +1,125 @@
+<mujoco model="TH01">
+    <compiler angle="radian" meshdir="../../urdf/themis/TH01/meshes/"/>
+    <statistic meansize="0.182711" extent="1.50747" center="-0.0708167 7.3416e-06 -0.481466"/>
+    <asset>
+        <mesh name="BASE_LINK" file="BASE_LINK.STL"/>
+        <mesh name="HIP_R" file="HIP_R.STL"/>
+        <mesh name="HIP_ABAD_R" file="HIP_ABAD_R.STL"/>
+        <mesh name="FEMUR_R" file="FEMUR_R.STL"/>
+        <mesh name="TIBIA_R" file="TIBIA_R.STL"/>
+        <mesh name="ANKLE_R" file="ANKLE_R.STL"/>
+        <mesh name="FOOT_R" file="FOOT_R.STL"/>
+        <mesh name="HIP_L" file="HIP_L.STL"/>
+        <mesh name="HIP_ABAD_L" file="HIP_ABAD_L.STL"/>
+        <mesh name="FEMUR_L" file="FEMUR_L.STL"/>
+        <mesh name="TIBIA_L" file="TIBIA_L.STL"/>
+        <mesh name="ANKLE_L" file="ANKLE_L.STL"/>
+        <mesh name="FOOT_L" file="FOOT_L.STL"/>
+    </asset>
+    <worldbody>
+        <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
+        <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
+        <body name="pelvis" pos="0 0 1.3">
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.79216 0.81961 0.93333 1"
+                  mesh="BASE_LINK"/>
+            <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="BASE_LINK"/>
+            <body name="HIP_R" pos="-0.18338 -0.0625 -0.25077" quat="0.923879 0 0.382684 0">
+                <inertial pos="0.00398 -6e-05 0.00636" mass="0.83264" diaginertia="0.0019 0.00124 0.00094"/>
+                <joint name="HIP_YAW_R" pos="0 0 0" axis="0 0 1"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.79216 0.81961 0.93333 1"
+                      mesh="HIP_R"/>
+                <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="HIP_R"/>
+                <body name="HIP_ABAD_R" pos="0.141 0 0" quat="0.499998 0.5 -0.500002 -0.5">
+                    <inertial pos="-0.002 0.00147 0.00404" quat="0.999999 0 0.00138503 0" mass="2.78794"
+                              diaginertia="0.0144201 0.00791 0.00719994"/>
+                    <joint name="HIP_ROLL_R" pos="0 0 0" axis="0 0 1"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.79216 0.81961 0.93333 1"
+                          mesh="HIP_ABAD_R"/>
+                    <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="HIP_ABAD_R"/>
+                    <body name="FEMUR_R" pos="0.029 0 0" quat="0.653281 -0.270597 0.653283 -0.270597">
+                        <inertial pos="0.06111 0.00174 0.02002" quat="0.0196859 0.712454 0.000931174 0.701442"
+                                  mass="3.75384" diaginertia="0.0759597 0.0702972 0.0116631"/>
+                        <joint name="HIP_PITCH_R" pos="0 0 0" axis="0 0 1"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                              rgba="0.79216 0.81961 0.93333 1"
+                              mesh="FEMUR_R"/>
+                        <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="FEMUR_R"/>
+                        <body name="TIBIA_R" pos="0.375 0 0">
+                            <inertial pos="0.09678 0.00694 -6e-05" quat="0.508837 0.506479 0.493209 0.491232"
+                                      mass="1.27716"
+                                      diaginertia="0.0232513 0.02318 0.000888685"/>
+                            <joint name="KNEE_PITCH_R" pos="0 0 0" axis="0 0 1"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                                  rgba="0.79216 0.81961 0.93333 1" mesh="TIBIA_R"/>
+<!--                            <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="TIBIA_R"/>-->
+                            <body name="ANKLE_R" pos="0.375 0 0">
+                                <inertial pos="0 0 0" mass="0.00694571" diaginertia="7.6e-07 7.6e-07 4e-08"/>
+                                <joint name="ANKLE_PITCH_R" pos="0 0 0" axis="0 0 1"/>
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                                      rgba="0.79216 0.81961 0.93333 1" mesh="ANKLE_R"/>
+                                <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="ANKLE_R"/>
+                                <body name="FOOT_R" pos="0 0 0" quat="0.707105 -0.707108 0 0">
+                                    <inertial pos="0.01948 -3e-05 0.03906" quat="0.991335 0 -0.131355 0" mass="0.17981"
+                                              diaginertia="0.000723159 0.00072 8.68412e-05"/>
+                                    <joint name="ANKLE_ROLL_R" pos="0 0 0" axis="0 0 1"/>
+                                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                                          rgba="0.79216 0.81961 0.93333 1" mesh="FOOT_R"/>
+                                    <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="FOOT_R"/>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="HIP_L" pos="-0.183378 0.0625 -0.250768" quat="0.923879 0 0.382684 0">
+                <inertial pos="0.00398 -6e-05 0.00636" mass="0.83264" diaginertia="0.0019 0.00124 0.00094"/>
+                <joint name="HIP_YAW_L" pos="0 0 0" axis="0 0 1"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.79216 0.81961 0.93333 1"
+                      mesh="HIP_L"/>
+                <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="HIP_L"/>
+                <body name="HIP_ABAD_L" pos="0.141 0 0" quat="0.499998 0.5 -0.500002 -0.5">
+                    <inertial pos="0.00198 0.00146 0.00395" quat="0.999999 0 -0.00138503 0" mass="2.818"
+                              diaginertia="0.0144201 0.00791 0.00719994"/>
+                    <joint name="HIP_ROLL_L" pos="0 0 0" axis="0 0 1"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.79216 0.81961 0.93333 1"
+                          mesh="HIP_ABAD_L"/>
+                    <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="HIP_ABAD_L"/>
+                    <body name="FEMUR_L" pos="-0.029 0 0" quat="0.653281 -0.270597 0.653283 -0.270597">
+                        <inertial pos="0.06112 0.00177 -0.02002" quat="-0.000932506 0.701443 -0.0196841 0.712453"
+                                  mass="3.75393" diaginertia="0.0759697 0.0703072 0.0116631"/>
+                        <joint name="HIP_PITCH_L" pos="0 0 0" axis="0 0 1"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                              rgba="0.79216 0.81961 0.93333 1"
+                              mesh="FEMUR_L"/>
+                        <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="FEMUR_L"/>
+                        <body name="TIBIA_L" pos="0.375 0 0">
+                            <inertial pos="0.09678 0.00694 -6e-05" quat="0.508837 0.506479 0.493209 0.491232"
+                                      mass="1.27716"
+                                      diaginertia="0.0232513 0.02318 0.000888685"/>
+                            <joint name="KNEE_PITCH_L" pos="0 0 0" axis="0 0 1"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                                  rgba="0.79216 0.81961 0.93333 1" mesh="TIBIA_L"/>
+<!--                            <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="TIBIA_L"/>-->
+                            <body name="ANKLE_L" pos="0.375 0 0">
+                                <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="0.00694571"
+                                          diaginertia="1e-07 1e-07 1e-07"/>
+                                <joint name="ANKLE_PITCH_L" pos="0 0 0" axis="0 0 1"/>
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                                      rgba="0.79216 0.81961 0.93333 1" mesh="ANKLE_L"/>
+                                <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="ANKLE_L"/>
+                                <body name="FOOT_L" pos="0 0 0" quat="0.707105 -0.707108 0 0">
+                                    <inertial pos="0.01948 -3e-05 0.03906" quat="0.991335 0 -0.131355 0" mass="0.17981"
+                                              diaginertia="0.000723159 0.00072 8.68412e-05"/>
+                                    <joint name="ANKLE_ROLL_L" pos="0 0 0" axis="0 0 1"/>
+                                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0"
+                                          rgba="0.79216 0.81961 0.93333 1" mesh="FOOT_L"/>
+                                    <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="FOOT_L"/>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>

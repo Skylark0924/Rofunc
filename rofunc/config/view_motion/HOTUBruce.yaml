@@ -1,0 +1,32 @@
+env:
+  envSpacing: 1
+
+  keyBodies: [ "hand_r", "hand_l", "ankle_pitch_link_r", "ankle_pitch_link_l" ]
+  contactBodies: [ "ankle_pitch_link_r", "ankle_pitch_link_l" ]
+
+  # animation files to learn from
+#  motion_file: "examples/data/hotu2/20240509/all_bruce_motion.yaml"
+  motion_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2bruce.npy"
+
+  use_extra_dof_states_motion: True
+  extra_rewrite_dof_names: "all"
+
+  motion_file_asset: "mjcf/bruce/bruce.xml"
+
+  object_motion_file:
+
+  asset:
+    assetFileName: "mjcf/bruce/bruce.xml"
+
+  use_object_motion: False
+  object_asset:
+    assetName:    # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+    assetFileName:     # List of object asset file path
+    assetSize:         # List of object size, used for scaling the object and creating the box objects
+
+
+task:
+  wb_decompose: False  # if True, decompose the whole body into parts
+  wb_decompose_parameter:
+    parts: [ "body" ]
+  use_synergy: False  # if True, use the synergy for the hand

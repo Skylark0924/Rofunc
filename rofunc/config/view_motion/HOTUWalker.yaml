@@ -1,0 +1,37 @@
+env:
+  terminationHeight: 0.5
+  charHeight: 1
+
+  keyBodies: [ "right_limb_l7", "left_limb_l7", "right_leg_l6", "left_leg_l6" ]
+  contactBodies: [ "right_leg_l6", "left_leg_l6" ]
+  headRbName: "head_l2"
+
+  # animation files to learn from
+  motion_file: "examples/data/hotu2/20240509/all_walker_motion.yaml"
+
+  use_extra_dof_states_motion: True
+  extra_rewrite_dof_names: [ "right_limb_j1", "right_limb_j2", "right_limb_j3", "right_limb_j4", "right_limb_j5",
+                             "right_limb_j6", "right_limb_j7", "left_limb_j1", "left_limb_j2", "left_limb_j3",
+                             "left_limb_j4", "left_limb_j5", "left_limb_j6", "left_limb_j7", "head_j1",
+                             "head_j2", "right_leg_j1", "right_leg_j2", "right_leg_j3", "right_leg_j4", "right_leg_j5",
+                             "right_leg_j6", "left_leg_j1", "left_leg_j2", "left_leg_j3", "left_leg_j4", "left_leg_j5",
+                             "left_leg_j6" ]
+
+  motion_file_asset: "mjcf/walker/walker.xml"
+
+  object_motion_file:
+
+  asset:
+    assetFileName: "mjcf/walker/walker.xml"
+
+  use_object_motion: False
+  object_asset:
+    assetName: [ "box" ]        # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+    assetFileName: [ "mjcf/objects/lab_box.xml" ]     # List of object asset file path
+    assetSize: [ [ 1, 1, 1 ] ]        # List of object size, used for scaling the object and creating the box objects
+
+task:
+  wb_decompose: False  # if True, decompose the whole body into parts
+  wb_decompose_parameter:
+    parts: [ "body" ]
+  use_synergy: False  # if True, use the synergy for the hand

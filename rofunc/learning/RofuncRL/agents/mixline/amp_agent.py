@@ -194,8 +194,10 @@ class AMPAgent(BaseAgent):
         # Create tensors for motion dataset and replay buffer
         self.motion_dataset.create_tensor(name="states", size=self.amp_observation_space, dtype=torch.float32)
         self.replay_buffer.create_tensor(name="states", size=self.amp_observation_space, dtype=torch.float32)
+        
+        self._initialize_motion_dataset()
 
-        # initialize motion dataset
+    def _initialize_motion_dataset(self):
         if self.collect_reference_motions is not None:
             for _ in range(math.ceil(self.motion_dataset.memory_size / self._amp_batch_size)):
                 self.motion_dataset.add_samples(states=self.collect_reference_motions(self._amp_batch_size))
@@ -204,14 +206,10 @@ class AMPAgent(BaseAgent):
         if self._current_states is not None:
             states = self._current_states
 
-        if not deterministic:
-            # sample stochastic actions
-            actions, log_prob = self.policy(self._state_preprocessor(states))
-            self._current_log_prob = log_prob
-        else:
-            # choose deterministic actions for evaluation
-            actions, _ = self.policy(self._state_preprocessor(states), deterministic=True)
-            log_prob = None
+        res_dict = self.policy(self._state_preprocessor(states), deterministic=deterministic)
+        actions = res_dict["action"]
+        log_prob = res_dict["log_prob"]
+        self._current_log_prob = log_prob
         return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
@@ -312,7 +310,8 @@ class AMPAgent(BaseAgent):
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
                     _) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
-                _, log_prob_now = self.policy(sampled_states, sampled_actions)
+                res_dict = self.policy(sampled_states, sampled_actions)
+                log_prob_now = res_dict["log_prob"]
 
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()

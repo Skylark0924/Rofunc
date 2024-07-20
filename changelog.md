@@ -4,6 +4,7 @@
 > - 🚄 for planning and control updates
 > - 🖼️ for Visualab updates
 > - 📈 for Datalab updates
+> - 🦾 for Robolab updates
 > - 📚 for documentation updates
 > - 🎮 for simulator updates
 > - 🐛 for bug fixes

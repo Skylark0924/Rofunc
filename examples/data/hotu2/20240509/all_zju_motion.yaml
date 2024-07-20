@@ -1,0 +1,30 @@
+motions:
+  - file: "Boxing_Take 2024-05-09 04.19.43 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Chest pressing_Take 2024-05-09 04.21.46 PM_optitrack2zju.npy"
+    weight: 1
+#  - file: "Finger movememnt_Take 2024-05-09 04.17.53 PM_optitrack2zju.npy"
+#    weight: 1
+  - file: "Handshake_Take 2024-05-09 04.20.17 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Hook_Take 2024-05-09 04.34.03 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Jumping_Take 2024-05-09 04.15.38 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Kung fu_Take 2024-05-09 04.19.23 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Leg stretch_Take 2024-05-09 04.21.17 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Moving box_Take 2024-05-09 04.33.08 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Slapping_Take 2024-05-09 04.20.43 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Squating_Take 2024-05-09 04.21.34 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Thumbs up_Take 2024-05-09 04.33.36 PM_optitrack2zju.npy"
+    weight: 1
+  - file: "Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2zju.npy"
+    weight: 1
+

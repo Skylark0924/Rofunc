@@ -39,7 +39,7 @@
   <material name="qbhand/default">
     <color rgba="0.35 0.35 0.35 1.0"/>
   </material>
-  <joint name="reference" type="floating">
+  <joint name="reference" type="fixed">
     <parent link="world"/>
     <child link="summit_xls_base_footprint"/>
   </joint>
@@ -59,7 +59,7 @@
   <!-- BASE_LINK -->
   <link name="summit_xls_base_link">
     <inertial>
-      <mass value="125.0"/>
+      <mass value="300.0"/>
       <origin xyz="0 0 0"/>
       <inertia ixx="1.391" ixy="0.004" ixz="0.0" iyy="6.853" iyz="0.0" izz="6.125"/>
     </inertial>
@@ -293,6 +293,9 @@
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="torso_base2"/>
     <child link="torso_link_b2"/>
+    <axis xyz="0 1 0"/>
+    <limit acceleration="0.6" effort="300" lower="-1.2" upper="0.5" velocity="0.3"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <link name="torso_middle">
     <visual>
@@ -317,6 +320,10 @@
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <parent link="torso_link_b2"/>
     <child link="torso_middle"/>
+    <axis xyz="0 1 0"/>
+    <limit acceleration="0.6" effort="300" lower="-0.5" upper="1.2" velocity="0.3"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
+    <mimic joint="torso_actuated_joint2" multiplier="-1"/>
   </joint>
   <link name="torso_link_c1">
     <visual>
@@ -342,36 +349,20 @@
     <parent link="torso_middle"/>
     <child link="torso_link_c1"/>
   </joint>
-  <link name="torso_end">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="../meshes/clover/visual/torso_end_v2_yup.dae"/>
-      </geometry>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="../meshes/clover/collision/torso_end_v2_yup.stl"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <origin rpy="0 0 0" xyz="1.3086e-02 0.132e-03 0.184066"/>
-      <mass value="12.083"/>
-      <inertia ixx="0.146638956" ixy="-2.2432e-05" ixz="-0.012989506" iyy="0.097685785" iyz="-2.19304e-04" izz="0.100449047"/>
-    </inertial>
-  </link>
   <link name="shell">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="../meshes/clover/visual/Shell_v2_Share_yup.dae"/>
       </geometry>
+    <material name="shell">
+        <color rgba="1 1 1. 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/Shell_v2_Share_yup.STL"/>
+        <mesh filename="../meshes/clover/collision/Shell_v2_Share_zup.STL"/>
       </geometry>
     </collision>
     <inertial>
@@ -385,6 +376,25 @@
     <child link="shell"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
+  <link name="torso_end">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/visual/torso_end_v2_yup.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/clover/collision/torso_end_v2.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-5.05e-03 -0.09e-03 0.27614"/>
+      <mass value="1.63531"/>
+      <inertia ixx="0.010693997" ixy="5.645e-06" ixz="-9.4779e-04" iyy="0.026717753" iyz="-8.196e-06" izz="0.036543169"/>
+    </inertial>
+  </link>
   <joint name="torso_joint8" type="fixed">
     <origin rpy="0 0 0" xyz="0.25 0 0"/>
     <parent link="torso_link_c1"/>
@@ -715,7 +725,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/flange90_yup.STL"/>
+        <mesh filename="../meshes/clover/collision/flange90_zup.STL"/>
       </geometry>
     </collision>
   </link>
@@ -742,7 +752,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/flange_iso_04_yupzfront.STL" scale="1 1 1"/>
+        <mesh filename="../meshes/qbhand/flange_iso_04.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -769,11 +779,11 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/palm_pinch_l_yupzfront1.STL" scale="1000 1000 1000"/>
+        <mesh filename="../meshes/qbhand/palm_pinch_l.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
-  <joint name="left_qbhand_synergy_joint" type="revolute">
+  <joint name="left_qbhand_synergy_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="left_qbhand_palm_link"/>
     <child link="left_qbhand_synergy_tendon_virtual_link"/>
@@ -1835,7 +1845,7 @@
   </joint>
   <link name="right_hand_root_link"/>
   <joint name="right_qbhand_flange_joint" type="fixed">
-    <origin rpy="0 0 -2.3562" xyz="0 0 0"/>
+    <origin rpy="0 0 0.78" xyz="0 0 0"/>
     <parent link="right_hand_root_link"/>
     <child link="flange90_r"/>
   </joint>
@@ -1849,7 +1859,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/clover/collision/flange90_yup.STL"/>
+        <mesh filename="../meshes/clover/collision/flange90_zup.STL"/>
       </geometry>
     </collision>
   </link>
@@ -1874,7 +1884,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/qbhand/flange_iso_04_yupzfront.STL" scale="1 1 1"/>
+        <mesh filename="../meshes/qbhand/flange_iso_04.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -1903,7 +1913,7 @@
       </geometry>
     </collision>
   </link>
-  <joint name="right_qbhand_synergy_joint" type="revolute">
+  <joint name="right_qbhand_synergy_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="right_qbhand_palm_link"/>
     <child link="right_qbhand_synergy_tendon_virtual_link"/>

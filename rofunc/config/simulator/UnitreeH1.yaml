@@ -1,0 +1,69 @@
+name: UnitreeH1
+
+physics_engine: 'physx'  #  'physx' or 'flex'
+graphics_device_id: 0
+sim_device: 'cuda:0'
+
+cam_pos: [-3.0, 0.0, 2.0]
+cam_target: [0.0, 0.0, 1.0]
+
+env:
+  numEnvs: 16
+  envSpacing: 1
+  numEnvPerRow: 1
+
+  controller_type: "ik" # "ik" or "osc"
+  # If the collision filter for the actor is set to -1,
+  # the actor will use filters loaded in by the asset loaders.
+  # This is important for MJCF files that specify non-zero contypes/conaffinities
+  # or have other contacts specified. Setting the collision filter to 0 will
+  # enable collisions between all shapes in the actor. Setting the collision filter
+  # to anything > 0 will disable all self collisions.
+  collision_mode: 0
+
+  asset:
+    robot_name: "UnitreeH1"
+    assetRoot:
+#    assetFile: "mjcf/unitreeH1/h1.xml"
+#    assetFile: "mjcf/unitreeH1/h1_w_qbhand.xml"
+    assetFile: "mjcf/unitreeH1/h1_w_qbhand_new.xml"
+    init_pose: [0.2, 0.0, 0.85, -0.3, 0.0, 1.0, 0.0]
+    fix_base_link: False
+    disable_gravity: False
+    flip_visual_attachments: False
+    armature: 0.01
+    slices_per_cylinder: 10
+
+  object_asset:
+#    object_names: ["power_drill"]
+#    assetRoot:
+#    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
+#    init_poses: [[-0.5, 0, 0.73,0.6532815, -0.2705981, -0.2705981, 0.6532815]]
+#    fix_base_link: True
+#
+#  table:
+#    init_pose: [-0.5, 0.0, 0.4, 0.0, 0.0, 0.0, 1]
+#    size: [0.5, 0.6, 0.5]
+#    fix_base_link: True
+
+sim:
+  dt: 0.0166 # 1/60
+  substeps: 1
+  up_axis: "Z"
+  use_gpu_pipeline: False
+  gravity: ${if:${eq:${.up_axis}, "Y"}, [0, -9.81, 0], [0, 0, -9.81]}
+  physx:
+    num_threads: 4 # Number of worker threads per scene used by PhysX - for CPU PhysX only.
+    solver_type: 1 # 0: pgs, 1: tgs
+    use_gpu: False # set to False to run on CPU
+    num_position_iterations: 12
+    num_velocity_iterations: 1
+    contact_offset: 0.005
+    rest_offset: 0.0
+    bounce_threshold_velocity: 0.2
+    max_depenetration_velocity: 1000.0
+    num_subscenes: 4 # Splits the simulation into N physics scenes and runs each one in a separate thread
+    contact_collection: 0 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (default - all contacts)
+    friction_offset_threshold: 0.001
+    friction_correlation_distance: 0.0005
+

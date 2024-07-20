@@ -1,0 +1,900 @@
+<mujoco model="walker_lab v200">
+
+    <compiler angle="radian" meshdir="./meshes/"/>
+    <statistic meansize="0.226223" extent="2.02548" center="0.015564 2.74848e-06 -0.182867"/>
+
+    <size njmax="1000" nconmax="100"/>
+    <!--    <visual>-->
+    <!--        <quality shadowsize='4096'/>-->
+    <!--        <map znear='0.05'/>-->
+    <!--    </visual>-->
+
+    <default>
+        <default class="walker">
+            <position forcelimited="true" ctrllimited="true" kp="870"/>
+            <site rgba="0.8 0.4 0.2 0.5" group="3"/>
+            <geom type="capsule" condim="1" friction="1.0 0.05 0.05" solimp=".9 .99 .003" solref=".015 1"/>
+            <!--  Joint damping and friction, directly borrowed from the URDF  -->
+            <default class="walker_head_joints">
+                <joint damping="5"/>
+            </default>
+            <default class="walker_shoulder_j1">
+                <joint damping="15"/>
+            </default>
+            <default class="walker_shoulder_j2">
+                <joint damping="8"/>
+            </default>
+            <default class="walker_upper_arm_joints">
+                <!--  j3, j4  -->
+                <joint damping="5"/>
+            </default>
+            <default class="walker_lower_arm_joints">
+                <!--  j5, j6, j7  -->
+                <joint damping="5" frictionloss="0.5"/>
+            </default>
+            <default class="walker_hip_j1">
+                <joint damping="15"/>
+            </default>
+            <default class="walker_hip_j2">
+                <joint damping="8"/>
+            </default>
+            <default class="walker_hip_j3">
+                <joint damping="5"/>
+            </default>
+            <default class="walker_knee_joint">
+                <joint damping="5"/>
+            </default>
+            <default class="walker_ankle_joints">
+                <joint damping="5" frictionloss="0.5"/>
+            </default>
+            <default class="walker_finger">
+                <joint damping="0.01"/>
+                <!--  TODO These friction parameters are based on Franka gripper  -->
+                <geom friction="1 0.5 0.0001" solref="0.01 1" solimp="0.8 0.9 0.001" margin="0.001" user="0"
+                      rgba="0.5 0.6 0.7 .4" contype="1" conaffinity="0" condim="6" group="2"/>
+                <position forcerange="0 1" ctrlrange="0 1.5708"/>
+            </default>
+            <joint type="hinge" damping="0.1" stiffness="5" armature=".007" limited="true" solimplimit="0 .99 .01"/>
+
+        </default>
+        <!--    <default class="panda_overlay">-->
+        <!--      <joint limited="false" damping="1000" armature="1" frictionloss="10"/>-->
+        <!--      <geom contype="0" conaffinity="0" group="2" type="mesh" rgba=".42 0.42 0.42 .5"/>-->
+        <!--    </default>-->
+    </default>
+    <!--    <contact>-->
+    <!--        &lt;!&ndash; Torso &ndash;&gt;-->
+    <!--        <exclude body1="base_link" body2="head_l2"/>-->
+    <!--        <exclude body1="base_link" body2="left_leg_l2"/>-->
+    <!--        <exclude body1="base_link" body2="right_leg_l2"/>-->
+    <!--        <exclude body1="base_link" body2="left_leg_l3"/>-->
+    <!--        <exclude body1="base_link" body2="right_leg_l3"/>-->
+
+    <!--        &lt;!&ndash; Left Arm &ndash;&gt;-->
+    <!--        <exclude body1="left_limb_l5" body2="left_limb_l7"/>-->
+
+    <!--        &lt;!&ndash; Right Arm &ndash;&gt;-->
+    <!--        <exclude body1="right_limb_l5" body2="right_limb_l7"/>-->
+
+    <!--        &lt;!&ndash; Left Leg &ndash;&gt;-->
+    <!--        <exclude body1="left_leg_l1" body2="left_leg_l3"/>-->
+    <!--        <exclude body1="left_leg_l4" body2="left_leg_l6"/>-->
+
+    <!--        &lt;!&ndash; Right Leg &ndash;&gt;-->
+    <!--        <exclude body1="right_leg_l1" body2="right_leg_l3"/>-->
+    <!--        <exclude body1="right_leg_l4" body2="right_leg_l6"/>-->
+    <!--    </contact>-->
+
+    <asset>
+        <mesh name="base_link" file="base_link.STL"/>
+        <mesh name="right_limb_l1" file="right_limb_l1.STL"/>
+        <mesh name="right_limb_l2" file="right_limb_l2.STL"/>
+        <mesh name="right_limb_l3" file="right_limb_l3.STL"/>
+        <mesh name="right_limb_l4" file="right_limb_l4.STL"/>
+        <mesh name="right_limb_l5" file="right_limb_l5.STL"/>
+        <mesh name="right_limb_l6" file="right_limb_l6.STL"/>
+        <mesh name="right_limb_l7" file="right_limb_l7.STL"/>
+        <mesh name="right_palm_link" file="right_palm_link.STL"/>
+        <mesh name="right_thumb_l1" file="right_thumb_l1.STL"/>
+        <mesh name="right_thumb_l2" file="right_thumb_l2.STL"/>
+        <mesh name="right_index_l1" file="right_index_l1.STL"/>
+        <mesh name="right_index_l2" file="right_index_l2.STL"/>
+        <mesh name="right_middle_l1" file="right_middle_l1.STL"/>
+        <mesh name="right_middle_l2" file="right_middle_l2.STL"/>
+        <mesh name="right_ring_l1" file="right_ring_l1.STL"/>
+        <mesh name="right_ring_l2" file="right_ring_l2.STL"/>
+        <mesh name="right_pinky_l1" file="right_pinky_l1.STL"/>
+        <mesh name="right_pinky_l2" file="right_pinky_l2.STL"/>
+        <mesh name="left_limb_l1" file="left_limb_l1.STL"/>
+        <mesh name="left_limb_l2" file="left_limb_l2.STL"/>
+        <mesh name="left_limb_l3" file="left_limb_l3.STL"/>
+        <mesh name="left_limb_l4" file="left_limb_l4.STL"/>
+        <mesh name="left_limb_l5" file="left_limb_l5.STL"/>
+        <mesh name="left_limb_l6" file="left_limb_l6.STL"/>
+        <mesh name="left_limb_l7" file="left_limb_l7.STL"/>
+        <mesh name="left_palm_link" file="left_palm_link.STL"/>
+        <mesh name="left_thumb_l1" file="left_thumb_l1.STL"/>
+        <mesh name="left_thumb_l2" file="left_thumb_l2.STL"/>
+        <mesh name="left_index_l1" file="left_index_l1.STL"/>
+        <mesh name="left_index_l2" file="left_index_l2.STL"/>
+        <mesh name="left_middle_l1" file="left_middle_l1.STL"/>
+        <mesh name="left_middle_l2" file="left_middle_l2.STL"/>
+        <mesh name="left_ring_l1" file="left_ring_l1.STL"/>
+        <mesh name="left_ring_l2" file="left_ring_l2.STL"/>
+        <mesh name="left_pinky_l1" file="left_pinky_l1.STL"/>
+        <mesh name="left_pinky_l2" file="left_pinky_l2.STL"/>
+        <mesh name="head_l1" file="head_l1.STL"/>
+        <mesh name="head_l2" file="head_l2.STL"/>
+        <mesh name="head_l3" file="head_l3.STL"/>
+        <mesh name="right_leg_l1" file="right_leg_l1.STL"/>
+        <mesh name="right_leg_l2" file="right_leg_l2.STL"/>
+        <mesh name="right_leg_l3" file="right_leg_l3.STL"/>
+        <mesh name="right_leg_link1" file="right_leg_link1.STL"/>
+        <mesh name="right_leg_l4" file="right_leg_l4.STL"/>
+        <mesh name="right_leg_l5" file="right_leg_l5.STL"/>
+        <mesh name="right_leg_l6" file="right_leg_l6.STL"/>
+        <mesh name="right_leg_link2" file="right_leg_link2.STL"/>
+        <mesh name="left_leg_l1" file="left_leg_l1.STL"/>
+        <mesh name="left_leg_l2" file="left_leg_l2.STL"/>
+        <mesh name="left_leg_l3" file="left_leg_l3.STL"/>
+        <mesh name="left_leg_link1" file="left_leg_link1.STL"/>
+        <mesh name="left_leg_l4" file="left_leg_l4.STL"/>
+        <mesh name="left_leg_l5" file="left_leg_l5.STL"/>
+        <mesh name="left_leg_l6" file="left_leg_l6.STL"/>
+        <mesh name="left_leg_link2" file="left_leg_link2.STL"/>
+    </asset>
+    <worldbody>
+        <light directional="true" pos="2 2 3" dir="-2 -2 -3"/>
+        <!--        <light directional="true" pos="2 -2 3" dir="-2 2 -3"/>-->
+        <!--        <light directional="true" pos="-2 2 3" dir="2 -2 -3"/>-->
+        <!--        <light directional="true" pos="-2 -2 3" dir="2 2 -3"/>-->
+        <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
+        <!--  Base link height from the ground 1.145 is an estimated value  -->
+        <body name="base_link" childclass="walker" pos="0 0 1.145" quat="0 0 0 1">
+<!--            <freejoint name="base_link_j"/>-->
+            <geom name="torso" type="sphere" pos="0 0 0.0" size=".09" density="2226"/>
+            <site name='imu_site' size='0.01' pos='0 0 -0.267'/>
+            <camera name="top_rgb" fovy="63" pos="0.13 0 -0.035" xyaxes="0 -1 0 0 0 1"/>
+            <camera name="top_depth" fovy="58.44" pos="0.13 0 -0.035" xyaxes="0 -1 0 0 0 1"/>
+
+            <body name="torso" pos="0 0 0">
+                <geom type="mesh" contype="0" conaffinity="0" rgba="1 1 1 1" mesh="base_link"/>
+                <geom type="mesh" contype="0" rgba="1 1 1 1" mesh="base_link"/>
+                <body name="right_limb_l1" pos="0 -0.24142 0.018386" quat="0.560618 0.430937 0.430937 -0.560619">
+                    <inertial pos="-0.00722075 0.000182064 -0.0361421" quat="0.526509 0.526376 -0.471605 0.472552"
+                              mass="0.0906357" diaginertia="0.001 0.001 0.001"/>
+                    <joint name="right_limb_j1" class="walker_shoulder_j1" pos="0 0 0" axis="0 0 -1" limited="true"
+                           range="-3.1416 0.7854"/>
+                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                          mesh="right_limb_l1"/>
+                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="right_limb_l1"/>
+                    <body name="right_limb_l2" pos="0 0 0" quat="0.500002 0.499997 0.500001 -0.5">
+                        <inertial pos="-0.0019628 0.0273169 -0.000134288" quat="0.483494 0.513795 -0.487092 0.514772"
+                                  mass="0.113461" diaginertia="0.001 0.001 0.001"/>
+                        <joint name="right_limb_j2" class="walker_shoulder_j2" pos="0 0 0" axis="0 0 -1" limited="true"
+                               range="-1.5708 0.0175"/>
+                        <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                              mesh="right_limb_l2"/>
+                        <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="right_limb_l2"/>
+                        <body name="right_limb_l3" childclass="walker_upper_arm_joints" pos="-0.00064368 0.22946 0"
+                              quat="0.707105 -0.707108 -1.90282e-07 -1.90283e-07">
+                            <inertial pos="0.00629656 -0.000210202 -0.0621806"
+                                      quat="0.995221 0.00112729 0.0955282 0.0202071" mass="0.135195"
+                                      diaginertia="0.001 0.001 0.001"/>
+                            <joint name="right_limb_j3" pos="0 0 0" axis="0 0 1" limited="true" range="-1.9199 1.9199"/>
+                            <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                  mesh="right_limb_l3"/>
+                            <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="right_limb_l3"/>
+                            <body name="right_limb_l4" pos="0.02546 0 0"
+                                  quat="0.0176764 -0.0176816 -0.706887 -0.706885">
+                                <inertial pos="0.0187332 0.0270289 -0.000700112"
+                                          quat="0.594877 0.353764 -0.619731 0.370008"
+                                          mass="0.111556" diaginertia="0.001 0.001 0.001"/>
+                                <joint name="right_limb_j4" pos="0 0 0" axis="0 0 -1" limited="true" range="-2.234 -0.2"/>
+                                <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                      mesh="right_limb_l4"/>
+                                <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="right_limb_l4"/>
+                                <body name="right_limb_l5" childclass="walker_lower_arm_joints" pos="0.024799 0.20964 0"
+                                      quat="0.499993 -0.500007 -0.499995 -0.500005">
+                                    <inertial pos="-0.000596824 0.000121711 -0.0604709"
+                                              quat="0.999932 -0.00601512 0.00625009 0.00782187" mass="0.102333"
+                                              diaginertia="0.001 0.001 0.001"/>
+                                    <joint name="right_limb_j5" pos="0 0 0" axis="0 0 1" limited="true"
+                                           range="-2.3562 2.3562"/>
+                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                          mesh="right_limb_l5"/>
+                                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                          mesh="right_limb_l5"/>
+                                    <body name="right_limb_l6" pos="0 0 0" quat="0.5 0.500002 -0.499998 0.5">
+                                        <inertial pos="0.0128445 0.000377301 -0.000161615"
+                                                  quat="0.999958 0.00482949 -0.000498884 -0.00783349" mass="0.0224407"
+                                                  diaginertia="0.001 0.001 0.001"/>
+                                        <joint name="right_limb_j6" pos="0 0 0" axis="0 0 1" limited="true"
+                                               range="-0.3508 0.3508"/>
+                                        <geom type="mesh" contype="0" conaffinity="0"
+                                              rgba="0.752941 0.752941 0.752941 1"
+                                              mesh="right_limb_l6"/>
+                                        <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                              mesh="right_limb_l6"/>
+                                        <body name="right_limb_l7" pos="0 0 0" quat="0.707105 0.707108 0 0">
+                                            <inertial pos="0.0754347 -0.000220452 8.25196e-05"
+                                                      quat="-0.0155752 0.701721 0.0117855 0.712184" mass="0.111716"
+                                                      diaginertia="0.00412774 0.00412474 0.00400319"/>
+                                            <joint name="right_limb_j7" pos="0 0 0" axis="0 0 1" limited="true"
+                                                   range="-0.3508 0.3508"/>
+                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                  rgba="0.752941 0.752941 0.752941 1" mesh="right_limb_l7"/>
+                                            <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                                  mesh="right_limb_l7"/>
+                                            <geom contype="0" conaffinity="0" pos="0.074796 0.011942 -0.02228"
+                                                  quat="0.628401 4.13383e-08 -1.03745e-07 0.777889" type="mesh"
+                                                  rgba="0.752941 0.752941 0.752941 1" mesh="right_palm_link"/>
+                                            <geom contype="0" pos="0.074796 0.011942 -0.02228"
+                                                  quat="0.628401 4.13383e-08 -1.03745e-07 0.777889" type="mesh"
+                                                  rgba="0.752941 0.752941 0.752941 1" mesh="right_palm_link"/>
+                                            <body name="right_thumb_l1" childclass="walker_finger"
+                                                  pos="0.0806931 0.0431215 0.024638"
+                                                  quat="0.862286 0.0855111 0.134873 0.480584">
+                                                <inertial pos="0.0109079 -0.000509975 -0.00754093"
+                                                          quat="4.12949e-05 0.705713 -0.0129193 0.70838"
+                                                          mass="0.00861449"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="right_thumb_j1" pos="0 0 0" axis="0 0 -1" limited="true"
+                                                       range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="right_thumb_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="right_thumb_l1"/>
+                                                <body name="right_thumb_l2" pos="0.03655 0 -0.014481"
+                                                      quat="0.925027 -5.25802e-12 0 0.379902">
+                                                    <inertial pos="0.00381391 -0.00519299 0.00691359"
+                                                              quat="0.690254 0.655785 0.272301 0.139095"
+                                                              mass="0.00424318"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="right_thumb_j2" pos="0 0 0" axis="0 0 -1"
+                                                           limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_thumb_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_thumb_l2"/>
+                                                </body>
+                                            </body>
+                                            <body name="right_index_l1" childclass="walker_finger"
+                                                  pos="0.152691 0.0105882 0.033294"
+                                                  quat="0.980702 0.00556918 0.0284549 0.193347">
+                                                <inertial pos="0.0152771 0.000408639 -0.00626307"
+                                                          quat="-0.0191554 0.707941 -0.0122947 0.705904"
+                                                          mass="0.00605247"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="right_index_j1" pos="0 0 0" axis="0 0 1" limited="true"
+                                                       range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="right_index_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="right_index_l1"/>
+                                                <body name="right_index_l2" pos="0.038459 0 -0.012377"
+                                                      quat="0.76666 -0.0256347 -0.0135487 0.641399">
+                                                    <inertial pos="0.00234423 -0.010213 0.00542737"
+                                                              quat="0.426755 0.559471 -0.461044 0.540657"
+                                                              mass="0.00445699"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="right_index_j2" pos="0 0 0"
+                                                           axis="-0.01211 -0.0566869 0.998319" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_index_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_index_l2"/>
+                                                </body>
+                                            </body>
+                                            <body name="right_middle_l1" childclass="walker_finger"
+                                                  pos="0.157797 0.0104289 0.00909601"
+                                                  quat="0.973956 0.00646066 0.0282021 0.224884">
+                                                <inertial pos="0.0152763 0.000409442 -0.00626288"
+                                                          quat="-0.0206703 0.707905 -0.013748 0.705871"
+                                                          mass="0.00605245"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="right_middle_j1" pos="0 0 0" axis="0 0 1" limited="true"
+                                                       range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="right_middle_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="right_middle_l1"/>
+                                                <body name="right_middle_l2" pos="0.038459 0 -0.0122"
+                                                      quat="0.786944 -0.0259977 -0.0126968 0.616345">
+                                                    <inertial pos="0.00289049 -0.0100491 0.00544431"
+                                                              quat="0.411754 0.570154 -0.446983 0.552802"
+                                                              mass="0.00445697"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="right_middle_j2" pos="0 0 0"
+                                                           axis="-0.012065 -0.0565618 0.998326" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_middle_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_middle_l2"/>
+                                                </body>
+                                            </body>
+                                            <body name="right_ring_l1" childclass="walker_finger"
+                                                  pos="0.151696 0.0102249 -0.014603"
+                                                  quat="0.00539907 -0.981927 -0.187025 0.0284915">
+                                                <inertial pos="0.0152791 -0.00040793 0.00626138"
+                                                          quat="-0.0131804 0.705877 -0.0200541 0.707928"
+                                                          mass="0.00605248"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="right_ring_j1" pos="0 0 0" axis="1.7588e-05 0 -1"
+                                                       limited="true" range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="right_ring_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="right_ring_l1"/>
+                                                <body name="right_ring_l2" pos="0.038461 0 0.012203"
+                                                      quat="0.0255389 0.762539 -0.646292 -0.0137006">
+                                                    <inertial pos="0.00226446 -0.0102341 0.00542586"
+                                                              quat="0.428976 0.557752 -0.463293 0.538751"
+                                                              mass="0.004457"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="right_ring_j2" pos="0 0 0"
+                                                           axis="-0.012113 -0.0567049 0.998318" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_ring_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_ring_l2"/>
+                                                </body>
+                                            </body>
+                                            <body name="right_pinky_l1" childclass="walker_finger"
+                                                  pos="0.146774 0.00883713 -0.037929"
+                                                  quat="0.975141 0.0259703 0.029973 0.218006">
+                                                <inertial pos="0.0136418 -0.000125532 -0.00569767"
+                                                          quat="-0.0298852 0.708034 -0.0215377 0.705217"
+                                                          mass="0.00475338"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="right_pinky_j1" pos="0 0 0" axis="5.8842e-05 0 1"
+                                                       limited="true" range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="right_pinky_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="right_pinky_l1"/>
+                                                <body name="right_pinky_l2" pos="0.033786 -0.00038214 -0.010543"
+                                                      quat="0.782485 2.64612e-05 2.50502e-05 0.62267">
+                                                    <inertial pos="0.00385751 -0.0117318 0.00513394"
+                                                              quat="0.414173 0.566455 -0.420121 0.575402"
+                                                              mass="0.00390662"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="right_pinky_j2" pos="0 0 0" axis="0 0 1" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_pinky_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="right_pinky_l2"/>
+                                                </body>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+                <body name="left_limb_l1" pos="0 0.24142 0.018386" quat="0.561349 -0.429984 0.429982 0.561352">
+                    <inertial pos="-0.00723118 -0.000176693 -0.036151" quat="0.525832 0.52715 -0.471845 0.472203"
+                              mass="0.0906426" diaginertia="0.001 0.001 0.001"/>
+                    <joint name="left_limb_j1" class="walker_shoulder_j1" pos="0 0 0" axis="0 0 -1" limited="true"
+                           range="-0.7854 3.1416"/>
+                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                          mesh="left_limb_l1"/>
+                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="left_limb_l1"/>
+                    <body name="left_limb_l2" pos="0 0 0" quat="0.499998 -0.5 0.5 0.500002">
+                        <inertial pos="-0.00095581 -0.0269333 -0.000117719" quat="0.502035 0.49277 -0.505523 0.499585"
+                                  mass="0.111652" diaginertia="0.001 0.001 0.001"/>
+                        <joint name="left_limb_j2" class="walker_shoulder_j2" pos="0 0 0" axis="0 0 1" limited="true"
+                               range="-1.5708 0.0175"/>
+                        <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                              mesh="left_limb_l2"/>
+                        <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                              mesh="left_limb_l2"/>
+                        <body name="left_limb_l3" childclass="walker_upper_arm_joints" pos="-0.00064368 -0.2285 0"
+                              quat="0.707105 0.707108 2.17976e-11 -2.17977e-11">
+                            <inertial pos="0.0062727 0.00019432 -0.0621535"
+                                      quat="0.995262 -0.00177932 0.0951069 -0.0201207"
+                                      mass="0.135127" diaginertia="0.001 0.001 0.001"/>
+                            <joint name="left_limb_j3" pos="0 0 0" axis="0 0 1" limited="true" range="-1.9199 1.9199"/>
+                            <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                  mesh="left_limb_l3"/>
+                            <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                  mesh="left_limb_l3"/>
+                            <body name="left_limb_l4" pos="0.025422 0 0" quat="0.0163793 0.0163844 -0.706918 0.706916">
+                                <inertial pos="0.0187474 -0.0269366 -0.000697445"
+                                          quat="0.353751 0.594738 -0.370052 0.619845" mass="0.111546"
+                                          diaginertia="0.001 0.001 0.001"/>
+                                <joint name="left_limb_j4" pos="0 0 0" axis="0 0 1" limited="true" range="-2.234 -0.2"/>
+                                <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                      mesh="left_limb_l4"/>
+                                <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                      mesh="left_limb_l4"/>
+                                <body name="left_limb_l5" childclass="walker_lower_arm_joints" pos="0.024818 -0.22241 0"
+                                      quat="-0.500004 -0.499998 0.500002 -0.499996">
+                                    <inertial pos="0.000547047 -0.00012252 -0.0604686"
+                                              quat="0.999966 0.00601418 -0.00535602 0.0017551" mass="0.102339"
+                                              diaginertia="0.001 0.001 0.001"/>
+                                    <joint name="left_limb_j5" pos="0 0 0" axis="0 0 1" limited="true"
+                                           range="-2.3562 2.3562"/>
+                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                          mesh="left_limb_l5"/>
+                                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                          mesh="left_limb_l5"/>
+                                    <body name="left_limb_l6" pos="0 0 0" quat="0.499998 0.5 -0.5 0.500002">
+                                        <inertial pos="0.0125426 0.000622049 0.000522269"
+                                                  quat="0.99996 -0.0043188 -0.000535316 0.00779324" mass="0.0224426"
+                                                  diaginertia="0.001 0.001 0.001"/>
+                                        <joint name="left_limb_j6" pos="0 0 0" axis="0 0 -1" limited="true"
+                                               range="-0.3508 0.3508"/>
+                                        <geom type="mesh" contype="0" conaffinity="0"
+                                              rgba="0.752941 0.752941 0.752941 1"
+                                              mesh="left_limb_l6"/>
+                                        <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                              mesh="left_limb_l6"/>
+                                        <body name="left_limb_l7" pos="0 0 0" quat="0.707105 0.707108 0 0">
+                                            <inertial pos="0.0734107 0.00406146 0.0046864"
+                                                      quat="0.0225633 0.674089 0.0509748 0.736543" mass="0.10838"
+                                                      diaginertia="0.00412627 0.00411115 0.00401514"/>
+                                            <joint name="left_limb_j7" pos="0 0 0" axis="0 0 -1" limited="true"
+                                                   range="-0.3508 0.3508"/>
+                                            <geom type="mesh" contype="0" conaffinity="0"
+                                                  rgba="0.752941 0.752941 0.752941 1" mesh="left_limb_l7"/>
+                                            <geom type="mesh" contype="0"
+                                                  rgba="0.752941 0.752941 0.752941 1" mesh="left_limb_l7"/>
+                                            <geom contype="0" conaffinity="0" pos="0.073849 -0.0065547 -0.01588"
+                                                  quat="0.779048 -5.73213e-08 4.61224e-08 0.626964" type="mesh"
+                                                  rgba="0.752941 0.752941 0.752941 1" mesh="left_palm_link"/>
+                                            <geom contype="0" pos="0.073849 -0.0065547 -0.01588"
+                                                  quat="0.779048 -5.73213e-08 4.61224e-08 0.626964" type="mesh"
+                                                  rgba="0.752941 0.752941 0.752941 1" mesh="left_palm_link"/>
+                                            <body name="left_thumb_l1" childclass="walker_finger"
+                                                  pos="0.0774795 -0.0376185 0.031344"
+                                                  quat="0.876094 -0.0696066 0.101432 -0.466183">
+                                                <inertial pos="0.0109078 0.000509913 -0.00754109"
+                                                          quat="-1.03526e-06 0.705718 0.0129539 0.708374"
+                                                          mass="0.00861402"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="left_thumb_j1" pos="0 0 0" axis="0 0 1" limited="true"
+                                                       range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="left_thumb_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="left_thumb_l1"/>
+                                                <body name="left_thumb_l2" pos="0.03655 0 -0.014552"
+                                                      quat="0.390227 -0.0093718 -0.122661 0.912463">
+                                                    <inertial pos="-0.00326119 -0.00670733 0.0057951"
+                                                              quat="0.619947 0.726609 -0.225292 -0.19222"
+                                                              mass="0.0042432"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="left_thumb_j2" pos="0 0 0"
+                                                           axis="0.0786372 -0.231161 0.969732" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_thumb_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_thumb_l2"/>
+                                                </body>
+                                            </body>
+                                            <body name="left_index_l1" childclass="walker_finger"
+                                                  pos="0.147296 -0.00229954 0.045319"
+                                                  quat="0.980158 0.00199268 -0.00787874 -0.198049">
+                                                <inertial pos="0.0150097 -0.000417442 -0.00617411"
+                                                          quat="0.00878151 0.703776 0.000784651 0.710367"
+                                                          mass="0.00596801"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="left_index_j1" pos="0 0 0" axis="0 0 -1" limited="true"
+                                                       range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="left_index_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="left_index_l1"/>
+                                                <body name="left_index_l2" pos="0.038461 0 -0.012199"
+                                                      quat="0.639414 0.00338695 0.00738723 0.76882">
+                                                    <inertial pos="-0.00253991 -0.00977019 0.00611226"
+                                                              quat="0.555303 0.435713 -0.549687 0.446807"
+                                                              mass="0.0044572"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="left_index_j2" pos="0 0 0"
+                                                           axis="-0.00423899 0.015691 -0.999868" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_index_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_index_l2"/>
+                                                </body>
+                                            </body>
+                                            <body name="left_middle_l1" childclass="walker_finger"
+                                                  pos="0.15417 -0.00186654 0.021567"
+                                                  quat="0.981577 0.00195879 -0.00795471 -0.190889">
+                                                <inertial pos="0.0150067 -0.000415058 -0.00617389"
+                                                          quat="0.00969867 0.703763 0.00175941 0.710366"
+                                                          mass="0.00596791"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="left_middle_j1" pos="0 0 0" axis="0 0 -1" limited="true"
+                                                       range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="left_middle_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1"
+                                                      mesh="left_middle_l1"/>
+                                                <body name="left_middle_l2" pos="0.038459 0 -0.0122"
+                                                      quat="0.645009 0.00346154 0.00742526 0.764131">
+                                                    <inertial pos="-0.00226193 -0.00982259 0.00611526"
+                                                              quat="0.548774 0.444783 -0.54223 0.454974"
+                                                              mass="0.00445721"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="left_middle_j2" pos="0 0 0"
+                                                           axis="-0.00428858 0.0158129 -0.999866" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_middle_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_middle_l2"/>
+                                                </body>
+                                            </body>
+                                            <body name="left_ring_l1" childclass="walker_finger"
+                                                  pos="0.149841 -0.00183191 -0.002519"
+                                                  quat="0.986974 0.00168855 -0.00794857 -0.160673">
+                                                <inertial pos="0.0150066 -0.000417741 -0.00617162"
+                                                          quat="0.00866014 0.703758 0.000550381 0.710387"
+                                                          mass="0.00596757"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="left_ring_j1" pos="0 0 0" axis="1.7588e-05 0 -1"
+                                                       limited="true"
+                                                       range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="left_ring_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="left_ring_l1"/>
+                                                <body name="left_ring_l2" pos="0.038459 0 -0.012203"
+                                                      quat="0.66816 0.0036676 0.00725102 0.743973">
+                                                    <inertial pos="-0.00178574 -0.00993452 0.00611862"
+                                                              quat="0.538359 0.456456 -0.532396 0.467302"
+                                                              mass="0.00445722"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="left_ring_j2" pos="0 0 0"
+                                                           axis="-0.00423439 0.015673 -0.999868" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_ring_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_ring_l2"/>
+                                                </body>
+                                            </body>
+                                            <body name="left_pinky_l1" childclass="walker_finger"
+                                                  pos="0.146832 -0.000235728 -0.026064"
+                                                  quat="0.989396 -0.0180426 -0.00558457 -0.14401">
+                                                <inertial pos="0.0129948 6.74415e-05 -0.0056998"
+                                                          quat="0.0384251 0.707624 0.0310475 0.70486" mass="0.00474007"
+                                                          diaginertia="0.001 0.001 0.001"/>
+                                                <joint name="left_pinky_j1" pos="0 0 0" axis="6.6172e-05 0 -1"
+                                                       limited="true" range="0 1.5708"/>
+                                                <geom type="mesh" contype="0" conaffinity="0"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="left_pinky_l1"/>
+                                                <geom type="mesh"
+                                                      rgba="0.752941 0.752941 0.752941 1" mesh="left_pinky_l1"/>
+                                                <body name="left_pinky_l2" pos="0.03311 0.00034528 -0.00040579"
+                                                      quat="0.680475 0.0175571 -0.00696171 0.732528">
+                                                    <inertial pos="-0.00207317 -0.0122244 -0.00503144"
+                                                              quat="0.552367 0.468957 -0.517877 0.454723"
+                                                              mass="0.00390645"
+                                                              diaginertia="0.001 0.001 0.001"/>
+                                                    <joint name="left_pinky_j2" pos="0 0 0"
+                                                           axis="0.0351969 0.013623 -0.999288" limited="true"
+                                                           range="0 1.5708"/>
+                                                    <geom type="mesh" contype="0" conaffinity="0"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_pinky_l2"/>
+                                                    <geom type="mesh"
+                                                          rgba="0.752941 0.752941 0.752941 1"
+                                                          mesh="left_pinky_l2"/>
+                                                </body>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+                <body name="head_l1" childclass="walker_head_joints" pos="0 -0.00016327 0.098503"
+                      quat="1 0.00082875 -3.8923e-07 -3.22575e-10">
+                    <inertial pos="-0.00101176 2.14927e-05 2.40864e-05" quat="0.00128593 0.707103 0.000578011 0.707109"
+                              mass="0.0330194" diaginertia="0.001 0.001 0.001"/>
+                    <joint name="head_j1" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.5708"/>
+                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1" mesh="head_l1"/>
+                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="head_l1"/>
+                    <body name="head_l2" pos="0 0 0" quat="0.707105 0.707108 0 0">
+                        <inertial pos="0.00512858 0.132552 9.45488e-05"
+                                  quat="0.997108 0.000576686 0.000749952 0.0759968"
+                                  mass="1.24075" diaginertia="0.0123279 0.00987994 0.00904807"/>
+                        <joint name="head_j2" pos="0 0 0" axis="0 0 -1" limited="true" range="-0.2 0.2"/>
+                        <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                              mesh="head_l2"/>
+                        <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="head_l2"/>
+                        <geom contype="0" conaffinity="0" pos="0.084415 0.093313 0.00013289"
+                              quat="0.707105 2.5745e-07 0.707108 -2.57451e-07"
+                              type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="head_l3"/>
+                        <geom contype="0" pos="0.084415 0.093313 0.00013289"
+                              quat="0.707105 2.5745e-07 0.707108 -2.57451e-07"
+                              type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="head_l3"/>
+                    </body>
+                </body>
+            </body>
+            <body name="right_leg_l1" pos="0 -0.11 -0.43709" quat="0.000583418 -0.707105 0.707108 0.000588611">
+                <inertial pos="5.11129e-06 -0.00936418 -0.0512174" quat="0.72346 0.690367 7.21566e-05 -3.09664e-06"
+                          mass="0.319858" diaginertia="0.00254236 0.00197383 0.001"/>
+                <joint name="right_leg_j1" class="walker_hip_j1" pos="0 0 0" axis="0 0 -1" limited="true"
+                       range="-1.0472 1.0472"/>
+                <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1" mesh="right_leg_l1"/>
+                <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="right_leg_l1"/>
+                <body name="right_leg_l2" pos="0 0 0" quat="0.499998 0.5 -0.5 0.500002">
+                    <inertial pos="-6.56339e-06 -5.57679e-05 -0.00164948" quat="0.499034 0.500839 0.499183 0.50094"
+                              mass="0.267365" diaginertia="0.00186098 0.00155483 0.00124885"/>
+                    <joint name="right_leg_j2" class="walker_hip_j2" pos="0 0 0" axis="0 0 1" limited="true"
+                           range="-0.5236 0.5236"/>
+                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                          mesh="right_leg_l2"/>
+                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                          mesh="right_leg_l2"/>
+                    <body name="right_leg_l3" pos="0 0 0" quat="0.707105 0.707108 0 0">
+                        <inertial pos="0.0906289 0.00652824 0.000693465" quat="0.489525 0.486688 0.514488 0.508726"
+                                  mass="0.951687" diaginertia="0.0163575 0.0144898 0.00617846"/>
+                        <joint name="right_leg_j3" class="walker_hip_j3" pos="0 0 0" axis="0 0 -1" limited="true"
+                               range="-1.3963 0.5236"/>
+                        <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                              mesh="right_leg_l3"/>
+                        <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                              mesh="right_leg_l3"/>
+                        <geom contype="0" conaffinity="0" pos="0.109108 0.0115829 -0.000478266" quat="0.5 0.5 0.5 -0.5"
+                              type="mesh"
+                              rgba="0.752941 0.752941 0.752941 1" mesh="right_leg_link1"/>
+                        <geom contype="0" pos="0.109108 0.0115829 -0.000478266" quat="0.5 0.5 0.5 -0.5"
+                              type="mesh"
+                              rgba="0.752941 0.752941 0.752941 1" mesh="right_leg_link1"/>
+                        <body name="right_leg_l4" pos="0.289998 -1.22921e-07 0.0619997"
+                              quat="1 -1.8366e-06 -1.8366e-06 -3.37474e-12">
+                            <inertial pos="0.144365 0.00102667 -0.0602126" quat="0.505641 0.500207 0.497211 0.496892"
+                                      mass="0.563192" diaginertia="0.00919309 0.00803467 0.00349338"/>
+                            <joint name="right_leg_j4" class="walker_knee_joint" pos="0 0 0" axis="0 0 -1"
+                                   limited="true" range="-0.1745 2.1817"/>
+                            <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                  mesh="right_leg_l4"/>
+                            <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                  mesh="right_leg_l4"/>
+                            <body name="right_leg_l5" childclass="walker_ankle_joints" pos="0.275 0 -0.0622">
+                                <inertial pos="7.96336e-06 0.000381749 0.000653556"
+                                          quat="0.000323608 0.707191 0.00148492 0.707021" mass="0.27329"
+                                          diaginertia="0.00151565 0.0012288 0.00109931"/>
+                                <joint name="right_leg_j5" pos="0 0 0" axis="0 0 -1" limited="true"
+                                       range="-1.3963 0.5236"/>
+                                <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                      mesh="right_leg_l5"/>
+                                <geom type="mesh" rgba="0.752941 0.752941 0.752941 1"
+                                      mesh="right_leg_l5"/>
+                                <body name="right_leg_l6" pos="0 0 0" quat="0.707105 -0.707108 0 0">
+                                    <inertial pos="0.0778942 -0.000234137 0.0120837"
+                                              quat="0.680841 0.187781 0.189182 0.682205" mass="1.12186"
+                                              diaginertia="0.0109218 0.00808147 0.00698017"/>
+                                    <joint name="right_leg_j6" pos="0 0 0" axis="0 0 1" limited="true"
+                                           range="-0.5236 0.5236"/>
+                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                          mesh="right_leg_l6"/>
+                                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                          mesh="right_leg_l6"/>
+                                    <geom contype="0" conaffinity="0" pos="0.0757485 0 0"
+                                          quat="0.707107 -4.39778e-11 -4.39779e-11 0.707107"
+                                          type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_leg_link2"/>
+                                    <geom contype="0" pos="0.0757485 0 0"
+                                          quat="0.707107 -4.39778e-11 -4.39779e-11 0.707107"
+                                          type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="right_leg_link2"/>
+                                    <site name="right_foot_site" pos="0.14 0 0.022" xyaxes="0 1 0 -1 0 0" type="box"
+                                          size="0.075 0.005 0.135"/>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="left_leg_l1" pos="0 0.11 -0.43677" quat="-0.000588613 0.707105 0.707108 0.000583416">
+                <inertial pos="-5.11729e-06 0.0093642 -0.0512174" quat="0.690367 0.723459 -3.03833e-06 7.21457e-05"
+                          mass="0.319858" diaginertia="0.00254236 0.00197383 0.001"/>
+                <joint name="left_leg_j1" class="walker_hip_j1" pos="0 0 0" axis="0 0 -1" limited="true"
+                       range="-1.0472 1.0472"/>
+                <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1" mesh="left_leg_l1"/>
+                <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1" mesh="left_leg_l1"/>
+                <body name="left_leg_l2" pos="0 0 0" quat="0.499998 0.5 -0.5 0.500002">
+                    <inertial pos="-2.80791e-06 -5.52022e-05 -0.00165085" quat="0.499108 0.500788 0.49912 0.500982"
+                              mass="0.267357" diaginertia="0.00186091 0.00155478 0.00124886"/>
+                    <joint name="left_leg_j2" class="walker_hip_j2" pos="0 0 0" axis="0 0 -1" limited="true"
+                           range="-0.5236 0.5236"/>
+                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                          mesh="left_leg_l2"/>
+                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                          mesh="left_leg_l2"/>
+                    <body name="left_leg_l3" pos="0 0 0" quat="0.707105 0.707108 0 0">
+                        <inertial pos="0.090714 -0.00664981 0.000664224" quat="0.509256 0.514241 0.486784 0.489137"
+                                  mass="0.953341" diaginertia="0.0163661 0.014505 0.00618494"/>
+                        <joint name="left_leg_j3" class="walker_hip_j3" pos="0 0 0" axis="0 0 1" limited="true"
+                               range="-1.3963 0.5236"/>
+                        <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                              mesh="left_leg_l3"/>
+                        <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                              mesh="left_leg_l3"/>
+                        <geom contype="0" conaffinity="0" pos="0.10911 -0.011583 -0.00049937"
+                              quat="0.499998 0.5 -0.5 0.500002" type="mesh"
+                              rgba="0.752941 0.752941 0.752941 1" mesh="left_leg_link1"/>
+                        <geom contype="0" pos="0.10911 -0.011583 -0.00049937"
+                              quat="0.499998 0.5 -0.5 0.500002" type="mesh"
+                              rgba="0.752941 0.752941 0.752941 1" mesh="left_leg_link1"/>
+                        <body name="left_leg_l4" pos="0.29 6.64446e-07 0.0620003"
+                              quat="1 -1.83661e-06 -3.37319e-12 1.83666e-06">
+                            <inertial pos="0.144284 -0.0010228 -0.0603084" quat="0.497031 0.497043 0.500528 0.505352"
+                                      mass="0.562763" diaginertia="0.00918472 0.00803167 0.00348701"/>
+                            <joint name="left_leg_j4" class="walker_knee_joint" pos="0 0 0" axis="0 0 1" limited="true"
+                                   range="-0.1745 2.1817"/>
+                            <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                  mesh="left_leg_l4"/>
+                            <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                  mesh="left_leg_l4"/>
+                            <body name="left_leg_l5" childclass="walker_ankle_joints" pos="0.275 0 -0.0622">
+                                <inertial pos="-8.21978e-06 -0.00038478 -0.000653186"
+                                          quat="-0.000120962 0.707181 0.00185976 0.70703" mass="0.273284"
+                                          diaginertia="0.0015155 0.00122863 0.00109933"/>
+                                <joint name="left_leg_j5" pos="0 0 0" axis="0 0 1" limited="true"
+                                       range="-1.3963 0.5236"/>
+                                <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                      mesh="left_leg_l5"/>
+                                <geom type="mesh" rgba="0.752941 0.752941 0.752941 1"
+                                      mesh="left_leg_l5"/>
+                                <body name="left_leg_l6" pos="0 0 0" quat="0.707105 0.707108 0 0">
+                                    <inertial pos="0.0777422 -0.000233953 0.0120845"
+                                              quat="0.681196 0.186586 0.187973 0.682513" mass="1.12185"
+                                              diaginertia="0.0109147 0.00807823 0.00697623"/>
+                                    <joint name="left_leg_j6" pos="0 0 0" axis="0 0 1" limited="true"
+                                           range="-0.5236 0.5236"/>
+                                    <geom type="mesh" contype="0" conaffinity="0" rgba="0.752941 0.752941 0.752941 1"
+                                          mesh="left_leg_l6"/>
+                                    <geom type="mesh" contype="0" rgba="0.752941 0.752941 0.752941 1"
+                                          mesh="left_leg_l6"/>
+                                    <geom contype="0" conaffinity="0" pos="0.075748 0 0" quat="0.707105 0 0 0.707108"
+                                          type="mesh"
+                                          rgba="0.752941 0.752941 0.752941 1" mesh="left_leg_link2"/>
+                                    <geom contype="0" pos="0.075748 0 0" quat="0.707105 0 0 0.707108"
+                                          type="mesh"
+                                          rgba="0.752941 0.752941 0.752941 1" mesh="left_leg_link2"/>
+                                    <site name="left_foot_site" pos="0.14 0 0.022" xyaxes="0 1 0 -1 0 0" type="box"
+                                          size="0.075 0.005 0.135"/>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+    <actuator>
+        <!--  Head joints  -->
+        <position name="head_j1" joint="head_j1" class="walker" forcerange="-10 10" ctrlrange="-1.5708 1.5708"/>
+        <position name="head_j2" joint="head_j2" class="walker" forcerange="-10 10" ctrlrange="-0.2618 0.2618"/>
+        <!--  Left limb joints  -->
+        <position name="left_limb_j1" joint="left_limb_j1" class="walker" kp="870" forcerange="-30 30"
+                  ctrlrange="-0.7854 3.1416"/>
+        <position name="left_limb_j2" joint="left_limb_j2" class="walker" kp="870" forcerange="-25 25"
+                  ctrlrange="-1.5708 0.0175"/>
+        <position name="left_limb_j3" joint="left_limb_j3" class="walker" kp="870" forcerange="-15 15"
+                  ctrlrange="-1.9199 1.9199"/>
+        <position name="left_limb_j4" joint="left_limb_j4" class="walker" kp="870" forcerange="-15 15"
+                  ctrlrange="-2.234 0"/>
+        <position name="left_limb_j5" joint="left_limb_j5" class="walker" kp="870" forcerange="-2.5 2.5"
+                  ctrlrange="-2.3562 2.3562"/>
+        <position name="left_limb_j6" joint="left_limb_j6" class="walker" kp="870" forcerange="-2.5 2.5"
+                  ctrlrange="-0.3508 0.3508"/>
+        <position name="left_limb_j7" joint="left_limb_j7" class="walker" kp="870" forcerange="-2.5 2.5"
+                  ctrlrange="-0.3508 0.3508"/>
+        <!--  Left hand joints  -->
+        <position name="left_thumb_j1" joint="left_thumb_j1" class="walker_finger"/>
+        <position name="left_thumb_j2" joint="left_thumb_j2" class="walker_finger"/>
+        <position name="left_index_j1" joint="left_index_j1" class="walker_finger"/>
+        <position name="left_index_j2" joint="left_index_j2" class="walker_finger"/>
+        <position name="left_middle_j1" joint="left_middle_j1" class="walker_finger"/>
+        <position name="left_middle_j2" joint="left_middle_j2" class="walker_finger"/>
+        <position name="left_ring_j1" joint="left_ring_j1" class="walker_finger"/>
+        <position name="left_ring_j2" joint="left_ring_j2" class="walker_finger"/>
+        <position name="left_pinky_j1" joint="left_pinky_j1" class="walker_finger"/>
+        <position name="left_pinky_j2" joint="left_pinky_j2" class="walker_finger"/>
+        <!--  Right limb joints  -->
+        <position name="right_limb_j1" joint="right_limb_j1" class="walker" kp="870" forcerange="-30 30"
+                  ctrlrange="-3.1416 0.7854"/>
+        <position name="right_limb_j2" joint="right_limb_j2" class="walker" kp="870" forcerange="-25 25"
+                  ctrlrange="-1.5708 0.0175"/>
+        <position name="right_limb_j3" joint="right_limb_j3" class="walker" kp="870" forcerange="-15 15"
+                  ctrlrange="-1.9199 1.9199"/>
+        <position name="right_limb_j4" joint="right_limb_j4" class="walker" kp="870" forcerange="-15 15"
+                  ctrlrange="-2.234 0"/>
+        <position name="right_limb_j5" joint="right_limb_j5" class="walker" kp="870" forcerange="-2.5 2.5"
+                  ctrlrange="-2.3562 2.3562"/>
+        <position name="right_limb_j6" joint="right_limb_j6" class="walker" kp="870" forcerange="-2.5 2.5"
+                  ctrlrange="-0.3508 0.3508"/>
+        <position name="right_limb_j7" joint="right_limb_j7" class="walker" kp="870" forcerange="-2.5 2.5"
+                  ctrlrange="-0.3508 0.3508"/>
+        <!--  Right hand joints  -->
+        <position name="right_thumb_j1" joint="right_thumb_j1" class="walker_finger"/>
+        <position name="right_thumb_j2" joint="right_thumb_j2" class="walker_finger"/>
+        <position name="right_index_j1" joint="right_index_j1" class="walker_finger"/>
+        <position name="right_index_j2" joint="right_index_j2" class="walker_finger"/>
+        <position name="right_middle_j1" joint="right_middle_j1" class="walker_finger"/>
+        <position name="right_middle_j2" joint="right_middle_j2" class="walker_finger"/>
+        <position name="right_ring_j1" joint="right_ring_j1" class="walker_finger"/>
+        <position name="right_ring_j2" joint="right_ring_j2" class="walker_finger"/>
+        <position name="right_pinky_j1" joint="right_pinky_j1" class="walker_finger"/>
+        <position name="right_pinky_j2" joint="right_pinky_j2" class="walker_finger"/>
+        <!--  Left leg joints  -->
+        <position name="left_leg_j1" joint="left_leg_j1" class="walker" kp="870" forcerange="-30 30"
+                  ctrlrange="-1.0472 1.0472"/>
+        <position name="left_leg_j2" joint="left_leg_j2" class="walker" kp="870" forcerange="-25 25"
+                  ctrlrange="-0.5236 0.5236"/>
+        <position name="left_leg_j3" joint="left_leg_j3" class="walker" kp="870" forcerange="-15 15"
+                  ctrlrange="-1.3963 0.5236"/>
+        <position name="left_leg_j4" joint="left_leg_j4" class="walker" kp="870" forcerange="-15 15"
+                  ctrlrange="-0.1745 2.1817"/>
+        <position name="left_leg_j5" joint="left_leg_j5" class="walker" kp="870" forcerange="-10 10"
+                  ctrlrange="-1.3963 0.5236"/>
+        <position name="left_leg_j6" joint="left_leg_j6" class="walker" kp="870" forcerange="-10 10"
+                  ctrlrange="-0.5236 0.5236"/>
+        <!--  Right leg joints  -->
+        <position name="right_leg_j1" joint="right_leg_j1" class="walker" kp="870" forcerange="-30 30"
+                  ctrlrange="-1.0472 1.0472"/>
+        <position name="right_leg_j2" joint="right_leg_j2" class="walker" kp="870" forcerange="-25 25"
+                  ctrlrange="-0.5236 0.5236"/>
+        <position name="right_leg_j3" joint="right_leg_j3" class="walker" kp="870" forcerange="-15 15"
+                  ctrlrange="-1.3963 0.5236"/>
+        <position name="right_leg_j4" joint="right_leg_j4" class="walker" kp="870" forcerange="-15 15"
+                  ctrlrange="-0.1745 2.1817"/>
+        <position name="right_leg_j5" joint="right_leg_j5" class="walker" kp="870" forcerange="-10 10"
+                  ctrlrange="-1.3963 0.5236"/>
+        <position name="right_leg_j6" joint="right_leg_j6" class="walker" kp="870" forcerange="-10 10"
+                  ctrlrange="-0.5236 0.5236"/>
+    </actuator>
+    <sensor>
+        <!--  IMU  -->
+        <gyro name='angular_velocity' site='imu_site' noise='5e-4' cutoff='34.9'/>
+        <accelerometer name='linear_acceleration' site='imu_site' noise='1e-2' cutoff='157'/>
+        <magnetometer name='magnetometer' site='imu_site'/>
+        <!--  Foot force sensors  -->
+        <touch name="left_foot_force_sensor" site="left_foot_site"/>
+        <touch name="right_foot_force_sensor" site="right_foot_site"/>
+    </sensor>
+</mujoco>

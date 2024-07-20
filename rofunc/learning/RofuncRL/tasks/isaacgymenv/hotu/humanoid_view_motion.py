@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import numpy as np
 import torch
+from isaacgym import gymapi
 from isaacgym import gymtorch
 
-import rofunc as rf
 from rofunc.learning.RofuncRL.tasks.isaacgymenv.hotu.humanoid_hotu import HumanoidHOTUTask
 
 
@@ -35,6 +35,8 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
 
         cfg["env"]["controlFrequencyInv"] = 1
         cfg["env"]["pdControl"] = False
+        self._incremental_playback = cfg["env"]["incrementalPlayback"]
+        self._incremental_dt = cfg["env"]["incrementalDt"]
 
         super().__init__(
             cfg=cfg,
@@ -48,12 +50,28 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
 
         self._motion_dt = control_freq_inv * self.sim_params.dt
 
-        num_motions = self._motion_lib.num_motions()
+        num_motions = self._motion_lib.num_motions
         self._motion_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.long)
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
 
+        # self.set_colors_for_parts(self.humanoid_handles, self.wb_decompose_param_rb_ids)
+
     def pre_physics_step(self, actions):
-        self.actions = actions.to(self.device).clone()
+        # TODO: just for avoiding warning
+        expanded_actions = torch.zeros((actions.shape[0], len(self.humanoid_info["dofs"])), device=self.device)
+        asset_file = self.cfg["env"]["asset"]["assetFileName"]
+
+        dof_dict = self.humanoid_asset_infos[asset_file.split("/")[-1].split(".")[0]]["dofs"]
+
+        j = 0
+        for dof, index in dof_dict.items():
+            if "qbhand" not in dof:
+                expanded_actions[:, index] = actions[:, j]
+                j += 1
+
+        self.actions = expanded_actions.to(self.device).clone()
+
+        # self.actions = actions.to(self.device).clone()
 
         # Set the actuation force to zero so that the motion is not affected
         # So the action obtaining from the policy is not the real action
@@ -69,9 +87,13 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         return 1  # disable self collisions
 
     def _motion_sync(self):
-        num_motions = self._motion_lib.num_motions()
+        num_motions = self._motion_lib.num_motions
         motion_ids = self._motion_ids
         motion_times = self.progress_buf * self._motion_dt
+
+        if self._incremental_playback:
+            env_list = torch.arange(self.num_envs, device=self.device)
+            motion_times += env_list * self._incremental_dt
 
         (
             root_pos,
@@ -88,7 +110,7 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         root_ang_vel = torch.zeros_like(root_ang_vel)
         dof_vel = torch.zeros_like(dof_vel)
 
-        if self.object_names is not None:
+        if self.use_object_motion:
             object_poses = self._object_motion_lib.get_motion_state(motion_ids, motion_times)
             for object_name, object_pose in object_poses.items():
                 # 13-dim for the actor root state: [x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz]
@@ -138,13 +160,12 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         self.reset_buf[:], self._terminate_buf[:] = compute_view_motion_reset(
             self.reset_buf, motion_lengths, self.progress_buf, self._motion_dt
         )
-        return
 
     def _reset_actors(self, env_ids):
         return
 
     def _reset_env_tensors(self, env_ids):
-        num_motions = self._motion_lib.num_motions()
+        num_motions = self._motion_lib.num_motions
         self._motion_ids[env_ids] = torch.remainder(
             self._motion_ids[env_ids] + self.num_envs, num_motions
         )
@@ -152,7 +173,6 @@ class HumanoidHOTUViewMotionTask(HumanoidHOTUTask):
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
         self._terminate_buf[env_ids] = 0
-        return
 
 
 @torch.jit.script

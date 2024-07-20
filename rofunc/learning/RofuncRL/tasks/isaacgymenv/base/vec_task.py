@@ -129,8 +129,8 @@ class Env(ABC):
             np.ones(self.num_actions, dtype=np.float32) * 1.0,
         )
 
-        self.clip_obs = config["env"].get("clipObservations", np.Inf)
-        self.clip_actions = config["env"].get("clipActions", np.Inf)
+        self.clip_obs = config["env"].get("clipObservations", 5.0)
+        self.clip_actions = config["env"].get("clipActions", 1.0)
 
     @abc.abstractmethod
     def allocate_buffers(self):
@@ -270,7 +270,13 @@ class VecTask(Env):
         # if running with a viewer, set up keyboard shortcuts and camera
         if self.headless == False:
             # subscribe to keyboard shortcuts
-            self.viewer = self.gym.create_viewer(self.sim, gymapi.CameraProperties())
+            camera_props = gymapi.CameraProperties()
+            camera_props.horizontal_fov = 30
+            camera_props.width = 1920
+            camera_props.height = 1080
+            camera_props.use_collision_geometry = False
+
+            self.viewer = self.gym.create_viewer(self.sim, camera_props)
             self.gym.subscribe_viewer_keyboard_event(
                 self.viewer, gymapi.KEY_ESCAPE, "QUIT"
             )

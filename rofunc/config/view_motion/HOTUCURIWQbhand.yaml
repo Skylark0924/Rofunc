@@ -1,0 +1,24 @@
+env:
+  keyBodies: [ "panda_right_link7", "panda_left_link7" ]
+  contactBodies: [ "summit_xls_back_right_wheel_link", "summit_xls_back_left_wheel_link", "summit_xls_front_right_wheel_link", "summit_xls_front_left_wheel_link" ]
+
+
+  # animation files to learn from
+  motion_file:
+  motion_file_asset: "mjcf/curi/curi_w_softhand_isaacgym.xml"
+  object_motion_file:
+
+  asset:
+    assetFileName: "mjcf/curi/curi_w_softhand_isaacgym.xml"
+
+  use_object_motion: False
+  object_asset:
+    assetName: [ "box" ]        # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+    assetFileName: [ "mjcf/objects/lab_box.xml" ]     # List of object asset file path
+    assetSize: [ [ 1, 1, 1 ] ]        # List of object size, used for scaling the object and creating the box objects
+
+task:
+  wb_decompose: False  # if True, decompose the whole body into parts
+  wb_decompose_parameter:
+    parts: [ "body" ]
+  use_synergy: False  # if True, use the synergy for the hand
