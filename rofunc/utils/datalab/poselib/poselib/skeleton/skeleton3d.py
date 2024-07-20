@@ -28,15 +28,14 @@
 
 import os
 import xml.etree.ElementTree as ET
-from collections import OrderedDict
-from typing import List, Optional, Type, Dict
+from typing import List, Type, Dict
 
 import numpy as np
-import torch
-
-from ..core import *
-from .backend.fbx.fbx_read_wrapper import fbx_to_array
 import scipy.ndimage.filters as filters
+
+import rofunc as rf
+from .backend.fbx.fbx_read_wrapper import fbx_to_array
+from ..core import *
 
 
 class SkeletonTree(Serializable):
@@ -115,6 +114,10 @@ class SkeletonTree(Serializable):
         self._local_orientation = local_orientation
         self._node_indices = {self.node_names[i]: i for i in range(len(self))}
 
+        # self.asset_dof_dict = asset_dof_dict
+        # self.asset_rigid_body_dict = asset_rigid_body_dict
+        # self.asset_joint_dict = asset_joint_dict
+
     def __len__(self):
         """ number of nodes in the skeleton tree """
         return len(self.node_names)
@@ -130,10 +133,13 @@ class SkeletonTree(Serializable):
     def __repr__(self):
         return (
             "SkeletonTree(\n    node_names={},\n    parent_indices={},"
-            "\n    local_translation={}\n)".format(
+            "\n    local_translation={}".format(
                 self._indent(repr(self.node_names)),
                 self._indent(repr(self.parent_indices)),
                 self._indent(repr(self.local_translation)),
+                # self._indent(repr(self.asset_dof_dict)),
+                # self._indent(repr(self.asset_rigid_body_dict)),
+                # self._indent(repr(self.asset_joint_dict))
             )
         )
 
@@ -167,6 +173,9 @@ class SkeletonTree(Serializable):
             list(map(str, dict_repr["node_names"])),
             TensorUtils.from_dict(dict_repr["parent_indices"], *args, **kwargs),
             TensorUtils.from_dict(dict_repr["local_translation"], *args, **kwargs),
+            # dict(dict_repr["asset_dof_dict"]) if "asset_dof_dict" in dict_repr else None,
+            # dict(dict_repr["asset_rigid_body_dict"]) if "asset_rigid_body_dict" in dict_repr else None,
+            # dict(dict_repr["asset_joint_dict"]) if "asset_joint_dict" in dict_repr else None,
         )
 
     def to_dict(self):
@@ -175,6 +184,9 @@ class SkeletonTree(Serializable):
                 ("node_names", self.node_names),
                 ("parent_indices", tensor_to_dict(self.parent_indices)),
                 ("local_translation", tensor_to_dict(self.local_translation)),
+                # ("asset_dof_dict", self.asset_dof_dict),
+                # ("asset_rigid_body_dict", self.asset_rigid_body_dict),
+                # ("asset_joint_dict", self.asset_joint_dict),
             ]
         )
 
@@ -183,7 +195,7 @@ class SkeletonTree(Serializable):
         """
         Parses a mujoco xml scene description file and returns a Skeleton Tree.
         We use the model attribute at the root as the name of the tree.
-        
+
         :param path:
         :type path: string
         :return: The skeleton tree constructed from the mjcf file
@@ -220,8 +232,11 @@ class SkeletonTree(Serializable):
             local_orientation.append(quat)
             curr_index = node_index
             node_index += 1
-            for next_node in xml_node.findall("body"):
-                node_index = _add_xml_node(next_node, curr_index, node_index)
+            try:
+                for next_node in xml_node.findall("body"):
+                    node_index = _add_xml_node(next_node, curr_index, node_index)
+            except Exception as e:
+                rf.logger.beauty_print(f"Error in parsing {node_name}: {e}", type="error")
             return node_index
 
         _add_xml_node(xml_body_root, -1, 0)
@@ -244,7 +259,7 @@ class SkeletonTree(Serializable):
 
     def index(self, node_name):
         """ get the index of the node
-        
+
         :param node_name: the name of the node
         :type node_name: string
         :rtype: int
@@ -412,7 +427,7 @@ class SkeletonState(Serializable):
     @property
     def is_local(self):
         """ is the rotation represented in local frame? 
-        
+
         :rtype: bool
         """
         return self._is_local
@@ -424,7 +439,7 @@ class SkeletonState(Serializable):
     @property
     def num_joints(self):
         """ number of joints in the skeleton tree 
-        
+
         :rtype: int
         """
         return self.skeleton_tree.num_joints
@@ -432,7 +447,7 @@ class SkeletonState(Serializable):
     @property
     def skeleton_tree(self):
         """ skeleton tree 
-        
+
         :rtype: SkeletonTree
         """
         return self._skeleton_tree
@@ -440,7 +455,7 @@ class SkeletonState(Serializable):
     @property
     def root_translation(self):
         """ root translation 
-        
+
         :rtype: Tensor
         """
         if not hasattr(self, "_root_translation"):
@@ -721,9 +736,32 @@ class SkeletonState(Serializable):
         node_names_dict = {node_name: i for i, node_name in enumerate(skeleton_tree.node_names)}
         r = quat_identity([skeleton_tree.num_joints])
         for node_name, i in node_names_dict.items():
+            # for humanoid
             if 'hand' in node_name:
                 r[i] = skeleton_tree.local_orientation[i]
-                r[i] = torch.tensor([r[i][1], r[i][2], r[i][3], r[i][0]])
+                r[i] = torch.tensor([r[i][1], r[i][2], r[i][3], r[i][0]])  # mujoco: wxyz -> xyzw
+
+            # # for curi
+            # if "panda" in node_name:
+            #     r[i] = skeleton_tree.local_orientation[i]
+            #     r[i] = torch.tensor([r[i][1], r[i][2], r[i][3], r[i][0]])
+            #
+            # # for walker
+            # if "limb" in node_name:
+            #     r[i] = skeleton_tree.local_orientation[i]
+            #     r[i] = torch.tensor([r[i][1], r[i][2], r[i][3], r[i][0]])
+            #
+            # if "leg" in node_name:
+            #     r[i] = skeleton_tree.local_orientation[i]
+            #     r[i] = torch.tensor([r[i][1], r[i][2], r[i][3], r[i][0]])
+            #
+            # if "l1" in node_name:
+            #     r[i] = skeleton_tree.local_orientation[i]
+            #     r[i] = torch.tensor([r[i][1], r[i][2], r[i][3], r[i][0]])
+            #
+            # if "l2" in node_name:
+            #     r[i] = skeleton_tree.local_orientation[i]
+            #     r[i] = torch.tensor([r[i][1], r[i][2], r[i][3], r[i][0]])
 
         return cls.from_rotation_and_root_translation(
             skeleton_tree=skeleton_tree,
@@ -856,6 +894,65 @@ class SkeletonState(Serializable):
             is_local=True,
         )
 
+    def _remapped_to_hotu_qbhand(self, joint_mapping: Dict[str, str], target_skeleton_tree: SkeletonTree):
+        joint_mapping_inv = {target: source for source, target in joint_mapping.items()}
+
+        if len(self.local_rotation.shape) == 2:
+            a = torch.zeros((target_skeleton_tree.num_joints, 4), dtype=torch.float32).to(self.local_rotation.device)
+        elif len(self.local_rotation.shape) == 3:
+            a = torch.zeros((self.local_rotation.shape[0], target_skeleton_tree.num_joints, 4), dtype=torch.float32).to(
+                self.local_rotation.device)
+        else:
+            raise ValueError("Invalid shape of local rotation")
+        for i, x in enumerate(target_skeleton_tree):
+            if x in joint_mapping_inv:
+                source_index = self.skeleton_tree.index(joint_mapping_inv[x])
+                a[..., i, :] = self.local_rotation[..., source_index, :]
+            else:
+                if "virtual_link" in x:
+                    source_index = self.skeleton_tree.index(joint_mapping_inv[x.replace("virtual_link", "link")])
+                    a[..., i, :] = self.local_rotation[..., source_index, :]
+                elif "knuckle" in x:
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                elif "right_qbhand_root_link" in x:
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                elif "left_qbhand_root_link" in x:
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                elif x in ["left_hip_roll_link", "left_hip_yaw_link", "right_hip_roll_link", "right_hip_yaw_link",
+                           "left_shoulder_roll_link", "right_shoulder_roll_link", "left_shoulder_yaw_link",
+                           "right_shoulder_yaw_link"]:
+                    # For unitree H1
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                elif x in ["summit_xls_back_right_wheel_link", "summit_xls_back_left_wheel_link",
+                           "summit_xls_front_right_wheel_link", "summit_xls_front_left_wheel_link",
+                           "panda_left_link2", "panda_right_link2", "panda_left_link3", "panda_right_link3",
+                           "panda_left_link5", "panda_right_link5",
+                           "panda_left_link6", "panda_right_link6", "head_link2", "root"]:
+                    # For CURI
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                elif x in ["left_limb_l2", "left_limb_l3", "left_limb_l5", "left_limb_l6", "right_limb_l2",
+                           "right_limb_l3", "right_limb_l5", "right_limb_l6", "left_leg_l2", "left_leg_l3",
+                           "left_leg_l5", "right_leg_l2", "right_leg_l3", "right_leg_l5", "head_l2"]:
+                    # For walker
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                elif x in ["shoulder_pitch_link_r", "shoulder_pitch_link_l", "hip_roll_link_l", "hip_pitch_link_l", "hip_roll_link_r", "hip_pitch_link_r"]:
+                    # For bruce
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                # elif x in ["SCAPULA_R", "SHOULDER_R", "WRIST_REVOLUTE_R", "WRIST_UPDOWN_R", "SCAPULA_L", "SHOULDER_L",
+                #     "WRIST_REVOLUTE_L", "WRIST_UPDOWN_L", "ILIUM_R", "ISCHIUM_R",
+                else:
+                    print(x)
+                    a[..., i, :] = torch.tensor([0, 0, 0, 1], dtype=torch.float32).to(self.local_rotation.device)
+                    # raise ValueError("Joint not found in source skeleton")
+                    # pass
+
+        return SkeletonState.from_rotation_and_root_translation(
+            skeleton_tree=target_skeleton_tree,
+            r=a,
+            t=self.root_translation,
+            is_local=True,
+        )
+
     def retarget_to(
             self,
             joint_mapping: Dict[str, str],
@@ -876,41 +973,41 @@ class SkeletonState(Serializable):
             1. Drop the joints from the source (self) that do not belong to the joint mapping\
             with an implementation that is similar to "keep_nodes_by_names()" - take a\
             look at the function doc for more details (same for source_tpose)
-            
+
             2. Rotate the source state and the source tpose by "rotation_to_target_skeleton"\
             to align the source with the target orientation
-            
+
             3. Extract the root translation and normalize it to match the scale of the target\
             skeleton
-            
+
             4. Extract the global rotation from source state relative to source tpose and\
             re-apply the relative rotation to the target tpose to construct the global\
             rotation after retargetting
-            
+
             5. Combine the computed global rotation and the root translation from 3 and 4 to\
             complete the retargeting.
-            
+
             6. Make feet on the ground (global translation z)
 
         :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
         the target skeleton
         :type joint_mapping: Dict[str, str]
-        
+
         :param source_tpose_local_rotation: the local rotation of the source skeleton
         :type source_tpose_local_rotation: Tensor
-        
+
         :param source_tpose_root_translation: the root translation of the source tpose
         :type source_tpose_root_translation: np.ndarray
-        
+
         :param target_skeleton_tree: the target skeleton tree
         :type target_skeleton_tree: SkeletonTree
-        
+
         :param target_tpose_local_rotation: the local rotation of the target skeleton
         :type target_tpose_local_rotation: Tensor
-        
+
         :param target_tpose_root_translation: the root translation of the target tpose
         :type target_tpose_root_translation: Tensor
-        
+
         :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
         skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
         the frame of reference of the target skeleton and s is the frame of reference of the source\
@@ -1020,6 +1117,170 @@ class SkeletonState(Serializable):
 
         return source_state
 
+    def retarget_to_hotu_qbhand(
+            self,
+            joint_mapping: Dict[str, str],
+            source_tpose_local_rotation,
+            source_tpose_root_translation: np.ndarray,
+            target_skeleton_tree: SkeletonTree,
+            target_tpose_local_rotation,
+            target_tpose_root_translation: np.ndarray,
+            rotation_to_target_skeleton,
+            scale_to_target_skeleton: float,
+            z_up: bool = True,
+    ) -> "SkeletonState":
+        """
+        Retarget the skeleton state to a target skeleton tree. This is a naive retarget
+        implementation with rough approximations. The function follows the procedures below.
+
+        Steps:
+            1. Drop the joints from the source (self) that do not belong to the joint mapping\
+            with an implementation that is similar to "keep_nodes_by_names()" - take a\
+            look at the function doc for more details (same for source_tpose)
+
+            2. Rotate the source state and the source tpose by "rotation_to_target_skeleton"\
+            to align the source with the target orientation
+
+            3. Extract the root translation and normalize it to match the scale of the target\
+            skeleton
+
+            4. Extract the global rotation from source state relative to source tpose and\
+            re-apply the relative rotation to the target tpose to construct the global\
+            rotation after retargetting
+
+            5. Combine the computed global rotation and the root translation from 3 and 4 to\
+            complete the retargeting.
+
+            6. Make feet on the ground (global translation z)
+
+        :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
+        the target skeleton
+        :type joint_mapping: Dict[str, str]
+
+        :param source_tpose_local_rotation: the local rotation of the source skeleton
+        :type source_tpose_local_rotation: Tensor
+
+        :param source_tpose_root_translation: the root translation of the source tpose
+        :type source_tpose_root_translation: np.ndarray
+
+        :param target_skeleton_tree: the target skeleton tree
+        :type target_skeleton_tree: SkeletonTree
+
+        :param target_tpose_local_rotation: the local rotation of the target skeleton
+        :type target_tpose_local_rotation: Tensor
+
+        :param target_tpose_root_translation: the root translation of the target tpose
+        :type target_tpose_root_translation: Tensor
+
+        :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
+        skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
+        the frame of reference of the target skeleton and s is the frame of reference of the source\
+        skeleton
+        :type rotation_to_target_skeleton: Tensor
+        :param scale_to_target_skeleton: the factor that needs to be multiplied from source\
+        skeleton to target skeleton (unit in distance). For example, to go from `cm` to `m`, the \
+        factor needs to be 0.01.
+        :type scale_to_target_skeleton: float
+        :rtype: SkeletonState
+        """
+
+        # STEP 0: Preprocess
+        source_tpose = SkeletonState.from_rotation_and_root_translation(
+            skeleton_tree=self.skeleton_tree,
+            r=source_tpose_local_rotation,
+            t=source_tpose_root_translation,
+            is_local=True,
+        )
+        target_tpose = SkeletonState.from_rotation_and_root_translation(
+            skeleton_tree=target_skeleton_tree,
+            r=target_tpose_local_rotation,
+            t=target_tpose_root_translation,
+            is_local=True,
+        )
+
+        # STEP 1: Drop the irrelevant joints
+        pairwise_translation = self._get_pairwise_average_translation()
+        node_names = list(joint_mapping)
+        new_skeleton_tree = self.skeleton_tree.keep_nodes_by_names(
+            node_names, pairwise_translation
+        )
+
+        # TODO: combine the following steps before STEP 3
+        source_tpose = source_tpose._transfer_to(new_skeleton_tree)
+        source_state = self._transfer_to(new_skeleton_tree)
+
+        source_tpose = source_tpose._remapped_to_hotu_qbhand(joint_mapping, target_skeleton_tree)
+        source_state = source_state._remapped_to_hotu_qbhand(joint_mapping, target_skeleton_tree)
+
+        # STEP 2: Rotate the source to align with the target
+        new_local_rotation = source_tpose.local_rotation.clone()
+        new_local_rotation[..., 0, :] = quat_mul_norm(
+            rotation_to_target_skeleton, source_tpose.local_rotation[..., 0, :]
+        )
+
+        source_tpose = SkeletonState.from_rotation_and_root_translation(
+            skeleton_tree=source_tpose.skeleton_tree,
+            r=new_local_rotation,
+            t=quat_rotate(rotation_to_target_skeleton, source_tpose.root_translation),
+            is_local=True,
+        )
+
+        new_local_rotation = source_state.local_rotation.clone()
+        new_local_rotation[..., 0, :] = quat_mul_norm(
+            rotation_to_target_skeleton, source_state.local_rotation[..., 0, :]
+        )
+        source_state = SkeletonState.from_rotation_and_root_translation(
+            skeleton_tree=source_state.skeleton_tree,
+            r=new_local_rotation,
+            t=quat_rotate(rotation_to_target_skeleton, source_state.root_translation),
+            is_local=True,
+        )
+
+        # STEP 3: Normalize to match the target scale
+        root_translation_diff = (
+                                        source_state.root_translation - source_tpose.root_translation
+                                ) * scale_to_target_skeleton
+        # STEP 4: the global rotation from source state relative to source tpose and
+        # re-apply to the target
+        current_skeleton_tree = source_state.skeleton_tree
+        target_tpose_global_rotation = source_state.global_rotation[0, :].clone()
+        for current_index, name in enumerate(current_skeleton_tree):
+            if name in target_tpose.skeleton_tree:
+                target_tpose_global_rotation[
+                current_index, :
+                ] = target_tpose.global_rotation[
+                    target_tpose.skeleton_tree.index(name), :
+                    ]
+
+        global_rotation_diff = quat_mul_norm(
+            source_state.global_rotation, quat_inverse(source_tpose.global_rotation)
+        )
+        new_global_rotation = quat_mul_norm(
+            global_rotation_diff, target_tpose_global_rotation
+        )
+
+        # STEP 5: Putting 3 and 4 together
+        current_skeleton_tree = source_state.skeleton_tree
+        shape = source_state.global_rotation.shape[:-1]
+        shape = shape[:-1] + target_tpose.global_rotation.shape[-2:-1]
+        new_global_rotation_output = quat_identity(shape)
+        for current_index, name in enumerate(target_skeleton_tree):
+            while name not in current_skeleton_tree:
+                name = target_skeleton_tree.parent_of(name)
+            parent_index = current_skeleton_tree.index(name)
+            new_global_rotation_output[:, current_index, :] = new_global_rotation[
+                                                              :, parent_index, :
+                                                              ]
+
+        source_state = SkeletonState.from_rotation_and_root_translation(
+            skeleton_tree=target_skeleton_tree,
+            r=new_global_rotation_output,
+            t=target_tpose.root_translation + root_translation_diff,
+            is_local=False,
+        ).local_repr()
+
+        return source_state
+
     def retarget_to_by_tpose(
             self,
             joint_mapping: Dict[str, str],
@@ -1035,13 +1296,13 @@ class SkeletonState(Serializable):
         :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
         the target skeleton
         :type joint_mapping: Dict[str, str]
-        
+
         :param source_tpose: t-pose of the source skeleton
         :type source_tpose: SkeletonState
-        
+
         :param target_tpose: t-pose of the target skeleton
         :type target_tpose: SkeletonState
-        
+
         :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
         skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
         the frame of reference of the target skeleton and s is the frame of reference of the source\
@@ -1073,6 +1334,10 @@ class SkeletonMotion(SkeletonState):
         self._fps = fps
         self._object_poses = object_poses
         super().__init__(tensor_backend, skeleton_tree, is_local, *args, **kwargs)
+
+        # self.asset_dof_dict = None
+        # self.asset_rigid_body_dict = None
+        # self.asset_joint_dict = None
 
     def clone(self):
         return SkeletonMotion(
@@ -1400,22 +1665,22 @@ class SkeletonMotion(SkeletonState):
         :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
         the target skeleton
         :type joint_mapping: Dict[str, str]
-        
+
         :param source_tpose_local_rotation: the local rotation of the source skeleton
         :type source_tpose_local_rotation: Tensor
-        
+
         :param source_tpose_root_translation: the root translation of the source tpose
         :type source_tpose_root_translation: np.ndarray
-        
+
         :param target_skeleton_tree: the target skeleton tree
         :type target_skeleton_tree: SkeletonTree
-        
+
         :param target_tpose_local_rotation: the local rotation of the target skeleton
         :type target_tpose_local_rotation: Tensor
-        
+
         :param target_tpose_root_translation: the root translation of the target tpose
         :type target_tpose_root_translation: Tensor
-        
+
         :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
         skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
         the frame of reference of the target skeleton and s is the frame of reference of the source\
@@ -1429,6 +1694,68 @@ class SkeletonMotion(SkeletonState):
         """
         return SkeletonMotion.from_skeleton_state(
             super().retarget_to(
+                joint_mapping,
+                source_tpose_local_rotation,
+                source_tpose_root_translation,
+                target_skeleton_tree,
+                target_tpose_local_rotation,
+                target_tpose_root_translation,
+                rotation_to_target_skeleton,
+                scale_to_target_skeleton,
+                z_up,
+            ),
+            self.fps,
+        )
+
+    def retarget_to_hotu_qbhand(
+            self,
+            joint_mapping: Dict[str, str],
+            source_tpose_local_rotation,
+            source_tpose_root_translation: np.ndarray,
+            target_skeleton_tree: "SkeletonTree",
+            target_tpose_local_rotation,
+            target_tpose_root_translation: np.ndarray,
+            rotation_to_target_skeleton,
+            scale_to_target_skeleton: float,
+            z_up: bool = True,
+    ) -> "SkeletonMotion":
+        """
+        Same as the one in :class:`SkeletonState`. This method discards all velocity information before
+        retargeting and re-estimate the velocity after the retargeting. The same fps is used in the
+        new retargetted motion.
+
+        :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
+        the target skeleton
+        :type joint_mapping: Dict[str, str]
+
+        :param source_tpose_local_rotation: the local rotation of the source skeleton
+        :type source_tpose_local_rotation: Tensor
+
+        :param source_tpose_root_translation: the root translation of the source tpose
+        :type source_tpose_root_translation: np.ndarray
+
+        :param target_skeleton_tree: the target skeleton tree
+        :type target_skeleton_tree: SkeletonTree
+
+        :param target_tpose_local_rotation: the local rotation of the target skeleton
+        :type target_tpose_local_rotation: Tensor
+
+        :param target_tpose_root_translation: the root translation of the target tpose
+        :type target_tpose_root_translation: Tensor
+
+        :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
+        skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
+        the frame of reference of the target skeleton and s is the frame of reference of the source\
+        skeleton
+        :type rotation_to_target_skeleton: Tensor
+        :param scale_to_target_skeleton: the factor that needs to be multiplied from source\
+        skeleton to target skeleton (unit in distance). For example, to go from `cm` to `m`, the \
+        factor needs to be 0.01.
+        :type scale_to_target_skeleton: float
+        :rtype: SkeletonMotion
+        """
+        return SkeletonMotion.from_skeleton_state(
+            super().retarget_to_hotu_qbhand(
                 joint_mapping,
                 source_tpose_local_rotation,
                 source_tpose_root_translation,
@@ -1459,13 +1786,13 @@ class SkeletonMotion(SkeletonState):
         :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
         the target skeleton
         :type joint_mapping: Dict[str, str]
-        
+
         :param source_tpose: t-pose of the source skeleton
         :type source_tpose: SkeletonState
-        
+
         :param target_tpose: t-pose of the target skeleton
         :type target_tpose: SkeletonState
-        
+
         :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
         skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
         the frame of reference of the target skeleton and s is the frame of reference of the source\
@@ -1478,6 +1805,53 @@ class SkeletonMotion(SkeletonState):
         :rtype: SkeletonMotion
         """
         return self.retarget_to(
+            joint_mapping,
+            source_tpose.local_rotation,
+            source_tpose.root_translation,
+            target_tpose.skeleton_tree,
+            target_tpose.local_rotation,
+            target_tpose.root_translation,
+            rotation_to_target_skeleton,
+            scale_to_target_skeleton,
+            z_up,
+        )
+
+    def retarget_to_hotu_qbhand_by_tpose(
+            self,
+            joint_mapping: Dict[str, str],
+            source_tpose: "SkeletonState",
+            target_tpose: "SkeletonState",
+            rotation_to_target_skeleton,
+            scale_to_target_skeleton: float,
+            z_up: bool = True,
+    ) -> "SkeletonMotion":
+        """
+        Same as the one in :class:`SkeletonState`. This method discards all velocity information before
+        retargeting and re-estimate the velocity after the retargeting. The same fps is used in the
+        new retargetted motion.
+
+        :param joint_mapping: a dictionary of that maps the joint node from the source skeleton to \
+        the target skeleton
+        :type joint_mapping: Dict[str, str]
+
+        :param source_tpose: t-pose of the source skeleton
+        :type source_tpose: SkeletonState
+
+        :param target_tpose: t-pose of the target skeleton
+        :type target_tpose: SkeletonState
+
+        :param rotation_to_target_skeleton: the rotation that needs to be applied to the source\
+        skeleton to align with the target skeleton. Essentially the rotation is t_R_s, where t is\
+        the frame of reference of the target skeleton and s is the frame of reference of the source\
+        skeleton
+        :type rotation_to_target_skeleton: Tensor
+        :param scale_to_target_skeleton: the factor that needs to be multiplied from source\
+        skeleton to target skeleton (unit in distance). For example, to go from `cm` to `m`, the \
+        factor needs to be 0.01.
+        :type scale_to_target_skeleton: float
+        :rtype: SkeletonMotion
+        """
+        return self.retarget_to_hotu_qbhand(
             joint_mapping,
             source_tpose.local_rotation,
             source_tpose.root_translation,

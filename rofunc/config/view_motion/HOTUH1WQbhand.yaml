@@ -1,0 +1,42 @@
+env:
+  terminationHeight: 0.15
+  charHeight: 1
+
+  keyBodies: [ "right_hand", "left_hand", "right_ankle_link", "left_ankle_link" ]
+  contactBodies: [ "right_ankle_link", "left_ankle_link" ]
+  headRbName: "torso_link"
+
+  # animation files to learn from
+  motion_file: "examples/data/hotu2/20240509/all_h1_motion.yaml"
+#  motion_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2h1.npy"
+
+
+  use_extra_dof_states_motion: True
+  extra_rewrite_dof_names: [ "left_hip_yaw_joint", "left_hip_roll_joint", "left_hip_pitch_joint",
+                             "left_knee_joint",
+                             "left_ankle_joint",
+                             "right_hip_yaw_joint", "right_hip_roll_joint", "right_hip_pitch_joint",
+                             "right_knee_joint",
+                             "right_ankle_joint",
+                             "left_shoulder_pitch_joint", "left_shoulder_roll_joint", "left_elbow_joint", "left_hand_x", "left_hand_y", "left_hand_z",
+                             "left_shoulder_yaw_joint", "right_shoulder_pitch_joint", "right_shoulder_roll_joint", "right_shoulder_yaw_joint",
+                             "right_elbow_joint", "right_hand_x", "right_hand_y", "right_hand_z" ]
+
+  motion_file_asset: "mjcf/unitreeH1/h1_w_qbhand.xml"
+
+  object_motion_file:
+
+  asset:
+    assetFileName: "mjcf/unitreeH1/h1_w_qbhand.xml"
+
+  use_object_motion: False
+  object_asset:
+    assetName:    # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+    assetFileName:     # List of object asset file path
+    assetSize:         # List of object size, used for scaling the object and creating the box objects
+
+task:
+  wb_decompose: False  # if True, decompose the whole body into parts
+  wb_decompose_parameter:
+    parts: [ "body" ]
+  use_synergy: True  # if True, use the synergy for the hand

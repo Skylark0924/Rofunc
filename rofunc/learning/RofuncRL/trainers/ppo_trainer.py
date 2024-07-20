@@ -16,6 +16,7 @@ from rofunc.learning.RofuncRL.agents.online.ppo_agent import PPOAgent
 from rofunc.learning.RofuncRL.trainers.base_trainer import BaseTrainer
 from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 
+import torch
 
 class PPOTrainer(BaseTrainer):
     def __init__(self, cfg, env, device, env_name, inference=False):
@@ -23,6 +24,9 @@ class PPOTrainer(BaseTrainer):
         self.memory = RandomMemory(memory_size=self.rollouts, num_envs=self.env.num_envs, device=device)
         self.agent = PPOAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
                               device, self.exp_dir, self.rofunc_logger)
+
+    def pre_interaction(self):
+        self.env.reset_done()
 
     def post_interaction(self):
         self._rollout += 1

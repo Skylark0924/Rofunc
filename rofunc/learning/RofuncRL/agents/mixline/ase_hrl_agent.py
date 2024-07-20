@@ -54,7 +54,8 @@ class ASEHRLAgent(BaseAgent):
                  motion_dataset: Optional[Union[Memory, Tuple[Memory]]] = None,
                  replay_buffer: Optional[Union[Memory, Tuple[Memory]]] = None,
                  collect_reference_motions: Optional[Callable[[int], torch.Tensor]] = None,
-                 task_related_state_size: Optional[int] = None, ):
+                 task_related_state_size: Optional[int] = None,
+                 num_part: Optional[int] = 1):
         """
         :param cfg: Configuration
         :param observation_space: Observation space
@@ -68,6 +69,7 @@ class ASEHRLAgent(BaseAgent):
         :param replay_buffer: Replay buffer
         :param collect_reference_motions: Function for collecting reference motions
         :param task_related_state_size: Size of task-related states
+        :param num_part: Number of parts
         """
         """ASE specific parameters"""
         self._ase_latent_dim = cfg.Agent.ase_latent_dim
@@ -76,10 +78,12 @@ class ASEHRLAgent(BaseAgent):
 
         '''Define models for ASE HRL agent'''
         if self.cfg.Model.actor.type == "Beta":
-            self.policy = ActorPPO_Beta(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
+            self.policy = ActorPPO_Beta(cfg.Model, observation_space, self._ase_latent_dim * num_part, self.se).to(
+                self.device)
         else:
-            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
-        self.value = Critic(cfg.Model, observation_space, self._ase_latent_dim, self.se).to(self.device)
+            self.policy = ActorPPO_Gaussian(cfg.Model, observation_space, self._ase_latent_dim * num_part, self.se).to(
+                self.device)
+        self.value = Critic(cfg.Model, observation_space, self._ase_latent_dim * num_part, self.se).to(self.device)
         self.models = {"policy": self.policy, "value": self.value}
         # checkpoint models
         self.checkpoint_modules["policy"] = self.policy
@@ -257,8 +261,9 @@ class ASEHRLAgent(BaseAgent):
         self.llc_cum_disc_rew = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
         self.need_reset = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
         self.need_terminate = torch.zeros((self.memory.num_envs, 1), dtype=torch.float32).to(self.device)
-        omega_actions, self._current_log_prob = self.policy(self._state_preprocessor(states),
-                                                            deterministic=deterministic)
+        res_dict = self.policy(self._state_preprocessor(states), deterministic=deterministic)
+        omega_actions, self._current_log_prob = res_dict["action"], res_dict["log_prob"]
+
         self._omega_actions_for_llc = omega_actions
         actions = self._get_llc_action(states, self._omega_actions_for_llc)
         return actions, self._current_log_prob
@@ -374,10 +379,8 @@ class ASEHRLAgent(BaseAgent):
                     sampled_log_prob, sampled_values, sampled_returns, sampled_advantages, sampled_amp_states,
                     _, sampled_omega_actions, _) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=True)
-                try:
-                    _, log_prob_now = self.policy(sampled_states, sampled_omega_actions)
-                except:
-                    pass
+                res_dict = self.policy(sampled_states, sampled_omega_actions)
+                log_prob_now = res_dict["log_prob"]
 
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()

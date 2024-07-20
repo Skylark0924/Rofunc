@@ -42,7 +42,8 @@ class BaseTrainer:
                  env: Union[gym.Env, gymnasium.Env],
                  device: Optional[Union[str, torch.device]] = None,
                  env_name: Optional[str] = None,
-                 inference: bool = False):
+                 inference: bool = False,
+                 **kwargs):
         self.cfg = cfg
         self.cfg_trainer = cfg.train.Trainer
         self.agent = None
@@ -65,7 +66,6 @@ class BaseTrainer:
 
         '''Rofunc logger'''
         self.rofunc_logger = BeautyLogger(self.exp_dir, verbose=self.cfg.train.Trainer.rofunc_logger_kwargs.verbose)
-        self.rofunc_logger.info(f"Trainer configurations:\n{OmegaConf.to_yaml(self.cfg.train)}")
 
         '''Setup Weights & Biases'''
         self.setup_wandb()
@@ -120,7 +120,8 @@ class BaseTrainer:
                                 f"  num_envs: {self.env.num_envs}")
 
         if hasattr(self.env._env, "cfg"):
-            self.rofunc_logger.info(f"Task configurations:\n{self.env._env.cfg}")
+            self.rofunc_logger.info(f"Task configurations:\n{OmegaConf.to_yaml(self.env._env.cfg)}")
+            self.rofunc_logger.info(f"Trainer configurations:\n{OmegaConf.to_yaml(self.cfg.train)}")
 
         '''Normalization'''
         self.state_norm = Normalization(shape=self.env.observation_space, device=device)
@@ -171,13 +172,14 @@ class BaseTrainer:
                 with torch.no_grad():
                     actions = self.get_action(states)
 
-                # Interact with environment
-                next_states, rewards, terminated, truncated, infos = self.env.step(actions)
-                next_states, rewards, terminated, truncated, infos = self.agent.multi_gpu_transfer(next_states, rewards,
-                                                                                                   terminated,
-                                                                                                   truncated, infos)
-
-                with torch.no_grad():
+                    # Interact with environment
+                    next_states, rewards, terminated, truncated, infos = self.env.step(actions)
+                    if self.device != self.env.device:
+                        next_states, rewards, terminated, truncated, infos = self.agent.multi_gpu_transfer(next_states,
+                                                                                                           rewards,
+                                                                                                           terminated,
+                                                                                                           truncated,
+                                                                                                           infos)
                     # Store transition
                     self.agent.store_transition(states=states, actions=actions, next_states=next_states,
                                                 rewards=rewards, terminated=terminated, truncated=truncated,
@@ -267,7 +269,7 @@ class BaseTrainer:
         for _ in tqdm.trange(self.eval_steps):
             with torch.no_grad():
                 # Obtain action from agent
-                actions, _ = self.agent.act(states, deterministic=True)  # TODO: check
+                actions, _, _ = self.agent.act(states, deterministic=True)  # TODO: check
 
                 # Interact with environment
                 next_states, rewards, terminated, truncated, infos = self.eval_env.step(actions)

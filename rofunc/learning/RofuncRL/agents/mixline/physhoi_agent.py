@@ -58,6 +58,8 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
             experiment_dir,
             rofunc_logger,
         )
+        self._bound_loss_scale = self.cfg.Agent.bound_loss_scale
+
         if hasattr(cfg.Model, "state_encoder"):
             img_channel = int(self.cfg.Model.state_encoder.inp_channels)
             img_size = int(self.cfg.Model.state_encoder.image_size)
@@ -68,16 +70,40 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
             kd = False
         self.memory.create_tensor(name="next_states", size=state_tensor_size, dtype=torch.float32, keep_dimensions=kd)
         self.memory.create_tensor(name="next_values", size=1, dtype=torch.float32)
+        self.memory.create_tensor(name="mu", size=self.action_space, dtype=torch.float32)
+
+        self._tensors_names.append("mu")
 
         self._rewards_shaper = self.cfg.get("Agent", {}).get("rewards_shaper", lambda rewards: rewards * 1)
 
         self.scaler = torch.cuda.amp.GradScaler(enabled=False)
+        self.scaler_policy = torch.cuda.amp.GradScaler(enabled=False)
+        self.scaler_value = torch.cuda.amp.GradScaler(enabled=False)
+
+        self._current_states = None
+        self._current_log_prob = None
+        self._current_mu = None
+
+    def act(self, states: torch.Tensor, deterministic: bool = False):
+        if self._current_states is not None:
+            states = self._current_states
+        self._state_preprocessor.eval()
+        res_dict = self.policy(self._state_preprocessor(states), deterministic=deterministic)
+        actions = res_dict["action"]
+        log_prob = res_dict["log_prob"]
+        self._current_mu = res_dict["mu"]
+        self._current_log_prob = log_prob
+        return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
                          rewards: torch.Tensor, terminated: torch.Tensor, truncated: torch.Tensor, infos: torch.Tensor):
+        if self._current_states is not None:
+            states = self._current_states
+
         BaseAgent.store_transition(self, states=states, actions=actions, next_states=next_states, rewards=rewards,
                                    terminated=terminated, truncated=truncated, infos=infos)
-        self._current_next_states = next_states
+
+        # self._current_next_states = next_states
 
         # reward shaping
         if self._rewards_shaper is not None:
@@ -88,19 +114,21 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
             values = self.value.get_value(self._state_preprocessor(states))
         else:
             values = self.value(self._state_preprocessor(states))
-        values = self._value_preprocessor(values, inverse=True)
+        values = self._value_preprocessor(values)
+        # values = self._value_preprocessor(values, inverse=True)
 
         if self.cfg.Model.use_same_model:
             next_values = self.value.get_value(self._state_preprocessor(next_states))
         else:
             next_values = self.value(self._state_preprocessor(next_states))
-        next_values = self._value_preprocessor(next_values, inverse=True)
+        next_values = self._value_preprocessor(next_values)
+        # next_values = self._value_preprocessor(next_values, inverse=True)
         next_values *= infos['terminate'].view(-1, 1).logical_not()
 
         # storage transition in memory
         self.memory.add_samples(states=states, actions=actions, rewards=rewards, next_states=next_states,
                                 terminated=terminated, truncated=truncated, log_prob=self._current_log_prob,
-                                values=values, next_values=next_values)
+                                values=values, next_values=next_values, mu=self._current_mu)
 
     def bound_loss(self, mu):
         soft_bound = 1.0
@@ -133,8 +161,10 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
         # advantage normalization
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
-        self.memory.set_tensor_by_name("values", self._value_preprocessor(values, train=True))
-        self.memory.set_tensor_by_name("returns", self._value_preprocessor(values_target, train=True))
+        # self.memory.set_tensor_by_name("values", self._value_preprocessor(values, train=True))
+        # self.memory.set_tensor_by_name("returns", self._value_preprocessor(values_target, train=True))
+        self.memory.set_tensor_by_name("values", self._value_preprocessor(values))
+        self.memory.set_tensor_by_name("returns", self._value_preprocessor(values_target))
         self.memory.set_tensor_by_name("advantages", advantages)
 
         '''Sample mini-batches from memory and update the network'''
@@ -152,9 +182,12 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
             for i, (
                     sampled_states, sampled_actions, sampled_dones, sampled_log_prob, sampled_values,
                     sampled_returns,
-                    sampled_advantages) in enumerate(sampled_batches):
-                sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
-                _, log_prob_now = self.policy(sampled_states, sampled_actions)
+                    sampled_advantages, sampled_mu) in enumerate(sampled_batches):
+                # sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
+                self._state_preprocessor.train()
+                sampled_states = self._state_preprocessor(sampled_states)
+                res_dict = self.policy(sampled_states, sampled_actions)
+                log_prob_now, mu = res_dict["log_prob"], res_dict["mu"]
 
                 # compute approximate KL divergence
                 with torch.no_grad():
@@ -163,8 +196,8 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
                     kl_divergences.append(kl_divergence)
 
                 # early stopping with KL divergence
-                if self._kl_threshold and kl_divergence > self._kl_threshold:
-                    break
+                # if self._kl_threshold and kl_divergence > self._kl_threshold:
+                #     break
 
                 # compute entropy loss
                 entropy_loss = -self._entropy_loss_scale * self.policy.get_entropy().mean()
@@ -190,30 +223,48 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
                 value_loss = self._value_loss_scale * F.mse_loss(sampled_returns, predicted_values)
 
                 # compute bound loss
-                b_loss = 10 * self.bound_loss(sampled_actions)
+                b_loss = self._bound_loss_scale * self.bound_loss(mu)
                 b_loss = torch.mean(b_loss)
 
-                loss = policy_loss + value_loss + b_loss
+                if self.policy is self.value:
+                    loss = policy_loss + value_loss + b_loss
+                    self.optimizer.zero_grad()
+                    self.scaler.scale(loss).backward()
+                    self.scaler.unscale_(self.optimizer)
+                    if self._grad_norm_clip > 0:
+                        nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
+                    self.scaler.step(self.optimizer)
+                    self.scaler.update()
+                else:
+                    loss_p = policy_loss + b_loss
+                    self.optimizer_policy.zero_grad()
+                    self.scaler_policy.scale(loss_p).backward()
+                    self.scaler_policy.unscale_(self.optimizer_policy)
+                    if self._grad_norm_clip > 0:
+                        nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
+                    self.scaler_policy.step(self.optimizer_policy)
+                    self.scaler_policy.update()
 
-                self.optimizer.zero_grad()
-                self.scaler.scale(loss).backward()
-                self.scaler.unscale_(self.optimizer)
-                if self._grad_norm_clip > 0:
-                    nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
+                    loss_v = value_loss
+                    self.optimizer_value.zero_grad()
+                    self.scaler_value.scale(loss_v).backward()
+                    self.scaler_value.unscale_(self.optimizer_value)
+                    if self._grad_norm_clip > 0:
+                        nn.utils.clip_grad_norm_(self.value.parameters(), self._grad_norm_clip)
+                    self.scaler_value.step(self.optimizer_value)
+                    self.scaler_value.update()
 
                 # if self.policy is self.value:
                 #     # optimization step
                 #     self.optimizer.zero_grad()
-                #     (policy_loss + entropy_loss + value_loss + b_loss).backward()
+                #     (policy_loss + value_loss + b_loss).backward()
                 #     if self._grad_norm_clip > 0:
                 #         nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
                 #     self.optimizer.step()
                 # else:
                 #     # Update policy network
                 #     self.optimizer_policy.zero_grad()
-                #     (policy_loss + entropy_loss + b_loss).backward()
+                #     (policy_loss + b_loss).backward()
                 #     if self._grad_norm_clip > 0:
                 #         nn.utils.clip_grad_norm_(self.policy.parameters(), self._grad_norm_clip)
                 #     self.optimizer_policy.step()
@@ -232,21 +283,12 @@ class PhysHOIAgent(PPOAgent, BaseAgent):
                     cumulative_entropy_loss += entropy_loss.item()
 
             # # update learning rate
-            # if self._lr_scheduler:
-            #     if self.policy is self.value:
-            #         if isinstance(self.scheduler, KLAdaptiveRL):
-            #             self.scheduler.step(torch.tensor(kl_divergences).mean())
-            #         else:
-            #             self.scheduler.step()
-            #     else:
-            #         if isinstance(self.scheduler_policy, KLAdaptiveRL):
-            #             self.scheduler_policy.step(torch.tensor(kl_divergences).mean())
-            #         else:
-            #             self.scheduler_policy.step()
-            #         if isinstance(self.scheduler_value, KLAdaptiveRL):
-            #             self.scheduler_value.step(torch.tensor(kl_divergences).mean())
-            #         else:
-            #             self.scheduler_value.step()
+            if self._lr_scheduler:
+                if self.policy is self.value:
+                    self.scheduler.step()
+                else:
+                    self.scheduler_policy.step()
+                    self.scheduler_value.step()
 
         # record data
         self.track_data("Loss / Policy loss", cumulative_policy_loss / (self._learning_epochs * self._mini_batch_size))

@@ -28,7 +28,7 @@ from rofunc.learning.RofuncRL.processors.schedulers import KLAdaptiveRL
 from rofunc.learning.RofuncRL.processors.standard_scaler import RunningStandardScaler
 from rofunc.learning.RofuncRL.utils.memory import Memory
 from rofunc.learning.RofuncRL.processors.normalizers import Normalization
-
+from rofunc.learning.RofuncRL.processors.running_mean_std import RunningMeanStd
 
 class PPOAgent(BaseAgent):
     """
@@ -117,13 +117,11 @@ class PPOAgent(BaseAgent):
         self._state_preprocessor = RunningStandardScaler
         self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
                                                                         {"size": observation_space, "device": device})
-        # self._state_preprocessor = Normalization
-        # self._state_preprocessor_kwargs = self.cfg.get("Agent", {}).get("state_preprocessor_kwargs",
-        #                                                                 {"shape": observation_space, "device": device})
-
         self._value_preprocessor = RunningStandardScaler
         self._value_preprocessor_kwargs = self.cfg.get("Agent", {}).get("value_preprocessor_kwargs",
                                                                         {"size": 1, "device": device})
+        # self._state_preprocessor = RunningMeanStd(observation_space.shape).to(self.device)
+        # self._value_preprocessor = RunningMeanStd(1).to(self.device)
 
         '''Misc variables'''
         self._current_log_prob = None
@@ -164,7 +162,8 @@ class PPOAgent(BaseAgent):
                 actions = dist.rsample()  # Sample the action according to the probability distribution
                 log_prob = dist.log_prob(actions)  # The log probability density of the action
             else:
-                actions, log_prob = self.policy(self._state_preprocessor(states))
+                res_dict = self.policy(self._state_preprocessor(states))
+                actions, log_prob, mu = res_dict["action"], res_dict["log_prob"], res_dict["mu"]
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
@@ -172,8 +171,8 @@ class PPOAgent(BaseAgent):
                 actions = self.policy.mean(self._state_preprocessor(states)).detach()
                 log_prob = None
             else:
-                actions, log_prob = self.policy(self._state_preprocessor(states), deterministic=True)
-                # actions = actions.detach()
+                res_dict = self.policy(self._state_preprocessor(states), deterministic=True)
+                actions, log_prob, mu = res_dict["action"], res_dict["log_prob"], res_dict["mu"]
                 self._current_log_prob = log_prob
         return actions, log_prob
 
@@ -249,7 +248,8 @@ class PPOAgent(BaseAgent):
             for i, (sampled_states, sampled_actions, sampled_dones, sampled_log_prob, sampled_values, sampled_returns,
                     sampled_advantages) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
-                _, log_prob_now = self.policy(sampled_states, sampled_actions)
+                res_dict = self.policy(sampled_states, sampled_actions)
+                log_prob_now, mu = res_dict["log_prob"], res_dict["mu"]
 
                 # compute approximate KL divergence
                 with torch.no_grad():

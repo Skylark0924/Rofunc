@@ -146,12 +146,13 @@ class A2CAgent(BaseAgent):
     def act(self, states: torch.Tensor, deterministic: bool = False):
         if not deterministic:
             # sample stochastic actions
-            actions, log_prob = self.policy(self._state_preprocessor(states))
+            res_dict = self.policy(self._state_preprocessor(states))
+            actions, log_prob = res_dict["action"], res_dict["log_prob"]
             self._current_log_prob = log_prob
         else:
             # choose deterministic actions for evaluation
-            actions = self.policy(self._state_preprocessor(states)).detach()
-            log_prob = None
+            res_dict = self.policy(self._state_preprocessor(states)).detach()
+            actions, log_prob = res_dict["action"], res_dict["log_prob"]
         return actions, log_prob
 
     def store_transition(self, states: torch.Tensor, actions: torch.Tensor, next_states: torch.Tensor,
@@ -222,7 +223,8 @@ class A2CAgent(BaseAgent):
             for i, (sampled_states, sampled_actions, sampled_dones, sampled_log_prob, sampled_values, sampled_returns,
                     sampled_advantages) in enumerate(sampled_batches):
                 sampled_states = self._state_preprocessor(sampled_states, train=not epoch)
-                _, log_prob_now = self.policy(sampled_states, sampled_actions)
+                res_dict = self.policy(sampled_states, sampled_actions)
+                log_prob_now = res_dict["log_prob"]
 
                 # compute approximate KL divergence
                 with torch.no_grad():
