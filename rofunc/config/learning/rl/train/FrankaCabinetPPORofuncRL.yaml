@@ -69,6 +69,7 @@ Model:
   use_log_std_clip: True               # If true, clip log standard deviations to the range [-20, 2].
   log_std_clip_max: 2.0                # clipping coefficient for the log standard deviations
   log_std_clip_min: -20                # clipping coefficient for the log standard deviations
+  fixed_log_std:                        # If empty, use nn.Parameter to learn log_std. Or give a fixed value.
 
   actor:
     type: "Gaussian"  # ["Beta", "Gaussian"]

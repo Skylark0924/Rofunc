@@ -13,6 +13,8 @@
 # limitations under the License.
 import torch
 
+from rofunc.learning.RofuncRL.agents.mixline.hotu_llc_agent import HOTULLCAgent
+from rofunc.learning.RofuncRL.agents.mixline.hotu_hrl_agent import HOTUHRLAgent
 from rofunc.learning.RofuncRL.agents.mixline.ase_agent import ASEAgent
 from rofunc.learning.RofuncRL.agents.mixline.ase_hrl_agent import ASEHRLAgent
 from rofunc.learning.RofuncRL.trainers.base_trainer import BaseTrainer
@@ -20,32 +22,52 @@ from rofunc.learning.RofuncRL.utils.memory import RandomMemory
 
 
 class HOTUTrainer(BaseTrainer):
-    def __init__(self, cfg, env, device, env_name, hrl=False, inference=False):
+    """Trainer for HOTU (either HLMM or RLRF)"""
+
+    def __init__(self, cfg, env, device, env_name, mode, inference=False):
         super().__init__(cfg, env, device, env_name, inference)
         self.memory = RandomMemory(memory_size=self.rollouts, num_envs=self.env.num_envs, device=device)
-        self.motion_dataset = RandomMemory(memory_size=200000, device=device)
+        self.motion_dataset = RandomMemory(memory_size=20000, device=device)
         self.replay_buffer = RandomMemory(memory_size=1000000, device=device)
         self.collect_observation = lambda: self.env.reset_done()[0]["obs"]
-        self.hrl = hrl
-        if self.hrl:
-            self.agent = ASEHRLAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
-                                     device, self.exp_dir, self.rofunc_logger,
-                                     amp_observation_space=self.env.amp_observation_space,
-                                     motion_dataset=self.motion_dataset,
-                                     replay_buffer=self.replay_buffer,
-                                     collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
-                                         num_samples),
-                                     task_related_state_size=self.env.get_task_obs_size())
+        self.mode = mode
+        if self.mode == 'LLC':  # LLC motion prior learning
+            self.agent = HOTULLCAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
+                                      device, self.exp_dir, self.rofunc_logger,
+                                      amp_observation_space=self.env.amp_observation_space,
+                                      motion_dataset=self.motion_dataset,
+                                      replay_buffer=self.replay_buffer,
+                                      collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
+                                          num_samples))
+
+        elif self.mode == "HRL":  # HRL
+            self.agent = HOTUHRLAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
+                                      device, self.exp_dir, self.rofunc_logger,
+                                      amp_observation_space=self.env.amp_observation_space,
+                                      motion_dataset=self.motion_dataset,
+                                      replay_buffer=self.replay_buffer,
+                                      collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
+                                          num_samples),
+                                      task_related_state_size=self.env.get_task_obs_size())
+        # elif self.mode == "RLRF":  # RLRF
+        #     self.agent = HOTURLRFAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
+        #                                device, self.exp_dir, self.rofunc_logger,
+        #                                amp_observation_space=self.env.amp_observation_space,
+        #                                motion_dataset=self.motion_dataset,
+        #                                replay_buffer=self.replay_buffer,
+        #                                collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
+        #                                    num_samples),
+        #                                task_related_state_size=self.env.get_task_obs_size())
         else:
-            self.agent = ASEAgent(cfg.train, self.env.observation_space, self.env.action_space, self.memory,
-                                  device, self.exp_dir, self.rofunc_logger,
-                                  amp_observation_space=self.env.amp_observation_space,
-                                  motion_dataset=self.motion_dataset,
-                                  replay_buffer=self.replay_buffer,
-                                  collect_reference_motions=lambda num_samples: self.env.fetch_amp_obs_demo(
-                                      num_samples))
+            raise NotImplementedError
 
         '''Misc variables'''
+        if not isinstance(self.env.amp_observation_space, list):
+            amp_observation_space = [self.env.amp_observation_space]
+        else:
+            amp_observation_space = self.env.amp_observation_space
+        self.num_parts = len(amp_observation_space)
+
         self._latent_reset_steps = torch.zeros(self.env.num_envs, dtype=torch.int32).to(self.device)
         self._latent_steps_min = self.cfg.train.Agent.ase_latent_steps_min
         self._latent_steps_max = self.cfg.train.Agent.ase_latent_steps_max
@@ -53,7 +75,9 @@ class HOTUTrainer(BaseTrainer):
     def _reset_latents(self, env_ids):
         # Equ. 11, provide the model with a latent space
         z_bar = torch.normal(torch.zeros([len(env_ids), self.agent._ase_latent_dim]))
-        self.agent._ase_latents[env_ids] = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
+        for i in range(self.num_parts):
+            self.agent._ase_latents[i][env_ids] = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
+        # self.agent._ase_latents[env_ids] = torch.nn.functional.normalize(z_bar, dim=-1).to(self.device)
 
     def _reset_latent_step_count(self, env_ids):
         self._latent_reset_steps[env_ids] = torch.randint_like(self._latent_reset_steps[env_ids],
@@ -73,16 +97,11 @@ class HOTUTrainer(BaseTrainer):
                 high=self._latent_steps_max)
 
     def pre_interaction(self):
-        # if self.hrl and self.agent._llc_step == 0:
-        #     if self.collect_observation is not None:  # Reset failed envs
-        #         self.env.reset_buf = self.env.reset_buf + self.agent.need_reset
-        #         obs_dict, done_env_ids = self.env.reset_done()
-        #         self.agent._current_states = obs_dict["obs"]
-        if self.hrl:
+        if self.mode in 'HRL':
             if self.collect_observation is not None:  # Reset failed envs
                 obs_dict, done_env_ids = self.env.reset_done()
                 self.agent._current_states = obs_dict["obs"]
-        elif not self.hrl:
+        elif self.mode == 'LLC':
             if self.collect_observation is not None:  # Reset failed envs
                 obs_dict, done_env_ids = self.env.reset_done()
                 obs_dict, done_env_ids = self.agent.multi_gpu_transfer(obs_dict, done_env_ids)
@@ -93,9 +112,7 @@ class HOTUTrainer(BaseTrainer):
             self._update_latents()
 
     def post_interaction(self):
-        # if self.agent._llc_step == self.cfg.train.Agent.llc_steps_per_high_action:
         self._rollout += 1
-        # self.agent._llc_step = 0
 
         # Update agent
         if not self._rollout % self.rollouts and self._step >= self.start_learning_steps and self._rollout > 0:

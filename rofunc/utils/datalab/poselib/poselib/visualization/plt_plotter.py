@@ -79,6 +79,12 @@ class Matplotlib2DPlotter(BasePlotter):
         return self._fig
 
     def show(self):
+        self.ax.patch.set_alpha(0.)
+        self.ax.grid(False)  # 默认True，风格线。
+        self.ax.set_xticks([])  # 不显示x坐标轴
+        self.ax.set_yticks([])  # 不显示y坐标轴
+        self.ax.set_zticks([])  # 不显示z坐标轴
+        plt.axis('off')  # 关闭所有坐标轴
         plt.show()
 
     def _min(self, x, y):
@@ -269,6 +275,12 @@ class Matplotlib3DPlotter(BasePlotter):
         self.ax.set_zlabel("Z")
 
     def show(self):
+        self._ax.patch.set_alpha(0.)
+        self._ax.grid(False)  # 默认True，风格线。
+        self._ax.set_xticks([])  # 不显示x坐标轴
+        self._ax.set_yticks([])  # 不显示y坐标轴
+        self._ax.set_zticks([])  # 不显示z坐标轴
+        plt.axis('off')  # 关闭所有坐标轴
         plt.show()
 
     def _min(self, x, y):
@@ -451,4 +463,10 @@ class Matplotlib3DPlotter(BasePlotter):
         self._set_aspect_equal_3d()
         self._fig.canvas.draw()
         self._fig.canvas.flush_events()
+        self._ax.patch.set_alpha(0.)
+        self._ax.grid(False)  # 默认True，风格线。
+        self._ax.set_xticks([])  # 不显示x坐标轴
+        self._ax.set_yticks([])  # 不显示y坐标轴
+        self._ax.set_zticks([])  # 不显示z坐标轴
+        plt.axis('off')  # 关闭所有坐标轴
         plt.pause(0.00001)

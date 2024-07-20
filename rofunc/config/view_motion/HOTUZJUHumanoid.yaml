@@ -1,0 +1,40 @@
+env:
+  stateInit: "Hybrid"
+  enableEarlyTermination: True
+
+  terminationHeight: 0.15
+  charHeight: 1.5
+
+  keyBodies: [ "HAND_R", "HAND_L", "FOOT_R", "FOOT_L" ]
+  contactBodies: [ "FOOT_R", "FOOT_L", "ASTRAGALUS_R", "ASTRAGALUS_L"]
+  headRbName: "HEAD"
+
+
+  # animation files to learn from
+  motion_file: "examples/data/hotu2/20240509/all_zju_motion.yaml"
+#  motion_file: "examples/data/hotu2/20240509/Waving hand_Take 2024-05-09 04.20.29 PM_optitrack2zju.npy"
+
+  use_extra_dof_states_motion: True
+  extra_rewrite_dof_names: [ "Shoulder_Y_R", "Shoulder_X_R", "Shoulder_Z_R", "Elbow_R", "Wrist_Z_R", "Wrist_Y_R", "Wrist_X_R",
+                             "Shoulder_Y_L", "Shoulder_X_L", "Shoulder_Z_L", "Elbow_L", "Wrist_Z_L", "Wrist_Y_L", "Wrist_X_L",
+                             "A_Waist", "Hip_Y_R", "Hip_X_R", "Hip_Z_R", "Knee_R", "Ankle_Y_R", "Ankle_X_R", "Hip_Y_L", "Hip_X_L",
+                             "Hip_Z_L", "Knee_L", "Ankle_Y_L", "Ankle_X_L", "Neck_Z", "Neck_Y" ]
+
+  motion_file_asset: "mjcf/zju_humanoid/zju_humanoid_w_qbhand.xml"
+
+  object_motion_file:
+
+  asset:
+    assetFileName: "mjcf/zju_humanoid/zju_humanoid.xml"
+
+  use_object_motion: False
+  object_asset:
+    assetName:    # List of object names, also used for finding objects in object_motion_file, if the name is box or sphere, it will be created as a box or sphere
+    assetFileName:     # List of object asset file path
+    assetSize:         # List of object size, used for scaling the object and creating the box objects
+
+task:
+  wb_decompose: False  # if True, decompose the whole body into parts
+  wb_decompose_parameter:
+    parts: [ "body" ]
+  use_synergy: False  # if True, use the synergy for the hand

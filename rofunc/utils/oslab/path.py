@@ -14,6 +14,8 @@
 
 
 import os
+import subprocess
+import sys
 
 import rofunc as rf
 
@@ -65,3 +67,19 @@ def is_absl_path(path):
     :return: True if the path is an absolute path, False otherwise
     """
     return os.path.isabs(path)
+
+
+def check_package_exist(package_name: str):
+    """
+    Check if the package is installed, if not, install the package.
+
+    :param package_name: the name of the package
+    """
+    try:
+        __import__(package_name)
+    except ImportError:
+        package_name = package_name.replace("_", "-")
+
+        rf.logger.beauty_print(f"{package_name} is not installed, installing {package_name}...", type="warning")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+        rf.logger.beauty_print(f"{package_name} is installed successfully!")

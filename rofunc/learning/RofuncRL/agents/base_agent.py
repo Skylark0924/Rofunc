@@ -170,15 +170,18 @@ class BaseAgent:
         torch.save(modules, path)
         self.rofunc_logger.info("Saved the checkpoint to {}".format(path), local_verbose=False)
 
-    def load_ckpt(self, path: str):
+    def load_ckpt(self, path: str, load_modules: list = None):
         """
         Load the agent model parameters from a checkpoint.
         :param path:
+        :param load_modules: List of modules to be loaded
         :return:
         """
         modules = torch.load(path, map_location=self.device)
         if type(modules) is dict:
             for name, data in modules.items():
+                if load_modules is not None and name not in load_modules:
+                    continue
                 module = self.checkpoint_modules.get(name, None)
                 if module is not None:
                     if hasattr(module, "load_state_dict"):
@@ -202,7 +205,7 @@ class BaseAgent:
         for arg in args:
             if isinstance(arg, torch.Tensor):
                 if arg.device != rl_device:
-                    arg.data = arg.data.to(rl_device)
+                    arg.data = arg.data.clone().to(rl_device)
             elif isinstance(arg, tuple) or isinstance(arg, list):
                 self.multi_gpu_transfer(*arg)
             elif isinstance(arg, dict) or isinstance(arg, collections.OrderedDict):
@@ -213,7 +216,7 @@ class BaseAgent:
                 pass
             elif isinstance(arg, np.ndarray):
                 try:
-                    arg = torch.from_numpy(arg).to(rl_device)
+                    arg = torch.from_numpy(arg).clone().to(rl_device)
                 except:
                     for i in range(len(arg)):
                         self.multi_gpu_transfer(*arg[i])

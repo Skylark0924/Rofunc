@@ -147,19 +147,28 @@ class Humanoid_SMPLX(VecTask):
         self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
 
-    # def reset(self, env_ids=None):
-    #     if (env_ids is None):
-    #         env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
-    #     self.reset_idx(env_ids)
+    def reset(self, env_ids=None):
+        if (env_ids is None):
+            env_ids = to_torch(np.arange(self.num_envs), device=self.device, dtype=torch.long)
+        self.reset_idx(env_ids)
 
-    def reset(self):
-        actions = 0.01 * (1 - 2 * np.random.rand(self.num_envs, self.num_actions)).astype('f')
-        actions = to_torch(actions, device=self.rl_device, dtype=torch.float)
+        self.obs_dict["obs"] = torch.clamp(
+            self.obs_buf, -self.clip_obs, self.clip_obs
+        ).to(self.rl_device)
 
-        # step the simulator
-        obs, rewards, resets, extras = self.step(actions)
+        if self.num_states > 0:
+            self.obs_dict["states"] = self.get_state()
 
-        return torch.clamp(obs["obs"], -self.clip_obs, self.clip_obs)
+        return self.obs_dict
+
+    # def reset(self):
+    #     actions = 0.01 * (1 - 2 * np.random.rand(self.num_envs, self.num_actions)).astype('f')
+    #     actions = to_torch(actions, device=self.rl_device, dtype=torch.float)
+    #
+    #     # step the simulator
+    #     obs, rewards, resets, extras = self.step(actions)
+    #
+    #     return torch.clamp(obs["obs"], -self.clip_obs, self.clip_obs)
 
     def set_char_color(self, col, env_ids):
         for env_id in env_ids:
@@ -353,17 +362,18 @@ class Humanoid_SMPLX(VecTask):
             self._contact_forces,
             self._tar_contact_forces,
             len(self._key_body_ids),
-            self.reward_weights_p,
-            self.reward_weights_r,
-            self.reward_weights_pv,
-            self.reward_weights_rv,
-            self.reward_weights_op,
-            self.reward_weights_or,
-            self.reward_weights_opv,
-            self.reward_weights_orv,
-            self.reward_weights_ig,
-            self.reward_weights_cg1,
-            self.reward_weights_cg2,
+            self.reward_weights
+            # self.reward_weights_p,
+            # self.reward_weights_r,
+            # self.reward_weights_pv,
+            # self.reward_weights_rv,
+            # self.reward_weights_op,
+            # self.reward_weights_or,
+            # self.reward_weights_opv,
+            # self.reward_weights_orv,
+            # self.reward_weights_ig,
+            # self.reward_weights_cg1,
+            # self.reward_weights_cg2,
         )
 
     def _compute_reset(self):
@@ -416,6 +426,8 @@ class Humanoid_SMPLX(VecTask):
             next_ts = torch.clamp(ts + 1, max=self.max_episode_length - 1)
             ref_obs = self.hoi_data_dict[0]['hoi_data'][next_ts].clone()
             self.obs_buf[env_ids] = torch.cat((obs, ref_obs), dim=-1)
+
+        self.obs_buf = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
 
     def _compute_humanoid_obs(self, env_ids=None):
         if env_ids is None:
@@ -1322,11 +1334,7 @@ def compute_humanoid_observations_max(body_pos, body_rot, body_vel, body_ang_vel
     return obs
 
 
-@torch.jit.script
-def compute_humanoid_reward(hoi_ref, hoi_obs, contact_buf, tar_contact_forces, len_keypos, w_p, w_r, w_pv, w_rv, w_op,
-                            w_or, w_opv, w_orv, w_ig, w_cg1, w_cg2):
-    # type: (Tensor, Tensor, Tensor, Tensor, int, float, float, float, float, float, float, float, float, float, float, float) -> Tensor
-
+def compute_humanoid_reward(hoi_ref, hoi_obs, contact_buf, tar_contact_forces, len_keypos, w):
     ### data preprocess ###
 
     # simulated states
@@ -1363,19 +1371,19 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, contact_buf, tar_contact_forces, l
 
     # body pos reward
     ep = torch.mean((ref_key_pos - key_pos) ** 2, dim=-1)
-    rp = torch.exp(-ep * w_p)
+    rp = torch.exp(-ep * w['p'])
 
     # body rot reward
     er = torch.mean((ref_body_rot - body_rot) ** 2, dim=-1)
-    rr = torch.exp(-er * w_r)
+    rr = torch.exp(-er * w['r'])
 
     # body pos vel reward
     epv = torch.zeros_like(ep)
-    rpv = torch.exp(-epv * w_pv)
+    rpv = torch.exp(-epv * w['pv'])
 
     # body rot vel reward
     erv = torch.mean((ref_dof_pos_vel - dof_pos_vel) ** 2, dim=-1)
-    rrv = torch.exp(-erv * w_rv)
+    rrv = torch.exp(-erv * w['rv'])
 
     rb = rp * rr * rpv * rrv
 
@@ -1383,26 +1391,26 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, contact_buf, tar_contact_forces, l
 
     # object pos reward
     eop = torch.mean((ref_obj_pos - obj_pos) ** 2, dim=-1)
-    rop = torch.exp(-eop * w_op)
+    rop = torch.exp(-eop * w['op'])
 
     # object rot reward
     eor = torch.zeros_like(ep)  # torch.mean((ref_obj_rot - obj_rot)**2,dim=-1)
-    ror = torch.exp(-eor * w_or)
+    ror = torch.exp(-eor * w['or'])
 
     # object pos vel reward
     eopv = torch.mean((ref_obj_pos_vel - obj_pos_vel) ** 2, dim=-1)
-    ropv = torch.exp(-eopv * w_opv)
+    ropv = torch.exp(-eopv * w['opv'])
 
     # object rot vel reward
     eorv = torch.zeros_like(ep)  # torch.mean((ref_obj_rot_vel - obj_rot_vel)**2,dim=-1)
-    rorv = torch.exp(-eorv * w_orv)
+    rorv = torch.exp(-eorv * w['orv'])
 
     ro = rop * ror * ropv * rorv
 
     ### interaction graph reward ###
 
     eig = torch.mean((ref_ig - ig) ** 2, dim=-1)
-    rig = torch.exp(-eig * w_ig)
+    rig = torch.exp(-eig * w['ig'])
 
     ### simplified contact graph reward ###
 
@@ -1411,7 +1419,7 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, contact_buf, tar_contact_forces, l
     # In this case we use the CG node istead of the CG edge for imitation.
     # TODO: update the code once collision detection API is available.
 
-    # body ids
+    ## body ids
     # Pelvis, 0
     # L_Hip, 1
     # L_Knee, 2
@@ -1441,17 +1449,17 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, contact_buf, tar_contact_forces, l
     contact_body_ids = [0, 1, 2, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 33, 34, 35]
     body_contact_buf = contact_buf[:, contact_body_ids, :].clone()
     body_contact = torch.all(torch.abs(body_contact_buf) < 0.1, dim=-1)
-    body_contact = torch.all(body_contact, dim=-1)  # =1 when no contact happens to the body
+    body_contact = torch.all(body_contact, dim=-1).to(float)  # =1 when no contact happens to the body
 
     # object contact
-    # =1 when contact happens to the object
-    obj_contact = torch.any(torch.abs(tar_contact_forces[..., 0:2]) > 0.1, dim=-1)
+    obj_contact = torch.any(torch.abs(tar_contact_forces[..., 0:2]) > 0.1, dim=-1).to(
+        float)  # =1 when contact happens to the object
 
     ref_body_contact = torch.ones_like(ref_obj_contact)  # no body contact for all time
     ecg1 = torch.abs(body_contact - ref_body_contact[:, 0])
-    rcg1 = torch.exp(-ecg1 * w_cg1)
+    rcg1 = torch.exp(-ecg1 * w['cg1'])
     ecg2 = torch.abs(obj_contact - ref_obj_contact[:, 0])
-    rcg2 = torch.exp(-ecg2 * w_cg2)
+    rcg2 = torch.exp(-ecg2 * w['cg2'])
 
     rcg = rcg1 * rcg2
 
@@ -1459,6 +1467,144 @@ def compute_humanoid_reward(hoi_ref, hoi_obs, contact_buf, tar_contact_forces, l
     reward = rb * ro * rig * rcg
 
     return reward
+
+# @torch.jit.script
+# def compute_humanoid_reward(hoi_ref, hoi_obs, contact_buf, tar_contact_forces, len_keypos, w_p, w_r, w_pv, w_rv, w_op,
+#                             w_or, w_opv, w_orv, w_ig, w_cg1, w_cg2):
+#     # type: (Tensor, Tensor, Tensor, Tensor, int, float, float, float, float, float, float, float, float, float, float, float) -> Tensor
+#
+#     ### data preprocess ###
+#
+#     # simulated states
+#     root_pos = hoi_obs[:, :3]
+#     root_rot = hoi_obs[:, 3:3 + 4]
+#     dof_pos = hoi_obs[:, 7:7 + 51 * 3]
+#     dof_pos_vel = hoi_obs[:, 160:160 + 51 * 3]
+#     obj_pos = hoi_obs[:, 313:313 + 3]
+#     obj_rot = hoi_obs[:, 316:316 + 4]
+#     obj_pos_vel = hoi_obs[:, 320:320 + 3]
+#     key_pos = hoi_obs[:, 323:323 + len_keypos * 3]
+#     contact = hoi_obs[:, -1:]  # fake one
+#     key_pos = torch.cat((root_pos, key_pos), dim=-1)
+#     body_rot = torch.cat((root_rot, dof_pos), dim=-1)
+#     ig = key_pos.view(-1, len_keypos + 1, 3).transpose(0, 1) - obj_pos[:, :3]
+#     ig = ig.transpose(0, 1).view(-1, (len_keypos + 1) * 3)
+#
+#     # reference states
+#     ref_root_pos = hoi_ref[:, :3]
+#     ref_root_rot = hoi_ref[:, 3:3 + 4]
+#     ref_dof_pos = hoi_ref[:, 7:7 + 51 * 3]
+#     ref_dof_pos_vel = hoi_ref[:, 160:160 + 51 * 3]
+#     ref_obj_pos = hoi_ref[:, 313:313 + 3]
+#     ref_obj_rot = hoi_ref[:, 316:316 + 4]
+#     ref_obj_pos_vel = hoi_ref[:, 320:320 + 3]
+#     ref_key_pos = hoi_ref[:, 323:323 + len_keypos * 3]
+#     ref_obj_contact = hoi_ref[:, -1:]
+#     ref_key_pos = torch.cat((ref_root_pos, ref_key_pos), dim=-1)
+#     ref_body_rot = torch.cat((ref_root_rot, ref_dof_pos), dim=-1)
+#     ref_ig = ref_key_pos.view(-1, len_keypos + 1, 3).transpose(0, 1) - ref_obj_pos[:, :3]
+#     ref_ig = ref_ig.transpose(0, 1).view(-1, (len_keypos + 1) * 3)
+#
+#     ### body reward ###
+#
+#     # body pos reward
+#     ep = torch.mean((ref_key_pos - key_pos) ** 2, dim=-1)
+#     rp = torch.exp(-ep * w_p)
+#
+#     # body rot reward
+#     er = torch.mean((ref_body_rot - body_rot) ** 2, dim=-1)
+#     rr = torch.exp(-er * w_r)
+#
+#     # body pos vel reward
+#     epv = torch.zeros_like(ep)
+#     rpv = torch.exp(-epv * w_pv)
+#
+#     # body rot vel reward
+#     erv = torch.mean((ref_dof_pos_vel - dof_pos_vel) ** 2, dim=-1)
+#     rrv = torch.exp(-erv * w_rv)
+#
+#     rb = rp * rr * rpv * rrv
+#
+#     ### object reward ###
+#
+#     # object pos reward
+#     eop = torch.mean((ref_obj_pos - obj_pos) ** 2, dim=-1)
+#     rop = torch.exp(-eop * w_op)
+#
+#     # object rot reward
+#     eor = torch.zeros_like(ep)  # torch.mean((ref_obj_rot - obj_rot)**2,dim=-1)
+#     ror = torch.exp(-eor * w_or)
+#
+#     # object pos vel reward
+#     eopv = torch.mean((ref_obj_pos_vel - obj_pos_vel) ** 2, dim=-1)
+#     ropv = torch.exp(-eopv * w_opv)
+#
+#     # object rot vel reward
+#     eorv = torch.zeros_like(ep)  # torch.mean((ref_obj_rot_vel - obj_rot_vel)**2,dim=-1)
+#     rorv = torch.exp(-eorv * w_orv)
+#
+#     ro = rop * ror * ropv * rorv
+#
+#     ### interaction graph reward ###
+#
+#     eig = torch.mean((ref_ig - ig) ** 2, dim=-1)
+#     rig = torch.exp(-eig * w_ig)
+#
+#     ### simplified contact graph reward ###
+#
+#     # Since Isaac Gym does not yet provide API for detailed collision detection in GPU pipeline,
+#     # we use force detection to approximate the contact status.
+#     # In this case we use the CG node istead of the CG edge for imitation.
+#     # TODO: update the code once collision detection API is available.
+#
+#     # body ids
+#     # Pelvis, 0
+#     # L_Hip, 1
+#     # L_Knee, 2
+#     # L_Ankle, 3
+#     # L_Toe, 4
+#     # R_Hip, 5
+#     # R_Knee, 6
+#     # R_Ankle, 7
+#     # R_Toe, 8
+#     # Torso, 9
+#     # Spine, 10
+#     # Chest, 11
+#     # Neck, 12
+#     # Head, 13
+#     # L_Thorax, 14
+#     # L_Shoulder, 15
+#     # L_Elbow, 16
+#     # L_Wrist, 17
+#     # L_Hand, 18-32
+#     # R_Thorax, 33
+#     # R_Shoulder, 34
+#     # R_Elbow, 35
+#     # R_Wrist, 36
+#     # R_Hand, 37-51
+#
+#     # body contact
+#     contact_body_ids = [0, 1, 2, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 33, 34, 35]
+#     body_contact_buf = contact_buf[:, contact_body_ids, :].clone()
+#     body_contact = torch.all(torch.abs(body_contact_buf) < 0.1, dim=-1)
+#     body_contact = torch.all(body_contact, dim=-1)  # =1 when no contact happens to the body
+#
+#     # object contact
+#     # =1 when contact happens to the object
+#     obj_contact = torch.any(torch.abs(tar_contact_forces[..., 0:2]) > 0.1, dim=-1)
+#
+#     ref_body_contact = torch.ones_like(ref_obj_contact)  # no body contact for all time
+#     ecg1 = torch.abs(body_contact - ref_body_contact[:, 0])
+#     rcg1 = torch.exp(-ecg1 * w_cg1)
+#     ecg2 = torch.abs(obj_contact - ref_obj_contact[:, 0])
+#     rcg2 = torch.exp(-ecg2 * w_cg2)
+#
+#     rcg = rcg1 * rcg2
+#
+#     ### task-agnostic HOI imitation reward ###
+#     reward = rb * ro * rig * rcg
+#
+#     return reward
 
 
 @torch.jit.script

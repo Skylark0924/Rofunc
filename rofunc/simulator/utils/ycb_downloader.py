@@ -44,6 +44,7 @@ def download_ycb_objects(objects_to_download="all", files_to_download=['google_1
 
     # Define an output folder
     output_directory = os.path.join(get_rofunc_path(), "simulator/assets/urdf/ycb")
+    rf.oslab.create_dir(output_directory)
 
     objects = fetch_objects(objects_url)
 
