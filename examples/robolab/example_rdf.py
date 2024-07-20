@@ -1,3 +1,11 @@
+"""
+Robot distance field (RDF)
+========================
+
+This example demonstrates how to use the RDF_BP class to train a Bernstein Polynomial model for the robot distance field
+from URDF/MJCF files and visualize the reconstructed whole body.
+"""
+
 import argparse
 import os
 
