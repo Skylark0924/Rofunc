@@ -35,18 +35,38 @@ processing, learning, and its deployment on robots.
 ![](doc/img/pipeline.png)
 
 - [Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation](#rofunc-the-full-process-python-package-for-robot-learning-from-demonstration-and-robot-manipulation)
+  - [Citation](#citation)
   - [Update News 🎉🎉🎉](#update-news-)
   - [Installation](#installation)
   - [Documentation](#documentation)
   - [RofuncRL](#rofuncrl)
   - [Star History](#star-history)
-  - [Citation](#citation)
   - [Related Papers](#related-papers)
   - [The Team](#the-team)
   - [Acknowledge](#acknowledge)
     - [Learning from Demonstration](#learning-from-demonstration)
     - [Planning and Control](#planning-and-control)
 
+## Citation
+
+If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
+
+```
+@software{liu2023rofunc, 
+          title = {Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation},
+          author = {Liu, Junjia and Dong, Zhipeng and Li, Chenzui and Li, Zhihao and Yu, Minghao and Delehelle, Donatien and Chen, Fei},
+          year = {2023},
+          publisher = {Zenodo},
+          doi = {10.5281/zenodo.10016946},
+          url = {https://doi.org/10.5281/zenodo.10016946},
+          dimensions = {true},
+          google_scholar_id = {0EnyYjriUFMC},
+}
+```
+> [!WARNING]
+> **If our code is found to be used in a published paper without proper citation, we reserve the right to address this issue formally by contacting the editor to report potential academic misconduct!**
+> 
+> **如果我们的代码被发现用于已发表的论文而没有被恰当引用，我们保留通过正式联系编辑报告潜在学术不端行为的权利。**
 
 ## Update News 🎉🎉🎉
 
@@ -57,7 +77,6 @@ processing, learning, and its deployment on robots.
 - **[2023-10-31] 🚀 [`RofuncRL`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/index.html): A modular easy-to-use Reinforcement Learning sub-package designed for Robot Learning tasks is released. It has been tested with simulators like `OpenAIGym`, `IsaacGym`, `OmniIsaacGym` (see [example gallery](https://rofunc.readthedocs.io/en/latest/examples/learning_rl/index.html)), and also differentiable simulators like `PlasticineLab` and `DiffCloth`.**
 - ...
 - If you want to know more about the update news, please refer to the [changelog](https://github.com/Skylark0924/Rofunc/blob/main/changelog.md).
-
 
 ## Installation
 
@@ -173,26 +192,6 @@ section of the documentation.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Skylark0924/Rofunc&type=Date)](https://star-history.com/#Skylark0924/Rofunc&Date)
 
-## Citation
-
-If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
-
-```
-@software{liu2023rofunc, 
-          title = {Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation},
-          author = {Liu, Junjia and Dong, Zhipeng and Li, Chenzui and Li, Zhihao and Yu, Minghao and Delehelle, Donatien and Chen, Fei},
-          year = {2023},
-          publisher = {Zenodo},
-          doi = {10.5281/zenodo.10016946},
-          url = {https://doi.org/10.5281/zenodo.10016946},
-          dimensions = {true},
-          google_scholar_id = {0EnyYjriUFMC},
-}
-```
-> [!WARNING]
-> **If our code is found to be used in a published paper without proper citation, we reserve the right to address this issue formally by contacting the editor to report potential academic misconduct!**
-> 
-> **如果我们的代码被发现用于已发表的论文而没有被恰当引用，我们保留通过正式联系编辑报告潜在学术不端行为的权利。**
 
 ## Related Papers          
 
