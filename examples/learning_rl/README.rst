@@ -146,7 +146,7 @@ The following are examples of reinforcement learning methods for robot learning.
                     python examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py --task=BiShadowHandOver --agent=ppo --inference
 
         .. list-table:: Task Overview
-           :widths: 25 40 40 10
+           :widths: 25 25 25 25
            :header-rows: 1
 
            * - Tasks
