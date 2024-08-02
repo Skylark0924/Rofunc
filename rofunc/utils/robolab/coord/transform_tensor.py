@@ -33,15 +33,15 @@ def check_pos_tensor(pos):
     """
     Check if the input position is valid.
 
+    :param pos: (batch, 3) or (3, )
+    :return: position
+
     >>> check_pos_tensor([0, 0, 0])
     tensor([[0., 0., 0.]])
     >>> check_pos_tensor([[0, 0, 0]])
     tensor([[0., 0., 0.]])
     >>> check_pos_tensor(np.array([0, 0, 0]))
     tensor([[0., 0., 0.]])
-
-    :param pos: (batch, 3) or (3, )
-    :return: position
     """
     pos = torch.tensor(pos, dtype=torch.float32)
     if len(pos.shape) == 1:
@@ -54,15 +54,15 @@ def check_quat_tensor(quat):
     """
     Check if the input quat is normalized.
 
+    :param quat: (batch, 4) or (4, )
+    :return: normalized quat
+
     >>> check_quat_tensor([0, 5, 0, 1])
     tensor([[0.0000, 0.9806, 0.0000, 0.1961]])
     >>> check_quat_tensor([[0, 2, 0, 1]])
     tensor([[0.0000, 0.8944, 0.0000, 0.4472]])
     >>> check_quat_tensor(np.array([1, 5, 5.435, 1]))
     tensor([[0.1330, 0.6650, 0.7228, 0.1330]])
-
-    :param quat: (batch, 4) or (4, )
-    :return: normalized quat
     """
     quat = torch.tensor(quat, dtype=torch.float32)
     if len(quat.shape) == 1:
@@ -80,13 +80,13 @@ def check_rot_matrix_tensor(rot_matrix):
     """
     Check if the input rotation matrix is valid, orthogonal, and normalize it if necessary.
 
+    :param rot_matrix: Input rotation matrix
+    :return: Validated and normalized rotation matrix
+
     >>> from rofunc.utils.robolab.coord.transform import random_rot_matrix
     >>> rot_matrix = random_rot_matrix() * 3
     >>> torch.allclose(check_rot_matrix_tensor(rot_matrix) * 3, torch.tensor(rot_matrix, dtype=torch.float32))
     True
-
-    :param rot_matrix: Input rotation matrix
-    :return: Validated and normalized rotation matrix
     """
     rot_matrix = torch.tensor(rot_matrix, dtype=torch.float32)
     if len(rot_matrix.shape) == 2:
@@ -114,15 +114,15 @@ def check_euler_tensor(euler):
     """
     Check if the input euler angles are valid.
 
+    :param euler: (batch, 3) or (3, )
+    :return: euler angles
+
     >>> check_euler_tensor([1.57, 0, 0])
     tensor([[1.5700, 0.0000, 0.0000]])
     >>> check_euler_tensor([[0, 0, 0]])
     tensor([[0., 0., 0.]])
     >>> check_euler_tensor(np.array([0, 0, 0]))
     tensor([[0., 0., 0.]])
-
-    :param euler: (batch, 3) or (3, )
-    :return: euler angles
     """
     euler = torch.tensor(euler, dtype=torch.float32)
     if len(euler.shape) == 1:
@@ -135,15 +135,15 @@ def random_quat_tensor(batch_size, rand=None):
     """
     Return uniform random unit quat.
 
+    :param batch_size: Batch size
+    :param rand: Random number generator (optional)
+    :return: Random unit quat, [x, y, z, w]
+
     >>> torch.allclose(torch.norm(random_quat_tensor(100), dim=-1), torch.ones(100))
     True
     >>> rand_quat = random_quat_tensor(100)
     >>> torch.allclose(check_quat_tensor(rand_quat), rand_quat)
     True
-
-    :param batch_size: Batch size
-    :param rand: Random number generator (optional)
-    :return: Random unit quat, [x, y, z, w]
     """
     if rand is None:
         rand = torch.rand
@@ -169,6 +169,10 @@ def random_rot_matrix_tensor(batch_size, rand=None):
     """
     Generate random rotation matrix. quat = [x, y, z, w].
 
+    :param batch_size: Batch size
+    :param rand: Random number generator (optional)
+    :return: Random rotation matrix
+
     >>> rand_rot_matrix = random_rot_matrix_tensor(100)
     >>> torch.allclose(rand_rot_matrix.det(), torch.ones(100))
     True
@@ -177,10 +181,6 @@ def random_rot_matrix_tensor(batch_size, rand=None):
     >>> from rofunc.utils.robolab.coord.transform import check_rot_matrix
     >>> torch.allclose(torch.tensor(check_rot_matrix(rand_rot_matrix[0]), dtype=torch.float32), rand_rot_matrix[0])
     True
-
-    :param batch_size: Batch size
-    :param rand: Random number generator (optional)
-    :return: Random rotation matrix
     """
     if rand is None:
         rand = torch.rand
@@ -220,6 +220,9 @@ def quat_from_rot_matrix_tensor(rot_matrix):
     """
     Convert rotation matrix to quat. [x, y, z, w]
 
+    :param rot_matrix:
+    :return: quat, [x, y, z, w]
+
     >>> quat_from_rot_matrix_tensor([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
     tensor([[0., 0., 0., 1.]])
     >>> quat_from_rot_matrix_tensor([[0.9362934, -0.2896295,  0.1986693], [0.3129918,  0.9447025, -0.0978434], [-0.1593451,  0.1537920,  0.9751703]])
@@ -227,9 +230,6 @@ def quat_from_rot_matrix_tensor(rot_matrix):
     >>> rand_rot_matrix = random_rot_matrix_tensor(100)
     >>> torch.allclose(check_rot_matrix_tensor(rand_rot_matrix), rot_matrix_from_quat_tensor(quat_from_rot_matrix_tensor(rand_rot_matrix)), rtol=1e-03, atol=1e-03)
     True
-
-    :param rot_matrix:
-    :return: quat, [x, y, z, w]
     """
     rot_matrix = check_rot_matrix_tensor(rot_matrix)
 
@@ -249,6 +249,9 @@ def quat_from_euler_tensor(euler):
     """
     Convert euler angles to quat. The rotation order is ZYX.
 
+    :param euler: (batch, 3) or (3, ), [roll, pitch, yaw], the rotation order is ZYX.
+    :return: quat, [x, y, z, w]
+
     >>> quat_from_euler_tensor([0, 0, 0])
     tensor([[0., 0., 0., 1.]])
     >>> quat_from_euler_tensor([[0, 0, 0]])
@@ -259,9 +262,6 @@ def quat_from_euler_tensor(euler):
     tensor([[-0.1622,  0.5537,  0.2296,  0.7838],
             [ 0.1801,  0.2199,  0.2938,  0.9126],
             [ 0.0343,  0.1060,  0.1436,  0.9833]])
-
-    :param euler: (batch, 3) or (3, ), [roll, pitch, yaw], the rotation order is ZYX.
-    :return: quat, [x, y, z, w]
     """
     euler = check_euler_tensor(euler)
 
@@ -290,6 +290,9 @@ def rot_matrix_from_quat_tensor(quat):
     """
     Convert quat to rotation matrix.
 
+    :param quat: [x, y, z, w]
+    :return:
+
     >>> rot_matrix_from_quat_tensor([0, 0, 0, 1])
     tensor([[[1., 0., 0.],
              [0., 1., 0.],
@@ -302,9 +305,6 @@ def rot_matrix_from_quat_tensor(quat):
             [[ 0.7307, -0.6154,  0.2955],
              [ 0.6737,  0.5799, -0.4580],
              [ 0.1105,  0.5338,  0.8384]]])
-
-    :param quat: [x, y, z, w]
-    :return:
     """
     quat = check_quat_tensor(quat)
     x, y, z, w = quat[:, 0], quat[:, 1], quat[:, 2], quat[:, 3]
@@ -332,6 +332,9 @@ def rot_matrix_from_euler_tensor(euler):
     """
     Convert euler angles to rotation matrix.
 
+    :param euler: (batch, 3) or (3, ), [roll, pitch, yaw] in radian
+    :return: Rotation matrix
+
     >>> rot_matrix_from_euler_tensor([0, 0, 0])
     tensor([[[1., 0., 0.],
              [0., 1., 0.],
@@ -344,9 +347,6 @@ def rot_matrix_from_euler_tensor(euler):
             [[ 0.9796,  0.2000,  0.0182],
              [-0.0294,  0.2326, -0.9721],
              [-0.1987,  0.9518,  0.2337]]])
-
-    :param euler: (batch, 3) or (3, ), [roll, pitch, yaw] in radian
-    :return: Rotation matrix
     """
     euler = check_euler_tensor(euler)
 
@@ -382,14 +382,14 @@ def euler_from_quat_tensor(quat):
     """
     Convert quat to euler angles.
 
+    :param quat: [x, y, z, w]
+    :return: euler angles, [roll, pitch, yaw] in radian
+
     >>> euler_from_quat_tensor(torch.tensor([[0, 0, 0, 1.]]))
     tensor([[0., 0., 0.]])
     >>> euler_from_quat_tensor(torch.tensor([[0.06146124, 0, 0, 0.99810947], [0.2794439, 0.0521324, 0.3632374, 0.8872722]]))
     tensor([[ 0.1230,  0.0000,  0.0000],
             [ 0.5669, -0.1107,  0.7449]])
-
-    :param quat: [x, y, z, w]
-    :return: euler angles, [roll, pitch, yaw] in radian
     """
     quat = check_quat_tensor(quat)
 
@@ -411,14 +411,14 @@ def euler_from_rot_matrix_tensor(rot_matrix):
     """
     Convert rotation matrix to euler angles.
 
+    :param rot_matrix:
+    :return:
+
     >>> euler_from_rot_matrix_tensor([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
     tensor([[0., -0., 0.]])
     >>> euler_from_rot_matrix_tensor([[[ 0.7307, -0.4570,  0.5072], [ 0.6154,  0.7625, -0.1996], [-0.2955,  0.4580,  0.8384]], [[ 0.9796,  0.2000,  0.0182], [-0.0294,  0.2326, -0.9721], [-0.1987,  0.9518,  0.2337]]])
     tensor([[ 0.5000,  0.3000,  0.6999],
             [ 1.3300,  0.2000, -0.0300]])
-
-    :param rot_matrix:
-    :return:
     """
     rot_matrix = check_rot_matrix_tensor(rot_matrix)
 

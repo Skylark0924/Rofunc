@@ -1,17 +1,16 @@
-import torch
 import os
-from panda_layer.panda_layer import PandaLayer
-import bf_sdf
+
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 import trimesh
+
 from rofunc.utils.robolab.rdf import utils
-import argparse
 
 
-def plot_2D_panda_sdf(pose, theta, bp_sdf, nbData, model, device):
-    domain_0 = torch.linspace(-1.0, 1.0, nbData).to(device)
-    domain_1 = torch.linspace(-1.0, 1.0, nbData).to(device)
+def plot_2D_panda_sdf(joint_value, rdf_bp, nbData, model, device):
+    domain_0 = torch.linspace(-2.0, 2.0, nbData).to(device)
+    domain_1 = torch.linspace(-2.0, 2.0, nbData).to(device)
     grid_x, grid_y = torch.meshgrid(domain_0, domain_1)
     p1 = torch.stack([grid_x.reshape(-1), grid_y.reshape(-1), torch.zeros_like(grid_x.reshape(-1))], dim=1)
     p2 = torch.stack([torch.zeros_like(grid_x.reshape(-1)), grid_x.reshape(-1) * 0.4, grid_y.reshape(-1) * 0.4 + 0.375],
@@ -25,7 +24,7 @@ def plot_2D_panda_sdf(pose, theta, bp_sdf, nbData, model, device):
     p2_split = torch.split(p2, 1000, dim=0)
     sdf, ana_grad = [], []
     for p_2 in p2_split:
-        sdf_split, ana_grad_split = bp_sdf.get_whole_body_sdf_batch(p_2, pose, theta, model, use_derivative=True)
+        sdf_split, ana_grad_split = rdf_bp.get_whole_body_sdf_batch(p_2, joint_value, model, use_derivative=True)
         sdf_split, ana_grad_split = sdf_split.squeeze(), ana_grad_split.squeeze()
         sdf.append(sdf_split)
         ana_grad.append(ana_grad_split)
@@ -50,7 +49,7 @@ def plot_2D_panda_sdf(pose, theta, bp_sdf, nbData, model, device):
     p3_split = torch.split(p3, 1000, dim=0)
     sdf, ana_grad = [], []
     for p_3 in p3_split:
-        sdf_split, ana_grad_split = bp_sdf.get_whole_body_sdf_batch(p_3, pose, theta, model, use_derivative=True)
+        sdf_split, ana_grad_split = rdf_bp.get_whole_body_sdf_batch(p_3, joint_value, model, use_derivative=True)
         sdf_split, ana_grad_split = sdf_split.squeeze(), ana_grad_split.squeeze()
         sdf.append(sdf_split)
         ana_grad.append(ana_grad_split)
@@ -70,8 +69,8 @@ def plot_2D_panda_sdf(pose, theta, bp_sdf, nbData, model, device):
     plt.show()
 
 
-def plot_3D_panda_with_gradient(pose, theta, bp_sdf, model, device):
-    robot_mesh = panda.get_forward_robot_mesh(pose, theta)[0]
+def plot_3D_panda_with_gradient(joint_value, rdf_bp, model, device):
+    robot_mesh = rdf_bp.robot.get_forward_robot_mesh(joint_value)[0]
     robot_mesh = np.sum(robot_mesh)
 
     surface_points = robot_mesh.vertices
@@ -85,8 +84,7 @@ def plot_3D_panda_with_gradient(pose, theta, bp_sdf, model, device):
     choice_ball = np.random.choice(len(ball_query), 1024, replace=False)
     ball_query = ball_query[choice_ball]
     p = p + torch.from_numpy(ball_query).float().to(device) * 0.5
-    sdf, ana_grad = bp_sdf.get_whole_body_sdf_batch(p, pose, theta, model, use_derivative=True,
-                                                    used_links=[0, 1, 2, 3, 4, 5, 6, 7, 8])
+    sdf, ana_grad = rdf_bp.get_whole_body_sdf_batch(p, joint_value, model, use_derivative=True)
     sdf, ana_grad = sdf.squeeze().detach().cpu().numpy(), ana_grad.squeeze().detach().cpu().numpy()
     # points
     pts = p.detach().cpu().numpy()
@@ -101,7 +99,9 @@ def plot_3D_panda_with_gradient(pose, theta, bp_sdf, model, device):
         if dg.sum() == 0:
             continue
         c = colors[i]
-        print(c)
+        if np.any(c > 255):
+            c = [255, 0, 0]
+        # print(c)
         m = utils.create_arrow(-dg, pts[i], vec_length=0.05, color=c)
         scene.add_geometry(m)
     scene.show()
@@ -139,9 +139,9 @@ def generate_panda_mesh_sdf_points(max_dist=0.10):
     np.save('data/panda_mesh_sdf.npy', mesh_dict)
 
 
-def vis_panda_sdf(pose, theta, device):
+def vis_panda_sdf(pose, joint_value, device):
     data = np.load('data/panda_mesh_sdf.npy', allow_pickle=True).item()
-    trans = panda.get_transformations_each_link(pose, theta)
+    trans = panda.get_transformations_each_link(pose, joint_value)
     pts = []
     for i, k in enumerate(data.keys()):
         points = data[k]['points']
@@ -165,35 +165,9 @@ def vis_panda_sdf(pose, theta, device):
     pts = torch.cat(pts, dim=0).detach().cpu().numpy()
     print(pts.shape)
     scene = trimesh.Scene()
-    robot_mesh = panda.get_forward_robot_mesh(pose, theta)[0]
+    robot_mesh = panda.get_forward_robot_mesh(pose, joint_value)[0]
     robot_mesh = np.sum(robot_mesh)
     scene.add_geometry(robot_mesh)
     pc = trimesh.PointCloud(pts, colors=[255, 0, 0])
     scene.add_geometry(pc)
     scene.show()
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--device', default='cuda', type=str)
-    parser.add_argument('--domain_max', default=1.0, type=float)
-    parser.add_argument('--domain_min', default=-1.0, type=float)
-    parser.add_argument('--n_func', default=8, type=float)
-    parser.add_argument('--train', action='store_true')
-    args = parser.parse_args()
-
-    panda = PandaLayer(args.device)
-    bp_sdf = bf_sdf.BPSDF(args.n_func, args.domain_min, args.domain_max, panda, args.device)
-
-    #  load  model
-    model = torch.load(f'models/BP_{args.n_func}.pt')
-
-    # initial the robot configuration
-    theta = torch.tensor([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]).float().to(args.device).reshape(-1, 7)
-    pose = torch.from_numpy(np.identity(4)).unsqueeze(0).to(args.device).expand(len(theta), 4, 4).float()
-
-    # # vis 2D SDF with gradient
-    plot_2D_panda_sdf(pose, theta, bp_sdf, nbData=80, model=model, device=args.device)
-
-    # vis 3D SDF with gradient
-    plot_3D_panda_with_gradient(pose,theta,bp_sdf,model=model,device=args.device)
