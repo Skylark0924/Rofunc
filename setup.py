@@ -24,7 +24,7 @@ setup(
     include_package_data=True,
     extras_require=extras,
     install_requires=['cython==3.0.0a10',  # for mujoco_py
-                      'setuptools==59.8.0',
+                      'setuptools',
                       'pandas',
                       'tqdm==4.65.0',
                       'pillow==9.5.0',
@@ -47,7 +47,7 @@ setup(
                       'dgl',
                       'trimesh==4.0.5',
                       'wandb==0.16.2'],
-    python_requires=">=3.7,<3.9",
+    python_requires=">=3.7,<3.11",
     keywords=['robotics', 'robot learning', 'learning from demonstration', 'reinforcement learning',
               'robot manipulation'],
     license='MIT',
