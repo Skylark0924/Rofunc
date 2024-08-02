@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Union, Tuple, Any, Optional
+import collections
+from typing import Tuple, Any, Optional
 
 import gym
 import gymnasium
-import collections
 import numpy as np
-from packaging import version
-
 import torch
+from packaging import version
 
 from rofunc.utils.logger.beauty_logger import beauty_print
 
@@ -250,7 +249,8 @@ class OmniverseIsaacGymWrapper(Wrapper):
         self._env.run(trainer)
 
     def _process_data(self):
-        self._obs = torch.clamp(self._obs, -self._env._task.clip_obs, self._env._task.clip_obs).to(self._env._task.rl_device).clone()
+        self._obs = torch.clamp(self._obs, -self._env._task.clip_obs, self._env._task.clip_obs).to(
+            self._env._task.rl_device).clone()
         self._rew = self._rew.to(self._env._task.rl_device).clone()
         self._states = torch.clamp(self._states, -self._env._task.clip_obs, self._env._task.clip_obs).to(
             self._env._task.rl_device).clone()
@@ -292,7 +292,8 @@ class OmniverseIsaacGymWrapper(Wrapper):
 
         # self._obs_dict, reward, terminated, info = self._env.step(actions)
         # truncated = torch.zeros_like(terminated)
-        return self._obs_dict["obs"], self._rew.view(-1, 1), self._resets.view(-1, 1), self._resets.view(-1, 1), self._extras
+        return self._obs_dict["obs"], self._rew.view(-1, 1), self._resets.view(-1, 1), self._resets.view(-1,
+                                                                                                         1), self._extras
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -995,6 +996,54 @@ class RobosuiteWrapper(Wrapper):
         self._env.close()
 
 
+class IsaacLabWrapper(Wrapper):
+    def __init__(self, env: Any) -> None:
+        """Isaac Lab environment wrapper
+
+        :param env: The environment to wrap
+        :type env: Any supported Isaac Lab environment
+        """
+        super().__init__(env)
+
+        self._reset_once = True
+        self._obs_dict = None
+
+        self._observation_space = self._observation_space["policy"]
+
+    def step(self, actions: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, Any]:
+        """Perform a step in the environment
+
+        :param actions: The actions to perform
+        :type actions: torch.Tensor
+
+        :return: Observation, reward, terminated, truncated, info
+        :rtype: tuple of torch.Tensor and any other info
+        """
+        self._obs_dict, reward, terminated, truncated, info = self._env.step(actions)
+        return self._obs_dict["policy"], reward.view(-1, 1), terminated.view(-1, 1), truncated.view(-1, 1), info
+
+    def reset(self) -> Tuple[torch.Tensor, Any]:
+        """Reset the environment
+
+        :return: Observation, info
+        :rtype: torch.Tensor and any other info
+        """
+        if self._reset_once:
+            self._obs_dict, info = self._env.reset()
+            self._reset_once = False
+        return self._obs_dict["policy"], info
+
+    def render(self, *args, **kwargs) -> None:
+        """Render the environment
+        """
+        pass
+
+    def close(self) -> None:
+        """Close the environment
+        """
+        self._env.close()
+
+
 def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None, seed=None) -> Wrapper:
     """
     Wrap an environment to use a common interface
@@ -1027,6 +1076,8 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None,
                     |Omniverse Isaac Gym |``"omniverse-isaacgym"`` |
                     +--------------------+-------------------------+
                     |Isaac Sim (orbit)   |``"isaac-orbit"``        |
+                    +--------------------+-------------------------+
+                    |Isaac Lab           |``"isaaclab"``           |
                     +--------------------+-------------------------+
     :param verbose: Whether to print the wrapper type (default: True)
     :param logger: rofunc logger (default: None)
@@ -1109,5 +1160,9 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None,
         if verbose:
             logger.info("Environment wrapper: Isaac Orbit")
         return IsaacOrbitWrapper(env)
+    elif wrapper == "isaaclab":
+        if verbose:
+            logger.info("Environment wrapper: Isaac Lab")
+        return IsaacLabWrapper(env)
     else:
         raise ValueError("Unknown {} wrapper type".format(wrapper))
