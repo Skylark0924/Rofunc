@@ -1,5 +1,5 @@
 ![](doc/img/logo/logo8.png)
-
+---
 # Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation
 
 [![Release](https://img.shields.io/github/v/release/Skylark0924/Rofunc)](https://pypi.org/project/rofunc/)
