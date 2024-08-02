@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import neurokit2 as nk
 import numpy as np
 
 SAMPING_RATE = 2000
@@ -19,6 +18,8 @@ def process_one_channel(data, sampling_rate, k):
     data_mvc: Calculate the Maximum Voluntary Contraction (MVC) of the EMG signals
     data_abs: Take the absolute value of the EMG signals
     """
+    import neurokit2 as nk
+
     data_filter = []
     for i in range(0, len(data) - k + 1, k):
         data_new = data[i]
@@ -50,6 +51,8 @@ def process_all_channels(data, n, sampling_rate, k):
     DATA_MVC: Calculate the Maximum Voluntary Contraction (MVC) of the EMG signals
     DATA_ABS: Take the absolute value of the EMG signals
     """
+    import neurokit2 as nk
+
     DATA_FILTER = []
     DATA_CLEAN = []
     DATA_MVC = []

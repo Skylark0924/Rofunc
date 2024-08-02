@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from typing import Union, List
+from collections.abc import Mapping
 
 import gym
 import gymnasium
@@ -143,6 +144,8 @@ def get_space_dim(space):
         dim = 0
         for i in range(len(space)):
             dim += get_space_dim(space[i])
+    elif isinstance(space, Mapping):
+        dim = get_space_dim(space["policy"])
     elif isinstance(space, gym.Space) or isinstance(space, gymnasium.Space):
         dim = space.shape
         if isinstance(dim, tuple) and len(dim) == 1:

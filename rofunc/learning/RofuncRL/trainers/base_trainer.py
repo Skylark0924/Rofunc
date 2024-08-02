@@ -112,15 +112,15 @@ class BaseTrainer:
 
         '''Environment'''
         # env.device = self.device  # TODO: check whether this is necessary
-        self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.train.Trainer.seed)
-        self.eval_env = wrap_env(env, logger=self.rofunc_logger, seed=self.eval_env_seed) if self.eval_flag else None
+        self.env = wrap_env(env, logger=self.rofunc_logger, seed=self.cfg.train.Trainer.seed, wrapper="isaaclab")
+        self.eval_env = wrap_env(env, logger=self.rofunc_logger, seed=self.eval_env_seed, wrapper="isaaclab") if self.eval_flag else None
         self.rofunc_logger.info(f"Environment:\n  "
                                 f"  action_space: {self.env.action_space.shape}\n  "
                                 f"  observation_space: {self.env.observation_space.shape}\n  "
                                 f"  num_envs: {self.env.num_envs}")
 
         if hasattr(self.env._env, "cfg"):
-            self.rofunc_logger.info(f"Task configurations:\n{OmegaConf.to_yaml(self.env._env.cfg)}")
+            # self.rofunc_logger.info(f"Task configurations:\n{OmegaConf.to_yaml(self.env._env.cfg)}")
             self.rofunc_logger.info(f"Trainer configurations:\n{OmegaConf.to_yaml(self.cfg.train)}")
 
         '''Normalization'''

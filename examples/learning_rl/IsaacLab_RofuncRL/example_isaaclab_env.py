@@ -5,7 +5,10 @@ Ant (RofuncRL)
 Ant RL using RofuncRL
 """
 
-import isaacgym
+import sys,os
+
+sys.path.append("/home/ubuntu/Github/Rofunc")
+
 import argparse
 
 from rofunc.config.utils import omegaconf_to_dict, get_config
@@ -33,8 +36,7 @@ def train(custom_args):
     set_seed(cfg.train.Trainer.seed)
 
     # Instantiate the Isaac Gym environment
-    env = load_isaaclab_env(task_name="Isaac-Cartpole-v0")
-    env = wrap_env(env)
+    env = load_isaaclab_env(task_name="Isaac-Cartpole-v0", headless=True, num_envs=custom_args.num_envs)
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map[custom_args.agent](cfg=cfg,
@@ -87,7 +89,7 @@ if __name__ == '__main__':
     gpu_id = 0
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="Ant")
+    parser.add_argument("--task", type=str, default="Cartpole")
     parser.add_argument("--agent", type=str, default="ppo")  # Available agents: ppo, sac, td3, a2c
     parser.add_argument("--num_envs", type=int, default=4096)
     parser.add_argument("--sim_device", type=int, default=0)

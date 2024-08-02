@@ -27,7 +27,7 @@ __all__ = ["wrap_env"]
 
 
 class Wrapper(object):
-    def __init__(self, env: Any, device=None) -> None:
+    def __init__(self, env: Any) -> None:
         """Base wrapper class for RL environments
 
         :param env: The environment to wrap
@@ -40,8 +40,14 @@ class Wrapper(object):
             self.device = torch.device(self._env.device)
         else:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        if device is not None:
-            self.device = torch.device(device)
+        # spaces
+        try:
+            self._action_space = self._env.single_action_space
+            self._observation_space = self._env.single_observation_space
+        except AttributeError:
+            self._action_space = self._env.action_space
+            self._observation_space = self._env.observation_space
+        self._state_space = self._env.state_space if hasattr(self._env, "state_space") else self._observation_space
 
     def __getattr__(self, key: str) -> Any:
         """Get an attribute from the wrapped environment
@@ -56,8 +62,7 @@ class Wrapper(object):
         """
         if hasattr(self._env, key):
             return getattr(self._env, key)
-        raise AttributeError("Wrapped environment ({}) does not have attribute '{}'" \
-                             .format(self._env.__class__.__name__, key))
+        raise AttributeError(f"Wrapped environment ({self._env.__class__.__name__}) does not have attribute '{key}'")
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -84,17 +89,13 @@ class Wrapper(object):
 
     def render(self, *args, **kwargs) -> None:
         """Render the environment
-
-        :raises NotImplementedError: Not implemented
         """
-        raise NotImplementedError
+        pass
 
     def close(self) -> None:
         """Close the environment
-
-        :raises NotImplementedError: Not implemented
         """
-        raise NotImplementedError
+        pass
 
     @property
     def num_envs(self) -> int:
@@ -105,25 +106,33 @@ class Wrapper(object):
         return self._env.num_envs if hasattr(self._env, "num_envs") else 1
 
     @property
+    def num_agents(self) -> int:
+        """Number of agents
+
+        If the wrapped environment does not have the ``num_agents`` property, it will be set to 1
+        """
+        return self._env.num_agents if hasattr(self._env, "num_agents") else 1
+
+    @property
     def state_space(self) -> gym.Space:
         """State space
 
         If the wrapped environment does not have the ``state_space`` property,
         the value of the ``observation_space`` property will be used
         """
-        return self._env.state_space if hasattr(self._env, "state_space") else self._env.observation_space
+        return self._state_space
 
     @property
     def observation_space(self) -> gym.Space:
         """Observation space
         """
-        return self._env.observation_space
+        return self._observation_space
 
     @property
     def action_space(self) -> gym.Space:
         """Action space
         """
-        return self._env.action_space
+        return self._action_space
 
 
 class IsaacGymPreview2Wrapper(Wrapper):
