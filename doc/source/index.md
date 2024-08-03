@@ -13,14 +13,11 @@
 > **Repository address: https://github.com/Skylark0924/Rofunc** <br>
 > **Documentation: https://rofunc.readthedocs.io/**
 
-Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (
-LfD)** for
+Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for
 **(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including _demonstration
-collection, data
-pre-processing, LfD algorithms, planning, and control methods_. We also provide an Isaac Gym-based robot simulator for
+collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an Isaac Gym-based robot simulator for
 evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that
-simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on
-robots.
+simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
 
 ![](../img/pipeline.png)
 
@@ -70,16 +67,22 @@ The available functions and plans can be found as follows.
 If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
 
 ```
-@software{liu2023rofunc,
-          title={Rofunc: The full process python package for robot learning from demonstration and robot manipulation},
-          author={Liu, Junjia and Li, Chenzui and Delehelle, Donatien and Li, Zhihao and Chen, Fei},
-          month=jun,
-          year= 2023,
-          publisher={Zenodo},
-          doi={10.5281/zenodo.8084510},
-          url={https://doi.org/10.5281/zenodo.8084510}
+@software{liu2023rofunc, 
+          title = {Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation},
+          author = {Liu, Junjia and Dong, Zhipeng and Li, Chenzui and Li, Zhihao and Yu, Minghao and Delehelle, Donatien and Chen, Fei},
+          year = {2023},
+          publisher = {Zenodo},
+          doi = {10.5281/zenodo.10016946},
+          url = {https://doi.org/10.5281/zenodo.10016946},
+          dimensions = {true},
+          google_scholar_id = {0EnyYjriUFMC},
 }
 ```
+
+> **Warning** <br>
+> If our code is found to be used in a published paper without proper citation, we reserve the right to address this issue formally by contacting the editor to report potential academic misconduct!**
+> 
+> 如果我们的代码被发现用于已发表的论文而没有被恰当引用，我们保留通过正式联系编辑报告潜在学术不端行为的权利。**
 
 ## Related Papers
 
