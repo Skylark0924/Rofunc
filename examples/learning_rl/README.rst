@@ -164,9 +164,16 @@ The following are examples of reinforcement learning methods for robot learning.
             +------------------+-----------------------------+-------------------------------+-------------+
             | |CCI|            | |CCI-gif|                   |                               |    ✅       |
             +------------------+-----------------------------+-------------------------------+-------------+            
-            | |CCB|            | |CCB-gif|                   |                               |    ✅       |
+            | |CCB|            |                             |                               |    ✅       |
             +------------------+-----------------------------+-------------------------------+-------------+
-            | |CSG|            | |CSG-gif|                   |                               |    ✅       |
+            | |CSG|            | |CSG-gif1|                  |                               |    ✅       |
+            |                  | |CSG-gif2|                  |                               |             |
+            |                  | |CSG-gif3|                  |                               |             |
+            |                  | |CSG-gif4|                  |                               |             |
+            |                  | |CSG-gif5|                  |                               |             |
+            |                  | |CSG-gif6|                  |                               |             |
+            |                  | |CSG-gif7|                  |                               |             |
+            |                  | |CSG-gif8|                  |                               |             |
             +------------------+-----------------------------+-------------------------------+-------------+
             | |Hod|            | |Hod-gif|                   |                               |    ✅       |
             +------------------+-----------------------------+-------------------------------+-------------+
@@ -235,40 +242,47 @@ The following are examples of reinforcement learning methods for robot learning.
 
 
 
-        .. |Ant-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/AntRofuncRLPPO.gif
-        .. |FrC-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/FrankaCabinetRofuncRLPPO.gif
-        .. |CUC-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/CURICabinetRofuncRLPPO.gif
-        .. |CCI-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/CURICabinetRofuncRLPPO.gif
-        .. |CCB-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.gif
-        .. |Hod-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidRofuncRLPPO.gif
-        .. |HAB-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidFlipRofuncRLAMP.gif
-        .. |HAR-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidRunRofuncRLAMP.gif
-        .. |HAD-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidDanceRofuncRLAMP.gif
-        .. |HAH-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidHopRofuncRLAMP.gif
-        .. |HEG-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidASEGetupSwordShieldRofuncRLASE.gif
-        .. |HEP-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidASEPerturbSwordShieldRofuncRLASE.gif
-        .. |HEH-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidASEHeadingSwordShieldRofuncRLASE.gif
-        .. |HEL-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidASELocationSwordShieldRofuncRLASE.gif
-        .. |HES-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/HumanoidASEStrikeSwordShieldRofuncRLASE.gif
-        .. |SBS-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandBlockStackRofuncRLPPO.gif
-        .. |SBC-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandBottleCapRofuncRLPPO.gif
-        .. |SCA-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandCatchAbreastRofuncRLPPO.gif
-        .. |SU2-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandCatchOver2UnderarmRofuncRLPPO.gif
-        .. |SCU-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandCatchUnderarmRofuncRLPPO.gif
-        .. |SOI-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandDoorOpenInwardRofuncRLPPO.gif
-        .. |SOO-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandDoorOpenOutwardRofuncRLPPO.gif
-        .. |SCI-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandDoorCloseInwardRofuncRLPPO.gif
-        .. |SCO-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandDoorCloseOutwardRofuncRLPPO.gif
-        .. |SGP-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandGraspAndPlaceRofuncRLPPO.gif
-        .. |SLU-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandLiftUnderarmRofuncRLPPO.gif
-        .. |SHO-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandOverRofuncRLPPO.gif
-        .. |SPE-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandPenRofuncRLPPO.gif
-        .. |SPB-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandPushBlockRofuncRLPPO.gif
-        .. |SRO-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandReOrientationRofuncRLPPO.gif
-        .. |SSC-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandScissorsRofuncRLPPO.gif
-        .. |SSW-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandSwingCupRofuncRLPPO.gif
-        .. |SWH-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandSwitchRofuncRLPPO.gif
-        .. |STC-gif| image:: https://github.com/Skylark0924/Rofunc/tree/main/doc/img/task_gifs/BiShadowHandTwoCatchUnderarmRofuncRLPPO.gif
+        .. |Ant-gif| image:: ../../img/task_gifs/AntRofuncRLPPO.gif
+        .. |FrC-gif| image:: ../../img/task_gifs/FrankaCabinetRofuncRLPPO.gif
+        .. |CUC-gif| image:: ../../img/task_gifs/CURICabinetRofuncRLPPO.gif
+        .. |CCI-gif| image:: ../../img/task_gifs/CURICabinetRofuncRLPPO.gif
+        .. |CSG-gif1| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.gif
+        .. |CSG-gif2| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.gif
+        .. |CSG-gif3| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.gif 
+        .. |CSG-gif4| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspLarge_clampRofuncRLPPO.gif 
+        .. |CSG-gif5| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspMugRofuncRLPPO.gif
+        .. |CSG-gif6| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.gif
+        .. |CSG-gif7| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspPower_drillRofuncRLPPO.gif
+        .. |CSG-gif8| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspScissorsRofuncRLPPO.gif
+        .. |Hod-gif| image:: ../../img/task_gifs/HumanoidRofuncRLPPO.gif
+        .. |HAB-gif| image:: ../../img/task_gifs/HumanoidFlipRofuncRLAMP.gif
+        .. |HAR-gif| image:: ../../img/task_gifs/HumanoidRunRofuncRLAMP.gif
+        .. |HAD-gif| image:: ../../img/task_gifs/HumanoidDanceRofuncRLAMP.gif
+        .. |HAH-gif| image:: ../../img/task_gifs/HumanoidHopRofuncRLAMP.gif
+        .. |HEG-gif| image:: ../../img/task_gifs/HumanoidASEGetupSwordShieldRofuncRLASE.gif
+        .. |HEP-gif| image:: ../../img/task_gifs/HumanoidASEPerturbSwordShieldRofuncRLASE.gif
+        .. |HEH-gif| image:: ../../img/task_gifs/HumanoidASEHeadingSwordShieldRofuncRLASE.gif
+        .. |HEL-gif| image:: ../../img/task_gifs/HumanoidASELocationSwordShieldRofuncRLASE.gif
+        .. |HES-gif| image:: ../../img/task_gifs/HumanoidASEStrikeSwordShieldRofuncRLASE.gif
+        .. |SBS-gif| image:: ../../img/task_gifs/BiShadowHandBlockStackRofuncRLPPO.gif
+        .. |SBC-gif| image:: ../../img/task_gifs/BiShadowHandBottleCapRofuncRLPPO.gif
+        .. |SCA-gif| image:: ../../img/task_gifs/BiShadowHandCatchAbreastRofuncRLPPO.gif
+        .. |SU2-gif| image:: ../../img/task_gifs/BiShadowHandCatchOver2UnderarmRofuncRLPPO.gif
+        .. |SCU-gif| image:: ../../img/task_gifs/BiShadowHandCatchUnderarmRofuncRLPPO.gif
+        .. |SOI-gif| image:: ../../img/task_gifs/BiShadowHandDoorOpenInwardRofuncRLPPO.gif
+        .. |SOO-gif| image:: ../../img/task_gifs/BiShadowHandDoorOpenOutwardRofuncRLPPO.gif
+        .. |SCI-gif| image:: ../../img/task_gifs/BiShadowHandDoorCloseInwardRofuncRLPPO.gif
+        .. |SCO-gif| image:: ../../img/task_gifs/BiShadowHandDoorCloseOutwardRofuncRLPPO.gif
+        .. |SGP-gif| image:: ../../img/task_gifs/BiShadowHandGraspAndPlaceRofuncRLPPO.gif
+        .. |SLU-gif| image:: ../../img/task_gifs/BiShadowHandLiftUnderarmRofuncRLPPO.gif
+        .. |SHO-gif| image:: ../../img/task_gifs/BiShadowHandOverRofuncRLPPO.gif
+        .. |SPE-gif| image:: ../../img/task_gifs/BiShadowHandPenRofuncRLPPO.gif
+        .. |SPB-gif| image:: ../../img/task_gifs/BiShadowHandPushBlockRofuncRLPPO.gif
+        .. |SRO-gif| image:: ../../img/task_gifs/BiShadowHandReOrientationRofuncRLPPO.gif
+        .. |SSC-gif| image:: ../../img/task_gifs/BiShadowHandScissorsRofuncRLPPO.gif
+        .. |SSW-gif| image:: ../../img/task_gifs/BiShadowHandSwingCupRofuncRLPPO.gif
+        .. |SWH-gif| image:: ../../img/task_gifs/BiShadowHandSwitchRofuncRLPPO.gif
+        .. |STC-gif| image:: ../../img/task_gifs/BiShadowHandTwoCatchUnderarmRofuncRLPPO.gif
 
         .. |ModelZoo| replace:: `Model Zoo <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/config/learning/model_zoo.json>`__
         .. |Ant| replace:: `Ant <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ant.py>`__
@@ -276,44 +290,41 @@ The following are examples of reinforcement learning methods for robot learning.
         .. |FrC| replace:: `FrankaCabinet <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cabinet.py>`__
         .. |FCS| replace:: `FrankaCubeStack <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cube_stack.py>`__
         .. |CUC| replace:: `CURICabinet <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet.py>`__
-        .. |CCI| replace:: `CURICabinetImage <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_image.py>`__
-        .. |CCB| replace:: `CURICabinetBimanual <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_bimanual.py>`__
-        .. |CSG| replace:: `CURIQbSoftHandSynergyGrasp <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/grasp/curi_qbhand_synergy_grasp.py>`__
+        .. |CCI| replace:: `CURICabinet Image <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_image.py>`__
+        .. |CCB| replace:: `CURICabinet Bimanual <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_bimanual.py>`__
+        .. |CSG| replace:: `CURIQbSoftHand SynergyGrasp <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/grasp/curi_qbhand_synergy_grasp.py>`__
         .. |Hod| replace:: `Humanoid <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid.py>`__
-        .. |HAB| replace:: `HumanoidAMPBackflip <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
-        .. |HAW| replace:: `HumanoidAMPWalk <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
-        .. |HAR| replace:: `HumanoidAMPRun <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
-        .. |HAD| replace:: `HumanoidAMPDance <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
-        .. |HAH| replace:: `HumanoidAMPHop <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
-        .. |HEG| replace:: `HumanoidASEGetupSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_amp_getup.py>`__
-        .. |HEP| replace:: `HumanoidASEPerturbSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_perturb.py>`__
-        .. |HEH| replace:: `HumanoidASEHeadingSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_heading.py>`__
-        .. |HER| replace:: `HumanoidASEReachSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_reach.py>`__
-        .. |HEL| replace:: `HumanoidASELocationSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_location.py>`__
-        .. |HES| replace:: `HumanoidASEStrikeSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_strike.py>`__
-        .. |SBS| replace:: `BiShadowHandBlockStack <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_block_stack.py>`__
-        .. |SBC| replace:: `BiShadowHandBottleCap <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_bottle_cap.py>`__
-        .. |SCA| replace:: `BiShadowHandCatchAbreast <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_abreast.py>`__
-        .. |SU2| replace:: `BiShadowHandCatchOver2Underarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_over2underarm.py>`__
-        .. |SCU| replace:: `BiShadowHandCatchUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_underarm.py>`__
-        .. |SOI| replace:: `BiShadowHandDoorOpenInward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_inward.py>`__
-        .. |SOO| replace:: `BiShadowHandDoorOpenOutward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_outward.py>`__
-        .. |SCI| replace:: `BiShadowHandDoorCloseInward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_inward.py>`__
-        .. |SCO| replace:: `BiShadowHandDoorCloseOutward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_outward.py>`__
-        .. |SGP| replace:: `BiShadowHandGraspAndPlace <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_grasp_and_place.py>`__
-        .. |SLU| replace:: `BiShadowHandLiftUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_lift_underarm.py>`__
-        .. |SHO| replace:: `BiShadowHandOver <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_over.py>`__
-        .. |SPE| replace:: `BiShadowHandPen <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_pen.py>`__
-        .. |SPC| replace:: `BiShadowHandPointCloud <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_point_cloud.py>`__
-        .. |SPB| replace:: `BiShadowHandPushBlock <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_push_block.py>`__
-        .. |SRO| replace:: `BiShadowHandReOrientation <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_re_orientation.py>`__
-        .. |SSC| replace:: `BiShadowHandScissors <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ahandsse/shadow_hand_scissors.py>`__
-        .. |SSW| replace:: `BiShadowHandSwingCup <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_swing_cup.py>`__
-        .. |SWH| replace:: `BiShadowHandSwitch <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_switch.py>`__
-        .. |STC| replace:: `BiShadowHandTwoCatchUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_two_catch_underarm.py>`__
-
-
-
+        .. |HAB| replace:: `HumanoidAMP Backflip <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HAW| replace:: `HumanoidAMP Walk <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HAR| replace:: `HumanoidAMP Run <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HAD| replace:: `HumanoidAMP Dance <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HAH| replace:: `HumanoidAMP Hop <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HEG| replace:: `HumanoidASE GetupSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_amp_getup.py>`__
+        .. |HEP| replace:: `HumanoidASE PerturbSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_perturb.py>`__
+        .. |HEH| replace:: `HumanoidASE HeadingSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_heading.py>`__
+        .. |HER| replace:: `HumanoidASE ReachSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_reach.py>`__
+        .. |HEL| replace:: `HumanoidASE LocationSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_location.py>`__
+        .. |HES| replace:: `HumanoidASE StrikeSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_strike.py>`__
+        .. |SBS| replace:: `BiShadowHand BlockStack <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_block_stack.py>`__
+        .. |SBC| replace:: `BiShadowHand BottleCap <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_bottle_cap.py>`__
+        .. |SCA| replace:: `BiShadowHand CatchAbreast <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_abreast.py>`__
+        .. |SU2| replace:: `BiShadowHand CatchOver2Underarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_over2underarm.py>`__
+        .. |SCU| replace:: `BiShadowHand CatchUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_underarm.py>`__
+        .. |SOI| replace:: `BiShadowHand DoorOpenInward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_inward.py>`__
+        .. |SOO| replace:: `BiShadowHand DoorOpenOutward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_outward.py>`__
+        .. |SCI| replace:: `BiShadowHand DoorCloseInward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_inward.py>`__
+        .. |SCO| replace:: `BiShadowHand DoorCloseOutward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_outward.py>`__
+        .. |SGP| replace:: `BiShadowHand GraspAndPlace <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_grasp_and_place.py>`__
+        .. |SLU| replace:: `BiShadowHand LiftUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_lift_underarm.py>`__
+        .. |SHO| replace:: `BiShadowHand Over <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_over.py>`__
+        .. |SPE| replace:: `BiShadowHand Pen <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_pen.py>`__
+        .. |SPC| replace:: `BiShadowHand PointCloud <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_point_cloud.py>`__
+        .. |SPB| replace:: `BiShadowHand PushBlock <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_push_block.py>`__
+        .. |SRO| replace:: `BiShadowHand ReOrientation <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_re_orientation.py>`__
+        .. |SSC| replace:: `BiShadowHand Scissors <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ahandsse/shadow_hand_scissors.py>`__
+        .. |SSW| replace:: `BiShadowHand SwingCup <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_swing_cup.py>`__
+        .. |SWH| replace:: `BiShadowHand Switch <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_switch.py>`__
+        .. |STC| replace:: `BiShadowHand TwoCatchUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_two_catch_underarm.py>`__
 
     .. tab:: OmniIsaacGym
 
