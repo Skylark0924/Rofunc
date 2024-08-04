@@ -1,6 +1,6 @@
 scikit-learn
 myst-parser
-sphinx==6.2.1
+sphinx
 sphinx_markdown_tables==0.0.17
 sphinx_gallery==0.14.0
 sphinx-book-theme==1.0.1
@@ -28,7 +28,8 @@ https://github.com/Skylark0924/Rofunc/releases/download/v0.0.0.9/isaacgym-1.0rc4
 matplotlib==3.7.1
 numpy==1.21.6
 open3d
-kinpy
 transformers
 astroid<3
-
+lxml
+mujoco
+mesh_to_sdf

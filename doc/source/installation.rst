@@ -31,6 +31,22 @@ Installation
                   # [Option] For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
                   sh ./scripts/mac_install.sh
 
+            .. tab:: IsaacLab
+
+               Please follow the :guilabel:`Isaac Sim` `documentation <https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html>`__ to install the latest Isaac Sim release (:guilabel:`4.1.0`). Make sure the :guilabel:`$HOME/.local/share/ov/pkg/isaac-sim-4.1.0` is the default installation path. Then, run the following command to set up :guilabel:`IsaacLab`.
+
+               .. code-block:: shell
+
+                  git clone https://github.com/Skylark0924/Rofunc.git
+                  cd Rofunc
+
+                  # Create a conda environment
+                  # Python 3.10 is strongly recommended
+                  conda create -n rofunc python=3.10
+
+
+
+
             .. tab:: OmniIsaacGym
 
                :guilabel:`Isaac Sim` has to be installed firstly by following this `documentation <https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html>`_. Note that the :guilabel:`Isaac Sim` version should be :guilabel:`2022.2.1`, :guilabel:`2023.1.0` is not supported yet since its default python version is `3.10` which is not compatible with :guilabel:`rofunc`.

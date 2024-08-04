@@ -145,175 +145,186 @@ The following are examples of reinforcement learning methods for robot learning.
                     '''Inference with pre-trained model in model zoo'''
                     python examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py --task=BiShadowHandOver --agent=ppo --inference
 
-        .. list-table:: Task Overview
-           :widths: 25 25 25 25
-           :header-rows: 1
 
-           * - Tasks
-             - Animation
-             - Performance
-             - `ModelZoo <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/config/learning/model_zoo.json>`_
-           * - `Ant <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ant.py>`_
-             - .. image:: ../../../img/task_gifs/AntRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `Cartpole <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/cartpole.py>`_
-             -
-             -
-             - 
-           * - `FrankaCabinet <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cabinet.py>`_
-             - .. image:: ../../../img/task_gifs/FrankaCabinetRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `FrankaCubeStack <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cube_stack.py>`_
-             - 
-             - 
-             -
-           * - `CURICabinet <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet.py>`_
-             - .. image:: ../../../img/task_gifs/CURICabinetRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `CURICabinetImage <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_image.py>`_
-             - .. image:: ../../../img/task_gifs/CURICabinetRofuncRLPPO.gif
-             - 
-             -
-           * - `CURICabinetBimanual <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_bimanual.py>`_
-             - 
-             - 
-             -
-           * - `CURIQbSoftHandSynergyGrasp <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/grasp/curi_qbhand_synergy_grasp.py>`_
-             - .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspLarge_clampRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspMugRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspPower_drillRofuncRLPPO.gif .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspScissorsRofuncRLPPO.gif  .. image:: ../../../img/task_gifs/CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.gif
-             -
-             - ✅
-           * - `Humanoid <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidRofuncRLPPO.gif
-             -
-             - ✅
-           * - `HumanoidAMP_backflip <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidFlipRofuncRLAMP.gif
-             - 
-             - ✅
-           * - `HumanoidAMP_walk <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - 
-             -
-             - ✅
-           * - `HumanoidAMP_run <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidRunRofuncRLAMP.gif
-             - 
-             - ✅
-           * - `HumanoidAMP_dance <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidDanceRofuncRLAMP.gif
-             -
-             - ✅
-           * - `HumanoidAMP_hop <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidHopRofuncRLAMP.gif
-             -
-             - ✅
-           * - `HumanoidASEGetupSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_amp_getup.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidASEGetupSwordShieldRofuncRLASE.gif
-             -
-             - ✅
-           * - `HumanoidASEPerturbSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_perturb.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidASEPerturbSwordShieldRofuncRLASE.gif
-             -
-             - ✅
-           * - `HumanoidASEHeadingSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_heading.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidASEHeadingSwordShieldRofuncRLASE.gif
-             -
-             - ✅
-           * - `HumanoidASELocationSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_location.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidASELocationSwordShieldRofuncRLASE.gif
-             -
-             - ✅
-           * - `HumanoidASEReachSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_reach.py>`_
-             - 
-             -
-             - ✅
-           * - `HumanoidASEStrikeSwordShield <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_strike.py>`_
-             - .. image:: ../../../img/task_gifs/HumanoidASEStrikeSwordShieldRofuncRLASE.gif
-             - 
-             - ✅
-           * - `BiShadowHandBlockStack <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_block_stack.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandBlockStackRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `BiShadowHandBottleCap <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_bottle_cap.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandBottleCapRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandCatchAbreast <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_abreast.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandCatchAbreastRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandCatchOver2Underarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_over2underarm.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandCatchOver2UnderarmRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandCatchUnderarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_underarm.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandCatchUnderarmRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandDoorOpenInward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_inward.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandDoorOpenInwardRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandDoorOpenOutward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_outward.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandDoorOpenOutwardRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `BiShadowHandDoorCloseInward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_inward.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandDoorCloseInwardRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `BiShadowHandDoorCloseOutward <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_outward.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandDoorCloseOutwardRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandGraspAndPlace <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_grasp_and_place.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandGraspAndPlaceRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandLiftUnderarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_lift_underarm.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandLiftUnderarmRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `BiShadowHandOver <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_over.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandOverRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `BiShadowHandPen <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_pen.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandPenRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandPointCloud <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_point_cloud.py>`_
-             - 
-             -
-             - 
-           * - `BiShadowHandPushBlock <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_push_block.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandPushBlockRofuncRLPPO.gif
-             - 
-             - ✅
-           * - `BiShadowHandReOrientation <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_re_orientation.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandReOrientationRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandScissors <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ahandsse/shadow_hand_scissors.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandScissorsRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandSwingCup <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_swing_cup.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandSwingCupRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandSwitch <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_switch.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandSwitchRofuncRLPPO.gif
-             -
-             - ✅
-           * - `BiShadowHandTwoCatchUnderarm <https://github.com/Skylark0924/Rofunc/blob/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_two_catch_underarm.py>`_
-             - .. image:: ../../../img/task_gifs/BiShadowHandTwoCatchUnderarmRofuncRLPPO.gif
-             -
-             - ✅
+        .. table:: Task Overview
+            :widths: 20 35 35 10
 
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | Tasks            | Animation                   | Performance                   | |ModelZoo|  |
+            +==================+=============================+===============================+=============+
+            | |Ant|            | |Ant-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |Cartpole|       |                             |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+    
+            | |FrC|            | |FrC-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |FCS|            |                             |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |CUC|            | |CUC-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |CCI|            | |CCI-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+            
+            | |CCB|            |                             |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |CSG|            | |CSG-gif1|                  |                               |    ✅       |
+            |                  | |CSG-gif2|                  |                               |             |
+            |                  | |CSG-gif3|                  |                               |             |
+            |                  | |CSG-gif4|                  |                               |             |
+            |                  | |CSG-gif5|                  |                               |             |
+            |                  | |CSG-gif6|                  |                               |             |
+            |                  | |CSG-gif7|                  |                               |             |
+            |                  | |CSG-gif8|                  |                               |             |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |Hod|            | |Hod-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HAB|            | |HAB-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HAW|            |                             |                               |             |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HAR|            | |HAR-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HAD|            | |HAD-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HAH|            | |HAH-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HEG|            | |HEG-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HEP|            | |HEP-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HEH|            | |HEH-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HER|            |                             |                               |             |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HEL|            | |HEL-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |HES|            | |HES-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SBS|            | |SBS-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SBC|            | |SBC-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SCA|            | |SCA-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SU2|            | |SU2-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SCU|            | |SCU-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SOI|            | |SOI-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SOO|            | |SOO-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SCI|            | |SCI-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SCO|            | |SCO-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SGP|            | |SGP-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SLU|            | |SLU-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SHO|            | |SHO-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SPE|            | |SPE-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SPC|            |                             |                               |             |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SPB|            | |SPB-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SRO|            | |SRO-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SSC|            | |SSC-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SSW|            | |SSW-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |SWH|            | |SWH-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+
+            | |STC|            | |STC-gif|                   |                               |    ✅       |
+            +------------------+-----------------------------+-------------------------------+-------------+           
+
+
+
+        .. |Ant-gif| image:: ../../img/task_gifs/AntRofuncRLPPO.gif
+        .. |FrC-gif| image:: ../../img/task_gifs/FrankaCabinetRofuncRLPPO.gif
+        .. |CUC-gif| image:: ../../img/task_gifs/CURICabinetRofuncRLPPO.gif
+        .. |CCI-gif| image:: ../../img/task_gifs/CURICabinetRofuncRLPPO.gif
+        .. |CSG-gif1| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.gif
+        .. |CSG-gif2| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.gif
+        .. |CSG-gif3| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.gif 
+        .. |CSG-gif4| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspLarge_clampRofuncRLPPO.gif 
+        .. |CSG-gif5| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspMugRofuncRLPPO.gif
+        .. |CSG-gif6| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.gif
+        .. |CSG-gif7| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspPower_drillRofuncRLPPO.gif
+        .. |CSG-gif8| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspScissorsRofuncRLPPO.gif
+        .. |Hod-gif| image:: ../../img/task_gifs/HumanoidRofuncRLPPO.gif
+        .. |HAB-gif| image:: ../../img/task_gifs/HumanoidFlipRofuncRLAMP.gif
+        .. |HAR-gif| image:: ../../img/task_gifs/HumanoidRunRofuncRLAMP.gif
+        .. |HAD-gif| image:: ../../img/task_gifs/HumanoidDanceRofuncRLAMP.gif
+        .. |HAH-gif| image:: ../../img/task_gifs/HumanoidHopRofuncRLAMP.gif
+        .. |HEG-gif| image:: ../../img/task_gifs/HumanoidASEGetupSwordShieldRofuncRLASE.gif
+        .. |HEP-gif| image:: ../../img/task_gifs/HumanoidASEPerturbSwordShieldRofuncRLASE.gif
+        .. |HEH-gif| image:: ../../img/task_gifs/HumanoidASEHeadingSwordShieldRofuncRLASE.gif
+        .. |HEL-gif| image:: ../../img/task_gifs/HumanoidASELocationSwordShieldRofuncRLASE.gif
+        .. |HES-gif| image:: ../../img/task_gifs/HumanoidASEStrikeSwordShieldRofuncRLASE.gif
+        .. |SBS-gif| image:: ../../img/task_gifs/BiShadowHandBlockStackRofuncRLPPO.gif
+        .. |SBC-gif| image:: ../../img/task_gifs/BiShadowHandBottleCapRofuncRLPPO.gif
+        .. |SCA-gif| image:: ../../img/task_gifs/BiShadowHandCatchAbreastRofuncRLPPO.gif
+        .. |SU2-gif| image:: ../../img/task_gifs/BiShadowHandCatchOver2UnderarmRofuncRLPPO.gif
+        .. |SCU-gif| image:: ../../img/task_gifs/BiShadowHandCatchUnderarmRofuncRLPPO.gif
+        .. |SOI-gif| image:: ../../img/task_gifs/BiShadowHandDoorOpenInwardRofuncRLPPO.gif
+        .. |SOO-gif| image:: ../../img/task_gifs/BiShadowHandDoorOpenOutwardRofuncRLPPO.gif
+        .. |SCI-gif| image:: ../../img/task_gifs/BiShadowHandDoorCloseInwardRofuncRLPPO.gif
+        .. |SCO-gif| image:: ../../img/task_gifs/BiShadowHandDoorCloseOutwardRofuncRLPPO.gif
+        .. |SGP-gif| image:: ../../img/task_gifs/BiShadowHandGraspAndPlaceRofuncRLPPO.gif
+        .. |SLU-gif| image:: ../../img/task_gifs/BiShadowHandLiftUnderarmRofuncRLPPO.gif
+        .. |SHO-gif| image:: ../../img/task_gifs/BiShadowHandOverRofuncRLPPO.gif
+        .. |SPE-gif| image:: ../../img/task_gifs/BiShadowHandPenRofuncRLPPO.gif
+        .. |SPB-gif| image:: ../../img/task_gifs/BiShadowHandPushBlockRofuncRLPPO.gif
+        .. |SRO-gif| image:: ../../img/task_gifs/BiShadowHandReOrientationRofuncRLPPO.gif
+        .. |SSC-gif| image:: ../../img/task_gifs/BiShadowHandScissorsRofuncRLPPO.gif
+        .. |SSW-gif| image:: ../../img/task_gifs/BiShadowHandSwingCupRofuncRLPPO.gif
+        .. |SWH-gif| image:: ../../img/task_gifs/BiShadowHandSwitchRofuncRLPPO.gif
+        .. |STC-gif| image:: ../../img/task_gifs/BiShadowHandTwoCatchUnderarmRofuncRLPPO.gif
+
+        .. |ModelZoo| replace:: `Model Zoo <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/config/learning/model_zoo.json>`__
+        .. |Ant| replace:: `Ant <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ant.py>`__
+        .. |Cartpole| replace:: `Cartpole <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/cartpole.py>`__
+        .. |FrC| replace:: `FrankaCabinet <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cabinet.py>`__
+        .. |FCS| replace:: `FrankaCubeStack <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/franka_cube_stack.py>`__
+        .. |CUC| replace:: `CURICabinet <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet.py>`__
+        .. |CCI| replace:: `CURICabinet Image <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_image.py>`__
+        .. |CCB| replace:: `CURICabinet Bimanual <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/curi_cabinet_bimanual.py>`__
+        .. |CSG| replace:: `CURIQbSoftHand SynergyGrasp <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/grasp/curi_qbhand_synergy_grasp.py>`__
+        .. |Hod| replace:: `Humanoid <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid.py>`__
+        .. |HAB| replace:: `HumanoidAMP Backflip <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HAW| replace:: `HumanoidAMP Walk <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HAR| replace:: `HumanoidAMP Run <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HAD| replace:: `HumanoidAMP Dance <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HAH| replace:: `HumanoidAMP Hop <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/humanoid_amp.py>`__
+        .. |HEG| replace:: `HumanoidASE GetupSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_amp_getup.py>`__
+        .. |HEP| replace:: `HumanoidASE PerturbSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_perturb.py>`__
+        .. |HEH| replace:: `HumanoidASE HeadingSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_heading.py>`__
+        .. |HER| replace:: `HumanoidASE ReachSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_reach.py>`__
+        .. |HEL| replace:: `HumanoidASE LocationSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_location.py>`__
+        .. |HES| replace:: `HumanoidASE StrikeSwordShield <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ase/humanoid_strike.py>`__
+        .. |SBS| replace:: `BiShadowHand BlockStack <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_block_stack.py>`__
+        .. |SBC| replace:: `BiShadowHand BottleCap <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_bottle_cap.py>`__
+        .. |SCA| replace:: `BiShadowHand CatchAbreast <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_abreast.py>`__
+        .. |SU2| replace:: `BiShadowHand CatchOver2Underarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_over2underarm.py>`__
+        .. |SCU| replace:: `BiShadowHand CatchUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_catch_underarm.py>`__
+        .. |SOI| replace:: `BiShadowHand DoorOpenInward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_inward.py>`__
+        .. |SOO| replace:: `BiShadowHand DoorOpenOutward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_open_outward.py>`__
+        .. |SCI| replace:: `BiShadowHand DoorCloseInward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_inward.py>`__
+        .. |SCO| replace:: `BiShadowHand DoorCloseOutward <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_door_close_outward.py>`__
+        .. |SGP| replace:: `BiShadowHand GraspAndPlace <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_grasp_and_place.py>`__
+        .. |SLU| replace:: `BiShadowHand LiftUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_lift_underarm.py>`__
+        .. |SHO| replace:: `BiShadowHand Over <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_over.py>`__
+        .. |SPE| replace:: `BiShadowHand Pen <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_pen.py>`__
+        .. |SPC| replace:: `BiShadowHand PointCloud <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_point_cloud.py>`__
+        .. |SPB| replace:: `BiShadowHand PushBlock <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_push_block.py>`__
+        .. |SRO| replace:: `BiShadowHand ReOrientation <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_re_orientation.py>`__
+        .. |SSC| replace:: `BiShadowHand Scissors <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/ahandsse/shadow_hand_scissors.py>`__
+        .. |SSW| replace:: `BiShadowHand SwingCup <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_swing_cup.py>`__
+        .. |SWH| replace:: `BiShadowHand Switch <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_switch.py>`__
+        .. |STC| replace:: `BiShadowHand TwoCatchUnderarm <https://github.com/Skylark0924/Rofunc/tree/main/rofunc/learning/RofuncRL/tasks/isaacgymenv/hands/shadow_hand_two_catch_underarm.py>`__
 
     .. tab:: OmniIsaacGym
 
