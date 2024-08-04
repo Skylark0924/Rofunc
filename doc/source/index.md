@@ -13,11 +13,14 @@
 > **Repository address: https://github.com/Skylark0924/Rofunc** <br>
 > **Documentation: https://rofunc.readthedocs.io/**
 
-Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (LfD)** for
+Rofunc package focuses on the **Imitation Learning (IL), Reinforcement Learning (RL) and Learning from Demonstration (
+LfD)** for
 **(Humanoid) Robot Manipulation**. It provides valuable and convenient python functions, including _demonstration
-collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an Isaac Gym-based robot simulator for
+collection, data pre-processing, LfD algorithms, planning, and control methods_. We also provide an Isaac Gym-based
+robot simulator for
 evaluation. This package aims to advance the field by building a full-process toolkit and validation platform that
-simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on robots.
+simplifies and standardizes the process of demonstration data collection, processing, learning, and its deployment on
+robots.
 
 ![](../img/pipeline.png)
 
@@ -56,7 +59,7 @@ The available functions and plans can be found as follows.
 |                                                                                                         |   |            [`TD3(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/TD3.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |                                            `CQL(RofuncRL)`                                             | ⛔  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |                                           `TD3BC(RofuncRL)`                                            | ⛔  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
-|                                                                                                         |   |         [`DTrans(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/DTrans.html)         | ✅ |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
+|                                                                                                         |   |         [`DTrans(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/DTrans.html)         | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |                                            `EDAC(RofuncRL)`                                            | ⛔  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |            [`AMP(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/AMP.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
 |                                                                                                         |   |            [`ASE(RofuncRL)`](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/ASE.html)            | ✅  |                                                                                                                    |    |                                                                                                                     |   |                                                                                                              |    |
@@ -80,13 +83,15 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 ```
 
 > **Warning** <br>
-> If our code is found to be used in a published paper without proper citation, we reserve the right to address this issue formally by contacting the editor to report potential academic misconduct!**
-> 
-> 如果我们的代码被发现用于已发表的论文而没有被恰当引用，我们保留通过正式联系编辑报告潜在学术不端行为的权利。**
+> **If our code is found to be used in a published paper without proper citation, we reserve the right to address this
+> issue formally by contacting the editor to report potential academic misconduct!**
+>
+> **如果我们的代码被发现用于已发表的论文而没有被恰当引用，我们保留通过正式联系编辑报告潜在学术不端行为的权利。**
 
 ## Related Papers
 
-1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](../../rofunc/learning/RofuncIL/structured_transformer/strans.py))
+1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid
+   objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](../../rofunc/learning/RofuncIL/structured_transformer/strans.py))
 
 ```
 @article{liu2022robot,
@@ -101,7 +106,8 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 }
 ```
 
-2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph Transformer ([IROS 2023](https://arxiv.org/abs/2306.12677)｜Code coming soon)
+2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph
+   Transformer ([IROS 2023](https://arxiv.org/abs/2306.12677)｜Code coming soon)
 
 ```
 @inproceedings{liu2023softgpt,
@@ -114,7 +120,8 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 }
 ```
 
-3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](../../rofunc/learning/ml/tpgmm.py))
+3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human
+   Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](../../rofunc/learning/ml/tpgmm.py))
 
 ```
 @article{liu2023birp,
