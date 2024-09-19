@@ -2,7 +2,7 @@
 
 Loading will take a few seconds. Please wait.
 
-You can also refer to the page in doc: [Human-Humanoid Robots Cross-Embodiment  Behavior-Skill Transfer Using Decomposed Adversarial Learning from Demonstration](https://www.shadowrobot.com/doc/lfd/RofuncRL/HOTU.html)
+You can also refer to the page in [doc](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/HOTU.html).
 
 ## Kinematic Motion Retargeting
 
