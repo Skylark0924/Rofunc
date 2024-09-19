@@ -42,7 +42,8 @@ Mixline (Mixing online and offline) reinforcement learning
     ASE implementation and explanation of tricks in `RofuncRL`
 :doc:`ODTrans`
     ODTrans implementation and explanation of tricks in `RofuncRL`
-
+:doc:`HOTU`
+    HOTU implementation and explanation of tricks in `RofuncRL`
 
 
 
@@ -64,3 +65,4 @@ Mixline (Mixing online and offline) reinforcement learning
    AMP
    ASE
    ODTrans
+   HOTU
