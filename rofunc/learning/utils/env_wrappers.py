@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Union, Tuple, Any, Optional
+import collections
+from typing import Tuple, Any, Optional
 
 import gym
 import gymnasium
-import collections
 import numpy as np
-from packaging import version
-
 import torch
+from packaging import version
 
 from rofunc.utils.logger.beauty_logger import beauty_print
 
@@ -28,7 +27,7 @@ __all__ = ["wrap_env"]
 
 
 class Wrapper(object):
-    def __init__(self, env: Any, device=None) -> None:
+    def __init__(self, env: Any) -> None:
         """Base wrapper class for RL environments
 
         :param env: The environment to wrap
@@ -41,8 +40,14 @@ class Wrapper(object):
             self.device = torch.device(self._env.device)
         else:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        if device is not None:
-            self.device = torch.device(device)
+        # spaces
+        try:
+            self._action_space = self._env.single_action_space
+            self._observation_space = self._env.single_observation_space
+        except AttributeError:
+            self._action_space = self._env.action_space
+            self._observation_space = self._env.observation_space
+        self._state_space = self._env.state_space if hasattr(self._env, "state_space") else self._observation_space
 
     def __getattr__(self, key: str) -> Any:
         """Get an attribute from the wrapped environment
@@ -57,8 +62,7 @@ class Wrapper(object):
         """
         if hasattr(self._env, key):
             return getattr(self._env, key)
-        raise AttributeError("Wrapped environment ({}) does not have attribute '{}'" \
-                             .format(self._env.__class__.__name__, key))
+        raise AttributeError(f"Wrapped environment ({self._env.__class__.__name__}) does not have attribute '{key}'")
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -85,17 +89,13 @@ class Wrapper(object):
 
     def render(self, *args, **kwargs) -> None:
         """Render the environment
-
-        :raises NotImplementedError: Not implemented
         """
-        raise NotImplementedError
+        pass
 
     def close(self) -> None:
         """Close the environment
-
-        :raises NotImplementedError: Not implemented
         """
-        raise NotImplementedError
+        pass
 
     @property
     def num_envs(self) -> int:
@@ -106,25 +106,33 @@ class Wrapper(object):
         return self._env.num_envs if hasattr(self._env, "num_envs") else 1
 
     @property
+    def num_agents(self) -> int:
+        """Number of agents
+
+        If the wrapped environment does not have the ``num_agents`` property, it will be set to 1
+        """
+        return self._env.num_agents if hasattr(self._env, "num_agents") else 1
+
+    @property
     def state_space(self) -> gym.Space:
         """State space
 
         If the wrapped environment does not have the ``state_space`` property,
         the value of the ``observation_space`` property will be used
         """
-        return self._env.state_space if hasattr(self._env, "state_space") else self._env.observation_space
+        return self._state_space
 
     @property
     def observation_space(self) -> gym.Space:
         """Observation space
         """
-        return self._env.observation_space
+        return self._observation_space
 
     @property
     def action_space(self) -> gym.Space:
         """Action space
         """
-        return self._env.action_space
+        return self._action_space
 
 
 class IsaacGymPreview2Wrapper(Wrapper):
@@ -250,7 +258,8 @@ class OmniverseIsaacGymWrapper(Wrapper):
         self._env.run(trainer)
 
     def _process_data(self):
-        self._obs = torch.clamp(self._obs, -self._env._task.clip_obs, self._env._task.clip_obs).to(self._env._task.rl_device).clone()
+        self._obs = torch.clamp(self._obs, -self._env._task.clip_obs, self._env._task.clip_obs).to(
+            self._env._task.rl_device).clone()
         self._rew = self._rew.to(self._env._task.rl_device).clone()
         self._states = torch.clamp(self._states, -self._env._task.clip_obs, self._env._task.clip_obs).to(
             self._env._task.rl_device).clone()
@@ -292,7 +301,8 @@ class OmniverseIsaacGymWrapper(Wrapper):
 
         # self._obs_dict, reward, terminated, info = self._env.step(actions)
         # truncated = torch.zeros_like(terminated)
-        return self._obs_dict["obs"], self._rew.view(-1, 1), self._resets.view(-1, 1), self._resets.view(-1, 1), self._extras
+        return self._obs_dict["obs"], self._rew.view(-1, 1), self._resets.view(-1, 1), self._resets.view(-1,
+                                                                                                         1), self._extras
 
     def reset(self) -> Tuple[torch.Tensor, Any]:
         """Reset the environment
@@ -995,6 +1005,54 @@ class RobosuiteWrapper(Wrapper):
         self._env.close()
 
 
+class IsaacLabWrapper(Wrapper):
+    def __init__(self, env: Any) -> None:
+        """Isaac Lab environment wrapper
+
+        :param env: The environment to wrap
+        :type env: Any supported Isaac Lab environment
+        """
+        super().__init__(env)
+
+        self._reset_once = True
+        self._obs_dict = None
+
+        self._observation_space = self._observation_space["policy"]
+
+    def step(self, actions: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, Any]:
+        """Perform a step in the environment
+
+        :param actions: The actions to perform
+        :type actions: torch.Tensor
+
+        :return: Observation, reward, terminated, truncated, info
+        :rtype: tuple of torch.Tensor and any other info
+        """
+        self._obs_dict, reward, terminated, truncated, info = self._env.step(actions)
+        return self._obs_dict["policy"], reward.view(-1, 1), terminated.view(-1, 1), truncated.view(-1, 1), info
+
+    def reset(self) -> Tuple[torch.Tensor, Any]:
+        """Reset the environment
+
+        :return: Observation, info
+        :rtype: torch.Tensor and any other info
+        """
+        if self._reset_once:
+            self._obs_dict, info = self._env.reset()
+            self._reset_once = False
+        return self._obs_dict["policy"], {}
+
+    def render(self, *args, **kwargs) -> None:
+        """Render the environment
+        """
+        pass
+
+    def close(self) -> None:
+        """Close the environment
+        """
+        self._env.close()
+
+
 def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None, seed=None) -> Wrapper:
     """
     Wrap an environment to use a common interface
@@ -1027,6 +1085,8 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None,
                     |Omniverse Isaac Gym |``"omniverse-isaacgym"`` |
                     +--------------------+-------------------------+
                     |Isaac Sim (orbit)   |``"isaac-orbit"``        |
+                    +--------------------+-------------------------+
+                    |Isaac Lab           |``"isaaclab"``           |
                     +--------------------+-------------------------+
     :param verbose: Whether to print the wrapper type (default: True)
     :param logger: rofunc logger (default: None)
@@ -1109,5 +1169,9 @@ def wrap_env(env: Any, wrapper: str = "auto", verbose: bool = True, logger=None,
         if verbose:
             logger.info("Environment wrapper: Isaac Orbit")
         return IsaacOrbitWrapper(env)
+    elif wrapper == "isaaclab":
+        if verbose:
+            logger.info("Environment wrapper: Isaac Lab")
+        return IsaacLabWrapper(env)
     else:
         raise ValueError("Unknown {} wrapper type".format(wrapper))

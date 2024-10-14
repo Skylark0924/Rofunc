@@ -34,7 +34,7 @@ def calculate_inertial_tag(file_name=None, mass=-1, pr=8, scale_factor=100):
 
 
 if __name__ == '__main__':
-    path = "/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/rofunc/simulator/assets/urdf/zju_humanoid/low_meshes"
+    path = "./simulator/assets/urdf/zju_humanoid/low_meshes"
     name = "WRIST_UPDOWN_R.STL"
     path = os.path.join(path, name)
     calculate_inertial_tag(path, 1)

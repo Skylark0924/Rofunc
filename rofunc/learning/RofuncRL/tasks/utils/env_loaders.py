@@ -1,12 +1,17 @@
 import os
-import sys
 import queue
+import sys
 from contextlib import contextmanager
+from typing import Optional, Sequence
+
+from rofunc.utils.logger.beauty_logger import beauty_print
 
 __all__ = ["load_isaacgym_env_preview2",
            "load_isaacgym_env_preview3",
            "load_isaacgym_env_preview4",
-           "load_omniverse_isaacgym_env"]
+           "load_omniverse_isaacgym_env",
+           "load_isaac_orbit_env",
+           "load_isaaclab_env"]
 
 
 @contextmanager
@@ -25,6 +30,7 @@ def cwd(new_path: str) -> None:
     finally:
         os.chdir(current_path)
 
+
 def _omegaconf_to_dict(config) -> dict:
     """Convert OmegaConf config to dict
 
@@ -41,6 +47,7 @@ def _omegaconf_to_dict(config) -> dict:
     for k, v in config.items():
         d[k] = _omegaconf_to_dict(v) if isinstance(v, DictConfig) else v
     return d
+
 
 def _print_cfg(d, indent=0) -> None:
     """Print the environment configuration
@@ -89,21 +96,25 @@ def load_isaacgym_env_preview2(task_name: str = "", isaacgymenvs_path: str = "",
     if defined:
         arg_index = sys.argv.index("--task") + 1
         if arg_index >= len(sys.argv):
-            raise ValueError("No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
+            raise ValueError(
+                "No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
         if task_name and task_name != sys.argv[arg_index]:
-            print("[WARNING] Overriding task ({}) with command line argument ({})".format(task_name, sys.argv[arg_index]))
+            print(
+                "[WARNING] Overriding task ({}) with command line argument ({})".format(task_name, sys.argv[arg_index]))
     # get task name from function arguments
     else:
         if task_name:
             sys.argv.append("--task")
             sys.argv.append(task_name)
         else:
-            raise ValueError("No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
+            raise ValueError(
+                "No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
 
     # get isaacgym envs path from isaacgym package metadata
     if not isaacgymenvs_path:
         if not hasattr(isaacgym, "__path__"):
-            raise RuntimeError("isaacgym package is not installed or could not be accessed by the current Python environment")
+            raise RuntimeError(
+                "isaacgym package is not installed or could not be accessed by the current Python environment")
         path = isaacgym.__path__
         path = os.path.join(path[0], "..", "rlgpu")
     else:
@@ -120,8 +131,9 @@ def load_isaacgym_env_preview2(task_name: str = "", isaacgymenvs_path: str = "",
         status = False
         print("[ERROR] Failed to import required packages: {}".format(e))
     if not status:
-        raise RuntimeError("The path ({}) is not valid or the isaacgym package is not installed in editable mode (pip install -e .)" \
-            .format(path))
+        raise RuntimeError(
+            "The path ({}) is not valid or the isaacgym package is not installed in editable mode (pip install -e .)" \
+                .format(path))
 
     args = get_args()
 
@@ -141,6 +153,7 @@ def load_isaacgym_env_preview2(task_name: str = "", isaacgymenvs_path: str = "",
         task, env = parse_task(args, cfg, cfg_train, sim_params)
 
     return env
+
 
 def load_isaacgym_env_preview3(task_name: str = "", isaacgymenvs_path: str = "", show_cfg: bool = True):
     """Load an Isaac Gym environment (preview 3)
@@ -169,7 +182,6 @@ def load_isaacgym_env_preview3(task_name: str = "", isaacgymenvs_path: str = "",
 
     from omegaconf import OmegaConf
 
-    import isaacgym
     import isaacgymenvs
 
     # check task from command line arguments
@@ -182,13 +194,14 @@ def load_isaacgym_env_preview3(task_name: str = "", isaacgymenvs_path: str = "",
     if defined:
         if task_name and task_name != arg.split("task=")[1].split(" ")[0]:
             print("[WARNING] Overriding task name ({}) with command line argument ({})" \
-                .format(task_name, arg.split("task=")[1].split(" ")[0]))
+                  .format(task_name, arg.split("task=")[1].split(" ")[0]))
     # get task name from function arguments
     else:
         if task_name:
             sys.argv.append("task={}".format(task_name))
         else:
-            raise ValueError("No task name defined. Set task_name parameter or use task=<task_name> as command line argument")
+            raise ValueError(
+                "No task name defined. Set task_name parameter or use task=<task_name> as command line argument")
 
     # get isaacgymenvs path from isaacgymenvs package metadata
     if isaacgymenvs_path == "":
@@ -248,6 +261,7 @@ def load_isaacgym_env_preview3(task_name: str = "", isaacgymenvs_path: str = "",
 
     return env
 
+
 def load_isaacgym_env_preview4(task_name: str = "", isaacgymenvs_path: str = "", show_cfg: bool = True):
     """Load an Isaac Gym environment (preview 4)
 
@@ -270,6 +284,7 @@ def load_isaacgym_env_preview4(task_name: str = "", isaacgymenvs_path: str = "",
     :rtype: isaacgymenvs.tasks.base.vec_task.VecTask
     """
     return load_isaacgym_env_preview3(task_name, isaacgymenvs_path, show_cfg)
+
 
 def load_omniverse_isaacgym_env(task_name: str = "",
                                 omniisaacgymenvs_path: str = "",
@@ -322,13 +337,14 @@ def load_omniverse_isaacgym_env(task_name: str = "",
     if defined:
         if task_name and task_name != arg.split("task=")[1].split(" ")[0]:
             print("[WARNING] Overriding task name ({}) with command line argument ({})" \
-                .format(task_name, arg.split("task=")[1].split(" ")[0]))
+                  .format(task_name, arg.split("task=")[1].split(" ")[0]))
     # get task name from function arguments
     else:
         if task_name:
             sys.argv.append("task={}".format(task_name))
         else:
-            raise ValueError("No task name defined. Set task_name parameter or use task=<task_name> as command line argument")
+            raise ValueError(
+                "No task name defined. Set task_name parameter or use task=<task_name> as command line argument")
 
     # get rofunc.learning.RofuncRL.tasks.omniisaacgym path from rofunc.learning.RofuncRL.tasks.omniisaacgym package metadata
     if omniisaacgymenvs_path == "":
@@ -362,7 +378,8 @@ def load_omniverse_isaacgym_env(task_name: str = "",
     # internal classes
     class _OmniIsaacGymVecEnv(VecEnvBase):
         def step(self, actions):
-            actions = torch.clamp(actions, -self._task.clip_actions, self._task.clip_actions).to(self._task.device).clone()
+            actions = torch.clamp(actions, -self._task.clip_actions, self._task.clip_actions).to(
+                self._task.device).clone()
             self._task.pre_physics_step(actions)
 
             for _ in range(self._task.control_frequency_inv):
@@ -371,7 +388,8 @@ def load_omniverse_isaacgym_env(task_name: str = "",
 
             observations, rewards, dones, info = self._task.post_physics_step()
 
-            return {"obs": torch.clamp(observations, -self._task.clip_obs, self._task.clip_obs).to(self._task.rl_device).clone()}, \
+            return {"obs": torch.clamp(observations, -self._task.clip_obs, self._task.clip_obs).to(
+                self._task.rl_device).clone()}, \
                 rewards.to(self._task.rl_device).clone(), dones.to(self._task.rl_device).clone(), info.copy()
 
         def reset(self):
@@ -397,7 +415,8 @@ def load_omniverse_isaacgym_env(task_name: str = "",
             super().run(_OmniIsaacGymTrainerMT() if trainer is None else trainer)
 
         def _parse_data(self, data):
-            self._observations = torch.clamp(data["obs"], -self._task.clip_obs, self._task.clip_obs).to(self._task.rl_device).clone()
+            self._observations = torch.clamp(data["obs"], -self._task.clip_obs, self._task.clip_obs).to(
+                self._task.rl_device).clone()
             self._rewards = data["rew"].to(self._task.rl_device).clone()
             self._dones = data["reset"].to(self._task.rl_device).clone()
             self._info = data["extras"].copy()
@@ -449,6 +468,7 @@ def load_omniverse_isaacgym_env(task_name: str = "",
 
     return env
 
+
 def load_isaac_orbit_env(task_name: str = "", show_cfg: bool = True):
     """Load an Isaac Orbit environment
 
@@ -488,16 +508,19 @@ def load_isaac_orbit_env(task_name: str = "", show_cfg: bool = True):
     if defined:
         arg_index = sys.argv.index("--task") + 1
         if arg_index >= len(sys.argv):
-            raise ValueError("No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
+            raise ValueError(
+                "No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
         if task_name and task_name != sys.argv[arg_index]:
-            print("[WARNING] Overriding task ({}) with command line argument ({})".format(task_name, sys.argv[arg_index]))
+            print(
+                "[WARNING] Overriding task ({}) with command line argument ({})".format(task_name, sys.argv[arg_index]))
     # get task name from function arguments
     else:
         if task_name:
             sys.argv.append("--task")
             sys.argv.append(task_name)
         else:
-            raise ValueError("No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
+            raise ValueError(
+                "No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
 
     # parse arguments
     parser = argparse.ArgumentParser("Welcome to Orbit: Omniverse Robotics Environments!")
@@ -541,5 +564,148 @@ def load_isaac_orbit_env(task_name: str = "", show_cfg: bool = True):
 
     # load environment
     env = gym.make(args.task, cfg=cfg, headless=args.headless)
+
+    return env
+
+
+def load_isaaclab_env(task_name: str = "",
+                      num_envs: Optional[int] = None,
+                      headless: Optional[bool] = None,
+                      cli_args: Sequence[str] = [],
+                      show_cfg: bool = True):
+    """Load an Isaac Lab environment
+
+    Isaac Lab: https://isaac-sim.github.io/IsaacLab
+
+    This function includes the definition and parsing of command line arguments used by Isaac Lab:
+
+    - ``--headless``: Force display off at all times
+    - ``--cpu``: Use CPU pipeline
+    - ``--num_envs``: Number of environments to simulate
+    - ``--task``: Name of the task
+    - ``--num_envs``: Seed used for the environment
+
+    :param task_name: The name of the task (default: ``""``).
+                      If not specified, the task name is taken from the command line argument (``--task TASK_NAME``).
+                      Command line argument has priority over function parameter if both are specified
+    :type task_name: str, optional
+    :param num_envs: Number of parallel environments to create (default: ``None``).
+                     If not specified, the default number of environments defined in the task configuration is used.
+                     Command line argument has priority over function parameter if both are specified
+    :type num_envs: int, optional
+    :param headless: Whether to use headless mode (no rendering) (default: ``None``).
+                     If not specified, the default task configuration is used.
+                     Command line argument has priority over function parameter if both are specified
+    :type headless: bool, optional
+    :param cli_args: Isaac Lab configuration and command line arguments (default: ``[]``)
+    :type cli_args: list of str, optional
+    :param show_cfg: Whether to print the configuration (default: ``True``)
+    :type show_cfg: bool, optional
+
+    :raises ValueError: The task name has not been defined, neither by the function parameter nor by the command line arguments
+
+    :return: Isaac Lab environment
+    :rtype: gym.Env
+    """
+    import argparse
+    import atexit
+    import gymnasium as gym
+
+    # check task from command line arguments
+    defined = False
+    for arg in sys.argv:
+        if arg.startswith("--task"):
+            defined = True
+            break
+    # get task name from command line arguments
+    if defined:
+        arg_index = sys.argv.index("--task") + 1
+        if arg_index >= len(sys.argv):
+            raise ValueError(
+                "No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
+        if task_name and task_name != sys.argv[arg_index]:
+            beauty_print(f"Overriding task ({task_name}) with command line argument ({sys.argv[arg_index]})", "warning")
+    # get task name from function arguments
+    else:
+        if task_name:
+            sys.argv.append("--task")
+            sys.argv.append(task_name)
+        else:
+            raise ValueError(
+                "No task name defined. Set the task_name parameter or use --task <task_name> as command line argument")
+
+    # check num_envs from command line arguments
+    defined = False
+    for arg in sys.argv:
+        if arg.startswith("--num_envs"):
+            defined = True
+            break
+    # get num_envs from command line arguments
+    if defined:
+        if num_envs is not None:
+            beauty_print.warning("Overriding num_envs with command line argument (--num_envs)", "warning")
+    # get num_envs from function arguments
+    elif num_envs is not None and num_envs > 0:
+        sys.argv.append("--num_envs")
+        sys.argv.append(str(num_envs))
+
+    # check headless from command line arguments
+    defined = False
+    for arg in sys.argv:
+        if arg.startswith("--headless"):
+            defined = True
+            break
+    # get headless from command line arguments
+    if defined:
+        if headless is not None:
+            beauty_print("Overriding headless with command line argument (--headless)", "warning")
+    # get headless from function arguments
+    elif headless is not None:
+        sys.argv.append("--headless")
+
+    # others command line arguments
+    sys.argv += cli_args
+
+    # parse arguments
+    parser = argparse.ArgumentParser("Isaac Lab: Omniverse Robotics Environments!")
+    parser.add_argument("--cpu", action="store_true", default=False, help="Use CPU pipeline.")
+    parser.add_argument("--num_envs", type=int, default=None, help="Number of environments to simulate.")
+    parser.add_argument("--task", type=str, default=None, help="Name of the task.")
+    parser.add_argument("--seed", type=int, default=None, help="Seed used for the environment")
+    parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
+    parser.add_argument("--video_length", type=int, default=200, help="Length of the recorded video (in steps).")
+    parser.add_argument("--video_interval", type=int, default=2000,
+                        help="Interval between video recordings (in steps).")
+    parser.add_argument("--disable_fabric", action="store_true", default=False,
+                        help="Disable fabric and use USD I/O operations.")
+    parser.add_argument("--distributed", action="store_true", default=False,
+                        help="Run training with multiple GPUs or nodes.")
+
+    # launch the simulation app
+    from omni.isaac.lab.app import AppLauncher
+
+    AppLauncher.add_app_launcher_args(parser)
+    args = parser.parse_args()
+    app_launcher = AppLauncher(args)
+
+    @atexit.register
+    def close_the_simulator():
+        app_launcher.app.close()
+
+    import omni.isaac.lab_tasks  # type: ignore
+    from omni.isaac.lab_tasks.utils import parse_env_cfg  # type: ignore
+
+    cfg = parse_env_cfg(args.task, use_gpu=not args.cpu, num_envs=args.num_envs, use_fabric=not args.disable_fabric)
+
+    # print config
+    if show_cfg:
+        print(f"\nIsaac Lab environment ({args.task})")
+        try:
+            _print_cfg(cfg)
+        except AttributeError as e:
+            pass
+
+    # load environment
+    env = gym.make(args.task, cfg=cfg, render_mode="rgb_array" if args.video else None)
 
     return env

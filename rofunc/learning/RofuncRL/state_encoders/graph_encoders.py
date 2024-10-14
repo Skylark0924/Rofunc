@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import dgl.nn.pytorch as dglnn
 import torch.nn as nn
 
 from .base_encoders import BaseEncoder
@@ -20,6 +19,8 @@ from .base_encoders import BaseEncoder
 
 class HomoGraphEncoder(BaseEncoder):
     def __init__(self, in_dim, hidden_dim):
+        import dgl.nn.pytorch as dglnn
+
         super(HomoGraphEncoder, self).__init__(hidden_dim)
         # init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
         #                        constant_(x, 0), nn.init.calculate_gain('relu'))
@@ -35,6 +36,8 @@ class HomoGraphEncoder(BaseEncoder):
         self.linear = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), nn.ReLU())
 
     def forward(self, g, inputs):
+        import torch.nn.functional as F
+        import dgl
         # 应用图卷积和激活函数
         h = self.conv1(g, inputs)
         h = h.view(-1, h.size(1) * h.size(2))
