@@ -13,7 +13,7 @@ from rofunc.utils.datalab.poselib.poselib.skeleton.skeleton3d import SkeletonSta
 
 
 def hotu_random():
-    file = "/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2hotu.npy"
+    file = "../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2hotu.npy"
     motion = SkeletonMotion.from_file(file)
     body_links = {"right_hand": gymapi.AXIS_ALL, "left_hand": gymapi.AXIS_ALL,
                   "right_foot": gymapi.AXIS_ROTATION, "left_foot": gymapi.AXIS_ROTATION,
@@ -90,7 +90,7 @@ def hotu_random():
 
 
 def h1_random():
-    file = "/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2h1.npy"
+    file = "../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2h1.npy"
     motion = SkeletonMotion.from_file(file)
     body_links = {"torso_link": gymapi.AXIS_ALL,
                   "right_elbow_link": gymapi.AXIS_ROTATION, "left_elbow_link": gymapi.AXIS_ROTATION,
@@ -172,7 +172,7 @@ def h1_random():
 
 
 def zju_random():
-    file = "/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2zju.npy"
+    file = "../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2zju.npy"
     motion = SkeletonMotion.from_file(file)
     body_links = {"pelvis": gymapi.AXIS_ROTATION,
                   "FOREARM_R": gymapi.AXIS_ROTATION, "FOREARM_L": gymapi.AXIS_ROTATION,
@@ -254,7 +254,7 @@ def zju_random():
 
 
 def walker_random():
-    file = "/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2walker.npy"
+    file = "../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2walker.npy"
     motion = SkeletonMotion.from_file(file)
     body_links = {"torso": gymapi.AXIS_ROTATION,
                   "right_limb_l4": gymapi.AXIS_ROTATION, "left_limb_l4": gymapi.AXIS_ROTATION,
@@ -304,7 +304,7 @@ def walker_random():
 
 
 def bruce_random():
-    file = "/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2bruce.npy"
+    file = "../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2bruce.npy"
     motion = SkeletonMotion.from_file(file)
     body_links = {
         "hand_l": gymapi.AXIS_TRANSLATION, "hand_r": gymapi.AXIS_TRANSLATION,
@@ -354,7 +354,7 @@ def bruce_random():
 
 
 def curi_random():
-    file = "/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2curi.npy"
+    file = "../examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2curi.npy"
     motion = SkeletonMotion.from_file(file)
     body_links = {
         # "torso_base2": gymapi.AXIS_ROTATION, "root": gymapi.AXIS_ROTATION,

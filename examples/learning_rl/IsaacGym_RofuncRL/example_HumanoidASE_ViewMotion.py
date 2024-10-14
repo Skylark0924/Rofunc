@@ -8,7 +8,8 @@ Preview the motion of the digital humanoid
 import isaacgym
 import argparse
 
-from rofunc.config.utils import omegaconf_to_dict, get_config, load_view_motion_config
+import rofunc as rf
+from rofunc.config.utils import omegaconf_to_dict, get_config
 from rofunc.learning.RofuncRL.tasks import Tasks
 from rofunc.learning.RofuncRL.trainers import Trainers
 
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     # Available types of motion file path:
     #  1. test data provided by rofunc: `examples/data/amp/*.npy`
     #  2. custom motion file with absolute path
-    parser.add_argument("--motion_file", type=str, default="/home/ubuntu/Github/HOTU/hotu/data/hotu/010_amp.npy")
+    parser.add_argument("--motion_file", type=str, default=rf.oslab.get_rofunc_path('../examples/data/amp/amp_humanoid_backflip.npy'))
     custom_args = parser.parse_args()
 
     inference(custom_args)

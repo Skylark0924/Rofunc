@@ -9,7 +9,6 @@ import kinpy as kp
 def build_chain_from_model(model_path: str, verbose=False):
     """
     Build a serial chain from a URDF or MuJoCo XML file
-
     :param model_path: the path of the URDF or MuJoCo XML file
     :param verbose: whether to print the chain
     :return: robot kinematics chain

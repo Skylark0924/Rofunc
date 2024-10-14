@@ -22,12 +22,12 @@ class Tasks:
             from .isaacgymenv.physhoi.humanoid_physhoi import HumanoidPhysHOITask
             # from .isaacgymenv.physhoi.physhoi import PhysHOI_BallPlay
             # from .isaacgymenv.hotu.humanoid_hotu import HumanoidHOTUTask
-            from .isaacgymenv.hotu.humanoid_hotu_getup import HumanoidHOTUGetupTask
-            from .isaacgymenv.hotu.humanoid_hotu_perturb import HumanoidHOTUPerturbTask
-            from .isaacgymenv.hotu.humanoid_view_motion import HumanoidHOTUViewMotionTask
-            from .isaacgymenv.hotu.humanoid_hotu_heading import HumanoidHOTUHeadingTask
-            from .isaacgymenv.hotu.humanoid_hotu_location import HumanoidHOTULocationTask
-            from .isaacgymenv.hotu.humanoid_hotu_style import HumanoidHOTUStyleTask
+            # from .isaacgymenv.hotu.humanoid_hotu_getup import HumanoidHOTUGetupTask
+            # from .isaacgymenv.hotu.humanoid_hotu_perturb import HumanoidHOTUPerturbTask
+            # from .isaacgymenv.hotu.humanoid_view_motion import HumanoidHOTUViewMotionTask
+            # from .isaacgymenv.hotu.humanoid_hotu_heading import HumanoidHOTUHeadingTask
+            # from .isaacgymenv.hotu.humanoid_hotu_location import HumanoidHOTULocationTask
+            # from .isaacgymenv.hotu.humanoid_hotu_style import HumanoidHOTUStyleTask
 
             from .isaacgymenv.hands.shadow_hand_block_stack import ShadowHandBlockStackTask
             from .isaacgymenv.hands.shadow_hand_bottle_cap import ShadowHandBottleCapTask
@@ -76,12 +76,12 @@ class Tasks:
                 "HumanoidASEViewMotion": HumanoidASEViewMotionTask,
                 "HumanoidPhysHOI": HumanoidPhysHOITask,
                 # "HumanoidPhysHOI": PhysHOI_BallPlay,
-                "HumanoidHOTUGetup": HumanoidHOTUGetupTask,
-                "HumanoidHOTUPerturb": HumanoidHOTUPerturbTask,
-                "HumanoidHOTUViewMotion": HumanoidHOTUViewMotionTask,
-                "HumanoidHOTUHeading": HumanoidHOTUHeadingTask,
-                "HumanoidHOTULocation": HumanoidHOTULocationTask,
-                "HumanoidHOTUStyle": HumanoidHOTUStyleTask,
+                # "HumanoidHOTUGetup": HumanoidHOTUGetupTask,
+                # "HumanoidHOTUPerturb": HumanoidHOTUPerturbTask,
+                # "HumanoidHOTUViewMotion": HumanoidHOTUViewMotionTask,
+                # "HumanoidHOTUHeading": HumanoidHOTUHeadingTask,
+                # "HumanoidHOTULocation": HumanoidHOTULocationTask,
+                # "HumanoidHOTUStyle": HumanoidHOTUStyleTask,
 
                 "BiShadowHandOver": ShadowHandOverTask,
                 "BiShadowHandBlockStack": ShadowHandBlockStackTask,

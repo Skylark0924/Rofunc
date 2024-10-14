@@ -20,7 +20,7 @@ import sys
 import rofunc as rf
 
 
-def get_rofunc_path():
+def get_rofunc_path(extra_path=None):
     """
     Get the path of the rofunc package.
 
@@ -29,7 +29,11 @@ def get_rofunc_path():
     if not hasattr(rf, "__path__"):
         raise RuntimeError("rofunc package is not installed")
     rofunc_path = list(rf.__path__)[0]
+
+    if extra_path is not None:
+        rofunc_path = os.path.join(rofunc_path, extra_path)
     return rofunc_path
+
 
 
 def get_elegantrl_path():
