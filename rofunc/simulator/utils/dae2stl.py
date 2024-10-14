@@ -12,8 +12,8 @@ def dae2stl(dae_files, stl_save_path):
 
 
 if __name__ == '__main__':
-    dae_folder = '/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/rofunc/simulator/assets/urdf/curi/meshes'
+    dae_folder = './simulator/assets/urdf/curi/meshes'
     dae_files = rf.oslab.list_absl_path(dae_folder, recursive=True, suffix='.dae')
 
-    stl_save_path = '/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/rofunc/simulator/assets/urdf/curi/all_visual'
+    stl_save_path = './simulator/assets/urdf/curi/all_visual'
     dae2stl(dae_files[6:12], stl_save_path)

@@ -1,58 +1,59 @@
+from typing import Union, List, Tuple
 import torch
 
 from rofunc.utils.robolab.coord import convert_ori_format, convert_quat_order
 from rofunc.utils.robolab.kinematics.pytorch_kinematics_utils import build_chain_from_model
 
 
-def get_ik_from_chain(chain, pos, rot, device):
+def get_ik_from_chain(chain, goal_pose: Union[torch.Tensor, None, List, Tuple], device, goal_in_rob_tf: bool = True,
+                      robot_pose: Union[torch.Tensor, None, List, Tuple] = None, cur_configs=None,
+                      num_retries: int = 10):
     """
     Get the inverse kinematics from a serial chain
-
     :param chain: only the serial chain is supported
-    :param pos: the position of the export_link
-    :param rot: the rotation of the export_link
+    :param goal_pose: the pose of the export ee link
     :param device: the device to run the computation
+    :param goal_in_rob_tf: whether the goal pose is in the robot base frame
+    :param robot_pose: the pose of the robot base frame
+    :param cur_configs: let the ik solver retry from these configurations
+    :param num_retries: the number of retries
     :return:
     """
     import pytorch_kinematics as pk
 
-    rob_tf = pk.Transform3d(pos=pos, rot=rot, device=device)
+    goal_pos = goal_pose[:3]
+    goal_rot = goal_pose[3:]
+    goal_tf = pk.Transform3d(pos=goal_pos, rot=goal_rot, device=device)
+    if not goal_in_rob_tf:
+        assert robot_pose is not None, "The robot pose must be provided if the goal pose is not in the robot base frame"
+        robot_pos = robot_pose[:3]
+        robot_rot = robot_pose[3:]
+        rob_tf = pk.Transform3d(pos=robot_pos, rot=robot_rot, device=device)
+        goal_tf = rob_tf.inverse().compose(goal_tf)
 
     # get robot joint limits
     lim = torch.tensor(chain.get_joint_limits(), device=device)
-    cur_q = torch.rand(7, device=device) * (lim[1] - lim[0]) + lim[0]
 
-    goal_q = cur_q.unsqueeze(0).repeat(1, 1)
-
-    goal_in_rob_frame_tf = chain.forward_kinematics(goal_q)
+    if cur_configs is not None:
+        cur_configs = torch.tensor(cur_configs, device=device)
 
     # create the IK object
     # see the constructor for more options and their explanations, such as convergence tolerances
-    # ik = PseudoInverseIK(chain, max_iterations=30, num_retries=10,
-    #                      joint_limits=lim.T,
-    #                      early_stopping_any_converged=True,
-    #                      early_stopping_no_improvement="all",
-    #                      retry_configs=cur_q.reshape(1, -1),
-    #                      # line_search=pk.BacktrackingLineSearch(max_lr=0.2),
-    #                      debug=False,
-    #                      lr=0.2)
-    ik = pk.PseudoInverseIK(chain, max_iterations=30, num_retries=10,
+    ik = pk.PseudoInverseIK(chain, max_iterations=30, retry_configs=cur_configs, num_retries=num_retries,
                             joint_limits=lim.T,
                             early_stopping_any_converged=True,
                             early_stopping_no_improvement="all",
-                            # line_search=pk.BacktrackingLineSearch(max_lr=0.2),
                             debug=False,
                             lr=0.2)
 
     # solve IK
-    sol = ik.solve(goal_in_rob_frame_tf)
+    sol = ik.solve(goal_tf)
     return sol
 
 
 def get_ik_from_model(model_path: str, pose: torch.Tensor, device, export_link, verbose=False):
     """
     Get the inverse kinematics from a URDF or MuJoCo XML file
-
     :param model_path: the path of the URDF or MuJoCo XML file
     :param pose: the pose of the end effector, 7D vector with the first 3 elements as position and the last 4 elements as rotation
     :param device: the device to run the computation
@@ -72,7 +73,7 @@ def get_ik_from_model(model_path: str, pose: torch.Tensor, device, export_link, 
 
 
 if __name__ == '__main__':
-    model_path = "/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/rofunc/simulator/assets/urdf/franka_description/robots/franka_panda.urdf"
+    model_path = "./simulator/assets/urdf/franka_description/robots/franka_panda.urdf"
 
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = torch.device("cpu")

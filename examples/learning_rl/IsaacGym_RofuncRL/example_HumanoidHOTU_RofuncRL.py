@@ -136,16 +136,16 @@ if __name__ == "__main__":
     parser.add_argument("--debug", type=str, default="False")
     parser.add_argument("--headless", type=str, default="True")
     parser.add_argument("--inference", action="store_false", help="turn to inference mode while adding this argument")
-    parser.add_argument("--ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUBruce_24-05-28_13-51-39-584325_body_amp5/checkpoints/best_ckpt.pth")
+    parser.add_argument("--ckpt_path", type=str, default="../examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUBruce_24-05-28_13-51-39-584325_body_amp5/checkpoints/best_ckpt.pth")
 
     # HOTU
-    # parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUHumanoidWQbhandNew_24-05-26_21-16-24-361269_body_amp5/checkpoints/best_ckpt.pth")
+    # parser.add_argument("--llc_ckpt_path", type=str, default="../examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUHumanoidWQbhandNew_24-05-26_21-16-24-361269_body_amp5/checkpoints/best_ckpt.pth")
     # ZJU
-    # parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUZJUHumanoidWQbhandNew_24-05-26_18-57-20-244370_body_amp5/checkpoints/best_ckpt.pth")
+    # parser.add_argument("--llc_ckpt_path", type=str, default="../examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUZJUHumanoidWQbhandNew_24-05-26_18-57-20-244370_body_amp5/checkpoints/best_ckpt.pth")
     # H1
-    # parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUH1WQbhandNew_24-05-27_16-59-15-598225_body_amp5/checkpoints/best_ckpt.pth")
+    # parser.add_argument("--llc_ckpt_path", type=str, default="../examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUH1WQbhandNew_24-05-27_16-59-15-598225_body_amp5/checkpoints/best_ckpt.pth")
     # Bruce
-    parser.add_argument("--llc_ckpt_path", type=str, default="/home/ubuntu/Github/Xianova_Robotics/Rofunc-secret/examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUBruce_24-05-28_13-51-39-584325_body_amp5/checkpoints/best_ckpt.pth")
+    parser.add_argument("--llc_ckpt_path", type=str, default="../examples/learning_rl/IsaacGym_RofuncRL/saved_runs/RofuncRL_HOTUTrainer_HumanoidHOTUGetup_HOTUBruce_24-05-28_13-51-39-584325_body_amp5/checkpoints/best_ckpt.pth")
 
     custom_args = parser.parse_args()
 

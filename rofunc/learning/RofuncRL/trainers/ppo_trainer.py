@@ -26,7 +26,8 @@ class PPOTrainer(BaseTrainer):
                               device, self.exp_dir, self.rofunc_logger)
 
     def pre_interaction(self):
-        self.env.reset_done()
+        # self.env.reset_done()
+        pass
 
     def post_interaction(self):
         self._rollout += 1

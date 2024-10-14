@@ -7,7 +7,7 @@ class Trainers:
         from .amp_trainer import AMPTrainer
         from .ase_trainer import ASETrainer
         from .dtrans_trainer import DTransTrainer
-        from .hotu_trainer import HOTUTrainer
+        # from .hotu_trainer import HOTUTrainer
         from .physhoi_trainer import PhysHOITrainer
 
         self.trainer_map = {
@@ -18,7 +18,7 @@ class Trainers:
             "amp": AMPTrainer,
             "ase": ASETrainer,
             "dtrans": DTransTrainer,
-            "hotu": HOTUTrainer,
+            # "hotu": HOTUTrainer,
             "physhoi": PhysHOITrainer,
         }
 
