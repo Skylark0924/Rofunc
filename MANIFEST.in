@@ -1,3 +1,4 @@
 recursive-include rofunc/simulator/assets/ *
 recursive-include rofunc/config/ *
 recursive-exclude rofunc/simulator/assets/urdf/ycb *
+recursive-include rofunc/utils/robolab/formatter/mjcf_parser/ *
