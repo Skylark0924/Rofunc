@@ -35,7 +35,6 @@ def get_rofunc_path(extra_path=None):
     return rofunc_path
 
 
-
 def get_elegantrl_path():
     """
     Get the path of the elegantrl package.
@@ -84,6 +83,6 @@ def check_package_exist(package_name: str):
     except ImportError:
         package_name = package_name.replace("_", "-")
 
-        rf.logger.beauty_print(f"{package_name} is not installed, installing {package_name}...", type="warning")
+        print(f"{package_name} is not installed, installing {package_name}...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
-        rf.logger.beauty_print(f"{package_name} is installed successfully!")
+        print(f"{package_name} is installed successfully!")
