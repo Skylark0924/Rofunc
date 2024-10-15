@@ -35,7 +35,7 @@ class TPGMR(TPGMM):
         :param plot: whether to plot the result
         """
         super().__init__(demos_x, task_params, nb_states=nb_states, reg=reg, plot=plot)
-        self.gmr = rf.learning.gmr.GMR(self.demos_x, self.demos_dx, self.demos_xdx, nb_states=nb_states, reg=reg,
+        self.gmr = rf.gmr.GMR(self.demos_x, self.demos_dx, self.demos_xdx, nb_states=nb_states, reg=reg,
                                        plot=False)
 
     def gmm_learning(self):
