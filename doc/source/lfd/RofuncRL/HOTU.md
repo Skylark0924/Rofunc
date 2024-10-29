@@ -6,17 +6,23 @@ You can either view the [GitHub page](https://github.com/Skylark0924/Rofunc/blob
 
 ## Kinematic Motion Retargeting
 
+### Speed: 4x
+
 <img src="../../../img/task_gif3/UDH_Random_Motion.gif" width=25% /><img src="../../../img/task_gif3/H1_Random_Motion.gif" width=25% /><img src="../../../img/task_gif3/Walker_Random_Motion.gif" width=25% /><img src="../../../img/task_gif3/Bruce_Random_Motion.gif" width=25% />
 
 <img src="../../../img/task_gif3/UDH_wave.gif" width=25% /><img src="../../../img/task_gif3/H1_wave.gif" width=25% /><img src="../../../img/task_gif3/Walker_wave.gif" width=25% /><img src="../../../img/task_gif3/Bruce_wave.gif" width=25% />
 
 ## Perturb after Behavior Primitive Pre-training
 
+### Speed: 1x
+
 <img src="../../../img/task_gif3/UDH_perturb.gif" width=50% /><img src="../../../img/task_gif3/H1_perturb.gif" width=50% /><img src="../../../img/task_gif3/NAVIAI_perturb.gif" width=50% /><img src="../../../img/task_gif3/Bruce_perturb.gif" width=50% />
 
 <img src="../../../img/task_gif3/UDH_perturb2.gif" width=100% /><img src="../../../img/task_gif3/H1_perturb2.gif" width=100% /><img src="../../../img/task_gif3/NAVIAI_perturb2.gif" width=100% /><img src="../../../img/task_gif3/Bruce_perturb2.gif" width=100% />
 
-## Box Carrying Task (from random starting position to random target position with different box sizes)
+## Box Carrying Task (from random starting position to random target position with different box sizes) 
+
+### Speed: 4x
 
 <img src="../../../img/task_gif3/UDH_multi_motion.gif" width=100% /><img src="../../../img/task_gif3/H1_multi_motion.gif" width=100% /><img src="../../../img/task_gif3/NAVIAI_multi_motion.gif" width=100% />
 
