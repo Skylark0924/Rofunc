@@ -1,8 +1,8 @@
 # Human-Humanoid Robots Cross-Embodiment  Behavior-Skill Transfer Using Decomposed Adversarial Learning from Demonstration
 
-Loading will take a few seconds. Please wait.
+Due to the large number of GIFs on this page, loading may take a bit longer—**thank you for your patience**.
 
-You can also refer to the page in [doc](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/HOTU.html).
+You can either view the [GitHub page](https://github.com/Skylark0924/Rofunc/blob/main/doc/source/lfd/RofuncRL/HOTU.md) or the precompiled [document](https://rofunc.readthedocs.io/en/latest/lfd/RofuncRL/HOTU.html). Please feel free to decide based on the loading speed.
 
 ## Kinematic Motion Retargeting
 
