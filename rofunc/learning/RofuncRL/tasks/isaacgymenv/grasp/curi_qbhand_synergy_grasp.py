@@ -1,16 +1,17 @@
-# Copyright 2023, Junjia LIU, jjliu@mae.cuhk.edu.hk
+#  Copyright (C) 2024, Junjia Liu
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  This file is part of Rofunc.
 #
-#      https://www.apache.org/licenses/LICENSE-2.0
+#  Rofunc is licensed under the GNU General Public License v3.0.
+#  You may use, distribute, and modify this code under the terms of the GPL-3.0.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Additional Terms for Commercial Use:
+#  Commercial use requires sharing 50% of net profits with the copyright holder.
+#  Financial reports and regular payments must be provided as agreed in writing.
+#  Non-compliance results in revocation of commercial rights.
+#
+#  For more details, see <https://www.gnu.org/licenses/>.
+#  Contact: skylark0924@gmail.com
 
 import math
 import os
