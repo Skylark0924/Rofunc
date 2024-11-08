@@ -63,10 +63,10 @@ def update(frame):
 
 
 if __name__ == '__main__':
-    skeleton_joint_name, skeleton_joint, skeleton_parent_indices, skeleton_joint_local_translation = rf.maniplab.read_skeleton_motion('/home/ubuntu/Ergo-Manip/data/demo_2_test_chenzui_only_optitrack2hotu.npy')
+    skeleton_joint_name, skeleton_joint, skeleton_parent_indices, skeleton_joint_local_translation = rf.maniplab.read_skeleton_motion(rf.oslab.get_rofunc_path('../examples/data/hotu2/demo_2_test_andrew_only_optitrack2hotu.npy'))
     skeleton_joint = skeleton_joint[::40, :, :]
-    jacobians_left = np.load('/home/ubuntu/Ergo-Manip/data/jacobian_data/jacobians_left_hand_2.npy', allow_pickle=True)[::10]
-    jacobians_right = np.load('/home/ubuntu/Ergo-Manip/data/jacobian_data/jacobians_right_hand_2.npy', allow_pickle=True)[::10]
+    jacobians_left = np.load(rf.oslab.get_rofunc_path('../examples/data/jacobian_data/jacobians_andrew_left_hand_2.npy'), allow_pickle=True)[::10]
+    jacobians_right = np.load(rf.oslab.get_rofunc_path('../examples/data/jacobian_data/jacobians_andrew_right_hand_2.npy'), allow_pickle=True)[::10]
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ani = FuncAnimation(fig, update, frames=len(skeleton_joint), repeat=True)
