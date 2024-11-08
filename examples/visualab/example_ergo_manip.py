@@ -1,3 +1,10 @@
+"""
+Ergo manipulation
+===========================
+
+Examples
+"""
+
 import numpy as np
 import rofunc as rf
 import matplotlib.pyplot as plt
