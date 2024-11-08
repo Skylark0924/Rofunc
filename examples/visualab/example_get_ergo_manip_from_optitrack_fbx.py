@@ -37,10 +37,10 @@ def inference(custom_args):
                                             sim_device=f'cuda:{cfg.device_id}',
                                             graphics_device_id=cfg.device_id,
                                             headless=cfg.headless,
-                                            virtual_screen_capture=cfg.capture_video,  # TODO: check
+                                            virtual_screen_capture=cfg.capture_video,
                                             force_render=cfg.force_render,
                                             csv_path=rf.oslab.get_rofunc_path(
-        f'../examples/data/hotu2/{input_file_name}.csv'))
+                                                f'../examples/data/hotu2/{input_file_name}.csv'))
 
     # Instantiate the RL trainer
     trainer = Trainers().trainer_map["ase"](cfg=cfg,
@@ -63,7 +63,8 @@ def update(frame):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     joint_rotations = skeleton_joint[frame]
-    global_positions, global_rotations = rf.maniplab.forward_kinematics(skeleton_joint_local_translation, joint_rotations, skeleton_parent_indices)
+    global_positions, global_rotations = rf.maniplab.forward_kinematics(skeleton_joint_local_translation,
+                                                                        joint_rotations, skeleton_parent_indices)
     rf.visualab.plot_skeleton(ax, global_positions, skeleton_parent_indices)
     right_hand_index = 5
     left_hand_index = 8
@@ -115,6 +116,8 @@ def update(frame):
 if __name__ == "__main__":
     gpu_id = 0
     input_file_name = 'demo_3_chenzui_only'
+
+    # # Calculate from optitrack data to HOTU joint information
     parser = argparse.ArgumentParser()
     parser.add_argument("--fbx_dir", type=str, default=None)
     parser.add_argument("--fbx_file", type=str,
@@ -144,25 +147,24 @@ if __name__ == "__main__":
                 npy_from_fbx(fbx_file)
                 pbar.update(1)
 
+    # # Calculate joint angles
     parser.add_argument("--motion_file", type=str, default=rf.oslab.get_rofunc_path(
         f"../examples/data/hotu2/{input_file_name}_optitrack2hotu.npy"))
     custom_args = parser.parse_args()
 
     inference(custom_args)
 
+    # # Calculate Jacobian matrix
     rf.logger.beauty_print("########## Jacobian from URDF or MuJoCo XML files with RobotModel class ##########")
     model_path = "../../rofunc/simulator/assets/mjcf/hotu/hotu_humanoid.xml"
     joint_value = [0.1 for _ in range(34)]
-
     export_links = ["right_hand_2", "left_hand_2"]
 
-    # # Build the robot model with pytorch_kinematics, kinpy is not supported for MJCF files
     robot = rf.robolab.RobotModel(model_path, solve_engine="pytorch_kinematics", verbose=True)
-
     input_csv_path = rf.oslab.get_rofunc_path(
         f'../examples/data/hotu2/{input_file_name}.csv')
+    save_directory = rf.oslab.get_rofunc_path('../examples/data/jacobian_data')
 
-    save_directory = '../examples/data/jacobian_data'
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
 
@@ -174,7 +176,6 @@ if __name__ == "__main__":
 
     for joint_values in joint_data:
         joint_values = list(map(float, joint_values))
-
         for link in export_links:
             J = robot.get_jacobian(joint_values, link)
             jacobians[link].append(J)
@@ -184,6 +185,7 @@ if __name__ == "__main__":
         np.save(filename, np.array(jacobians[link]))
         print(f"Saved all Jacobians for {link} to {filename}")
 
+    # # Calculate and draw skeleton model, ergonomics and manipulability
     skeleton_joint_name, skeleton_joint, skeleton_parent_indices, skeleton_joint_local_translation = rf.maniplab.read_skeleton_motion(
         rf.oslab.get_rofunc_path(f'../examples/data/hotu2/{input_file_name}_optitrack2hotu.npy'))
     skeleton_joint = skeleton_joint[::40, :, :]
