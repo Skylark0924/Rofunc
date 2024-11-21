@@ -27,6 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import torch
+import csv
 
 from isaacgym import gymtorch
 
@@ -43,6 +44,7 @@ class HumanoidASEViewMotionTask(HumanoidAMP):
             headless,
             virtual_screen_capture,
             force_render,
+            csv_path
     ):
         self.cfg = cfg
         control_freq_inv = cfg["env"]["controlFrequencyInv"]
@@ -67,6 +69,10 @@ class HumanoidASEViewMotionTask(HumanoidAMP):
             self.num_envs, device=self.device, dtype=torch.long
         )
         self._motion_ids = torch.remainder(self._motion_ids, num_motions)
+
+        # Initialize CSV writing
+        self.csv_file = open(csv_path, 'w', newline='')
+        self.csv_writer = csv.writer(self.csv_file)
 
     def pre_physics_step(self, actions):
         self.actions = actions.to(self.device).clone()
@@ -100,6 +106,10 @@ class HumanoidASEViewMotionTask(HumanoidAMP):
             dof_vel,
             key_pos,
         ) = self._motion_lib.get_motion_state(motion_ids, motion_times)
+
+        # Convert torch tensor to a list and write to CSV
+        dof_pos_list = dof_pos.tolist()
+        self.csv_writer.writerows(dof_pos_list)
 
         root_vel = torch.zeros_like(root_vel)
         root_ang_vel = torch.zeros_like(root_ang_vel)
