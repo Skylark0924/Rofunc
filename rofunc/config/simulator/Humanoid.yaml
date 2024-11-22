@@ -5,7 +5,7 @@ graphics_device_id: 0
 sim_device: 'cuda:0'
 
 env:
-  numEnvs: 16
+  numEnvs: 1
   envSpacing: 1
   numEnvPerRow: 1
 
@@ -17,6 +17,11 @@ env:
   # enable collisions between all shapes in the actor. Setting the collision filter
   # to anything > 0 will disable all self collisions.
   collision_mode: -1
+
+  mani:
+    enable: True
+    export_link: ...
+    vis: True
 
   asset:
     robot_name: "Humanoid"

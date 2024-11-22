@@ -9,17 +9,19 @@ env:
   # animation files to learn from
 #  motion_file: "examples/data/hotu2/20240509/all_hotu_motion.yaml"
 #  motion_file: "examples/data/hotu2/20240509/Ramdom (good)_Take 2024-05-09 04.49.16 PM_optitrack2hotu.npy"
-  motion_file: "examples/data/hotu2/20240509/Jumping_Take 2024-05-09 04.15.38 PM_optitrack2hotu.npy"
+  motion_file: "examples/data/hotu2/demo_2_test_chenzui_only_optitrack2hotu.npy"
 
   use_extra_dof_states_motion: False
 
-  motion_file_asset: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
+#  motion_file_asset: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
+  motion_file_asset: "mjcf/hotu/hotu_humanoid.xml"
 
   object_motion_file:
 
   asset:
 #    assetFileName: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
-    assetFileName: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
+#    assetFileName: "mjcf/hotu/hotu_humanoid_w_qbhand_full_new.xml"
+    assetFileName: "mjcf/hotu/hotu_humanoid.xml"
 
   use_object_motion: False
   object_asset:
@@ -28,8 +30,8 @@ env:
     assetSize:         # List of object size, used for scaling the object and creating the box objects
 
 task:
-  wb_decompose: True  # if True, decompose the whole body into parts
+  wb_decompose: False  # if True, decompose the whole body into parts
   wb_decompose_parameter:
     parts: ["body"]
 #    parts: [ "hands", "upper_body", "lower_body" ]
-  use_synergy: True  # if True, use the synergy for the hand
+  use_synergy: False  # if True, use the synergy for the hand
