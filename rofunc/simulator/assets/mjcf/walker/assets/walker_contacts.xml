@@ -1,0 +1,26 @@
+<mujocoinclude>
+
+  <contact>
+    <!-- Torso -->
+    <exclude body1="base_link" body2="head_l2"/>
+    <exclude body1="base_link" body2="left_leg_l2"/>
+    <exclude body1="base_link" body2="right_leg_l2"/>
+    <exclude body1="base_link" body2="left_leg_l3"/>
+    <exclude body1="base_link" body2="right_leg_l3"/>
+
+    <!-- Left Arm -->
+    <exclude body1="left_limb_l5" body2="left_limb_l7"/>
+
+    <!-- Right Arm -->
+    <exclude body1="right_limb_l5" body2="right_limb_l7"/>
+
+    <!-- Left Leg -->
+    <exclude body1="left_leg_l1" body2="left_leg_l3"/>
+    <exclude body1="left_leg_l4" body2="left_leg_l6"/>
+
+    <!-- Right Leg -->
+    <exclude body1="right_leg_l1" body2="right_leg_l3"/>
+    <exclude body1="right_leg_l4" body2="right_leg_l6"/>
+  </contact>
+
+</mujocoinclude>
