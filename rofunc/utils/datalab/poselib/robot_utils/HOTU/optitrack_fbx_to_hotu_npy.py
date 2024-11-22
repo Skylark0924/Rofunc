@@ -225,7 +225,7 @@ def _run_sim(motion):
                   "right_qbhand_ring_middle_link", "right_qbhand_ring_distal_link",
                   "right_qbhand_little_proximal_link", "right_qbhand_little_middle_link",
                   "right_qbhand_little_distal_link"]
-    hand_ids = [motion.skeleton_tree._node_indices[link] for link in hand_links]
+    # hand_ids = [motion.skeleton_tree._node_indices[link] for link in hand_links]
     # all_links = body_links + hand_links
     # all_ids = body_ids + hand_ids
     all_links = list(body_links.keys())
@@ -359,7 +359,7 @@ def motion_retargeting(retarget_cfg, source_motion, visualize=False):
     # rf.logger.beauty_print(f"Saved HOTU dof_states to {retarget_cfg['target_motion_path']}", type="module")
 
 
-def npy_from_fbx(fbx_file):
+def npy_from_fbx(args, fbx_file):
     """
     This scripts shows how to retarget a motion clip from the source skeleton to a target skeleton.
     Data required for retargeting are stored in a retarget config dictionary as a json file. This file contains:
@@ -399,36 +399,36 @@ def npy_from_fbx(fbx_file):
             "Skeleton_RightForeArm": "right_lower_arm",
             "Skeleton_RightHand": "right_hand",
             # extra mapping for hotu_humanoid_w_qbhand.xml
-            "Skeleton_LeftHandThumb1": "left_qbhand_thumb_knuckle_link",
-            "Skeleton_LeftHandThumb2": "left_qbhand_thumb_proximal_link",
-            "Skeleton_LeftHandThumb3": "left_qbhand_thumb_distal_link",
-            "Skeleton_LeftHandIndex1": "left_qbhand_index_proximal_link",
-            "Skeleton_LeftHandIndex2": "left_qbhand_index_middle_link",
-            "Skeleton_LeftHandIndex3": "left_qbhand_index_distal_link",
-            "Skeleton_LeftHandMiddle1": "left_qbhand_middle_proximal_link",
-            "Skeleton_LeftHandMiddle2": "left_qbhand_middle_middle_link",
-            "Skeleton_LeftHandMiddle3": "left_qbhand_middle_distal_link",
-            "Skeleton_LeftHandRing1": "left_qbhand_ring_proximal_link",
-            "Skeleton_LeftHandRing2": "left_qbhand_ring_middle_link",
-            "Skeleton_LeftHandRing3": "left_qbhand_ring_distal_link",
-            "Skeleton_LeftHandPinky1": "left_qbhand_little_proximal_link",
-            "Skeleton_LeftHandPinky2": "left_qbhand_little_middle_link",
-            "Skeleton_LeftHandPinky3": "left_qbhand_little_distal_link",
-            "Skeleton_RightHandThumb1": "right_qbhand_thumb_knuckle_link",
-            "Skeleton_RightHandThumb2": "right_qbhand_thumb_proximal_link",
-            "Skeleton_RightHandThumb3": "right_qbhand_thumb_distal_link",
-            "Skeleton_RightHandIndex1": "right_qbhand_index_proximal_link",
-            "Skeleton_RightHandIndex2": "right_qbhand_index_middle_link",
-            "Skeleton_RightHandIndex3": "right_qbhand_index_distal_link",
-            "Skeleton_RightHandMiddle1": "right_qbhand_middle_proximal_link",
-            "Skeleton_RightHandMiddle2": "right_qbhand_middle_middle_link",
-            "Skeleton_RightHandMiddle3": "right_qbhand_middle_distal_link",
-            "Skeleton_RightHandRing1": "right_qbhand_ring_proximal_link",
-            "Skeleton_RightHandRing2": "right_qbhand_ring_middle_link",
-            "Skeleton_RightHandRing3": "right_qbhand_ring_distal_link",
-            "Skeleton_RightHandPinky1": "right_qbhand_little_proximal_link",
-            "Skeleton_RightHandPinky2": "right_qbhand_little_middle_link",
-            "Skeleton_RightHandPinky3": "right_qbhand_little_distal_link",
+            # "Skeleton_LeftHandThumb1": "left_qbhand_thumb_knuckle_link",
+            # "Skeleton_LeftHandThumb2": "left_qbhand_thumb_proximal_link",
+            # "Skeleton_LeftHandThumb3": "left_qbhand_thumb_distal_link",
+            # "Skeleton_LeftHandIndex1": "left_qbhand_index_proximal_link",
+            # "Skeleton_LeftHandIndex2": "left_qbhand_index_middle_link",
+            # "Skeleton_LeftHandIndex3": "left_qbhand_index_distal_link",
+            # "Skeleton_LeftHandMiddle1": "left_qbhand_middle_proximal_link",
+            # "Skeleton_LeftHandMiddle2": "left_qbhand_middle_middle_link",
+            # "Skeleton_LeftHandMiddle3": "left_qbhand_middle_distal_link",
+            # "Skeleton_LeftHandRing1": "left_qbhand_ring_proximal_link",
+            # "Skeleton_LeftHandRing2": "left_qbhand_ring_middle_link",
+            # "Skeleton_LeftHandRing3": "left_qbhand_ring_distal_link",
+            # "Skeleton_LeftHandPinky1": "left_qbhand_little_proximal_link",
+            # "Skeleton_LeftHandPinky2": "left_qbhand_little_middle_link",
+            # "Skeleton_LeftHandPinky3": "left_qbhand_little_distal_link",
+            # "Skeleton_RightHandThumb1": "right_qbhand_thumb_knuckle_link",
+            # "Skeleton_RightHandThumb2": "right_qbhand_thumb_proximal_link",
+            # "Skeleton_RightHandThumb3": "right_qbhand_thumb_distal_link",
+            # "Skeleton_RightHandIndex1": "right_qbhand_index_proximal_link",
+            # "Skeleton_RightHandIndex2": "right_qbhand_index_middle_link",
+            # "Skeleton_RightHandIndex3": "right_qbhand_index_distal_link",
+            # "Skeleton_RightHandMiddle1": "right_qbhand_middle_proximal_link",
+            # "Skeleton_RightHandMiddle2": "right_qbhand_middle_middle_link",
+            # "Skeleton_RightHandMiddle3": "right_qbhand_middle_distal_link",
+            # "Skeleton_RightHandRing1": "right_qbhand_ring_proximal_link",
+            # "Skeleton_RightHandRing2": "right_qbhand_ring_middle_link",
+            # "Skeleton_RightHandRing3": "right_qbhand_ring_distal_link",
+            # "Skeleton_RightHandPinky1": "right_qbhand_little_proximal_link",
+            # "Skeleton_RightHandPinky2": "right_qbhand_little_middle_link",
+            # "Skeleton_RightHandPinky3": "right_qbhand_little_distal_link",
         },
         # "rotation": [0.707, 0, 0, 0.707], xyzw
         "rotation": [0.5, 0.5, 0.5, 0.5],

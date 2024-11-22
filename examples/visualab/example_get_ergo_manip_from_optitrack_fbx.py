@@ -115,7 +115,7 @@ def update(frame):
 
 if __name__ == "__main__":
     gpu_id = 0
-    input_file_name = 'demo_3_chenzui_only'
+    input_file_name = 'demo_3_andrew_only'
 
     # # Calculate from optitrack data to HOTU joint information
     parser = argparse.ArgumentParser()
@@ -144,10 +144,10 @@ if __name__ == "__main__":
     else:
         with tqdm(total=len(fbx_files)) as pbar:
             for fbx_file in fbx_files:
-                npy_from_fbx(fbx_file)
+                npy_from_fbx(args, fbx_file)
                 pbar.update(1)
 
-    # # Calculate joint angles
+    # # # Calculate joint angles
     parser.add_argument("--motion_file", type=str, default=rf.oslab.get_rofunc_path(
         f"../examples/data/hotu2/{input_file_name}_optitrack2hotu.npy"))
     custom_args = parser.parse_args()
