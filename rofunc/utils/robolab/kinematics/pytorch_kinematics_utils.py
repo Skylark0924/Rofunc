@@ -6,7 +6,7 @@ from typing import Union
 from rofunc.utils.logger.beauty_logger import beauty_print
 from rofunc.utils.oslab.path import check_package_exist
 
-check_package_exist("pytorch_kinematics")
+# check_package_exist("pytorch_kinematics")
 
 import mujoco
 import torch
