@@ -1,1 +1,0 @@
-These files are derived from the `develop` branch of the [franka_description repository](https://github.com/frankaemika/franka_ros/tree/develop/franka_description)

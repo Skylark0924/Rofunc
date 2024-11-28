@@ -202,10 +202,7 @@ wandb
 rofunc/simulator/assets/urdf/themis/archive/
 /rofunc/utils/robolab/rdf/data/
 
-examples/data/robolab/rdf/
-
 rofunc/simulator/assets/urdf/franka_description/rdf/
 
-examples/data/hotu2/demo_3_andrew_only.csv
-
-examples/data/jacobian_data/
+examples/data/
+rofunc/simulator/assets

@@ -1,7 +1,0 @@
-<mujocoinclude>
-  <default>
-    <default class="lab_light">
-      <light directional="true"/>
-    </default>
-  </default>
-</mujocoinclude>

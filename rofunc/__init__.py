@@ -1,7 +1,6 @@
 import os
 import warnings
 
-import pip
 import shutup
 
 shutup.please()
@@ -22,7 +21,8 @@ from . import simulator as sim
 from .learning import ml
 from .learning import RofuncIL, RofuncRL
 from .planning_control import lqt, lqr
-from .utils import visualab, robolab, logger, oslab, ergolab, maniplab
+from .utils import visualab, robolab, logger, oslab, maniplab
+from .utils.robolab import ergonomics
 from .utils.datalab import primitive, data_generator
 from . import config
 
