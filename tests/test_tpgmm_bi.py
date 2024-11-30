@@ -23,7 +23,7 @@ def test_bi_spatial_data():
     task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                    'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
 
-    Repr = rf.ml.TPGMM_RPCtrl(demos_left_x, demos_right_x, task_params, plot=False)
+    Repr = rf.RofuncML.TPGMM_RPCtrl(demos_left_x, demos_right_x, task_params, plot=False)
     model_l, model_r, model_c = Repr.fit()
 
     Repr.reproduce([model_l, model_r, model_c], show_demo_idx=2)
@@ -54,7 +54,7 @@ def test_bi_temporal_data():
     task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                    'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
 
-    Repr = rf.ml.TPGMM_RPCtrl(demos_left_x, demos_right_x, task_params, plot=False)
+    Repr = rf.RofuncML.TPGMM_RPCtrl(demos_left_x, demos_right_x, task_params, plot=False)
     model_l, model_r, model_c = Repr.fit()
 
     Repr.reproduce([model_l, model_r, model_c], show_demo_idx=2)

@@ -76,7 +76,7 @@ class TPHSMM:
         self.hsmm.em(self.demos_tp, reg=self.reg)
 
         if self.plot:
-            rf.ml.hmm_plot(self.nb_dim, self.demos_tp_f, self.hsmm)
+            rf.RofuncML.hmm_plot(self.nb_dim, self.demos_tp_f, self.hsmm)
 
     def poe(self, show_demo_idx: int, task_params: tuple = None) -> pbd.GMM:
         """
@@ -108,7 +108,7 @@ class TPHSMM:
                 prod = prod * mod
 
         if self.plot:
-            rf.ml.poe_plot(self.nb_dim, [marginal_models[0], marginal_models[1]], prod, self.demos_x, show_demo_idx)
+            rf.RofuncML.poe_plot(self.nb_dim, [marginal_models[0], marginal_models[1]], prod, self.demos_x, show_demo_idx)
         return prod
 
     def _reproduce(self, prod: pbd.GMM, show_demo_idx: int, start_xdx: np.ndarray,
@@ -136,7 +136,7 @@ class TPHSMM:
 
         xi = lqr.seq_xi
         if self.plot:
-            rf.ml.gen_plot(self.nb_dim, xi, prod, self.demos_x, show_demo_idx)
+            rf.RofuncML.gen_plot(self.nb_dim, xi, prod, self.demos_x, show_demo_idx)
         return xi
 
     def _generate(self, prod: pbd.GMM, ref_demo_idx: int,
@@ -171,7 +171,7 @@ class TPHSMM:
 
         xi = lqr.seq_xi
         if self.plot:
-            rf.ml.gen_plot(self.nb_dim, xi, prod, self.demos_x, ref_demo_idx)
+            rf.RofuncML.gen_plot(self.nb_dim, xi, prod, self.demos_x, ref_demo_idx)
         return xi
 
     def fit(self) -> pbd.HSMM:

@@ -110,7 +110,7 @@ def learn(demos_left_x, demos_right_x, demo_idx=0):
                              'frame_names': ['start', 'via1', 'via2', 'end']}}
 
     # Create representation model
-    representation = rf.ml.TPGMM_RPCtrl(demos_left_x, demos_right_x, nb_states=4, plot=True, save=False,
+    representation = rf.RofuncML.TPGMM_RPCtrl(demos_left_x, demos_right_x, nb_states=4, plot=True, save=False,
                                           save_params=save_params, task_params=task_params)
 
     # Define observe frames for new situation
@@ -129,7 +129,7 @@ def learn(demos_left_x, demos_right_x, demo_idx=0):
                    'right': {'frame_origins': [start_xdx_r, via1_xdx_r, via2_xdx_r, end_xdx_r],
                              'frame_names': ['start', 'via1', 'via2', 'end']}}
     # 'traj': representation.repr_r.demos_x[demo_idx]}}
-    if isinstance(representation, rf.ml.TPGMM_RPCtrl) or isinstance(representation, rf.ml.TPGMM_RPAll):
+    if isinstance(representation, rf.RofuncML.TPGMM_RPCtrl) or isinstance(representation, rf.RofuncML.TPGMM_RPAll):
         model_l, model_r, model_c = representation.fit()
         representation.reproduce(model_l, model_r, model_c, show_demo_idx=demo_idx)
         traj_l, traj_r, _, _ = representation.generate(model_l, model_r, model_c, ref_demo_idx=demo_idx,

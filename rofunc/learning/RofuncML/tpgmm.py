@@ -143,7 +143,7 @@ class TPGMM:
         model.init_hmm_kbins(self.demos_xdx_augm)  # initializing model
         model.em(self.demos_xdx_augm, reg=self.reg)
 
-        fig = rf.ml.hmm_plot(self.nb_dim, self.demos_xdx_f, model, self.task_params)
+        fig = rf.RofuncML.hmm_plot(self.nb_dim, self.demos_xdx_f, model, self.task_params)
         if self.save:
             rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
@@ -176,7 +176,7 @@ class TPGMM:
         for p in range(1, self.nb_frames):
             prod *= mod_list[p]
 
-        fig = rf.ml.poe_plot(self.nb_dim, mod_list, prod, self.demos_x, show_demo_idx, self.task_params)
+        fig = rf.RofuncML.poe_plot(self.nb_dim, mod_list, prod, self.demos_x, show_demo_idx, self.task_params)
         if self.save:
             rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
@@ -207,7 +207,7 @@ class TPGMM:
 
         xi = lqr.seq_xi
 
-        fig = rf.ml.gen_plot(self.nb_dim, xi, prod, self.demos_x, show_demo_idx, title=title, label=label)
+        fig = rf.RofuncML.gen_plot(self.nb_dim, xi, prod, self.demos_x, show_demo_idx, title=title, label=label)
         if self.save:
             rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:
@@ -573,7 +573,7 @@ class TPGMM_RPRepr(TPGMMBi):
         prod = mod_list[0] * mod_list[1] * mod_list[2] * mod_list[2] * mod_list[2] * mod_list[2] * mod_list[2] * \
                mod_list[2] * mod_list[2]
 
-        fig = rf.ml.poe_plot(self.nb_dim, mod_list, prod, repr.demos_x, show_demo_idx, repr.task_params)
+        fig = rf.RofuncML.poe_plot(self.nb_dim, mod_list, prod, repr.demos_x, show_demo_idx, repr.task_params)
         if self.save:
             rf.visualab.save_img(fig, self.save_params['save_dir'], format=self.save_params['format'])
         if self.plot:

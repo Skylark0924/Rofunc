@@ -27,7 +27,7 @@ def uni():
     demos_x = np.vstack((raw_demo[:, 430:525, :], raw_demo[:, 240:335, :], raw_demo[:, 335:430, :]))
 
     # Reproductions for the same situations
-    representation = rf.ml.tpgmm.TPGMM(demos_x)
+    representation = rf.RofuncML.tpgmm.TPGMM(demos_x)
     model = representation.fit(plot=True)
 
     # Reproductions for new situations
@@ -66,7 +66,7 @@ def bi():
     task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                    'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
 
-    representation = rf.ml.tpgmm.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=True)
+    representation = rf.RofuncML.tpgmm.TPGMMBi(demos_left_x, demos_right_x, task_params, plot=True)
     model_l, model_r = representation.fit()
 
     # # Reproductions for the same situations

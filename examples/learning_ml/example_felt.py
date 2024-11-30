@@ -67,7 +67,7 @@ start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
 end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
 task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
 # Fit the model
-Repr = rf.ml.TPGMM(demos_x, task_params, plot=True, nb_states=100)
+Repr = rf.RofuncML.TPGMM(demos_x, task_params, plot=True, nb_states=100)
 model = Repr.fit()
 
 # Reproductions for the same situations

@@ -27,7 +27,7 @@ end_xdx_r = [demos_right_x[i][-1] for i in range(len(demos_right_x))]
 task_params = {'left': {'frame_origins': [start_xdx_l, end_xdx_l], 'frame_names': ['start', 'end']},
                'right': {'frame_origins': [start_xdx_r, end_xdx_r], 'frame_names': ['start', 'end']}}
 # Fit the model
-Repr = rf.ml.TPGMM_RPCtrl(demos_left_x, demos_right_x, task_params, plot=True)
+Repr = rf.RofuncML.TPGMM_RPCtrl(demos_left_x, demos_right_x, task_params, plot=True)
 model_l, model_r, model_c = Repr.fit()
 
 # Reproductions for the same situations

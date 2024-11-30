@@ -14,5 +14,5 @@ demos_x = data['x']  # Position data
 demos_dx = data['dx']  # Velocity data
 demos_xdx = [np.hstack([_x, _dx]) for _x, _dx in zip(demos_x, demos_dx)]  # Position-velocity
 
-representation = rf.ml.GMR(demos_x, demos_dx, demos_xdx, plot=True)
+representation = rf.RofuncML.GMR(demos_x, demos_dx, demos_xdx, plot=True)
 representation.fit()
