@@ -1,0 +1,16 @@
+# Blender MTL File: 'separated_pan.blend'
+# Material Count: 1
+
+newmtl pan_Mat
+Ns 10.000005
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Bump -bm 0.300000 /home/Downloads/1414859 to blend/kitchen_pan_01_22cm_pan_Mat_Normal.png
+map_Kd /home/Downloads/1414859 to blend/kitchen_pan_01_22cm_pan_Mat_Diffuse.png
+map_Ks /home/Downloads/1414859 to blend/kitchen_pan_01_22cm_pan_Mat_Specular.png
+refl /home/Downloads/1414859 to blend/kitchen_pan_01_22cm_pan_Mat_Glossiness.png

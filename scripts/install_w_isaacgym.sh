@@ -25,12 +25,7 @@ pip3rf install pip==21.3.1
 pip3rf install -r requirements.txt
 pip3rf install gdown==5.2.0
 
-# Download assets and data
-cd ./rofunc/simulator/
-gdown https://drive.google.com/uc?id=1GT-rhPrg0FSzX556FVPzShHOPMt8vo8C&export=download
-unzip -q assets.zip
-rm assets.zip
-cd ../../
+# Download data
 cd ./examples/
 gdown https://drive.google.com/uc?id=1pOzD61CQJcy4L2hXveT1cGiD0AkIDt_c&export=download
 unzip -q data.zip

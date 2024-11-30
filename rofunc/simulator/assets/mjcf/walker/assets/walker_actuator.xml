@@ -1,0 +1,59 @@
+<mujocoinclude>
+  <actuator>
+    <!--  Head joints  -->
+    <position name="head_j1" joint="head_j1" class="walker" forcerange="-10 10" ctrlrange="-1.5708 1.5708"/>
+    <position name="head_j2" joint="head_j2" class="walker" forcerange="-10 10" ctrlrange="-0.2618 0.2618"/>
+    <!--  Left limb joints  -->
+    <position name="left_limb_j1" joint="left_limb_j1" class="walker" kp="870" forcerange="-30 30" ctrlrange="-0.7854 3.1416"/>
+    <position name="left_limb_j2" joint="left_limb_j2" class="walker" kp="870" forcerange="-25 25" ctrlrange="-1.5708 0.0175"/>
+    <position name="left_limb_j3" joint="left_limb_j3" class="walker" kp="870" forcerange="-15 15" ctrlrange="-1.9199 1.9199"/>
+    <position name="left_limb_j4" joint="left_limb_j4" class="walker" kp="870" forcerange="-15 15" ctrlrange="-2.234 0"/>
+    <position name="left_limb_j5" joint="left_limb_j5" class="walker" kp="870" forcerange="-2.5 2.5" ctrlrange="-2.3562 2.3562"/>
+    <position name="left_limb_j6" joint="left_limb_j6" class="walker" kp="870" forcerange="-2.5 2.5" ctrlrange="-0.3508 0.3508"/>
+    <position name="left_limb_j7" joint="left_limb_j7" class="walker" kp="870" forcerange="-2.5 2.5" ctrlrange="-0.3508 0.3508"/>
+    <!--  Left hand joints  -->
+    <position name="left_thumb_j1" joint="left_thumb_j1" class="walker_finger"/>
+    <position name="left_thumb_j2" joint="left_thumb_j2" class="walker_finger"/>
+    <position name="left_index_j1" joint="left_index_j1" class="walker_finger"/>
+    <position name="left_index_j2" joint="left_index_j2" class="walker_finger"/>
+    <position name="left_middle_j1" joint="left_middle_j1" class="walker_finger"/>
+    <position name="left_middle_j2" joint="left_middle_j2" class="walker_finger"/>
+    <position name="left_ring_j1" joint="left_ring_j1" class="walker_finger"/>
+    <position name="left_ring_j2" joint="left_ring_j2" class="walker_finger"/>
+    <position name="left_pinky_j1" joint="left_pinky_j1" class="walker_finger"/>
+    <position name="left_pinky_j2" joint="left_pinky_j2" class="walker_finger"/>
+    <!--  Right limb joints  -->
+    <position name="right_limb_j1" joint="right_limb_j1" class="walker" kp="870" forcerange="-30 30" ctrlrange="-3.1416 0.7854"/>
+    <position name="right_limb_j2" joint="right_limb_j2" class="walker" kp="870" forcerange="-25 25" ctrlrange="-1.5708 0.0175"/>
+    <position name="right_limb_j3" joint="right_limb_j3" class="walker" kp="870" forcerange="-15 15" ctrlrange="-1.9199 1.9199"/>
+    <position name="right_limb_j4" joint="right_limb_j4" class="walker" kp="870" forcerange="-15 15" ctrlrange="-2.234 0"/>
+    <position name="right_limb_j5" joint="right_limb_j5" class="walker" kp="870" forcerange="-2.5 2.5" ctrlrange="-2.3562 2.3562"/>
+    <position name="right_limb_j6" joint="right_limb_j6" class="walker" kp="870" forcerange="-2.5 2.5" ctrlrange="-0.3508 0.3508"/>
+    <position name="right_limb_j7" joint="right_limb_j7" class="walker" kp="870" forcerange="-2.5 2.5" ctrlrange="-0.3508 0.3508"/>
+    <!--  Right hand joints  -->
+    <position name="right_thumb_j1" joint="right_thumb_j1" class="walker_finger"/>
+    <position name="right_thumb_j2" joint="right_thumb_j2" class="walker_finger"/>
+    <position name="right_index_j1" joint="right_index_j1" class="walker_finger"/>
+    <position name="right_index_j2" joint="right_index_j2" class="walker_finger"/>
+    <position name="right_middle_j1" joint="right_middle_j1" class="walker_finger"/>
+    <position name="right_middle_j2" joint="right_middle_j2" class="walker_finger"/>
+    <position name="right_ring_j1" joint="right_ring_j1" class="walker_finger"/>
+    <position name="right_ring_j2" joint="right_ring_j2" class="walker_finger"/>
+    <position name="right_pinky_j1" joint="right_pinky_j1" class="walker_finger"/>
+    <position name="right_pinky_j2" joint="right_pinky_j2" class="walker_finger"/>
+    <!--  Left leg joints  -->
+    <position name="left_leg_j1" joint="left_leg_j1" class="walker" kp="870" forcerange="-30 30" ctrlrange="-1.0472 1.0472"/>
+    <position name="left_leg_j2" joint="left_leg_j2" class="walker" kp="870" forcerange="-25 25" ctrlrange="-0.5236 0.5236"/>
+    <position name="left_leg_j3" joint="left_leg_j3" class="walker" kp="870" forcerange="-15 15" ctrlrange="-1.3963 0.5236"/>
+    <position name="left_leg_j4" joint="left_leg_j4" class="walker" kp="870" forcerange="-15 15" ctrlrange="-0.1745 2.1817"/>
+    <position name="left_leg_j5" joint="left_leg_j5" class="walker" kp="870" forcerange="-10 10" ctrlrange="-1.3963 0.5236"/>
+    <position name="left_leg_j6" joint="left_leg_j6" class="walker" kp="870" forcerange="-10 10" ctrlrange="-0.5236 0.5236"/>
+    <!--  Right leg joints  -->
+    <position name="right_leg_j1" joint="right_leg_j1" class="walker" kp="870" forcerange="-30 30" ctrlrange="-1.0472 1.0472"/>
+    <position name="right_leg_j2" joint="right_leg_j2" class="walker" kp="870" forcerange="-25 25" ctrlrange="-0.5236 0.5236"/>
+    <position name="right_leg_j3" joint="right_leg_j3" class="walker" kp="870" forcerange="-15 15" ctrlrange="-1.3963 0.5236"/>
+    <position name="right_leg_j4" joint="right_leg_j4" class="walker" kp="870" forcerange="-15 15" ctrlrange="-0.1745 2.1817"/>
+    <position name="right_leg_j5" joint="right_leg_j5" class="walker" kp="870" forcerange="-10 10" ctrlrange="-1.3963 0.5236"/>
+    <position name="right_leg_j6" joint="right_leg_j6" class="walker" kp="870" forcerange="-10 10" ctrlrange="-0.5236 0.5236"/>
+  </actuator>
+</mujocoinclude>

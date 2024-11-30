@@ -36,4 +36,4 @@ def test_7d_uni_tpgmr():
 
 if __name__ == '__main__':
     test_2d_uni_tpgmr()
-    test_7d_uni_tpgmr()
+    # test_7d_uni_tpgmr()

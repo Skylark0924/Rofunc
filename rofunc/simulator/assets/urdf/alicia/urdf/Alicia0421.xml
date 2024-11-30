@@ -1,0 +1,68 @@
+<mujoco model="Alicia0421">
+    <compiler angle="radian" meshdir="./"/>
+    <statistic meansize="0.163642" extent="1.01088" center="-0.0856465 -0.395559 9.8098e-07"/>
+    <asset>
+        <mesh name="base_link" file="base_link.STL"/>
+        <mesh name="Link1" file="Link1.STL"/>
+        <mesh name="Link2" file="Link2.STL"/>
+        <mesh name="Link3" file="Link3.STL"/>
+        <mesh name="Link4" file="Link4.STL"/>
+        <mesh name="Link5" file="Link5.STL"/>
+        <mesh name="Link6" file="Link6.STL"/>
+    </asset>
+    <worldbody>
+        <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1"/>
+        <geom name="floor" type="plane" conaffinity="1" size="100 100 .2"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.59216 0.66667 0.68235 1"
+              mesh="base_link"/>
+        <geom type="mesh" rgba="0.59216 0.66667 0.68235 1" mesh="base_link"/>
+        <body name="Link1" pos="0 -0.0593 0" quat="0.707105 0.707108 0 0">
+            <inertial pos="-0.0071825 -1.0002e-05 0.10355" quat="0.980387 0.000685499 -0.197067 -0.00249926"
+                      mass="2.9587" diaginertia="0.00326445 0.0031575 0.00298215"/>
+            <joint name="Joint1" pos="0 0 0" axis="0 0 1" range="-3.14 3.14"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 0.6 0 1" mesh="Link1"/>
+            <geom type="mesh" rgba="1 0.6 0 1" mesh="Link1"/>
+            <body name="Link2" pos="-0.05855 0 0.1174" quat="0.612371 -0.353553 -0.612374 0.353553">
+                <inertial pos="0.073662 -0.1276 0.053582" quat="0.33025 0.636291 -0.367182 0.592661" mass="3.0982"
+                          diaginertia="0.00417116 0.00409304 0.0034659"/>
+                <joint name="Joint2" pos="0 0 0" axis="0 0 1" range="-1.57 1.57"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 0.6 0 1" mesh="Link2"/>
+                <geom type="mesh" rgba="1 0.6 0 1" mesh="Link2"/>
+                <body name="Link3" pos="0.1315 -0.22776 0.039" quat="-2.02097e-06 0.550194 0.835037 -3.06726e-06">
+                    <inertial pos="-0.14374 0.017042 0.077622" quat="0.578739 0.480424 0.44098 0.489684" mass="2.6245"
+                              diaginertia="0.00226747 0.00226254 0.001992"/>
+                    <joint name="Joint3" pos="0 0 0" axis="0 0 -1" range="-3.14 3.14"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 0.6 0 1" mesh="Link3"/>
+                    <geom type="mesh" rgba="1 0.6 0 1" mesh="Link3"/>
+                    <body name="Link4" pos="-0.22145 0.026259 0.06705"
+                          quat="-2.02097e-06 0.550194 0.835037 -3.06726e-06">
+                        <inertial pos="0.0072078 -0.012507 0.085681" quat="0.430513 0.309272 -0.201991 0.823534"
+                                  mass="1.9968" diaginertia="0.0014192 0.00140303 0.00128276"/>
+                        <joint name="Joint4" pos="0 0 0" axis="0 0 -1" range="-3.14 3.14"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 0.6 0 1"
+                              mesh="Link4"/>
+                        <geom type="mesh" rgba="1 0.6 0 1" mesh="Link4"/>
+                        <body name="Link5" pos="0.01275 -0.022084 0.09755" quat="0.612371 0.353553 0.612373 -0.353555">
+                            <inertial pos="-0.01713 -8.1655e-06 0.083775"
+                                      quat="-0.00118108 0.724568 -0.00231954 0.689198" mass="2.0172"
+                                      diaginertia="0.00166162 0.0016093 0.00129578"/>
+                            <joint name="Joint5" pos="0 0 0" axis="0 0 1" range="-3.14 3.14"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 0.6 0 1"
+                                  mesh="Link5"/>
+                            <geom type="mesh" rgba="1 0.6 0 1" mesh="Link5"/>
+                            <body name="Link6" pos="-0.0255 0 0.0918" quat="0.707105 0 -0.707108 0">
+                                <inertial pos="-0.0070414 -0.00095826 -0.089958"
+                                          quat="0.72101 0.692774 0.00840654 -0.0117591" mass="0.85167"
+                                          diaginertia="0.000188127 0.000168574 0.000149869"/>
+                                <joint name="Joint6" pos="0 0 0" axis="0 0 -1" range="-3.14 3.14"/>
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 0.6 0 1"
+                                      mesh="Link6"/>
+                                <geom type="mesh" rgba="1 0.6 0 1" mesh="Link6"/>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>

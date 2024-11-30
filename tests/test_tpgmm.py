@@ -96,7 +96,7 @@ def test_7d_bi_tpgmm():
 
 
 if __name__ == '__main__':
-    test_7d_uni_tpgmm()
-    test_7d_bi_tpgmm()
+    # test_7d_uni_tpgmm()
+    # test_7d_bi_tpgmm()
     test_2d_uni_tpgmm()
     test_2d_bi_tpgmm()

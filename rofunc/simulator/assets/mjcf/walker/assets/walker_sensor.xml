@@ -1,0 +1,11 @@
+<mujocoinclude>
+  <sensor>
+    <!--  IMU  -->
+    <gyro name='angular_velocity' site='imu_site' noise='5e-4' cutoff='34.9'/>
+    <accelerometer name='linear_acceleration' site='imu_site' noise='1e-2' cutoff='157'/>
+    <magnetometer name='magnetometer' site='imu_site'/>
+    <!--  Foot force sensors  -->
+    <touch name="left_foot_force_sensor" site="left_foot_site"/>
+    <touch name="right_foot_force_sensor" site="right_foot_site"/>
+  </sensor>
+</mujocoinclude>

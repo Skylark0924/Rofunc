@@ -1,0 +1,9 @@
+<mujoco model="gluon">
+    <compiler angle="radian" />
+    <size njmax="500" nconmax="100" />
+<!--    <include file="./empty_arena.xml"/>-->
+    <include file="./gluon_kinematics.xml"/>
+    <include file="./gluon_position_actuators.xml"/>
+    <option integrator="Euler" />
+</mujoco>
+
