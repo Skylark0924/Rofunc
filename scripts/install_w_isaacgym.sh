@@ -23,6 +23,7 @@ pip3rf install pip==21.3.1
 
 # Install the requirements and rofunc
 pip3rf install -r requirements.txt
+pip3rf install gdown==5.2.0
 
 # Download assets and data
 cd ./rofunc/simulator/

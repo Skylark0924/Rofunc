@@ -30,7 +30,7 @@ setup(
                       'tqdm==4.67.1',
                       'pandas==2.0.3',
                       'hydra-core==1.3.2',
-                      'trimesh-4.5.3',
+                      'trimesh==4.5.3',
                       'lxml==5.3.0',
                       "pytorch_kinematics==0.7.2",
                       'nestle==0.2.0',

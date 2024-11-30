@@ -32,6 +32,18 @@ jobs:
           python -m pip install flake8 pytest pytest-cov
           pip install pip==21.0
           pip install -r requirements.txt
+          pip install gdown==5.2.0
+
+          cd ./rofunc/simulator/
+          gdown https://drive.google.com/uc?id=1GT-rhPrg0FSzX556FVPzShHOPMt8vo8C&export=download
+          unzip -q assets.zip
+          rm assets.zip
+          cd ../../
+          cd ./examples/
+          gdown https://drive.google.com/uc?id=1pOzD61CQJcy4L2hXveT1cGiD0AkIDt_c&export=download
+          unzip -q data.zip
+          rm data.zip
+          cd ../
           pip install .
           
           sudo apt install -qqy lsb-release gnupg2 curl
