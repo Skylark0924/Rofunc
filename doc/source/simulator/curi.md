@@ -12,7 +12,7 @@ CURIsim = rf.sim.CURISim(args)
 CURIsim.show(visual_obs_flag=False)
 ```
 
-![](../img/Videos/curi_interactive.gif)
+![](../../img/simulator_gif/curi_interactive.gif)
 
 ### Run the bimanual trajectory in the Cartesian space
 
@@ -33,5 +33,5 @@ CURIsim = rf.sim.CURISim(args)
 CURIsim.run_traj(traj=[traj_l, traj_r], update_freq=0.001)
 ```
 
-![](../img/Videos/CURITaichiFlat.gif)
+![](../../img/simulator_gif/CURITaichiFlat.gif)
 

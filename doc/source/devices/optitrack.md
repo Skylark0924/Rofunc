@@ -8,7 +8,7 @@
 
 ## Setup
 
-![](../img/optitrack_setup.png)
+![](../../img/optitrack_setup.png)
 
 
 

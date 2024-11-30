@@ -12,7 +12,7 @@ frankasim = rf.sim.FrankaSim(args)
 frankasim.show()
 ```
 
-![](../img/Videos/franka_interative.gif)
+![](../../img/simulator_gif/franka_interative.gif)
 
 ### Run the trajectory in the Cartesian space
 
@@ -32,4 +32,4 @@ frankasim = rf.sim.FrankaSim(args)
 frankasim.run_traj(traj)
 ```
 
-![](../img/Videos/FrankaTaichi.gif)
+![](../../img/simulator_gif/FrankaTaichi.gif)

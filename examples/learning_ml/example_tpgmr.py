@@ -35,7 +35,7 @@ traj, _ = Repr.generate(model, ref_demo_idx, task_params)
 # raw_demo = np.load(os.path.join(rf.utils.get_rofunc_path(), 'data/LFD_ML/RightHand.npy'))
 # demos_right_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
 #
-# Repr = rf.ml.TPGMRBi(demos_left_x, demos_right_x, horizon=300, plot=True)
+# Repr = rf.RofuncML.TPGMRBi(demos_left_x, demos_right_x, horizon=300, plot=True)
 # model_l, model_r = Repr.fit()
 #
 # # Reproductions for the same situations

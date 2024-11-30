@@ -44,7 +44,7 @@ skeleton_data_path = '[your_path]/xsens_data/test'
 rf.xsens.plot_skeleton(skeleton_data_path)
 ```
 
-![](../img/Videos/dough_01.gif)
+![](../../img/simulator_gif/dough_01.gif)
 
 > We also provide a batch form for saving gifs of several skeleton data in parallel.
 

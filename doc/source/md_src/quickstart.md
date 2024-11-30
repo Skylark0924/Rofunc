@@ -14,7 +14,7 @@ from isaacgym import gymutil
 
 ### Demonstration collection
 
-![demonstration_3](../img/demonstration_3.png)
+![demonstration_3](../../img/demonstration_3.png)
 
 Two types of Tai Chi pushing hand with fixed step are defined and demonstrated by two individuals, which includes the motion of flat circles (repetition of a → b → c → a) and vertical circles (repetition of a → d → e → a). The person whose hand motions are supposed to be learned by CURI was wearing the Xsens suit and the Optitrack markers on his back for global localization while the partner was attached with two markers on both hands for trajectory recording. Starting with the initial phase a, the cycle of the confrontational pushing hand movement is separated into two phases, which are the
 ’Yin’ phase and the ’Yang’ phase from the perspective of one single hand. The hands of demonstrators marked by the red solid circle represent that they were in the ’Yang’ phase while the green solid circle represents the ’Yin’ phase. The directions of hand motions were indicated by the orange arrow. For instance, during the motion of a → b → c → a, the left hand of the demonstrator on the left side performs stiff to push the opponent’s hand as ’Yang’ motion and then becomes compliant to comply with the  opponent’s motion with a pulling back action as ’Yin’ motion. (We declare that the individuals in this figure are both authors and they gave permission for the use of their image.)
@@ -42,17 +42,17 @@ _, _, gmm_rep_l, gmm_rep_r = rf.tpgmm.bi(demos_x_l, demos_x_r, show_demo_idx=sho
 
 **Visualization of bimanual demonstration data**
 
-![FormatFactoryPart1](../img/taichi_test1.png)
+![FormatFactoryPart1](../../img/taichi_test1.png)
 
 **TP-GMM representation of bimanual demonstration data**
 
-![taichi_test2](../img/taichi_test2.png)
+![taichi_test2](../../img/taichi_test2.png)
 
-![taichi_test3](../img/taichi_test3.png)
+![taichi_test3](../../img/taichi_test3.png)
 
 **Reproduction of the bimanual trajectory**
 
-![taichi_test4](../img/taichi_test4.png)![](../img/taichi_test5.png)
+![taichi_test4](../../img/taichi_test4.png)![](../../img/taichi_test5.png)
 
 ### TP-GMR
 
@@ -71,13 +71,13 @@ rep_r = np.vstack((gmm_rep_r[:, :7], rep_r[:, :7]))
 
 **TP-GMR representation of bimanual demonstration data**
 
-![taichi_test8](../img/taichi_test6.png)
+![taichi_test8](../../img/taichi_test6.png)
 
-![taichi_test8](../img/taichi_test8.png)
+![taichi_test8](../../img/taichi_test8.png)
 
 **Generation for connecting the start & end points and transforming them into a periodic motion**
 
-![taichi_test4](../img/taichi_test7.png)![taichi_test4](../img/taichi_test9.png)
+![taichi_test4](../../img/taichi_test7.png)![taichi_test4](../../img/taichi_test9.png)
 
 ## Planning and control
 
@@ -117,7 +117,7 @@ rf.lqt.plot_3d_bi(x_hat_l, x_hat_r, ori=False, save=False)
 
 **Smooth trajectory interpolated by LQT**
 
-![taichi_test11](../img/taichi_test11.png)
+![taichi_test11](../../img/taichi_test11.png)
 
 ## Simulator
 

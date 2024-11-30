@@ -227,7 +227,7 @@ section of the documentation.
 ```
 
 3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human
-   Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](./rofunc/learning/ml/tpgmm.py))
+   Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](rofunc/learning/RofuncML/tpgmm.py))
 
 ```
 @inproceedings{liu2023birp,

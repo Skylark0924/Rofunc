@@ -248,8 +248,8 @@ The following are examples of reinforcement learning methods for robot learning.
         .. |CCI-gif| image:: ../../img/task_gifs/CURICabinetRofuncRLPPO.gif
         .. |CSG-gif1| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspSpatulaRofuncRLPPO.gif
         .. |CSG-gif2| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspHammerRofuncRLPPO.gif
-        .. |CSG-gif3| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.gif 
-        .. |CSG-gif4| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspLarge_clampRofuncRLPPO.gif 
+        .. |CSG-gif3| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspKnifeRofuncRLPPO.gif
+        .. |CSG-gif4| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspLarge_clampRofuncRLPPO.gif
         .. |CSG-gif5| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspMugRofuncRLPPO.gif
         .. |CSG-gif6| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspPhillips_Screw_DriverRofuncRLPPO.gif
         .. |CSG-gif7| image:: ../../img/task_gifs/CURIQbSoftHandSynergyGraspPower_drillRofuncRLPPO.gif

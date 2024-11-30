@@ -37,7 +37,11 @@ setup(
                       'gdown==5.2.0',
                       "transformations==2022.9.26",
                       'gym>=0.26.2',
-                      "numpy<=1.23.0"
+                      "numpy<=1.23.0",
+                      'wandb==0.18.7',
+                      "gymnasium==1.0.0",
+                      "tensorboard==2.14.0",
+                      "transformers==4.46.3"
                       ],
     python_requires=">=3.7,<3.11",
     keywords=['robotics', 'robot learning', 'learning from demonstration', 'reinforcement learning',

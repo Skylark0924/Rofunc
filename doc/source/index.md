@@ -121,7 +121,7 @@ If you use rofunc in a scientific publication, we would appreciate citations to 
 ```
 
 3. BiRP: Learning Robot Generalized Bimanual Coordination using Relative Parameterization Method on Human
-   Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](../../rofunc/learning/ml/tpgmm.py))
+   Demonstration ([IEEE CDC 2023](https://arxiv.org/abs/2307.05933) | [Code](../../rofunc/learning/RofuncML/tpgmm.py))
 
 ```
 @article{liu2023birp,

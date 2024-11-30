@@ -38,7 +38,7 @@ project_name/
 
 We provide a [**RofuncRL-based repository template**](https://github.com/Skylark0924/RofuncRL-template) to generate your own repository following the RofuncRL structure by one click.
 
-![RofuncRL-based repository template](../img/template.png)
+![RofuncRL-based repository template](../../img/template.png)
 
 :::{tip}
 For more details about the configuration system, please refer to [Configuration System](https://rofunc.readthedocs.io/en/latest/tutorial/config_system.html).

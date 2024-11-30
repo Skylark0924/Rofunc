@@ -18,7 +18,7 @@ warnings.simplefilter('ignore', DeprecationWarning)
 
 from .devices import zed, xsens, optitrack, mmodal, emg
 from . import simulator as sim
-from .learning import ml
+from .learning import RofuncML
 from .learning import RofuncIL, RofuncRL
 from .planning_control import lqt, lqr
 from .utils import visualab, robolab, logger, oslab, maniplab
@@ -26,4 +26,4 @@ from .utils.robolab import ergonomics
 from .utils.datalab import primitive, data_generator
 from . import config
 
-from .learning.ml import tpgmm, gmr, tpgmr
+from .learning.RofuncML import tpgmm, gmr, tpgmr
