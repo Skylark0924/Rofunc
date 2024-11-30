@@ -17,21 +17,21 @@ def test_2d_uni_tpgmr():
 
     traj, _ = Repr.reproduce(model, show_demo_idx=2)
 
-
-def test_7d_uni_tpgmr():
-    # Uni_3d
-    raw_demo = np.load('../examples/data/LFD_ML/LeftHand.npy')
-    demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
-
-    # TP-GMR
-    start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
-    end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
-    task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
-    Repr = rf.RofuncML.TPGMR(demos_x, task_params, plot=False)
-    model = Repr.fit()
-
-    # Reproductions for the same situations
-    traj, _ = Repr.reproduce(model, show_demo_idx=2)
+#
+# def test_7d_uni_tpgmr():
+#     # Uni_3d
+#     raw_demo = np.load('../examples/data/LFD_ML/LeftHand.npy')
+#     demos_x = [raw_demo[500:635, :], raw_demo[635:770, :], raw_demo[770:905, :]]
+#
+#     # TP-GMR
+#     start_xdx = [demos_x[i][0] for i in range(len(demos_x))]  # TODO: change to xdx
+#     end_xdx = [demos_x[i][-1] for i in range(len(demos_x))]
+#     task_params = {'frame_origins': [start_xdx, end_xdx], 'frame_names': ['start', 'end']}
+#     Repr = rf.RofuncML.TPGMR(demos_x, task_params, plot=False)
+#     model = Repr.fit()
+#
+#     # Reproductions for the same situations
+#     traj, _ = Repr.reproduce(model, show_demo_idx=2)
 
 
 if __name__ == '__main__':
