@@ -39,11 +39,12 @@ processing, learning, and its deployment on robots.
 - [Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation](#rofunc-the-full-process-python-package-for-robot-learning-from-demonstration-and-robot-manipulation)
   - [Citation](#citation)
   - [Update News 🎉🎉🎉](#update-news-)
+    - [v0.0.2.6 Support dexterous grasping and human-humanoid robot skill transfer](#v0026-support-dexterous-grasping-and-human-humanoid-robot-skill-transfer)
   - [Installation](#installation)
   - [Documentation](#documentation)
   - [RofuncRL](#rofuncrl)
   - [Star History](#star-history)
-  - [Related Papers](#related-papers)
+  - [Related Papers          ](#related-papers)
   - [The Team](#the-team)
   - [Acknowledge](#acknowledge)
     - [Learning from Demonstration](#learning-from-demonstration)
@@ -54,15 +55,12 @@ processing, learning, and its deployment on robots.
 If you use rofunc in a scientific publication, we would appreciate citations to the following paper:
 
 ```
-@software{liu2023rofunc, 
-          title = {Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation},
-          author = {Liu, Junjia and Dong, Zhipeng and Li, Chenzui and Li, Zhihao and Yu, Minghao and Delehelle, Donatien and Chen, Fei},
-          year = {2023},
-          publisher = {Zenodo},
-          doi = {10.5281/zenodo.10016946},
-          url = {https://doi.org/10.5281/zenodo.10016946},
-          dimensions = {true},
-          google_scholar_id = {0EnyYjriUFMC},
+@article{liu2023rofunc,
+	title={Rofunc: The Full Process Python Package for Robot Learning from Demonstration and Robot Manipulation},
+	author={Liu, Junjia and Dong, Zhipeng and Li, Chenzui and Li, Zhihao and Yu, Minghao and Delehelle, Donatien and Chen, Fei},
+	year={2023},
+	journal={Zenodo, https://github.com/Skylark0924/Rofunc},
+	doi={10.5281/zenodo.10016946},
 }
 ```
 > [!WARNING]
