@@ -13,8 +13,10 @@
 
 ## Update News 🎉🎉🎉
 
+- [2024-12-24] 🎮 Start trying to support [Genesis](https://github.com/Genesis-Embodied-AI/Genesis) simulator.
+
 ### v0.0.2.6 Support dexterous grasping and human-humanoid robot skill transfer
-- [2024-06-30] 🎉🚀 **Human-level skill transfer from human to heterogeneous humanoid robots have been completed and are awaiting release.**
+- [2024-12-20] 🎉🚀 **Human-level skill transfer from human to heterogeneous humanoid robots have been completed and are awaiting release.**
 - [2024-01-24] 🚀 [CURI Synergy-based Softhand grasping tasks](https://github.com/Skylark0924/Rofunc/blob/main/examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py) are supported to be trained by `RofuncRL`.
 - [2023-12-24] 🚀 [Dexterous hand (Shadow Hand, Allegro Hand, qbSofthand) tasks](https://github.com/Skylark0924/Rofunc/blob/main/examples/learning_rl/IsaacGym_RofuncRL/example_DexterousHands_RofuncRL.py) are supported to be trained by `RofuncRL`.
 - [2023-12-07] 🖼️ [EfficientSAM](https://yformer.github.io/efficient-sam/) is supported for high-speed segmentation on edge devices like Nvidia Jetson, check the [example](https://github.com/Skylark0924/Rofunc/blob/main/examples/visualab/example_efficient_sam_seg_w_prompt.py) in Visualab.
