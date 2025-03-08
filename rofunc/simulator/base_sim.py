@@ -133,7 +133,7 @@ class PlaygroundSim:
         from isaacgym import gymapi
         l_color = gymapi.Vec3(1, 1, 1)
         l_ambient = gymapi.Vec3(0.12, 0.12, 0.12)
-        l_direction = gymapi.Vec3(-1, 0, 1)
+        l_direction = gymapi.Vec3(-1, 1, 1)
         self.gym.set_light_parameters(self.sim, 0, l_color, l_ambient, l_direction)
 
 

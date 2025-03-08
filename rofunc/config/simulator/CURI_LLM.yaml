@@ -9,6 +9,7 @@ cam_target: [0.0, 0.0, 1.0]
 
 env:
   numEnvs: 1
+  numEnvPerRow: 1
   envSpacing: 3.
   controller_type: "ik" # "ik" or "osc"
   # If the collision filter for the actor is set to -1,
@@ -24,8 +25,8 @@ env:
     assetRoot:
 #    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm.urdf"
 #    assetFile: "urdf/curi/urdf/curi_isaacgym_dual_arm_w_softhand.urdf"
-#    assetFile: "urdf/curi/urdf/curi_w_softhand_isaacgym.urdf"
-    assetFile: "urdf/curi/urdf/curi_isaacgym.urdf"
+    assetFile: "urdf/curi/urdf/curi_w_softhand_isaacgym.urdf"
+#    assetFile: "urdf/curi/urdf/curi_isaacgym.urdf"
 #    assetFile: "mjcf/curi/curi_w_softhand_isaacgym.xml"
     init_pose: [1., 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
     fix_base_link: False
@@ -35,15 +36,16 @@ env:
     slices_per_cylinder: 1000
 
   object_asset:
-    object_names: ["power_drill"]
+    object_names: ["knife", "apple"]
     assetRoot:
-    assetFiles: ["urdf/ycb/035_power_drill/035_power_drill.urdf"]
-    init_poses: [[0.0, 0, 0.7, 0.5, -0.5, -0.5, 0.5]]
+    assetFiles: ["urdf/ycb/032_knife/032_knife.urdf", "urdf/ycb/013_apple/013_apple.urdf"]
+    init_poses: [[0.0, 0, 0.7, 0, 0, 0, 1], [0.0, 0.2, 0.7, 0.5, -0.5, -0.5, 0.5]]
     fix_base_link: False
 
   table:
-    init_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1]
+    init_pose: [0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 1]
     size: [0.5, 1.2, 0.7]
+    fix_base_link: True
 
 
 

@@ -26,9 +26,10 @@ from rofunc.utils.logger.beauty_logger import beauty_print
 
 import torch
 
+
 def orientation_error(desired, current):
     from isaacgym.torch_utils import quat_conjugate, quat_mul
-    
+
     cc = quat_conjugate(current)
     q_r = quat_mul(desired, cc)
     return q_r[0:3] * torch.sign(q_r[3]).unsqueeze(-1)
@@ -59,9 +60,11 @@ class CURISim(RobotSim):
         self.right_gripper_dof_indices = [value for key, value in robot_dof_info["dof_dict"].items() if
                                           "panda_right_finger_joint" in key]
         self.left_softhand_dof_indices = [value for key, value in robot_dof_info["dof_dict"].items() if
-                                            "left_qbhand" in key and "synergy" not in key and ("knuckle" not in key or "thumb_knuckle" in key)]
+                                          "left_qbhand" in key and "synergy" not in key and (
+                                                  "knuckle" not in key or "thumb_knuckle" in key)]
         self.right_softhand_dof_indices = [value for key, value in robot_dof_info["dof_dict"].items() if
-                                             "right_qbhand" in key and "synergy" not in key and ("knuckle" not in key or "thumb_knuckle" in key)]
+                                           "right_qbhand" in key and "synergy" not in key and (
+                                                   "knuckle" not in key or "thumb_knuckle" in key)]
 
         if self.args.env.asset.assetFile in ["urdf/curi/urdf/curi_isaacgym_dual_arm.urdf",
                                              "urdf/curi/urdf/curi_isaacgym.urdf",
@@ -69,7 +72,7 @@ class CURISim(RobotSim):
             self.asset_arm_attracted_link = ["panda_left_hand", "panda_right_hand"]
             self.ee_type = "gripper"
         elif self.args.env.asset.assetFile in ["urdf/curi/urdf/curi_w_softhand_isaacgym.urdf"]:
-            self.asset_arm_attracted_link = ["left_hand_root_link", "right_hand_root_link"]
+            self.asset_arm_attracted_link = ["panda_left_link7", "panda_right_link7"]  # 24, 71
             self.ee_type = "softhand"
             self.synergy_action_matrix = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                                    [2, 2, 2, 1, 1, 1, 0, 0, 0, -1, -1, -1, -2, -2, -2]])
@@ -111,11 +114,11 @@ class CURISim(RobotSim):
         # Arms
         if self.robot_controller == "ik":
             robot_dof_props["driveMode"][self.left_arm_dof_indices] = 1 * np.ones_like(self.left_arm_dof_indices)
-            robot_dof_props["stiffness"][self.left_arm_dof_indices] = 500 * np.ones_like(self.left_arm_dof_indices)
-            robot_dof_props["damping"][self.left_arm_dof_indices] = 50 * np.ones_like(self.left_arm_dof_indices)
+            robot_dof_props["stiffness"][self.left_arm_dof_indices] = 1000 * np.ones_like(self.left_arm_dof_indices)
+            robot_dof_props["damping"][self.left_arm_dof_indices] = 100 * np.ones_like(self.left_arm_dof_indices)
             robot_dof_props["driveMode"][self.right_arm_dof_indices] = 1 * np.ones_like(self.right_arm_dof_indices)
-            robot_dof_props["stiffness"][self.right_arm_dof_indices] = 500 * np.ones_like(self.right_arm_dof_indices)
-            robot_dof_props["damping"][self.right_arm_dof_indices] = 50 * np.ones_like(self.right_arm_dof_indices)
+            robot_dof_props["stiffness"][self.right_arm_dof_indices] = 1000 * np.ones_like(self.right_arm_dof_indices)
+            robot_dof_props["damping"][self.right_arm_dof_indices] = 100 * np.ones_like(self.right_arm_dof_indices)
         else:  # osc
             robot_dof_props["driveMode"][self.left_arm_dof_indices] = 3 * np.ones_like(self.left_arm_dof_indices)
             robot_dof_props["stiffness"][self.left_arm_dof_indices] = 0 * np.ones_like(self.left_arm_dof_indices)
@@ -128,14 +131,17 @@ class CURISim(RobotSim):
         robot_dof_props["stiffness"][self.left_gripper_dof_indices] = 1000 * np.ones_like(self.left_gripper_dof_indices)
         robot_dof_props["damping"][self.left_gripper_dof_indices] = 40 * np.ones_like(self.left_gripper_dof_indices)
         robot_dof_props["driveMode"][self.right_gripper_dof_indices] = 1 * np.ones_like(self.right_gripper_dof_indices)
-        robot_dof_props["stiffness"][self.right_gripper_dof_indices] = 1000 * np.ones_like(self.right_gripper_dof_indices)
+        robot_dof_props["stiffness"][self.right_gripper_dof_indices] = 1000 * np.ones_like(
+            self.right_gripper_dof_indices)
         robot_dof_props["damping"][self.right_gripper_dof_indices] = 40 * np.ones_like(self.right_gripper_dof_indices)
         # softhands
         robot_dof_props["driveMode"][self.left_softhand_dof_indices] = 1 * np.ones_like(self.left_softhand_dof_indices)
         robot_dof_props["stiffness"][self.left_softhand_dof_indices] = 10 * np.ones_like(self.left_softhand_dof_indices)
         robot_dof_props["damping"][self.left_softhand_dof_indices] = 40 * np.ones_like(self.left_softhand_dof_indices)
-        robot_dof_props["driveMode"][self.right_softhand_dof_indices] = 1 * np.ones_like(self.right_softhand_dof_indices)
-        robot_dof_props["stiffness"][self.right_softhand_dof_indices] = 10 * np.ones_like(self.right_softhand_dof_indices)
+        robot_dof_props["driveMode"][self.right_softhand_dof_indices] = 1 * np.ones_like(
+            self.right_softhand_dof_indices)
+        robot_dof_props["stiffness"][self.right_softhand_dof_indices] = 10 * np.ones_like(
+            self.right_softhand_dof_indices)
         robot_dof_props["damping"][self.right_softhand_dof_indices] = 40 * np.ones_like(self.right_softhand_dof_indices)
 
         # default dof states and position targets
@@ -464,6 +470,7 @@ class CURISim(RobotSim):
     def run_with_text_commands(self, verbose=True):
         from isaacgym import gymapi, gymtorch, gymutil
         from isaacgym.torch_utils import to_torch
+        from scipy.spatial.transform import Rotation as R
 
         self.add_tracking_target_sphere_axes()
         self.add_head_embedded_camera()
@@ -486,29 +493,46 @@ class CURISim(RobotSim):
 
         if self.args.env.object_asset is not None:
             object_names = self.args.env.object_asset.object_names
-            assert len(object_names) == len(self.object_handles), "The number of object names should be the same as the number of object handles"
+            assert len(object_names) == len(
+                self.object_handles), "The number of object names should be the same as the number of object handles"
             for j in range(len(self.object_handles)):
                 object_dict = self.get_actor_rigid_body_info(self.object_handles[j][0])
                 beauty_print("object_name: {}, object_dict: {}".format(object_names[j], object_dict), type="info")
 
         # Define keyboard and mouse event
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_SPACE, "space_shoot")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_1, "KEY_1")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_2, "KEY_2")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_3, "KEY_3")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_4, "KEY_4")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_5, "KEY_5")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_6, "KEY_6")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_7, "KEY_7")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_8, "KEY_8")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_9, "KEY_9")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_0, "KEY_0")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_MINUS, "KEY_MINUS")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_EQUAL, "KEY_EQUAL")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_G, "grasp")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_C, "open_camera")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_D, "head_turn_right")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_A, "head_turn_left")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_W, "head_turn_up")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_S, "head_turn_down")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_UP, "mobile_base_forward")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_DOWN, "mobile_base_backward")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_LEFT, "mobile_base_left")
-        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_RIGHT, "mobile_base_right")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_D, "KEY_D")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_A, "KEY_A")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_W, "KEY_W")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_S, "KEY_S")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_UP, "KEY_UP")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_DOWN, "KEY_DOWN")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_LEFT, "KEY_LEFT")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_RIGHT, "KEY_RIGHT")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_PAGE_UP, "KEY_PAGE_UP")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_PAGE_DOWN, "KEY_PAGE_DOWN")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_K, "keep_arm_dof")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_H, "homing_arm_dof")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_B, "query_rigid_body_poses")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_O, "query_object_pose")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_M, "attach_object")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_R, "reset")
         self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_Q, "quit")
+        self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_ENTER, "confirm_target")
         beauty_print("====Keyboard and mouse event===\n"
                      "-----Arms-----\n"
                      "   Space: control dual arms of CURI\n"
@@ -531,6 +555,8 @@ class CURISim(RobotSim):
                      "-----Infos-----\n"
                      "   B: query key rigid body poses of the robot\n"
                      "   O: query the object pose\n"
+                     "-----Attach object-----\n"
+                     "   M: attach object\n"
                      "-----Others-----\n"
                      "   R: reset\n"
                      "   Q: quit\n", type="info")
@@ -546,20 +572,123 @@ class CURISim(RobotSim):
         right_grasp_flag = False
         left_synergy_action = [1.0, 0.0]
         right_synergy_action = [1.0, 0.0]
+        attached_objects = {}
+        attracted_link_index = None  # 当前控制的 link
+        target_pose = None  # 目标位姿
+        self.attached_objects = {}
+
+        def compute_relative_pose(object_pose, link_pose):
+            """ 修复后的相对位姿计算 """
+            # 提取位置和四元数 (IsaacGym xyzw 格式)
+            link_pos, link_quat = link_pose[:3], link_pose[3:]
+            obj_pos, obj_quat = object_pose[:3], object_pose[3:]
+
+            # 转换为 Rotation 对象（保持xyzw顺序）
+            link_rot = R.from_quat(link_quat)  # 直接传入 [x,y,z,w]
+            obj_rot = R.from_quat(obj_quat)
+
+            # 计算相对旋转
+            relative_rot = link_rot.inv() * obj_rot
+
+            # 计算相对位置（转换到 link 坐标系）
+            relative_pos = link_rot.inv().apply(obj_pos - link_pos)
+
+            return np.concatenate([relative_pos, relative_rot.as_quat()])
+
+        def apply_relative_pose(link_pose, relative_pose):
+            """ 修复后的绝对位姿计算 """
+            # 提取数据
+            link_pos, link_quat = link_pose[:3], link_pose[3:]
+            rel_pos, rel_quat = relative_pose[:3], relative_pose[3:]
+
+            # 转换为 Rotation 对象
+            link_rot = R.from_quat(link_quat)
+            rel_rot = R.from_quat(rel_quat)
+
+            # 计算绝对位姿
+            new_pos = link_pos + link_rot.apply(rel_pos)
+            new_rot = link_rot * rel_rot
+
+            return np.concatenate([new_pos, new_rot.as_quat()])
+
+        def update_object_pose(object_index, new_pose):
+            """ 更新仿真中的物体位姿 """
+            state = self.gym.get_actor_rigid_body_states(self.envs[0], self.object_handles[object_index][0],
+                                                         gymapi.STATE_ALL)
+            state['pose']['p'].fill(tuple(new_pose[:3]))  # 更新位置
+            state['pose']['r'].fill(tuple(new_pose[3:]))  # 更新旋转
+            state['vel']['linear'].fill((0, 0, 0))  # 清零线速度
+            state['vel']['angular'].fill((0, 0, 0))  # 清零角速度
+            self.gym.set_actor_rigid_body_states(self.envs[0], self.object_handles[object_index][0], state,
+                                                 gymapi.STATE_ALL)
+
         while not self.gym.query_viewer_has_closed(self.viewer):
             self.gym.clear_lines(self.viewer)
 
             for evt in self.gym.query_viewer_action_events(self.viewer):
-                if evt.action == "space_shoot" and evt.value > 0:
-                    attracted_link_index = input("Input attracted index:\n")
-                    target_pose = input("Input target pose:\n x y z qx qy qz qw\n")
+                if evt.value == 0:  # 按键松开时不处理
+                    continue
+                # **按 SPACE 选择目标 link**
+                if evt.action == "space_shoot":
                     try:
-                        attracted_link_index = int(attracted_link_index)
-                        target_pose = [([float(i) for i in target_pose.split(" ")])]
-                    except ValueError:
-                        beauty_print("Invalid input!", type="error")
-                        attracted_link_index = None
+                        attracted_link_index = int(input("Input attracted index:\n"))
+                    except:
                         continue
+                    current_pose = self.rb_states[attracted_link_index].clone().detach().cpu().numpy()
+                    x, y, z = current_pose[:3]  # 位置
+                    qx, qy, qz, qw = current_pose[3:7]  # 旋转（四元数）
+
+                    # **转换四元数为欧拉角**
+                    euler_angles = R.from_quat([qx, qy, qz, qw]).as_euler('xyz', degrees=True)
+                    rx, ry, rz = euler_angles  # roll, pitch, yaw
+
+                    # **初始化目标 pose**
+                    target_pose = torch.tensor([x, y, z, qx, qy, qz, qw])
+                    beauty_print(f"Controlling link {attracted_link_index} (Starting Pose: {x, y, z, qx, qy, qz, qw}).",
+                                 type="info")
+                    beauty_print("Use 1-6 to rotate, 7-+ to move. Press Enter to confirm.", type="info")
+                # **如果已经选择了 link，监听 1-+ 进行调整**
+                if attracted_link_index is not None:
+                    if evt.action == "KEY_1":
+                        rx += 5  # 绕 X 轴 +5°
+                    elif evt.action == "KEY_2":
+                        rx -= 5  # 绕 X 轴 -5°
+                    elif evt.action == "KEY_3":
+                        ry += 5  # 绕 Y 轴 +5°
+                    elif evt.action == "KEY_4":
+                        ry -= 5  # 绕 Y 轴 -5°
+                    elif evt.action == "KEY_5":
+                        rz += 5  # 绕 Z 轴 +5°
+                    elif evt.action == "KEY_6":
+                        rz -= 5  # 绕 Z 轴 -5°
+
+                    # **位置控制**
+                    elif evt.action == "KEY_7":
+                        x += 0.01  # X 轴 +
+                    elif evt.action == "KEY_8":
+                        x -= 0.01  # X 轴 -
+                    elif evt.action == "KEY_9":
+                        y += 0.01  # Y 轴 +
+                    elif evt.action == "KEY_0":
+                        y -= 0.01  # Y 轴 -
+                    elif evt.action == "KEY_MINUS":
+                        z += 0.01  # Z 轴 +
+                    elif evt.action == "KEY_EQUAL":  # `+` 键在 `KEY_EQUAL`
+                        z -= 0.01  # Z 轴 -
+
+                    quat = R.from_euler('xyz', [rx, ry, rz], degrees=True).as_quat()
+                    qx, qy, qz, qw = quat
+                    target_pose = torch.tensor([x, y, z, qx, qy, qz, qw])
+                    beauty_print(f"Target Pose: {x, y, z, rx, ry, rz}", type="info")
+
+                # if evt.action == "space_shoot" and evt.value > 0:
+                #     attracted_link_index = input("Input attracted index:\n")
+                #     target_pose = input("Input target pose:\n x, y, z, qx, qy, qz, qw\n")
+                #     try:
+                #         attracted_link_index = int(attracted_link_index)
+                #         target_pose = [([float(i) for i in target_pose.split(", ")])]
+                #     except ValueError:
+                #         beauty_print("Invalid input!", type="error")
                 if evt.action == "grasp" and evt.value > 0:
                     ee_link = input("Left/Right/Both End-effector: [L/R/B]\n")
 
@@ -568,109 +697,151 @@ class CURISim(RobotSim):
                         left_gripper_dof_index2 = self.robot_dof_info["dof_dict"]["panda_left_finger_joint2"]
                         right_gripper_dof_index1 = self.robot_dof_info["dof_dict"]["panda_right_finger_joint1"]
                         right_gripper_dof_index2 = self.robot_dof_info["dof_dict"]["panda_right_finger_joint2"]
-                        if ee_link.upper() in ["L", "B"]:
-                            if not left_grasp_flag:
-                                pos_action[:, left_gripper_dof_index1] = (
-                                        self.dof_pos.squeeze(-1)[:, left_gripper_dof_index1]
+
+                        def execute_gripper_grasp(grasp_flag, gripper_dof_index1, gripper_dof_index2, pos_action):
+                            if not grasp_flag:
+                                pos_action[:, gripper_dof_index1] = (
+                                        self.dof_pos.squeeze(-1)[:, gripper_dof_index1]
                                         - torch.tensor([0.03]))
-                                pos_action[:, left_gripper_dof_index2] = (
-                                        self.dof_pos.squeeze(-1)[:, left_gripper_dof_index2]
-                                        - torch.tensor([0.03]))
-                            else:
-                                pos_action[:, left_gripper_dof_index1] = (
-                                        self.dof_pos.squeeze(-1)[:, left_gripper_dof_index1]
-                                        + torch.tensor([0.03]))
-                                pos_action[:, left_gripper_dof_index2] = (
-                                        self.dof_pos.squeeze(-1)[:, left_gripper_dof_index2]
-                                        + torch.tensor([0.03]))
-                            left_grasp_flag = not left_grasp_flag
-                        if ee_link.upper() in ["R", "B"]:
-                            if right_grasp_flag:
-                                pos_action[:, right_gripper_dof_index1] = (
-                                        self.dof_pos.squeeze(-1)[:, right_gripper_dof_index1]
-                                        - torch.tensor([0.03]))
-                                pos_action[:, right_gripper_dof_index2] = (
-                                        self.dof_pos.squeeze(-1)[:, right_gripper_dof_index2]
+                                pos_action[:, gripper_dof_index2] = (
+                                        self.dof_pos.squeeze(-1)[:, gripper_dof_index2]
                                         - torch.tensor([0.03]))
                             else:
-                                pos_action[:, right_gripper_dof_index1] = (
-                                        self.dof_pos.squeeze(-1)[:, right_gripper_dof_index1]
+                                pos_action[:, gripper_dof_index1] = (
+                                        self.dof_pos.squeeze(-1)[:, gripper_dof_index1]
                                         + torch.tensor([0.03]))
-                                pos_action[:, right_gripper_dof_index2] = (
-                                        self.dof_pos.squeeze(-1)[:, right_gripper_dof_index2]
+                                pos_action[:, gripper_dof_index2] = (
+                                        self.dof_pos.squeeze(-1)[:, gripper_dof_index2]
                                         + torch.tensor([0.03]))
-                            right_grasp_flag = not right_grasp_flag
+                            grasp_flag = not grasp_flag
+                            return grasp_flag, pos_action
+
+                        if ee_link.upper() == "L":
+                            left_grasp_flag, pos_action = execute_gripper_grasp(left_grasp_flag,
+                                                                                left_gripper_dof_index1,
+                                                                                left_gripper_dof_index2,
+                                                                                pos_action)
+                        elif ee_link.upper() == "R":
+                            right_grasp_flag, pos_action = execute_gripper_grasp(right_grasp_flag,
+                                                                                 right_gripper_dof_index1,
+                                                                                 right_gripper_dof_index2,
+                                                                                 pos_action)
+                        elif ee_link.upper() == "B":
+                            left_grasp_flag, pos_action = execute_gripper_grasp(left_grasp_flag,
+                                                                                left_gripper_dof_index1,
+                                                                                left_gripper_dof_index2,
+                                                                                pos_action)
+                            right_grasp_flag, pos_action = execute_gripper_grasp(right_grasp_flag,
+                                                                                 right_gripper_dof_index1,
+                                                                                 right_gripper_dof_index2,
+                                                                                 pos_action)
                     elif self.ee_type == "softhand":
-                        if ee_link.upper() in ["L", "B"]:
-                            # if left_grasp_flag:
-                            #     left_synergy_action = [1, 0]
-                            # else:
-                            #     left_synergy_action = [0.2, 0.2]
-                            left_synergy_action = input("Input synergy:\n")
-                            left_synergy_action = [float(i) for i in left_synergy_action.split(" ")]
-                            left_dof_action = self._get_dof_action_from_synergy(left_synergy_action,
-                                                                                self.useful_left_qbhand_dof_index)
-                            for i, index in enumerate(self.useful_left_qbhand_dof_index):
-                                pos_action[:, index] = torch.tensor(left_dof_action[i])
-                            left_grasp_flag = not left_grasp_flag
-                        if ee_link.upper() in ["R", "B"]:
-                            if right_grasp_flag:
-                                right_synergy_action = [1, 0]
-                            else:
-                                right_synergy_action = [0.0, 0.0]
-                            right_dof_action = self._get_dof_action_from_synergy(right_synergy_action,
-                                                                                 self.useful_right_qbhand_dof_index)
-                            for i, index in enumerate(self.useful_right_qbhand_dof_index):
-                                pos_action[:, index] = torch.tensor(right_dof_action[i])
-                            right_grasp_flag = not right_grasp_flag
+                        def execute_softhand_grasp(grasp_flag, qbhand_dof_index, pos_action):
+                            synergy_action = input("Input synergy:\n")
+                            synergy_action = [float(i) for i in synergy_action.split(" ")]
+                            dof_action = self._get_dof_action_from_synergy(synergy_action,
+                                                                           qbhand_dof_index)
+                            for i, index in enumerate(qbhand_dof_index):
+                                pos_action[:, index] = torch.tensor(dof_action[i])
+                            grasp_flag = not grasp_flag
+                            return grasp_flag, pos_action,
+
+                        if ee_link.upper() == "L":
+                            left_grasp_flag, pos_action = execute_softhand_grasp(left_grasp_flag,
+                                                                                 self.useful_left_qbhand_dof_index,
+                                                                                 pos_action)
+                        elif ee_link.upper() == "R":
+                            right_grasp_flag, pos_action = execute_softhand_grasp(right_grasp_flag,
+                                                                                  self.useful_right_qbhand_dof_index,
+                                                                                  pos_action)
+                        if ee_link.upper() == "B":
+                            left_grasp_flag, pos_action = execute_softhand_grasp(left_grasp_flag,
+                                                                                 self.useful_left_qbhand_dof_index,
+                                                                                 pos_action)
+                            right_grasp_flag, pos_action = execute_softhand_grasp(right_grasp_flag,
+                                                                                  self.useful_right_qbhand_dof_index,
+                                                                                  pos_action)
 
                         for key, value in self.virtual2real_dof_index_map_dict.items():
                             pos_action[:, key] = pos_action[:, value]
-
                 if evt.action == "open_camera" and evt.value > 0:
                     visual_obs_flag = not visual_obs_flag
                     beauty_print("Open camera" if visual_obs_flag else "Close camera", type="info")
-                if evt.action == "head_turn_right" and evt.value > 0:
+                if evt.action == "KEY_D" and evt.value > 0:
                     head_righ_left_dof_index = self.robot_dof_info["dof_dict"]["head_actuated_joint1"]
                     pos_action[:, head_righ_left_dof_index] = (self.dof_pos.squeeze(-1)[:, head_righ_left_dof_index]
                                                                - torch.tensor([0.1]))
-                if evt.action == "head_turn_left" and evt.value > 0:
+                if evt.action == "KEY_A" and evt.value > 0:
                     head_righ_left_dof_index = self.robot_dof_info["dof_dict"]["head_actuated_joint1"]
                     pos_action[:, head_righ_left_dof_index] = (self.dof_pos.squeeze(-1)[:, head_righ_left_dof_index]
                                                                + torch.tensor([0.1]))
-                if evt.action == "head_turn_up" and evt.value > 0:
+                if evt.action == "KEY_W" and evt.value > 0:
                     head_up_down_dof_index = self.robot_dof_info["dof_dict"]["head_actuated_joint2"]
                     pos_action[:, head_up_down_dof_index] = (self.dof_pos.squeeze(-1)[:, head_up_down_dof_index]
                                                              - torch.tensor([0.1]))
-                if evt.action == "head_turn_down" and evt.value > 0:
+                if evt.action == "KEY_S" and evt.value > 0:
                     head_up_down_dof_index = self.robot_dof_info["dof_dict"]["head_actuated_joint2"]
                     pos_action[:, head_up_down_dof_index] = (self.dof_pos.squeeze(-1)[:, head_up_down_dof_index]
                                                              + torch.tensor([0.1]))
-                if evt.action == "mobile_base_forward" and evt.value > 0:
+                if evt.action == "KEY_UP" and evt.value > 0:
                     pos_action[:, self.summit_wheel_dof_indices] = (
                             self.dof_pos.squeeze(-1)[:, self.summit_wheel_dof_indices]
                             + torch.tensor([0.5, 0.5, 0.5, 0.5]))
-                if evt.action == "mobile_base_backward" and evt.value > 0:
+                if evt.action == "KEY_DOWN" and evt.value > 0:
                     pos_action[:, self.summit_wheel_dof_indices] = (
                             self.dof_pos.squeeze(-1)[:, self.summit_wheel_dof_indices]
                             - torch.tensor([0.5, 0.5, 0.5, 0.5]))
-                if evt.action == "mobile_base_left" and evt.value > 0:
+                if evt.action == "KEY_LEFT" and evt.value > 0:
                     pos_action[:, self.summit_wheel_dof_indices] = (
                             self.dof_pos.squeeze(-1)[:, self.summit_wheel_dof_indices]
                             + torch.tensor([0.3, -0.3, -0.3, 0.3]))
-                if evt.action == "mobile_base_right" and evt.value > 0:
+                if evt.action == "KEY_RIGHT" and evt.value > 0:
                     pos_action[:, self.summit_wheel_dof_indices] = (
                             self.dof_pos.squeeze(-1)[:, self.summit_wheel_dof_indices]
                             - torch.tensor([0.3, -0.3, -0.3, 0.3]))
                 if evt.action == "query_rigid_body_poses" and evt.value > 0:
-                    beauty_print("Left hand pose: {}".format(self.rb_states[curi_link_dict[self.asset_arm_attracted_link[0]]][:7]), type="info")
-                    beauty_print("Right hand pose: {}".format(self.rb_states[curi_link_dict[self.asset_arm_attracted_link[1]]][:7]), type="info")
+                    beauty_print("Left hand pose: {}".format(
+                        self.rb_states[curi_link_dict[self.asset_arm_attracted_link[0]]][:7]), type="info")
+                    beauty_print("Right hand pose: {}".format(
+                        self.rb_states[curi_link_dict[self.asset_arm_attracted_link[1]]][:7]), type="info")
                     beauty_print("Robot base pose: {}".format(self.rb_states[0][:7]), type="info")
                 if evt.action == "query_object_pose" and evt.value > 0:
                     for j in range(len(self.object_handles)):
-                        beauty_print("object_name: {}, object pose: {}".format(self.args.env.object_asset.object_names[j],
-                                                                              self.rb_states[self.object_idxs[j][0]][:7]), type="info")
+                        beauty_print(
+                            "object_name: {}, object pose: {}".format(self.args.env.object_asset.object_names[j],
+                                                                      self.rb_states[self.object_idxs[j][0]][:7]),
+                            type="info")
+                if evt.action == "attach_object" and evt.value > 0:
+                    object_names = self.args.env.object_asset.object_names
 
+                    print("\nAvailable objects:")
+                    for idx, name in enumerate(object_names):
+                        print(f"  [{idx}] {name}")
+                    object_index = input("Select object index to attach (0-{}):\n".format(len(self.object_handles) - 1))
+                    attach_link_index = input("Select robot link index to attach to:\n")
+
+                    try:
+                        object_index = int(object_index)
+                        attach_link_index = int(attach_link_index)
+                        if object_index < 0 or object_index >= len(self.object_handles):
+                            raise ValueError("Invalid object index!")
+
+                        # **如果已经 attach，则解除 attach**
+                        if object_index in attached_objects:
+                            del attached_objects[object_index]
+                            beauty_print(f"Detached object {object_index} from link {attach_link_index}", type="info")
+                        else:
+                            # **计算物体相对 link 的位姿**
+                            object_pose = self.rb_states[self.object_idxs[object_index][0]][:7]
+                            link_pose = self.rb_states[attach_link_index][:7]
+                            relative_pose = compute_relative_pose(object_pose, link_pose)
+
+                            # **存储 attach 信息**
+                            attached_objects[object_index] = (attach_link_index, relative_pose)
+                            beauty_print(f"Attached object {object_index} to link {attach_link_index}", type="info")
+
+                    except ValueError as e:
+                        beauty_print(f"Error: {e}", type="error")
                 if evt.action == "reset" and evt.value > 0:
                     pos_action = torch.tensor(self.default_dof_pos).reshape(self.dof_pos.shape).squeeze(-1)
                     effort_action = torch.zeros_like(pos_action)
@@ -681,13 +852,15 @@ class CURISim(RobotSim):
                     left_synergy_action = [1.0, 0.0]
                     right_synergy_action = [1.0, 0.0]
                     for j in range(len(self.object_handles)):
-                        state = self.gym.get_actor_rigid_body_states(self.envs[0], self.object_handles[j][0], gymapi.STATE_ALL)
+                        state = self.gym.get_actor_rigid_body_states(self.envs[0], self.object_handles[j][0],
+                                                                     gymapi.STATE_ALL)
                         init_pose = self.args.env.object_asset.init_poses[j]
                         state['pose']['p'].fill((init_pose[0], init_pose[1], init_pose[2]))
                         state['pose']['r'].fill((init_pose[3], init_pose[4], init_pose[5], init_pose[6]))
                         state['vel']['linear'].fill((0, 0, 0))
                         state['vel']['angular'].fill((0, 0, 0))
-                        self.gym.set_actor_rigid_body_states(self.envs[0], self.object_handles[j][0], state, gymapi.STATE_ALL)
+                        self.gym.set_actor_rigid_body_states(self.envs[0], self.object_handles[j][0], state,
+                                                             gymapi.STATE_ALL)
                     beauty_print("Reset", type="info")
                 if evt.action == "quit" and evt.value > 0:
                     break
@@ -745,13 +918,13 @@ class CURISim(RobotSim):
 
                 pose = gymapi.Transform()
                 # pose.p: (x, y, z), pose.r: (w, x, y, z)
-                pose.p.x = target_pose[0][0]
-                pose.p.y = target_pose[0][1]
-                pose.p.z = target_pose[0][2]
-                pose.r.x = target_pose[0][3]
-                pose.r.y = target_pose[0][4]
-                pose.r.z = target_pose[0][5]
-                pose.r.w = target_pose[0][6]
+                pose.p.x = target_pose[0]
+                pose.p.y = target_pose[1]
+                pose.p.z = target_pose[2]
+                pose.r.x = target_pose[3]
+                pose.r.y = target_pose[4]
+                pose.r.z = target_pose[5]
+                pose.r.w = target_pose[6]
                 if verbose:
                     # Draw axes and sphere at attractor location
                     gymutil.draw_lines(self.axes_geom, self.gym, self.viewer, self.envs[0], pose)
@@ -767,8 +940,8 @@ class CURISim(RobotSim):
                     hand_vel = self.rb_states[attracted_link_index + 1, 7:]
 
                 # compute goal position and orientation
-                goal_pos = torch.tensor(target_pose[0][:3], dtype=torch.float32)
-                goal_rot = torch.tensor(target_pose[0][3:], dtype=torch.float32)
+                goal_pos = torch.tensor(target_pose[:3], dtype=torch.float32)
+                goal_rot = torch.tensor(target_pose[3:], dtype=torch.float32)
 
                 # compute position and orientation error
                 pos_err = goal_pos - hand_pos
@@ -807,6 +980,12 @@ class CURISim(RobotSim):
                     pos_action[:, self.left_arm_dof_indices] = keep_dof_pos[:, self.left_arm_dof_indices]
                     pos_action[:, self.right_arm_dof_indices] = keep_dof_pos[:, self.right_arm_dof_indices]
 
+            # **更新附着物体的 pose**
+            for object_index, (attached_link_index, relative_pose) in attached_objects.items():
+                link_pose = self.rb_states[attached_link_index][:7]  # 获取 link 当前世界坐标
+                new_object_pose = apply_relative_pose(link_pose, relative_pose)  # 计算新位姿
+                update_object_pose(object_index, new_object_pose)  # 更新物体位姿
+
             # Deploy actions
             self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(pos_action))
             self.gym.set_dof_actuation_force_tensor(self.sim, gymtorch.unwrap_tensor(effort_action))
@@ -821,8 +1000,6 @@ class CURISim(RobotSim):
         self.gym.destroy_sim(self.sim)
 
     def _get_dof_action_from_synergy(self, synergy_action, useful_joint_index):
-        from isaacgym.torch_utils import scale_np
-
         # the first synergy is 0~1, the second is -1~1
         synergy_action[0] = abs(synergy_action[0])
         dof_action = np.matmul(synergy_action, self.synergy_action_matrix)
@@ -846,3 +1023,10 @@ class CURISim(RobotSim):
                               self.robot_upper_limits[useful_joint_index],
                               self.robot_lower_limits[useful_joint_index])
         return dof_action
+
+
+def scale_np(value, upper, lower):
+    """
+    将 `value` 从 `[-1, 1]` 线性缩放到 `[lower, upper]`
+    """
+    return lower + (value + 1) * (upper - lower) / 2
