@@ -25,13 +25,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-
       - name: Free up disk space
         run: |
           sudo apt-get clean
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
           df -h
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -42,7 +40,6 @@ jobs:
           
           sudo apt install -qqy lsb-release gnupg2 curl
           sudo apt-get update
-
       - name: Test with pytest
         run: |
           cd tests
