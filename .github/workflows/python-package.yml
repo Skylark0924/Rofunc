@@ -22,10 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4  # 更新到 v4
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          # 移除 cache: 'pip' 行以解决 422 错误
 
       - name: Free up disk space
         run: |
