@@ -193,7 +193,7 @@ section of the documentation.
 [![Star History Chart](https://api.star-history.com/svg?repos=Skylark0924/Rofunc&type=Date)](https://star-history.com/#Skylark0924/Rofunc&Date)
 
 
-## Related Papers          
+## Related Papers
 
 1. Robot cooking with stir-fry: Bimanual non-prehensile manipulation of semi-fluid objects ([IEEE RA-L 2022](https://arxiv.org/abs/2205.05960) | [Code](rofunc/learning/RofuncIL/structured_transformer/strans.py))
 
@@ -211,7 +211,7 @@ section of the documentation.
 ```
 
 2. SoftGPT: Learn Goal-oriented Soft Object Manipulation Skills by Generative Pre-trained Heterogeneous Graph
-   Transformer ([IROS 2023](https://arxiv.org/abs/2306.12677)｜Code coming soon)
+   Transformer ([IROS 2023](https://arxiv.org/abs/2306.12677))
 
 ```
 @inproceedings{liu2023softgpt,
@@ -235,6 +235,17 @@ section of the documentation.
                pages={8300--8305},
                year={2023},
                organization={IEEE}
+}
+```
+
+4. Human-Humanoid Robots’ Cross-Embodiment Behavior-Skill Transfer Using Decomposed Adversarial Learning From Demonstration ([IEEE RAM 2025](https://arxiv.org/abs/2412.15166))
+```
+@article{liu2025human,
+  title={Human--Humanoid Robots’ Cross-Embodiment Behavior-Skill Transfer Using Decomposed Adversarial Learning From Demonstration: HOTU, a Human--Humanoid Robots’ Skill Transfer Framework},
+  author={Liu, Junjia and Li, Zhuo and Yu, Minghao and Dong, Zhipeng and Calinon, Sylvain and Caldwell, Darwin and Chen, Fei},
+  journal={IEEE Robotics \& Automation Magazine},
+  year={2025},
+  publisher={IEEE}
 }
 ```
 
