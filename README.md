@@ -44,7 +44,7 @@ processing, learning, and its deployment on robots.
   - [Documentation](#documentation)
   - [RofuncRL](#rofuncrl)
   - [Star History](#star-history)
-  - [Related Papers          ](#related-papers)
+  - [Related Papers](#related-papers)
   - [The Team](#the-team)
   - [Acknowledge](#acknowledge)
     - [Learning from Demonstration](#learning-from-demonstration)
