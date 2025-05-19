@@ -25,7 +25,7 @@ Installation
                   conda create -n rofunc python=3.8
 
                   # For Linux user
-                  sh ./scripts/install.sh
+                  sh ./scripts/install_w_isaacgym.sh
                   # [Option] Install with baseline RL frameworks (SKRL, RLlib, Stable Baselines3)
                   sh ./scripts/install_w_baselines.sh
                   # [Option] For MacOS user (brew is required, Isaac Gym based simulator is not supported on MacOS)
